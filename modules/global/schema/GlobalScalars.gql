@@ -1,0 +1,10 @@
+scalar UUID
+
+scalar Datetime
+
+scalar Binary
+
+scalar Date
+
+scalar JSON
+

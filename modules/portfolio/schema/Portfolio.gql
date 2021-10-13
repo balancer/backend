@@ -1,0 +1,20 @@
+extend type Query {
+    portfolioGetPortfolio: Portfolio!
+}
+
+extend type Mutation {
+    someMutation: Boolean!
+}
+
+type Portfolio {
+    tokens: [PortfolioToken!]!
+}
+
+type PortfolioToken {
+    id: String!
+    symbol: String!
+    name: String!
+    balance: String!
+    totalPrice: Float!
+    pricePerToken: Float!
+}

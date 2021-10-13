@@ -1,0 +1,16 @@
+branch-defaults:
+  master:
+    group_suffix: null
+global:
+  application_name: ngagelab
+  branch: null
+  default_ec2_keyname: null
+  default_platform: Docker 18.09.9-ce
+  default_region: eu-central-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  repository: null
+  sc: git
+  workspace_type: Application

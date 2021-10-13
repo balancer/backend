@@ -1,0 +1,2139 @@
+directive @derivedFrom(field: String) on FIELD_DEFINITION
+
+directive @entity on OBJECT
+
+directive @subgraphId(id: String) on OBJECT
+
+type Balancer {
+    id: ID!
+    poolCount: Int!
+    pools(
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]
+    totalLiquidity: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+}
+
+input Balancer_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolCount: Int
+    poolCount_gt: Int
+    poolCount_gte: Int
+    poolCount_in: [Int!]
+    poolCount_lt: Int
+    poolCount_lte: Int
+    poolCount_not: Int
+    poolCount_not_in: [Int!]
+    totalLiquidity: BigDecimal
+    totalLiquidity_gt: BigDecimal
+    totalLiquidity_gte: BigDecimal
+    totalLiquidity_in: [BigDecimal!]
+    totalLiquidity_lt: BigDecimal
+    totalLiquidity_lte: BigDecimal
+    totalLiquidity_not: BigDecimal
+    totalLiquidity_not_in: [BigDecimal!]
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
+}
+
+enum Balancer_orderBy {
+    id
+    poolCount
+    pools
+    totalLiquidity
+    totalSwapFee
+    totalSwapVolume
+}
+
+scalar BigDecimal
+
+scalar BigInt
+
+scalar Binary
+
+input Block_height {
+    hash: Bytes
+    number: Int
+}
+
+scalar Bytes
+
+scalar Date
+
+scalar Datetime
+
+type GradualWeightUpdate {
+    endTimestamp: Int!
+    endWeights: [BigInt!]!
+    id: ID!
+    poolId: Pool!
+    scheduledTimestamp: Int!
+    startTimestamp: Int!
+    startWeights: [BigInt!]!
+}
+
+input GradualWeightUpdate_filter {
+    endTimestamp: Int
+    endTimestamp_gt: Int
+    endTimestamp_gte: Int
+    endTimestamp_in: [Int!]
+    endTimestamp_lt: Int
+    endTimestamp_lte: Int
+    endTimestamp_not: Int
+    endTimestamp_not_in: [Int!]
+    endWeights: [BigInt!]
+    endWeights_contains: [BigInt!]
+    endWeights_not: [BigInt!]
+    endWeights_not_contains: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    scheduledTimestamp: Int
+    scheduledTimestamp_gt: Int
+    scheduledTimestamp_gte: Int
+    scheduledTimestamp_in: [Int!]
+    scheduledTimestamp_lt: Int
+    scheduledTimestamp_lte: Int
+    scheduledTimestamp_not: Int
+    scheduledTimestamp_not_in: [Int!]
+    startTimestamp: Int
+    startTimestamp_gt: Int
+    startTimestamp_gte: Int
+    startTimestamp_in: [Int!]
+    startTimestamp_lt: Int
+    startTimestamp_lte: Int
+    startTimestamp_not: Int
+    startTimestamp_not_in: [Int!]
+    startWeights: [BigInt!]
+    startWeights_contains: [BigInt!]
+    startWeights_not: [BigInt!]
+    startWeights_not_contains: [BigInt!]
+}
+
+enum GradualWeightUpdate_orderBy {
+    endTimestamp
+    endWeights
+    id
+    poolId
+    scheduledTimestamp
+    startTimestamp
+    startWeights
+}
+
+enum InvestType {
+    Exit
+    Join
+}
+
+type Investment {
+    amount: BigDecimal!
+    assetManagerAddress: Bytes!
+    id: ID!
+    poolTokenId: PoolToken!
+    timestamp: Int!
+}
+
+input Investment_filter {
+    amount: BigDecimal
+    amount_gt: BigDecimal
+    amount_gte: BigDecimal
+    amount_in: [BigDecimal!]
+    amount_lt: BigDecimal
+    amount_lte: BigDecimal
+    amount_not: BigDecimal
+    amount_not_in: [BigDecimal!]
+    assetManagerAddress: Bytes
+    assetManagerAddress_contains: Bytes
+    assetManagerAddress_in: [Bytes!]
+    assetManagerAddress_not: Bytes
+    assetManagerAddress_not_contains: Bytes
+    assetManagerAddress_not_in: [Bytes!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolTokenId: String
+    poolTokenId_contains: String
+    poolTokenId_ends_with: String
+    poolTokenId_gt: String
+    poolTokenId_gte: String
+    poolTokenId_in: [String!]
+    poolTokenId_lt: String
+    poolTokenId_lte: String
+    poolTokenId_not: String
+    poolTokenId_not_contains: String
+    poolTokenId_not_ends_with: String
+    poolTokenId_not_in: [String!]
+    poolTokenId_not_starts_with: String
+    poolTokenId_starts_with: String
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+}
+
+enum Investment_orderBy {
+    amount
+    assetManagerAddress
+    id
+    poolTokenId
+    timestamp
+}
+
+scalar JSON
+
+type JoinExit {
+    amounts: [BigDecimal!]!
+    id: ID!
+    pool: Pool!
+    sender: Bytes!
+    timestamp: Int!
+    tx: Bytes!
+    type: InvestType!
+    user: User!
+}
+
+input JoinExit_filter {
+    amounts: [BigDecimal!]
+    amounts_contains: [BigDecimal!]
+    amounts_not: [BigDecimal!]
+    amounts_not_contains: [BigDecimal!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    pool: String
+    pool_contains: String
+    pool_ends_with: String
+    pool_gt: String
+    pool_gte: String
+    pool_in: [String!]
+    pool_lt: String
+    pool_lte: String
+    pool_not: String
+    pool_not_contains: String
+    pool_not_ends_with: String
+    pool_not_in: [String!]
+    pool_not_starts_with: String
+    pool_starts_with: String
+    sender: Bytes
+    sender_contains: Bytes
+    sender_in: [Bytes!]
+    sender_not: Bytes
+    sender_not_contains: Bytes
+    sender_not_in: [Bytes!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    tx: Bytes
+    tx_contains: Bytes
+    tx_in: [Bytes!]
+    tx_not: Bytes
+    tx_not_contains: Bytes
+    tx_not_in: [Bytes!]
+    type: InvestType
+    type_not: InvestType
+    user: String
+    user_contains: String
+    user_ends_with: String
+    user_gt: String
+    user_gte: String
+    user_in: [String!]
+    user_lt: String
+    user_lte: String
+    user_not: String
+    user_not_contains: String
+    user_not_ends_with: String
+    user_not_in: [String!]
+    user_not_starts_with: String
+    user_starts_with: String
+}
+
+enum JoinExit_orderBy {
+    amounts
+    id
+    pool
+    sender
+    timestamp
+    tx
+    type
+    user
+}
+
+type LatestPrice {
+    asset: Bytes!
+    block: BigInt!
+    id: ID!
+    poolId: Pool!
+    price: BigDecimal!
+    pricingAsset: Bytes!
+}
+
+input LatestPrice_filter {
+    asset: Bytes
+    asset_contains: Bytes
+    asset_in: [Bytes!]
+    asset_not: Bytes
+    asset_not_contains: Bytes
+    asset_not_in: [Bytes!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    price: BigDecimal
+    price_gt: BigDecimal
+    price_gte: BigDecimal
+    price_in: [BigDecimal!]
+    price_lt: BigDecimal
+    price_lte: BigDecimal
+    price_not: BigDecimal
+    price_not_in: [BigDecimal!]
+    pricingAsset: Bytes
+    pricingAsset_contains: Bytes
+    pricingAsset_in: [Bytes!]
+    pricingAsset_not: Bytes
+    pricingAsset_not_contains: Bytes
+    pricingAsset_not_in: [Bytes!]
+}
+
+enum LatestPrice_orderBy {
+    asset
+    block
+    id
+    poolId
+    price
+    pricingAsset
+}
+
+type Mutation {
+    someMutation: Boolean!
+}
+
+enum OrderDirection {
+    asc
+    desc
+}
+
+type Pool {
+    address: Bytes!
+    amp: BigInt
+    baseToken: Bytes
+    createTime: Int!
+    expiryTime: BigInt
+    factory: Bytes
+    historicalValues(
+        first: Int = 100
+        orderBy: PoolHistoricalLiquidity_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolHistoricalLiquidity_filter
+    ): [PoolHistoricalLiquidity!]
+    holdersCount: BigInt!
+    id: ID!
+    name: String
+    owner: Bytes
+    poolType: PoolType
+    priceRateProviders(
+        first: Int = 100
+        orderBy: PriceRateProvider_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PriceRateProvider_filter
+    ): [PriceRateProvider!]
+    principalToken: Bytes
+    shares(
+        first: Int = 100
+        orderBy: PoolShare_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolShare_filter
+    ): [PoolShare!]
+    strategyType: Int!
+    swapEnabled: Boolean!
+    swapFee: BigDecimal!
+    swaps(
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]
+    swapsCount: BigInt!
+    symbol: String
+    tokens(
+        first: Int = 100
+        orderBy: PoolToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolToken_filter
+    ): [PoolToken!]
+    tokensList: [Bytes!]!
+    totalLiquidity: BigDecimal!
+    totalShares: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalWeight: BigDecimal
+    tx: Bytes
+    unitSeconds: BigInt
+    vaultID: Balancer!
+    weightUpdates(
+        first: Int = 100
+        orderBy: GradualWeightUpdate_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: GradualWeightUpdate_filter
+    ): [GradualWeightUpdate!]
+}
+
+type PoolHistoricalLiquidity {
+    block: BigInt!
+    id: ID!
+    poolId: Pool!
+    poolLiquidity: BigDecimal!
+    poolShareValue: BigDecimal!
+    poolTotalShares: BigDecimal!
+    pricingAsset: Bytes!
+}
+
+input PoolHistoricalLiquidity_filter {
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    poolLiquidity: BigDecimal
+    poolLiquidity_gt: BigDecimal
+    poolLiquidity_gte: BigDecimal
+    poolLiquidity_in: [BigDecimal!]
+    poolLiquidity_lt: BigDecimal
+    poolLiquidity_lte: BigDecimal
+    poolLiquidity_not: BigDecimal
+    poolLiquidity_not_in: [BigDecimal!]
+    poolShareValue: BigDecimal
+    poolShareValue_gt: BigDecimal
+    poolShareValue_gte: BigDecimal
+    poolShareValue_in: [BigDecimal!]
+    poolShareValue_lt: BigDecimal
+    poolShareValue_lte: BigDecimal
+    poolShareValue_not: BigDecimal
+    poolShareValue_not_in: [BigDecimal!]
+    poolTotalShares: BigDecimal
+    poolTotalShares_gt: BigDecimal
+    poolTotalShares_gte: BigDecimal
+    poolTotalShares_in: [BigDecimal!]
+    poolTotalShares_lt: BigDecimal
+    poolTotalShares_lte: BigDecimal
+    poolTotalShares_not: BigDecimal
+    poolTotalShares_not_in: [BigDecimal!]
+    pricingAsset: Bytes
+    pricingAsset_contains: Bytes
+    pricingAsset_in: [Bytes!]
+    pricingAsset_not: Bytes
+    pricingAsset_not_contains: Bytes
+    pricingAsset_not_in: [Bytes!]
+}
+
+enum PoolHistoricalLiquidity_orderBy {
+    block
+    id
+    poolId
+    poolLiquidity
+    poolShareValue
+    poolTotalShares
+    pricingAsset
+}
+
+type PoolShare {
+    balance: BigDecimal!
+    id: ID!
+    poolId: Pool!
+    userAddress: User!
+}
+
+input PoolShare_filter {
+    balance: BigDecimal
+    balance_gt: BigDecimal
+    balance_gte: BigDecimal
+    balance_in: [BigDecimal!]
+    balance_lt: BigDecimal
+    balance_lte: BigDecimal
+    balance_not: BigDecimal
+    balance_not_in: [BigDecimal!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    userAddress: String
+    userAddress_contains: String
+    userAddress_ends_with: String
+    userAddress_gt: String
+    userAddress_gte: String
+    userAddress_in: [String!]
+    userAddress_lt: String
+    userAddress_lte: String
+    userAddress_not: String
+    userAddress_not_contains: String
+    userAddress_not_ends_with: String
+    userAddress_not_in: [String!]
+    userAddress_not_starts_with: String
+    userAddress_starts_with: String
+}
+
+enum PoolShare_orderBy {
+    balance
+    id
+    poolId
+    userAddress
+}
+
+type PoolSnapshot {
+    amounts: [BigDecimal!]!
+    id: ID!
+    pool: Pool!
+    swapFees: BigDecimal!
+    swapVolume: BigDecimal!
+    timestamp: Int!
+    totalShares: BigDecimal!
+}
+
+input PoolSnapshot_filter {
+    amounts: [BigDecimal!]
+    amounts_contains: [BigDecimal!]
+    amounts_not: [BigDecimal!]
+    amounts_not_contains: [BigDecimal!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    pool: String
+    pool_contains: String
+    pool_ends_with: String
+    pool_gt: String
+    pool_gte: String
+    pool_in: [String!]
+    pool_lt: String
+    pool_lte: String
+    pool_not: String
+    pool_not_contains: String
+    pool_not_ends_with: String
+    pool_not_in: [String!]
+    pool_not_starts_with: String
+    pool_starts_with: String
+    swapFees: BigDecimal
+    swapFees_gt: BigDecimal
+    swapFees_gte: BigDecimal
+    swapFees_in: [BigDecimal!]
+    swapFees_lt: BigDecimal
+    swapFees_lte: BigDecimal
+    swapFees_not: BigDecimal
+    swapFees_not_in: [BigDecimal!]
+    swapVolume: BigDecimal
+    swapVolume_gt: BigDecimal
+    swapVolume_gte: BigDecimal
+    swapVolume_in: [BigDecimal!]
+    swapVolume_lt: BigDecimal
+    swapVolume_lte: BigDecimal
+    swapVolume_not: BigDecimal
+    swapVolume_not_in: [BigDecimal!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    totalShares: BigDecimal
+    totalShares_gt: BigDecimal
+    totalShares_gte: BigDecimal
+    totalShares_in: [BigDecimal!]
+    totalShares_lt: BigDecimal
+    totalShares_lte: BigDecimal
+    totalShares_not: BigDecimal
+    totalShares_not_in: [BigDecimal!]
+}
+
+enum PoolSnapshot_orderBy {
+    amounts
+    id
+    pool
+    swapFees
+    swapVolume
+    timestamp
+    totalShares
+}
+
+type PoolToken {
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    id: ID!
+    invested: BigDecimal!
+    investments(
+        first: Int = 100
+        orderBy: Investment_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Investment_filter
+    ): [Investment!]
+    name: String
+    poolId: Pool!
+    priceRate: BigDecimal
+    symbol: String
+    weight: BigDecimal
+}
+
+input PoolToken_filter {
+    address: String
+    address_contains: String
+    address_ends_with: String
+    address_gt: String
+    address_gte: String
+    address_in: [String!]
+    address_lt: String
+    address_lte: String
+    address_not: String
+    address_not_contains: String
+    address_not_ends_with: String
+    address_not_in: [String!]
+    address_not_starts_with: String
+    address_starts_with: String
+    balance: BigDecimal
+    balance_gt: BigDecimal
+    balance_gte: BigDecimal
+    balance_in: [BigDecimal!]
+    balance_lt: BigDecimal
+    balance_lte: BigDecimal
+    balance_not: BigDecimal
+    balance_not_in: [BigDecimal!]
+    decimals: Int
+    decimals_gt: Int
+    decimals_gte: Int
+    decimals_in: [Int!]
+    decimals_lt: Int
+    decimals_lte: Int
+    decimals_not: Int
+    decimals_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    invested: BigDecimal
+    invested_gt: BigDecimal
+    invested_gte: BigDecimal
+    invested_in: [BigDecimal!]
+    invested_lt: BigDecimal
+    invested_lte: BigDecimal
+    invested_not: BigDecimal
+    invested_not_in: [BigDecimal!]
+    name: String
+    name_contains: String
+    name_ends_with: String
+    name_gt: String
+    name_gte: String
+    name_in: [String!]
+    name_lt: String
+    name_lte: String
+    name_not: String
+    name_not_contains: String
+    name_not_ends_with: String
+    name_not_in: [String!]
+    name_not_starts_with: String
+    name_starts_with: String
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    priceRate: BigDecimal
+    priceRate_gt: BigDecimal
+    priceRate_gte: BigDecimal
+    priceRate_in: [BigDecimal!]
+    priceRate_lt: BigDecimal
+    priceRate_lte: BigDecimal
+    priceRate_not: BigDecimal
+    priceRate_not_in: [BigDecimal!]
+    symbol: String
+    symbol_contains: String
+    symbol_ends_with: String
+    symbol_gt: String
+    symbol_gte: String
+    symbol_in: [String!]
+    symbol_lt: String
+    symbol_lte: String
+    symbol_not: String
+    symbol_not_contains: String
+    symbol_not_ends_with: String
+    symbol_not_in: [String!]
+    symbol_not_starts_with: String
+    symbol_starts_with: String
+    weight: BigDecimal
+    weight_gt: BigDecimal
+    weight_gte: BigDecimal
+    weight_in: [BigDecimal!]
+    weight_lt: BigDecimal
+    weight_lte: BigDecimal
+    weight_not: BigDecimal
+    weight_not_in: [BigDecimal!]
+}
+
+enum PoolToken_orderBy {
+    address
+    balance
+    decimals
+    id
+    invested
+    investments
+    name
+    poolId
+    priceRate
+    symbol
+    weight
+}
+
+enum PoolType {
+    Element
+    LiquidityBootstrapping
+    MetaStable
+    Stable
+    Weighted
+}
+
+input Pool_filter {
+    address: Bytes
+    address_contains: Bytes
+    address_in: [Bytes!]
+    address_not: Bytes
+    address_not_contains: Bytes
+    address_not_in: [Bytes!]
+    amp: BigInt
+    amp_gt: BigInt
+    amp_gte: BigInt
+    amp_in: [BigInt!]
+    amp_lt: BigInt
+    amp_lte: BigInt
+    amp_not: BigInt
+    amp_not_in: [BigInt!]
+    baseToken: Bytes
+    baseToken_contains: Bytes
+    baseToken_in: [Bytes!]
+    baseToken_not: Bytes
+    baseToken_not_contains: Bytes
+    baseToken_not_in: [Bytes!]
+    createTime: Int
+    createTime_gt: Int
+    createTime_gte: Int
+    createTime_in: [Int!]
+    createTime_lt: Int
+    createTime_lte: Int
+    createTime_not: Int
+    createTime_not_in: [Int!]
+    expiryTime: BigInt
+    expiryTime_gt: BigInt
+    expiryTime_gte: BigInt
+    expiryTime_in: [BigInt!]
+    expiryTime_lt: BigInt
+    expiryTime_lte: BigInt
+    expiryTime_not: BigInt
+    expiryTime_not_in: [BigInt!]
+    factory: Bytes
+    factory_contains: Bytes
+    factory_in: [Bytes!]
+    factory_not: Bytes
+    factory_not_contains: Bytes
+    factory_not_in: [Bytes!]
+    holdersCount: BigInt
+    holdersCount_gt: BigInt
+    holdersCount_gte: BigInt
+    holdersCount_in: [BigInt!]
+    holdersCount_lt: BigInt
+    holdersCount_lte: BigInt
+    holdersCount_not: BigInt
+    holdersCount_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    name: String
+    name_contains: String
+    name_ends_with: String
+    name_gt: String
+    name_gte: String
+    name_in: [String!]
+    name_lt: String
+    name_lte: String
+    name_not: String
+    name_not_contains: String
+    name_not_ends_with: String
+    name_not_in: [String!]
+    name_not_starts_with: String
+    name_starts_with: String
+    owner: Bytes
+    owner_contains: Bytes
+    owner_in: [Bytes!]
+    owner_not: Bytes
+    owner_not_contains: Bytes
+    owner_not_in: [Bytes!]
+    poolType: PoolType
+    poolType_not: PoolType
+    principalToken: Bytes
+    principalToken_contains: Bytes
+    principalToken_in: [Bytes!]
+    principalToken_not: Bytes
+    principalToken_not_contains: Bytes
+    principalToken_not_in: [Bytes!]
+    strategyType: Int
+    strategyType_gt: Int
+    strategyType_gte: Int
+    strategyType_in: [Int!]
+    strategyType_lt: Int
+    strategyType_lte: Int
+    strategyType_not: Int
+    strategyType_not_in: [Int!]
+    swapEnabled: Boolean
+    swapEnabled_in: [Boolean!]
+    swapEnabled_not: Boolean
+    swapEnabled_not_in: [Boolean!]
+    swapFee: BigDecimal
+    swapFee_gt: BigDecimal
+    swapFee_gte: BigDecimal
+    swapFee_in: [BigDecimal!]
+    swapFee_lt: BigDecimal
+    swapFee_lte: BigDecimal
+    swapFee_not: BigDecimal
+    swapFee_not_in: [BigDecimal!]
+    swapsCount: BigInt
+    swapsCount_gt: BigInt
+    swapsCount_gte: BigInt
+    swapsCount_in: [BigInt!]
+    swapsCount_lt: BigInt
+    swapsCount_lte: BigInt
+    swapsCount_not: BigInt
+    swapsCount_not_in: [BigInt!]
+    symbol: String
+    symbol_contains: String
+    symbol_ends_with: String
+    symbol_gt: String
+    symbol_gte: String
+    symbol_in: [String!]
+    symbol_lt: String
+    symbol_lte: String
+    symbol_not: String
+    symbol_not_contains: String
+    symbol_not_ends_with: String
+    symbol_not_in: [String!]
+    symbol_not_starts_with: String
+    symbol_starts_with: String
+    tokensList: [Bytes!]
+    tokensList_contains: [Bytes!]
+    tokensList_not: [Bytes!]
+    tokensList_not_contains: [Bytes!]
+    totalLiquidity: BigDecimal
+    totalLiquidity_gt: BigDecimal
+    totalLiquidity_gte: BigDecimal
+    totalLiquidity_in: [BigDecimal!]
+    totalLiquidity_lt: BigDecimal
+    totalLiquidity_lte: BigDecimal
+    totalLiquidity_not: BigDecimal
+    totalLiquidity_not_in: [BigDecimal!]
+    totalShares: BigDecimal
+    totalShares_gt: BigDecimal
+    totalShares_gte: BigDecimal
+    totalShares_in: [BigDecimal!]
+    totalShares_lt: BigDecimal
+    totalShares_lte: BigDecimal
+    totalShares_not: BigDecimal
+    totalShares_not_in: [BigDecimal!]
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
+    totalWeight: BigDecimal
+    totalWeight_gt: BigDecimal
+    totalWeight_gte: BigDecimal
+    totalWeight_in: [BigDecimal!]
+    totalWeight_lt: BigDecimal
+    totalWeight_lte: BigDecimal
+    totalWeight_not: BigDecimal
+    totalWeight_not_in: [BigDecimal!]
+    tx: Bytes
+    tx_contains: Bytes
+    tx_in: [Bytes!]
+    tx_not: Bytes
+    tx_not_contains: Bytes
+    tx_not_in: [Bytes!]
+    unitSeconds: BigInt
+    unitSeconds_gt: BigInt
+    unitSeconds_gte: BigInt
+    unitSeconds_in: [BigInt!]
+    unitSeconds_lt: BigInt
+    unitSeconds_lte: BigInt
+    unitSeconds_not: BigInt
+    unitSeconds_not_in: [BigInt!]
+    vaultID: String
+    vaultID_contains: String
+    vaultID_ends_with: String
+    vaultID_gt: String
+    vaultID_gte: String
+    vaultID_in: [String!]
+    vaultID_lt: String
+    vaultID_lte: String
+    vaultID_not: String
+    vaultID_not_contains: String
+    vaultID_not_ends_with: String
+    vaultID_not_in: [String!]
+    vaultID_not_starts_with: String
+    vaultID_starts_with: String
+}
+
+enum Pool_orderBy {
+    address
+    amp
+    baseToken
+    createTime
+    expiryTime
+    factory
+    historicalValues
+    holdersCount
+    id
+    name
+    owner
+    poolType
+    priceRateProviders
+    principalToken
+    shares
+    strategyType
+    swapEnabled
+    swapFee
+    swaps
+    swapsCount
+    symbol
+    tokens
+    tokensList
+    totalLiquidity
+    totalShares
+    totalSwapFee
+    totalSwapVolume
+    totalWeight
+    tx
+    unitSeconds
+    vaultID
+    weightUpdates
+}
+
+type Portfolio {
+    tokens: [PortfolioToken!]!
+}
+
+type PortfolioToken {
+    balance: String!
+    id: String!
+    name: String!
+    pricePerToken: Float!
+    symbol: String!
+    totalPrice: Float!
+}
+
+type PriceRateProvider {
+    address: Bytes!
+    cacheDuration: Int!
+    cacheExpiry: Int!
+    id: ID!
+    lastCached: Int!
+    poolId: Pool!
+    rate: BigDecimal!
+    token: PoolToken!
+}
+
+input PriceRateProvider_filter {
+    address: Bytes
+    address_contains: Bytes
+    address_in: [Bytes!]
+    address_not: Bytes
+    address_not_contains: Bytes
+    address_not_in: [Bytes!]
+    cacheDuration: Int
+    cacheDuration_gt: Int
+    cacheDuration_gte: Int
+    cacheDuration_in: [Int!]
+    cacheDuration_lt: Int
+    cacheDuration_lte: Int
+    cacheDuration_not: Int
+    cacheDuration_not_in: [Int!]
+    cacheExpiry: Int
+    cacheExpiry_gt: Int
+    cacheExpiry_gte: Int
+    cacheExpiry_in: [Int!]
+    cacheExpiry_lt: Int
+    cacheExpiry_lte: Int
+    cacheExpiry_not: Int
+    cacheExpiry_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    lastCached: Int
+    lastCached_gt: Int
+    lastCached_gte: Int
+    lastCached_in: [Int!]
+    lastCached_lt: Int
+    lastCached_lte: Int
+    lastCached_not: Int
+    lastCached_not_in: [Int!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    rate: BigDecimal
+    rate_gt: BigDecimal
+    rate_gte: BigDecimal
+    rate_in: [BigDecimal!]
+    rate_lt: BigDecimal
+    rate_lte: BigDecimal
+    rate_not: BigDecimal
+    rate_not_in: [BigDecimal!]
+    token: String
+    token_contains: String
+    token_ends_with: String
+    token_gt: String
+    token_gte: String
+    token_in: [String!]
+    token_lt: String
+    token_lte: String
+    token_not: String
+    token_not_contains: String
+    token_not_ends_with: String
+    token_not_in: [String!]
+    token_not_starts_with: String
+    token_starts_with: String
+}
+
+enum PriceRateProvider_orderBy {
+    address
+    cacheDuration
+    cacheExpiry
+    id
+    lastCached
+    poolId
+    rate
+    token
+}
+
+type Query {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    balancer(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Balancer
+    balancers(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Balancer_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Balancer_filter
+    ): [Balancer!]!
+    gradualWeightUpdate(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): GradualWeightUpdate
+    gradualWeightUpdates(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: GradualWeightUpdate_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: GradualWeightUpdate_filter
+    ): [GradualWeightUpdate!]!
+    investment(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Investment
+    investments(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Investment_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Investment_filter
+    ): [Investment!]!
+    joinExit(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): JoinExit
+    joinExits(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: JoinExit_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: JoinExit_filter
+    ): [JoinExit!]!
+    latestPrice(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): LatestPrice
+    latestPrices(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: LatestPrice_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: LatestPrice_filter
+    ): [LatestPrice!]!
+    pool(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Pool
+    poolHistoricalLiquidities(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolHistoricalLiquidity_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolHistoricalLiquidity_filter
+    ): [PoolHistoricalLiquidity!]!
+    poolHistoricalLiquidity(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolHistoricalLiquidity
+    poolShare(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolShare
+    poolShares(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolShare_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolShare_filter
+    ): [PoolShare!]!
+    poolSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolSnapshot
+    poolSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolSnapshot_filter
+    ): [PoolSnapshot!]!
+    poolToken(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolToken
+    poolTokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolToken_filter
+    ): [PoolToken!]!
+    pools(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]!
+    portfolioGetPortfolio: Portfolio!
+    priceRateProvider(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PriceRateProvider
+    priceRateProviders(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PriceRateProvider_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PriceRateProvider_filter
+    ): [PriceRateProvider!]!
+    swap(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Swap
+    swaps(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]!
+    tokenPrice(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TokenPrice
+    tokenPrices(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TokenPrice_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TokenPrice_filter
+    ): [TokenPrice!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): User
+    userInternalBalance(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): UserInternalBalance
+    userInternalBalances(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: UserInternalBalance_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: UserInternalBalance_filter
+    ): [UserInternalBalance!]!
+    users(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+type Subscription {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    balancer(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Balancer
+    balancers(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Balancer_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Balancer_filter
+    ): [Balancer!]!
+    gradualWeightUpdate(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): GradualWeightUpdate
+    gradualWeightUpdates(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: GradualWeightUpdate_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: GradualWeightUpdate_filter
+    ): [GradualWeightUpdate!]!
+    investment(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Investment
+    investments(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Investment_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Investment_filter
+    ): [Investment!]!
+    joinExit(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): JoinExit
+    joinExits(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: JoinExit_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: JoinExit_filter
+    ): [JoinExit!]!
+    latestPrice(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): LatestPrice
+    latestPrices(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: LatestPrice_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: LatestPrice_filter
+    ): [LatestPrice!]!
+    pool(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Pool
+    poolHistoricalLiquidities(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolHistoricalLiquidity_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolHistoricalLiquidity_filter
+    ): [PoolHistoricalLiquidity!]!
+    poolHistoricalLiquidity(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolHistoricalLiquidity
+    poolShare(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolShare
+    poolShares(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolShare_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolShare_filter
+    ): [PoolShare!]!
+    poolSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolSnapshot
+    poolSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolSnapshot_filter
+    ): [PoolSnapshot!]!
+    poolToken(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PoolToken
+    poolTokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PoolToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolToken_filter
+    ): [PoolToken!]!
+    pools(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]!
+    priceRateProvider(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): PriceRateProvider
+    priceRateProviders(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: PriceRateProvider_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PriceRateProvider_filter
+    ): [PriceRateProvider!]!
+    swap(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Swap
+    swaps(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]!
+    tokenPrice(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TokenPrice
+    tokenPrices(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TokenPrice_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TokenPrice_filter
+    ): [TokenPrice!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): User
+    userInternalBalance(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): UserInternalBalance
+    userInternalBalances(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: UserInternalBalance_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: UserInternalBalance_filter
+    ): [UserInternalBalance!]!
+    users(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+type Swap {
+    caller: Bytes!
+    id: ID!
+    poolId: Pool!
+    timestamp: Int!
+    tokenAmountIn: BigDecimal!
+    tokenAmountOut: BigDecimal!
+    tokenIn: Bytes!
+    tokenInSym: String!
+    tokenOut: Bytes!
+    tokenOutSym: String!
+    tx: Bytes!
+    userAddress: User!
+}
+
+input Swap_filter {
+    caller: Bytes
+    caller_contains: Bytes
+    caller_in: [Bytes!]
+    caller_not: Bytes
+    caller_not_contains: Bytes
+    caller_not_in: [Bytes!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    tokenAmountIn: BigDecimal
+    tokenAmountIn_gt: BigDecimal
+    tokenAmountIn_gte: BigDecimal
+    tokenAmountIn_in: [BigDecimal!]
+    tokenAmountIn_lt: BigDecimal
+    tokenAmountIn_lte: BigDecimal
+    tokenAmountIn_not: BigDecimal
+    tokenAmountIn_not_in: [BigDecimal!]
+    tokenAmountOut: BigDecimal
+    tokenAmountOut_gt: BigDecimal
+    tokenAmountOut_gte: BigDecimal
+    tokenAmountOut_in: [BigDecimal!]
+    tokenAmountOut_lt: BigDecimal
+    tokenAmountOut_lte: BigDecimal
+    tokenAmountOut_not: BigDecimal
+    tokenAmountOut_not_in: [BigDecimal!]
+    tokenIn: Bytes
+    tokenInSym: String
+    tokenInSym_contains: String
+    tokenInSym_ends_with: String
+    tokenInSym_gt: String
+    tokenInSym_gte: String
+    tokenInSym_in: [String!]
+    tokenInSym_lt: String
+    tokenInSym_lte: String
+    tokenInSym_not: String
+    tokenInSym_not_contains: String
+    tokenInSym_not_ends_with: String
+    tokenInSym_not_in: [String!]
+    tokenInSym_not_starts_with: String
+    tokenInSym_starts_with: String
+    tokenIn_contains: Bytes
+    tokenIn_in: [Bytes!]
+    tokenIn_not: Bytes
+    tokenIn_not_contains: Bytes
+    tokenIn_not_in: [Bytes!]
+    tokenOut: Bytes
+    tokenOutSym: String
+    tokenOutSym_contains: String
+    tokenOutSym_ends_with: String
+    tokenOutSym_gt: String
+    tokenOutSym_gte: String
+    tokenOutSym_in: [String!]
+    tokenOutSym_lt: String
+    tokenOutSym_lte: String
+    tokenOutSym_not: String
+    tokenOutSym_not_contains: String
+    tokenOutSym_not_ends_with: String
+    tokenOutSym_not_in: [String!]
+    tokenOutSym_not_starts_with: String
+    tokenOutSym_starts_with: String
+    tokenOut_contains: Bytes
+    tokenOut_in: [Bytes!]
+    tokenOut_not: Bytes
+    tokenOut_not_contains: Bytes
+    tokenOut_not_in: [Bytes!]
+    tx: Bytes
+    tx_contains: Bytes
+    tx_in: [Bytes!]
+    tx_not: Bytes
+    tx_not_contains: Bytes
+    tx_not_in: [Bytes!]
+    userAddress: String
+    userAddress_contains: String
+    userAddress_ends_with: String
+    userAddress_gt: String
+    userAddress_gte: String
+    userAddress_in: [String!]
+    userAddress_lt: String
+    userAddress_lte: String
+    userAddress_not: String
+    userAddress_not_contains: String
+    userAddress_not_ends_with: String
+    userAddress_not_in: [String!]
+    userAddress_not_starts_with: String
+    userAddress_starts_with: String
+}
+
+enum Swap_orderBy {
+    caller
+    id
+    poolId
+    timestamp
+    tokenAmountIn
+    tokenAmountOut
+    tokenIn
+    tokenInSym
+    tokenOut
+    tokenOutSym
+    tx
+    userAddress
+}
+
+type TokenPrice {
+    amount: BigDecimal!
+    asset: Bytes!
+    block: BigInt!
+    id: ID!
+    poolId: Pool!
+    price: BigDecimal!
+    pricingAsset: Bytes!
+    timestamp: BigInt!
+}
+
+input TokenPrice_filter {
+    amount: BigDecimal
+    amount_gt: BigDecimal
+    amount_gte: BigDecimal
+    amount_in: [BigDecimal!]
+    amount_lt: BigDecimal
+    amount_lte: BigDecimal
+    amount_not: BigDecimal
+    amount_not_in: [BigDecimal!]
+    asset: Bytes
+    asset_contains: Bytes
+    asset_in: [Bytes!]
+    asset_not: Bytes
+    asset_not_contains: Bytes
+    asset_not_in: [Bytes!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    price: BigDecimal
+    price_gt: BigDecimal
+    price_gte: BigDecimal
+    price_in: [BigDecimal!]
+    price_lt: BigDecimal
+    price_lte: BigDecimal
+    price_not: BigDecimal
+    price_not_in: [BigDecimal!]
+    pricingAsset: Bytes
+    pricingAsset_contains: Bytes
+    pricingAsset_in: [Bytes!]
+    pricingAsset_not: Bytes
+    pricingAsset_not_contains: Bytes
+    pricingAsset_not_in: [Bytes!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+}
+
+enum TokenPrice_orderBy {
+    amount
+    asset
+    block
+    id
+    poolId
+    price
+    pricingAsset
+    timestamp
+}
+
+type TranslatedString {
+    de: String!
+    en: String!
+}
+
+scalar UUID
+
+type User {
+    id: ID!
+    sharesOwned(
+        first: Int = 100
+        orderBy: PoolShare_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: PoolShare_filter
+    ): [PoolShare!]
+    swaps(
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]
+    userInternalBalances(
+        first: Int = 100
+        orderBy: UserInternalBalance_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: UserInternalBalance_filter
+    ): [UserInternalBalance!]
+}
+
+type UserInternalBalance {
+    balance: BigDecimal!
+    id: ID!
+    token: Bytes!
+    userAddress: User
+}
+
+input UserInternalBalance_filter {
+    balance: BigDecimal
+    balance_gt: BigDecimal
+    balance_gte: BigDecimal
+    balance_in: [BigDecimal!]
+    balance_lt: BigDecimal
+    balance_lte: BigDecimal
+    balance_not: BigDecimal
+    balance_not_in: [BigDecimal!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    token: Bytes
+    token_contains: Bytes
+    token_in: [Bytes!]
+    token_not: Bytes
+    token_not_contains: Bytes
+    token_not_in: [Bytes!]
+    userAddress: String
+    userAddress_contains: String
+    userAddress_ends_with: String
+    userAddress_gt: String
+    userAddress_gte: String
+    userAddress_in: [String!]
+    userAddress_lt: String
+    userAddress_lte: String
+    userAddress_not: String
+    userAddress_not_contains: String
+    userAddress_not_ends_with: String
+    userAddress_not_in: [String!]
+    userAddress_not_starts_with: String
+    userAddress_starts_with: String
+}
+
+enum UserInternalBalance_orderBy {
+    balance
+    id
+    token
+    userAddress
+}
+
+input User_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+}
+
+enum User_orderBy {
+    id
+    sharesOwned
+    swaps
+    userInternalBalances
+}
+
+type _Block_ {
+    """
+    The hash of the block
+    """
+    hash: Bytes
+
+    """
+    The block number
+    """
+    number: Int!
+}
+
+"""
+The type for the top-level _meta field
+"""
+type _Meta_ {
+    """
+    Information about a specific subgraph block. The hash of the block
+    will be null if the _meta field has a block constraint that asks for
+    a block number. It will be filled if the _meta field has no block constraint
+    and therefore asks for the latest  block
+    """
+    block: _Block_!
+
+    """
+    The deployment ID
+    """
+    deployment: String!
+
+    """
+    If `true`, the subgraph encountered indexing errors at some past block
+    """
+    hasIndexingErrors: Boolean!
+}
+
+enum _SubgraphErrorPolicy_ {
+    """
+    Data will be returned even if the subgraph has indexing errors
+    """
+    allow
+
+    """
+    If the subgraph has indexing errors, data will be omitted. The default.
+    """
+    deny
+}

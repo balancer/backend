@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["es2018"],
+    "module": "commonjs",
+    "strict": true,
+    "target": "es2018",
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "skipLibCheck": true
+  }
+}

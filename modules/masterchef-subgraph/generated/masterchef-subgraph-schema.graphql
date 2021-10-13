@@ -1,0 +1,623 @@
+directive @derivedFrom(field: String) on FIELD_DEFINITION
+
+directive @entity on OBJECT
+
+directive @subgraphId(id: String) on OBJECT
+
+scalar BigDecimal
+
+scalar BigInt
+
+scalar Binary
+
+input Block_height {
+    hash: Bytes
+    number: Int
+}
+
+scalar Bytes
+
+scalar Date
+
+scalar Datetime
+
+scalar JSON
+
+type MasterChef {
+    beetsPerBlock: BigInt!
+    block: BigInt!
+    id: ID!
+    poolCount: BigInt!
+    pools(
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]
+    timestamp: BigInt!
+    totalAllocPoint: BigInt!
+}
+
+input MasterChef_filter {
+    beetsPerBlock: BigInt
+    beetsPerBlock_gt: BigInt
+    beetsPerBlock_gte: BigInt
+    beetsPerBlock_in: [BigInt!]
+    beetsPerBlock_lt: BigInt
+    beetsPerBlock_lte: BigInt
+    beetsPerBlock_not: BigInt
+    beetsPerBlock_not_in: [BigInt!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolCount: BigInt
+    poolCount_gt: BigInt
+    poolCount_gte: BigInt
+    poolCount_in: [BigInt!]
+    poolCount_lt: BigInt
+    poolCount_lte: BigInt
+    poolCount_not: BigInt
+    poolCount_not_in: [BigInt!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    totalAllocPoint: BigInt
+    totalAllocPoint_gt: BigInt
+    totalAllocPoint_gte: BigInt
+    totalAllocPoint_in: [BigInt!]
+    totalAllocPoint_lt: BigInt
+    totalAllocPoint_lte: BigInt
+    totalAllocPoint_not: BigInt
+    totalAllocPoint_not_in: [BigInt!]
+}
+
+enum MasterChef_orderBy {
+    beetsPerBlock
+    block
+    id
+    poolCount
+    pools
+    timestamp
+    totalAllocPoint
+}
+
+type Mutation {
+    someMutation: Boolean!
+}
+
+enum OrderDirection {
+    asc
+    desc
+}
+
+type Pool {
+    accBeetsPerShare: BigInt!
+    allocPoint: BigInt!
+    block: BigInt!
+    id: ID!
+    lastRewardBlock: BigInt!
+    masterChef: MasterChef!
+    pair: Bytes!
+    rewarder: Rewarder
+    slpBalance: BigInt!
+    timestamp: BigInt!
+    userCount: BigInt!
+    users(
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+input Pool_filter {
+    accBeetsPerShare: BigInt
+    accBeetsPerShare_gt: BigInt
+    accBeetsPerShare_gte: BigInt
+    accBeetsPerShare_in: [BigInt!]
+    accBeetsPerShare_lt: BigInt
+    accBeetsPerShare_lte: BigInt
+    accBeetsPerShare_not: BigInt
+    accBeetsPerShare_not_in: [BigInt!]
+    allocPoint: BigInt
+    allocPoint_gt: BigInt
+    allocPoint_gte: BigInt
+    allocPoint_in: [BigInt!]
+    allocPoint_lt: BigInt
+    allocPoint_lte: BigInt
+    allocPoint_not: BigInt
+    allocPoint_not_in: [BigInt!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    lastRewardBlock: BigInt
+    lastRewardBlock_gt: BigInt
+    lastRewardBlock_gte: BigInt
+    lastRewardBlock_in: [BigInt!]
+    lastRewardBlock_lt: BigInt
+    lastRewardBlock_lte: BigInt
+    lastRewardBlock_not: BigInt
+    lastRewardBlock_not_in: [BigInt!]
+    masterChef: String
+    masterChef_contains: String
+    masterChef_ends_with: String
+    masterChef_gt: String
+    masterChef_gte: String
+    masterChef_in: [String!]
+    masterChef_lt: String
+    masterChef_lte: String
+    masterChef_not: String
+    masterChef_not_contains: String
+    masterChef_not_ends_with: String
+    masterChef_not_in: [String!]
+    masterChef_not_starts_with: String
+    masterChef_starts_with: String
+    pair: Bytes
+    pair_contains: Bytes
+    pair_in: [Bytes!]
+    pair_not: Bytes
+    pair_not_contains: Bytes
+    pair_not_in: [Bytes!]
+    rewarder: String
+    rewarder_contains: String
+    rewarder_ends_with: String
+    rewarder_gt: String
+    rewarder_gte: String
+    rewarder_in: [String!]
+    rewarder_lt: String
+    rewarder_lte: String
+    rewarder_not: String
+    rewarder_not_contains: String
+    rewarder_not_ends_with: String
+    rewarder_not_in: [String!]
+    rewarder_not_starts_with: String
+    rewarder_starts_with: String
+    slpBalance: BigInt
+    slpBalance_gt: BigInt
+    slpBalance_gte: BigInt
+    slpBalance_in: [BigInt!]
+    slpBalance_lt: BigInt
+    slpBalance_lte: BigInt
+    slpBalance_not: BigInt
+    slpBalance_not_in: [BigInt!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    userCount: BigInt
+    userCount_gt: BigInt
+    userCount_gte: BigInt
+    userCount_in: [BigInt!]
+    userCount_lt: BigInt
+    userCount_lte: BigInt
+    userCount_not: BigInt
+    userCount_not_in: [BigInt!]
+}
+
+enum Pool_orderBy {
+    accBeetsPerShare
+    allocPoint
+    block
+    id
+    lastRewardBlock
+    masterChef
+    pair
+    rewarder
+    slpBalance
+    timestamp
+    userCount
+    users
+}
+
+type Portfolio {
+    tokens: [PortfolioToken!]!
+}
+
+type PortfolioToken {
+    balance: String!
+    id: String!
+    name: String!
+    pricePerToken: Float!
+    symbol: String!
+    totalPrice: Float!
+}
+
+type Query {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    masterChef(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): MasterChef
+    masterChefs(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: MasterChef_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: MasterChef_filter
+    ): [MasterChef!]!
+    pool(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Pool
+    pools(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]!
+    portfolioGetPortfolio: Portfolio!
+    rewarder(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Rewarder
+    rewarders(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Rewarder_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Rewarder_filter
+    ): [Rewarder!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): User
+    users(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+type Rewarder {
+    block: BigInt!
+    id: ID!
+    rewardPerSecond: BigInt!
+    rewardToken: Bytes!
+    timestamp: BigInt!
+}
+
+input Rewarder_filter {
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    rewardPerSecond: BigInt
+    rewardPerSecond_gt: BigInt
+    rewardPerSecond_gte: BigInt
+    rewardPerSecond_in: [BigInt!]
+    rewardPerSecond_lt: BigInt
+    rewardPerSecond_lte: BigInt
+    rewardPerSecond_not: BigInt
+    rewardPerSecond_not_in: [BigInt!]
+    rewardToken: Bytes
+    rewardToken_contains: Bytes
+    rewardToken_in: [Bytes!]
+    rewardToken_not: Bytes
+    rewardToken_not_contains: Bytes
+    rewardToken_not_in: [Bytes!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+}
+
+enum Rewarder_orderBy {
+    block
+    id
+    rewardPerSecond
+    rewardToken
+    timestamp
+}
+
+type Subscription {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    masterChef(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): MasterChef
+    masterChefs(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: MasterChef_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: MasterChef_filter
+    ): [MasterChef!]!
+    pool(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Pool
+    pools(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Pool_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Pool_filter
+    ): [Pool!]!
+    rewarder(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Rewarder
+    rewarders(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Rewarder_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Rewarder_filter
+    ): [Rewarder!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): User
+    users(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+type TranslatedString {
+    de: String!
+    en: String!
+}
+
+scalar UUID
+
+type User {
+    address: Bytes!
+    amount: BigInt!
+    beetsHarvested: BigInt!
+    block: BigInt!
+    id: ID!
+    pool: Pool
+    rewardDebt: BigInt!
+    timestamp: BigInt!
+}
+
+input User_filter {
+    address: Bytes
+    address_contains: Bytes
+    address_in: [Bytes!]
+    address_not: Bytes
+    address_not_contains: Bytes
+    address_not_in: [Bytes!]
+    amount: BigInt
+    amount_gt: BigInt
+    amount_gte: BigInt
+    amount_in: [BigInt!]
+    amount_lt: BigInt
+    amount_lte: BigInt
+    amount_not: BigInt
+    amount_not_in: [BigInt!]
+    beetsHarvested: BigInt
+    beetsHarvested_gt: BigInt
+    beetsHarvested_gte: BigInt
+    beetsHarvested_in: [BigInt!]
+    beetsHarvested_lt: BigInt
+    beetsHarvested_lte: BigInt
+    beetsHarvested_not: BigInt
+    beetsHarvested_not_in: [BigInt!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    pool: String
+    pool_contains: String
+    pool_ends_with: String
+    pool_gt: String
+    pool_gte: String
+    pool_in: [String!]
+    pool_lt: String
+    pool_lte: String
+    pool_not: String
+    pool_not_contains: String
+    pool_not_ends_with: String
+    pool_not_in: [String!]
+    pool_not_starts_with: String
+    pool_starts_with: String
+    rewardDebt: BigInt
+    rewardDebt_gt: BigInt
+    rewardDebt_gte: BigInt
+    rewardDebt_in: [BigInt!]
+    rewardDebt_lt: BigInt
+    rewardDebt_lte: BigInt
+    rewardDebt_not: BigInt
+    rewardDebt_not_in: [BigInt!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+}
+
+enum User_orderBy {
+    address
+    amount
+    beetsHarvested
+    block
+    id
+    pool
+    rewardDebt
+    timestamp
+}
+
+type _Block_ {
+    """
+    The hash of the block
+    """
+    hash: Bytes
+
+    """
+    The block number
+    """
+    number: Int!
+}
+
+"""
+The type for the top-level _meta field
+"""
+type _Meta_ {
+    """
+    Information about a specific subgraph block. The hash of the block
+    will be null if the _meta field has a block constraint that asks for
+    a block number. It will be filled if the _meta field has no block constraint
+    and therefore asks for the latest  block
+    """
+    block: _Block_!
+
+    """
+    The deployment ID
+    """
+    deployment: String!
+
+    """
+    If `true`, the subgraph encountered indexing errors at some past block
+    """
+    hasIndexingErrors: Boolean!
+}
+
+enum _SubgraphErrorPolicy_ {
+    """
+    Data will be returned even if the subgraph has indexing errors
+    """
+    allow
+
+    """
+    If the subgraph has indexing errors, data will be omitted. The default.
+    """
+    deny
+}

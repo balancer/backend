@@ -1,0 +1,336 @@
+directive @derivedFrom(field: String) on FIELD_DEFINITION
+
+directive @entity on OBJECT
+
+directive @subgraphId(id: String) on OBJECT
+
+scalar BigDecimal
+
+scalar BigInt
+
+scalar Binary
+
+type Block {
+    author: String
+    difficulty: BigInt
+    gasLimit: BigInt
+    gasUsed: BigInt
+    id: ID!
+    number: BigInt!
+    parentHash: String
+    receiptsRoot: String
+    size: BigInt
+    stateRoot: String
+    timestamp: BigInt!
+    totalDifficulty: BigInt
+    transactionsRoot: String
+    unclesHash: String
+}
+
+input Block_filter {
+    author: String
+    author_contains: String
+    author_ends_with: String
+    author_gt: String
+    author_gte: String
+    author_in: [String!]
+    author_lt: String
+    author_lte: String
+    author_not: String
+    author_not_contains: String
+    author_not_ends_with: String
+    author_not_in: [String!]
+    author_not_starts_with: String
+    author_starts_with: String
+    difficulty: BigInt
+    difficulty_gt: BigInt
+    difficulty_gte: BigInt
+    difficulty_in: [BigInt!]
+    difficulty_lt: BigInt
+    difficulty_lte: BigInt
+    difficulty_not: BigInt
+    difficulty_not_in: [BigInt!]
+    gasLimit: BigInt
+    gasLimit_gt: BigInt
+    gasLimit_gte: BigInt
+    gasLimit_in: [BigInt!]
+    gasLimit_lt: BigInt
+    gasLimit_lte: BigInt
+    gasLimit_not: BigInt
+    gasLimit_not_in: [BigInt!]
+    gasUsed: BigInt
+    gasUsed_gt: BigInt
+    gasUsed_gte: BigInt
+    gasUsed_in: [BigInt!]
+    gasUsed_lt: BigInt
+    gasUsed_lte: BigInt
+    gasUsed_not: BigInt
+    gasUsed_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    number: BigInt
+    number_gt: BigInt
+    number_gte: BigInt
+    number_in: [BigInt!]
+    number_lt: BigInt
+    number_lte: BigInt
+    number_not: BigInt
+    number_not_in: [BigInt!]
+    parentHash: String
+    parentHash_contains: String
+    parentHash_ends_with: String
+    parentHash_gt: String
+    parentHash_gte: String
+    parentHash_in: [String!]
+    parentHash_lt: String
+    parentHash_lte: String
+    parentHash_not: String
+    parentHash_not_contains: String
+    parentHash_not_ends_with: String
+    parentHash_not_in: [String!]
+    parentHash_not_starts_with: String
+    parentHash_starts_with: String
+    receiptsRoot: String
+    receiptsRoot_contains: String
+    receiptsRoot_ends_with: String
+    receiptsRoot_gt: String
+    receiptsRoot_gte: String
+    receiptsRoot_in: [String!]
+    receiptsRoot_lt: String
+    receiptsRoot_lte: String
+    receiptsRoot_not: String
+    receiptsRoot_not_contains: String
+    receiptsRoot_not_ends_with: String
+    receiptsRoot_not_in: [String!]
+    receiptsRoot_not_starts_with: String
+    receiptsRoot_starts_with: String
+    size: BigInt
+    size_gt: BigInt
+    size_gte: BigInt
+    size_in: [BigInt!]
+    size_lt: BigInt
+    size_lte: BigInt
+    size_not: BigInt
+    size_not_in: [BigInt!]
+    stateRoot: String
+    stateRoot_contains: String
+    stateRoot_ends_with: String
+    stateRoot_gt: String
+    stateRoot_gte: String
+    stateRoot_in: [String!]
+    stateRoot_lt: String
+    stateRoot_lte: String
+    stateRoot_not: String
+    stateRoot_not_contains: String
+    stateRoot_not_ends_with: String
+    stateRoot_not_in: [String!]
+    stateRoot_not_starts_with: String
+    stateRoot_starts_with: String
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    totalDifficulty: BigInt
+    totalDifficulty_gt: BigInt
+    totalDifficulty_gte: BigInt
+    totalDifficulty_in: [BigInt!]
+    totalDifficulty_lt: BigInt
+    totalDifficulty_lte: BigInt
+    totalDifficulty_not: BigInt
+    totalDifficulty_not_in: [BigInt!]
+    transactionsRoot: String
+    transactionsRoot_contains: String
+    transactionsRoot_ends_with: String
+    transactionsRoot_gt: String
+    transactionsRoot_gte: String
+    transactionsRoot_in: [String!]
+    transactionsRoot_lt: String
+    transactionsRoot_lte: String
+    transactionsRoot_not: String
+    transactionsRoot_not_contains: String
+    transactionsRoot_not_ends_with: String
+    transactionsRoot_not_in: [String!]
+    transactionsRoot_not_starts_with: String
+    transactionsRoot_starts_with: String
+    unclesHash: String
+    unclesHash_contains: String
+    unclesHash_ends_with: String
+    unclesHash_gt: String
+    unclesHash_gte: String
+    unclesHash_in: [String!]
+    unclesHash_lt: String
+    unclesHash_lte: String
+    unclesHash_not: String
+    unclesHash_not_contains: String
+    unclesHash_not_ends_with: String
+    unclesHash_not_in: [String!]
+    unclesHash_not_starts_with: String
+    unclesHash_starts_with: String
+}
+
+input Block_height {
+    hash: Bytes
+    number: Int
+}
+
+enum Block_orderBy {
+    author
+    difficulty
+    gasLimit
+    gasUsed
+    id
+    number
+    parentHash
+    receiptsRoot
+    size
+    stateRoot
+    timestamp
+    totalDifficulty
+    transactionsRoot
+    unclesHash
+}
+
+scalar Bytes
+
+scalar Date
+
+scalar Datetime
+
+scalar JSON
+
+type Mutation {
+    someMutation: Boolean!
+}
+
+enum OrderDirection {
+    asc
+    desc
+}
+
+type Portfolio {
+    tokens: [PortfolioToken!]!
+}
+
+type PortfolioToken {
+    balance: String!
+    id: String!
+    name: String!
+    pricePerToken: Float!
+    symbol: String!
+    totalPrice: Float!
+}
+
+type Query {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    block(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Block
+    blocks(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Block_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Block_filter
+    ): [Block!]!
+    portfolioGetPortfolio: Portfolio!
+}
+
+type Subscription {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    block(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Block
+    blocks(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Block_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Block_filter
+    ): [Block!]!
+}
+
+type TranslatedString {
+    de: String!
+    en: String!
+}
+
+scalar UUID
+
+type _Block_ {
+    """
+    The hash of the block
+    """
+    hash: Bytes
+
+    """
+    The block number
+    """
+    number: Int!
+}
+
+"""
+The type for the top-level _meta field
+"""
+type _Meta_ {
+    """
+    Information about a specific subgraph block. The hash of the block
+    will be null if the _meta field has a block constraint that asks for
+    a block number. It will be filled if the _meta field has no block constraint
+    and therefore asks for the latest  block
+    """
+    block: _Block_!
+
+    """
+    The deployment ID
+    """
+    deployment: String!
+
+    """
+    If `true`, the subgraph encountered indexing errors at some past block
+    """
+    hasIndexingErrors: Boolean!
+}
+
+enum _SubgraphErrorPolicy_ {
+    """
+    Data will be returned even if the subgraph has indexing errors
+    """
+    allow
+
+    """
+    If the subgraph has indexing errors, data will be omitted. The default.
+    """
+    deny
+}

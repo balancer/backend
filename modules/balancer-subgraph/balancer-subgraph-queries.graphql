@@ -1,0 +1,209 @@
+query BalancerProtocolData(
+    $skip: Int
+    $first: Int
+    $orderBy: Balancer_orderBy
+    $orderDirection: OrderDirection
+    $where: Balancer_filter
+    $block: Block_height
+) {
+    balancers(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        totalLiquidity
+        totalSwapVolume
+        totalSwapFee
+        poolCount
+    }
+}
+
+query BalancerUser($id: ID!, $block: Block_height) {
+    user(id: $id, block: $block) {
+        ...BalancerUser
+    }
+}
+
+fragment BalancerUser on User {
+    id
+    sharesOwned(first: 1000) {
+        balance
+        poolId {
+            id
+        }
+    }
+}
+
+query BalancerTokenPrices(
+    $skip: Int
+    $first: Int
+    $orderBy: TokenPrice_orderBy
+    $orderDirection: OrderDirection
+    $where: TokenPrice_filter
+    $block: Block_height
+) {
+    tokenPrices(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerTokenPrice
+    }
+}
+
+fragment BalancerTokenPrice on TokenPrice {
+    id
+    poolId {
+        id
+    }
+    asset
+    amount
+    pricingAsset
+    price
+    block
+    timestamp
+}
+
+fragment BalancerPool on Pool {
+    id
+    address
+    poolType
+    symbol
+    name
+    swapFee
+    totalWeight
+    totalSwapVolume
+    totalSwapFee
+    totalLiquidity
+    totalShares
+    swapsCount
+    holdersCount
+
+    tokens(first: 1000) {
+        ...BalancerPoolToken
+    }
+}
+
+fragment BalancerPoolToken on PoolToken {
+    id
+    symbol
+    name
+    decimals
+    address
+    balance
+    invested
+    weight
+    priceRate
+}
+
+query BalancerPools(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    pools(skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block) {
+        ...BalancerPool
+    }
+}
+
+query BalancerPool($id: ID!, $block: Block_height) {
+    pool(id: $id, block: $block) {
+        ...BalancerPool
+    }
+}
+
+query BalancerPoolHistoricalLiquidities(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolHistoricalLiquidity_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolHistoricalLiquidity_filter
+    $block: Block_height
+) {
+    poolHistoricalLiquidities(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        poolId {
+            id
+        }
+        poolTotalShares
+        poolLiquidity
+        poolShareValue
+        pricingAsset
+        block
+    }
+}
+
+query BalancerPoolSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolSnapshot_filter
+    $block: Block_height
+) {
+    poolSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        pool {
+            id
+        }
+        totalShares
+        swapVolume
+        swapFees
+        timestamp
+    }
+}
+
+query BalancerLatestPrices(
+    $skip: Int
+    $first: Int
+    $orderBy: LatestPrice_orderBy
+    $orderDirection: OrderDirection
+    $where: LatestPrice_filter
+    $block: Block_height
+) {
+    latestPrices(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        asset
+        price
+        poolId {
+            id
+        }
+        pricingAsset
+    }
+}
