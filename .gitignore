@@ -1,0 +1,24 @@
+.idea/
+.vscode/
+.DS_Store
+.env.sample
+.env.dev
+.env
+node_modules/
+*-debug.log
+*-error.log
+
+schema.ts
+graphql_schema_generated.ts
+prisma/schema.prisma
+prisma/generated/
+i18n/*
+google-service-account.json
+omni.config.ts
+app.json
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+Users/
+dist

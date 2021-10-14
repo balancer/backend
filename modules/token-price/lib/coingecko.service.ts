@@ -4,10 +4,8 @@ import { twentyFourHoursInSecs } from '../../util/time';
 import { fromPairs, invert } from 'lodash';
 import { env } from '../../../app/env';
 import { coinGeckoTokenMappings } from './coingecko-token-mappings';
-import { HistoricalPriceResponse, HistoricalPrices, Price, PriceResponse, TokenPrices } from '../token-price-types';
-import { cache } from '../../cache/cache';
-
-const CACHE_PREFIX = 'coingecko';
+import { HistoricalPrice, HistoricalPriceResponse, Price, PriceResponse, TokenPrices } from '../token-price-types';
+import moment from 'moment-timezone';
 
 export class CoingeckoService {
     baseUrl: string;
@@ -42,16 +40,7 @@ export class CoingeckoService {
      *  Rate limit for the CoinGecko API is 10 calls each second per IP address.
      */
     public async getTokenPrices(addresses: string[], addressesPerRequest = 100): Promise<TokenPrices> {
-        const startingAddresses = addresses;
         try {
-            const cachedValue = await cache.getValueKeyedOnObject(`${CACHE_PREFIX}getTokenPrices`, {
-                addresses: startingAddresses,
-            });
-
-            if (cachedValue) {
-                return JSON.parse(cachedValue);
-            }
-
             if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
 
             addresses = addresses.map((address) => this.addressMapIn(address));
@@ -88,13 +77,6 @@ export class CoingeckoService {
                 results[this.nativeAssetAddress] = await this.getNativeAssetPrice();
             }
 
-            await cache.putValueKeyedOnObject(
-                `${CACHE_PREFIX}getTokenPrices`,
-                { addresses: startingAddresses },
-                JSON.stringify(results),
-                2,
-            );
-
             return results;
         } catch (error) {
             console.error('Unable to fetch token prices', addresses, error);
@@ -102,85 +84,40 @@ export class CoingeckoService {
         }
     }
 
-    async getTokenHistoricalPrices(
-        addresses: string[],
-        days: number,
-        addressesPerRequest = 1,
-    ): Promise<HistoricalPrices> {
-        if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
-
+    async getTokenHistoricalPrices(address: string, days: number): Promise<HistoricalPrice[]> {
         const now = Math.floor(Date.now() / 1000);
-        const end = now - (now % twentyFourHoursInSecs);
+        const end = now;
         const start = end - days * twentyFourHoursInSecs;
 
-        addresses = addresses.map((address) => this.addressMapIn(address));
-        const requests: Promise<HistoricalPriceResponse>[] = [];
+        const mappedAddress = this.addressMapIn(address);
 
-        addresses.forEach((address) => {
-            const endpoint = `/coins/${this.getPlatformIdForAddress(
-                address.toLowerCase(),
-            )}/contract/${address.toLowerCase()}/market_chart/range?vs_currency=${
-                this.fiatParam
-            }&from=${start}&to=${end}`;
-            const request = retryPromiseWithDelay(
-                this.get<HistoricalPriceResponse>(endpoint),
-                3, // retryCount
-                2000, // delayTime
-            );
-            requests.push(request);
-        });
+        const endpoint = `/coins/${this.getPlatformIdForAddress(
+            mappedAddress.toLowerCase(),
+        )}/contract/${mappedAddress.toLowerCase()}/market_chart/range?vs_currency=${
+            this.fiatParam
+        }&from=${start}&to=${end}`;
 
-        const paginatedResults = await Promise.all(requests);
-        const results = this.parseHistoricalPrices(paginatedResults, addresses, start);
+        const result = await this.get<HistoricalPriceResponse>(endpoint);
 
-        return results;
+        return result.prices.map((item) => ({
+            //anchor to the start of the hour
+            timestamp:
+                moment
+                    .unix(item[0] / 1000)
+                    .startOf('hour')
+                    .unix() * 1000,
+            price: item[1],
+        }));
     }
 
     private parsePaginatedTokens(paginatedResults: TokenPrices[]): TokenPrices {
         const results = paginatedResults.reduce((result, page) => ({ ...result, ...page }), {});
         const entries = Object.entries(results)
             .filter((result) => Object.keys(result[1]).length > 0)
+
             .map((result) => [this.addressMapOut(result[0]), result[1]]);
 
         return fromPairs(entries);
-    }
-
-    private parseHistoricalPrices(
-        results: HistoricalPriceResponse[],
-        addresses: string[],
-        start: number,
-    ): HistoricalPrices {
-        const assetPrices = fromPairs(
-            addresses.map((address, index) => {
-                address = this.addressMapOut(address);
-                const result = results[index].prices;
-                const prices: { [timestamp: number]: number } = {};
-                let dayTimestamp = start;
-                for (const key in result) {
-                    const value = result[key];
-                    const [timestamp, price] = value;
-                    if (timestamp > dayTimestamp * 1000) {
-                        prices[dayTimestamp * 1000] = price;
-                        dayTimestamp += twentyFourHoursInSecs;
-                    }
-                }
-                return [address, prices];
-            }),
-        );
-
-        const prices: { [timestamp: string]: number[] } = {};
-        for (const asset in assetPrices) {
-            const assetPrice = assetPrices[asset];
-            for (const timestamp in assetPrice) {
-                const price = assetPrice[timestamp];
-                if (!(timestamp in prices)) {
-                    prices[timestamp] = [];
-                }
-                prices[timestamp].push(price);
-            }
-        }
-
-        return prices;
     }
 
     /**

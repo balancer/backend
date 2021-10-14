@@ -11,8 +11,6 @@ import { fromFp } from '../util/numbers';
 import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
-import { coingeckoService } from '../token-price/lib/coingecko.service';
-import { getHourlyTimestampRanges } from '../util/time';
 
 class PortfolioService {
     constructor() {}
@@ -32,15 +30,12 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string) {
-        const timestamps = getHourlyTimestampRanges(1);
-        console.log(timestamps);
-
-        await balancerService.getHistoricalTokenPrices({
+        /*await balancerService.getHistoricalTokenPrices({
             address: '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e',
-            pricingAsset: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
-            poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
             days: 7,
-        });
+        });*/
+
+        await tokenPriceService.cacheHistoricalTokenPrices();
 
         /*const { user } = await balancerService.getUser({ id: address });
         const { pools } = await balancerService.getPools({ first: 1000, where: { totalShares_gt: '0' } });

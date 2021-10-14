@@ -3,12 +3,12 @@ import { tokenPriceService } from '../modules/token-price/token-price.service';
 
 export function scheduleCronJobs() {
     //every two minutes
-    cron.schedule('*/2 * * * *', () => {
+    cron.schedule('*/5 * * * * *', () => {
         tokenPriceService.cacheTokenPrices().catch();
     });
 
     //every fifteen minutes
-    cron.schedule('*/15 * * * *', () => {
-        //
+    cron.schedule('*/5 * * * *', () => {
+        tokenPriceService.cacheHistoricalTokenPrices().catch();
     });
 }

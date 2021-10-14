@@ -8,5 +8,5 @@ export interface HistoricalPriceResponse {
     total_volumes: number[][];
 }
 
-export type HistoricalPrices = { [timestamp: string]: number[] };
-export type TokenHistoricalPrices = { [address: string]: HistoricalPrices };
+export type HistoricalPrice = { timestamp: number; price: number };
+export type TokenHistoricalPrices = { [address: string]: HistoricalPrice[] };

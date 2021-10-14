@@ -9,16 +9,18 @@ import {
     BalancerPoolsQuery,
     BalancerPoolsQueryVariables,
     BalancerProtocolDataQueryVariables,
+    BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
     BalancerUserQuery,
     BalancerUserQueryVariables,
     getSdk,
+    OrderDirection,
+    TokenPrice_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { env } from '../../app/env';
 import _ from 'lodash';
-import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import { getHourlyTimestampRanges } from '../util/time';
+import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../util/time';
 
 export class BalancerSubgraphService {
     private readonly client: GraphQLClient;
@@ -46,6 +48,27 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerTokenPrices(args);
     }
 
+    public async getAllTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPriceFragment[]> {
+        let allTokenPrices: BalancerTokenPriceFragment[] = [];
+        const limit = 1000;
+        let skip = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+            const { tokenPrices } = await this.getTokenPrices({
+                ...args,
+                first: limit,
+                skip,
+            });
+
+            allTokenPrices = [...allTokenPrices, ...tokenPrices];
+            skip += limit;
+            hasMore = tokenPrices.length === limit;
+        }
+
+        return allTokenPrices;
+    }
+
     public async getPoolSnapshots(args: BalancerPoolSnapshotsQueryVariables): Promise<BalancerPoolSnapshotsQuery> {
         return this.sdk.BalancerPoolSnapshots(args);
     }
@@ -60,31 +83,6 @@ export class BalancerSubgraphService {
 
     public getUniqueTokenAddressesFromPools(pools: BalancerPoolFragment[]): string[] {
         return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
-    }
-
-    public async getHistoricalTokenPrices({
-        address,
-        poolId,
-        pricingAsset,
-        days,
-    }: {
-        address: string;
-        poolId: string;
-        pricingAsset: string;
-        days: number;
-    }) {
-        const timestamps = getHourlyTimestampRanges(days).map((timestamp) => `${timestamp}`);
-        const blocks = await blocksSubgraphService.getBlocks({ where: { timestamp_in: timestamps } });
-
-        /*const prices = await this.getTokenPrices({
-            where: {
-                asset: address,
-                poolId,
-                timestamp_in: timestamps,
-            },
-        });*/
-
-        console.log('blocks', JSON.stringify(blocks, null, 4));
     }
 
     private get sdk() {

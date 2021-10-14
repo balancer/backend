@@ -20,6 +20,17 @@ export class TokenPriceService {
         return this.cacheTokenPrices();
     }
 
+    public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
+        const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            return tokenPrices;
+        }
+
+        //don't try to refetch the cache, it takes way too long
+        return {};
+    }
+
     public async cacheTokenPrices(): Promise<TokenPrices> {
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
         const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
@@ -33,27 +44,40 @@ export class TokenPriceService {
         return tokenPrices;
     }
 
-    public async cacheHistoricalTokenPrices(): Promise<void> {
+    public async cacheHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
         const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
+        const missingTokens: string[] = [];
         const tokenPrices: TokenHistoricalPrices = {};
 
-        for (const token in coingeckoTokens) {
-            tokenPrices[token] = await coingeckoService.getTokenHistoricalPrices([token], 30);
+        for (const token of coingeckoTokens) {
+            try {
+                tokenPrices[token] = await coingeckoService.getTokenHistoricalPrices(token, 30);
+            } catch {
+                missingTokens.push(token);
+            }
 
             //coingecko rate limit is 10 requests per seconds, be generous here so we don't get rate limited
             await sleep(150);
         }
 
-        for (const token in balancerTokens) {
-            //
+        for (const token of [...balancerTokens, ...missingTokens]) {
+            tokenPrices[token] = await balancerPriceService.getHistoricalTokenPrices({
+                address: token,
+                days: 30,
+                coingeckoHistoricalPrices: tokenPrices,
+            });
         }
+
+        await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
+
+        return tokenPrices;
     }
 
     private async getTokenAddresses(): Promise<{ balancerTokens: string[]; coingeckoTokens: string[] }> {
-        const { pools } = await balancerService.getPools({ first: 1000 });
+        const { pools } = await balancerService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
 
         const addresses = balancerService.getUniqueTokenAddressesFromPools(pools);
-        const balancerTokens = Object.keys(balancerTokenMappings.tokenPriceOraclePool);
+        const balancerTokens = balancerTokenMappings.balancerPricedTokens;
         const coingeckoTokens = addresses.filter((address) => !balancerTokens.includes(address.toLowerCase()));
 
         return { balancerTokens, coingeckoTokens };
