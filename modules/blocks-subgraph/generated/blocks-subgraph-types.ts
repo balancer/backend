@@ -14,12 +14,7 @@ export type Scalars = {
     Float: number;
     BigDecimal: string;
     BigInt: string;
-    Binary: any;
     Bytes: string;
-    Date: any;
-    Datetime: any;
-    JSON: any;
-    UUID: any;
 };
 
 export type Block = {
@@ -213,30 +208,10 @@ export enum Block_OrderBy {
     UnclesHash = 'unclesHash',
 }
 
-export type Mutation = {
-    __typename?: 'Mutation';
-    someMutation: Scalars['Boolean'];
-};
-
 export enum OrderDirection {
     Asc = 'asc',
     Desc = 'desc',
 }
-
-export type Portfolio = {
-    __typename?: 'Portfolio';
-    tokens: Array<PortfolioToken>;
-};
-
-export type PortfolioToken = {
-    __typename?: 'PortfolioToken';
-    balance: Scalars['String'];
-    id: Scalars['String'];
-    name: Scalars['String'];
-    pricePerToken: Scalars['Float'];
-    symbol: Scalars['String'];
-    totalPrice: Scalars['Float'];
-};
 
 export type Query = {
     __typename?: 'Query';
@@ -244,7 +219,6 @@ export type Query = {
     _meta?: Maybe<_Meta_>;
     block?: Maybe<Block>;
     blocks: Array<Block>;
-    portfolioGetPortfolio: Portfolio;
 };
 
 export type Query_MetaArgs = {
@@ -289,12 +263,6 @@ export type SubscriptionBlocksArgs = {
     orderDirection?: Maybe<OrderDirection>;
     skip?: Maybe<Scalars['Int']>;
     where?: Maybe<Block_Filter>;
-};
-
-export type TranslatedString = {
-    __typename?: 'TranslatedString';
-    de: Scalars['String'];
-    en: Scalars['String'];
 };
 
 export type _Block_ = {

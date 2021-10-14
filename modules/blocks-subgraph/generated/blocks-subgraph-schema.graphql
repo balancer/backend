@@ -8,8 +8,6 @@ scalar BigDecimal
 
 scalar BigInt
 
-scalar Binary
-
 type Block {
     author: String
     difficulty: BigInt
@@ -202,32 +200,9 @@ enum Block_orderBy {
 
 scalar Bytes
 
-scalar Date
-
-scalar Datetime
-
-scalar JSON
-
-type Mutation {
-    someMutation: Boolean!
-}
-
 enum OrderDirection {
     asc
     desc
-}
-
-type Portfolio {
-    tokens: [PortfolioToken!]!
-}
-
-type PortfolioToken {
-    balance: String!
-    id: String!
-    name: String!
-    pricePerToken: Float!
-    symbol: String!
-    totalPrice: Float!
 }
 
 type Query {
@@ -253,7 +228,6 @@ type Query {
         skip: Int = 0
         where: Block_filter
     ): [Block!]!
-    portfolioGetPortfolio: Portfolio!
 }
 
 type Subscription {
@@ -280,13 +254,6 @@ type Subscription {
         where: Block_filter
     ): [Block!]!
 }
-
-type TranslatedString {
-    de: String!
-    en: String!
-}
-
-scalar UUID
 
 type _Block_ {
     """

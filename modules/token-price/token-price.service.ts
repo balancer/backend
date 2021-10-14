@@ -13,29 +13,21 @@ export class TokenPriceService {
     public async getTokenPrices(): Promise<TokenPrices> {
         const tokenPrices = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
 
-        if (tokenPrices) {
-            return tokenPrices;
-        }
-
-        return this.cacheTokenPrices();
+        return tokenPrices || {};
     }
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
         const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
 
-        if (tokenPrices) {
-            return tokenPrices;
-        }
-
         //don't try to refetch the cache, it takes way too long
-        return {};
+        return tokenPrices || {};
     }
 
     public async cacheTokenPrices(): Promise<TokenPrices> {
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
         const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
 
-        const coingeckoTokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
+        const coingeckoTokenPrices: TokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(balancerTokens, coingeckoTokenPrices);
         const tokenPrices = { ...coingeckoTokenPrices, ...balancerTokenPrices };
 

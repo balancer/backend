@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { retryPromiseWithDelay } from '../../util/promise';
 import { twentyFourHoursInSecs } from '../../util/time';
 import { fromPairs, invert } from 'lodash';
 import { env } from '../../../app/env';
@@ -57,7 +56,7 @@ export class CoingeckoService {
             pages.forEach((page) => {
                 const addressString = addresses.slice(addressesPerRequest * page, addressesPerRequest * (page + 1));
                 const endpoint = `/simple/token_price/${this.platformId}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
-                const request = retryPromiseWithDelay(this.get<PriceResponse>(endpoint), 3, 2000);
+                const request = this.get<PriceResponse>(endpoint);
                 requests.push(request);
             });
 
@@ -65,7 +64,7 @@ export class CoingeckoService {
                 const endpoint = `/simple/token_price/${this.getPlatformIdForAddress(
                     address,
                 )}?contract_addresses=${address}&vs_currencies=${this.fiatParam}`;
-                const request = retryPromiseWithDelay(this.get<PriceResponse>(endpoint), 3, 2000);
+                const request = this.get<PriceResponse>(endpoint);
                 requests.push(request);
             });
 

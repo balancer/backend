@@ -14,12 +14,7 @@ export type Scalars = {
     Float: number;
     BigDecimal: string;
     BigInt: string;
-    Binary: any;
     Bytes: string;
-    Date: any;
-    Datetime: any;
-    JSON: any;
-    UUID: any;
 };
 
 export type Block_Height = {
@@ -106,11 +101,6 @@ export enum MasterChef_OrderBy {
     Timestamp = 'timestamp',
     TotalAllocPoint = 'totalAllocPoint',
 }
-
-export type Mutation = {
-    __typename?: 'Mutation';
-    someMutation: Scalars['Boolean'];
-};
 
 export enum OrderDirection {
     Asc = 'asc',
@@ -257,21 +247,6 @@ export enum Pool_OrderBy {
     Users = 'users',
 }
 
-export type Portfolio = {
-    __typename?: 'Portfolio';
-    tokens: Array<PortfolioToken>;
-};
-
-export type PortfolioToken = {
-    __typename?: 'PortfolioToken';
-    balance: Scalars['String'];
-    id: Scalars['String'];
-    name: Scalars['String'];
-    pricePerToken: Scalars['Float'];
-    symbol: Scalars['String'];
-    totalPrice: Scalars['Float'];
-};
-
 export type Query = {
     __typename?: 'Query';
     /** Access to subgraph metadata */
@@ -280,7 +255,6 @@ export type Query = {
     masterChefs: Array<MasterChef>;
     pool?: Maybe<Pool>;
     pools: Array<Pool>;
-    portfolioGetPortfolio: Portfolio;
     rewarder?: Maybe<Rewarder>;
     rewarders: Array<Rewarder>;
     user?: Maybe<User>;
@@ -477,12 +451,6 @@ export type SubscriptionUsersArgs = {
     orderDirection?: Maybe<OrderDirection>;
     skip?: Maybe<Scalars['Int']>;
     where?: Maybe<User_Filter>;
-};
-
-export type TranslatedString = {
-    __typename?: 'TranslatedString';
-    de: Scalars['String'];
-    en: Scalars['String'];
 };
 
 export type User = {

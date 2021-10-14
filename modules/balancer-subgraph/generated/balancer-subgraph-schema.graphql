@@ -75,18 +75,12 @@ scalar BigDecimal
 
 scalar BigInt
 
-scalar Binary
-
 input Block_height {
     hash: Bytes
     number: Int
 }
 
 scalar Bytes
-
-scalar Date
-
-scalar Datetime
 
 type GradualWeightUpdate {
     endTimestamp: Int!
@@ -232,8 +226,6 @@ enum Investment_orderBy {
     poolTokenId
     timestamp
 }
-
-scalar JSON
 
 type JoinExit {
     amounts: [BigDecimal!]!
@@ -391,10 +383,6 @@ enum LatestPrice_orderBy {
     poolId
     price
     pricingAsset
-}
-
-type Mutation {
-    someMutation: Boolean!
 }
 
 enum OrderDirection {
@@ -1085,19 +1073,6 @@ enum Pool_orderBy {
     weightUpdates
 }
 
-type Portfolio {
-    tokens: [PortfolioToken!]!
-}
-
-type PortfolioToken {
-    balance: String!
-    id: String!
-    name: String!
-    pricePerToken: Float!
-    symbol: String!
-    totalPrice: Float!
-}
-
 type PriceRateProvider {
     address: Bytes!
     cacheDuration: Int!
@@ -1382,7 +1357,6 @@ type Query {
         skip: Int = 0
         where: Pool_filter
     ): [Pool!]!
-    portfolioGetPortfolio: Portfolio!
     priceRateProvider(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1987,13 +1961,6 @@ enum TokenPrice_orderBy {
     pricingAsset
     timestamp
 }
-
-type TranslatedString {
-    de: String!
-    en: String!
-}
-
-scalar UUID
 
 type User {
     id: ID!

@@ -7,17 +7,12 @@ const resolvers: Resolvers = {
         portfolioGetPortfolio: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
-            //await portfolioService.getPortfolio(accountAddress);
-
-            await portfolioService.getPortfolioHistory(accountAddress);
-            return {
-                tokens: [],
-            };
+            return portfolioService.getPortfolio(accountAddress);
         },
     },
     //we're forced to have at least one mutation
     Mutation: {
-        someMutation: async () => true,
+        emptyMutation: async () => true,
     },
 };
 

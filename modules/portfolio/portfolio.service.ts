@@ -15,28 +15,29 @@ import { tokenPriceService } from '../token-price/token-price.service';
 class PortfolioService {
     constructor() {}
 
-    public async getPortfolio(address: string) {
+    public async getPortfolio(address: string): Promise<{ pools: UserPoolData[]; tokens: UserTokenData[] }> {
         const { user } = await balancerService.getUser({ id: address });
         const { pools } = await balancerService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
         const { farmUsers } = await masterchefService.getFarmUsers({ first: 1000, where: { address } });
         const tokenPrices = await tokenPriceService.getTokenPrices();
 
         if (!user) {
-            return null;
+            return { pools: [], tokens: [] };
         }
 
         const poolData = this.getUserPoolData(user, pools, farmUsers, tokenPrices);
-        const assets = this.assetsFromUserPoolData(poolData);
+        const tokens = this.tokensFromUserPoolData(poolData);
+
+        return { pools: poolData, tokens };
     }
 
     public async getPortfolioHistory(address: string) {
+        const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         /*await balancerService.getHistoricalTokenPrices({
             address: '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e',
             days: 7,
         });*/
-
-        await tokenPriceService.cacheHistoricalTokenPrices();
-
+        //await tokenPriceService.cacheHistoricalTokenPrices();
         /*const { user } = await balancerService.getUser({ id: address });
         const { pools } = await balancerService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
         const { farmUsers } = await masterchefService.getFarmUsers({ first: 1000, where: { address } });
@@ -67,17 +68,19 @@ class PortfolioService {
                 ).toNumber();
                 const totalShares = parseFloat(pool.totalShares);
                 const percentShare = shares / totalShares;
-
                 const tokens = (pool.tokens || []).map((token) =>
                     this.mapPoolTokenToUserPoolTokenData(token, percentShare, tokenPrices),
                 );
+                const totalPrice = _.sumBy(tokens, (token) => token.totalPrice);
 
                 return {
+                    id: pool.id,
                     poolId: pool.id,
                     poolAddress: pool.address,
                     shares,
                     percentShare,
-                    value: _.sumBy(tokens, (token) => token.value),
+                    totalPrice,
+                    pricePerShare: totalPrice / shares,
                     tokens,
                 };
             })
@@ -89,27 +92,28 @@ class PortfolioService {
         percentShare: number,
         tokenPrices: TokenPrices,
     ): UserTokenData {
-        const price = tokenPrices[token.address.toLowerCase()]?.usd || 0;
+        const pricePerToken = tokenPrices[token.address.toLowerCase()]?.usd || 0;
         const balance = parseFloat(token.balance) * percentShare;
 
         return {
+            id: token.id,
             address: token.address || '',
             symbol: token.symbol || '',
             name: token.name || '',
-            price,
+            pricePerToken,
             balance,
-            value: price * balance,
+            totalPrice: pricePerToken * balance,
         };
     }
 
-    private assetsFromUserPoolData(data: UserPoolData[]): UserTokenData[] {
+    private tokensFromUserPoolData(data: UserPoolData[]): UserTokenData[] {
         const allTokens = _.flatten(data.map((item) => item.tokens));
         const groupedTokens = _.groupBy(allTokens, 'symbol');
 
         return _.map(groupedTokens, (group) => ({
             ...group[0],
             balance: _.sumBy(group, (token) => token.balance),
-            value: _.sumBy(group, (token) => token.value),
+            totalPrice: _.sumBy(group, (token) => token.totalPrice),
         }));
     }
 }

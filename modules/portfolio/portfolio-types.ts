@@ -1,17 +1,20 @@
 interface UserPoolData {
+    id: string;
     poolId: string;
     poolAddress: string;
     shares: number;
     percentShare: number;
-    value: number;
+    totalPrice: number;
+    pricePerShare: number;
     tokens: UserTokenData[];
 }
 
 interface UserTokenData {
+    id: string;
     address: string;
     symbol: string;
     name: string;
-    price: number;
     balance: number;
-    value: number;
+    pricePerToken: number;
+    totalPrice: number;
 }

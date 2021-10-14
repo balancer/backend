@@ -14,12 +14,7 @@ export type Scalars = {
     Float: number;
     BigDecimal: string;
     BigInt: string;
-    Binary: any;
     Bytes: string;
-    Date: any;
-    Datetime: any;
-    JSON: any;
-    UUID: any;
 };
 
 export type Balancer = {
@@ -403,11 +398,6 @@ export enum LatestPrice_OrderBy {
     Price = 'price',
     PricingAsset = 'pricingAsset',
 }
-
-export type Mutation = {
-    __typename?: 'Mutation';
-    someMutation: Scalars['Boolean'];
-};
 
 export enum OrderDirection {
     Asc = 'asc',
@@ -1116,21 +1106,6 @@ export enum Pool_OrderBy {
     WeightUpdates = 'weightUpdates',
 }
 
-export type Portfolio = {
-    __typename?: 'Portfolio';
-    tokens: Array<PortfolioToken>;
-};
-
-export type PortfolioToken = {
-    __typename?: 'PortfolioToken';
-    balance: Scalars['String'];
-    id: Scalars['String'];
-    name: Scalars['String'];
-    pricePerToken: Scalars['Float'];
-    symbol: Scalars['String'];
-    totalPrice: Scalars['Float'];
-};
-
 export type PriceRateProvider = {
     __typename?: 'PriceRateProvider';
     address: Scalars['Bytes'];
@@ -1255,7 +1230,6 @@ export type Query = {
     poolToken?: Maybe<PoolToken>;
     poolTokens: Array<PoolToken>;
     pools: Array<Pool>;
-    portfolioGetPortfolio: Portfolio;
     priceRateProvider?: Maybe<PriceRateProvider>;
     priceRateProviders: Array<PriceRateProvider>;
     swap?: Maybe<Swap>;
@@ -1969,12 +1943,6 @@ export enum TokenPrice_OrderBy {
     PricingAsset = 'pricingAsset',
     Timestamp = 'timestamp',
 }
-
-export type TranslatedString = {
-    __typename?: 'TranslatedString';
-    de: Scalars['String'];
-    en: Scalars['String'];
-};
 
 export type User = {
     __typename?: 'User';

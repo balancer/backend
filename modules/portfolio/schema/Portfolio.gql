@@ -3,18 +3,35 @@ extend type Query {
 }
 
 extend type Mutation {
-    someMutation: Boolean!
+    emptyMutation: Boolean!
 }
 
 type Portfolio {
+    tokens: [PortfolioToken!]!
+    pools: [PortfolioPool!]!
+}
+
+type PortfolioPool {
+    id: String!
+    poolId: String!
+    poolAddress: String!
+    shares: Float!
+    percentShare: Float!
+    totalPrice: Float!
+    pricePerShare: Float!
     tokens: [PortfolioToken!]!
 }
 
 type PortfolioToken {
     id: String!
+    address: String!
     symbol: String!
     name: String!
-    balance: String!
-    totalPrice: Float!
+    balance: Float!
     pricePerToken: Float!
+    totalPrice: Float!
+}
+
+type PortfolioHistory {
+
 }
