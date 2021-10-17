@@ -74,20 +74,9 @@ export class BalancerPriceService {
                         (price) => price.timestamp === timestamp * 1000,
                     );
 
-                    if (!entry) {
-                        console.log('-------------------');
-                        console.log(
-                            'pricing asset',
-                            coingeckoHistoricalPrices[closest.pricingAsset][
-                                coingeckoHistoricalPrices[closest.pricingAsset].length - 1
-                            ],
-                        );
-                        console.log('closest', closest);
-                        console.log('timestamp', timestamp * 1000);
-                        console.log('-------------------');
+                    if (entry) {
+                        historicalTokenPrices.push({ timestamp: timestamp * 1000, price: entry.price });
                     }
-
-                    historicalTokenPrices.push({ timestamp: timestamp * 1000, price: entry?.price || 0 });
                 }
             }
         }

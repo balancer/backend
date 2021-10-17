@@ -1,5 +1,6 @@
 extend type Query {
     portfolioGetPortfolio: Portfolio!
+    portfolioGetPortfolioHistory: Boolean!
 }
 
 extend type Mutation {
@@ -30,8 +31,4 @@ type PortfolioToken {
     balance: Float!
     pricePerToken: Float!
     totalPrice: Float!
-}
-
-type PortfolioHistory {
-
 }

@@ -28,6 +28,26 @@ query BalancerUser($id: ID!, $block: Block_height) {
     }
 }
 
+query BalancerUsers(
+    $skip: Int
+    $first: Int
+    $orderBy: User_orderBy
+    $orderDirection: OrderDirection
+    $where: User_filter
+    $block: Block_height
+) {
+    users(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerUser
+    }
+}
+
 fragment BalancerUser on User {
     id
     sharesOwned(first: 1000) {
@@ -171,15 +191,19 @@ query BalancerPoolSnapshots(
         where: $where
         block: $block
     ) {
-        id
-        pool {
-            id
-        }
-        totalShares
-        swapVolume
-        swapFees
-        timestamp
+        ...BalancerPoolSnapshot
     }
+}
+
+fragment BalancerPoolSnapshot on PoolSnapshot {
+    id
+    pool {
+        id
+    }
+    totalShares
+    swapVolume
+    swapFees
+    timestamp
 }
 
 query BalancerLatestPrices(
@@ -205,5 +229,40 @@ query BalancerLatestPrices(
             id
         }
         pricingAsset
+    }
+}
+
+query BalancerJoinExits(
+    $skip: Int
+    $first: Int
+    $orderBy: JoinExit_orderBy
+    $orderDirection: OrderDirection
+    $where: JoinExit_filter
+    $block: Block_height
+) {
+    joinExits(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerJoinExit
+    }
+}
+
+fragment BalancerJoinExit on JoinExit {
+    amounts
+    id
+    sender
+    timestamp
+    tx
+    type
+    user {
+        id
+    }
+    pool {
+        id
     }
 }

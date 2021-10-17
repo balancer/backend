@@ -2121,6 +2121,27 @@ export type BalancerUserQuery = {
         | undefined;
 };
 
+export type BalancerUsersQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<User_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<User_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerUsersQuery = {
+    __typename?: 'Query';
+    users: Array<{
+        __typename?: 'User';
+        id: string;
+        sharesOwned?:
+            | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+            | null
+            | undefined;
+    }>;
+};
+
 export type BalancerUserFragment = {
     __typename?: 'User';
     id: string;
@@ -2343,6 +2364,16 @@ export type BalancerPoolSnapshotsQuery = {
     }>;
 };
 
+export type BalancerPoolSnapshotFragment = {
+    __typename?: 'PoolSnapshot';
+    id: string;
+    totalShares: string;
+    swapVolume: string;
+    swapFees: string;
+    timestamp: number;
+    pool: { __typename?: 'Pool'; id: string };
+};
+
 export type BalancerLatestPricesQueryVariables = Exact<{
     skip?: Maybe<Scalars['Int']>;
     first?: Maybe<Scalars['Int']>;
@@ -2362,6 +2393,42 @@ export type BalancerLatestPricesQuery = {
         pricingAsset: string;
         poolId: { __typename?: 'Pool'; id: string };
     }>;
+};
+
+export type BalancerJoinExitsQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<JoinExit_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<JoinExit_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerJoinExitsQuery = {
+    __typename?: 'Query';
+    joinExits: Array<{
+        __typename?: 'JoinExit';
+        amounts: Array<string>;
+        id: string;
+        sender: string;
+        timestamp: number;
+        tx: string;
+        type: InvestType;
+        user: { __typename?: 'User'; id: string };
+        pool: { __typename?: 'Pool'; id: string };
+    }>;
+};
+
+export type BalancerJoinExitFragment = {
+    __typename?: 'JoinExit';
+    amounts: Array<string>;
+    id: string;
+    sender: string;
+    timestamp: number;
+    tx: string;
+    type: InvestType;
+    user: { __typename?: 'User'; id: string };
+    pool: { __typename?: 'Pool'; id: string };
 };
 
 export const BalancerUserFragmentDoc = gql`
@@ -2423,6 +2490,34 @@ export const BalancerPoolFragmentDoc = gql`
     }
     ${BalancerPoolTokenFragmentDoc}
 `;
+export const BalancerPoolSnapshotFragmentDoc = gql`
+    fragment BalancerPoolSnapshot on PoolSnapshot {
+        id
+        pool {
+            id
+        }
+        totalShares
+        swapVolume
+        swapFees
+        timestamp
+    }
+`;
+export const BalancerJoinExitFragmentDoc = gql`
+    fragment BalancerJoinExit on JoinExit {
+        amounts
+        id
+        sender
+        timestamp
+        tx
+        type
+        user {
+            id
+        }
+        pool {
+            id
+        }
+    }
+`;
 export const BalancerProtocolDataDocument = gql`
     query BalancerProtocolData(
         $skip: Int
@@ -2451,6 +2546,28 @@ export const BalancerProtocolDataDocument = gql`
 export const BalancerUserDocument = gql`
     query BalancerUser($id: ID!, $block: Block_height) {
         user(id: $id, block: $block) {
+            ...BalancerUser
+        }
+    }
+    ${BalancerUserFragmentDoc}
+`;
+export const BalancerUsersDocument = gql`
+    query BalancerUsers(
+        $skip: Int
+        $first: Int
+        $orderBy: User_orderBy
+        $orderDirection: OrderDirection
+        $where: User_filter
+        $block: Block_height
+    ) {
+        users(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
             ...BalancerUser
         }
     }
@@ -2554,16 +2671,10 @@ export const BalancerPoolSnapshotsDocument = gql`
             where: $where
             block: $block
         ) {
-            id
-            pool {
-                id
-            }
-            totalShares
-            swapVolume
-            swapFees
-            timestamp
+            ...BalancerPoolSnapshot
         }
     }
+    ${BalancerPoolSnapshotFragmentDoc}
 `;
 export const BalancerLatestPricesDocument = gql`
     query BalancerLatestPrices(
@@ -2591,6 +2702,28 @@ export const BalancerLatestPricesDocument = gql`
             pricingAsset
         }
     }
+`;
+export const BalancerJoinExitsDocument = gql`
+    query BalancerJoinExits(
+        $skip: Int
+        $first: Int
+        $orderBy: JoinExit_orderBy
+        $orderDirection: OrderDirection
+        $where: JoinExit_filter
+        $block: Block_height
+    ) {
+        joinExits(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerJoinExit
+        }
+    }
+    ${BalancerJoinExitFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -2626,6 +2759,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerUser',
+            );
+        },
+        BalancerUsers(
+            variables?: BalancerUsersQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerUsersQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerUsersQuery>(BalancerUsersDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerUsers',
             );
         },
         BalancerTokenPrices(
@@ -2705,6 +2851,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerLatestPrices',
+            );
+        },
+        BalancerJoinExits(
+            variables?: BalancerJoinExitsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerJoinExitsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerJoinExitsQuery>(BalancerJoinExitsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerJoinExits',
             );
         },
     };

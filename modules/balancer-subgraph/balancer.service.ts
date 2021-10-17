@@ -12,15 +12,20 @@ import {
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
+    BalancerUserFragment,
     BalancerUserQuery,
     BalancerUserQueryVariables,
+    BalancerUsersQueryVariables,
     getSdk,
-    OrderDirection,
-    TokenPrice_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { env } from '../../app/env';
 import _ from 'lodash';
-import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../util/time';
+import { subgraphLoadAll, subgraphLoadAllAtBlock } from '../util/subgraph-util';
+import { cache } from '../cache/cache';
+import { thirtyDaysInSeconds } from '../util/time';
+
+const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
+const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
 
 export class BalancerSubgraphService {
     private readonly client: GraphQLClient;
@@ -48,27 +53,6 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerTokenPrices(args);
     }
 
-    public async getAllTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPriceFragment[]> {
-        let allTokenPrices: BalancerTokenPriceFragment[] = [];
-        const limit = 1000;
-        let skip = 0;
-        let hasMore = true;
-
-        while (hasMore) {
-            const { tokenPrices } = await this.getTokenPrices({
-                ...args,
-                first: limit,
-                skip,
-            });
-
-            allTokenPrices = [...allTokenPrices, ...tokenPrices];
-            skip += limit;
-            hasMore = tokenPrices.length === limit;
-        }
-
-        return allTokenPrices;
-    }
-
     public async getPoolSnapshots(args: BalancerPoolSnapshotsQueryVariables): Promise<BalancerPoolSnapshotsQuery> {
         return this.sdk.BalancerPoolSnapshots(args);
     }
@@ -83,6 +67,43 @@ export class BalancerSubgraphService {
 
     public getUniqueTokenAddressesFromPools(pools: BalancerPoolFragment[]): string[] {
         return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
+    }
+
+    public async getAllUsers(args: BalancerUsersQueryVariables): Promise<BalancerUserFragment[]> {
+        return subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
+    }
+
+    public async getAllTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPriceFragment[]> {
+        return subgraphLoadAll<BalancerTokenPriceFragment>(this.sdk.BalancerTokenPrices, 'tokenPrices', args);
+    }
+
+    public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
+        return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', args);
+    }
+
+    public async getAllUsersAtBlock(block: number): Promise<BalancerUserFragment[]> {
+        return subgraphLoadAllAtBlock<BalancerUserFragment>(
+            this.sdk.BalancerUsers,
+            'users',
+            block,
+            ALL_USERS_CACHE_KEY,
+        );
+    }
+
+    public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
+        return subgraphLoadAllAtBlock<BalancerPoolFragment>(
+            this.sdk.BalancerPools,
+            'pools',
+            block,
+            ALL_POOLS_CACHE_KEY,
+            { where: { totalShares_gt: '0' } },
+        );
+    }
+
+    public async getUserAtBlock(address: string, block: number): Promise<BalancerUserFragment | null> {
+        const users = await this.getAllUsersAtBlock(block);
+
+        return users.find((user) => user.id === address) || null;
     }
 
     private get sdk() {

@@ -5,6 +5,7 @@ import { balancerPriceService } from './lib/balancer-price.service';
 import { balancerService } from '../balancer-subgraph/balancer.service';
 import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
+import _ from 'lodash';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -21,6 +22,12 @@ export class TokenPriceService {
 
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
+    }
+
+    public getTokenPricesForTimestamp(timestamp: string, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
+        return _.mapValues(tokenHistoricalPrices, (tokenPrices) => ({
+            usd: tokenPrices.find((tokenPrice) => tokenPrice.timestamp === parseInt(timestamp) * 1000)?.price || 0,
+        }));
     }
 
     public async cacheTokenPrices(): Promise<TokenPrices> {

@@ -14,8 +14,12 @@ query Blocks(
         where: $where
         block: $block
     ) {
-        id
-        number
-        timestamp
+        ...Block
     }
+}
+
+fragment Block on Block {
+    id
+    number
+    timestamp
 }

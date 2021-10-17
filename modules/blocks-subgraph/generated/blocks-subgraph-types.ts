@@ -311,6 +311,15 @@ export type BlocksQuery = {
     blocks: Array<{ __typename?: 'Block'; id: string; number: string; timestamp: string }>;
 };
 
+export type BlockFragment = { __typename?: 'Block'; id: string; number: string; timestamp: string };
+
+export const BlockFragmentDoc = gql`
+    fragment Block on Block {
+        id
+        number
+        timestamp
+    }
+`;
 export const BlocksDocument = gql`
     query Blocks(
         $skip: Int
@@ -328,11 +337,10 @@ export const BlocksDocument = gql`
             where: $where
             block: $block
         ) {
-            id
-            number
-            timestamp
+            ...Block
         }
     }
+    ${BlockFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(

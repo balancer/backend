@@ -10,12 +10,13 @@ export const oneHourInMs = 60 * oneMinInMs;
 export const twentyFourHoursInMs = 24 * oneHourInMs;
 export const twentyFourHoursInSecs = twentyFourHoursInMs / oneSecondInMs;
 
+export const thirtyDaysInSeconds = 60 * 60 * 24;
 export const timeNowInMs = Math.floor(Date.now() / oneSecondInMs);
 
 export function getDailyTimestampRanges(numDays: number): [number, number][] {
     const timestamps: [number, number][] = [];
-    const endTime = moment().subtract(numDays, 'days').startOf('day');
-    let current = moment().endOf('day');
+    const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
+    let current = moment.tz('GMT').endOf('day');
 
     while (current.isAfter(endTime)) {
         timestamps.push([current.clone().startOf('day').unix(), current.unix()]);
@@ -33,6 +34,78 @@ export function getHourlyTimestamps(startTimestamp: number, endTimestamp: number
     while (current.unix() < endTimestamp) {
         timestamps.push(current.unix());
         current = current.add(1, 'hour');
+    }
+
+    return timestamps;
+}
+
+export function getHourlyTimestampsForDays(numDays: number): number[] {
+    const timestamps: number[] = [];
+
+    const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
+    let current = moment.tz('GMT').startOf('hour');
+
+    while (current.isAfter(endTime)) {
+        timestamps.push(current.unix());
+
+        current = current.subtract(1, 'hour');
+    }
+
+    return timestamps;
+}
+
+export function getHourlyTimestampsWithBuffer(numDays: number): number[] {
+    let timestamps: number[] = [];
+
+    const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
+    let current = moment.tz('GMT').startOf('hour');
+
+    while (current.isAfter(endTime)) {
+        timestamps = [
+            ...timestamps,
+            //we create a buffer of 3 seconds to match on to ensure we get at least one block for this hour
+            current.clone().subtract(1, 'second').unix(),
+            current.unix(),
+            current.clone().add(1, 'second').unix(),
+        ];
+
+        current = current.subtract(1, 'hour');
+    }
+
+    return timestamps;
+}
+
+export function getDailyTimestampsForDays(numDays: number): number[] {
+    const timestamps: number[] = [];
+
+    const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
+    let current = moment.tz('GMT').startOf('day');
+
+    while (current.isAfter(endTime)) {
+        timestamps.push(current.unix());
+
+        current = current.subtract(1, 'day');
+    }
+
+    return timestamps;
+}
+
+export function getDailyTimestampsWithBuffer(numDays: number): number[] {
+    let timestamps: number[] = [];
+
+    const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
+    let current = moment.tz('GMT').startOf('day');
+
+    while (current.isAfter(endTime)) {
+        timestamps = [
+            ...timestamps,
+            //we create a buffer of 3 seconds to match on to ensure we get at least one block for this hour
+            current.clone().subtract(1, 'second').unix(),
+            current.unix(),
+            current.clone().add(1, 'second').unix(),
+        ];
+
+        current = current.subtract(1, 'day');
     }
 
     return timestamps;

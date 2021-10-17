@@ -1,6 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import {
     FarmFragment,
+    FarmUserFragment,
     getSdk,
     MasterChef,
     MasterchefFarmsQuery,
@@ -10,6 +11,8 @@ import {
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../app/env';
+import { subgraphLoadAll, subgraphLoadAllAtBlock } from '../util/subgraph-util';
+import { BalancerUserFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 
 export class MasterchefSubgraphService {
     private readonly client: GraphQLClient;
@@ -37,8 +40,25 @@ export class MasterchefSubgraphService {
         return this.sdk.MasterchefUsers(args);
     }
 
+    public async getAllFarms(args: MasterchefFarmsQueryVariables): Promise<FarmFragment[]> {
+        return subgraphLoadAll<FarmFragment>(this.sdk.MasterchefUsers, 'farms', args);
+    }
+
+    public async getAllFarmUsers(args: MasterchefUsersQueryVariables): Promise<FarmUserFragment[]> {
+        return subgraphLoadAll<FarmUserFragment>(this.sdk.MasterchefUsers, 'farmUsers', args);
+    }
+
     public getFarmForPoolAddress(poolAddress: string, farms: FarmFragment[]): FarmFragment | null {
         return farms.find((farm) => farm.pair.toLowerCase() === poolAddress.toLowerCase()) || null;
+    }
+
+    public async getAllFarmUsersAtBlock(block: number): Promise<FarmUserFragment[]> {
+        return subgraphLoadAllAtBlock<FarmUserFragment>(
+            this.sdk.MasterchefUsers,
+            'farmUsers',
+            block,
+            'masterchef-all-farm-users',
+        );
     }
 
     public get sdk() {
