@@ -264,5 +264,6 @@ fragment BalancerJoinExit on JoinExit {
     }
     pool {
         id
+        tokensList
     }
 }

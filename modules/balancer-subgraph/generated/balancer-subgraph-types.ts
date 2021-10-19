@@ -2415,7 +2415,7 @@ export type BalancerJoinExitsQuery = {
         tx: string;
         type: InvestType;
         user: { __typename?: 'User'; id: string };
-        pool: { __typename?: 'Pool'; id: string };
+        pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
     }>;
 };
 
@@ -2428,7 +2428,7 @@ export type BalancerJoinExitFragment = {
     tx: string;
     type: InvestType;
     user: { __typename?: 'User'; id: string };
-    pool: { __typename?: 'Pool'; id: string };
+    pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
 };
 
 export const BalancerUserFragmentDoc = gql`
@@ -2515,6 +2515,7 @@ export const BalancerJoinExitFragmentDoc = gql`
         }
         pool {
             id
+            tokensList
         }
     }
 `;

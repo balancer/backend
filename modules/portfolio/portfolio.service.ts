@@ -1,9 +1,11 @@
 import { balancerService } from '../balancer-subgraph/balancer.service';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import {
+    BalancerJoinExitFragment,
     BalancerPoolFragment,
     BalancerPoolTokenFragment,
     BalancerUserFragment,
+    InvestType,
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmUserFragment } from '../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BigNumber } from 'ethers';
@@ -63,11 +65,14 @@ class PortfolioService {
             const allFarmUsers = await masterchefService.getAllFarmUsersAtBlock(blockNumber);
             const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
             const previousPools = await balancerService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+            const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
 
             if (user) {
                 const farmUsers = allFarmUsers.filter((famUser) => famUser.address === user.id);
                 const poolData = this.getUserPoolData(user, pools, previousPools, farmUsers, tokenPrices);
                 const tokens = this.tokensFromUserPoolData(poolData);
+                const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
+                const summedJoinExits = this.sumJoinExits(joinExits, tokenPrices);
 
                 portfolioHistories.push({
                     tokens,
@@ -108,6 +113,12 @@ class PortfolioService {
                 );
                 const totalPrice = _.sumBy(tokens, (token) => token.totalPrice);
                 const previousPool = previousPools.find((previousPool) => previousPool.id === pool.id);
+                const previousTotalPrice = _.sumBy(
+                    (previousPool?.tokens || []).map((token) =>
+                        this.mapPoolTokenToUserPoolTokenData(token, percentShare, tokenPrices),
+                    ),
+                    'totalPrice',
+                );
 
                 const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool?.totalSwapFee || '0');
 
@@ -127,11 +138,18 @@ class PortfolioService {
                     swapFees,
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool?.totalSwapVolume || '0'),
                     myFees: swapFees * percentShare,
+                    priceChange: totalPrice - previousTotalPrice,
+                    priceChangePercent: (totalPrice - previousTotalPrice) / previousTotalPrice,
                 };
             })
             .filter((item) => item.shares > 0);
 
-        return _.orderBy(userPoolData, 'totalPrice', 'desc');
+        const totalValue = _.sumBy(userPoolData, 'totalPrice');
+
+        return _.orderBy(userPoolData, 'totalPrice', 'desc').map((pool) => ({
+            ...pool,
+            percentOfPortfolio: pool.totalPrice / totalValue,
+        }));
     }
 
     private mapPoolTokenToUserPoolTokenData(
@@ -153,7 +171,7 @@ class PortfolioService {
         };
     }
 
-    public tokensFromUserPoolData(data: UserPoolData[]): UserTokenData[] {
+    private tokensFromUserPoolData(data: UserPoolData[]): UserTokenData[] {
         const allTokens = _.flatten(data.map((item) => item.tokens));
         const groupedTokens = _.groupBy(allTokens, 'symbol');
 
@@ -164,6 +182,37 @@ class PortfolioService {
         }));
 
         return _.orderBy(tokens, 'totalPrice', 'desc');
+    }
+
+    private sumJoinExits(
+        joinExits: BalancerJoinExitFragment[],
+        tokenPrices: TokenPrices,
+    ): { token: string; balance: number; totalValue: number }[] {
+        const tokensWithAmounts = _.flatten(
+            joinExits.map((joinExit) =>
+                joinExit.amounts.map((amount, idx) => ({
+                    amount,
+                    token: joinExit.pool.tokensList[idx],
+                    type: joinExit.type,
+                })),
+            ),
+        );
+
+        const grouped = _.groupBy(tokensWithAmounts, 'token');
+
+        return _.map(grouped, (token, address) => {
+            const balance = _.sumBy(
+                token,
+                (item) => parseFloat(item.amount) * (item.type === InvestType.Exit ? -1 : 1),
+            );
+            const pricePerToken = tokenPrices[address.toLowerCase()]?.usd || 0;
+
+            return {
+                token: address,
+                balance,
+                totalValue: balance * pricePerToken,
+            };
+        });
     }
 }
 

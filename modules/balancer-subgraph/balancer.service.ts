@@ -1,6 +1,8 @@
 import { GraphQLClient } from 'graphql-request';
 import {
     Balancer,
+    BalancerJoinExitFragment,
+    BalancerJoinExitsQueryVariables,
     BalancerPoolFragment,
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
@@ -26,6 +28,7 @@ import { thirtyDaysInSeconds } from '../util/time';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
+const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
 
 export class BalancerSubgraphService {
     private readonly client: GraphQLClient;
@@ -104,6 +107,19 @@ export class BalancerSubgraphService {
         const users = await this.getAllUsersAtBlock(block);
 
         return users.find((user) => user.id === address) || null;
+    }
+
+    public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
+        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
+    }
+
+    public async getAllJoinExitsAtBlock(block: number): Promise<BalancerJoinExitFragment[]> {
+        return subgraphLoadAllAtBlock<BalancerJoinExitFragment>(
+            this.sdk.BalancerJoinExits,
+            'joinExits',
+            block,
+            ALL_JOIN_EXITS_CACHE_KEY,
+        );
     }
 
     private get sdk() {

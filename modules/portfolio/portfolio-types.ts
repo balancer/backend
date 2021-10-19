@@ -22,6 +22,9 @@ export interface UserPoolData {
     swapFees: number;
     swapVolume: number;
     myFees: number;
+    percentOfPortfolio: number;
+    priceChange: number;
+    priceChangePercent: number;
 }
 
 export interface UserTokenData {
