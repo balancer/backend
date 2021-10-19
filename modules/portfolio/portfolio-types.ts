@@ -1,8 +1,8 @@
 export interface UserPortfolioData {
     timestamp: number;
     totalValue: number;
-    totalFees: number;
-    totalVolume: number;
+    totalSwapFees: number;
+    totalSwapVolume: number;
     myFees: number;
 
     pools: UserPoolData[];
@@ -16,7 +16,7 @@ export interface UserPoolData {
     name: string;
     shares: number;
     percentShare: number;
-    totalPrice: number;
+    totalValue: number;
     pricePerShare: number;
     tokens: UserTokenData[];
     swapFees: number;
@@ -34,6 +34,6 @@ export interface UserTokenData {
     name: string;
     balance: number;
     pricePerToken: number;
-    totalPrice: number;
+    totalValue: number;
     percentOfPortfolio: number;
 }

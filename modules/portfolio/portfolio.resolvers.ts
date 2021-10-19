@@ -4,19 +4,21 @@ import { getRequiredAccountAddress } from '../util/resolver-util';
 
 const resolvers: Resolvers = {
     Query: {
-        portfolioGetPortfolio: async (parent, {}, context) => {
+        portfolioGetUserPortfolio: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
             console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
 
-            return portfolioService.getPortfolio(accountAddress);
+            const portfolioData = await portfolioService.getPortfolio(accountAddress);
+
+            return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
-        portfolioGetPortfolioHistory: async (parent, {}, context) => {
+        portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
-            await portfolioService.getPortfolioHistory(accountAddress);
+            const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
 
-            return true;
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
     },
     //we're forced to have at least one mutation

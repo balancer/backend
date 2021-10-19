@@ -1,34 +1,47 @@
 extend type Query {
-    portfolioGetPortfolio: Portfolio!
-    portfolioGetPortfolioHistory: Boolean!
+    portfolioGetUserPortfolio: GqlUserPortfolioData!
+    portfolioGetUserPortfolioHistory: [GqlUserPortfolioData!]!
 }
 
 extend type Mutation {
     emptyMutation: Boolean!
 }
 
-type Portfolio {
-    tokens: [PortfolioToken!]!
-    pools: [PortfolioPool!]!
+type GqlUserPortfolioData {
+    timestamp: Int!
+    totalValue: GqlBigNumber!
+    totalSwapFees: GqlBigNumber!
+    totalSwapVolume: GqlBigNumber!
+    myFees: GqlBigNumber!
+    tokens: [GqlUserTokenData!]!
+    pools: [GqlUserPoolData!]!
 }
 
-type PortfolioPool {
+type GqlUserPoolData {
     id: String!
     poolId: String!
     poolAddress: String!
-    shares: Float!
+    name: String!
+    shares: GqlBigNumber!
     percentShare: Float!
-    totalPrice: Float!
-    pricePerShare: Float!
-    tokens: [PortfolioToken!]!
+    totalValue: GqlBigNumber!
+    pricePerShare: GqlBigNumber!
+    tokens: [GqlUserTokenData!]!
+    swapFees: GqlBigNumber!
+    swapVolume: GqlBigNumber!
+    myFees: GqlBigNumber!
+    percentOfPortfolio: Float!
+    priceChange: GqlBigNumber!
+    priceChangePercent: Float!
 }
 
-type PortfolioToken {
+type GqlUserTokenData {
     id: String!
     address: String!
     symbol: String!
     name: String!
-    balance: Float!
-    pricePerToken: Float!
-    totalPrice: Float!
+    balance: GqlBigNumber!
+    pricePerToken: GqlBigNumber!
+    totalValue: GqlBigNumber!
+    percentOfPortfolio: Float!
 }

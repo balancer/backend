@@ -79,3 +79,4 @@ generates:
         #    Cursor: string
         #    Datetime: Date
         UUID: string
+        GqlBigNumber: string

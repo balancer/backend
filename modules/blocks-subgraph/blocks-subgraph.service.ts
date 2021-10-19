@@ -125,7 +125,11 @@ export class BlocksSubgraphService {
     }
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
+        const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');
+        numDays = maxDays < numDays ? maxDays : numDays;
+
         const timestampsWithBuffer = getDailyTimestampsWithBuffer(numDays);
+
         const timestamps = getDailyTimestampsForDays(numDays);
         const blocks: BlockFragment[] = [];
         const args = {

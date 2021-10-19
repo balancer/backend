@@ -16,6 +16,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
 import moment from 'moment-timezone';
+import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 
 class PortfolioService {
     constructor() {}
@@ -33,7 +34,15 @@ class PortfolioService {
         });
 
         if (!user) {
-            return { pools: [], tokens: [], totalValue: 0, totalFees: 0, totalVolume: 0, timestamp: 0, myFees: 0 };
+            return {
+                pools: [],
+                tokens: [],
+                totalValue: 0,
+                totalSwapFees: 0,
+                totalSwapVolume: 0,
+                timestamp: 0,
+                myFees: 0,
+            };
         }
 
         const poolData = this.getUserPoolData(user, pools, previousPools, farmUsers, tokenPrices);
@@ -43,16 +52,16 @@ class PortfolioService {
             pools: poolData,
             tokens,
             timestamp: moment().unix(),
-            totalValue: _.sumBy(poolData, 'totalPrice'),
-            totalFees: _.sumBy(poolData, 'swapFees'),
-            totalVolume: _.sumBy(poolData, 'swapVolume'),
+            totalValue: _.sumBy(poolData, 'totalValue'),
+            totalSwapFees: _.sumBy(poolData, 'swapFees'),
+            totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
             myFees: _.sumBy(poolData, 'myFees'),
         };
     }
 
-    public async getPortfolioHistory(address: string) {
+    public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
-        const blocks = await blocksSubgraphService.getDailyBlocks(8);
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const portfolioHistories: UserPortfolioData[] = [];
 
         for (let i = 0; i < blocks.length - 1; i++) {
@@ -65,28 +74,30 @@ class PortfolioService {
             const allFarmUsers = await masterchefService.getAllFarmUsersAtBlock(blockNumber);
             const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
             const previousPools = await balancerService.getAllPoolsAtBlock(parseInt(previousBlock.number));
-            const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
+            //const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
 
             if (user) {
                 const farmUsers = allFarmUsers.filter((famUser) => famUser.address === user.id);
                 const poolData = this.getUserPoolData(user, pools, previousPools, farmUsers, tokenPrices);
                 const tokens = this.tokensFromUserPoolData(poolData);
-                const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
-                const summedJoinExits = this.sumJoinExits(joinExits, tokenPrices);
+                //const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
+                //const summedJoinExits = this.sumJoinExits(joinExits, tokenPrices);
 
                 portfolioHistories.push({
                     tokens,
                     pools: poolData,
                     timestamp: parseInt(block.timestamp),
-                    totalValue: _.sumBy(poolData, 'totalPrice'),
-                    totalFees: _.sumBy(poolData, 'swapFees'),
-                    totalVolume: _.sumBy(poolData, 'swapVolume'),
+                    totalValue: _.sumBy(poolData, 'totalValue'),
+                    totalSwapFees: _.sumBy(poolData, 'swapFees'),
+                    totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
                     myFees: _.sumBy(poolData, 'myFees'),
                 });
             }
         }
 
         console.log(JSON.stringify(portfolioHistories, null, 4));
+
+        return portfolioHistories;
     }
 
     public getUserPoolData(
@@ -108,16 +119,16 @@ class PortfolioService {
                     (pool.tokens || []).map((token) =>
                         this.mapPoolTokenToUserPoolTokenData(token, percentShare, tokenPrices),
                     ),
-                    'totalPrice',
+                    'totalValue',
                     'desc',
                 );
-                const totalPrice = _.sumBy(tokens, (token) => token.totalPrice);
+                const totalValue = _.sumBy(tokens, (token) => token.totalValue);
                 const previousPool = previousPools.find((previousPool) => previousPool.id === pool.id);
-                const previousTotalPrice = _.sumBy(
+                const previousTotalValue = _.sumBy(
                     (previousPool?.tokens || []).map((token) =>
                         this.mapPoolTokenToUserPoolTokenData(token, percentShare, tokenPrices),
                     ),
-                    'totalPrice',
+                    'totalValue',
                 );
 
                 const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool?.totalSwapFee || '0');
@@ -129,26 +140,26 @@ class PortfolioService {
                     name: pool.name || '',
                     shares,
                     percentShare,
-                    totalPrice,
-                    pricePerShare: totalPrice / shares,
+                    totalValue,
+                    pricePerShare: totalValue / shares,
                     tokens: tokens.map((token) => ({
                         ...token,
-                        percentOfPortfolio: token.totalPrice / totalPrice,
+                        percentOfPortfolio: token.totalValue / totalValue,
                     })),
                     swapFees,
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool?.totalSwapVolume || '0'),
                     myFees: swapFees * percentShare,
-                    priceChange: totalPrice - previousTotalPrice,
-                    priceChangePercent: (totalPrice - previousTotalPrice) / previousTotalPrice,
+                    priceChange: totalValue - previousTotalValue,
+                    priceChangePercent: (totalValue - previousTotalValue) / previousTotalValue,
                 };
             })
             .filter((item) => item.shares > 0);
 
-        const totalValue = _.sumBy(userPoolData, 'totalPrice');
+        const totalValue = _.sumBy(userPoolData, 'totalValue');
 
-        return _.orderBy(userPoolData, 'totalPrice', 'desc').map((pool) => ({
+        return _.orderBy(userPoolData, 'totalValue', 'desc').map((pool) => ({
             ...pool,
-            percentOfPortfolio: pool.totalPrice / totalValue,
+            percentOfPortfolio: pool.totalValue / totalValue,
         }));
     }
 
@@ -167,21 +178,27 @@ class PortfolioService {
             name: token.name || '',
             pricePerToken,
             balance,
-            totalPrice: pricePerToken * balance,
+            totalValue: pricePerToken * balance,
         };
     }
 
     private tokensFromUserPoolData(data: UserPoolData[]): UserTokenData[] {
         const allTokens = _.flatten(data.map((item) => item.tokens));
         const groupedTokens = _.groupBy(allTokens, 'symbol');
+        const poolsTotalValue = _.sumBy(data, 'totalValue');
 
-        const tokens = _.map(groupedTokens, (group) => ({
-            ...group[0],
-            balance: _.sumBy(group, (token) => token.balance),
-            totalPrice: _.sumBy(group, (token) => token.totalPrice),
-        }));
+        const tokens = _.map(groupedTokens, (group) => {
+            const totalValue = _.sumBy(group, (token) => token.totalValue);
 
-        return _.orderBy(tokens, 'totalPrice', 'desc');
+            return {
+                ...group[0],
+                balance: _.sumBy(group, (token) => token.balance),
+                totalValue,
+                percentOfPortfolio: totalValue / poolsTotalValue,
+            };
+        });
+
+        return _.orderBy(tokens, 'totalValue', 'desc');
     }
 
     private sumJoinExits(
@@ -213,6 +230,37 @@ class PortfolioService {
                 totalValue: balance * pricePerToken,
             };
         });
+    }
+
+    public mapPortfolioDataToGql(data: UserPortfolioData): GqlUserPortfolioData {
+        return {
+            ...data,
+            totalValue: `${data.totalValue}`,
+            totalSwapFees: `${data.totalSwapFees}`,
+            totalSwapVolume: `${data.totalSwapVolume}`,
+            myFees: `${data.myFees}`,
+            pools: data.pools.map((pool) => ({
+                ...pool,
+                totalValue: `${pool.totalValue}`,
+                swapFees: `${pool.swapFees}`,
+                swapVolume: `${pool.swapVolume}`,
+                myFees: `${pool.myFees}`,
+                priceChange: `${pool.priceChange}`,
+                pricePerShare: `${pool.pricePerShare}`,
+                shares: `${pool.shares}`,
+                tokens: pool.tokens.map((token) => this.mapUserTokenDataToGql(token)),
+            })),
+            tokens: data.tokens.map((token) => this.mapUserTokenDataToGql(token)),
+        };
+    }
+
+    private mapUserTokenDataToGql(token: UserTokenData): GqlUserTokenData {
+        return {
+            ...token,
+            balance: `${token.balance}`,
+            pricePerToken: `${token.pricePerToken}`,
+            totalValue: `${token.totalValue}`,
+        };
     }
 }
 

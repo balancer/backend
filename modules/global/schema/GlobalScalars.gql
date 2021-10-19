@@ -8,3 +8,4 @@ scalar Date
 
 scalar JSON
 
+scalar GqlBigNumber

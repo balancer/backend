@@ -18,6 +18,7 @@ export const schema = {
     COINGECKO_NATIVE_ASSET_ID: String,
     COINGECKO_PLATFORM_ID: String,
     BEETS_ADDRESS: String,
+    SUBGRAPH_START_DATE: String,
 };
 
 export const env: Env = load(schema, {
