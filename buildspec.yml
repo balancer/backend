@@ -16,5 +16,6 @@ cache:
 artifacts:
   files:
     - node_modules/**/*
+    - package.json
     - dist/**/*
     - Procfile
