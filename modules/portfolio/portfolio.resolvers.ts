@@ -7,7 +7,7 @@ const resolvers: Resolvers = {
         portfolioGetUserPortfolio: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
-            console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
+            //console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
 
             const portfolioData = await portfolioService.getPortfolio(accountAddress);
 

@@ -6,6 +6,7 @@ import { balancerService } from '../balancer-subgraph/balancer.service';
 import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
+import { fiveMinutesInSeconds } from '../util/time';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -25,9 +26,18 @@ export class TokenPriceService {
     }
 
     public getTokenPricesForTimestamp(timestamp: string, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
-        return _.mapValues(tokenHistoricalPrices, (tokenPrices) => ({
-            usd: tokenPrices.find((tokenPrice) => tokenPrice.timestamp === parseInt(timestamp) * 1000)?.price || 0,
-        }));
+        const msTimestamp = parseInt(timestamp) * 1000;
+        return _.mapValues(tokenHistoricalPrices, (tokenPrices) => {
+            if (tokenPrices.length === 0) {
+                return { usd: 0 };
+            }
+
+            const closest = tokenPrices.reduce((a, b) => {
+                return Math.abs(b.timestamp - msTimestamp) < Math.abs(a.timestamp - msTimestamp) ? b : a;
+            });
+
+            return { usd: closest.price };
+        });
     }
 
     public async cacheTokenPrices(): Promise<TokenPrices> {
