@@ -124,7 +124,8 @@ class PortfolioService {
                 portfolioHistories.push({
                     tokens,
                     pools: poolData,
-                    timestamp: parseInt(block.timestamp),
+                    //this data represents the previous day
+                    timestamp: moment.unix(parseInt(block.timestamp)).subtract(1, 'day').unix(),
                     totalValue: _.sumBy(poolData, 'totalValue'),
                     totalSwapFees: _.sumBy(poolData, 'swapFees'),
                     totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
@@ -183,8 +184,14 @@ class PortfolioService {
                     swapFees,
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume),
                     myFees: swapFees * userPercentShare,
-                    priceChange: userNumShares * pricePerShare - userNumShares * previous.pricePerShare,
-                    priceChangePercent: (pricePerShare - previous.pricePerShare) / pricePerShare,
+                    priceChange:
+                        pricePerShare && previous.pricePerShare
+                            ? userNumShares * pricePerShare - userNumShares * previous.pricePerShare
+                            : 0,
+                    priceChangePercent:
+                        pricePerShare && previous.pricePerShare
+                            ? (pricePerShare - previous.pricePerShare) / pricePerShare
+                            : 0,
                 });
             }
         }
