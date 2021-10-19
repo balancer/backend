@@ -95,8 +95,6 @@ class PortfolioService {
             }
         }
 
-        console.log(JSON.stringify(portfolioHistories, null, 4));
-
         return portfolioHistories;
     }
 
@@ -150,7 +148,12 @@ class PortfolioService {
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool?.totalSwapVolume || '0'),
                     myFees: swapFees * percentShare,
                     priceChange: totalValue - previousTotalValue,
-                    priceChangePercent: (totalValue - previousTotalValue) / previousTotalValue,
+                    priceChangePercent:
+                        previousTotalValue !== 0
+                            ? (totalValue - previousTotalValue) / previousTotalValue
+                            : totalValue > 0
+                            ? 1
+                            : 0,
                 };
             })
             .filter((item) => item.shares > 0);
