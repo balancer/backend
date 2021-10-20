@@ -70,12 +70,15 @@ export class BalancerPriceService {
                 //filter out any matches that are further than 5 minutes away.
                 //This can happen for periods before the token was listed or times in the future
                 if (Math.abs(timestamp - parseInt(closest.timestamp)) < fiveMinutesInSeconds) {
-                    const entry = coingeckoHistoricalPrices[closest.pricingAsset]?.find(
+                    const pricingAsset = coingeckoHistoricalPrices[closest.pricingAsset]?.find(
                         (price) => price.timestamp === timestamp * 1000,
                     );
 
-                    if (entry) {
-                        historicalTokenPrices.push({ timestamp: timestamp * 1000, price: entry.price });
+                    if (pricingAsset) {
+                        historicalTokenPrices.push({
+                            timestamp: timestamp * 1000,
+                            price: parseFloat(closest.price) * pricingAsset.price,
+                        });
                     }
                 }
             }

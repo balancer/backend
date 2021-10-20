@@ -21,13 +21,6 @@ export class TokenPriceService {
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
         const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
 
-        /*if (tokenPrices) {
-            console.log(
-                'tokenPrices',
-                JSON.stringify(tokenPrices['0x04068da6c83afcfa0e13ba15a6696662335d5b75'], null, 4),
-            );
-        }*/
-
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
     }

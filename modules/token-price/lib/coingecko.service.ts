@@ -88,13 +88,11 @@ export class CoingeckoService {
         const end = now;
         const start = end - days * twentyFourHoursInSecs;
 
-        const mappedAddress = this.addressMapIn(address);
+        const mappedAddress = this.addressMapIn(address).toLowerCase();
 
         const endpoint = `/coins/${this.getPlatformIdForAddress(
-            mappedAddress.toLowerCase(),
-        )}/contract/${mappedAddress.toLowerCase()}/market_chart/range?vs_currency=${
-            this.fiatParam
-        }&from=${start}&to=${end}`;
+            mappedAddress,
+        )}/contract/${mappedAddress}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;
 
         const result = await this.get<HistoricalPriceResponse>(endpoint);
 
