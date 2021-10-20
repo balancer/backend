@@ -1,4 +1,4 @@
-import { TokenHistoricalPrices, TokenPrices } from './token-price-types';
+import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerTokenMappings } from './lib/balancer-token-mappings';
 import { balancerPriceService } from './lib/balancer-price.service';
@@ -43,18 +43,25 @@ export class TokenPriceService {
     public async cacheTokenPrices(): Promise<TokenPrices> {
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
         const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
+        let coingeckoTokenPrices: TokenPrices = {};
+        let nativeAssetPrice: Price | null = null;
 
-        const coingeckoTokenPrices: TokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
+        try {
+            coingeckoTokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
+            nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
+        } catch (e) {
+            console.log('caught coingecko error', e);
+        }
+
         const missingTokens = coingeckoTokens.filter((token) => !coingeckoTokenPrices[token]);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
-            [...balancerTokens, ...missingTokens],
+            [...balancerTokens, ...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
         );
-        const nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         const tokenPrices = {
             ...coingeckoTokenPrices,
             ...balancerTokenPrices,
-            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
+            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
         };
 
         await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
