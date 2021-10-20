@@ -49,9 +49,7 @@ export class TokenPriceService {
         try {
             coingeckoTokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
-        } catch (e) {
-            console.log('caught coingecko error', e);
-        }
+        } catch {}
 
         const missingTokens = coingeckoTokens.filter((token) => !coingeckoTokenPrices[token]);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(

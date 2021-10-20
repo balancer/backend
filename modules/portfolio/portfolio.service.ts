@@ -17,6 +17,7 @@ import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.servic
 import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
 import moment from 'moment-timezone';
 import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
+import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 
 class PortfolioService {
     constructor() {}
@@ -215,7 +216,7 @@ class PortfolioService {
         return {
             id: token.id,
             address: token.address || '',
-            symbol: token.symbol || '',
+            symbol: balancerTokenMappings.tokenSymbolOverwrites[token.symbol || ''] || token.symbol || '',
             name: token.name || '',
             pricePerToken,
             balance,

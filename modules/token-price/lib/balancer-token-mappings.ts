@@ -1,5 +1,6 @@
 export const balancerTokenMappings: {
     balancerPricedTokens: string[];
+    tokenSymbolOverwrites: { [oldSymbol: string]: string };
 } = {
     balancerPricedTokens: [
         '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
@@ -20,4 +21,7 @@ export const balancerTokenMappings: {
         '0x4a13a2cf881f5378def61e430139ed26d843df9a',
         '0xddc0385169797937066bbd8ef409b5b3c0dfeb52',
     ],
+    tokenSymbolOverwrites: {
+        miMATIC: 'MAI',
+    },
 };
