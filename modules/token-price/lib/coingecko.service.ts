@@ -23,7 +23,7 @@ export class CoingeckoService {
         this.nativeAssetAddress = env.NATIVE_ASSET_ADDRESS;
     }
 
-    async getNativeAssetPrice(): Promise<Price> {
+    public async getNativeAssetPrice(): Promise<Price> {
         try {
             const response = await this.get<PriceResponse>(
                 `/simple/price?ids=${this.nativeAssetId}&vs_currencies=${this.fiatParam}`,
@@ -83,7 +83,7 @@ export class CoingeckoService {
         }
     }
 
-    async getTokenHistoricalPrices(address: string, days: number): Promise<HistoricalPrice[]> {
+    public async getTokenHistoricalPrices(address: string, days: number): Promise<HistoricalPrice[]> {
         const now = Math.floor(Date.now() / 1000);
         const end = now;
         const start = end - days * twentyFourHoursInSecs;

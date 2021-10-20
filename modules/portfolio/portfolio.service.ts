@@ -23,23 +23,15 @@ class PortfolioService {
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        const { user } = await balancerService.getUser({ id: address });
-        const pools = await balancerService.getAllPools({ where: { totalShares_gt: '0' } });
-        const farmUsers = await masterchefService.getAllFarmUsers({ where: { address } });
+        const { user, pools, previousUser, previousPools } = await balancerService.getPortfolioData(
+            address,
+            parseInt(previousBlock.number),
+        );
+        const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
+            address,
+            previousBlockNumber: parseInt(previousBlock.number),
+        });
         const tokenPrices = await tokenPriceService.getTokenPrices();
-        const { pools: previousPools } = await balancerService.getPools({
-            first: 1000,
-            where: { totalShares_gt: '0' },
-            block: { number: parseInt(previousBlock.number) },
-        });
-        const previousFarmUsers = await masterchefService.getAllFarmUsers({
-            where: { address },
-            block: { number: parseInt(previousBlock.number) },
-        });
-        const { user: previousUser } = await balancerService.getUser({
-            id: address,
-            block: { number: parseInt(previousBlock.number) },
-        });
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
             previousBlock.timestamp,
@@ -156,18 +148,26 @@ class PortfolioService {
                 continue;
             }
 
+            //console.log('---- current ----');
             const { userNumShares, userPercentShare, userTotalValue, userTokens, pricePerShare } =
                 this.generatePoolIntermediates(pool, balancerUser, userFarms, tokenPrices);
+            //console.log('----previous -----');
             const previous = this.generatePoolIntermediates(
                 previousPool,
                 previousBalancerUser,
                 previousUserFarms,
                 previousTokenPrices,
             );
+            //console.log('---------');
 
             const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
 
             if (userNumShares > 0) {
+                /*if (pool.id === '0xd163415bd34ef06f57c58d2aed5a5478afb464cc00000000000000000000000e') {
+                    console.log('pricePerShare', pricePerShare);
+                    console.log('previous.pricePerShare', previous.pricePerShare);
+                }*/
+
                 userPoolData.push({
                     id: pool.id,
                     poolId: pool.id,
@@ -294,6 +294,13 @@ class PortfolioService {
             'desc',
         );
         const userTotalValue = _.sumBy(userTokens, (token) => token.totalValue);
+
+        /*if (pool.id === '0xd163415bd34ef06f57c58d2aed5a5478afb464cc00000000000000000000000e') {
+            console.log('poolTotalValue', poolTotalValue);
+            console.log('poolTotalShares', poolTotalShares);
+            console.log('pricePerShare', poolTotalValue / poolTotalShares);
+            console.log('token prices', tokenPrices);
+        }*/
 
         return {
             userNumShares,

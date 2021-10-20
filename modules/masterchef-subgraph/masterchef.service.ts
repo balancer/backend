@@ -6,6 +6,8 @@ import {
     MasterChef,
     MasterchefFarmsQuery,
     MasterchefFarmsQueryVariables,
+    MasterchefPortfolioDataQuery,
+    MasterchefPortfolioDataQueryVariables,
     MasterchefUsersQuery,
     MasterchefUsersQueryVariables,
     QueryMasterChefsArgs,
@@ -46,6 +48,10 @@ export class MasterchefSubgraphService {
 
     public async getAllFarmUsers(args: MasterchefUsersQueryVariables): Promise<FarmUserFragment[]> {
         return subgraphLoadAll<FarmUserFragment>(this.sdk.MasterchefUsers, 'farmUsers', args);
+    }
+
+    public async getPortfolioData(args: MasterchefPortfolioDataQueryVariables): Promise<MasterchefPortfolioDataQuery> {
+        return this.sdk.MasterchefPortfolioData(args);
     }
 
     public getFarmForPoolAddress(poolAddress: string, farms: FarmFragment[]): FarmFragment | null {

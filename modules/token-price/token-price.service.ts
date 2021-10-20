@@ -7,6 +7,7 @@ import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { fiveMinutesInSeconds } from '../util/time';
+import { env } from '../../app/env';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -20,6 +21,13 @@ export class TokenPriceService {
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
         const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+
+        /*if (tokenPrices) {
+            console.log(
+                'tokenPrices',
+                JSON.stringify(tokenPrices['0x04068da6c83afcfa0e13ba15a6696662335d5b75'], null, 4),
+            );
+        }*/
 
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
@@ -46,7 +54,12 @@ export class TokenPriceService {
 
         const coingeckoTokenPrices: TokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(balancerTokens, coingeckoTokenPrices);
-        const tokenPrices = { ...coingeckoTokenPrices, ...balancerTokenPrices };
+        const nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
+        const tokenPrices = {
+            ...coingeckoTokenPrices,
+            ...balancerTokenPrices,
+            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
+        };
 
         await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
 

@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import {
+    BalancePortfolioDataQuery,
     Balancer,
     BalancerJoinExitFragment,
     BalancerJoinExitsQueryVariables,
@@ -66,6 +67,10 @@ export class BalancerSubgraphService {
 
     public async getPool(args: BalancerPoolQueryVariables): Promise<BalancerPoolQuery> {
         return this.sdk.BalancerPool(args);
+    }
+
+    public async getPortfolioData(id: string, previousBlockNumber: number): Promise<BalancePortfolioDataQuery> {
+        return this.sdk.BalancePortfolioData({ id, previousBlockNumber });
     }
 
     public getUniqueTokenAddressesFromPools(pools: BalancerPoolFragment[]): string[] {

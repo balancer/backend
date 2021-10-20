@@ -673,6 +673,35 @@ export type FarmFragment = {
     block: string;
 };
 
+export type MasterchefPortfolioDataQueryVariables = Exact<{
+    address: Scalars['Bytes'];
+    previousBlockNumber: Scalars['Int'];
+}>;
+
+export type MasterchefPortfolioDataQuery = {
+    __typename?: 'Query';
+    farmUsers: Array<{
+        __typename?: 'User';
+        id: string;
+        address: string;
+        amount: string;
+        rewardDebt: string;
+        beetsHarvested: string;
+        timestamp: string;
+        pool?: { __typename?: 'Pool'; id: string; pair: string } | null | undefined;
+    }>;
+    previousFarmUsers: Array<{
+        __typename?: 'User';
+        id: string;
+        address: string;
+        amount: string;
+        rewardDebt: string;
+        beetsHarvested: string;
+        timestamp: string;
+        pool?: { __typename?: 'Pool'; id: string; pair: string } | null | undefined;
+    }>;
+};
+
 export const FarmUserFragmentDoc = gql`
     fragment FarmUser on User {
         id
@@ -770,6 +799,17 @@ export const MasterchefFarmsDocument = gql`
     }
     ${FarmFragmentDoc}
 `;
+export const MasterchefPortfolioDataDocument = gql`
+    query MasterchefPortfolioData($address: Bytes!, $previousBlockNumber: Int!) {
+        farmUsers: users(first: 1000, where: { address: $address }) {
+            ...FarmUser
+        }
+        previousFarmUsers: users(first: 1000, where: { address: $address }, block: { number: $previousBlockNumber }) {
+            ...FarmUser
+        }
+    }
+    ${FarmUserFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -817,6 +857,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'MasterchefFarms',
+            );
+        },
+        MasterchefPortfolioData(
+            variables: MasterchefPortfolioDataQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<MasterchefPortfolioDataQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<MasterchefPortfolioDataQuery>(MasterchefPortfolioDataDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'MasterchefPortfolioData',
             );
         },
     };

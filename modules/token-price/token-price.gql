@@ -1,0 +1,19 @@
+extend type Query {
+    tokenPriceGetCurrentPrices: [GqlTokenPrice!]!
+    tokenPriceGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
+}
+
+type GqlTokenPrice {
+    address: String!
+    price: Float!
+}
+
+type GqlHistoricalTokenPrice {
+    address: String!
+    prices: [GqlHistoricalTokenPriceEntry!]!
+}
+
+type GqlHistoricalTokenPriceEntry {
+    timestamp: String!
+    price: Float!
+}

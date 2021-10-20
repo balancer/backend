@@ -2431,6 +2431,99 @@ export type BalancerJoinExitFragment = {
     pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
 };
 
+export type BalancePortfolioDataQueryVariables = Exact<{
+    id: Scalars['ID'];
+    previousBlockNumber: Scalars['Int'];
+}>;
+
+export type BalancePortfolioDataQuery = {
+    __typename?: 'Query';
+    user?:
+        | {
+              __typename?: 'User';
+              id: string;
+              sharesOwned?:
+                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
+    pools: Array<{
+        __typename?: 'Pool';
+        id: string;
+        address: string;
+        poolType?: PoolType | null | undefined;
+        symbol?: string | null | undefined;
+        name?: string | null | undefined;
+        swapFee: string;
+        totalWeight?: string | null | undefined;
+        totalSwapVolume: string;
+        totalSwapFee: string;
+        totalLiquidity: string;
+        totalShares: string;
+        swapsCount: string;
+        holdersCount: string;
+        tokens?:
+            | Array<{
+                  __typename?: 'PoolToken';
+                  id: string;
+                  symbol?: string | null | undefined;
+                  name?: string | null | undefined;
+                  decimals: number;
+                  address: string;
+                  balance: string;
+                  invested: string;
+                  weight?: string | null | undefined;
+                  priceRate?: string | null | undefined;
+              }>
+            | null
+            | undefined;
+    }>;
+    previousUser?:
+        | {
+              __typename?: 'User';
+              id: string;
+              sharesOwned?:
+                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
+    previousPools: Array<{
+        __typename?: 'Pool';
+        id: string;
+        address: string;
+        poolType?: PoolType | null | undefined;
+        symbol?: string | null | undefined;
+        name?: string | null | undefined;
+        swapFee: string;
+        totalWeight?: string | null | undefined;
+        totalSwapVolume: string;
+        totalSwapFee: string;
+        totalLiquidity: string;
+        totalShares: string;
+        swapsCount: string;
+        holdersCount: string;
+        tokens?:
+            | Array<{
+                  __typename?: 'PoolToken';
+                  id: string;
+                  symbol?: string | null | undefined;
+                  name?: string | null | undefined;
+                  decimals: number;
+                  address: string;
+                  balance: string;
+                  invested: string;
+                  weight?: string | null | undefined;
+                  priceRate?: string | null | undefined;
+              }>
+            | null
+            | undefined;
+    }>;
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
@@ -2726,6 +2819,24 @@ export const BalancerJoinExitsDocument = gql`
     }
     ${BalancerJoinExitFragmentDoc}
 `;
+export const BalancePortfolioDataDocument = gql`
+    query BalancePortfolioData($id: ID!, $previousBlockNumber: Int!) {
+        user(id: $id) {
+            ...BalancerUser
+        }
+        pools(first: 1000, where: { totalShares_gt: "0" }) {
+            ...BalancerPool
+        }
+        previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
+            ...BalancerUser
+        }
+        previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
+            ...BalancerPool
+        }
+    }
+    ${BalancerUserFragmentDoc}
+    ${BalancerPoolFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -2865,6 +2976,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerJoinExits',
+            );
+        },
+        BalancePortfolioData(
+            variables: BalancePortfolioDataQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancePortfolioDataQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancePortfolioDataQuery>(BalancePortfolioDataDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancePortfolioData',
             );
         },
     };
