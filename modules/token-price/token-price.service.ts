@@ -6,7 +6,6 @@ import { balancerService } from '../balancer-subgraph/balancer.service';
 import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
-import { fiveMinutesInSeconds } from '../util/time';
 import { env } from '../../app/env';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
@@ -53,7 +52,11 @@ export class TokenPriceService {
         const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
 
         const coingeckoTokenPrices: TokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
-        const balancerTokenPrices = await balancerPriceService.getTokenPrices(balancerTokens, coingeckoTokenPrices);
+        const missingTokens = coingeckoTokens.filter((token) => !coingeckoTokenPrices[token]);
+        const balancerTokenPrices = await balancerPriceService.getTokenPrices(
+            [...balancerTokens, ...missingTokens],
+            coingeckoTokenPrices,
+        );
         const nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         const tokenPrices = {
             ...coingeckoTokenPrices,

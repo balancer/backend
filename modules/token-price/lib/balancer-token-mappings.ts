@@ -17,5 +17,7 @@ export const balancerTokenMappings: {
         '0x0d318ef2cf0aafa2713419aed6c0f6a21fd34cf0',
         '0x8503eb4a136bdbeb323e37aa6e0fa0c772228378',
         '0xbf4906762c38f50bc7be0a11bb452c944f6c72e1',
+        '0x4a13a2cf881f5378def61e430139ed26d843df9a',
+        '0xddc0385169797937066bbd8ef409b5b3c0dfeb52',
     ],
 };
