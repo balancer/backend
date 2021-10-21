@@ -23,5 +23,6 @@ export const balancerTokenMappings: {
     ],
     tokenSymbolOverwrites: {
         miMATIC: 'MAI',
+        mooFantomBIFI: 'mooBIFI',
     },
 };
