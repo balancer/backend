@@ -49,10 +49,6 @@ export class BalancerSubgraphService {
         return balancers[0];
     }
 
-    public async getUser(args: BalancerUserQueryVariables): Promise<BalancerUserQuery> {
-        return this.sdk.BalancerUser(args);
-    }
-
     public async getTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPricesQuery> {
         return this.sdk.BalancerTokenPrices(args);
     }
@@ -78,7 +74,9 @@ export class BalancerSubgraphService {
     }
 
     public async getAllUsers(args: BalancerUsersQueryVariables): Promise<BalancerUserFragment[]> {
-        return subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
+        const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
+
+        return users.map((user) => this.normalizeBalancerUser(user));
     }
 
     public async getAllTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPriceFragment[]> {
@@ -90,12 +88,14 @@ export class BalancerSubgraphService {
     }
 
     public async getAllUsersAtBlock(block: number): Promise<BalancerUserFragment[]> {
-        return subgraphLoadAllAtBlock<BalancerUserFragment>(
+        const users = await subgraphLoadAllAtBlock<BalancerUserFragment>(
             this.sdk.BalancerUsers,
             'users',
             block,
             ALL_USERS_CACHE_KEY,
         );
+
+        return users.map((user) => this.normalizeBalancerUser(user));
     }
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
@@ -129,6 +129,17 @@ export class BalancerSubgraphService {
 
     private get sdk() {
         return getSdk(this.client);
+    }
+
+    private normalizeBalancerUser(user: BalancerUserFragment): BalancerUserFragment {
+        return {
+            ...user,
+            sharesOwned: user.sharesOwned?.map((shares) => ({
+                ...shares,
+                //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
+                balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+            })),
+        };
     }
 }
 
