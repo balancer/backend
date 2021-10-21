@@ -39,7 +39,7 @@ class PortfolioService {
             historicalTokenPrices,
         );
 
-        if (!user || !previousUser) {
+        if (!user) {
             return {
                 pools: [],
                 tokens: [],
@@ -53,7 +53,7 @@ class PortfolioService {
 
         const poolData = this.getUserPoolData(
             user,
-            previousUser,
+            previousUser || user,
             pools,
             previousPools,
             farmUsers,
@@ -149,26 +149,18 @@ class PortfolioService {
                 continue;
             }
 
-            //console.log('---- current ----');
             const { userNumShares, userPercentShare, userTotalValue, userTokens, pricePerShare } =
                 this.generatePoolIntermediates(pool, balancerUser, userFarms, tokenPrices);
-            //console.log('----previous -----');
             const previous = this.generatePoolIntermediates(
                 previousPool,
                 previousBalancerUser,
                 previousUserFarms,
                 previousTokenPrices,
             );
-            //console.log('---------');
 
             const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
 
             if (userNumShares > 0) {
-                /*if (pool.id === '0xd163415bd34ef06f57c58d2aed5a5478afb464cc00000000000000000000000e') {
-                    console.log('pricePerShare', pricePerShare);
-                    console.log('previous.pricePerShare', previous.pricePerShare);
-                }*/
-
                 userPoolData.push({
                     id: pool.id,
                     poolId: pool.id,
@@ -295,13 +287,6 @@ class PortfolioService {
             'desc',
         );
         const userTotalValue = _.sumBy(userTokens, (token) => token.totalValue);
-
-        /*if (pool.id === '0xd163415bd34ef06f57c58d2aed5a5478afb464cc00000000000000000000000e') {
-            console.log('poolTotalValue', poolTotalValue);
-            console.log('poolTotalShares', poolTotalShares);
-            console.log('pricePerShare', poolTotalValue / poolTotalShares);
-            console.log('token prices', tokenPrices);
-        }*/
 
         return {
             userNumShares,
