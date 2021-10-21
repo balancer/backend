@@ -143,11 +143,8 @@ class PortfolioService {
         const userPoolData: Omit<UserPoolData, 'percentOfPortfolio'>[] = [];
 
         for (const pool of pools) {
-            const previousPool = previousPools.find((previousPool) => previousPool.id === pool.id);
-
-            if (!previousPool) {
-                continue;
-            }
+            //if no previous pool, it means this pool is less than 24 hours old. Use the current pool so we get zeros
+            const previousPool = previousPools.find((previousPool) => previousPool.id === pool.id) || pool;
 
             const { userNumShares, userPercentShare, userTotalValue, userTokens, pricePerShare } =
                 this.generatePoolIntermediates(pool, balancerUser, userFarms, tokenPrices);
