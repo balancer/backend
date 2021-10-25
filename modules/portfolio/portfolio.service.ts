@@ -114,16 +114,20 @@ class PortfolioService {
                 //const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
                 //const summedJoinExits = this.sumJoinExits(joinExits, tokenPrices);
 
-                portfolioHistories.push({
-                    tokens,
-                    pools: poolData,
-                    //this data represents the previous day
-                    timestamp: moment.unix(parseInt(block.timestamp)).subtract(1, 'day').unix(),
-                    totalValue: _.sumBy(poolData, 'totalValue'),
-                    totalSwapFees: _.sumBy(poolData, 'swapFees'),
-                    totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
-                    myFees: _.sumBy(poolData, 'myFees'),
-                });
+                const totalValue = _.sumBy(poolData, 'totalValue');
+
+                if (totalValue > 0) {
+                    portfolioHistories.push({
+                        tokens,
+                        pools: poolData,
+                        //this data represents the previous day
+                        timestamp: moment.unix(parseInt(block.timestamp)).subtract(1, 'day').unix(),
+                        totalValue,
+                        totalSwapFees: _.sumBy(poolData, 'swapFees'),
+                        totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
+                        myFees: _.sumBy(poolData, 'myFees'),
+                    });
+                }
             }
         }
 
