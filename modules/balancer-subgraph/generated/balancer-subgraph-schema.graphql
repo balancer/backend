@@ -4,6 +4,91 @@ directive @entity on OBJECT
 
 directive @subgraphId(id: String) on OBJECT
 
+type AmpUpdate {
+    endAmp: BigInt!
+    endTimestamp: Int!
+    id: ID!
+    poolId: Pool!
+    scheduledTimestamp: Int!
+    startAmp: BigInt!
+    startTimestamp: Int!
+}
+
+input AmpUpdate_filter {
+    endAmp: BigInt
+    endAmp_gt: BigInt
+    endAmp_gte: BigInt
+    endAmp_in: [BigInt!]
+    endAmp_lt: BigInt
+    endAmp_lte: BigInt
+    endAmp_not: BigInt
+    endAmp_not_in: [BigInt!]
+    endTimestamp: Int
+    endTimestamp_gt: Int
+    endTimestamp_gte: Int
+    endTimestamp_in: [Int!]
+    endTimestamp_lt: Int
+    endTimestamp_lte: Int
+    endTimestamp_not: Int
+    endTimestamp_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolId: String
+    poolId_contains: String
+    poolId_ends_with: String
+    poolId_gt: String
+    poolId_gte: String
+    poolId_in: [String!]
+    poolId_lt: String
+    poolId_lte: String
+    poolId_not: String
+    poolId_not_contains: String
+    poolId_not_ends_with: String
+    poolId_not_in: [String!]
+    poolId_not_starts_with: String
+    poolId_starts_with: String
+    scheduledTimestamp: Int
+    scheduledTimestamp_gt: Int
+    scheduledTimestamp_gte: Int
+    scheduledTimestamp_in: [Int!]
+    scheduledTimestamp_lt: Int
+    scheduledTimestamp_lte: Int
+    scheduledTimestamp_not: Int
+    scheduledTimestamp_not_in: [Int!]
+    startAmp: BigInt
+    startAmp_gt: BigInt
+    startAmp_gte: BigInt
+    startAmp_in: [BigInt!]
+    startAmp_lt: BigInt
+    startAmp_lte: BigInt
+    startAmp_not: BigInt
+    startAmp_not_in: [BigInt!]
+    startTimestamp: Int
+    startTimestamp_gt: Int
+    startTimestamp_gte: Int
+    startTimestamp_in: [Int!]
+    startTimestamp_lt: Int
+    startTimestamp_lte: Int
+    startTimestamp_not: Int
+    startTimestamp_not_in: [Int!]
+}
+
+enum AmpUpdate_orderBy {
+    endAmp
+    endTimestamp
+    id
+    poolId
+    scheduledTimestamp
+    startAmp
+    startTimestamp
+}
+
 type Balancer {
     id: ID!
     poolCount: Int!
@@ -15,8 +100,104 @@ type Balancer {
         where: Pool_filter
     ): [Pool!]
     totalLiquidity: BigDecimal!
+    totalSwapCount: BigInt!
     totalSwapFee: BigDecimal!
     totalSwapVolume: BigDecimal!
+}
+
+type BalancerSnapshot {
+    id: ID!
+    poolCount: Int!
+    timestamp: Int!
+    totalLiquidity: BigDecimal!
+    totalSwapCount: BigInt!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    vault: Balancer!
+}
+
+input BalancerSnapshot_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    poolCount: Int
+    poolCount_gt: Int
+    poolCount_gte: Int
+    poolCount_in: [Int!]
+    poolCount_lt: Int
+    poolCount_lte: Int
+    poolCount_not: Int
+    poolCount_not_in: [Int!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    totalLiquidity: BigDecimal
+    totalLiquidity_gt: BigDecimal
+    totalLiquidity_gte: BigDecimal
+    totalLiquidity_in: [BigDecimal!]
+    totalLiquidity_lt: BigDecimal
+    totalLiquidity_lte: BigDecimal
+    totalLiquidity_not: BigDecimal
+    totalLiquidity_not_in: [BigDecimal!]
+    totalSwapCount: BigInt
+    totalSwapCount_gt: BigInt
+    totalSwapCount_gte: BigInt
+    totalSwapCount_in: [BigInt!]
+    totalSwapCount_lt: BigInt
+    totalSwapCount_lte: BigInt
+    totalSwapCount_not: BigInt
+    totalSwapCount_not_in: [BigInt!]
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
+    vault: String
+    vault_contains: String
+    vault_ends_with: String
+    vault_gt: String
+    vault_gte: String
+    vault_in: [String!]
+    vault_lt: String
+    vault_lte: String
+    vault_not: String
+    vault_not_contains: String
+    vault_not_ends_with: String
+    vault_not_in: [String!]
+    vault_not_starts_with: String
+    vault_starts_with: String
+}
+
+enum BalancerSnapshot_orderBy {
+    id
+    poolCount
+    timestamp
+    totalLiquidity
+    totalSwapCount
+    totalSwapFee
+    totalSwapVolume
+    vault
 }
 
 input Balancer_filter {
@@ -44,6 +225,14 @@ input Balancer_filter {
     totalLiquidity_lte: BigDecimal
     totalLiquidity_not: BigDecimal
     totalLiquidity_not_in: [BigDecimal!]
+    totalSwapCount: BigInt
+    totalSwapCount_gt: BigInt
+    totalSwapCount_gte: BigInt
+    totalSwapCount_in: [BigInt!]
+    totalSwapCount_lt: BigInt
+    totalSwapCount_lte: BigInt
+    totalSwapCount_not: BigInt
+    totalSwapCount_not_in: [BigInt!]
     totalSwapFee: BigDecimal
     totalSwapFee_gt: BigDecimal
     totalSwapFee_gte: BigDecimal
@@ -67,6 +256,7 @@ enum Balancer_orderBy {
     poolCount
     pools
     totalLiquidity
+    totalSwapCount
     totalSwapFee
     totalSwapVolume
 }
@@ -286,7 +476,9 @@ input JoinExit_filter {
     tx_not_contains: Bytes
     tx_not_in: [Bytes!]
     type: InvestType
+    type_in: [InvestType!]
     type_not: InvestType
+    type_not_in: [InvestType!]
     user: String
     user_contains: String
     user_ends_with: String
@@ -320,6 +512,7 @@ type LatestPrice {
     id: ID!
     poolId: Pool!
     price: BigDecimal!
+    priceUsd: BigDecimal!
     pricingAsset: Bytes!
 }
 
@@ -361,6 +554,14 @@ input LatestPrice_filter {
     poolId_not_starts_with: String
     poolId_starts_with: String
     price: BigDecimal
+    priceUsd: BigDecimal
+    priceUsd_gt: BigDecimal
+    priceUsd_gte: BigDecimal
+    priceUsd_in: [BigDecimal!]
+    priceUsd_lt: BigDecimal
+    priceUsd_lte: BigDecimal
+    priceUsd_not: BigDecimal
+    priceUsd_not_in: [BigDecimal!]
     price_gt: BigDecimal
     price_gte: BigDecimal
     price_in: [BigDecimal!]
@@ -382,6 +583,7 @@ enum LatestPrice_orderBy {
     id
     poolId
     price
+    priceUsd
     pricingAsset
 }
 
@@ -406,9 +608,10 @@ type Pool {
     ): [PoolHistoricalLiquidity!]
     holdersCount: BigInt!
     id: ID!
+    managementFee: BigDecimal
     name: String
     owner: Bytes
-    poolType: PoolType
+    poolType: String
     priceRateProviders(
         first: Int = 100
         orderBy: PriceRateProvider_orderBy
@@ -466,9 +669,11 @@ type PoolHistoricalLiquidity {
     id: ID!
     poolId: Pool!
     poolLiquidity: BigDecimal!
+    poolLiquidityUSD: BigDecimal!
     poolShareValue: BigDecimal!
     poolTotalShares: BigDecimal!
     pricingAsset: Bytes!
+    timestamp: Int!
 }
 
 input PoolHistoricalLiquidity_filter {
@@ -503,6 +708,14 @@ input PoolHistoricalLiquidity_filter {
     poolId_not_starts_with: String
     poolId_starts_with: String
     poolLiquidity: BigDecimal
+    poolLiquidityUSD: BigDecimal
+    poolLiquidityUSD_gt: BigDecimal
+    poolLiquidityUSD_gte: BigDecimal
+    poolLiquidityUSD_in: [BigDecimal!]
+    poolLiquidityUSD_lt: BigDecimal
+    poolLiquidityUSD_lte: BigDecimal
+    poolLiquidityUSD_not: BigDecimal
+    poolLiquidityUSD_not_in: [BigDecimal!]
     poolLiquidity_gt: BigDecimal
     poolLiquidity_gte: BigDecimal
     poolLiquidity_in: [BigDecimal!]
@@ -532,6 +745,14 @@ input PoolHistoricalLiquidity_filter {
     pricingAsset_not: Bytes
     pricingAsset_not_contains: Bytes
     pricingAsset_not_in: [Bytes!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
 }
 
 enum PoolHistoricalLiquidity_orderBy {
@@ -539,9 +760,11 @@ enum PoolHistoricalLiquidity_orderBy {
     id
     poolId
     poolLiquidity
+    poolLiquidityUSD
     poolShareValue
     poolTotalShares
     pricingAsset
+    timestamp
 }
 
 type PoolShare {
@@ -607,12 +830,17 @@ enum PoolShare_orderBy {
 
 type PoolSnapshot {
     amounts: [BigDecimal!]!
+    holdersCount: BigInt!
     id: ID!
     pool: Pool!
     swapFees: BigDecimal!
     swapVolume: BigDecimal!
+    swapsCount: BigInt!
     timestamp: Int!
+    totalLiquidity: BigDecimal!
     totalShares: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
 }
 
 input PoolSnapshot_filter {
@@ -620,6 +848,14 @@ input PoolSnapshot_filter {
     amounts_contains: [BigDecimal!]
     amounts_not: [BigDecimal!]
     amounts_not_contains: [BigDecimal!]
+    holdersCount: BigInt
+    holdersCount_gt: BigInt
+    holdersCount_gte: BigInt
+    holdersCount_in: [BigInt!]
+    holdersCount_lt: BigInt
+    holdersCount_lte: BigInt
+    holdersCount_not: BigInt
+    holdersCount_not_in: [BigInt!]
     id: ID
     id_gt: ID
     id_gte: ID
@@ -658,6 +894,14 @@ input PoolSnapshot_filter {
     swapVolume_lte: BigDecimal
     swapVolume_not: BigDecimal
     swapVolume_not_in: [BigDecimal!]
+    swapsCount: BigInt
+    swapsCount_gt: BigInt
+    swapsCount_gte: BigInt
+    swapsCount_in: [BigInt!]
+    swapsCount_lt: BigInt
+    swapsCount_lte: BigInt
+    swapsCount_not: BigInt
+    swapsCount_not_in: [BigInt!]
     timestamp: Int
     timestamp_gt: Int
     timestamp_gte: Int
@@ -666,6 +910,14 @@ input PoolSnapshot_filter {
     timestamp_lte: Int
     timestamp_not: Int
     timestamp_not_in: [Int!]
+    totalLiquidity: BigDecimal
+    totalLiquidity_gt: BigDecimal
+    totalLiquidity_gte: BigDecimal
+    totalLiquidity_in: [BigDecimal!]
+    totalLiquidity_lt: BigDecimal
+    totalLiquidity_lte: BigDecimal
+    totalLiquidity_not: BigDecimal
+    totalLiquidity_not_in: [BigDecimal!]
     totalShares: BigDecimal
     totalShares_gt: BigDecimal
     totalShares_gte: BigDecimal
@@ -674,16 +926,37 @@ input PoolSnapshot_filter {
     totalShares_lte: BigDecimal
     totalShares_not: BigDecimal
     totalShares_not_in: [BigDecimal!]
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
 }
 
 enum PoolSnapshot_orderBy {
     amounts
+    holdersCount
     id
     pool
     swapFees
     swapVolume
+    swapsCount
     timestamp
+    totalLiquidity
     totalShares
+    totalSwapFee
+    totalSwapVolume
 }
 
 type PoolToken {
@@ -699,10 +972,11 @@ type PoolToken {
         skip: Int = 0
         where: Investment_filter
     ): [Investment!]
-    name: String
+    name: String!
     poolId: Pool!
-    priceRate: BigDecimal
-    symbol: String
+    priceRate: BigDecimal!
+    symbol: String!
+    token: Token!
     weight: BigDecimal
 }
 
@@ -803,6 +1077,20 @@ input PoolToken_filter {
     symbol_not_in: [String!]
     symbol_not_starts_with: String
     symbol_starts_with: String
+    token: String
+    token_contains: String
+    token_ends_with: String
+    token_gt: String
+    token_gte: String
+    token_in: [String!]
+    token_lt: String
+    token_lte: String
+    token_not: String
+    token_not_contains: String
+    token_not_ends_with: String
+    token_not_in: [String!]
+    token_not_starts_with: String
+    token_starts_with: String
     weight: BigDecimal
     weight_gt: BigDecimal
     weight_gte: BigDecimal
@@ -824,15 +1112,8 @@ enum PoolToken_orderBy {
     poolId
     priceRate
     symbol
+    token
     weight
-}
-
-enum PoolType {
-    Element
-    LiquidityBootstrapping
-    MetaStable
-    Stable
-    Weighted
 }
 
 input Pool_filter {
@@ -894,6 +1175,14 @@ input Pool_filter {
     id_lte: ID
     id_not: ID
     id_not_in: [ID!]
+    managementFee: BigDecimal
+    managementFee_gt: BigDecimal
+    managementFee_gte: BigDecimal
+    managementFee_in: [BigDecimal!]
+    managementFee_lt: BigDecimal
+    managementFee_lte: BigDecimal
+    managementFee_not: BigDecimal
+    managementFee_not_in: [BigDecimal!]
     name: String
     name_contains: String
     name_ends_with: String
@@ -914,8 +1203,20 @@ input Pool_filter {
     owner_not: Bytes
     owner_not_contains: Bytes
     owner_not_in: [Bytes!]
-    poolType: PoolType
-    poolType_not: PoolType
+    poolType: String
+    poolType_contains: String
+    poolType_ends_with: String
+    poolType_gt: String
+    poolType_gte: String
+    poolType_in: [String!]
+    poolType_lt: String
+    poolType_lte: String
+    poolType_not: String
+    poolType_not_contains: String
+    poolType_not_ends_with: String
+    poolType_not_in: [String!]
+    poolType_not_starts_with: String
+    poolType_starts_with: String
     principalToken: Bytes
     principalToken_contains: Bytes
     principalToken_in: [Bytes!]
@@ -1048,6 +1349,7 @@ enum Pool_orderBy {
     historicalValues
     holdersCount
     id
+    managementFee
     name
     owner
     poolType
@@ -1177,6 +1479,24 @@ type Query {
     Access to subgraph metadata
     """
     _meta(block: Block_height): _Meta_
+    ampUpdate(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): AmpUpdate
+    ampUpdates(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: AmpUpdate_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: AmpUpdate_filter
+    ): [AmpUpdate!]!
     balancer(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1184,6 +1504,24 @@ type Query {
         block: Block_height
         id: ID!
     ): Balancer
+    balancerSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BalancerSnapshot
+    balancerSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BalancerSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BalancerSnapshot_filter
+    ): [BalancerSnapshot!]!
     balancers(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1393,6 +1731,13 @@ type Query {
         skip: Int = 0
         where: Swap_filter
     ): [Swap!]!
+    token(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Token
     tokenPrice(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1411,6 +1756,71 @@ type Query {
         skip: Int = 0
         where: TokenPrice_filter
     ): [TokenPrice!]!
+    tokenSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TokenSnapshot
+    tokenSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TokenSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TokenSnapshot_filter
+    ): [TokenSnapshot!]!
+    tokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Token_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Token_filter
+    ): [Token!]!
+    tradePair(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TradePair
+    tradePairSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TradePairSnapshot
+    tradePairSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TradePairSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TradePairSnapshot_filter
+    ): [TradePairSnapshot!]!
+    tradePairs(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TradePair_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TradePair_filter
+    ): [TradePair!]!
     user(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1454,6 +1864,24 @@ type Subscription {
     Access to subgraph metadata
     """
     _meta(block: Block_height): _Meta_
+    ampUpdate(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): AmpUpdate
+    ampUpdates(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: AmpUpdate_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: AmpUpdate_filter
+    ): [AmpUpdate!]!
     balancer(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1461,6 +1889,24 @@ type Subscription {
         block: Block_height
         id: ID!
     ): Balancer
+    balancerSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BalancerSnapshot
+    balancerSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BalancerSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BalancerSnapshot_filter
+    ): [BalancerSnapshot!]!
     balancers(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1670,6 +2116,13 @@ type Subscription {
         skip: Int = 0
         where: Swap_filter
     ): [Swap!]!
+    token(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): Token
     tokenPrice(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1688,6 +2141,71 @@ type Subscription {
         skip: Int = 0
         where: TokenPrice_filter
     ): [TokenPrice!]!
+    tokenSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TokenSnapshot
+    tokenSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TokenSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TokenSnapshot_filter
+    ): [TokenSnapshot!]!
+    tokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Token_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Token_filter
+    ): [Token!]!
+    tradePair(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TradePair
+    tradePairSnapshot(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): TradePairSnapshot
+    tradePairSnapshots(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TradePairSnapshot_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TradePairSnapshot_filter
+    ): [TradePairSnapshot!]!
+    tradePairs(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: TradePair_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: TradePair_filter
+    ): [TradePair!]!
     user(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1739,6 +2257,7 @@ type Swap {
     tokenOutSym: String!
     tx: Bytes!
     userAddress: User!
+    value: BigDecimal!
 }
 
 input Swap_filter {
@@ -1854,6 +2373,14 @@ input Swap_filter {
     userAddress_not_in: [String!]
     userAddress_not_starts_with: String
     userAddress_starts_with: String
+    value: BigDecimal
+    value_gt: BigDecimal
+    value_gte: BigDecimal
+    value_in: [BigDecimal!]
+    value_lt: BigDecimal
+    value_lte: BigDecimal
+    value_not: BigDecimal
+    value_not_in: [BigDecimal!]
 }
 
 enum Swap_orderBy {
@@ -1869,6 +2396,21 @@ enum Swap_orderBy {
     tokenOutSym
     tx
     userAddress
+    value
+}
+
+type Token {
+    address: String!
+    decimals: Int!
+    id: ID!
+    latestPrice: LatestPrice
+    name: String
+    symbol: String
+    totalBalanceNotional: BigDecimal!
+    totalBalanceUSD: BigDecimal!
+    totalSwapCount: BigInt!
+    totalVolumeNotional: BigDecimal!
+    totalVolumeUSD: BigDecimal!
 }
 
 type TokenPrice {
@@ -1878,8 +2420,9 @@ type TokenPrice {
     id: ID!
     poolId: Pool!
     price: BigDecimal!
+    priceUsd: BigDecimal!
     pricingAsset: Bytes!
-    timestamp: BigInt!
+    timestamp: Int!
 }
 
 input TokenPrice_filter {
@@ -1928,6 +2471,14 @@ input TokenPrice_filter {
     poolId_not_starts_with: String
     poolId_starts_with: String
     price: BigDecimal
+    priceUsd: BigDecimal
+    priceUsd_gt: BigDecimal
+    priceUsd_gte: BigDecimal
+    priceUsd_in: [BigDecimal!]
+    priceUsd_lt: BigDecimal
+    priceUsd_lte: BigDecimal
+    priceUsd_not: BigDecimal
+    priceUsd_not_in: [BigDecimal!]
     price_gt: BigDecimal
     price_gte: BigDecimal
     price_in: [BigDecimal!]
@@ -1941,14 +2492,14 @@ input TokenPrice_filter {
     pricingAsset_not: Bytes
     pricingAsset_not_contains: Bytes
     pricingAsset_not_in: [Bytes!]
-    timestamp: BigInt
-    timestamp_gt: BigInt
-    timestamp_gte: BigInt
-    timestamp_in: [BigInt!]
-    timestamp_lt: BigInt
-    timestamp_lte: BigInt
-    timestamp_not: BigInt
-    timestamp_not_in: [BigInt!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
 }
 
 enum TokenPrice_orderBy {
@@ -1958,8 +2509,372 @@ enum TokenPrice_orderBy {
     id
     poolId
     price
+    priceUsd
     pricingAsset
     timestamp
+}
+
+type TokenSnapshot {
+    id: ID!
+    timestamp: Int!
+    token: Token!
+    totalBalanceNotional: BigDecimal!
+    totalBalanceUSD: BigDecimal!
+    totalSwapCount: BigInt!
+    totalVolumeNotional: BigDecimal!
+    totalVolumeUSD: BigDecimal!
+}
+
+input TokenSnapshot_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    token: String
+    token_contains: String
+    token_ends_with: String
+    token_gt: String
+    token_gte: String
+    token_in: [String!]
+    token_lt: String
+    token_lte: String
+    token_not: String
+    token_not_contains: String
+    token_not_ends_with: String
+    token_not_in: [String!]
+    token_not_starts_with: String
+    token_starts_with: String
+    totalBalanceNotional: BigDecimal
+    totalBalanceNotional_gt: BigDecimal
+    totalBalanceNotional_gte: BigDecimal
+    totalBalanceNotional_in: [BigDecimal!]
+    totalBalanceNotional_lt: BigDecimal
+    totalBalanceNotional_lte: BigDecimal
+    totalBalanceNotional_not: BigDecimal
+    totalBalanceNotional_not_in: [BigDecimal!]
+    totalBalanceUSD: BigDecimal
+    totalBalanceUSD_gt: BigDecimal
+    totalBalanceUSD_gte: BigDecimal
+    totalBalanceUSD_in: [BigDecimal!]
+    totalBalanceUSD_lt: BigDecimal
+    totalBalanceUSD_lte: BigDecimal
+    totalBalanceUSD_not: BigDecimal
+    totalBalanceUSD_not_in: [BigDecimal!]
+    totalSwapCount: BigInt
+    totalSwapCount_gt: BigInt
+    totalSwapCount_gte: BigInt
+    totalSwapCount_in: [BigInt!]
+    totalSwapCount_lt: BigInt
+    totalSwapCount_lte: BigInt
+    totalSwapCount_not: BigInt
+    totalSwapCount_not_in: [BigInt!]
+    totalVolumeNotional: BigDecimal
+    totalVolumeNotional_gt: BigDecimal
+    totalVolumeNotional_gte: BigDecimal
+    totalVolumeNotional_in: [BigDecimal!]
+    totalVolumeNotional_lt: BigDecimal
+    totalVolumeNotional_lte: BigDecimal
+    totalVolumeNotional_not: BigDecimal
+    totalVolumeNotional_not_in: [BigDecimal!]
+    totalVolumeUSD: BigDecimal
+    totalVolumeUSD_gt: BigDecimal
+    totalVolumeUSD_gte: BigDecimal
+    totalVolumeUSD_in: [BigDecimal!]
+    totalVolumeUSD_lt: BigDecimal
+    totalVolumeUSD_lte: BigDecimal
+    totalVolumeUSD_not: BigDecimal
+    totalVolumeUSD_not_in: [BigDecimal!]
+}
+
+enum TokenSnapshot_orderBy {
+    id
+    timestamp
+    token
+    totalBalanceNotional
+    totalBalanceUSD
+    totalSwapCount
+    totalVolumeNotional
+    totalVolumeUSD
+}
+
+input Token_filter {
+    address: String
+    address_contains: String
+    address_ends_with: String
+    address_gt: String
+    address_gte: String
+    address_in: [String!]
+    address_lt: String
+    address_lte: String
+    address_not: String
+    address_not_contains: String
+    address_not_ends_with: String
+    address_not_in: [String!]
+    address_not_starts_with: String
+    address_starts_with: String
+    decimals: Int
+    decimals_gt: Int
+    decimals_gte: Int
+    decimals_in: [Int!]
+    decimals_lt: Int
+    decimals_lte: Int
+    decimals_not: Int
+    decimals_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    latestPrice: String
+    latestPrice_contains: String
+    latestPrice_ends_with: String
+    latestPrice_gt: String
+    latestPrice_gte: String
+    latestPrice_in: [String!]
+    latestPrice_lt: String
+    latestPrice_lte: String
+    latestPrice_not: String
+    latestPrice_not_contains: String
+    latestPrice_not_ends_with: String
+    latestPrice_not_in: [String!]
+    latestPrice_not_starts_with: String
+    latestPrice_starts_with: String
+    name: String
+    name_contains: String
+    name_ends_with: String
+    name_gt: String
+    name_gte: String
+    name_in: [String!]
+    name_lt: String
+    name_lte: String
+    name_not: String
+    name_not_contains: String
+    name_not_ends_with: String
+    name_not_in: [String!]
+    name_not_starts_with: String
+    name_starts_with: String
+    symbol: String
+    symbol_contains: String
+    symbol_ends_with: String
+    symbol_gt: String
+    symbol_gte: String
+    symbol_in: [String!]
+    symbol_lt: String
+    symbol_lte: String
+    symbol_not: String
+    symbol_not_contains: String
+    symbol_not_ends_with: String
+    symbol_not_in: [String!]
+    symbol_not_starts_with: String
+    symbol_starts_with: String
+    totalBalanceNotional: BigDecimal
+    totalBalanceNotional_gt: BigDecimal
+    totalBalanceNotional_gte: BigDecimal
+    totalBalanceNotional_in: [BigDecimal!]
+    totalBalanceNotional_lt: BigDecimal
+    totalBalanceNotional_lte: BigDecimal
+    totalBalanceNotional_not: BigDecimal
+    totalBalanceNotional_not_in: [BigDecimal!]
+    totalBalanceUSD: BigDecimal
+    totalBalanceUSD_gt: BigDecimal
+    totalBalanceUSD_gte: BigDecimal
+    totalBalanceUSD_in: [BigDecimal!]
+    totalBalanceUSD_lt: BigDecimal
+    totalBalanceUSD_lte: BigDecimal
+    totalBalanceUSD_not: BigDecimal
+    totalBalanceUSD_not_in: [BigDecimal!]
+    totalSwapCount: BigInt
+    totalSwapCount_gt: BigInt
+    totalSwapCount_gte: BigInt
+    totalSwapCount_in: [BigInt!]
+    totalSwapCount_lt: BigInt
+    totalSwapCount_lte: BigInt
+    totalSwapCount_not: BigInt
+    totalSwapCount_not_in: [BigInt!]
+    totalVolumeNotional: BigDecimal
+    totalVolumeNotional_gt: BigDecimal
+    totalVolumeNotional_gte: BigDecimal
+    totalVolumeNotional_in: [BigDecimal!]
+    totalVolumeNotional_lt: BigDecimal
+    totalVolumeNotional_lte: BigDecimal
+    totalVolumeNotional_not: BigDecimal
+    totalVolumeNotional_not_in: [BigDecimal!]
+    totalVolumeUSD: BigDecimal
+    totalVolumeUSD_gt: BigDecimal
+    totalVolumeUSD_gte: BigDecimal
+    totalVolumeUSD_in: [BigDecimal!]
+    totalVolumeUSD_lt: BigDecimal
+    totalVolumeUSD_lte: BigDecimal
+    totalVolumeUSD_not: BigDecimal
+    totalVolumeUSD_not_in: [BigDecimal!]
+}
+
+enum Token_orderBy {
+    address
+    decimals
+    id
+    latestPrice
+    name
+    symbol
+    totalBalanceNotional
+    totalBalanceUSD
+    totalSwapCount
+    totalVolumeNotional
+    totalVolumeUSD
+}
+
+type TradePair {
+    """
+    Token Address - Token Address
+    """
+    id: ID!
+    token0: Token!
+    token1: Token!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+}
+
+type TradePairSnapshot {
+    id: ID!
+    pair: TradePair!
+    timestamp: Int!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+}
+
+input TradePairSnapshot_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    pair: String
+    pair_contains: String
+    pair_ends_with: String
+    pair_gt: String
+    pair_gte: String
+    pair_in: [String!]
+    pair_lt: String
+    pair_lte: String
+    pair_not: String
+    pair_not_contains: String
+    pair_not_ends_with: String
+    pair_not_in: [String!]
+    pair_not_starts_with: String
+    pair_starts_with: String
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
+}
+
+enum TradePairSnapshot_orderBy {
+    id
+    pair
+    timestamp
+    totalSwapFee
+    totalSwapVolume
+}
+
+input TradePair_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    token0: String
+    token0_contains: String
+    token0_ends_with: String
+    token0_gt: String
+    token0_gte: String
+    token0_in: [String!]
+    token0_lt: String
+    token0_lte: String
+    token0_not: String
+    token0_not_contains: String
+    token0_not_ends_with: String
+    token0_not_in: [String!]
+    token0_not_starts_with: String
+    token0_starts_with: String
+    token1: String
+    token1_contains: String
+    token1_ends_with: String
+    token1_gt: String
+    token1_gte: String
+    token1_in: [String!]
+    token1_lt: String
+    token1_lte: String
+    token1_not: String
+    token1_not_contains: String
+    token1_not_ends_with: String
+    token1_not_in: [String!]
+    token1_not_starts_with: String
+    token1_starts_with: String
+    totalSwapFee: BigDecimal
+    totalSwapFee_gt: BigDecimal
+    totalSwapFee_gte: BigDecimal
+    totalSwapFee_in: [BigDecimal!]
+    totalSwapFee_lt: BigDecimal
+    totalSwapFee_lte: BigDecimal
+    totalSwapFee_not: BigDecimal
+    totalSwapFee_not_in: [BigDecimal!]
+    totalSwapVolume: BigDecimal
+    totalSwapVolume_gt: BigDecimal
+    totalSwapVolume_gte: BigDecimal
+    totalSwapVolume_in: [BigDecimal!]
+    totalSwapVolume_lt: BigDecimal
+    totalSwapVolume_lte: BigDecimal
+    totalSwapVolume_not: BigDecimal
+    totalSwapVolume_not_in: [BigDecimal!]
+}
+
+enum TradePair_orderBy {
+    id
+    token0
+    token1
+    totalSwapFee
+    totalSwapVolume
 }
 
 type User {

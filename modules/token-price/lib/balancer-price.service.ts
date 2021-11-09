@@ -43,14 +43,14 @@ export class BalancerPriceService {
         const maxTimestamp = _.max(_.flatten(ranges));
 
         const allTokenPrices = await balancerService.getAllTokenPrices({
-            where: { asset: address, timestamp_gte: `${minTimestamp}`, timestamp_lte: `${maxTimestamp}` },
+            where: { asset: address, timestamp_gte: minTimestamp, timestamp_lte: maxTimestamp },
             orderBy: TokenPrice_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
 
         for (const range of ranges) {
             const tokenPrices = allTokenPrices.filter(
-                (item) => parseInt(item.timestamp) >= range[0] && parseInt(item.timestamp) < range[1],
+                (item) => item.timestamp >= range[0] && item.timestamp < range[1],
             );
 
             if (tokenPrices.length === 0) {
@@ -62,14 +62,12 @@ export class BalancerPriceService {
             for (const timestamp of hourlyTimestamps) {
                 //find the price with the closest timestamp
                 const closest = tokenPrices.reduce((a, b) => {
-                    return Math.abs(parseInt(b.timestamp) - timestamp) < Math.abs(parseInt(a.timestamp) - timestamp)
-                        ? b
-                        : a;
+                    return Math.abs(b.timestamp - timestamp) < Math.abs(a.timestamp - timestamp) ? b : a;
                 });
 
                 //filter out any matches that are further than 5 minutes away.
                 //This can happen for periods before the token was listed or times in the future
-                if (Math.abs(timestamp - parseInt(closest.timestamp)) < fiveMinutesInSeconds) {
+                if (Math.abs(timestamp - closest.timestamp) < fiveMinutesInSeconds) {
                     const pricingAsset = coingeckoHistoricalPrices[closest.pricingAsset]?.find(
                         (price) => price.timestamp === timestamp * 1000,
                     );

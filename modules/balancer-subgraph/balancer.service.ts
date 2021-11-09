@@ -46,7 +46,7 @@ export class BalancerSubgraphService {
         }
 
         //There is only ever one
-        return balancers[0];
+        return balancers[0] as Balancer;
     }
 
     public async getTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPricesQuery> {
