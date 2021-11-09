@@ -1,12 +1,9 @@
 import { Contract, ethers } from 'ethers';
-import * as fs from 'fs';
-import * as path from 'path';
 
 const jsonRpcProvider = new ethers.providers.JsonRpcProvider('https://graph-node.beets-ftm-node.com/rpc');
 
 export class EthersService {
-    getContractAt(address: string, name: string): Contract {
-        const abi = JSON.parse(fs.readFileSync(path.join(__dirname, 'abi', `${name}.json`), 'utf8'));
+    getContractAt(address: string, abi: any): Contract {
         return new Contract(address, abi, jsonRpcProvider);
     }
 }

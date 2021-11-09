@@ -1,13 +1,14 @@
 import { Contract, utils } from 'ethers';
 import { ethersService } from '../ethers/ethers.service';
 import { fp } from '../util/numbers';
+import beetsAbi from './abi/BeethovenxToken.json';
 
 const INITIAL_MINT = fp(50_000_000);
 
 class BeetsService {
     private readonly beetsContract: Contract;
     constructor() {
-        this.beetsContract = ethersService.getContractAt(process.env.BEETS_ADDRESS!, 'BeethovenxToken');
+        this.beetsContract = ethersService.getContractAt(process.env.BEETS_ADDRESS!, beetsAbi);
     }
 
     async getCirculatingSupply() {
