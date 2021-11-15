@@ -5,21 +5,22 @@ import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { generatedGraphQlSchema } from '../../graphql_schema_generated';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { mergeResolvers } from '@graphql-tools/merge';
+import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import * as http from 'http';
+import { Express } from 'express';
 
 const context = ({ req }: ExpressContext): Context => {
-    //@ts-ignore
     return req.context;
 };
 
-export function createApolloServer() {
+export function createApolloServer(app: Express) {
     const resolversArray = loadFilesSync(path.join(__dirname, '../../**/*.resolvers.*'));
-
+    const httpServer = http.createServer(app);
     return new ApolloServer({
         typeDefs: generatedGraphQlSchema,
-        //@ts-ignore
         resolvers: mergeResolvers(resolversArray),
         context,
         introspection: true,
-        playground: true,
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
 }

@@ -261,6 +261,208 @@ enum Balancer_orderBy {
     totalSwapVolume
 }
 
+type BatchSwap {
+    id: ID!
+    routes(
+        first: Int = 100
+        orderBy: BatchSwapRoute_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BatchSwapRoute_filter
+    ): [BatchSwapRoute!]!
+    swaps(
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]!
+    timestamp: Int!
+    user: User!
+    valueUSD: BigDecimal!
+}
+
+type BatchSwapRoute {
+    batchSwap: BatchSwap!
+    id: ID!
+
+    """
+    Swaps in this route, properly ordered
+    """
+    swaps(
+        first: Int = 100
+        orderBy: Swap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: Swap_filter
+    ): [Swap!]!
+    timestamp: Int!
+    tokenAmountIn: BigDecimal!
+    tokenAmountOut: BigDecimal!
+    tokenIn: Token!
+    tokenOut: Token!
+    valueUSD: BigDecimal!
+}
+
+input BatchSwapRoute_filter {
+    batchSwap: String
+    batchSwap_contains: String
+    batchSwap_ends_with: String
+    batchSwap_gt: String
+    batchSwap_gte: String
+    batchSwap_in: [String!]
+    batchSwap_lt: String
+    batchSwap_lte: String
+    batchSwap_not: String
+    batchSwap_not_contains: String
+    batchSwap_not_ends_with: String
+    batchSwap_not_in: [String!]
+    batchSwap_not_starts_with: String
+    batchSwap_starts_with: String
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    swaps: [String!]
+    swaps_contains: [String!]
+    swaps_not: [String!]
+    swaps_not_contains: [String!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    tokenAmountIn: BigDecimal
+    tokenAmountIn_gt: BigDecimal
+    tokenAmountIn_gte: BigDecimal
+    tokenAmountIn_in: [BigDecimal!]
+    tokenAmountIn_lt: BigDecimal
+    tokenAmountIn_lte: BigDecimal
+    tokenAmountIn_not: BigDecimal
+    tokenAmountIn_not_in: [BigDecimal!]
+    tokenAmountOut: BigDecimal
+    tokenAmountOut_gt: BigDecimal
+    tokenAmountOut_gte: BigDecimal
+    tokenAmountOut_in: [BigDecimal!]
+    tokenAmountOut_lt: BigDecimal
+    tokenAmountOut_lte: BigDecimal
+    tokenAmountOut_not: BigDecimal
+    tokenAmountOut_not_in: [BigDecimal!]
+    tokenIn: String
+    tokenIn_contains: String
+    tokenIn_ends_with: String
+    tokenIn_gt: String
+    tokenIn_gte: String
+    tokenIn_in: [String!]
+    tokenIn_lt: String
+    tokenIn_lte: String
+    tokenIn_not: String
+    tokenIn_not_contains: String
+    tokenIn_not_ends_with: String
+    tokenIn_not_in: [String!]
+    tokenIn_not_starts_with: String
+    tokenIn_starts_with: String
+    tokenOut: String
+    tokenOut_contains: String
+    tokenOut_ends_with: String
+    tokenOut_gt: String
+    tokenOut_gte: String
+    tokenOut_in: [String!]
+    tokenOut_lt: String
+    tokenOut_lte: String
+    tokenOut_not: String
+    tokenOut_not_contains: String
+    tokenOut_not_ends_with: String
+    tokenOut_not_in: [String!]
+    tokenOut_not_starts_with: String
+    tokenOut_starts_with: String
+    valueUSD: BigDecimal
+    valueUSD_gt: BigDecimal
+    valueUSD_gte: BigDecimal
+    valueUSD_in: [BigDecimal!]
+    valueUSD_lt: BigDecimal
+    valueUSD_lte: BigDecimal
+    valueUSD_not: BigDecimal
+    valueUSD_not_in: [BigDecimal!]
+}
+
+enum BatchSwapRoute_orderBy {
+    batchSwap
+    id
+    swaps
+    timestamp
+    tokenAmountIn
+    tokenAmountOut
+    tokenIn
+    tokenOut
+    valueUSD
+}
+
+input BatchSwap_filter {
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    routes: [String!]
+    routes_contains: [String!]
+    routes_not: [String!]
+    routes_not_contains: [String!]
+    swaps: [String!]
+    swaps_contains: [String!]
+    swaps_not: [String!]
+    swaps_not_contains: [String!]
+    timestamp: Int
+    timestamp_gt: Int
+    timestamp_gte: Int
+    timestamp_in: [Int!]
+    timestamp_lt: Int
+    timestamp_lte: Int
+    timestamp_not: Int
+    timestamp_not_in: [Int!]
+    user: String
+    user_contains: String
+    user_ends_with: String
+    user_gt: String
+    user_gte: String
+    user_in: [String!]
+    user_lt: String
+    user_lte: String
+    user_not: String
+    user_not_contains: String
+    user_not_ends_with: String
+    user_not_in: [String!]
+    user_not_starts_with: String
+    user_starts_with: String
+    valueUSD: BigDecimal
+    valueUSD_gt: BigDecimal
+    valueUSD_gte: BigDecimal
+    valueUSD_in: [BigDecimal!]
+    valueUSD_lt: BigDecimal
+    valueUSD_lte: BigDecimal
+    valueUSD_not: BigDecimal
+    valueUSD_not_in: [BigDecimal!]
+}
+
+enum BatchSwap_orderBy {
+    id
+    routes
+    swaps
+    timestamp
+    user
+    valueUSD
+}
+
 scalar BigDecimal
 
 scalar BigInt
@@ -426,6 +628,7 @@ type JoinExit {
     tx: Bytes!
     type: InvestType!
     user: User!
+    valueUSD: BigDecimal!
 }
 
 input JoinExit_filter {
@@ -493,6 +696,14 @@ input JoinExit_filter {
     user_not_in: [String!]
     user_not_starts_with: String
     user_starts_with: String
+    valueUSD: BigDecimal
+    valueUSD_gt: BigDecimal
+    valueUSD_gte: BigDecimal
+    valueUSD_in: [BigDecimal!]
+    valueUSD_lt: BigDecimal
+    valueUSD_lte: BigDecimal
+    valueUSD_not: BigDecimal
+    valueUSD_not_in: [BigDecimal!]
 }
 
 enum JoinExit_orderBy {
@@ -504,6 +715,7 @@ enum JoinExit_orderBy {
     tx
     type
     user
+    valueUSD
 }
 
 type LatestPrice {
@@ -512,7 +724,7 @@ type LatestPrice {
     id: ID!
     poolId: Pool!
     price: BigDecimal!
-    priceUsd: BigDecimal!
+    priceUSD: BigDecimal!
     pricingAsset: Bytes!
 }
 
@@ -554,14 +766,14 @@ input LatestPrice_filter {
     poolId_not_starts_with: String
     poolId_starts_with: String
     price: BigDecimal
-    priceUsd: BigDecimal
-    priceUsd_gt: BigDecimal
-    priceUsd_gte: BigDecimal
-    priceUsd_in: [BigDecimal!]
-    priceUsd_lt: BigDecimal
-    priceUsd_lte: BigDecimal
-    priceUsd_not: BigDecimal
-    priceUsd_not_in: [BigDecimal!]
+    priceUSD: BigDecimal
+    priceUSD_gt: BigDecimal
+    priceUSD_gte: BigDecimal
+    priceUSD_in: [BigDecimal!]
+    priceUSD_lt: BigDecimal
+    priceUSD_lte: BigDecimal
+    priceUSD_not: BigDecimal
+    priceUSD_not_in: [BigDecimal!]
     price_gt: BigDecimal
     price_gte: BigDecimal
     price_in: [BigDecimal!]
@@ -583,7 +795,7 @@ enum LatestPrice_orderBy {
     id
     poolId
     price
-    priceUsd
+    priceUSD
     pricingAsset
 }
 
@@ -1533,6 +1745,42 @@ type Query {
         skip: Int = 0
         where: Balancer_filter
     ): [Balancer!]!
+    batchSwap(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BatchSwap
+    batchSwapRoute(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BatchSwapRoute
+    batchSwapRoutes(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BatchSwapRoute_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BatchSwapRoute_filter
+    ): [BatchSwapRoute!]!
+    batchSwaps(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BatchSwap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BatchSwap_filter
+    ): [BatchSwap!]!
     gradualWeightUpdate(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -1918,6 +2166,42 @@ type Subscription {
         skip: Int = 0
         where: Balancer_filter
     ): [Balancer!]!
+    batchSwap(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BatchSwap
+    batchSwapRoute(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): BatchSwapRoute
+    batchSwapRoutes(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BatchSwapRoute_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BatchSwapRoute_filter
+    ): [BatchSwapRoute!]!
+    batchSwaps(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: BatchSwap_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: BatchSwap_filter
+    ): [BatchSwap!]!
     gradualWeightUpdate(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -2257,7 +2541,7 @@ type Swap {
     tokenOutSym: String!
     tx: Bytes!
     userAddress: User!
-    value: BigDecimal!
+    valueUSD: BigDecimal!
 }
 
 input Swap_filter {
@@ -2373,14 +2657,14 @@ input Swap_filter {
     userAddress_not_in: [String!]
     userAddress_not_starts_with: String
     userAddress_starts_with: String
-    value: BigDecimal
-    value_gt: BigDecimal
-    value_gte: BigDecimal
-    value_in: [BigDecimal!]
-    value_lt: BigDecimal
-    value_lte: BigDecimal
-    value_not: BigDecimal
-    value_not_in: [BigDecimal!]
+    valueUSD: BigDecimal
+    valueUSD_gt: BigDecimal
+    valueUSD_gte: BigDecimal
+    valueUSD_in: [BigDecimal!]
+    valueUSD_lt: BigDecimal
+    valueUSD_lte: BigDecimal
+    valueUSD_not: BigDecimal
+    valueUSD_not_in: [BigDecimal!]
 }
 
 enum Swap_orderBy {
@@ -2396,7 +2680,7 @@ enum Swap_orderBy {
     tokenOutSym
     tx
     userAddress
-    value
+    valueUSD
 }
 
 type Token {
@@ -2420,7 +2704,7 @@ type TokenPrice {
     id: ID!
     poolId: Pool!
     price: BigDecimal!
-    priceUsd: BigDecimal!
+    priceUSD: BigDecimal!
     pricingAsset: Bytes!
     timestamp: Int!
 }
@@ -2471,14 +2755,14 @@ input TokenPrice_filter {
     poolId_not_starts_with: String
     poolId_starts_with: String
     price: BigDecimal
-    priceUsd: BigDecimal
-    priceUsd_gt: BigDecimal
-    priceUsd_gte: BigDecimal
-    priceUsd_in: [BigDecimal!]
-    priceUsd_lt: BigDecimal
-    priceUsd_lte: BigDecimal
-    priceUsd_not: BigDecimal
-    priceUsd_not_in: [BigDecimal!]
+    priceUSD: BigDecimal
+    priceUSD_gt: BigDecimal
+    priceUSD_gte: BigDecimal
+    priceUSD_in: [BigDecimal!]
+    priceUSD_lt: BigDecimal
+    priceUSD_lte: BigDecimal
+    priceUSD_not: BigDecimal
+    priceUSD_not_in: [BigDecimal!]
     price_gt: BigDecimal
     price_gte: BigDecimal
     price_in: [BigDecimal!]
@@ -2509,7 +2793,7 @@ enum TokenPrice_orderBy {
     id
     poolId
     price
-    priceUsd
+    priceUSD
     pricingAsset
     timestamp
 }

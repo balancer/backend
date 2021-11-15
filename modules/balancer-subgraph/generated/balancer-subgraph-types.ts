@@ -279,6 +279,213 @@ export enum Balancer_OrderBy {
     TotalSwapVolume = 'totalSwapVolume',
 }
 
+export type BatchSwap = {
+    __typename?: 'BatchSwap';
+    id: Scalars['ID'];
+    routes: Array<BatchSwapRoute>;
+    swaps: Array<Swap>;
+    timestamp: Scalars['Int'];
+    user: User;
+    valueUSD: Scalars['BigDecimal'];
+};
+
+export type BatchSwapRoutesArgs = {
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<BatchSwapRoute_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<BatchSwapRoute_Filter>;
+};
+
+export type BatchSwapSwapsArgs = {
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Swap_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<Swap_Filter>;
+};
+
+export type BatchSwapRoute = {
+    __typename?: 'BatchSwapRoute';
+    batchSwap: BatchSwap;
+    id: Scalars['ID'];
+    /** Swaps in this route, properly ordered */
+    swaps: Array<Swap>;
+    timestamp: Scalars['Int'];
+    tokenAmountIn: Scalars['BigDecimal'];
+    tokenAmountOut: Scalars['BigDecimal'];
+    tokenIn: Token;
+    tokenOut: Token;
+    valueUSD: Scalars['BigDecimal'];
+};
+
+export type BatchSwapRouteSwapsArgs = {
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Swap_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<Swap_Filter>;
+};
+
+export type BatchSwapRoute_Filter = {
+    batchSwap?: Maybe<Scalars['String']>;
+    batchSwap_contains?: Maybe<Scalars['String']>;
+    batchSwap_ends_with?: Maybe<Scalars['String']>;
+    batchSwap_gt?: Maybe<Scalars['String']>;
+    batchSwap_gte?: Maybe<Scalars['String']>;
+    batchSwap_in?: Maybe<Array<Scalars['String']>>;
+    batchSwap_lt?: Maybe<Scalars['String']>;
+    batchSwap_lte?: Maybe<Scalars['String']>;
+    batchSwap_not?: Maybe<Scalars['String']>;
+    batchSwap_not_contains?: Maybe<Scalars['String']>;
+    batchSwap_not_ends_with?: Maybe<Scalars['String']>;
+    batchSwap_not_in?: Maybe<Array<Scalars['String']>>;
+    batchSwap_not_starts_with?: Maybe<Scalars['String']>;
+    batchSwap_starts_with?: Maybe<Scalars['String']>;
+    id?: Maybe<Scalars['ID']>;
+    id_gt?: Maybe<Scalars['ID']>;
+    id_gte?: Maybe<Scalars['ID']>;
+    id_in?: Maybe<Array<Scalars['ID']>>;
+    id_lt?: Maybe<Scalars['ID']>;
+    id_lte?: Maybe<Scalars['ID']>;
+    id_not?: Maybe<Scalars['ID']>;
+    id_not_in?: Maybe<Array<Scalars['ID']>>;
+    swaps?: Maybe<Array<Scalars['String']>>;
+    swaps_contains?: Maybe<Array<Scalars['String']>>;
+    swaps_not?: Maybe<Array<Scalars['String']>>;
+    swaps_not_contains?: Maybe<Array<Scalars['String']>>;
+    timestamp?: Maybe<Scalars['Int']>;
+    timestamp_gt?: Maybe<Scalars['Int']>;
+    timestamp_gte?: Maybe<Scalars['Int']>;
+    timestamp_in?: Maybe<Array<Scalars['Int']>>;
+    timestamp_lt?: Maybe<Scalars['Int']>;
+    timestamp_lte?: Maybe<Scalars['Int']>;
+    timestamp_not?: Maybe<Scalars['Int']>;
+    timestamp_not_in?: Maybe<Array<Scalars['Int']>>;
+    tokenAmountIn?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_gt?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_gte?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    tokenAmountIn_lt?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_lte?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_not?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountIn_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    tokenAmountOut?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_gt?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_gte?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    tokenAmountOut_lt?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_lte?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_not?: Maybe<Scalars['BigDecimal']>;
+    tokenAmountOut_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    tokenIn?: Maybe<Scalars['String']>;
+    tokenIn_contains?: Maybe<Scalars['String']>;
+    tokenIn_ends_with?: Maybe<Scalars['String']>;
+    tokenIn_gt?: Maybe<Scalars['String']>;
+    tokenIn_gte?: Maybe<Scalars['String']>;
+    tokenIn_in?: Maybe<Array<Scalars['String']>>;
+    tokenIn_lt?: Maybe<Scalars['String']>;
+    tokenIn_lte?: Maybe<Scalars['String']>;
+    tokenIn_not?: Maybe<Scalars['String']>;
+    tokenIn_not_contains?: Maybe<Scalars['String']>;
+    tokenIn_not_ends_with?: Maybe<Scalars['String']>;
+    tokenIn_not_in?: Maybe<Array<Scalars['String']>>;
+    tokenIn_not_starts_with?: Maybe<Scalars['String']>;
+    tokenIn_starts_with?: Maybe<Scalars['String']>;
+    tokenOut?: Maybe<Scalars['String']>;
+    tokenOut_contains?: Maybe<Scalars['String']>;
+    tokenOut_ends_with?: Maybe<Scalars['String']>;
+    tokenOut_gt?: Maybe<Scalars['String']>;
+    tokenOut_gte?: Maybe<Scalars['String']>;
+    tokenOut_in?: Maybe<Array<Scalars['String']>>;
+    tokenOut_lt?: Maybe<Scalars['String']>;
+    tokenOut_lte?: Maybe<Scalars['String']>;
+    tokenOut_not?: Maybe<Scalars['String']>;
+    tokenOut_not_contains?: Maybe<Scalars['String']>;
+    tokenOut_not_ends_with?: Maybe<Scalars['String']>;
+    tokenOut_not_in?: Maybe<Array<Scalars['String']>>;
+    tokenOut_not_starts_with?: Maybe<Scalars['String']>;
+    tokenOut_starts_with?: Maybe<Scalars['String']>;
+    valueUSD?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    valueUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+};
+
+export enum BatchSwapRoute_OrderBy {
+    BatchSwap = 'batchSwap',
+    Id = 'id',
+    Swaps = 'swaps',
+    Timestamp = 'timestamp',
+    TokenAmountIn = 'tokenAmountIn',
+    TokenAmountOut = 'tokenAmountOut',
+    TokenIn = 'tokenIn',
+    TokenOut = 'tokenOut',
+    ValueUsd = 'valueUSD',
+}
+
+export type BatchSwap_Filter = {
+    id?: Maybe<Scalars['ID']>;
+    id_gt?: Maybe<Scalars['ID']>;
+    id_gte?: Maybe<Scalars['ID']>;
+    id_in?: Maybe<Array<Scalars['ID']>>;
+    id_lt?: Maybe<Scalars['ID']>;
+    id_lte?: Maybe<Scalars['ID']>;
+    id_not?: Maybe<Scalars['ID']>;
+    id_not_in?: Maybe<Array<Scalars['ID']>>;
+    routes?: Maybe<Array<Scalars['String']>>;
+    routes_contains?: Maybe<Array<Scalars['String']>>;
+    routes_not?: Maybe<Array<Scalars['String']>>;
+    routes_not_contains?: Maybe<Array<Scalars['String']>>;
+    swaps?: Maybe<Array<Scalars['String']>>;
+    swaps_contains?: Maybe<Array<Scalars['String']>>;
+    swaps_not?: Maybe<Array<Scalars['String']>>;
+    swaps_not_contains?: Maybe<Array<Scalars['String']>>;
+    timestamp?: Maybe<Scalars['Int']>;
+    timestamp_gt?: Maybe<Scalars['Int']>;
+    timestamp_gte?: Maybe<Scalars['Int']>;
+    timestamp_in?: Maybe<Array<Scalars['Int']>>;
+    timestamp_lt?: Maybe<Scalars['Int']>;
+    timestamp_lte?: Maybe<Scalars['Int']>;
+    timestamp_not?: Maybe<Scalars['Int']>;
+    timestamp_not_in?: Maybe<Array<Scalars['Int']>>;
+    user?: Maybe<Scalars['String']>;
+    user_contains?: Maybe<Scalars['String']>;
+    user_ends_with?: Maybe<Scalars['String']>;
+    user_gt?: Maybe<Scalars['String']>;
+    user_gte?: Maybe<Scalars['String']>;
+    user_in?: Maybe<Array<Scalars['String']>>;
+    user_lt?: Maybe<Scalars['String']>;
+    user_lte?: Maybe<Scalars['String']>;
+    user_not?: Maybe<Scalars['String']>;
+    user_not_contains?: Maybe<Scalars['String']>;
+    user_not_ends_with?: Maybe<Scalars['String']>;
+    user_not_in?: Maybe<Array<Scalars['String']>>;
+    user_not_starts_with?: Maybe<Scalars['String']>;
+    user_starts_with?: Maybe<Scalars['String']>;
+    valueUSD?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    valueUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+};
+
+export enum BatchSwap_OrderBy {
+    Id = 'id',
+    Routes = 'routes',
+    Swaps = 'swaps',
+    Timestamp = 'timestamp',
+    User = 'user',
+    ValueUsd = 'valueUSD',
+}
+
 export type Block_Height = {
     hash?: Maybe<Scalars['Bytes']>;
     number?: Maybe<Scalars['Int']>;
@@ -441,6 +648,7 @@ export type JoinExit = {
     tx: Scalars['Bytes'];
     type: InvestType;
     user: User;
+    valueUSD: Scalars['BigDecimal'];
 };
 
 export type JoinExit_Filter = {
@@ -508,6 +716,14 @@ export type JoinExit_Filter = {
     user_not_in?: Maybe<Array<Scalars['String']>>;
     user_not_starts_with?: Maybe<Scalars['String']>;
     user_starts_with?: Maybe<Scalars['String']>;
+    valueUSD?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    valueUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum JoinExit_OrderBy {
@@ -519,6 +735,7 @@ export enum JoinExit_OrderBy {
     Tx = 'tx',
     Type = 'type',
     User = 'user',
+    ValueUsd = 'valueUSD',
 }
 
 export type LatestPrice = {
@@ -528,7 +745,7 @@ export type LatestPrice = {
     id: Scalars['ID'];
     poolId: Pool;
     price: Scalars['BigDecimal'];
-    priceUsd: Scalars['BigDecimal'];
+    priceUSD: Scalars['BigDecimal'];
     pricingAsset: Scalars['Bytes'];
 };
 
@@ -570,14 +787,14 @@ export type LatestPrice_Filter = {
     poolId_not_starts_with?: Maybe<Scalars['String']>;
     poolId_starts_with?: Maybe<Scalars['String']>;
     price?: Maybe<Scalars['BigDecimal']>;
-    priceUsd?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_gt?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_gte?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    priceUsd_lt?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_lte?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_not?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    priceUSD?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    priceUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_not?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
     price_gt?: Maybe<Scalars['BigDecimal']>;
     price_gte?: Maybe<Scalars['BigDecimal']>;
     price_in?: Maybe<Array<Scalars['BigDecimal']>>;
@@ -599,7 +816,7 @@ export enum LatestPrice_OrderBy {
     Id = 'id',
     PoolId = 'poolId',
     Price = 'price',
-    PriceUsd = 'priceUsd',
+    PriceUsd = 'priceUSD',
     PricingAsset = 'pricingAsset',
 }
 
@@ -1520,6 +1737,10 @@ export type Query = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
+    batchSwap?: Maybe<BatchSwap>;
+    batchSwapRoute?: Maybe<BatchSwapRoute>;
+    batchSwapRoutes: Array<BatchSwapRoute>;
+    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -1602,6 +1823,34 @@ export type QueryBalancersArgs = {
     orderDirection?: Maybe<OrderDirection>;
     skip?: Maybe<Scalars['Int']>;
     where?: Maybe<Balancer_Filter>;
+};
+
+export type QueryBatchSwapArgs = {
+    block?: Maybe<Block_Height>;
+    id: Scalars['ID'];
+};
+
+export type QueryBatchSwapRouteArgs = {
+    block?: Maybe<Block_Height>;
+    id: Scalars['ID'];
+};
+
+export type QueryBatchSwapRoutesArgs = {
+    block?: Maybe<Block_Height>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<BatchSwapRoute_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<BatchSwapRoute_Filter>;
+};
+
+export type QueryBatchSwapsArgs = {
+    block?: Maybe<Block_Height>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<BatchSwap_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<BatchSwap_Filter>;
 };
 
 export type QueryGradualWeightUpdateArgs = {
@@ -1866,6 +2115,10 @@ export type Subscription = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
+    batchSwap?: Maybe<BatchSwap>;
+    batchSwapRoute?: Maybe<BatchSwapRoute>;
+    batchSwapRoutes: Array<BatchSwapRoute>;
+    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -1948,6 +2201,34 @@ export type SubscriptionBalancersArgs = {
     orderDirection?: Maybe<OrderDirection>;
     skip?: Maybe<Scalars['Int']>;
     where?: Maybe<Balancer_Filter>;
+};
+
+export type SubscriptionBatchSwapArgs = {
+    block?: Maybe<Block_Height>;
+    id: Scalars['ID'];
+};
+
+export type SubscriptionBatchSwapRouteArgs = {
+    block?: Maybe<Block_Height>;
+    id: Scalars['ID'];
+};
+
+export type SubscriptionBatchSwapRoutesArgs = {
+    block?: Maybe<Block_Height>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<BatchSwapRoute_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<BatchSwapRoute_Filter>;
+};
+
+export type SubscriptionBatchSwapsArgs = {
+    block?: Maybe<Block_Height>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<BatchSwap_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<BatchSwap_Filter>;
 };
 
 export type SubscriptionGradualWeightUpdateArgs = {
@@ -2216,7 +2497,7 @@ export type Swap = {
     tokenOutSym: Scalars['String'];
     tx: Scalars['Bytes'];
     userAddress: User;
-    value: Scalars['BigDecimal'];
+    valueUSD: Scalars['BigDecimal'];
 };
 
 export type Swap_Filter = {
@@ -2332,14 +2613,14 @@ export type Swap_Filter = {
     userAddress_not_in?: Maybe<Array<Scalars['String']>>;
     userAddress_not_starts_with?: Maybe<Scalars['String']>;
     userAddress_starts_with?: Maybe<Scalars['String']>;
-    value?: Maybe<Scalars['BigDecimal']>;
-    value_gt?: Maybe<Scalars['BigDecimal']>;
-    value_gte?: Maybe<Scalars['BigDecimal']>;
-    value_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    value_lt?: Maybe<Scalars['BigDecimal']>;
-    value_lte?: Maybe<Scalars['BigDecimal']>;
-    value_not?: Maybe<Scalars['BigDecimal']>;
-    value_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    valueUSD?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    valueUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not?: Maybe<Scalars['BigDecimal']>;
+    valueUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum Swap_OrderBy {
@@ -2355,7 +2636,7 @@ export enum Swap_OrderBy {
     TokenOutSym = 'tokenOutSym',
     Tx = 'tx',
     UserAddress = 'userAddress',
-    Value = 'value',
+    ValueUsd = 'valueUSD',
 }
 
 export type Token = {
@@ -2381,7 +2662,7 @@ export type TokenPrice = {
     id: Scalars['ID'];
     poolId: Pool;
     price: Scalars['BigDecimal'];
-    priceUsd: Scalars['BigDecimal'];
+    priceUSD: Scalars['BigDecimal'];
     pricingAsset: Scalars['Bytes'];
     timestamp: Scalars['Int'];
 };
@@ -2432,14 +2713,14 @@ export type TokenPrice_Filter = {
     poolId_not_starts_with?: Maybe<Scalars['String']>;
     poolId_starts_with?: Maybe<Scalars['String']>;
     price?: Maybe<Scalars['BigDecimal']>;
-    priceUsd?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_gt?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_gte?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    priceUsd_lt?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_lte?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_not?: Maybe<Scalars['BigDecimal']>;
-    priceUsd_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    priceUSD?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_gt?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_gte?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    priceUSD_lt?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_lte?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_not?: Maybe<Scalars['BigDecimal']>;
+    priceUSD_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
     price_gt?: Maybe<Scalars['BigDecimal']>;
     price_gte?: Maybe<Scalars['BigDecimal']>;
     price_in?: Maybe<Array<Scalars['BigDecimal']>>;
@@ -2470,7 +2751,7 @@ export enum TokenPrice_OrderBy {
     Id = 'id',
     PoolId = 'poolId',
     Price = 'price',
-    PriceUsd = 'priceUsd',
+    PriceUsd = 'priceUSD',
     PricingAsset = 'pricingAsset',
     Timestamp = 'timestamp',
 }
