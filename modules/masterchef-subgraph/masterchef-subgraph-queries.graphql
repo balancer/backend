@@ -31,10 +31,6 @@ fragment FarmUser on User {
     }
 }
 
-query Foo {
-
-}
-
 query Masterchefs(
     $skip: Int
     $first: Int
