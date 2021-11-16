@@ -7,7 +7,7 @@ import { accountMiddleware } from './app/middleware/accountMiddleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
-import { generatedGraphQlSchema } from './graphql_schema_generated';
+import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 
 // const app = createApp();
@@ -29,7 +29,7 @@ async function startServer() {
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
         resolvers: resolvers,
-        typeDefs: generatedGraphQlSchema,
+        typeDefs: schema,
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
     await server.start();

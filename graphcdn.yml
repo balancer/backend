@@ -1,4 +1,4 @@
-schema: ./schema.ts
+schema: ./graphql_schema_generated.ts
 passThroughOnly: false
 rootTypeNames:
   query: Query
