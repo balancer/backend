@@ -6,7 +6,7 @@ import { contextMiddleware } from './app/middleware/contextMiddleware';
 import { accountMiddleware } from './app/middleware/accountMiddleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 
@@ -18,7 +18,6 @@ import { resolvers } from './app/resolvers';
 // });
 async function startServer() {
     const app = createExpressApp();
-
     app.use(json({ limit: '1mb' }));
     app.use(corsMiddleware);
     app.use(contextMiddleware);
@@ -30,7 +29,8 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: resolvers,
         typeDefs: schema,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ApolloServerPluginLandingPageGraphQLPlayground()],
+        context: ({ req }) => req.context,
     });
     await server.start();
     server.applyMiddleware({ app });
