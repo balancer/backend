@@ -1,4 +1,4 @@
-schema: null
+schema: ./schema.ts
 passThroughOnly: false
 rootTypeNames:
   query: Query
