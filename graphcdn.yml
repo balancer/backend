@@ -1,0 +1,13 @@
+schema: null
+passThroughOnly: false
+rootTypeNames:
+  query: Query
+  mutation: Mutation
+rules:
+  - types:
+      - Query
+    maxAge: 600
+    swr: 600
+    description: Cache everything (default)
+name: beets-backend
+originUrl: 'https://eu-backend.beets-ftm-node.com/graphql'
