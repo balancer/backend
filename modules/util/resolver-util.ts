@@ -1,4 +1,5 @@
 import { Context } from '../../app/Context';
+import { env } from '../../app/env';
 
 export function getRequiredAccountAddress(context: Context) {
     if (context.accountAddress === null) {
@@ -6,4 +7,10 @@ export function getRequiredAccountAddress(context: Context) {
     }
 
     return context.accountAddress;
+}
+
+export function isAdminRoute(context: Context) {
+    if (context.adminApiKey === null || context.adminApiKey !== env.ADMIN_API_KEY) {
+        throw new Error('Missing or invalid admin api key');
+    }
 }

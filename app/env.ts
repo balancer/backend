@@ -20,6 +20,10 @@ export const schema = {
     BEETS_ADDRESS: String,
     SUBGRAPH_START_DATE: String,
     BEETS_BAR_SUBGRAPH: String,
+    FBEETS_ADDRESS: String,
+    FBEETS_POOL_ID: String,
+    FBEETS_FARM_ID: String,
+    ADMIN_API_KEY: String,
 };
 
 export const env: Env = load(schema, {

@@ -1,16 +1,23 @@
-query GetBeetsBar($id: ID!) {
-    bar(id: $id) {
+query GetBeetsBar($id: ID!, $block: Block_height) {
+    bar(id: $id, block: $block) {
         ...BeetsBar
     }
 }
 
-query BeetsBarUsers($skip: Int
+query GetBeetsBarUser($id: ID!, $block: Block_height) {
+    user(id: $id, block: $block) {
+        ...BeetsBarUser
+    }
+}
+
+query BeetsBarUsers(
+    $skip: Int
     $first: Int
     $orderBy: User_orderBy
     $orderDirection: OrderDirection
     $where: User_filter
-    $block: Block_height) {
-
+    $block: Block_height
+) {
     users(
         skip: $skip
         first: $first
@@ -49,4 +56,20 @@ fragment BeetsBarUser on User {
     vestingTokenHarvested
     vestingTokenIn
     vestingTokenOut
+}
+
+query BeetsBarPortfolioData($barId: ID!, $userAddress: ID!, $previousBlockNumber: Int!) {
+    beetsBar: bar(id: $barId) {
+        ...BeetsBar
+    }
+    previousBeetsBar: bar(id: $barId, block: { number: $previousBlockNumber }) {
+        ...BeetsBar
+    }
+
+    beetsBarUser: user(id: $userAddress) {
+        ...BeetsBarUser
+    }
+    previousBeetsBarUser: user(id: $userAddress, block: { number: $previousBlockNumber }) {
+        ...BeetsBarUser
+    }
 }

@@ -417,6 +417,7 @@ export enum _SubgraphErrorPolicy_ {
 
 export type GetBeetsBarQueryVariables = Exact<{
     id: Scalars['ID'];
+    block?: Maybe<Block_Height>;
 }>;
 
 export type GetBeetsBarQuery = {
@@ -438,6 +439,29 @@ export type GetBeetsBarQuery = {
               totalSupply: string;
               vestingToken: string;
               vestingTokenStaked: string;
+          }
+        | null
+        | undefined;
+};
+
+export type GetBeetsBarUserQueryVariables = Exact<{
+    id: Scalars['ID'];
+    block?: Maybe<Block_Height>;
+}>;
+
+export type GetBeetsBarUserQuery = {
+    __typename?: 'Query';
+    user?:
+        | {
+              __typename?: 'User';
+              id: string;
+              address: string;
+              block: string;
+              fBeets: string;
+              timestamp: string;
+              vestingTokenHarvested: string;
+              vestingTokenIn: string;
+              vestingTokenOut: string;
           }
         | null
         | undefined;
@@ -497,6 +521,84 @@ export type BeetsBarUserFragment = {
     vestingTokenOut: string;
 };
 
+export type BeetsBarPortfolioDataQueryVariables = Exact<{
+    barId: Scalars['ID'];
+    userAddress: Scalars['ID'];
+    previousBlockNumber: Scalars['Int'];
+}>;
+
+export type BeetsBarPortfolioDataQuery = {
+    __typename?: 'Query';
+    beetsBar?:
+        | {
+              __typename?: 'Bar';
+              id: string;
+              address: string;
+              block: string;
+              decimals: number;
+              fBeetsBurned: string;
+              fBeetsMinted: string;
+              name: string;
+              ratio: string;
+              sharedVestingTokenRevenue: string;
+              symbol: string;
+              timestamp: string;
+              totalSupply: string;
+              vestingToken: string;
+              vestingTokenStaked: string;
+          }
+        | null
+        | undefined;
+    previousBeetsBar?:
+        | {
+              __typename?: 'Bar';
+              id: string;
+              address: string;
+              block: string;
+              decimals: number;
+              fBeetsBurned: string;
+              fBeetsMinted: string;
+              name: string;
+              ratio: string;
+              sharedVestingTokenRevenue: string;
+              symbol: string;
+              timestamp: string;
+              totalSupply: string;
+              vestingToken: string;
+              vestingTokenStaked: string;
+          }
+        | null
+        | undefined;
+    beetsBarUser?:
+        | {
+              __typename?: 'User';
+              id: string;
+              address: string;
+              block: string;
+              fBeets: string;
+              timestamp: string;
+              vestingTokenHarvested: string;
+              vestingTokenIn: string;
+              vestingTokenOut: string;
+          }
+        | null
+        | undefined;
+    previousBeetsBarUser?:
+        | {
+              __typename?: 'User';
+              id: string;
+              address: string;
+              block: string;
+              fBeets: string;
+              timestamp: string;
+              vestingTokenHarvested: string;
+              vestingTokenIn: string;
+              vestingTokenOut: string;
+          }
+        | null
+        | undefined;
+};
+
 export const BeetsBarFragmentDoc = gql`
     fragment BeetsBar on Bar {
         id
@@ -528,12 +630,20 @@ export const BeetsBarUserFragmentDoc = gql`
     }
 `;
 export const GetBeetsBarDocument = gql`
-    query GetBeetsBar($id: ID!) {
-        bar(id: $id) {
+    query GetBeetsBar($id: ID!, $block: Block_height) {
+        bar(id: $id, block: $block) {
             ...BeetsBar
         }
     }
     ${BeetsBarFragmentDoc}
+`;
+export const GetBeetsBarUserDocument = gql`
+    query GetBeetsBarUser($id: ID!, $block: Block_height) {
+        user(id: $id, block: $block) {
+            ...BeetsBarUser
+        }
+    }
+    ${BeetsBarUserFragmentDoc}
 `;
 export const BeetsBarUsersDocument = gql`
     query BeetsBarUsers(
@@ -555,6 +665,24 @@ export const BeetsBarUsersDocument = gql`
             ...BeetsBarUser
         }
     }
+    ${BeetsBarUserFragmentDoc}
+`;
+export const BeetsBarPortfolioDataDocument = gql`
+    query BeetsBarPortfolioData($barId: ID!, $userAddress: ID!, $previousBlockNumber: Int!) {
+        beetsBar: bar(id: $barId) {
+            ...BeetsBar
+        }
+        previousBeetsBar: bar(id: $barId, block: { number: $previousBlockNumber }) {
+            ...BeetsBar
+        }
+        beetsBarUser: user(id: $userAddress) {
+            ...BeetsBarUser
+        }
+        previousBeetsBarUser: user(id: $userAddress, block: { number: $previousBlockNumber }) {
+            ...BeetsBarUser
+        }
+    }
+    ${BeetsBarFragmentDoc}
     ${BeetsBarUserFragmentDoc}
 `;
 
@@ -580,6 +708,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                 'GetBeetsBar',
             );
         },
+        GetBeetsBarUser(
+            variables: GetBeetsBarUserQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<GetBeetsBarUserQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<GetBeetsBarUserQuery>(GetBeetsBarUserDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'GetBeetsBarUser',
+            );
+        },
         BeetsBarUsers(
             variables?: BeetsBarUsersQueryVariables,
             requestHeaders?: Dom.RequestInit['headers'],
@@ -591,6 +732,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BeetsBarUsers',
+            );
+        },
+        BeetsBarPortfolioData(
+            variables: BeetsBarPortfolioDataQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BeetsBarPortfolioDataQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BeetsBarPortfolioDataQuery>(BeetsBarPortfolioDataDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BeetsBarPortfolioData',
             );
         },
     };
