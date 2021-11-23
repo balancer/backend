@@ -2,7 +2,7 @@ import { ApolloServer } from 'apollo-server-express';
 import path from 'path';
 import { Context } from '../Context';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
-import { generatedGraphQlSchema } from '../../graphql_schema_generated';
+import { schema } from '../../graphql_schema_generated';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { mergeResolvers } from '@graphql-tools/merge';
 
@@ -15,7 +15,7 @@ export function createApolloServer() {
     const resolversArray = loadFilesSync(path.join(__dirname, '../../**/*.resolvers.*'));
 
     return new ApolloServer({
-        typeDefs: generatedGraphQlSchema,
+        typeDefs: schema,
         //@ts-ignore
         resolvers: mergeResolvers(resolversArray),
         context,
