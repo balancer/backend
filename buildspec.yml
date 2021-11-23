@@ -10,8 +10,8 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing to graph cdn
-      - npx graphcdn push
+#      - echo Pushing to graph cdn
+#      - npx graphcdn push
 cache:
   paths:
     - 'node_modules/**/*'

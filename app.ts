@@ -9,6 +9,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
+import { scheduleCronJobs } from './app/scheduleCronJobs';
 
 // const app = createApp();
 // loadRoutes(app);
@@ -34,6 +35,9 @@ async function startServer() {
     });
     await server.start();
     server.applyMiddleware({ app });
+
+    scheduleCronJobs();
+
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }

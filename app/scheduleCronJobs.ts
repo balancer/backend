@@ -25,4 +25,5 @@ export function scheduleCronJobs() {
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
+    console.log('scheduled cron jobs');
 }
