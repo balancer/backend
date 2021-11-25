@@ -9,7 +9,7 @@ import {
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmUserFragment } from '../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BigNumber } from 'ethers';
-import { fromFp } from '../util/numbers';
+import { bn, fromFp } from '../util/numbers';
 import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
@@ -362,7 +362,7 @@ class PortfolioService {
         }
 
         const userFbeetsFarm = userFarms.find((userFarm) => userFarm.pool?.pair === env.FBEETS_ADDRESS);
-        const userStakedFbeets = parseFloat(userFbeetsFarm?.amount || '0');
+        const userStakedFbeets = fromFp(userFbeetsFarm?.amount || '0').toNumber();
         const userFbeets = parseFloat(beetsBarUser?.fBeets || '0');
 
         return (userStakedFbeets + userFbeets) * parseFloat(beetsBar.ratio);
