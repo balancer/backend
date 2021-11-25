@@ -4,6 +4,7 @@ import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
 import { balancerService } from '../balancer-subgraph/balancer.service';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 
 const resolvers: Resolvers = {
     Query: {
@@ -36,6 +37,17 @@ const resolvers: Resolvers = {
             await balancerService.clearCacheAtBlock(block);
             await masterchefService.clearCacheAtBlock(block);
             await beetsBarService.clearCacheAtBlock(block);
+
+            return true;
+        },
+        clearCachedPools: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            const blocks = await blocksSubgraphService.getDailyBlocks(30);
+
+            for (const block of blocks) {
+                await balancerService.clearPoolsAtBlock(parseInt(block.number));
+            }
 
             return true;
         },

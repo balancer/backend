@@ -129,6 +129,10 @@ export class BalancerSubgraphService {
         await subgraphPurgeCacheKeyAtBlock(ALL_JOIN_EXITS_CACHE_KEY, block);
     }
 
+    public async clearPoolsAtBlock(block: number) {
+        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
+    }
+
     private get sdk() {
         return getSdk(this.client);
     }
