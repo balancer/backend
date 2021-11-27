@@ -3348,6 +3348,7 @@ export type BalancerTokenPricesQuery = {
         price: string;
         block: string;
         timestamp: number;
+        priceUSD: string;
         poolId: { __typename?: 'Pool'; id: string };
     }>;
 };
@@ -3361,6 +3362,7 @@ export type BalancerTokenPriceFragment = {
     price: string;
     block: string;
     timestamp: number;
+    priceUSD: string;
     poolId: { __typename?: 'Pool'; id: string };
 };
 
@@ -3724,6 +3726,7 @@ export const BalancerTokenPriceFragmentDoc = gql`
         price
         block
         timestamp
+        priceUSD
     }
 `;
 export const BalancerPoolTokenFragmentDoc = gql`

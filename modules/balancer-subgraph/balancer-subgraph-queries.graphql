@@ -89,6 +89,7 @@ fragment BalancerTokenPrice on TokenPrice {
     price
     block
     timestamp
+    priceUSD
 }
 
 fragment BalancerPool on Pool {
@@ -131,12 +132,14 @@ query BalancerPools(
     $where: Pool_filter
     $block: Block_height
 ) {
-    pools(skip: $skip
+    pools(
+        skip: $skip
         first: $first
         orderBy: $orderBy
         orderDirection: $orderDirection
         where: $where
-        block: $block) {
+        block: $block
+    ) {
         ...BalancerPool
     }
 }
@@ -272,14 +275,14 @@ query BalancePortfolioData($id: ID!, $previousBlockNumber: Int!) {
     user(id: $id) {
         ...BalancerUser
     }
-    pools(first: 1000, where: {totalShares_gt: "0"}) {
+    pools(first: 1000, where: { totalShares_gt: "0" }) {
         ...BalancerPool
     }
 
-    previousUser: user(id: $id, block: {number: $previousBlockNumber}) {
+    previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
         ...BalancerUser
     }
-    previousPools: pools(first: 1000, where: {totalShares_gt: "0"}, block: {number: $previousBlockNumber}) {
+    previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
         ...BalancerPool
     }
 }
