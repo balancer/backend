@@ -20,7 +20,7 @@ export class BalancerPriceService {
 
             if (tokenPrice) {
                 balancerTokenPrices[address] = {
-                    usd: (coingeckoPrices[tokenPrice.pricingAsset].usd || 0) * parseFloat(tokenPrice.price),
+                    usd: (coingeckoPrices[tokenPrice.pricingAsset]?.usd || 0) * parseFloat(tokenPrice.price),
                 };
             }
         }

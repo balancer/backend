@@ -3,6 +3,10 @@ extend type Query {
     tokenPriceGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
 }
 
+extend type Mutation {
+    reloadTokenPrices: Boolean
+}
+
 type GqlTokenPrice {
     address: String!
     price: Float!
