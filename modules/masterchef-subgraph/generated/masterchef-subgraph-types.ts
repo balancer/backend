@@ -581,12 +581,12 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type MasterchefUsersQueryVariables = Exact<{
-    skip?: Maybe<Scalars['Int']>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<User_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    where?: Maybe<User_Filter>;
-    block?: Maybe<Block_Height>;
+    skip?: InputMaybe<Scalars['Int']>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<User_Filter>;
+    block?: InputMaybe<Block_Height>;
 }>;
 
 export type MasterchefUsersQuery = {
@@ -615,12 +615,12 @@ export type FarmUserFragment = {
 };
 
 export type MasterchefsQueryVariables = Exact<{
-    skip?: Maybe<Scalars['Int']>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<MasterChef_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    where?: Maybe<MasterChef_Filter>;
-    block?: Maybe<Block_Height>;
+    skip?: InputMaybe<Scalars['Int']>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<MasterChef_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<MasterChef_Filter>;
+    block?: InputMaybe<Block_Height>;
 }>;
 
 export type MasterchefsQuery = {
@@ -637,12 +637,12 @@ export type MasterchefsQuery = {
 };
 
 export type MasterchefFarmsQueryVariables = Exact<{
-    skip?: Maybe<Scalars['Int']>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<Pool_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    where?: Maybe<Pool_Filter>;
-    block?: Maybe<Block_Height>;
+    skip?: InputMaybe<Scalars['Int']>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<Pool_Filter>;
+    block?: InputMaybe<Block_Height>;
 }>;
 
 export type MasterchefFarmsQuery = {

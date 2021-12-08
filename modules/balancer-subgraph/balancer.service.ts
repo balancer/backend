@@ -16,16 +16,12 @@ import {
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
     BalancerUserFragment,
-    BalancerUserQuery,
-    BalancerUserQueryVariables,
     BalancerUsersQueryVariables,
     getSdk,
 } from './generated/balancer-subgraph-types';
 import { env } from '../../app/env';
 import _ from 'lodash';
-import { subgraphLoadAll, subgraphLoadAllAtBlock } from '../util/subgraph-util';
-import { cache } from '../cache/cache';
-import { thirtyDaysInSeconds } from '../util/time';
+import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -125,6 +121,16 @@ export class BalancerSubgraphService {
             block,
             ALL_JOIN_EXITS_CACHE_KEY,
         );
+    }
+
+    public async clearCacheAtBlock(block: number) {
+        await subgraphPurgeCacheKeyAtBlock(ALL_USERS_CACHE_KEY, block);
+        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
+        await subgraphPurgeCacheKeyAtBlock(ALL_JOIN_EXITS_CACHE_KEY, block);
+    }
+
+    public async clearPoolsAtBlock(block: number) {
+        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
     }
 
     private get sdk() {

@@ -47,3 +47,7 @@ export async function subgraphLoadAllAtBlock<T>(
 
     return results;
 }
+
+export async function subgraphPurgeCacheKeyAtBlock(cacheKey: string, block: number): Promise<number> {
+    return cache.deleteKey(`${cacheKey}_${block}`);
+}

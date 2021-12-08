@@ -9,15 +9,18 @@ import {
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmUserFragment } from '../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BigNumber } from 'ethers';
-import { fromFp } from '../util/numbers';
+import { bn, fromFp } from '../util/numbers';
 import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
 import moment from 'moment-timezone';
-import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
+import { GqlBalancerPool, GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
+import { env } from '../../app/env';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 
 class PortfolioService {
     constructor() {}
@@ -32,6 +35,8 @@ class PortfolioService {
             address,
             previousBlockNumber: parseInt(previousBlock.number),
         });
+        const { beetsBarUser, previousBeetsBarUser, beetsBar, previousBeetsBar } =
+            await beetsBarService.getPortfolioData(address, parseInt(previousBlock.number));
         const tokenPrices = await tokenPriceService.getTokenPrices();
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
@@ -60,6 +65,10 @@ class PortfolioService {
             previousFarmUsers,
             tokenPrices,
             previousTokenPrices,
+            beetsBar,
+            previousBeetsBar,
+            beetsBarUser,
+            previousBeetsBarUser,
         );
         const tokens = this.tokensFromUserPoolData(poolData);
 
@@ -95,6 +104,10 @@ class PortfolioService {
                 previousBlock.timestamp,
                 historicalTokenPrices,
             );
+            const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
+            const previousBeetsBar = await beetsBarService.getBeetsBar(parseInt(previousBlock.number));
+            const beetsBarUser = await beetsBarService.getUserAtBlock(address, blockNumber);
+            const previousBeetsBarUser = await beetsBarService.getUserAtBlock(address, parseInt(previousBlock.number));
             //const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
 
             if (user && previousUser) {
@@ -109,6 +122,10 @@ class PortfolioService {
                     previousFarmUsers,
                     tokenPrices,
                     previousTokenPrices,
+                    beetsBar,
+                    previousBeetsBar,
+                    beetsBarUser,
+                    previousBeetsBarUser,
                 );
                 const tokens = this.tokensFromUserPoolData(poolData);
                 //const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
@@ -143,6 +160,10 @@ class PortfolioService {
         previousUserFarms: FarmUserFragment[],
         tokenPrices: TokenPrices,
         previousTokenPrices: TokenPrices,
+        beetsBar: BeetsBarFragment,
+        previousBeetsBar: BeetsBarFragment,
+        beetsBarUser: BeetsBarUserFragment | null,
+        previousBeetsBarUser: BeetsBarUserFragment | null,
     ): UserPoolData[] {
         const userPoolData: Omit<UserPoolData, 'percentOfPortfolio'>[] = [];
 
@@ -151,12 +172,14 @@ class PortfolioService {
             const previousPool = previousPools.find((previousPool) => previousPool.id === pool.id) || pool;
 
             const { userNumShares, userPercentShare, userTotalValue, userTokens, pricePerShare } =
-                this.generatePoolIntermediates(pool, balancerUser, userFarms, tokenPrices);
+                this.generatePoolIntermediates(pool, balancerUser, userFarms, tokenPrices, beetsBar, beetsBarUser);
             const previous = this.generatePoolIntermediates(
                 previousPool,
                 previousBalancerUser,
                 previousUserFarms,
                 previousTokenPrices,
+                previousBeetsBar,
+                previousBeetsBarUser,
             );
 
             const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
@@ -196,6 +219,29 @@ class PortfolioService {
             ...pool,
             percentOfPortfolio: pool.totalValue / totalValue,
         }));
+    }
+
+    public async getCachedPools(): Promise<GqlBalancerPool[]> {
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+        let balancePools: GqlBalancerPool[] = [];
+
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const block = blocks[i];
+            const blockNumber = parseInt(block.number);
+
+            const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
+            balancePools = [
+                ...balancePools,
+                ...pools.map((pool) => ({
+                    ...pool,
+                    __typename: 'GqlBalancerPool' as const,
+                    block: block.number,
+                    timestamp: block.timestamp,
+                })),
+            ];
+        }
+
+        return balancePools;
     }
 
     private mapPoolTokenToUserPoolTokenData(
@@ -272,11 +318,16 @@ class PortfolioService {
         balancerUser: BalancerUserFragment,
         userFarms: FarmUserFragment[],
         tokenPrices: TokenPrices,
+        beetsBar: BeetsBarFragment,
+        beetsBarUser: BeetsBarUserFragment | null,
     ) {
+        const beetsBarSharesForPool = this.getUserBeetsBarSharesForPool(pool, userFarms, beetsBar, beetsBarUser);
         const sharesOwned = balancerUser.sharesOwned?.find((shares) => shares.poolId.id === pool.id);
         const userFarm = userFarms.find((userFarm) => userFarm.pool?.pair === pool.address);
         const userNumShares =
-            parseFloat(sharesOwned?.balance || '0') + fromFp(BigNumber.from(userFarm?.amount || 0)).toNumber();
+            parseFloat(sharesOwned?.balance || '0') +
+            fromFp(BigNumber.from(userFarm?.amount || 0)).toNumber() +
+            beetsBarSharesForPool;
         const poolTotalShares = parseFloat(pool.totalShares);
         const poolTotalValue = this.getPoolValue(pool, tokenPrices);
         const userPercentShare = userNumShares / poolTotalShares;
@@ -298,6 +349,23 @@ class PortfolioService {
             poolTotalValue,
             poolTotalShares,
         };
+    }
+
+    private getUserBeetsBarSharesForPool(
+        pool: BalancerPoolFragment,
+        userFarms: FarmUserFragment[],
+        beetsBar: BeetsBarFragment,
+        beetsBarUser: BeetsBarUserFragment | null,
+    ): number {
+        if (pool.id !== env.FBEETS_POOL_ID) {
+            return 0;
+        }
+
+        const userFbeetsFarm = userFarms.find((userFarm) => userFarm.pool?.pair === env.FBEETS_ADDRESS);
+        const userStakedFbeets = fromFp(userFbeetsFarm?.amount || '0').toNumber();
+        const userFbeets = parseFloat(beetsBarUser?.fBeets || '0');
+
+        return (userStakedFbeets + userFbeets) * parseFloat(beetsBar.ratio);
     }
 
     private getPoolValue(pool: BalancerPoolFragment, tokenPrices: TokenPrices): number {

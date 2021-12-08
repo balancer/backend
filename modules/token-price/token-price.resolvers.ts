@@ -1,6 +1,7 @@
 import { Resolvers } from '../../schema';
 import { tokenPriceService } from './token-price.service';
 import _ from 'lodash';
+import { isAdminRoute } from '../util/resolver-util';
 
 const resolvers: Resolvers = {
     Query: {
@@ -20,6 +21,15 @@ const resolvers: Resolvers = {
                     price: entry.price,
                 })),
             }));
+        },
+    },
+    Mutation: {
+        reloadTokenPrices: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await tokenPriceService.cacheTokenPrices();
+
+            return true;
         },
     },
 };

@@ -27,4 +27,8 @@ export const cache = {
     async getValueKeyedOnObject<T extends Object>(keyPrefix: string, object: T) {
         return redis.get(`${keyPrefix}${JSON.stringify(object)}`);
     },
+
+    async deleteKey(key: string): Promise<number> {
+        return redis.del(key);
+    },
 };
