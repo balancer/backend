@@ -10,13 +10,8 @@ import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQL
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleCronJobs } from './app/scheduleCronJobs';
+import { prisma } from './modules/prisma/prisma-client';
 
-// const app = createApp();
-// loadRoutes(app);
-//
-// app.listen(env.PORT, () => {
-//     console.log(`Listening on port ${env.PORT}`);
-// });
 async function startServer() {
     const app = createExpressApp();
     app.use(json({ limit: '1mb' }));
@@ -42,4 +37,6 @@ async function startServer() {
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 
-startServer();
+startServer().finally(async () => {
+    await prisma.$disconnect();
+});

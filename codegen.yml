@@ -80,6 +80,6 @@ generates:
       scalars:
         #    Binary: Buffer
         #    Cursor: string
-        #    Datetime: Date
+        Date: Date
         UUID: string
         GqlBigNumber: string

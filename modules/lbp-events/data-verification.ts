@@ -1,0 +1,41 @@
+export const createLbpEventTypes = {
+    CreateLbpEvent: [
+        { name: 'name', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'tokenContractAddress', type: 'string' },
+        { name: 'collateralTokenAddress', type: 'string' },
+        { name: 'tokenAmount', type: 'string' },
+        { name: 'collateralAmount', type: 'string' },
+        { name: 'tokenStartWeight', type: 'string' },
+        { name: 'tokenEndWeight', type: 'string' },
+        { name: 'collateralStartWeight', type: 'string' },
+        { name: 'collateralEndWeight', type: 'string' },
+        { name: 'swapFeePercentage', type: 'string' },
+        { name: 'poolName', type: 'string' },
+        { name: 'poolSymbol', type: 'string' },
+        { name: 'tokenIconUrl', type: 'string' },
+        { name: 'websiteUrl', type: 'string' },
+        { name: 'telegramUrl', type: 'string' },
+        { name: 'twitterUrl', type: 'string' },
+        { name: 'discordUrl', type: 'string' },
+        { name: 'mediumUrl', type: 'string' },
+        { name: 'startDate', type: 'string' },
+        { name: 'endDate', type: 'string' },
+        { name: 'adminAddresses', type: 'string[]' },
+    ],
+};
+
+export const updateLbpEventTypes = {
+    UpdateLbpEvent: [
+        { name: 'id', type: 'string' },
+        { name: 'name', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'tokenIconUrl', type: 'string' },
+        { name: 'websiteUrl', type: 'string' },
+        { name: 'telegramUrl', type: 'string' },
+        { name: 'twitterUrl', type: 'string' },
+        { name: 'mediumUrl', type: 'string' },
+        { name: 'discordUrl', type: 'string' },
+        { name: 'adminAddresses', type: 'string[]' },
+    ],
+};

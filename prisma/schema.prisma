@@ -9,3 +9,47 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Account {
+  address               String              @id
+  lbpEvents             LbpEventsAdmins[]
+}
+
+model LbpEventsAdmins {
+  admin                 Account             @relation(fields:[adminAddress], references: [address])
+  adminAddress          String
+  lbpEvent              LbpEvent            @relation(fields:[lbpEventId], references: [id])
+  lbpEventId            String
+  assignedBy            String
+  assignedAt            DateTime            @default(now())
+
+  @@id([adminAddress, lbpEventId])
+}
+
+model LbpEvent {
+ id                     String              @id @default(uuid())
+ admins                 LbpEventsAdmins[]
+ name                   String
+ description            String
+ tokenContractAddress   String
+ collateralTokenAddress String
+ tokenAmount            String
+ collateralAmount       String
+ tokenStartWeight       Float
+ collateralStartWeight  Float
+ tokenEndWeight         Float
+ collateralEndWeight    Float
+ swapFeePercentage      Float
+ poolName               String
+ poolSymbol             String
+ websiteUrl             String
+ tokenIconUrl           String
+ twitterUrl             String
+ mediumUrl              String
+ discordUrl             String
+ telegramUrl            String
+ startDate              DateTime
+ endDate                DateTime
+ createdAt              DateTime           @default(now())
+ updatedAt              DateTime           @updatedAt
+}

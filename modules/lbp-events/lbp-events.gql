@@ -1,0 +1,83 @@
+input GqlLbpEventCreateInput {
+    name: String!
+    description: String!
+    tokenContractAddress: String!
+    collateralTokenAddress: String!
+    tokenAmount: String!
+    collateralAmount: String!
+    tokenStartWeight: Float!
+    collateralStartWeight: Float!
+    tokenEndWeight: Float!
+    collateralEndWeight: Float!
+    swapFeePercentage: Float!
+    poolName: String!
+    poolSymbol: String!
+    websiteUrl: String!
+    tokenIconUrl: String!
+    twitterUrl: String!
+    mediumUrl: String!
+    discordUrl:String!
+    telegramUrl: String!
+    startDate: Date!
+    endDate: Date!
+    adminAddresses: [String!]!
+    adminAddresses: [String!]!
+}
+
+input GqlLbpEventUpdateInput {
+    id: ID!
+    name: String!
+    description: String!
+    websiteUrl: String!
+    tokenIconUrl: String!
+    twitterUrl: String!
+    mediumUrl: String!
+    discordUrl:String!
+    telegramUrl: String!
+    adminAddresses: [String!]!
+}
+
+type GqlLbpEventAdmin {
+    adminAddress: String!
+    assignedBy: String!
+    assignedAt: Date!
+}
+
+type GqlLbpEvent {
+    id: ID!
+    name: String!
+    description: String!
+    tokenContractAddress: String!
+    collateralTokenAddress: String!
+    tokenAmount: String!
+    collateralAmount: String!
+    tokenStartWeight: Float!
+    collateralStartWeight: Float!
+    tokenEndWeight: Float!
+    collateralEndWeight: Float!
+    swapFeePercentage: Float!
+    poolName: String!
+    poolSymbol: String!
+    websiteUrl: String!
+    tokenIconUrl: String!
+    twitterUrl: String!
+    mediumUrl: String!
+    discordUrl:String!
+    telegramUrl: String!
+    startDate: Date!
+    endDate: Date!
+    admins: [GqlLbpEventAdmin!]!
+    createdAt: Date!
+    updatedAt: Date!
+}
+
+
+extend type Query {
+    lbpEvents: [GqlLbpEvent!]!
+    lbpEvent(id: ID!): GqlLbpEvent!
+}
+
+extend type Mutation {
+    lbpEventCreate(lbpEvent: GqlLbpEventCreateInput!, signature: String!): GqlLbpEvent!
+    lbpEventUpdate(lbpEvent: GqlLbpEventUpdateInput!, signature: String!): GqlLbpEvent!
+}
