@@ -46,7 +46,13 @@ export type LbpEventUpdateInput = {
 export async function createLbpEvent(lbpEvent: LbpEventCreateInput, signature: SignatureLike) {
     const { adminAddresses, ...eventData } = lbpEvent;
 
-    const signerAddress = extractSignerFromData(lbpEvent, createLbpEventTypes, signature);
+    let signerAddress: string;
+    try {
+        signerAddress = extractSignerFromData(lbpEvent, createLbpEventTypes, signature);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Unable to verify signature');
+    }
     if (!adminAddresses.includes(signerAddress)) {
         throw new Error(`Signer is not part of the admin addresses`);
     }
@@ -72,7 +78,13 @@ export async function updateLbpEvent(lbpEvent: LbpEventUpdateInput, signature: s
         throw new Error('At least 1 admin is required');
     }
 
-    const signerAddress = extractSignerFromData(lbpEvent, updateLbpEventTypes, signature);
+    let signerAddress: string;
+    try {
+        signerAddress = extractSignerFromData(lbpEvent, createLbpEventTypes, signature);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Unable to verify signature');
+    }
 
     if (!adminAddresses.includes(signerAddress)) {
         throw new Error(`Signer is not part of the admin addresses`);
