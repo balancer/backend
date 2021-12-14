@@ -25,6 +25,7 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: resolvers,
         typeDefs: schema,
+        introspection: true,
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ApolloServerPluginLandingPageGraphQLPlayground()],
         context: ({ req }) => req.context,
     });
