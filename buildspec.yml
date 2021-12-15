@@ -6,8 +6,6 @@ phases:
   build:
     commands:
       - yarn generate
-      - yarn prisma generate
-      - yarn prisma migrate deploy
       - yarn build
   post_build:
     commands:

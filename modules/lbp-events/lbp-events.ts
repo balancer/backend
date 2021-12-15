@@ -57,6 +57,7 @@ export async function createLbpEvent(lbpEvent: LbpEventCreateInput, signature: S
         throw new Error(`Signer is not part of the admin addresses`);
     }
 
+    // TODO: replace with sanity
     return prisma.lbpEvent.create({
         data: {
             ...eventData,
@@ -100,6 +101,8 @@ export async function updateLbpEvent(lbpEvent: LbpEventUpdateInput, signature: s
     if (!currentAdmins.includes(signerAddress)) {
         throw new Error(`Signer is no admin of this lbp event`);
     }
+
+    // TODO: replace with sanity
 
     const newAdmins = adminAddresses.filter((admin) => !currentAdmins.includes(admin));
     const removedAdmins = currentAdmins.filter((admin) => !adminAddresses.includes(admin));
