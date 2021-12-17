@@ -1,34 +1,13 @@
 import { ethers } from 'ethers';
 import { env } from '../../app/env';
 import { SignatureLike } from '@ethersproject/bytes';
-import { prisma } from '../prisma/prisma-client';
-import { createLbpEventTypes, updateLbpEventTypes } from './data-verification';
+import { createLgeTypes } from './data-verification';
 import { TypedDataField } from '@ethersproject/abstract-signer';
-
-export type LbpEventCreateInput = {
-    name: string;
-    description: string;
-    tokenContractAddress: string;
-    collateralTokenAddress: string;
-    tokenAmount: string;
-    collateralAmount: string;
-    tokenStartWeight: number;
-    collateralStartWeight: number;
-    tokenEndWeight: number;
-    collateralEndWeight: number;
-    swapFeePercentage: number;
-    poolName: string;
-    poolSymbol: string;
-    websiteUrl: string;
-    tokenIconUrl: string;
-    twitterUrl: string;
-    mediumUrl: string;
-    discordUrl: string;
-    telegramUrl: string;
-    startDate: Date;
-    endDate: Date;
-    adminAddresses: string[];
-};
+import { sanityClient } from '../sanity/sanity';
+import { GqlLgeCreateInput } from '../../schema';
+import { getLbpPoolOwner } from './copper-proxy';
+import { getAddress } from 'ethers/lib/utils';
+import { isAddressGnosisSafe } from '../gnosis/gnosis';
 
 export type LbpEventUpdateInput = {
     id: string;
@@ -40,39 +19,66 @@ export type LbpEventUpdateInput = {
     mediumUrl: string;
     discordUrl: string;
     telegramUrl: string;
-    adminAddresses: string[];
+    adminAddress: string;
 };
 
-export async function createLbpEvent(lbpEvent: LbpEventCreateInput, signature: SignatureLike) {
-    const { adminAddresses, ...eventData } = lbpEvent;
-
+export async function createLge(input: GqlLgeCreateInput, signature: SignatureLike) {
     let signerAddress: string;
     try {
-        signerAddress = extractSignerFromData(lbpEvent, createLbpEventTypes, signature);
+        signerAddress = extractSignerFromData(input, createLgeTypes, signature);
     } catch (error) {
         console.error(error);
         throw new Error('Unable to verify signature');
     }
-    if (!adminAddresses.includes(signerAddress)) {
-        throw new Error(`Signer is not part of the admin addresses`);
+
+    const poolOwner = await getLbpPoolOwner(getAddress(input.address));
+
+    if (signerAddress !== poolOwner) {
+        throw new Error(`Signer is not the pool owner`);
     }
 
-    // TODO: replace with sanity
-    return prisma.lbpEvent.create({
-        data: {
-            ...eventData,
-            admins: {
-                create: adminAddresses.map((address) => ({
-                    admin: { connectOrCreate: { create: { address }, where: { address } } },
-                    assignedBy: signerAddress,
-                })),
-            },
-        },
-        include: { admins: true },
+    const adminIsMultisig = await isAddressGnosisSafe(getAddress(poolOwner));
+
+    return sanityClient.create({
+        _type: 'lbp',
+        _id: input.id,
+        id: input.id,
+        address: input.address,
+        name: input.name,
+        websiteUrl: input.websiteUrl,
+        tokenIconUrl: input.tokenIconUrl,
+        bannerImageUrl: input.bannerImageUrl,
+        twitterUrl: input.twitterUrl,
+        mediumUrl: input.mediumUrl,
+        discordUrl: input.discordUrl,
+        telegramUrl: input.telegramUrl,
+        description: input.description,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        tokenContractAddress: input.tokenContractAddress,
+        collateralTokenAddress: input.collateralTokenAddress,
+        tokenAmount: input.tokenAmount,
+        collateralAmount: input.collateralAmount,
+        tokenStartWeight: input.tokenStartWeight,
+        collateralStartWeight: input.collateralStartWeight,
+        tokenEndWeight: input.tokenEndWeight,
+        collateralEndWeight: input.collateralEndWeight,
+        swapFeePercentage: input.swapFeePercentage,
+        adminAddress: poolOwner,
+        adminIsMultisig,
+        chainId: env.CHAIN_ID,
     });
 }
 
-export async function updateLbpEvent(lbpEvent: LbpEventUpdateInput, signature: string) {
+export async function getLges() {
+    return sanityClient.fetch(`*[_type == "lbp" && chainId == "${env.CHAIN_ID}"]`);
+}
+
+export async function getLge(id: string) {
+    return sanityClient.fetch(`*[_type == "lbp" && chainId == "${env.CHAIN_ID}" && id == "${id}"][0]`);
+}
+
+/*export async function updateLbpEvent(lbpEvent: LbpEventUpdateInput, signature: string) {
     const { adminAddresses, ...eventData } = lbpEvent;
 
     if (adminAddresses.length === 0) {
@@ -128,7 +134,7 @@ export async function updateLbpEvent(lbpEvent: LbpEventUpdateInput, signature: s
         },
         include: { admins: true },
     });
-}
+}*/
 
 function extractSignerFromData(
     data: Record<string, any>,

@@ -15,7 +15,6 @@ export class BalancerPriceService {
             where: { asset_in: addresses },
         });
 
-        console.log('coin gecko prices', coingeckoPrices);
         for (const address of addresses) {
             const tokenPrice = tokenPrices.find((tokenPrice) => tokenPrice.asset === address);
 

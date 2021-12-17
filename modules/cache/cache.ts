@@ -31,4 +31,16 @@ export const cache = {
     async deleteKey(key: string): Promise<number> {
         return redis.del(key);
     },
+
+    async putValue(key: string, value: string, timeoutInMinutes?: number): Promise<void> {
+        if (timeoutInMinutes) {
+            await redis.setex(key, timeoutInMinutes * 60, value);
+        } else {
+            await redis.set(key, value);
+        }
+    },
+
+    async getValue(key: string) {
+        return redis.get(key);
+    },
 };

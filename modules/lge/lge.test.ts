@@ -2,7 +2,7 @@ import { createTestDb, DeepPartial, TestDatabase } from '../util/jest-test-helpe
 import { createLbpEvent, LbpEventCreateInput, LbpEventUpdateInput, updateLbpEvent } from './lbp-events';
 import { ethers } from 'ethers';
 import { env } from '../../app/env';
-import { createLbpEventTypes, updateLbpEventTypes } from './data-verification';
+import { createLgeTypes, updateLbpEventTypes } from './data-verification';
 import { merge } from 'lodash';
 
 let db: TestDatabase;
@@ -21,7 +21,7 @@ describe('liqiuidity bootstrapping event tests', () => {
         const createLbpEventInput: LbpEventCreateInput = aLbpEventCreateInput({ adminAddresses: [wallet.address] });
         const signature = await wallet._signTypedData(
             { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-            createLbpEventTypes,
+            createLgeTypes,
             createLbpEventInput,
         );
         const { adminAddresses, ...expectedEvent } = createLbpEventInput;
@@ -35,7 +35,7 @@ describe('liqiuidity bootstrapping event tests', () => {
         const createLbpEventInput = aLbpEventCreateInput({ adminAddresses: [wallet.address] });
         const signature = await wallet._signTypedData(
             { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-            createLbpEventTypes,
+            createLgeTypes,
             createLbpEventInput,
         );
         return expect(createLbpEvent(createLbpEventInput, signature + '123')).rejects.toThrow();
@@ -46,7 +46,7 @@ describe('liqiuidity bootstrapping event tests', () => {
         const createLbpEventInput = aLbpEventCreateInput();
         const signature = await wallet._signTypedData(
             { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-            createLbpEventTypes,
+            createLgeTypes,
             createLbpEventInput,
         );
         return expect(createLbpEvent(createLbpEventInput, signature)).rejects.toMatchObject(
@@ -60,7 +60,7 @@ describe('liqiuidity bootstrapping event tests', () => {
         const createLbpEventInput: LbpEventCreateInput = aLbpEventCreateInput({ adminAddresses: [wallet.address] });
         const createSignature = await wallet._signTypedData(
             { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-            createLbpEventTypes,
+            createLgeTypes,
             createLbpEventInput,
         );
 
@@ -97,7 +97,7 @@ test('allows removal of admin from lbp event', async () => {
     });
     const createSignature = await wallet._signTypedData(
         { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-        createLbpEventTypes,
+        createLgeTypes,
         createLbpEventInput,
     );
 
@@ -129,7 +129,7 @@ test('allows re-adding of admin from lbp event', async () => {
     });
     const createSignature = await wallet._signTypedData(
         { name: 'beethovenx', version: '1', chainId: env.CHAIN_ID },
-        createLbpEventTypes,
+        createLgeTypes,
         createLbpEventInput,
     );
 
@@ -179,7 +179,7 @@ function aLbpEventCreateInput(lbpCreateInput?: DeepPartial<LbpEventCreateInput>)
         collateralAmount: '500',
         collateralStartWeight: 90,
         collateralEndWeight: 10,
-        swapFeePercentage: 0.1,
+        swapFeePercentage: '0.1',
         tokenStartWeight: 10,
         tokenEndWeight: 90,
         poolName: 'testpool',

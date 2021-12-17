@@ -679,9 +679,7 @@ input JoinExit_filter {
     tx_not_contains: Bytes
     tx_not_in: [Bytes!]
     type: InvestType
-    type_in: [InvestType!]
     type_not: InvestType
-    type_not_in: [InvestType!]
     user: String
     user_contains: String
     user_ends_with: String

@@ -24,6 +24,11 @@ export const schema = {
     FBEETS_POOL_ID: String,
     FBEETS_FARM_ID: String,
     ADMIN_API_KEY: String,
+    SANITY_PROJECT_ID: String,
+    SANITY_DATASET: String,
+    SANITY_API_TOKEN: String,
+    COPPER_PROXY_ADDRESS: String,
+    RPC_URL: String,
 };
 
 export const env: Env = load(schema, {

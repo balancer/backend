@@ -700,9 +700,7 @@ export type JoinExit_Filter = {
     tx_not_contains?: InputMaybe<Scalars['Bytes']>;
     tx_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     type?: InputMaybe<InvestType>;
-    type_in?: InputMaybe<Array<InvestType>>;
     type_not?: InputMaybe<InvestType>;
-    type_not_in?: InputMaybe<Array<InvestType>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
