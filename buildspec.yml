@@ -2,14 +2,16 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install
+      - yarn install
   build:
     commands:
-      - npm run generate
-      - npm run build
+      - yarn generate
+      - yarn build
   post_build:
     commands:
       - echo Build completed on `date`
+#      - echo Pushing to graph cdn
+#      - npx graphcdn push
 cache:
   paths:
     - 'node_modules/**/*'

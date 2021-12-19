@@ -299,12 +299,12 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type BlocksQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Block_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<Block_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Block_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<Block_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BlocksQuery = {

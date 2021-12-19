@@ -1,0 +1,22 @@
+schema: ./graphql_schema_generated.ts
+passThroughOnly: false
+rootTypeNames:
+  query: Query
+  mutation: Mutation
+rules:
+  - types:
+      - Query
+    maxAge: 600
+    swr: 600
+    description: Cache everything (default)
+  - types:
+      - GqlUserPoolData
+      - GqlUserTokenData
+      - GqlUserPortfolioData
+    maxAge: 600
+    swr: 600
+    scope: AUTHENTICATED
+name: beets-backend
+originUrl: 'https://eu-backend.beets-ftm-node.com/graphql'
+scopes:
+  AUTHENTICATED: 'header:accountaddress'

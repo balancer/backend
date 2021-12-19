@@ -10,8 +10,6 @@ node_modules/
 
 schema.ts
 graphql_schema_generated.ts
-prisma/schema.prisma
-prisma/generated/
 i18n/*
 google-service-account.json
 omni.config.ts

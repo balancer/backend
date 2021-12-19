@@ -1,10 +1,10 @@
 import { Express } from 'express';
-import { beetsService } from '../modules/beets/beets.service';
+import { getCirculatingSupply } from '../modules/beets/beets';
 
-export function loadRoutes(app: Express) {
+export function loadRestRoutes(app: Express) {
     app.use('/health', (req, res) => res.sendStatus(200));
     app.use('/circulating_supply', (req, res) => {
-        beetsService.getCirculatingSupply().then((result) => {
+        getCirculatingSupply().then((result) => {
             res.send(result);
         });
     });

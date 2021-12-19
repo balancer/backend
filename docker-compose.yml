@@ -12,4 +12,4 @@ services:
     environment:
       POSTGRES_USER: beetx
       POSTGRES_PASSWORD: let-me-in
-      POSTGRES_DB: beetx-backend
+      POSTGRES_DB: beetx

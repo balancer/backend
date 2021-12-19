@@ -3258,12 +3258,12 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type BalancerProtocolDataQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Balancer_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<Balancer_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Balancer_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<Balancer_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerProtocolDataQuery = {
@@ -3280,7 +3280,7 @@ export type BalancerProtocolDataQuery = {
 
 export type BalancerUserQueryVariables = Exact<{
     id: Scalars['ID'];
-    block?: InputMaybe<Block_Height>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerUserQuery = {
@@ -3299,12 +3299,12 @@ export type BalancerUserQuery = {
 };
 
 export type BalancerUsersQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<User_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<User_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<User_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<User_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerUsersQuery = {
@@ -3329,12 +3329,12 @@ export type BalancerUserFragment = {
 };
 
 export type BalancerTokenPricesQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<TokenPrice_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<TokenPrice_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<TokenPrice_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<TokenPrice_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerTokenPricesQuery = {
@@ -3412,12 +3412,12 @@ export type BalancerPoolTokenFragment = {
 };
 
 export type BalancerPoolsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Pool_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<Pool_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Pool_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<Pool_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerPoolsQuery = {
@@ -3457,7 +3457,7 @@ export type BalancerPoolsQuery = {
 
 export type BalancerPoolQueryVariables = Exact<{
     id: Scalars['ID'];
-    block?: InputMaybe<Block_Height>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerPoolQuery = {
@@ -3499,12 +3499,12 @@ export type BalancerPoolQuery = {
 };
 
 export type BalancerPoolHistoricalLiquiditiesQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolHistoricalLiquidity_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<PoolHistoricalLiquidity_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<PoolHistoricalLiquidity_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<PoolHistoricalLiquidity_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerPoolHistoricalLiquiditiesQuery = {
@@ -3522,12 +3522,12 @@ export type BalancerPoolHistoricalLiquiditiesQuery = {
 };
 
 export type BalancerPoolSnapshotsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<PoolSnapshot_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<PoolSnapshot_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<PoolSnapshot_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerPoolSnapshotsQuery = {
@@ -3554,12 +3554,12 @@ export type BalancerPoolSnapshotFragment = {
 };
 
 export type BalancerLatestPricesQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<LatestPrice_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<LatestPrice_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<LatestPrice_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<LatestPrice_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerLatestPricesQuery = {
@@ -3575,12 +3575,12 @@ export type BalancerLatestPricesQuery = {
 };
 
 export type BalancerJoinExitsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<JoinExit_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<JoinExit_Filter>;
-    block?: InputMaybe<Block_Height>;
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<JoinExit_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<JoinExit_Filter>;
+    block?: Maybe<Block_Height>;
 }>;
 
 export type BalancerJoinExitsQuery = {
