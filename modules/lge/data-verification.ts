@@ -1,19 +1,20 @@
-export const createLbpEventTypes = {
-    CreateLbpEvent: [
+export const createLgeTypes = {
+    CreateLge: [
+        { name: 'id', type: 'string' },
+        { name: 'address', type: 'string' },
         { name: 'name', type: 'string' },
         { name: 'description', type: 'string' },
         { name: 'tokenContractAddress', type: 'string' },
         { name: 'collateralTokenAddress', type: 'string' },
         { name: 'tokenAmount', type: 'string' },
         { name: 'collateralAmount', type: 'string' },
-        { name: 'tokenStartWeight', type: 'string' },
-        { name: 'tokenEndWeight', type: 'string' },
-        { name: 'collateralStartWeight', type: 'string' },
-        { name: 'collateralEndWeight', type: 'string' },
+        { name: 'tokenStartWeight', type: 'int' },
+        { name: 'tokenEndWeight', type: 'int' },
+        { name: 'collateralStartWeight', type: 'int' },
+        { name: 'collateralEndWeight', type: 'int' },
         { name: 'swapFeePercentage', type: 'string' },
-        { name: 'poolName', type: 'string' },
-        { name: 'poolSymbol', type: 'string' },
         { name: 'tokenIconUrl', type: 'string' },
+        { name: 'bannerImageUrl', type: 'string' },
         { name: 'websiteUrl', type: 'string' },
         { name: 'telegramUrl', type: 'string' },
         { name: 'twitterUrl', type: 'string' },
@@ -21,7 +22,6 @@ export const createLbpEventTypes = {
         { name: 'mediumUrl', type: 'string' },
         { name: 'startDate', type: 'string' },
         { name: 'endDate', type: 'string' },
-        { name: 'adminAddresses', type: 'string[]' },
     ],
 };
 
