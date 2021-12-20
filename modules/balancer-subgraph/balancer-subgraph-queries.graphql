@@ -271,17 +271,20 @@ fragment BalancerJoinExit on JoinExit {
     }
 }
 
-query BalancePortfolioData($id: ID!, $previousBlockNumber: Int!) {
+query BalancerPortfolioData($id: ID!, $previousBlockNumber: Int!) {
     user(id: $id) {
         ...BalancerUser
     }
+    previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
+        ...BalancerUser
+    }
+}
+
+query BalancerPortfolioPoolsData($previousBlockNumber: Int!) {
     pools(first: 1000, where: { totalShares_gt: "0" }) {
         ...BalancerPool
     }
 
-    previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
-        ...BalancerUser
-    }
     previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
         ...BalancerPool
     }

@@ -31,10 +31,8 @@ class PortfolioService {
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        const { user, pools, previousUser, previousPools } = await balancerService.getPortfolioData(
-            address,
-            parseInt(previousBlock.number),
-        );
+        const { user, previousUser } = await balancerService.getPortfolioData(address, parseInt(previousBlock.number));
+        const { pools, previousPools } = await balancerService.getPortfolioPoolsData(parseInt(previousBlock.number));
         const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
             address,
             previousBlockNumber: parseInt(previousBlock.number),
