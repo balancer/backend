@@ -1,5 +1,7 @@
 import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
+import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgraph.service';
+import { balancerService } from '../modules/balancer-subgraph/balancer.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds
@@ -19,6 +21,17 @@ export function scheduleCronJobs() {
         try {
             await tokenPriceService.cacheHistoricalTokenPrices();
             //console.log('cacheHistoricalTokenPrices success');
+        } catch (e) {
+            //console.log('cacheHistoricalTokenPrices error', e.message);
+        }
+    });
+
+    //every 30 seconds
+    cron.schedule('*/30 * * * * *', async () => {
+        //console.log('triggering cacheHistoricalTokenPrices');
+        try {
+            const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
+            await balancerService.cachePortfolioPoolsData(parseInt(previousBlock.number));
         } catch (e) {
             //console.log('cacheHistoricalTokenPrices error', e.message);
         }

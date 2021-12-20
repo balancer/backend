@@ -1,4 +1,5 @@
 export interface UserPortfolioData {
+    date: string;
     timestamp: number;
     totalValue: number;
     totalSwapFees: number;

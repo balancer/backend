@@ -11,6 +11,7 @@ export const twentyFourHoursInMs = 24 * oneHourInMs;
 export const twentyFourHoursInSecs = twentyFourHoursInMs / oneSecondInMs;
 
 export const thirtyDaysInSeconds = 60 * 60 * 24;
+export const thirtyDaysInMinutes = 60 * 24 * 30;
 export const timeNowInMs = Math.floor(Date.now() / oneSecondInMs);
 
 export function getDailyTimestampRanges(numDays: number): [number, number][] {

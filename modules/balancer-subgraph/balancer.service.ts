@@ -1,6 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
 import {
-    BalancePortfolioDataQuery,
     Balancer,
     BalancerJoinExitFragment,
     BalancerJoinExitsQueryVariables,
@@ -11,6 +10,8 @@ import {
     BalancerPoolSnapshotsQueryVariables,
     BalancerPoolsQuery,
     BalancerPoolsQueryVariables,
+    BalancerPortfolioDataQuery,
+    BalancerPortfolioPoolsDataQuery,
     BalancerProtocolDataQueryVariables,
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
@@ -22,10 +23,12 @@ import {
 import { env } from '../../app/env';
 import _ from 'lodash';
 import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { cache } from '../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
 const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
+const PORTFOLIO_POOLS_CACHE_KEY = 'balance-subgraph_portfolio-pools';
 
 export class BalancerSubgraphService {
     private readonly client: GraphQLClient;
@@ -61,8 +64,8 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerPool(args);
     }
 
-    public async getPortfolioData(id: string, previousBlockNumber: number): Promise<BalancePortfolioDataQuery> {
-        return this.sdk.BalancePortfolioData({ id, previousBlockNumber });
+    public async getPortfolioData(id: string, previousBlockNumber: number): Promise<BalancerPortfolioDataQuery> {
+        return this.sdk.BalancerPortfolioData({ id, previousBlockNumber });
     }
 
     public getUniqueTokenAddressesFromPools(pools: BalancerPoolFragment[]): string[] {
@@ -81,6 +84,24 @@ export class BalancerSubgraphService {
 
     public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', args);
+    }
+
+    public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
+        const response = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
+
+        await cache.putObjectValue(PORTFOLIO_POOLS_CACHE_KEY, response, 5);
+
+        return response;
+    }
+
+    public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
+        const cachedData = await cache.getObjectValue<BalancerPortfolioPoolsDataQuery>(PORTFOLIO_POOLS_CACHE_KEY);
+
+        if (cachedData) {
+            return cachedData;
+        }
+
+        return this.cachePortfolioPoolsData(previousBlockNumber);
     }
 
     public async getAllUsersAtBlock(block: number): Promise<BalancerUserFragment[]> {
