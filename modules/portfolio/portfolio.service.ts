@@ -21,6 +21,10 @@ import { balancerTokenMappings } from '../token-price/lib/balancer-token-mapping
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
+import { cache } from '../cache/cache';
+import { thirtyDaysInMinutes } from '../util/time';
+
+const CACHE_KEY_PREFIX = 'portfolio:';
 
 class PortfolioService {
     constructor() {}
@@ -46,6 +50,7 @@ class PortfolioService {
 
         if (!user) {
             return {
+                date: '',
                 pools: [],
                 tokens: [],
                 totalValue: 0,
@@ -76,6 +81,7 @@ class PortfolioService {
             pools: poolData,
             tokens,
             timestamp: moment().unix(),
+            date: moment().format('YYYY-MM-DD'),
             totalValue: _.sumBy(poolData, 'totalValue'),
             totalSwapFees: _.sumBy(poolData, 'swapFees'),
             totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
@@ -92,6 +98,13 @@ class PortfolioService {
             const block = blocks[i];
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
+            const date = moment.unix(parseInt(block.timestamp)).subtract(1, 'day').format('YYYY-MM-DD');
+            const cachedData = await cache.getObjectValue<UserPortfolioData>(`${CACHE_KEY_PREFIX}${address}:${date}`);
+
+            if (cachedData) {
+                portfolioHistories.push(cachedData);
+                continue;
+            }
 
             const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(block.timestamp, historicalTokenPrices);
             const user = await balancerService.getUserAtBlock(address, blockNumber);
@@ -134,16 +147,21 @@ class PortfolioService {
                 const totalValue = _.sumBy(poolData, 'totalValue');
 
                 if (totalValue > 0) {
-                    portfolioHistories.push({
+                    const data = {
                         tokens,
                         pools: poolData,
                         //this data represents the previous day
                         timestamp: moment.unix(parseInt(block.timestamp)).subtract(1, 'day').unix(),
+                        date,
                         totalValue,
                         totalSwapFees: _.sumBy(poolData, 'swapFees'),
                         totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
                         myFees: _.sumBy(poolData, 'myFees'),
-                    });
+                    };
+
+                    portfolioHistories.push(data);
+
+                    await cache.putObjectValue(`${CACHE_KEY_PREFIX}${address}:${date}`, data, thirtyDaysInMinutes);
                 }
             }
         }
