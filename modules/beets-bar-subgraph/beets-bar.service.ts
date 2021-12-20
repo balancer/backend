@@ -7,6 +7,7 @@ import {
     BeetsBarUsersQueryVariables,
     getSdk,
 } from './generated/beets-bar-subgraph-types';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 
@@ -15,6 +16,23 @@ export class BeetsBarSubgraphService {
 
     constructor() {
         this.client = new GraphQLClient(env.BEETS_BAR_SUBGRAPH);
+    }
+
+    public async getFbeetsApr() {
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+        const block = blocks[blocks.length - 1]; //take the block from 30 days ago
+
+        const { beetsBar, previousBeetsBar } = await this.sdk.BeetsBarData({
+            barId: env.FBEETS_ADDRESS,
+            previousBlockNumber: parseFloat(block.number),
+        });
+        const ratio = parseFloat(beetsBar?.ratio || '0');
+        const prevRatio = parseFloat(previousBeetsBar?.ratio || '1');
+
+        const diff = ratio - prevRatio;
+        const estimatedYield = diff * 12;
+
+        return estimatedYield / prevRatio;
     }
 
     public async getPortfolioData(

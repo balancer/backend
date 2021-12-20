@@ -73,3 +73,12 @@ query BeetsBarPortfolioData($barId: ID!, $userAddress: ID!, $previousBlockNumber
         ...BeetsBarUser
     }
 }
+
+query BeetsBarData($barId: ID!, $previousBlockNumber: Int!) {
+    beetsBar: bar(id: $barId) {
+        ...BeetsBar
+    }
+    previousBeetsBar: bar(id: $barId, block: { number: $previousBlockNumber }) {
+        ...BeetsBar
+    }
+}
