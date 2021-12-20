@@ -99,7 +99,7 @@ class PortfolioService {
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
             const date = moment.unix(parseInt(block.timestamp)).subtract(1, 'day').format('YYYY-MM-DD');
-            const cachedData = await cache.getObjectValue<UserPortfolioData>(`${CACHE_KEY_PREFIX}${address}:${date}`);
+            const cachedData = await cache.getObjectValue<UserPortfolioData>(`${CACHE_KEY_PREFIX}${date}:${address}`);
 
             if (cachedData) {
                 portfolioHistories.push(cachedData);
@@ -161,7 +161,7 @@ class PortfolioService {
 
                     portfolioHistories.push(data);
 
-                    await cache.putObjectValue(`${CACHE_KEY_PREFIX}${address}:${date}`, data, thirtyDaysInMinutes);
+                    await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, data, thirtyDaysInMinutes);
                 }
             }
         }
