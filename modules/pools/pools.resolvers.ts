@@ -15,6 +15,18 @@ const poolsResolvers: Resolvers = {
                 })),
             }));
         },
+        latestPrice: async (parent, { id }, context) => {
+            const latestPrice = await poolsService.getLatestPrice(id);
+
+            if (!latestPrice) {
+                throw new Error('No price found for id');
+            }
+
+            return {
+                ...latestPrice,
+                __typename: 'GqlBalancerTokenLatestPrice',
+            };
+        },
     },
 };
 
