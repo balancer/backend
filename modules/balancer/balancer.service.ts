@@ -11,7 +11,7 @@ import { cache } from '../cache/cache';
 const POOLS_CACHE_KEY = 'pools:all';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 
-export class PoolsService {
+export class BalancerService {
     constructor() {}
 
     public async getPools(): Promise<BalancerPoolFragment[]> {
@@ -73,4 +73,4 @@ export class PoolsService {
     }
 }
 
-export const poolsService = new PoolsService();
+export const poolsService = new BalancerService();

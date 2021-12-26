@@ -237,29 +237,6 @@ class PortfolioService {
         }));
     }
 
-    public async getCachedPools(): Promise<GqlBalancerPool[]> {
-        const blocks = await blocksSubgraphService.getDailyBlocks(30);
-        let balancePools: GqlBalancerPool[] = [];
-
-        for (let i = 0; i < blocks.length - 1; i++) {
-            const block = blocks[i];
-            const blockNumber = parseInt(block.number);
-
-            const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
-            balancePools = [
-                ...balancePools,
-                ...pools.map((pool) => ({
-                    ...pool,
-                    __typename: 'GqlBalancerPool' as const,
-                    block: block.number,
-                    timestamp: block.timestamp,
-                })),
-            ];
-        }
-
-        return balancePools;
-    }
-
     private mapPoolTokenToUserPoolTokenData(
         token: BalancerPoolTokenFragment,
         percentShare: number,
