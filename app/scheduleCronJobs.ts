@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgraph.service';
 import { balancerService } from '../modules/balancer-subgraph/balancer.service';
-import { poolsService } from '../modules/pools/pools.service';
+import { poolsService } from '../modules/balancer/balancer.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds

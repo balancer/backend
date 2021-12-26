@@ -1,14 +1,14 @@
 import { Resolvers } from '../../schema';
-import { poolsService } from './pools.service';
+import { poolsService } from './balancer.service';
 
-const poolsResolvers: Resolvers = {
+const balancerResolvers: Resolvers = {
     Query: {
         pools: async (parent, {}, context) => {
             const pools = await poolsService.getPools();
 
             return pools.map((pool) => ({
                 ...pool,
-                __typename: 'GqlPool',
+                __typename: 'GqlBalancerPool',
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,
                     __typename: 'GqlBalancerPoolToken',
@@ -30,4 +30,4 @@ const poolsResolvers: Resolvers = {
     },
 };
 
-export default poolsResolvers;
+export default balancerResolvers;
