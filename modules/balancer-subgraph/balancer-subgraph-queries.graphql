@@ -228,13 +228,13 @@ query BalancerLatestPrices(
         where: $where
         block: $block
     ) {
-        id
-        asset
-        price
-        poolId {
-            id
-        }
-        pricingAsset
+        ...BalancerLatestPrice
+    }
+}
+
+query BalancerLatestPrice($id: ID!) {
+    latestPrice(id: $id) {
+        ...BalancerLatestPrice
     }
 }
 
@@ -256,6 +256,18 @@ query BalancerJoinExits(
     ) {
         ...BalancerJoinExit
     }
+}
+
+fragment BalancerLatestPrice on LatestPrice {
+    id
+    asset
+    price
+    poolId {
+        id
+    }
+    pricingAsset
+    block
+    priceUSD
 }
 
 fragment BalancerJoinExit on JoinExit {

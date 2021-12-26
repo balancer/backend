@@ -1,5 +1,6 @@
 import { balancerService } from '../balancer-subgraph/balancer.service';
 import {
+    BalancerLatestPriceFragment,
     BalancerPoolFragment,
     OrderDirection,
     Pool_OrderBy,
@@ -8,6 +9,7 @@ import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
 
 const POOLS_CACHE_KEY = 'pools:all';
+const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 
 export class PoolsService {
     constructor() {}
@@ -20,6 +22,22 @@ export class PoolsService {
         }
 
         return this.cachePools();
+    }
+
+    public async getLatestPrice(id: string): Promise<BalancerLatestPriceFragment | null> {
+        const cached = await cache.getObjectValue<BalancerLatestPriceFragment>(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`);
+
+        if (cached) {
+            return cached;
+        }
+
+        const latestPrice = await balancerService.getLatestPrice(id);
+
+        if (latestPrice) {
+            await cache.putObjectValue(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
+        }
+
+        return latestPrice;
     }
 
     public async cachePools(): Promise<BalancerPoolFragment[]> {

@@ -3579,8 +3579,31 @@ export type BalancerLatestPricesQuery = {
         asset: string;
         price: string;
         pricingAsset: string;
+        block: string;
+        priceUSD: string;
         poolId: { __typename?: 'Pool'; id: string };
     }>;
+};
+
+export type BalancerLatestPriceQueryVariables = Exact<{
+    id: Scalars['ID'];
+}>;
+
+export type BalancerLatestPriceQuery = {
+    __typename?: 'Query';
+    latestPrice?:
+        | {
+              __typename?: 'LatestPrice';
+              id: string;
+              asset: string;
+              price: string;
+              pricingAsset: string;
+              block: string;
+              priceUSD: string;
+              poolId: { __typename?: 'Pool'; id: string };
+          }
+        | null
+        | undefined;
 };
 
 export type BalancerJoinExitsQueryVariables = Exact<{
@@ -3605,6 +3628,17 @@ export type BalancerJoinExitsQuery = {
         user: { __typename?: 'User'; id: string };
         pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
     }>;
+};
+
+export type BalancerLatestPriceFragment = {
+    __typename?: 'LatestPrice';
+    id: string;
+    asset: string;
+    price: string;
+    pricingAsset: string;
+    block: string;
+    priceUSD: string;
+    poolId: { __typename?: 'Pool'; id: string };
 };
 
 export type BalancerJoinExitFragment = {
@@ -3801,6 +3835,19 @@ export const BalancerPoolSnapshotFragmentDoc = gql`
         timestamp
     }
 `;
+export const BalancerLatestPriceFragmentDoc = gql`
+    fragment BalancerLatestPrice on LatestPrice {
+        id
+        asset
+        price
+        poolId {
+            id
+        }
+        pricingAsset
+        block
+        priceUSD
+    }
+`;
 export const BalancerJoinExitFragmentDoc = gql`
     fragment BalancerJoinExit on JoinExit {
         amounts
@@ -3993,15 +4040,18 @@ export const BalancerLatestPricesDocument = gql`
             where: $where
             block: $block
         ) {
-            id
-            asset
-            price
-            poolId {
-                id
-            }
-            pricingAsset
+            ...BalancerLatestPrice
         }
     }
+    ${BalancerLatestPriceFragmentDoc}
+`;
+export const BalancerLatestPriceDocument = gql`
+    query BalancerLatestPrice($id: ID!) {
+        latestPrice(id: $id) {
+            ...BalancerLatestPrice
+        }
+    }
+    ${BalancerLatestPriceFragmentDoc}
 `;
 export const BalancerJoinExitsDocument = gql`
     query BalancerJoinExits(
@@ -4173,6 +4223,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerLatestPrices',
+            );
+        },
+        BalancerLatestPrice(
+            variables: BalancerLatestPriceQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerLatestPriceQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerLatestPriceQuery>(BalancerLatestPriceDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerLatestPrice',
             );
         },
         BalancerJoinExits(

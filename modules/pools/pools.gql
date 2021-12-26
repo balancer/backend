@@ -1,5 +1,6 @@
 extend type Query {
     pools: [GqlBalancerPool!]!
+    latestPrice(id: ID!): GqlBalancerTokenLatestPrice
 }
 
 type GqlBalancerPool {
@@ -37,4 +38,13 @@ type GqlBalancerPoolToken {
     priceRate: BigDecimal!
     name: String!
     symbol: String!
+}
+
+type GqlBalancerTokenLatestPrice {
+    asset: Bytes!
+    block: BigInt!
+    id: ID!
+    price: BigDecimal!
+    priceUSD: BigDecimal!
+    pricingAsset: Bytes!
 }
