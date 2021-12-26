@@ -106,6 +106,9 @@ fragment BalancerPool on Pool {
     totalShares
     swapsCount
     holdersCount
+    createTime
+    swapEnabled
+    tokensList
 
     tokens(first: 1000) {
         ...BalancerPoolToken

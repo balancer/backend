@@ -3381,6 +3381,9 @@ export type BalancerPoolFragment = {
     totalShares: string;
     swapsCount: string;
     holdersCount: string;
+    createTime: number;
+    swapEnabled: boolean;
+    tokensList: Array<string>;
     tokens?:
         | Array<{
               __typename?: 'PoolToken';
@@ -3437,6 +3440,9 @@ export type BalancerPoolsQuery = {
         totalShares: string;
         swapsCount: string;
         holdersCount: string;
+        createTime: number;
+        swapEnabled: boolean;
+        tokensList: Array<string>;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3478,6 +3484,9 @@ export type BalancerPoolQuery = {
               totalShares: string;
               swapsCount: string;
               holdersCount: string;
+              createTime: number;
+              swapEnabled: boolean;
+              tokensList: Array<string>;
               tokens?:
                   | Array<{
                         __typename?: 'PoolToken';
@@ -3662,6 +3671,9 @@ export type BalancerPortfolioPoolsDataQuery = {
         totalShares: string;
         swapsCount: string;
         holdersCount: string;
+        createTime: number;
+        swapEnabled: boolean;
+        tokensList: Array<string>;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3693,6 +3705,9 @@ export type BalancerPortfolioPoolsDataQuery = {
         totalShares: string;
         swapsCount: string;
         holdersCount: string;
+        createTime: number;
+        swapEnabled: boolean;
+        tokensList: Array<string>;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3765,6 +3780,9 @@ export const BalancerPoolFragmentDoc = gql`
         totalShares
         swapsCount
         holdersCount
+        createTime
+        swapEnabled
+        tokensList
         tokens(first: 1000) {
             ...BalancerPoolToken
         }

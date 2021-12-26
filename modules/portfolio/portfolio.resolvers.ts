@@ -24,9 +24,6 @@ const resolvers: Resolvers = {
 
             return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
-        getCachedPools: async (parent, {}, context) => {
-            return portfolioService.getCachedPools();
-        },
     },
     //we're forced to have at least one mutation
     Mutation: {

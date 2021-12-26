@@ -1,7 +1,6 @@
 extend type Query {
     portfolioGetUserPortfolio: GqlUserPortfolioData!
     portfolioGetUserPortfolioHistory: [GqlUserPortfolioData!]!
-    getCachedPools: [GqlBalancerPool!]!
 }
 
 extend type Mutation {
@@ -47,19 +46,4 @@ type GqlUserTokenData {
     pricePerToken: GqlBigNumber!
     totalValue: GqlBigNumber!
     percentOfPortfolio: Float!
-}
-
-type GqlBalancerPool {
-    id: String!
-    address: String!
-    name: String
-    symbol: String
-    swapFee: String!
-    totalSwapFee: String!
-    totalLiquidity: String!
-    totalShares: String!
-    swapsCount: String!
-    holdersCount: String!
-    block: String!
-    timestamp: String!
 }
