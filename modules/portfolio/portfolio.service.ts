@@ -199,6 +199,7 @@ class PortfolioService {
             );
 
             const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
+            const myFees = swapFees * userPercentShare;
 
             if (userNumShares > 0) {
                 userPoolData.push({
@@ -216,7 +217,7 @@ class PortfolioService {
                     })),
                     swapFees,
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume),
-                    myFees: swapFees * userPercentShare,
+                    myFees: myFees > 0 ? myFees : 0,
                     priceChange:
                         pricePerShare && previous.pricePerShare
                             ? userNumShares * pricePerShare - userNumShares * previous.pricePerShare
