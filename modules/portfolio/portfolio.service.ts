@@ -9,14 +9,14 @@ import {
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmUserFragment } from '../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BigNumber } from 'ethers';
-import { fromFp } from '../util/numbers';
+import { bn, fromFp } from '../util/numbers';
 import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
 import moment from 'moment-timezone';
-import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
+import { GqlBalancerPool, GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
@@ -235,6 +235,29 @@ class PortfolioService {
             ...pool,
             percentOfPortfolio: pool.totalValue / totalValue,
         }));
+    }
+
+    public async getCachedPools(): Promise<GqlBalancerPool[]> {
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+        let balancePools: GqlBalancerPool[] = [];
+
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const block = blocks[i];
+            const blockNumber = parseInt(block.number);
+
+            const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
+            balancePools = [
+                ...balancePools,
+                ...pools.map((pool) => ({
+                    ...pool,
+                    __typename: 'GqlBalancerPool' as const,
+                    block: block.number,
+                    timestamp: block.timestamp,
+                })),
+            ];
+        }
+
+        return balancePools;
     }
 
     private mapPoolTokenToUserPoolTokenData(

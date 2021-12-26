@@ -1,9 +1,9 @@
 extend type Query {
-    pools: [GqlBalancerPool!]!
+    pools: [GqlPool!]!
     latestPrice(id: ID!): GqlBalancerTokenLatestPrice
 }
 
-type GqlBalancerPool {
+type GqlPool {
     id: ID!
     name: String
     address: Bytes!

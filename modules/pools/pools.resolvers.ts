@@ -8,7 +8,7 @@ const poolsResolvers: Resolvers = {
 
             return pools.map((pool) => ({
                 ...pool,
-                __typename: 'GqlBalancerPool',
+                __typename: 'GqlPool',
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,
                     __typename: 'GqlBalancerPoolToken',
