@@ -35,6 +35,7 @@ export function scheduleCronJobs() {
             await balancerService.cachePortfolioPoolsData(parseInt(previousBlock.number));
 
             await poolsService.cachePools();
+            await poolsService.cachePastPools();
         } catch (e) {
             //console.log('cacheHistoricalTokenPrices error', e.message);
         }
