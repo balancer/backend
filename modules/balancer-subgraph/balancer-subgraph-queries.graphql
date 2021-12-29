@@ -106,6 +106,9 @@ fragment BalancerPool on Pool {
     totalShares
     swapsCount
     holdersCount
+    createTime
+    swapEnabled
+    tokensList
 
     tokens(first: 1000) {
         ...BalancerPoolToken
@@ -225,13 +228,13 @@ query BalancerLatestPrices(
         where: $where
         block: $block
     ) {
-        id
-        asset
-        price
-        poolId {
-            id
-        }
-        pricingAsset
+        ...BalancerLatestPrice
+    }
+}
+
+query BalancerLatestPrice($id: ID!) {
+    latestPrice(id: $id) {
+        ...BalancerLatestPrice
     }
 }
 
@@ -255,6 +258,18 @@ query BalancerJoinExits(
     }
 }
 
+fragment BalancerLatestPrice on LatestPrice {
+    id
+    asset
+    price
+    poolId {
+        id
+    }
+    pricingAsset
+    block
+    priceUSD
+}
+
 fragment BalancerJoinExit on JoinExit {
     amounts
     id
@@ -271,17 +286,20 @@ fragment BalancerJoinExit on JoinExit {
     }
 }
 
-query BalancePortfolioData($id: ID!, $previousBlockNumber: Int!) {
+query BalancerPortfolioData($id: ID!, $previousBlockNumber: Int!) {
     user(id: $id) {
         ...BalancerUser
     }
+    previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
+        ...BalancerUser
+    }
+}
+
+query BalancerPortfolioPoolsData($previousBlockNumber: Int!) {
     pools(first: 1000, where: { totalShares_gt: "0" }) {
         ...BalancerPool
     }
 
-    previousUser: user(id: $id, block: { number: $previousBlockNumber }) {
-        ...BalancerUser
-    }
     previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
         ...BalancerPool
     }

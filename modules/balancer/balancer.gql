@@ -1,0 +1,51 @@
+extend type Query {
+    pools: [GqlBalancerPool!]!
+    poolsPastPools: [GqlBalancerPool!]!
+    latestPrice(id: ID!): GqlBalancerTokenLatestPrice
+}
+
+type GqlBalancerPool {
+    id: ID!
+    name: String
+    address: Bytes!
+    poolType: String
+    swapFee: BigDecimal!
+    totalShares: BigDecimal!
+    tokens: [GqlBalancerPoolToken!]!
+    tokensList: [Bytes!]!
+    totalWeight: BigDecimal
+    amp: BigInt
+    expiryTime: BigInt
+    unitSeconds: BigInt
+    principalToken: Bytes
+    baseToken: Bytes
+    swapEnabled: Boolean!
+
+    totalLiquidity: BigDecimal!
+    totalShares: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    owner: Bytes
+    factory: Bytes
+    createTime: Int!
+}
+
+type GqlBalancerPoolToken {
+    id: ID!
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    weight: BigDecimal
+    priceRate: BigDecimal!
+    name: String!
+    symbol: String!
+}
+
+type GqlBalancerTokenLatestPrice {
+    asset: Bytes!
+    block: BigInt!
+    id: ID!
+    price: BigDecimal!
+    priceUSD: BigDecimal!
+    pricingAsset: Bytes!
+}

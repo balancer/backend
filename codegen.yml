@@ -51,6 +51,22 @@ generates:
     schema: ${BLOCKS_SUBGRAPH}
     plugins:
       - schema-ast
+  modules/beets-bar-subgraph/generated/beets-bar-subgraph-types.ts:
+    schema: ${BEETS_BAR_SUBGRAPH}
+    documents: 'modules/beets-bar-subgraph/beets-bar-subgraph-queries.graphql'
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request
+    config:
+      scalars:
+        BigInt: string
+        Bytes: string
+        BigDecimal: string
+  modules/beets-bar-subgraph/generated/beets-bar-subgraph-schema.graphql:
+    schema: ${BEETS_BAR_SUBGRAPH}
+    plugins:
+      - schema-ast
   graphql_schema_generated.ts:
     schema: ./modules/**/*.gql
     plugins:

@@ -21,16 +21,18 @@ import { balancerTokenMappings } from '../token-price/lib/balancer-token-mapping
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
+import { cache } from '../cache/cache';
+import { thirtyDaysInMinutes } from '../util/time';
+
+const CACHE_KEY_PREFIX = 'portfolio:';
 
 class PortfolioService {
     constructor() {}
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        const { user, pools, previousUser, previousPools } = await balancerService.getPortfolioData(
-            address,
-            parseInt(previousBlock.number),
-        );
+        const { user, previousUser } = await balancerService.getPortfolioData(address, parseInt(previousBlock.number));
+        const { pools, previousPools } = await balancerService.getPortfolioPoolsData(parseInt(previousBlock.number));
         const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
             address,
             previousBlockNumber: parseInt(previousBlock.number),
@@ -46,6 +48,7 @@ class PortfolioService {
 
         if (!user) {
             return {
+                date: '',
                 pools: [],
                 tokens: [],
                 totalValue: 0,
@@ -76,6 +79,7 @@ class PortfolioService {
             pools: poolData,
             tokens,
             timestamp: moment().unix(),
+            date: moment().format('YYYY-MM-DD'),
             totalValue: _.sumBy(poolData, 'totalValue'),
             totalSwapFees: _.sumBy(poolData, 'swapFees'),
             totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
@@ -92,6 +96,13 @@ class PortfolioService {
             const block = blocks[i];
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
+            const date = moment.unix(parseInt(block.timestamp)).subtract(1, 'day').format('YYYY-MM-DD');
+            const cachedData = await cache.getObjectValue<UserPortfolioData>(`${CACHE_KEY_PREFIX}${date}:${address}`);
+
+            if (cachedData) {
+                portfolioHistories.push(cachedData);
+                continue;
+            }
 
             const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(block.timestamp, historicalTokenPrices);
             const user = await balancerService.getUserAtBlock(address, blockNumber);
@@ -134,16 +145,21 @@ class PortfolioService {
                 const totalValue = _.sumBy(poolData, 'totalValue');
 
                 if (totalValue > 0) {
-                    portfolioHistories.push({
+                    const data = {
                         tokens,
                         pools: poolData,
                         //this data represents the previous day
                         timestamp: moment.unix(parseInt(block.timestamp)).subtract(1, 'day').unix(),
+                        date,
                         totalValue,
                         totalSwapFees: _.sumBy(poolData, 'swapFees'),
                         totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
                         myFees: _.sumBy(poolData, 'myFees'),
-                    });
+                    };
+
+                    portfolioHistories.push(data);
+
+                    await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, data, thirtyDaysInMinutes);
                 }
             }
         }
@@ -183,6 +199,7 @@ class PortfolioService {
             );
 
             const swapFees = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
+            const myFees = swapFees * userPercentShare;
 
             if (userNumShares > 0) {
                 userPoolData.push({
@@ -200,7 +217,7 @@ class PortfolioService {
                     })),
                     swapFees,
                     swapVolume: parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume),
-                    myFees: swapFees * userPercentShare,
+                    myFees: myFees > 0 ? myFees : 0,
                     priceChange:
                         pricePerShare && previous.pricePerShare
                             ? userNumShares * pricePerShare - userNumShares * previous.pricePerShare
@@ -219,29 +236,6 @@ class PortfolioService {
             ...pool,
             percentOfPortfolio: pool.totalValue / totalValue,
         }));
-    }
-
-    public async getCachedPools(): Promise<GqlBalancerPool[]> {
-        const blocks = await blocksSubgraphService.getDailyBlocks(30);
-        let balancePools: GqlBalancerPool[] = [];
-
-        for (let i = 0; i < blocks.length - 1; i++) {
-            const block = blocks[i];
-            const blockNumber = parseInt(block.number);
-
-            const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
-            balancePools = [
-                ...balancePools,
-                ...pools.map((pool) => ({
-                    ...pool,
-                    __typename: 'GqlBalancerPool' as const,
-                    block: block.number,
-                    timestamp: block.timestamp,
-                })),
-            ];
-        }
-
-        return balancePools;
     }
 
     private mapPoolTokenToUserPoolTokenData(

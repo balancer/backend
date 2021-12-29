@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import * as Dom from 'graphql-request/dist/types.dom';
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -37,134 +38,134 @@ export type Bar = {
 };
 
 export type BarUsersArgs = {
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<User_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    skip?: Maybe<Scalars['Int']>;
-    where?: Maybe<User_Filter>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<User_Filter>;
 };
 
 export type Bar_Filter = {
-    address?: Maybe<Scalars['Bytes']>;
-    address_contains?: Maybe<Scalars['Bytes']>;
-    address_in?: Maybe<Array<Scalars['Bytes']>>;
-    address_not?: Maybe<Scalars['Bytes']>;
-    address_not_contains?: Maybe<Scalars['Bytes']>;
-    address_not_in?: Maybe<Array<Scalars['Bytes']>>;
-    block?: Maybe<Scalars['BigInt']>;
-    block_gt?: Maybe<Scalars['BigInt']>;
-    block_gte?: Maybe<Scalars['BigInt']>;
-    block_in?: Maybe<Array<Scalars['BigInt']>>;
-    block_lt?: Maybe<Scalars['BigInt']>;
-    block_lte?: Maybe<Scalars['BigInt']>;
-    block_not?: Maybe<Scalars['BigInt']>;
-    block_not_in?: Maybe<Array<Scalars['BigInt']>>;
-    decimals?: Maybe<Scalars['Int']>;
-    decimals_gt?: Maybe<Scalars['Int']>;
-    decimals_gte?: Maybe<Scalars['Int']>;
-    decimals_in?: Maybe<Array<Scalars['Int']>>;
-    decimals_lt?: Maybe<Scalars['Int']>;
-    decimals_lte?: Maybe<Scalars['Int']>;
-    decimals_not?: Maybe<Scalars['Int']>;
-    decimals_not_in?: Maybe<Array<Scalars['Int']>>;
-    fBeetsBurned?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_gt?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_gte?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    fBeetsBurned_lt?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_lte?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_not?: Maybe<Scalars['BigDecimal']>;
-    fBeetsBurned_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    fBeetsMinted?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_gt?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_gte?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    fBeetsMinted_lt?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_lte?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_not?: Maybe<Scalars['BigDecimal']>;
-    fBeetsMinted_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    id?: Maybe<Scalars['ID']>;
-    id_gt?: Maybe<Scalars['ID']>;
-    id_gte?: Maybe<Scalars['ID']>;
-    id_in?: Maybe<Array<Scalars['ID']>>;
-    id_lt?: Maybe<Scalars['ID']>;
-    id_lte?: Maybe<Scalars['ID']>;
-    id_not?: Maybe<Scalars['ID']>;
-    id_not_in?: Maybe<Array<Scalars['ID']>>;
-    name?: Maybe<Scalars['String']>;
-    name_contains?: Maybe<Scalars['String']>;
-    name_ends_with?: Maybe<Scalars['String']>;
-    name_gt?: Maybe<Scalars['String']>;
-    name_gte?: Maybe<Scalars['String']>;
-    name_in?: Maybe<Array<Scalars['String']>>;
-    name_lt?: Maybe<Scalars['String']>;
-    name_lte?: Maybe<Scalars['String']>;
-    name_not?: Maybe<Scalars['String']>;
-    name_not_contains?: Maybe<Scalars['String']>;
-    name_not_ends_with?: Maybe<Scalars['String']>;
-    name_not_in?: Maybe<Array<Scalars['String']>>;
-    name_not_starts_with?: Maybe<Scalars['String']>;
-    name_starts_with?: Maybe<Scalars['String']>;
-    ratio?: Maybe<Scalars['BigDecimal']>;
-    ratio_gt?: Maybe<Scalars['BigDecimal']>;
-    ratio_gte?: Maybe<Scalars['BigDecimal']>;
-    ratio_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    ratio_lt?: Maybe<Scalars['BigDecimal']>;
-    ratio_lte?: Maybe<Scalars['BigDecimal']>;
-    ratio_not?: Maybe<Scalars['BigDecimal']>;
-    ratio_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    sharedVestingTokenRevenue?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_gt?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_gte?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    sharedVestingTokenRevenue_lt?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_lte?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_not?: Maybe<Scalars['BigDecimal']>;
-    sharedVestingTokenRevenue_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    symbol?: Maybe<Scalars['String']>;
-    symbol_contains?: Maybe<Scalars['String']>;
-    symbol_ends_with?: Maybe<Scalars['String']>;
-    symbol_gt?: Maybe<Scalars['String']>;
-    symbol_gte?: Maybe<Scalars['String']>;
-    symbol_in?: Maybe<Array<Scalars['String']>>;
-    symbol_lt?: Maybe<Scalars['String']>;
-    symbol_lte?: Maybe<Scalars['String']>;
-    symbol_not?: Maybe<Scalars['String']>;
-    symbol_not_contains?: Maybe<Scalars['String']>;
-    symbol_not_ends_with?: Maybe<Scalars['String']>;
-    symbol_not_in?: Maybe<Array<Scalars['String']>>;
-    symbol_not_starts_with?: Maybe<Scalars['String']>;
-    symbol_starts_with?: Maybe<Scalars['String']>;
-    timestamp?: Maybe<Scalars['BigInt']>;
-    timestamp_gt?: Maybe<Scalars['BigInt']>;
-    timestamp_gte?: Maybe<Scalars['BigInt']>;
-    timestamp_in?: Maybe<Array<Scalars['BigInt']>>;
-    timestamp_lt?: Maybe<Scalars['BigInt']>;
-    timestamp_lte?: Maybe<Scalars['BigInt']>;
-    timestamp_not?: Maybe<Scalars['BigInt']>;
-    timestamp_not_in?: Maybe<Array<Scalars['BigInt']>>;
-    totalSupply?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_gt?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_gte?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    totalSupply_lt?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_lte?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_not?: Maybe<Scalars['BigDecimal']>;
-    totalSupply_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingToken?: Maybe<Scalars['Bytes']>;
-    vestingTokenStaked?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_gt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_gte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenStaked_lt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_lte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_not?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenStaked_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingToken_contains?: Maybe<Scalars['Bytes']>;
-    vestingToken_in?: Maybe<Array<Scalars['Bytes']>>;
-    vestingToken_not?: Maybe<Scalars['Bytes']>;
-    vestingToken_not_contains?: Maybe<Scalars['Bytes']>;
-    vestingToken_not_in?: Maybe<Array<Scalars['Bytes']>>;
+    address?: InputMaybe<Scalars['Bytes']>;
+    address_contains?: InputMaybe<Scalars['Bytes']>;
+    address_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    address_not?: InputMaybe<Scalars['Bytes']>;
+    address_not_contains?: InputMaybe<Scalars['Bytes']>;
+    address_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    block?: InputMaybe<Scalars['BigInt']>;
+    block_gt?: InputMaybe<Scalars['BigInt']>;
+    block_gte?: InputMaybe<Scalars['BigInt']>;
+    block_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    block_lt?: InputMaybe<Scalars['BigInt']>;
+    block_lte?: InputMaybe<Scalars['BigInt']>;
+    block_not?: InputMaybe<Scalars['BigInt']>;
+    block_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    decimals?: InputMaybe<Scalars['Int']>;
+    decimals_gt?: InputMaybe<Scalars['Int']>;
+    decimals_gte?: InputMaybe<Scalars['Int']>;
+    decimals_in?: InputMaybe<Array<Scalars['Int']>>;
+    decimals_lt?: InputMaybe<Scalars['Int']>;
+    decimals_lte?: InputMaybe<Scalars['Int']>;
+    decimals_not?: InputMaybe<Scalars['Int']>;
+    decimals_not_in?: InputMaybe<Array<Scalars['Int']>>;
+    fBeetsBurned?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_gt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_gte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    fBeetsBurned_lt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_lte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_not?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsBurned_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    fBeetsMinted?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_gt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_gte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    fBeetsMinted_lt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_lte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_not?: InputMaybe<Scalars['BigDecimal']>;
+    fBeetsMinted_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    id?: InputMaybe<Scalars['ID']>;
+    id_gt?: InputMaybe<Scalars['ID']>;
+    id_gte?: InputMaybe<Scalars['ID']>;
+    id_in?: InputMaybe<Array<Scalars['ID']>>;
+    id_lt?: InputMaybe<Scalars['ID']>;
+    id_lte?: InputMaybe<Scalars['ID']>;
+    id_not?: InputMaybe<Scalars['ID']>;
+    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
+    name?: InputMaybe<Scalars['String']>;
+    name_contains?: InputMaybe<Scalars['String']>;
+    name_ends_with?: InputMaybe<Scalars['String']>;
+    name_gt?: InputMaybe<Scalars['String']>;
+    name_gte?: InputMaybe<Scalars['String']>;
+    name_in?: InputMaybe<Array<Scalars['String']>>;
+    name_lt?: InputMaybe<Scalars['String']>;
+    name_lte?: InputMaybe<Scalars['String']>;
+    name_not?: InputMaybe<Scalars['String']>;
+    name_not_contains?: InputMaybe<Scalars['String']>;
+    name_not_ends_with?: InputMaybe<Scalars['String']>;
+    name_not_in?: InputMaybe<Array<Scalars['String']>>;
+    name_not_starts_with?: InputMaybe<Scalars['String']>;
+    name_starts_with?: InputMaybe<Scalars['String']>;
+    ratio?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_gt?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_gte?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    ratio_lt?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_lte?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_not?: InputMaybe<Scalars['BigDecimal']>;
+    ratio_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    sharedVestingTokenRevenue?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_gt?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_gte?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    sharedVestingTokenRevenue_lt?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_lte?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_not?: InputMaybe<Scalars['BigDecimal']>;
+    sharedVestingTokenRevenue_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    symbol?: InputMaybe<Scalars['String']>;
+    symbol_contains?: InputMaybe<Scalars['String']>;
+    symbol_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_gt?: InputMaybe<Scalars['String']>;
+    symbol_gte?: InputMaybe<Scalars['String']>;
+    symbol_in?: InputMaybe<Array<Scalars['String']>>;
+    symbol_lt?: InputMaybe<Scalars['String']>;
+    symbol_lte?: InputMaybe<Scalars['String']>;
+    symbol_not?: InputMaybe<Scalars['String']>;
+    symbol_not_contains?: InputMaybe<Scalars['String']>;
+    symbol_not_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_not_in?: InputMaybe<Array<Scalars['String']>>;
+    symbol_not_starts_with?: InputMaybe<Scalars['String']>;
+    symbol_starts_with?: InputMaybe<Scalars['String']>;
+    timestamp?: InputMaybe<Scalars['BigInt']>;
+    timestamp_gt?: InputMaybe<Scalars['BigInt']>;
+    timestamp_gte?: InputMaybe<Scalars['BigInt']>;
+    timestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    timestamp_lt?: InputMaybe<Scalars['BigInt']>;
+    timestamp_lte?: InputMaybe<Scalars['BigInt']>;
+    timestamp_not?: InputMaybe<Scalars['BigInt']>;
+    timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    totalSupply?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalSupply_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalSupply_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingToken?: InputMaybe<Scalars['Bytes']>;
+    vestingTokenStaked?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_gt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_gte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenStaked_lt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_lte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_not?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenStaked_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingToken_contains?: InputMaybe<Scalars['Bytes']>;
+    vestingToken_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    vestingToken_not?: InputMaybe<Scalars['Bytes']>;
+    vestingToken_not_contains?: InputMaybe<Scalars['Bytes']>;
+    vestingToken_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum Bar_OrderBy {
@@ -186,8 +187,8 @@ export enum Bar_OrderBy {
 }
 
 export type Block_Height = {
-    hash?: Maybe<Scalars['Bytes']>;
-    number?: Maybe<Scalars['Int']>;
+    hash?: InputMaybe<Scalars['Bytes']>;
+    number?: InputMaybe<Scalars['Int']>;
 };
 
 export enum OrderDirection {
@@ -206,35 +207,35 @@ export type Query = {
 };
 
 export type Query_MetaArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
 };
 
 export type QueryBarArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
 };
 
 export type QueryBarsArgs = {
-    block?: Maybe<Block_Height>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<Bar_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    skip?: Maybe<Scalars['Int']>;
-    where?: Maybe<Bar_Filter>;
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Bar_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<Bar_Filter>;
 };
 
 export type QueryUserArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
 };
 
 export type QueryUsersArgs = {
-    block?: Maybe<Block_Height>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<User_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    skip?: Maybe<Scalars['Int']>;
-    where?: Maybe<User_Filter>;
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<User_Filter>;
 };
 
 export type Subscription = {
@@ -248,35 +249,35 @@ export type Subscription = {
 };
 
 export type Subscription_MetaArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
 };
 
 export type SubscriptionBarArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
 };
 
 export type SubscriptionBarsArgs = {
-    block?: Maybe<Block_Height>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<Bar_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    skip?: Maybe<Scalars['Int']>;
-    where?: Maybe<Bar_Filter>;
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Bar_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<Bar_Filter>;
 };
 
 export type SubscriptionUserArgs = {
-    block?: Maybe<Block_Height>;
+    block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
 };
 
 export type SubscriptionUsersArgs = {
-    block?: Maybe<Block_Height>;
-    first?: Maybe<Scalars['Int']>;
-    orderBy?: Maybe<User_OrderBy>;
-    orderDirection?: Maybe<OrderDirection>;
-    skip?: Maybe<Scalars['Int']>;
-    where?: Maybe<User_Filter>;
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<User_Filter>;
 };
 
 export type User = {
@@ -293,82 +294,82 @@ export type User = {
 };
 
 export type User_Filter = {
-    address?: Maybe<Scalars['Bytes']>;
-    address_contains?: Maybe<Scalars['Bytes']>;
-    address_in?: Maybe<Array<Scalars['Bytes']>>;
-    address_not?: Maybe<Scalars['Bytes']>;
-    address_not_contains?: Maybe<Scalars['Bytes']>;
-    address_not_in?: Maybe<Array<Scalars['Bytes']>>;
-    bar?: Maybe<Scalars['String']>;
-    bar_contains?: Maybe<Scalars['String']>;
-    bar_ends_with?: Maybe<Scalars['String']>;
-    bar_gt?: Maybe<Scalars['String']>;
-    bar_gte?: Maybe<Scalars['String']>;
-    bar_in?: Maybe<Array<Scalars['String']>>;
-    bar_lt?: Maybe<Scalars['String']>;
-    bar_lte?: Maybe<Scalars['String']>;
-    bar_not?: Maybe<Scalars['String']>;
-    bar_not_contains?: Maybe<Scalars['String']>;
-    bar_not_ends_with?: Maybe<Scalars['String']>;
-    bar_not_in?: Maybe<Array<Scalars['String']>>;
-    bar_not_starts_with?: Maybe<Scalars['String']>;
-    bar_starts_with?: Maybe<Scalars['String']>;
-    block?: Maybe<Scalars['BigInt']>;
-    block_gt?: Maybe<Scalars['BigInt']>;
-    block_gte?: Maybe<Scalars['BigInt']>;
-    block_in?: Maybe<Array<Scalars['BigInt']>>;
-    block_lt?: Maybe<Scalars['BigInt']>;
-    block_lte?: Maybe<Scalars['BigInt']>;
-    block_not?: Maybe<Scalars['BigInt']>;
-    block_not_in?: Maybe<Array<Scalars['BigInt']>>;
-    fBeets?: Maybe<Scalars['BigDecimal']>;
-    fBeets_gt?: Maybe<Scalars['BigDecimal']>;
-    fBeets_gte?: Maybe<Scalars['BigDecimal']>;
-    fBeets_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    fBeets_lt?: Maybe<Scalars['BigDecimal']>;
-    fBeets_lte?: Maybe<Scalars['BigDecimal']>;
-    fBeets_not?: Maybe<Scalars['BigDecimal']>;
-    fBeets_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    id?: Maybe<Scalars['ID']>;
-    id_gt?: Maybe<Scalars['ID']>;
-    id_gte?: Maybe<Scalars['ID']>;
-    id_in?: Maybe<Array<Scalars['ID']>>;
-    id_lt?: Maybe<Scalars['ID']>;
-    id_lte?: Maybe<Scalars['ID']>;
-    id_not?: Maybe<Scalars['ID']>;
-    id_not_in?: Maybe<Array<Scalars['ID']>>;
-    timestamp?: Maybe<Scalars['BigInt']>;
-    timestamp_gt?: Maybe<Scalars['BigInt']>;
-    timestamp_gte?: Maybe<Scalars['BigInt']>;
-    timestamp_in?: Maybe<Array<Scalars['BigInt']>>;
-    timestamp_lt?: Maybe<Scalars['BigInt']>;
-    timestamp_lte?: Maybe<Scalars['BigInt']>;
-    timestamp_not?: Maybe<Scalars['BigInt']>;
-    timestamp_not_in?: Maybe<Array<Scalars['BigInt']>>;
-    vestingTokenHarvested?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_gt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_gte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenHarvested_lt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_lte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_not?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenHarvested_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenIn?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_gt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_gte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenIn_lt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_lte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_not?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenIn_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenOut?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_gt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_gte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_in?: Maybe<Array<Scalars['BigDecimal']>>;
-    vestingTokenOut_lt?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_lte?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_not?: Maybe<Scalars['BigDecimal']>;
-    vestingTokenOut_not_in?: Maybe<Array<Scalars['BigDecimal']>>;
+    address?: InputMaybe<Scalars['Bytes']>;
+    address_contains?: InputMaybe<Scalars['Bytes']>;
+    address_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    address_not?: InputMaybe<Scalars['Bytes']>;
+    address_not_contains?: InputMaybe<Scalars['Bytes']>;
+    address_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    bar?: InputMaybe<Scalars['String']>;
+    bar_contains?: InputMaybe<Scalars['String']>;
+    bar_ends_with?: InputMaybe<Scalars['String']>;
+    bar_gt?: InputMaybe<Scalars['String']>;
+    bar_gte?: InputMaybe<Scalars['String']>;
+    bar_in?: InputMaybe<Array<Scalars['String']>>;
+    bar_lt?: InputMaybe<Scalars['String']>;
+    bar_lte?: InputMaybe<Scalars['String']>;
+    bar_not?: InputMaybe<Scalars['String']>;
+    bar_not_contains?: InputMaybe<Scalars['String']>;
+    bar_not_ends_with?: InputMaybe<Scalars['String']>;
+    bar_not_in?: InputMaybe<Array<Scalars['String']>>;
+    bar_not_starts_with?: InputMaybe<Scalars['String']>;
+    bar_starts_with?: InputMaybe<Scalars['String']>;
+    block?: InputMaybe<Scalars['BigInt']>;
+    block_gt?: InputMaybe<Scalars['BigInt']>;
+    block_gte?: InputMaybe<Scalars['BigInt']>;
+    block_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    block_lt?: InputMaybe<Scalars['BigInt']>;
+    block_lte?: InputMaybe<Scalars['BigInt']>;
+    block_not?: InputMaybe<Scalars['BigInt']>;
+    block_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    fBeets?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_gt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_gte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    fBeets_lt?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_lte?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_not?: InputMaybe<Scalars['BigDecimal']>;
+    fBeets_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    id?: InputMaybe<Scalars['ID']>;
+    id_gt?: InputMaybe<Scalars['ID']>;
+    id_gte?: InputMaybe<Scalars['ID']>;
+    id_in?: InputMaybe<Array<Scalars['ID']>>;
+    id_lt?: InputMaybe<Scalars['ID']>;
+    id_lte?: InputMaybe<Scalars['ID']>;
+    id_not?: InputMaybe<Scalars['ID']>;
+    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
+    timestamp?: InputMaybe<Scalars['BigInt']>;
+    timestamp_gt?: InputMaybe<Scalars['BigInt']>;
+    timestamp_gte?: InputMaybe<Scalars['BigInt']>;
+    timestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    timestamp_lt?: InputMaybe<Scalars['BigInt']>;
+    timestamp_lte?: InputMaybe<Scalars['BigInt']>;
+    timestamp_not?: InputMaybe<Scalars['BigInt']>;
+    timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    vestingTokenHarvested?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_gt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_gte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenHarvested_lt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_lte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_not?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenHarvested_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenIn?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_gt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_gte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenIn_lt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_lte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_not?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenIn_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenOut?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_gt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_gte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    vestingTokenOut_lt?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_lte?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_not?: InputMaybe<Scalars['BigDecimal']>;
+    vestingTokenOut_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum User_OrderBy {
@@ -599,6 +600,55 @@ export type BeetsBarPortfolioDataQuery = {
         | undefined;
 };
 
+export type BeetsBarDataQueryVariables = Exact<{
+    barId: Scalars['ID'];
+    previousBlockNumber: Scalars['Int'];
+}>;
+
+export type BeetsBarDataQuery = {
+    __typename?: 'Query';
+    beetsBar?:
+        | {
+              __typename?: 'Bar';
+              id: string;
+              address: string;
+              block: string;
+              decimals: number;
+              fBeetsBurned: string;
+              fBeetsMinted: string;
+              name: string;
+              ratio: string;
+              sharedVestingTokenRevenue: string;
+              symbol: string;
+              timestamp: string;
+              totalSupply: string;
+              vestingToken: string;
+              vestingTokenStaked: string;
+          }
+        | null
+        | undefined;
+    previousBeetsBar?:
+        | {
+              __typename?: 'Bar';
+              id: string;
+              address: string;
+              block: string;
+              decimals: number;
+              fBeetsBurned: string;
+              fBeetsMinted: string;
+              name: string;
+              ratio: string;
+              sharedVestingTokenRevenue: string;
+              symbol: string;
+              timestamp: string;
+              totalSupply: string;
+              vestingToken: string;
+              vestingTokenStaked: string;
+          }
+        | null
+        | undefined;
+};
+
 export const BeetsBarFragmentDoc = gql`
     fragment BeetsBar on Bar {
         id
@@ -685,6 +735,17 @@ export const BeetsBarPortfolioDataDocument = gql`
     ${BeetsBarFragmentDoc}
     ${BeetsBarUserFragmentDoc}
 `;
+export const BeetsBarDataDocument = gql`
+    query BeetsBarData($barId: ID!, $previousBlockNumber: Int!) {
+        beetsBar: bar(id: $barId) {
+            ...BeetsBar
+        }
+        previousBeetsBar: bar(id: $barId, block: { number: $previousBlockNumber }) {
+            ...BeetsBar
+        }
+    }
+    ${BeetsBarFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -745,6 +806,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BeetsBarPortfolioData',
+            );
+        },
+        BeetsBarData(
+            variables: BeetsBarDataQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BeetsBarDataQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BeetsBarDataQuery>(BeetsBarDataDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BeetsBarData',
             );
         },
     };
