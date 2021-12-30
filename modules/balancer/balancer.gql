@@ -28,6 +28,11 @@ type GqlBalancerPool {
     owner: Bytes
     factory: Bytes
     createTime: Int!
+
+    mainIndex: Int
+    wrappedIndex: Int
+    upperTarget: String
+    lowerTarget: String
 }
 
 type GqlBalancerPoolToken {

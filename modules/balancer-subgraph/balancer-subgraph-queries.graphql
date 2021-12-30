@@ -109,6 +109,17 @@ fragment BalancerPool on Pool {
     createTime
     swapEnabled
     tokensList
+    amp
+    lowerTarget
+    upperTarget
+    mainIndex
+    wrappedIndex
+    factory
+    expiryTime
+    unitSeconds
+    principalToken
+    baseToken
+    owner
 
     tokens(first: 1000) {
         ...BalancerPoolToken
