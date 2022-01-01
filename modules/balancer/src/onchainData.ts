@@ -164,6 +164,9 @@ export async function getOnChainBalances(
             }*/
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
+            subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
+            subgraphPools[index].swapEnabled =
+                typeof swapEnabled !== 'undefined' ? swapEnabled : subgraphPools[index].swapEnabled;
 
             poolTokens.tokens.forEach((token, i) => {
                 const T = (subgraphPools[index].tokens || []).find((t) => isSameAddress(t.address, token));
@@ -175,23 +178,7 @@ export async function getOnChainBalances(
                 }
             });
 
-            onChainPools.push({
-                ...subgraphPools[index],
-                totalShares: formatFixed(totalSupply, 18),
-                swapFee: formatFixed(swapFee, 18),
-                amp: onchainData.amp ? formatFixed(onchainData.amp[0], 3) : subgraphPools[index].amp,
-                swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : subgraphPools[index].swapEnabled,
-                tokens: (subgraphPools[index].tokens ?? []).map((token) => {
-                    const idx = poolTokens.tokens.indexOf(getAddress(token.address));
-
-                    return {
-                        ...token,
-                        balance: poolTokens.balances[idx]
-                            ? formatFixed(poolTokens.balances[idx], token.decimals)
-                            : token.balance,
-                    };
-                }),
-            });
+            onChainPools.push(subgraphPools[index]);
         } catch (err) {
             console.log(err);
             throw `Issue with pool onchain data: ${err}`;
