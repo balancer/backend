@@ -6,8 +6,6 @@ const balancerResolvers: Resolvers = {
         beetsGetProtocolData: async (parent, {}, context) => {
             const protocolData = await beetsService.getProtocolData();
 
-            console.log('protocolData', protocolData);
-
             return protocolData;
         },
     },
