@@ -1,10 +1,10 @@
 import { Resolvers } from '../../schema';
-import { poolsService } from './balancer.service';
+import { balancerService } from './balancer.service';
 
 const balancerResolvers: Resolvers = {
     Query: {
         pools: async (parent, {}, context) => {
-            const pools = await poolsService.getPools();
+            const pools = await balancerService.getPools();
 
             return pools.map((pool) => ({
                 ...pool,
@@ -16,7 +16,7 @@ const balancerResolvers: Resolvers = {
             }));
         },
         poolsPastPools: async (parent, {}, context) => {
-            const pools = await poolsService.getPastPools();
+            const pools = await balancerService.getPastPools();
 
             return pools.map((pool) => ({
                 ...pool,
@@ -28,7 +28,7 @@ const balancerResolvers: Resolvers = {
             }));
         },
         latestPrice: async (parent, { id }, context) => {
-            const latestPrice = await poolsService.getLatestPrice(id);
+            const latestPrice = await balancerService.getLatestPrice(id);
 
             if (!latestPrice) {
                 throw new Error('No price found for id');

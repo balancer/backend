@@ -4,6 +4,8 @@ import {
     BalancerJoinExitFragment,
     BalancerJoinExitsQueryVariables,
     BalancerLatestPriceFragment,
+    BalancerLatestPricesQuery,
+    BalancerLatestPricesQueryVariables,
     BalancerPoolFragment,
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
@@ -77,6 +79,10 @@ export class BalancerSubgraphService {
         const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
 
         return users.map((user) => this.normalizeBalancerUser(user));
+    }
+
+    public async getLatestPrices(args: BalancerLatestPricesQueryVariables): Promise<BalancerLatestPricesQuery> {
+        return this.sdk.BalancerLatestPrices(args);
     }
 
     public async getLatestPrice(id: string): Promise<BalancerLatestPriceFragment | null> {
@@ -177,4 +183,4 @@ export class BalancerSubgraphService {
     }
 }
 
-export const balancerService = new BalancerSubgraphService();
+export const balancerSubgraphService = new BalancerSubgraphService();

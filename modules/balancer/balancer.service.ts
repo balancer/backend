@@ -1,4 +1,4 @@
-import { balancerService } from '../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import {
     BalancerLatestPriceFragment,
     BalancerPoolFragment,
@@ -47,7 +47,7 @@ export class BalancerService {
             return cached;
         }
 
-        const latestPrice = await balancerService.getLatestPrice(id);
+        const latestPrice = await balancerSubgraphService.getLatestPrice(id);
 
         if (latestPrice) {
             await cache.putObjectValue(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
@@ -59,7 +59,7 @@ export class BalancerService {
     public async cachePools(): Promise<BalancerPoolFragment[]> {
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
-        const pools = await balancerService.getAllPools({
+        const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
         });
@@ -91,7 +91,7 @@ export class BalancerService {
     public async cachePastPools(): Promise<BalancerPoolFragment[]> {
         const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const blacklistedPools = await this.getBlacklistedPools();
-        const pools = await balancerService.getAllPools({
+        const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
             block: { number: parseInt(block.number) },
@@ -123,4 +123,4 @@ export class BalancerService {
     }
 }
 
-export const poolsService = new BalancerService();
+export const balancerService = new BalancerService();

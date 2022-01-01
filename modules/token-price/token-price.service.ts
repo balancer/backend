@@ -2,7 +2,7 @@ import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerTokenMappings } from './lib/balancer-token-mappings';
 import { balancerPriceService } from './lib/balancer-price.service';
-import { balancerService } from '../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
@@ -97,9 +97,9 @@ export class TokenPriceService {
     }
 
     private async getTokenAddresses(): Promise<{ balancerTokens: string[]; coingeckoTokens: string[] }> {
-        const { pools } = await balancerService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
+        const { pools } = await balancerSubgraphService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
 
-        const addresses = balancerService.getUniqueTokenAddressesFromPools(pools);
+        const addresses = balancerSubgraphService.getUniqueTokenAddressesFromPools(pools);
         const balancerTokens = balancerTokenMappings.balancerPricedTokens;
         const coingeckoTokens = addresses.filter((address) => !balancerTokens.includes(address.toLowerCase()));
 

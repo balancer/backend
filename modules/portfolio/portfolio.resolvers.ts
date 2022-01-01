@@ -1,7 +1,7 @@
 import { Resolvers } from '../../schema';
 import { portfolioService } from './portfolio.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
-import { balancerService } from '../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
@@ -31,7 +31,7 @@ const resolvers: Resolvers = {
         clearCacheAtBlock: async (parent, { block }, context) => {
             isAdminRoute(context);
 
-            await balancerService.clearCacheAtBlock(block);
+            await balancerSubgraphService.clearCacheAtBlock(block);
             await masterchefService.clearCacheAtBlock(block);
             await beetsBarService.clearCacheAtBlock(block);
 
@@ -43,7 +43,7 @@ const resolvers: Resolvers = {
             const blocks = await blocksSubgraphService.getDailyBlocks(30);
 
             for (const block of blocks) {
-                await balancerService.clearPoolsAtBlock(parseInt(block.number));
+                await balancerSubgraphService.clearPoolsAtBlock(parseInt(block.number));
             }
 
             return true;

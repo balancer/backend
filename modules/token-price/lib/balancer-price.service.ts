@@ -1,4 +1,4 @@
-import { balancerService } from '../../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgraph.service';
 import { OrderDirection, TokenPrice_OrderBy } from '../../balancer-subgraph/generated/balancer-subgraph-types';
 import { HistoricalPrice, TokenHistoricalPrices, TokenPrices } from '../token-price-types';
 import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../../util/time';
@@ -8,7 +8,7 @@ export class BalancerPriceService {
     public async getTokenPrices(addresses: string[], coingeckoPrices: TokenPrices): Promise<TokenPrices> {
         const balancerTokenPrices: TokenPrices = {};
 
-        const { tokenPrices } = await balancerService.getTokenPrices({
+        const { tokenPrices } = await balancerSubgraphService.getTokenPrices({
             first: 1000, //TODO: this could stop working at some point
             orderBy: TokenPrice_OrderBy.Timestamp,
             orderDirection: OrderDirection.Desc,
@@ -48,7 +48,7 @@ export class BalancerPriceService {
         const minTimestamp = _.min(_.flatten(ranges));
         const maxTimestamp = _.max(_.flatten(ranges));
 
-        const allTokenPrices = await balancerService.getAllTokenPrices({
+        const allTokenPrices = await balancerSubgraphService.getAllTokenPrices({
             where: { asset: address, timestamp_gte: minTimestamp, timestamp_lte: maxTimestamp },
             orderBy: TokenPrice_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,

@@ -1,8 +1,9 @@
 import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgraph.service';
-import { balancerService } from '../modules/balancer-subgraph/balancer.service';
-import { poolsService } from '../modules/balancer/balancer.service';
+import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-subgraph.service';
+import { balancerService } from '../modules/balancer/balancer.service';
+import { beetsService } from '../modules/beets/beets.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds
@@ -22,7 +23,7 @@ export function scheduleCronJobs() {
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
-            await poolsService.cachePools();
+            await balancerService.cachePools();
         } catch (e) {}
     });
 
@@ -30,9 +31,11 @@ export function scheduleCronJobs() {
     cron.schedule('*/30 * * * * *', async () => {
         try {
             const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-            await balancerService.cachePortfolioPoolsData(parseInt(previousBlock.number));
+            await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
 
-            await poolsService.cachePastPools();
+            await balancerService.cachePastPools();
+
+            await beetsService.cacheProtocolData();
         } catch (e) {}
     });
 
