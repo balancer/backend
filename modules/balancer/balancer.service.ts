@@ -118,7 +118,7 @@ export class BalancerService {
 
     public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {
         const snapshots: GqlBalancerPoolSnapshot[] = [];
-        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+        const blocks = await blocksSubgraphService.getDailyBlocks(60);
 
         for (let i = 0; i < blocks.length - 1; i++) {
             const block = blocks[i];
