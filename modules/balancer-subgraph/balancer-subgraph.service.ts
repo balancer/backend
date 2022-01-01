@@ -9,6 +9,7 @@ import {
     BalancerPoolFragment,
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
+    BalancerPoolSnapshotFragment,
     BalancerPoolSnapshotsQuery,
     BalancerPoolSnapshotsQueryVariables,
     BalancerPoolsQuery,
@@ -57,6 +58,12 @@ export class BalancerSubgraphService {
 
     public async getPoolSnapshots(args: BalancerPoolSnapshotsQueryVariables): Promise<BalancerPoolSnapshotsQuery> {
         return this.sdk.BalancerPoolSnapshots(args);
+    }
+
+    public async getAllPoolSnapshots(
+        args: BalancerPoolSnapshotsQueryVariables,
+    ): Promise<BalancerPoolSnapshotFragment[]> {
+        return subgraphLoadAll<BalancerPoolSnapshotFragment>(this.sdk.BalancerPoolSnapshots, 'poolSnapshots', args);
     }
 
     public async getPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolsQuery> {
@@ -142,6 +149,10 @@ export class BalancerSubgraphService {
         const users = await this.getAllUsersAtBlock(block);
 
         return users.find((user) => user.id === address) || null;
+    }
+
+    public async getJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
+        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
     }
 
     public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {

@@ -12,6 +12,7 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
+import { GqlBalancerPoolSnapshot } from '../../schema';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -112,6 +113,45 @@ export class BalancerService {
         await cache.putObjectValue(PAST_POOLS_CACHE_KEY, filtered, 30);
 
         return filtered;
+    }
+
+    public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {
+        const snapshots: GqlBalancerPoolSnapshot[] = [];
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const block = blocks[i];
+            const previousBlock = blocks[i + 1];
+            const blockNumber = parseInt(block.number);
+            const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
+            const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+
+            const pool = pools.find((pool) => pool.id === poolId);
+            const previousPool = previousPools.find((previousPool) => previousPool.id === poolId);
+
+            if (!pool || !previousPool) {
+                break;
+            }
+
+            snapshots.push({
+                id: `${poolId}-${block.timestamp}`,
+                poolId,
+                timestamp: parseInt(block.timestamp),
+                totalShares: pool.totalShares,
+                totalSwapFee: pool.totalSwapFee,
+                totalSwapVolume: pool.totalSwapVolume,
+                totalLiquidity: pool.totalLiquidity,
+                swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
+                swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
+                liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+            });
+        }
+
+        return snapshots;
     }
 
     private async getBlacklistedPools() {

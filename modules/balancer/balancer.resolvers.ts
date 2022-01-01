@@ -39,6 +39,9 @@ const balancerResolvers: Resolvers = {
                 __typename: 'GqlBalancerTokenLatestPrice',
             };
         },
+        poolSnapshots: async (parent, { poolId }, context) => {
+            return balancerService.getPoolSnapshots(poolId);
+        },
     },
 };
 
