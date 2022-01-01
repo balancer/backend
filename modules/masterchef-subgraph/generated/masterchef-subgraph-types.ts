@@ -21,6 +21,7 @@ export type Scalars = {
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
+    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
 export type MasterChef = {
@@ -269,6 +270,7 @@ export type Query_MetaArgs = {
 export type QueryMasterChefArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryMasterChefsArgs = {
@@ -277,12 +279,14 @@ export type QueryMasterChefsArgs = {
     orderBy?: InputMaybe<MasterChef_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<MasterChef_Filter>;
 };
 
 export type QueryPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolsArgs = {
@@ -291,12 +295,14 @@ export type QueryPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type QueryRewarderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryRewardersArgs = {
@@ -305,12 +311,14 @@ export type QueryRewardersArgs = {
     orderBy?: InputMaybe<Rewarder_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Rewarder_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUsersArgs = {
@@ -319,6 +327,7 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -401,6 +410,7 @@ export type Subscription_MetaArgs = {
 export type SubscriptionMasterChefArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionMasterChefsArgs = {
@@ -409,12 +419,14 @@ export type SubscriptionMasterChefsArgs = {
     orderBy?: InputMaybe<MasterChef_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<MasterChef_Filter>;
 };
 
 export type SubscriptionPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolsArgs = {
@@ -423,12 +435,14 @@ export type SubscriptionPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type SubscriptionRewarderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionRewardersArgs = {
@@ -437,12 +451,14 @@ export type SubscriptionRewardersArgs = {
     orderBy?: InputMaybe<Rewarder_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Rewarder_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUsersArgs = {
@@ -451,6 +467,7 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 

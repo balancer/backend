@@ -7,38 +7,33 @@ import { poolsService } from '../modules/balancer/balancer.service';
 export function scheduleCronJobs() {
     //every 20 seconds
     cron.schedule('*/20 * * * * *', async () => {
-        //console.log('triggering cacheTokenPrices');
         try {
             await tokenPriceService.cacheTokenPrices();
-            //console.log('cacheTokenPrices success');
-        } catch (e) {
-            //console.log('cacheTokenPrices error', e.message);
-        }
+        } catch (e) {}
     });
 
     //every five minutes
     cron.schedule('*/5 * * * *', async () => {
-        //console.log('triggering cacheHistoricalTokenPrices');
         try {
             await tokenPriceService.cacheHistoricalTokenPrices();
-            //console.log('cacheHistoricalTokenPrices success');
-        } catch (e) {
-            //console.log('cacheHistoricalTokenPrices error', e.message);
-        }
+        } catch (e) {}
+    });
+
+    //every 5 seconds
+    cron.schedule('*/5 * * * * *', async () => {
+        try {
+            await poolsService.cachePools();
+        } catch (e) {}
     });
 
     //every 30 seconds
     cron.schedule('*/30 * * * * *', async () => {
-        //console.log('triggering cacheHistoricalTokenPrices');
         try {
             const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
             await balancerService.cachePortfolioPoolsData(parseInt(previousBlock.number));
 
-            await poolsService.cachePools();
             await poolsService.cachePastPools();
-        } catch (e) {
-            //console.log('cacheHistoricalTokenPrices error', e.message);
-        }
+        } catch (e) {}
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();

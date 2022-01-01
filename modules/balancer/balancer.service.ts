@@ -8,6 +8,10 @@ import {
 import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { getOnChainBalances } from './src/onchainData';
+import { providers } from 'ethers';
+import { env } from '../../app/env';
+import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -53,6 +57,7 @@ export class BalancerService {
     }
 
     public async cachePools(): Promise<BalancerPoolFragment[]> {
+        const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
         const pools = await balancerService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
@@ -71,9 +76,16 @@ export class BalancerService {
             return true;
         });
 
-        await cache.putObjectValue(POOLS_CACHE_KEY, filtered, 30);
+        const filteredWithOnChainBalances = await getOnChainBalances(
+            filtered,
+            BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
+            BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].vault,
+            provider,
+        );
 
-        return filtered;
+        await cache.putObjectValue(POOLS_CACHE_KEY, filteredWithOnChainBalances, 30);
+
+        return filteredWithOnChainBalances;
     }
 
     public async cachePastPools(): Promise<BalancerPoolFragment[]> {
