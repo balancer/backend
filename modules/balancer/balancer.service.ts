@@ -13,6 +13,7 @@ import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { GqlBalancerPoolSnapshot } from '../../schema';
+import _ from 'lodash';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -151,7 +152,7 @@ export class BalancerService {
             });
         }
 
-        return snapshots;
+        return _.orderBy(snapshots, 'timestamp', 'asc');
     }
 
     private async getBlacklistedPools() {
