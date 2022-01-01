@@ -1,4 +1,4 @@
-import { balancerService } from '../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import {
     BalancerLatestPriceFragment,
     BalancerPoolFragment,
@@ -12,6 +12,7 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
+import { GqlBalancerPoolSnapshot } from '../../schema';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -47,7 +48,7 @@ export class BalancerService {
             return cached;
         }
 
-        const latestPrice = await balancerService.getLatestPrice(id);
+        const latestPrice = await balancerSubgraphService.getLatestPrice(id);
 
         if (latestPrice) {
             await cache.putObjectValue(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
@@ -59,7 +60,7 @@ export class BalancerService {
     public async cachePools(): Promise<BalancerPoolFragment[]> {
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
-        const pools = await balancerService.getAllPools({
+        const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
         });
@@ -91,7 +92,7 @@ export class BalancerService {
     public async cachePastPools(): Promise<BalancerPoolFragment[]> {
         const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const blacklistedPools = await this.getBlacklistedPools();
-        const pools = await balancerService.getAllPools({
+        const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
             block: { number: parseInt(block.number) },
@@ -114,6 +115,45 @@ export class BalancerService {
         return filtered;
     }
 
+    public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {
+        const snapshots: GqlBalancerPoolSnapshot[] = [];
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const block = blocks[i];
+            const previousBlock = blocks[i + 1];
+            const blockNumber = parseInt(block.number);
+            const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
+            const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+
+            const pool = pools.find((pool) => pool.id === poolId);
+            const previousPool = previousPools.find((previousPool) => previousPool.id === poolId);
+
+            if (!pool || !previousPool) {
+                break;
+            }
+
+            snapshots.push({
+                id: `${poolId}-${block.timestamp}`,
+                poolId,
+                timestamp: parseInt(block.timestamp),
+                totalShares: pool.totalShares,
+                totalSwapFee: pool.totalSwapFee,
+                totalSwapVolume: pool.totalSwapVolume,
+                totalLiquidity: pool.totalLiquidity,
+                swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
+                swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
+                liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+            });
+        }
+
+        return snapshots;
+    }
+
     private async getBlacklistedPools() {
         const response = await sanityClient.fetch<string[] | null>(
             `*[_type == "config" && chainId == 250][0].blacklistedPools`,
@@ -123,4 +163,4 @@ export class BalancerService {
     }
 }
 
-export const poolsService = new BalancerService();
+export const balancerService = new BalancerService();

@@ -1,4 +1,4 @@
-import { balancerService } from '../balancer-subgraph/balancer.service';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import {
     BalancerJoinExitFragment,
@@ -31,8 +31,13 @@ class PortfolioService {
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        const { user, previousUser } = await balancerService.getPortfolioData(address, parseInt(previousBlock.number));
-        const { pools, previousPools } = await balancerService.getPortfolioPoolsData(parseInt(previousBlock.number));
+        const { user, previousUser } = await balancerSubgraphService.getPortfolioData(
+            address,
+            parseInt(previousBlock.number),
+        );
+        const { pools, previousPools } = await balancerSubgraphService.getPortfolioPoolsData(
+            parseInt(previousBlock.number),
+        );
         const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
             address,
             previousBlockNumber: parseInt(previousBlock.number),
@@ -105,12 +110,12 @@ class PortfolioService {
             }
 
             const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(block.timestamp, historicalTokenPrices);
-            const user = await balancerService.getUserAtBlock(address, blockNumber);
+            const user = await balancerSubgraphService.getUserAtBlock(address, blockNumber);
             const allFarmUsers = await masterchefService.getAllFarmUsersAtBlock(blockNumber);
-            const pools = await balancerService.getAllPoolsAtBlock(blockNumber);
-            const previousPools = await balancerService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+            const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
+            const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
             const allPreviousFarmUsers = await masterchefService.getAllFarmUsersAtBlock(parseInt(previousBlock.number));
-            const previousUser = await balancerService.getUserAtBlock(address, parseInt(previousBlock.number));
+            const previousUser = await balancerSubgraphService.getUserAtBlock(address, parseInt(previousBlock.number));
             const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
                 previousBlock.timestamp,
                 historicalTokenPrices,

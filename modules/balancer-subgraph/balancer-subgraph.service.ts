@@ -4,9 +4,12 @@ import {
     BalancerJoinExitFragment,
     BalancerJoinExitsQueryVariables,
     BalancerLatestPriceFragment,
+    BalancerLatestPricesQuery,
+    BalancerLatestPricesQueryVariables,
     BalancerPoolFragment,
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
+    BalancerPoolSnapshotFragment,
     BalancerPoolSnapshotsQuery,
     BalancerPoolSnapshotsQueryVariables,
     BalancerPoolsQuery,
@@ -57,6 +60,12 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerPoolSnapshots(args);
     }
 
+    public async getAllPoolSnapshots(
+        args: BalancerPoolSnapshotsQueryVariables,
+    ): Promise<BalancerPoolSnapshotFragment[]> {
+        return subgraphLoadAll<BalancerPoolSnapshotFragment>(this.sdk.BalancerPoolSnapshots, 'poolSnapshots', args);
+    }
+
     public async getPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolsQuery> {
         return this.sdk.BalancerPools(args);
     }
@@ -77,6 +86,10 @@ export class BalancerSubgraphService {
         const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
 
         return users.map((user) => this.normalizeBalancerUser(user));
+    }
+
+    public async getLatestPrices(args: BalancerLatestPricesQueryVariables): Promise<BalancerLatestPricesQuery> {
+        return this.sdk.BalancerLatestPrices(args);
     }
 
     public async getLatestPrice(id: string): Promise<BalancerLatestPriceFragment | null> {
@@ -138,6 +151,10 @@ export class BalancerSubgraphService {
         return users.find((user) => user.id === address) || null;
     }
 
+    public async getJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
+        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
+    }
+
     public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
         return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
     }
@@ -177,4 +194,4 @@ export class BalancerSubgraphService {
     }
 }
 
-export const balancerService = new BalancerSubgraphService();
+export const balancerSubgraphService = new BalancerSubgraphService();

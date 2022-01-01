@@ -1,0 +1,13 @@
+extend type Query {
+    beetsGetProtocolData: GqlBeetsProtocolData!
+}
+
+type GqlBeetsProtocolData {
+    totalLiquidity: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalSwapFee: BigDecimal!
+    poolCount: BigInt!
+    beetsPrice: BigDecimal!
+    circulatingSupply: BigDecimal!
+    marketCap: BigDecimal!
+}
