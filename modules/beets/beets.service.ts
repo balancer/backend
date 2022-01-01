@@ -43,8 +43,15 @@ export class BeetsService {
         const { latestPrices } = await balancerSubgraphService.getLatestPrices({
             where: { poolId: env.FBEETS_POOL_ID.toLowerCase(), asset: env.BEETS_ADDRESS.toLowerCase() },
         });
-        const beetsPrice = parseFloat(latestPrices[0]?.priceUSD || '0');
+
+        if (latestPrices.length === 0) {
+            throw new Error('did not find price for beets');
+        }
+
+        const beetsPrice = parseFloat(latestPrices[0].priceUSD);
         const circulatingSupply = parseFloat(await getCirculatingSupply());
+
+        console.log('latestPrices', latestPrices);
 
         return {
             beetsPrice: `${beetsPrice}`,

@@ -134,6 +134,18 @@ export class BalancerService {
                 break;
             }
 
+            const swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
+            const swapVolume24h = parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume);
+
+            if (
+                Math.abs(swapFees24h) > 500_000_000 ||
+                swapVolume24h > Math.abs(500_000_000) ||
+                swapFees24h < 0 ||
+                swapVolume24h < 0
+            ) {
+                continue;
+            }
+
             snapshots.push({
                 id: `${poolId}-${block.timestamp}`,
                 poolId,
