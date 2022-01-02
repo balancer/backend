@@ -99,3 +99,6 @@ generates:
         Date: Date
         UUID: string
         GqlBigNumber: string
+        Bytes: string
+        BigDecimal: string
+        BigInt: string

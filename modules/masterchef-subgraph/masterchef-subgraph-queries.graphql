@@ -86,20 +86,23 @@ fragment Farm on Pool {
     userCount
     timestamp
     block
+    masterChef {
+        id
+        totalAllocPoint
+        beetsPerBlock
+    }
+    rewarder {
+        id
+        rewardToken
+        rewardPerSecond
+    }
 }
 
 query MasterchefPortfolioData($address: Bytes!, $previousBlockNumber: Int!) {
-    farmUsers: users(
-        first: 1000
-        where: {address: $address}
-    ) {
+    farmUsers: users(first: 1000, where: { address: $address }) {
         ...FarmUser
     }
-    previousFarmUsers: users(
-        first: 1000
-        where: {address: $address}
-        block: {number: $previousBlockNumber}
-    ) {
+    previousFarmUsers: users(first: 1000, where: { address: $address }, block: { number: $previousBlockNumber }) {
         ...FarmUser
     }
 }
