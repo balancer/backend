@@ -51,8 +51,6 @@ export class BeetsService {
         const beetsPrice = parseFloat(latestPrices[0].priceUSD);
         const circulatingSupply = parseFloat(await getCirculatingSupply());
 
-        console.log('latestPrices', latestPrices);
-
         return {
             beetsPrice: `${beetsPrice}`,
             marketCap: `${beetsPrice * circulatingSupply}`,
