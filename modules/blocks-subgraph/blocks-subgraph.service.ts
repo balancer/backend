@@ -21,6 +21,7 @@ import { cache } from '../cache/cache';
 import moment from 'moment-timezone';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
+const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time:';
 
 export class BlocksSubgraphService {
     private readonly client: GraphQLClient;
@@ -29,10 +30,15 @@ export class BlocksSubgraphService {
         this.client = new GraphQLClient(env.BLOCKS_SUBGRAPH);
     }
 
-    //TODO: cache this
     public async getAverageBlockTime(): Promise<number> {
         const start = moment().startOf('hour').subtract(6, 'hours').unix();
         const end = moment().startOf('hour').unix();
+
+        const cachedValue = await cache.getValue(`${AVG_BLOCK_TIME_CACHE_PREFIX}${start}${end}`);
+
+        if (cachedValue) {
+            return parseFloat(cachedValue);
+        }
 
         const blocks = (
             await this.sdk.Blocks({
@@ -45,8 +51,8 @@ export class BlocksSubgraphService {
         ).blocks;
 
         if (blocks.length === 0) {
-            console.error('Unable to retrieve the blocks, returning a default value of 1.5 seconds per block');
-            return 1.5;
+            console.error('Unable to retrieve the blocks, returning a default value of 1 second per block');
+            return 1;
         }
 
         let timestamp: null | number = null;
@@ -61,6 +67,8 @@ export class BlocksSubgraphService {
 
             timestamp = parseInt(block.timestamp);
         }
+
+        await cache.putValue(`${AVG_BLOCK_TIME_CACHE_PREFIX}${start}${end}`, `${averageBlockTime / blocks.length}`, 60);
 
         return averageBlockTime / blocks.length;
     }
