@@ -14,10 +14,12 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { GqlBalancerPoolSnapshot } from '../../schema';
 import _ from 'lodash';
+import { oneDayInMinutes } from '../util/time';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
+const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 
 export class BalancerService {
     constructor() {}
@@ -120,6 +122,14 @@ export class BalancerService {
         const snapshots: GqlBalancerPoolSnapshot[] = [];
         const blocks = await blocksSubgraphService.getDailyBlocks(60);
 
+        const cached = await cache.getObjectValue<GqlBalancerPoolSnapshot[]>(
+            `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
+        );
+
+        if (cached) {
+            return cached;
+        }
+
         for (let i = 0; i < blocks.length - 1; i++) {
             const block = blocks[i];
             const previousBlock = blocks[i + 1];
@@ -164,7 +174,15 @@ export class BalancerService {
             });
         }
 
-        return _.orderBy(snapshots, 'timestamp', 'asc');
+        const orderedSnapshots = _.orderBy(snapshots, 'timestamp', 'asc');
+
+        await cache.putObjectValue(
+            `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
+            orderedSnapshots,
+            oneDayInMinutes,
+        );
+
+        return orderedSnapshots;
     }
 
     private async getBlacklistedPools() {
