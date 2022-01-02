@@ -1,5 +1,8 @@
 extend type Query {
     beetsGetProtocolData: GqlBeetsProtocolData!
+    beetsGetBeetsFarms: [GqlBeetsFarm!]!
+    beetsGetUserDataForFarm(farmId: String!): GqlBeetsFarmUser
+    beetsGetUserDataForAllFarms: [GqlBeetsFarmUser!]!
 }
 
 type GqlBeetsProtocolData {
@@ -10,4 +13,39 @@ type GqlBeetsProtocolData {
     beetsPrice: BigDecimal!
     circulatingSupply: BigDecimal!
     marketCap: BigDecimal!
+}
+
+type GqlBeetsFarm {
+    id: ID!
+    pair: Bytes!
+    allocPoint: Int!
+    slpBalance: BigInt!
+    userCount: BigInt!
+    block: BigInt!
+    lastRewardBlock: BigInt!
+    timestamp: BigInt!
+    masterChef: GqlBeetsMasterChef!
+    rewarder: GqlBeetsRewarder
+}
+
+type GqlBeetsMasterChef {
+    id: ID!
+    beetsPerBlock: BigInt!
+    totalAllocPoint: Int!
+}
+
+type GqlBeetsRewarder {
+    id: ID!
+    rewardPerSecond: BigInt!
+    rewardToken: Bytes!
+}
+
+type GqlBeetsFarmUser {
+    id: ID!
+    address: Bytes!
+    amount: BigInt!
+    beetsHarvested: BigInt!
+    farmId: ID!
+    rewardDebt: BigInt!
+    timestamp: BigInt!
 }

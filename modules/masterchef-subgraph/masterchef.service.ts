@@ -45,7 +45,7 @@ export class MasterchefSubgraphService {
     }
 
     public async getAllFarms(args: MasterchefFarmsQueryVariables): Promise<FarmFragment[]> {
-        return subgraphLoadAll<FarmFragment>(this.sdk.MasterchefUsers, 'farms', args);
+        return subgraphLoadAll<FarmFragment>(this.sdk.MasterchefFarms, 'farms', args);
     }
 
     public async getAllFarmUsers(args: MasterchefUsersQueryVariables): Promise<FarmUserFragment[]> {
