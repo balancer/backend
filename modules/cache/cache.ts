@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const cache = {
     async putObjectValue<T extends Object>(key: string, object: T, timeoutInMinutes?: number): Promise<void> {
+        console.log('putObjectValue ' + key);
         if (timeoutInMinutes) {
             await redis.setex(key, timeoutInMinutes * 60, JSON.stringify(object));
         } else {
@@ -29,6 +30,7 @@ export const cache = {
         value: string,
         timeoutInMinutes: number,
     ): Promise<void> {
+        console.log('putValueKeyedOnObject', `${keyPrefix}${JSON.stringify(object)}`);
         await redis.setex(`${keyPrefix}${JSON.stringify(object)}`, timeoutInMinutes * 60, value);
     },
 
@@ -41,6 +43,7 @@ export const cache = {
     },
 
     async putValue(key: string, value: string, timeoutInMinutes?: number): Promise<void> {
+        console.log('putValue', key);
         if (timeoutInMinutes) {
             await redis.setex(key, timeoutInMinutes * 60, value);
         } else {
