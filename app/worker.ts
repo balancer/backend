@@ -49,7 +49,7 @@ export function startWorker(app: Express) {
             //12 times per minute
             for (let i = 0; i < 12; i++) {
                 console.log('cache-pools' + i);
-                await tokenPriceService.cacheTokenPrices();
+                await balancerService.cachePools();
                 await delay(5000);
             }
             await balancerService.cachePools();
