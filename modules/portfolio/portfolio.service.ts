@@ -31,26 +31,40 @@ class PortfolioService {
     constructor() {}
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
+        console.time('getBlockFrom24HoursAgo');
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
+        console.timeEnd('getBlockFrom24HoursAgo');
+        console.time('getPortfolioData');
         const { user, previousUser } = await balancerSubgraphService.getPortfolioData(
             address,
             parseInt(previousBlock.number),
         );
+        console.timeEnd('getPortfolioData');
+        console.time('getPortfolioPoolsData');
         const { pools, previousPools } = await balancerSubgraphService.getPortfolioPoolsData(
             parseInt(previousBlock.number),
         );
+        console.timeEnd('getPortfolioPoolsData');
+        console.time('getPortfolioData');
         const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
             address,
             previousBlockNumber: parseInt(previousBlock.number),
         });
+        console.timeEnd('getPortfolioData');
+        console.time('beetsBarService.getPortfolioData');
         const { beetsBarUser, previousBeetsBarUser, beetsBar, previousBeetsBar } =
             await beetsBarService.getPortfolioData(address, parseInt(previousBlock.number));
+        console.timeEnd('beetsBarService.getPortfolioData');
+        console.time('getTokenPrices');
         const tokenPrices = await tokenPriceService.getTokenPrices();
+        console.timeEnd('getTokenPrices');
+        console.time('getHistoricalTokenPrices');
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
             previousBlock.timestamp,
             historicalTokenPrices,
         );
+        console.timeEnd('getHistoricalTokenPrices');
 
         if (!user) {
             return {
