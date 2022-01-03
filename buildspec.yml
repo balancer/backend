@@ -21,3 +21,4 @@ artifacts:
     - package.json
     - dist/**/*
     - Procfile
+    - cron.yaml
