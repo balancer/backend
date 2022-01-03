@@ -7,7 +7,7 @@ import { beetsService } from '../modules/beets/beets.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds
-    cron.schedule('*/20 * * * * *', async () => {
+    cron.schedule('*/45 * * * * *', async () => {
         try {
             console.time('cache token prices');
             await tokenPriceService.cacheTokenPrices();
@@ -28,7 +28,7 @@ export function scheduleCronJobs() {
     });
 
     //every 5 seconds
-    cron.schedule('*/5 * * * * *', async () => {
+    cron.schedule('*/30 * * * * *', async () => {
         try {
             console.time('cachePools');
             await balancerService.cachePools();
@@ -37,7 +37,7 @@ export function scheduleCronJobs() {
     });
 
     //every 3 seconds
-    cron.schedule('*/3 * * * * *', async () => {
+    cron.schedule('*/15 * * * * *', async () => {
         try {
             console.time('cacheBeetsFarmUsers');
             await beetsService.cacheBeetsFarmUsers();
