@@ -39,4 +39,5 @@ async function startServer() {
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 
+//
 startServer().finally(async () => {});
