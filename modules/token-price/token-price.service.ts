@@ -1,12 +1,12 @@
 import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
-import { balancerTokenMappings } from './lib/balancer-token-mappings';
 import { balancerPriceService } from './lib/balancer-price.service';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
+import { balancerService } from '../balancer/balancer.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -42,18 +42,18 @@ export class TokenPriceService {
 
     public async cacheTokenPrices(): Promise<TokenPrices> {
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
-        const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
+        const addresses = await this.getTokenAddresses();
         let coingeckoTokenPrices: TokenPrices = {};
         let nativeAssetPrice: Price | null = null;
 
         try {
-            coingeckoTokenPrices = await coingeckoService.getTokenPrices(coingeckoTokens);
+            coingeckoTokenPrices = await coingeckoService.getTokenPrices(addresses);
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
 
-        const missingTokens = coingeckoTokens.filter((token) => !coingeckoTokenPrices[token]);
+        const missingTokens = addresses.filter((token) => !coingeckoTokenPrices[token]);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
-            [...balancerTokens, ...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
+            [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
         );
         const tokenPrices = {
@@ -68,11 +68,11 @@ export class TokenPriceService {
     }
 
     public async cacheHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
-        const { balancerTokens, coingeckoTokens } = await this.getTokenAddresses();
+        const addresses = await this.getTokenAddresses();
         const missingTokens: string[] = [];
         const tokenPrices: TokenHistoricalPrices = {};
 
-        for (const token of coingeckoTokens) {
+        for (const token of addresses) {
             try {
                 tokenPrices[token] = await coingeckoService.getTokenHistoricalPrices(token, 30);
             } catch {
@@ -83,7 +83,7 @@ export class TokenPriceService {
             await sleep(150);
         }
 
-        for (const token of [...balancerTokens, ...missingTokens]) {
+        for (const token of [...missingTokens]) {
             tokenPrices[token] = await balancerPriceService.getHistoricalTokenPrices({
                 address: token,
                 days: 30,
@@ -96,14 +96,10 @@ export class TokenPriceService {
         return tokenPrices;
     }
 
-    private async getTokenAddresses(): Promise<{ balancerTokens: string[]; coingeckoTokens: string[] }> {
-        const { pools } = await balancerSubgraphService.getPools({ first: 1000, where: { totalShares_gt: '0' } });
+    private async getTokenAddresses(): Promise<string[]> {
+        const pools = await balancerService.getPools();
 
-        const addresses = balancerSubgraphService.getUniqueTokenAddressesFromPools(pools);
-        const balancerTokens = balancerTokenMappings.balancerPricedTokens;
-        const coingeckoTokens = addresses.filter((address) => !balancerTokens.includes(address.toLowerCase()));
-
-        return { balancerTokens, coingeckoTokens };
+        return balancerSubgraphService.getUniqueTokenAddressesFromPools(pools);
     }
 }
 
