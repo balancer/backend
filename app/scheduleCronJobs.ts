@@ -6,16 +6,15 @@ import { balancerService } from '../modules/balancer/balancer.service';
 import { beetsService } from '../modules/beets/beets.service';
 
 export function scheduleCronJobs() {
-    /*
     //every 20 seconds
-    cron.schedule('*!/20 * * * * *', async () => {
+    cron.schedule('*/20 * * * * *', async () => {
         try {
             await tokenPriceService.cacheTokenPrices();
         } catch (e) {}
     });
 
     //every five minutes
-    cron.schedule('*!/5 * * * *', async () => {
+    cron.schedule('*/5 * * * *', async () => {
         try {
             await tokenPriceService.cacheHistoricalTokenPrices();
             await beetsService.cacheBeetsFarms();
@@ -23,21 +22,21 @@ export function scheduleCronJobs() {
     });
 
     //every 5 seconds
-    cron.schedule('*!/15 * * * * *', async () => {
+    cron.schedule('*/5 * * * * *', async () => {
         try {
             await balancerService.cachePools();
         } catch (e) {}
     });
 
     //every 3 seconds
-    cron.schedule('*!/5 * * * * *', async () => {
+    cron.schedule('*/3 * * * * *', async () => {
         try {
             await beetsService.cacheBeetsFarmUsers();
         } catch (e) {}
     });
 
     //every 30 seconds
-    cron.schedule('*!/30 * * * * *', async () => {
+    cron.schedule('*/30 * * * * *', async () => {
         try {
             const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
             await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
@@ -50,5 +49,4 @@ export function scheduleCronJobs() {
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
     console.log('scheduled cron jobs');
-    */
 }
