@@ -4,7 +4,9 @@ import { balancerService } from './balancer.service';
 const balancerResolvers: Resolvers = {
     Query: {
         pools: async (parent, {}, context) => {
+            console.time('pools query');
             const pools = await balancerService.getPools();
+            console.timeEnd('pools query');
 
             return pools.map((pool) => ({
                 ...pool,
