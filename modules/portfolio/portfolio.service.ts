@@ -102,10 +102,15 @@ class PortfolioService {
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
             const date = moment.unix(parseInt(block.timestamp)).subtract(1, 'day').format('YYYY-MM-DD');
-            const cachedData = await cache.getObjectValue<UserPortfolioData>(`${CACHE_KEY_PREFIX}${date}:${address}`);
+            const cachedData = await cache.getObjectValue<UserPortfolioData | 'empty'>(
+                `${CACHE_KEY_PREFIX}${date}:${address}`,
+            );
 
             if (cachedData) {
-                portfolioHistories.push(cachedData);
+                if (cachedData !== 'empty') {
+                    portfolioHistories.push(cachedData);
+                }
+
                 continue;
             }
 
@@ -165,8 +170,12 @@ class PortfolioService {
                     portfolioHistories.push(data);
 
                     await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, data, thirtyDaysInMinutes);
+
+                    continue;
                 }
             }
+
+            await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
         }
 
         return portfolioHistories;

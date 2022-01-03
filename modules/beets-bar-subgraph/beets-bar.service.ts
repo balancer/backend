@@ -8,8 +8,10 @@ import {
     getSdk,
 } from './generated/beets-bar-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { cache } from '../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
+const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
 
 export class BeetsBarSubgraphService {
     private readonly client: GraphQLClient;
@@ -61,7 +63,15 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBar(block?: number): Promise<BeetsBarFragment> {
+        const cached = await cache.getObjectValue<BeetsBarFragment>(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`);
+
+        if (cached) {
+            return cached;
+        }
+
         const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS, block: { number: block } });
+
+        await cache.putObjectValue(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar);
 
         if (!bar) {
             return this.emptyBeetsBar;

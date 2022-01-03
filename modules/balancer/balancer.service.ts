@@ -31,7 +31,7 @@ export class BalancerService {
             return pools;
         }
 
-        return this.cachePools();
+        return [];
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
