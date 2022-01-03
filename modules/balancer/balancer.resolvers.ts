@@ -42,6 +42,28 @@ const balancerResolvers: Resolvers = {
         poolSnapshots: async (parent, { poolId }, context) => {
             return balancerService.getPoolSnapshots(poolId);
         },
+        balancerGetTopTradingPairs: async (parent, {}, context) => {
+            const tradePairSnapshots = await balancerService.getTopTradingPairs();
+
+            return tradePairSnapshots.map((snapshot) => ({
+                ...snapshot,
+                __typename: 'GqlBalancerTradePairSnapshot',
+                pair: {
+                    ...snapshot.pair,
+                    __typename: 'GqlBalancerTradePair',
+                    token0: {
+                        ...snapshot.pair.token0,
+                        __typename: 'GqlBalancerTradePairToken',
+                        symbol: snapshot.pair.token0.symbol || '',
+                    },
+                    token1: {
+                        ...snapshot.pair.token1,
+                        __typename: 'GqlBalancerTradePairToken',
+                        symbol: snapshot.pair.token1.symbol || '',
+                    },
+                },
+            }));
+        },
     },
 };
 
