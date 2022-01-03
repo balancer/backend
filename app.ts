@@ -33,7 +33,9 @@ async function startServer() {
     await server.start();
     server.applyMiddleware({ app });
 
-    //scheduleCronJobs();
+    if (process.env.WORKER === 'true') {
+        scheduleCronJobs();
+    }
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
