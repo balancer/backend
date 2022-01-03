@@ -1,10 +1,14 @@
 import { Resolvers } from '../../schema';
 import { balancerService } from './balancer.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const balancerResolvers: Resolvers = {
     Query: {
         pools: async (parent, {}, context) => {
+            const id = uuidv4();
+            console.time('pools query' + id);
             const pools = await balancerService.getPools();
+            console.timeEnd('pools query' + id);
 
             return pools.map((pool) => ({
                 ...pool,

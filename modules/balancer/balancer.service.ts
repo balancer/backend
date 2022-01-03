@@ -20,14 +20,18 @@ const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
+import { v4 as uuidv4 } from 'uuid';
 
 export class BalancerService {
     constructor() {}
 
     public async getPools(): Promise<BalancerPoolFragment[]> {
+        console.time('fetch pools from cache ' + uuidv4());
         const pools = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
+        console.timeEnd('fetch pools from cache ' + uuidv4());
 
         if (pools) {
+            console.log('return cached pools');
             return pools;
         }
 
