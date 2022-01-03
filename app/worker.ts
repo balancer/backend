@@ -14,6 +14,7 @@ export function startWorker(app: Express) {
         try {
             //3 times per minute
             for (let i = 0; i < 3; i++) {
+                console.log('cache-token-prices ' + i);
                 await tokenPriceService.cacheTokenPrices();
                 await delay(20000);
             }
@@ -25,6 +26,7 @@ export function startWorker(app: Express) {
 
     app.post('/cache-historical-token-prices', async (req, res) => {
         try {
+            console.log('cache-historical-token-prices');
             await tokenPriceService.cacheHistoricalTokenPrices();
             res.status(200).send({ message: 'success' });
         } catch (e: any) {
@@ -34,6 +36,7 @@ export function startWorker(app: Express) {
 
     app.post('/cache-beet-farms', async (req, res) => {
         try {
+            console.log('cache-beet-farms');
             await beetsService.cacheBeetsFarms();
             res.status(200).send({ message: 'success' });
         } catch (e: any) {
@@ -45,6 +48,7 @@ export function startWorker(app: Express) {
         try {
             //12 times per minute
             for (let i = 0; i < 12; i++) {
+                console.log('cache-pools' + i);
                 await tokenPriceService.cacheTokenPrices();
                 await delay(5000);
             }
@@ -59,6 +63,7 @@ export function startWorker(app: Express) {
         try {
             //20 times per minute
             for (let i = 0; i < 20; i++) {
+                console.log('cache-beet-farm-users ' + i);
                 await beetsService.cacheBeetsFarmUsers();
                 await delay(3000);
             }
@@ -73,6 +78,7 @@ export function startWorker(app: Express) {
         try {
             //2 times per minute
             for (let i = 0; i < 2; i++) {
+                console.log('cache-portfolio-pools-data ' + i);
                 const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
                 await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
                 await delay(30000);
@@ -88,6 +94,7 @@ export function startWorker(app: Express) {
         try {
             //2 times per minute
             for (let i = 0; i < 2; i++) {
+                console.log('cache-past-pools ' + i);
                 await balancerService.cachePastPools();
                 await delay(30000);
             }
@@ -102,6 +109,7 @@ export function startWorker(app: Express) {
         try {
             //2 times per minute
             for (let i = 0; i < 2; i++) {
+                console.log('cache-protocol-data ' + i);
                 await beetsService.cacheProtocolData();
                 await delay(30000);
             }
