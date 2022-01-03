@@ -13,9 +13,11 @@ const resolvers: Resolvers = {
 
             //console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
 
-            const portfolioData = await portfolioService.getPortfolio(accountAddress);
+            /*const portfolioData = await portfolioService.getPortfolio(accountAddress);
 
-            return portfolioService.mapPortfolioDataToGql(portfolioData);
+            return portfolioService.mapPortfolioDataToGql(portfolioData);*/
+
+            throw new Error('Temporarily disabled');
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
