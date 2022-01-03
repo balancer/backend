@@ -148,7 +148,7 @@ export class BlocksSubgraphService {
             },
         };
 
-        const cacheResult = await cache.getValueKeyedOnObject(DAILY_BLOCKS_CACHE_KEY, args);
+        const cacheResult = await cache.getValueKeyedOnObject(`${DAILY_BLOCKS_CACHE_KEY}:${numDays}`, args);
 
         if (cacheResult) {
             return JSON.parse(cacheResult);
@@ -169,7 +169,12 @@ export class BlocksSubgraphService {
             }
         }
 
-        await cache.putValueKeyedOnObject(DAILY_BLOCKS_CACHE_KEY, args, JSON.stringify(blocks), twentyFourHoursInSecs);
+        await cache.putValueKeyedOnObject(
+            `${DAILY_BLOCKS_CACHE_KEY}:${numDays}`,
+            args,
+            JSON.stringify(blocks),
+            twentyFourHoursInSecs,
+        );
 
         return blocks;
     }
