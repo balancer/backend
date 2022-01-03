@@ -22,9 +22,10 @@ import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { cache } from '../cache/cache';
-import { thirtyDaysInMinutes } from '../util/time';
+import { oneDayInMinutes, thirtyDaysInMinutes } from '../util/time';
 
 const CACHE_KEY_PREFIX = 'portfolio:';
+const USER_HISTORY_CACHE_KEY_PREFIX = 'portfolio:history:';
 
 class PortfolioService {
     constructor() {}
@@ -93,6 +94,16 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
+        const today = moment.utc().format('YYYY-MM-DD');
+
+        const cached = await cache.getObjectValue<UserPortfolioData[]>(
+            `${USER_HISTORY_CACHE_KEY_PREFIX}${address}:${today}`,
+        );
+
+        if (cached) {
+            return cached;
+        }
+
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const portfolioHistories: UserPortfolioData[] = [];
@@ -177,6 +188,12 @@ class PortfolioService {
 
             await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
         }
+
+        await cache.putObjectValue(
+            `${USER_HISTORY_CACHE_KEY_PREFIX}${address}:${today}`,
+            portfolioHistories,
+            oneDayInMinutes,
+        );
 
         return portfolioHistories;
     }
