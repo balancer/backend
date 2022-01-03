@@ -189,7 +189,6 @@ export enum Bar_OrderBy {
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
-    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
 export enum OrderDirection {
@@ -214,7 +213,6 @@ export type Query_MetaArgs = {
 export type QueryBarArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBarsArgs = {
@@ -223,14 +221,12 @@ export type QueryBarsArgs = {
     orderBy?: InputMaybe<Bar_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Bar_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUsersArgs = {
@@ -239,7 +235,6 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -260,7 +255,6 @@ export type Subscription_MetaArgs = {
 export type SubscriptionBarArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBarsArgs = {
@@ -269,14 +263,12 @@ export type SubscriptionBarsArgs = {
     orderBy?: InputMaybe<Bar_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Bar_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUsersArgs = {
@@ -285,7 +277,6 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 

@@ -23,6 +23,13 @@ export function scheduleCronJobs() {
         } catch (e) {}
     });
 
+    //every 30 minutes
+    cron.schedule('*/30 * * * *', async () => {
+        try {
+            await balancerService.cacheTopTradingPairs();
+        } catch (e) {}
+    });
+
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {

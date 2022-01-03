@@ -20,6 +20,8 @@ import {
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
+    BalancerTradePairSnapshotsQuery,
+    BalancerTradePairSnapshotsQueryVariables,
     BalancerUserFragment,
     BalancerUsersQueryVariables,
     getSdk,
@@ -157,6 +159,12 @@ export class BalancerSubgraphService {
 
     public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
         return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
+    }
+
+    public async getTradePairSnapshots(
+        args: BalancerTradePairSnapshotsQueryVariables,
+    ): Promise<BalancerTradePairSnapshotsQuery> {
+        return this.sdk.BalancerTradePairSnapshots(args);
     }
 
     public async getAllJoinExitsAtBlock(block: number): Promise<BalancerJoinExitFragment[]> {

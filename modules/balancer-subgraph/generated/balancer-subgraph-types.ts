@@ -280,217 +280,9 @@ export enum Balancer_OrderBy {
     TotalSwapVolume = 'totalSwapVolume',
 }
 
-export type BatchSwap = {
-    __typename?: 'BatchSwap';
-    id: Scalars['ID'];
-    routes: Array<BatchSwapRoute>;
-    swaps: Array<Swap>;
-    timestamp: Scalars['Int'];
-    user: User;
-    valueUSD: Scalars['BigDecimal'];
-};
-
-export type BatchSwapRoutesArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type BatchSwapSwapsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Swap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<Swap_Filter>;
-};
-
-export type BatchSwapRoute = {
-    __typename?: 'BatchSwapRoute';
-    batchSwap: BatchSwap;
-    id: Scalars['ID'];
-    /** Swaps in this route, properly ordered */
-    swaps: Array<Swap>;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['BigDecimal'];
-    tokenAmountOut: Scalars['BigDecimal'];
-    tokenIn: Token;
-    tokenOut: Token;
-    valueUSD: Scalars['BigDecimal'];
-};
-
-export type BatchSwapRouteSwapsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Swap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<Swap_Filter>;
-};
-
-export type BatchSwapRoute_Filter = {
-    batchSwap?: InputMaybe<Scalars['String']>;
-    batchSwap_contains?: InputMaybe<Scalars['String']>;
-    batchSwap_ends_with?: InputMaybe<Scalars['String']>;
-    batchSwap_gt?: InputMaybe<Scalars['String']>;
-    batchSwap_gte?: InputMaybe<Scalars['String']>;
-    batchSwap_in?: InputMaybe<Array<Scalars['String']>>;
-    batchSwap_lt?: InputMaybe<Scalars['String']>;
-    batchSwap_lte?: InputMaybe<Scalars['String']>;
-    batchSwap_not?: InputMaybe<Scalars['String']>;
-    batchSwap_not_contains?: InputMaybe<Scalars['String']>;
-    batchSwap_not_ends_with?: InputMaybe<Scalars['String']>;
-    batchSwap_not_in?: InputMaybe<Array<Scalars['String']>>;
-    batchSwap_not_starts_with?: InputMaybe<Scalars['String']>;
-    batchSwap_starts_with?: InputMaybe<Scalars['String']>;
-    id?: InputMaybe<Scalars['ID']>;
-    id_gt?: InputMaybe<Scalars['ID']>;
-    id_gte?: InputMaybe<Scalars['ID']>;
-    id_in?: InputMaybe<Array<Scalars['ID']>>;
-    id_lt?: InputMaybe<Scalars['ID']>;
-    id_lte?: InputMaybe<Scalars['ID']>;
-    id_not?: InputMaybe<Scalars['ID']>;
-    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
-    swaps?: InputMaybe<Array<Scalars['String']>>;
-    swaps_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    timestamp?: InputMaybe<Scalars['Int']>;
-    timestamp_gt?: InputMaybe<Scalars['Int']>;
-    timestamp_gte?: InputMaybe<Scalars['Int']>;
-    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
-    timestamp_lt?: InputMaybe<Scalars['Int']>;
-    timestamp_lte?: InputMaybe<Scalars['Int']>;
-    timestamp_not?: InputMaybe<Scalars['Int']>;
-    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
-    tokenAmountIn?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_gt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_gte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountIn_lt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_lte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_not?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountOut?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_gt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_gte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountOut_lt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_lte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_not?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenIn?: InputMaybe<Scalars['String']>;
-    tokenIn_contains?: InputMaybe<Scalars['String']>;
-    tokenIn_ends_with?: InputMaybe<Scalars['String']>;
-    tokenIn_gt?: InputMaybe<Scalars['String']>;
-    tokenIn_gte?: InputMaybe<Scalars['String']>;
-    tokenIn_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenIn_lt?: InputMaybe<Scalars['String']>;
-    tokenIn_lte?: InputMaybe<Scalars['String']>;
-    tokenIn_not?: InputMaybe<Scalars['String']>;
-    tokenIn_not_contains?: InputMaybe<Scalars['String']>;
-    tokenIn_not_ends_with?: InputMaybe<Scalars['String']>;
-    tokenIn_not_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenIn_not_starts_with?: InputMaybe<Scalars['String']>;
-    tokenIn_starts_with?: InputMaybe<Scalars['String']>;
-    tokenOut?: InputMaybe<Scalars['String']>;
-    tokenOut_contains?: InputMaybe<Scalars['String']>;
-    tokenOut_ends_with?: InputMaybe<Scalars['String']>;
-    tokenOut_gt?: InputMaybe<Scalars['String']>;
-    tokenOut_gte?: InputMaybe<Scalars['String']>;
-    tokenOut_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenOut_lt?: InputMaybe<Scalars['String']>;
-    tokenOut_lte?: InputMaybe<Scalars['String']>;
-    tokenOut_not?: InputMaybe<Scalars['String']>;
-    tokenOut_not_contains?: InputMaybe<Scalars['String']>;
-    tokenOut_not_ends_with?: InputMaybe<Scalars['String']>;
-    tokenOut_not_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenOut_not_starts_with?: InputMaybe<Scalars['String']>;
-    tokenOut_starts_with?: InputMaybe<Scalars['String']>;
-    valueUSD?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    valueUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-};
-
-export enum BatchSwapRoute_OrderBy {
-    BatchSwap = 'batchSwap',
-    Id = 'id',
-    Swaps = 'swaps',
-    Timestamp = 'timestamp',
-    TokenAmountIn = 'tokenAmountIn',
-    TokenAmountOut = 'tokenAmountOut',
-    TokenIn = 'tokenIn',
-    TokenOut = 'tokenOut',
-    ValueUsd = 'valueUSD',
-}
-
-export type BatchSwap_Filter = {
-    id?: InputMaybe<Scalars['ID']>;
-    id_gt?: InputMaybe<Scalars['ID']>;
-    id_gte?: InputMaybe<Scalars['ID']>;
-    id_in?: InputMaybe<Array<Scalars['ID']>>;
-    id_lt?: InputMaybe<Scalars['ID']>;
-    id_lte?: InputMaybe<Scalars['ID']>;
-    id_not?: InputMaybe<Scalars['ID']>;
-    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
-    routes?: InputMaybe<Array<Scalars['String']>>;
-    routes_contains?: InputMaybe<Array<Scalars['String']>>;
-    routes_not?: InputMaybe<Array<Scalars['String']>>;
-    routes_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps?: InputMaybe<Array<Scalars['String']>>;
-    swaps_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    timestamp?: InputMaybe<Scalars['Int']>;
-    timestamp_gt?: InputMaybe<Scalars['Int']>;
-    timestamp_gte?: InputMaybe<Scalars['Int']>;
-    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
-    timestamp_lt?: InputMaybe<Scalars['Int']>;
-    timestamp_lte?: InputMaybe<Scalars['Int']>;
-    timestamp_not?: InputMaybe<Scalars['Int']>;
-    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
-    user?: InputMaybe<Scalars['String']>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    valueUSD?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    valueUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-};
-
-export enum BatchSwap_OrderBy {
-    Id = 'id',
-    Routes = 'routes',
-    Swaps = 'swaps',
-    Timestamp = 'timestamp',
-    User = 'user',
-    ValueUsd = 'valueUSD',
-}
-
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
-    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
 export type GradualWeightUpdate = {
@@ -701,9 +493,7 @@ export type JoinExit_Filter = {
     tx_not_contains?: InputMaybe<Scalars['Bytes']>;
     tx_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     type?: InputMaybe<InvestType>;
-    type_in?: InputMaybe<Array<InvestType>>;
     type_not?: InputMaybe<InvestType>;
-    type_not_in?: InputMaybe<Array<InvestType>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
@@ -1739,10 +1529,6 @@ export type Query = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
-    batchSwap?: Maybe<BatchSwap>;
-    batchSwapRoute?: Maybe<BatchSwapRoute>;
-    batchSwapRoutes: Array<BatchSwapRoute>;
-    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -1788,7 +1574,6 @@ export type Query_MetaArgs = {
 export type QueryAmpUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryAmpUpdatesArgs = {
@@ -1797,20 +1582,17 @@ export type QueryAmpUpdatesArgs = {
     orderBy?: InputMaybe<AmpUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<AmpUpdate_Filter>;
 };
 
 export type QueryBalancerArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBalancerSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBalancerSnapshotsArgs = {
@@ -1819,7 +1601,6 @@ export type QueryBalancerSnapshotsArgs = {
     orderBy?: InputMaybe<BalancerSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<BalancerSnapshot_Filter>;
 };
 
@@ -1829,46 +1610,12 @@ export type QueryBalancersArgs = {
     orderBy?: InputMaybe<Balancer_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Balancer_Filter>;
-};
-
-export type QueryBatchSwapArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type QueryBatchSwapRouteArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type QueryBatchSwapRoutesArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type QueryBatchSwapsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<BatchSwap_Filter>;
 };
 
 export type QueryGradualWeightUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryGradualWeightUpdatesArgs = {
@@ -1877,14 +1624,12 @@ export type QueryGradualWeightUpdatesArgs = {
     orderBy?: InputMaybe<GradualWeightUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<GradualWeightUpdate_Filter>;
 };
 
 export type QueryInvestmentArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryInvestmentsArgs = {
@@ -1893,14 +1638,12 @@ export type QueryInvestmentsArgs = {
     orderBy?: InputMaybe<Investment_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Investment_Filter>;
 };
 
 export type QueryJoinExitArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryJoinExitsArgs = {
@@ -1909,14 +1652,12 @@ export type QueryJoinExitsArgs = {
     orderBy?: InputMaybe<JoinExit_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<JoinExit_Filter>;
 };
 
 export type QueryLatestPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryLatestPricesArgs = {
@@ -1925,14 +1666,12 @@ export type QueryLatestPricesArgs = {
     orderBy?: InputMaybe<LatestPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<LatestPrice_Filter>;
 };
 
 export type QueryPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolHistoricalLiquiditiesArgs = {
@@ -1941,20 +1680,17 @@ export type QueryPoolHistoricalLiquiditiesArgs = {
     orderBy?: InputMaybe<PoolHistoricalLiquidity_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolHistoricalLiquidity_Filter>;
 };
 
 export type QueryPoolHistoricalLiquidityArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolShareArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolSharesArgs = {
@@ -1963,14 +1699,12 @@ export type QueryPoolSharesArgs = {
     orderBy?: InputMaybe<PoolShare_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolShare_Filter>;
 };
 
 export type QueryPoolSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolSnapshotsArgs = {
@@ -1979,14 +1713,12 @@ export type QueryPoolSnapshotsArgs = {
     orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolSnapshot_Filter>;
 };
 
 export type QueryPoolTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolTokensArgs = {
@@ -1995,7 +1727,6 @@ export type QueryPoolTokensArgs = {
     orderBy?: InputMaybe<PoolToken_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolToken_Filter>;
 };
 
@@ -2005,14 +1736,12 @@ export type QueryPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type QueryPriceRateProviderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPriceRateProvidersArgs = {
@@ -2021,14 +1750,12 @@ export type QueryPriceRateProvidersArgs = {
     orderBy?: InputMaybe<PriceRateProvider_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PriceRateProvider_Filter>;
 };
 
 export type QuerySwapArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QuerySwapsArgs = {
@@ -2037,20 +1764,17 @@ export type QuerySwapsArgs = {
     orderBy?: InputMaybe<Swap_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Swap_Filter>;
 };
 
 export type QueryTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenPricesArgs = {
@@ -2059,14 +1783,12 @@ export type QueryTokenPricesArgs = {
     orderBy?: InputMaybe<TokenPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenPrice_Filter>;
 };
 
 export type QueryTokenSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenSnapshotsArgs = {
@@ -2075,7 +1797,6 @@ export type QueryTokenSnapshotsArgs = {
     orderBy?: InputMaybe<TokenSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenSnapshot_Filter>;
 };
 
@@ -2085,20 +1806,17 @@ export type QueryTokensArgs = {
     orderBy?: InputMaybe<Token_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Token_Filter>;
 };
 
 export type QueryTradePairArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTradePairSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTradePairSnapshotsArgs = {
@@ -2107,7 +1825,6 @@ export type QueryTradePairSnapshotsArgs = {
     orderBy?: InputMaybe<TradePairSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePairSnapshot_Filter>;
 };
 
@@ -2117,20 +1834,17 @@ export type QueryTradePairsArgs = {
     orderBy?: InputMaybe<TradePair_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePair_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUserInternalBalanceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUserInternalBalancesArgs = {
@@ -2139,7 +1853,6 @@ export type QueryUserInternalBalancesArgs = {
     orderBy?: InputMaybe<UserInternalBalance_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<UserInternalBalance_Filter>;
 };
 
@@ -2149,7 +1862,6 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -2163,10 +1875,6 @@ export type Subscription = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
-    batchSwap?: Maybe<BatchSwap>;
-    batchSwapRoute?: Maybe<BatchSwapRoute>;
-    batchSwapRoutes: Array<BatchSwapRoute>;
-    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -2212,7 +1920,6 @@ export type Subscription_MetaArgs = {
 export type SubscriptionAmpUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionAmpUpdatesArgs = {
@@ -2221,20 +1928,17 @@ export type SubscriptionAmpUpdatesArgs = {
     orderBy?: InputMaybe<AmpUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<AmpUpdate_Filter>;
 };
 
 export type SubscriptionBalancerArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBalancerSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBalancerSnapshotsArgs = {
@@ -2243,7 +1947,6 @@ export type SubscriptionBalancerSnapshotsArgs = {
     orderBy?: InputMaybe<BalancerSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<BalancerSnapshot_Filter>;
 };
 
@@ -2253,46 +1956,12 @@ export type SubscriptionBalancersArgs = {
     orderBy?: InputMaybe<Balancer_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Balancer_Filter>;
-};
-
-export type SubscriptionBatchSwapArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionBatchSwapRouteArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionBatchSwapRoutesArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type SubscriptionBatchSwapsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<BatchSwap_Filter>;
 };
 
 export type SubscriptionGradualWeightUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionGradualWeightUpdatesArgs = {
@@ -2301,14 +1970,12 @@ export type SubscriptionGradualWeightUpdatesArgs = {
     orderBy?: InputMaybe<GradualWeightUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<GradualWeightUpdate_Filter>;
 };
 
 export type SubscriptionInvestmentArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionInvestmentsArgs = {
@@ -2317,14 +1984,12 @@ export type SubscriptionInvestmentsArgs = {
     orderBy?: InputMaybe<Investment_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Investment_Filter>;
 };
 
 export type SubscriptionJoinExitArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionJoinExitsArgs = {
@@ -2333,14 +1998,12 @@ export type SubscriptionJoinExitsArgs = {
     orderBy?: InputMaybe<JoinExit_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<JoinExit_Filter>;
 };
 
 export type SubscriptionLatestPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionLatestPricesArgs = {
@@ -2349,14 +2012,12 @@ export type SubscriptionLatestPricesArgs = {
     orderBy?: InputMaybe<LatestPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<LatestPrice_Filter>;
 };
 
 export type SubscriptionPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolHistoricalLiquiditiesArgs = {
@@ -2365,20 +2026,17 @@ export type SubscriptionPoolHistoricalLiquiditiesArgs = {
     orderBy?: InputMaybe<PoolHistoricalLiquidity_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolHistoricalLiquidity_Filter>;
 };
 
 export type SubscriptionPoolHistoricalLiquidityArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolShareArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolSharesArgs = {
@@ -2387,14 +2045,12 @@ export type SubscriptionPoolSharesArgs = {
     orderBy?: InputMaybe<PoolShare_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolShare_Filter>;
 };
 
 export type SubscriptionPoolSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolSnapshotsArgs = {
@@ -2403,14 +2059,12 @@ export type SubscriptionPoolSnapshotsArgs = {
     orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolSnapshot_Filter>;
 };
 
 export type SubscriptionPoolTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolTokensArgs = {
@@ -2419,7 +2073,6 @@ export type SubscriptionPoolTokensArgs = {
     orderBy?: InputMaybe<PoolToken_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolToken_Filter>;
 };
 
@@ -2429,14 +2082,12 @@ export type SubscriptionPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type SubscriptionPriceRateProviderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPriceRateProvidersArgs = {
@@ -2445,14 +2096,12 @@ export type SubscriptionPriceRateProvidersArgs = {
     orderBy?: InputMaybe<PriceRateProvider_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PriceRateProvider_Filter>;
 };
 
 export type SubscriptionSwapArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionSwapsArgs = {
@@ -2461,20 +2110,17 @@ export type SubscriptionSwapsArgs = {
     orderBy?: InputMaybe<Swap_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Swap_Filter>;
 };
 
 export type SubscriptionTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenPricesArgs = {
@@ -2483,14 +2129,12 @@ export type SubscriptionTokenPricesArgs = {
     orderBy?: InputMaybe<TokenPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenPrice_Filter>;
 };
 
 export type SubscriptionTokenSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenSnapshotsArgs = {
@@ -2499,7 +2143,6 @@ export type SubscriptionTokenSnapshotsArgs = {
     orderBy?: InputMaybe<TokenSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenSnapshot_Filter>;
 };
 
@@ -2509,20 +2152,17 @@ export type SubscriptionTokensArgs = {
     orderBy?: InputMaybe<Token_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Token_Filter>;
 };
 
 export type SubscriptionTradePairArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTradePairSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTradePairSnapshotsArgs = {
@@ -2531,7 +2171,6 @@ export type SubscriptionTradePairSnapshotsArgs = {
     orderBy?: InputMaybe<TradePairSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePairSnapshot_Filter>;
 };
 
@@ -2541,20 +2180,17 @@ export type SubscriptionTradePairsArgs = {
     orderBy?: InputMaybe<TradePair_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePair_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUserInternalBalanceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUserInternalBalancesArgs = {
@@ -2563,7 +2199,6 @@ export type SubscriptionUserInternalBalancesArgs = {
     orderBy?: InputMaybe<UserInternalBalance_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<UserInternalBalance_Filter>;
 };
 
@@ -2573,7 +2208,6 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -3888,6 +3522,44 @@ export type BalancerPortfolioPoolsDataQuery = {
     }>;
 };
 
+export type BalancerTradePairSnapshotsQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<TradePairSnapshot_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<TradePairSnapshot_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerTradePairSnapshotsQuery = {
+    __typename?: 'Query';
+    tradePairSnapshots: Array<{
+        __typename?: 'TradePairSnapshot';
+        id: string;
+        totalSwapFee: string;
+        totalSwapVolume: string;
+        timestamp: number;
+        pair: {
+            __typename?: 'TradePair';
+            token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+            token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        };
+    }>;
+};
+
+export type BalancerTradePairSnapshotFragment = {
+    __typename?: 'TradePairSnapshot';
+    id: string;
+    totalSwapFee: string;
+    totalSwapVolume: string;
+    timestamp: number;
+    pair: {
+        __typename?: 'TradePair';
+        token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+    };
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
@@ -3997,6 +3669,24 @@ export const BalancerJoinExitFragmentDoc = gql`
         pool {
             id
             tokensList
+        }
+    }
+`;
+export const BalancerTradePairSnapshotFragmentDoc = gql`
+    fragment BalancerTradePairSnapshot on TradePairSnapshot {
+        id
+        totalSwapFee
+        totalSwapVolume
+        timestamp
+        pair {
+            token0 {
+                address
+                symbol
+            }
+            token1 {
+                address
+                symbol
+            }
         }
     }
 `;
@@ -4232,6 +3922,28 @@ export const BalancerPortfolioPoolsDataDocument = gql`
     }
     ${BalancerPoolFragmentDoc}
 `;
+export const BalancerTradePairSnapshotsDocument = gql`
+    query BalancerTradePairSnapshots(
+        $skip: Int
+        $first: Int
+        $orderBy: TradePairSnapshot_orderBy
+        $orderDirection: OrderDirection
+        $where: TradePairSnapshot_filter
+        $block: Block_height
+    ) {
+        tradePairSnapshots(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerTradePairSnapshot
+        }
+    }
+    ${BalancerTradePairSnapshotFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -4410,6 +4122,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerPortfolioPoolsData',
+            );
+        },
+        BalancerTradePairSnapshots(
+            variables?: BalancerTradePairSnapshotsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerTradePairSnapshotsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerTradePairSnapshotsQuery>(BalancerTradePairSnapshotsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerTradePairSnapshots',
             );
         },
     };
