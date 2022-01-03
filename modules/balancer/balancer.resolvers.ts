@@ -40,6 +40,10 @@ const balancerResolvers: Resolvers = {
             };
         },
         poolSnapshots: async (parent, { poolId }, context) => {
+            if (poolId === '') {
+                throw new Error('invalid pool id');
+            }
+
             return balancerService.getPoolSnapshots(poolId);
         },
     },
