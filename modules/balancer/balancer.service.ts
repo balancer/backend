@@ -28,7 +28,7 @@ export class BalancerService {
     public async getPools(): Promise<BalancerPoolFragment[]> {
         console.time('fetch pools from cache ' + uuidv4());
         const pools = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
-        console.timeEnd('fetch pools from cache' + uuidv4());
+        console.timeEnd('fetch pools from cache ' + uuidv4());
 
         if (pools) {
             console.log('return cached pools');
