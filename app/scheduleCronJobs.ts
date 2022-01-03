@@ -38,13 +38,6 @@ export function scheduleCronJobs() {
         } catch (e) {}
     });
 
-    //every 3 seconds
-    cron.schedule('*/3 * * * * *', async () => {
-        try {
-            await beetsService.cacheBeetsFarmUsers();
-        } catch (e) {}
-    });
-
     //every 30 seconds
     cron.schedule('*/30 * * * * *', async () => {
         try {
