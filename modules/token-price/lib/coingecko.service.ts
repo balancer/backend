@@ -116,11 +116,6 @@ export class CoingeckoService {
         for (const mappedToken of mappedTokens) {
             if (mappedToken.originalAddress && results[mappedToken.address]) {
                 prices[this.getAddress(mappedToken.originalAddress)] = results[mappedToken.address];
-
-                //delete any addresses that fail the eth address parsing
-                if (!isAddress(mappedToken.address)) {
-                    delete prices[mappedToken.address];
-                }
             }
         }
 
