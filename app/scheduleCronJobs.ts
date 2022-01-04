@@ -22,14 +22,14 @@ export function scheduleCronJobs() {
     });
 
     //every 5 seconds
-    cron.schedule('*/30 * * * * *', async () => {
+    cron.schedule('*/5 * * * * *', async () => {
         try {
             await balancerService.cachePools();
         } catch (e) {}
     });
 
     //every 3 seconds
-    cron.schedule('*/15 * * * * *', async () => {
+    cron.schedule('*/3 * * * * *', async () => {
         try {
             await beetsService.cacheBeetsFarmUsers();
         } catch (e) {}
