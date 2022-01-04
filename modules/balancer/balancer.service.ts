@@ -6,7 +6,6 @@ import {
     Pool_OrderBy,
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { sanityClient } from '../sanity/sanity';
-import { cache } from '../cache/cache';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
@@ -14,32 +13,33 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { GqlBalancerPoolSnapshot } from '../../schema';
 import _ from 'lodash';
-import { oneDayInMinutes } from '../util/time';
+import { twentyFourHoursInMs } from '../util/time';
+import { CacheClass, Cache } from 'memory-cache';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
-import { v4 as uuidv4 } from 'uuid';
 
 export class BalancerService {
-    constructor() {}
+    cache: CacheClass<string, any>;
+
+    constructor() {
+        this.cache = new Cache<string, any>();
+    }
 
     public async getPools(): Promise<BalancerPoolFragment[]> {
-        console.time('fetch pools from cache ' + uuidv4());
-        const pools = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
-        console.timeEnd('fetch pools from cache ' + uuidv4());
+        const pools = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (pools) {
-            console.log('return cached pools');
             return pools;
         }
 
-        return [];
+        return this.cachePools();
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
-        const pools = await cache.getObjectValue<BalancerPoolFragment[]>(PAST_POOLS_CACHE_KEY);
+        const pools = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (pools) {
             return pools;
@@ -49,7 +49,7 @@ export class BalancerService {
     }
 
     public async getLatestPrice(id: string): Promise<BalancerLatestPriceFragment | null> {
-        const cached = await cache.getObjectValue<BalancerLatestPriceFragment>(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`);
+        const cached = this.cache.get(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`) as BalancerLatestPriceFragment | null;
 
         if (cached) {
             return cached;
@@ -58,7 +58,7 @@ export class BalancerService {
         const latestPrice = await balancerSubgraphService.getLatestPrice(id);
 
         if (latestPrice) {
-            await cache.putObjectValue(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
+            this.cache.put(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
         }
 
         return latestPrice;
@@ -91,7 +91,7 @@ export class BalancerService {
             provider,
         );
 
-        await cache.putObjectValue(POOLS_CACHE_KEY, filteredWithOnChainBalances, 30);
+        this.cache.put(POOLS_CACHE_KEY, filteredWithOnChainBalances);
 
         return filteredWithOnChainBalances;
     }
@@ -117,7 +117,7 @@ export class BalancerService {
             return true;
         });
 
-        await cache.putObjectValue(PAST_POOLS_CACHE_KEY, filtered, 30);
+        this.cache.put(PAST_POOLS_CACHE_KEY, filtered);
 
         return filtered;
     }
@@ -126,9 +126,9 @@ export class BalancerService {
         const snapshots: GqlBalancerPoolSnapshot[] = [];
         const blocks = await blocksSubgraphService.getDailyBlocks(60);
 
-        const cached = await cache.getObjectValue<GqlBalancerPoolSnapshot[]>(
-            `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
-        );
+        const cached = this.cache.get(`${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`) as
+            | GqlBalancerPoolSnapshot[]
+            | null;
 
         if (cached) {
             return cached;
@@ -180,10 +180,10 @@ export class BalancerService {
 
         const orderedSnapshots = _.orderBy(snapshots, 'timestamp', 'asc');
 
-        await cache.putObjectValue(
+        this.cache.put(
             `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
             orderedSnapshots,
-            oneDayInMinutes,
+            twentyFourHoursInMs,
         );
 
         return orderedSnapshots;
