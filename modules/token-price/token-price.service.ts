@@ -7,19 +7,27 @@ import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
+import { Cache, CacheClass } from 'memory-cache';
+import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
 
 export class TokenPriceService {
+    cache: CacheClass<string, any>;
+
+    constructor() {
+        this.cache = new Cache<string, any>();
+    }
+
     public async getTokenPrices(): Promise<TokenPrices> {
-        const tokenPrices = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
+        const tokenPrices = this.cache.get(TOKEN_PRICES_CACHE_KEY) as TokenPrices | null;
 
         return tokenPrices || {};
     }
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
-        const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+        const tokenPrices = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
 
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
@@ -62,7 +70,7 @@ export class TokenPriceService {
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
         };
 
-        await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
+        this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, thirtyMinInMs);
 
         return tokenPrices;
     }
@@ -91,7 +99,7 @@ export class TokenPriceService {
             });
         }
 
-        await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
+        this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;
     }

@@ -13,13 +13,11 @@ export const cache = {
 
     async getObjectValue<T extends Object>(key: string): Promise<T | null> {
         const id = uuidv4();
-        console.time('cache getObjectValue ' + id);
+        console.time('cache getObjectValue ' + key + ' ' + id);
         const response = await redis.get(key);
-        console.timeEnd('cache getObjectValue ' + id);
+        console.timeEnd('cache getObjectValue ' + key + ' ' + id);
 
-        console.time('cache parse ' + id);
         const parsed = response ? JSON.parse(response) : null;
-        console.timeEnd('cache parse ' + id);
 
         return parsed;
     },
