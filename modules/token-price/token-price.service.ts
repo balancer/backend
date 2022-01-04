@@ -3,12 +3,11 @@ import { coingeckoService } from './lib/coingecko.service';
 import { balancerTokenMappings } from './lib/balancer-token-mappings';
 import { balancerPriceService } from './lib/balancer-price.service';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
 import { Cache, CacheClass } from 'memory-cache';
-import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
+import { thirtyMinInMs } from '../util/time';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';

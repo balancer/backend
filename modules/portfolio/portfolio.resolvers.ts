@@ -9,15 +9,13 @@ import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.servic
 const resolvers: Resolvers = {
     Query: {
         portfolioGetUserPortfolio: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
+            const accountAddress = getRequiredAccountAddress(context);
 
             //console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
 
             const portfolioData = await portfolioService.getPortfolio(accountAddress);
 
-            return portfolioService.mapPortfolioDataToGql(portfolioData);*/
-
-            throw new Error('disabled');
+            return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
