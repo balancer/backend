@@ -4,6 +4,7 @@ import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgrap
 import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-subgraph.service';
 import { balancerService } from '../modules/balancer/balancer.service';
 import { beetsService } from '../modules/beets/beets.service';
+import { beetsBarService } from '../modules/beets-bar-subgraph/beets-bar.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds
@@ -18,6 +19,8 @@ export function scheduleCronJobs() {
         try {
             await tokenPriceService.cacheHistoricalTokenPrices();
             await beetsService.cacheBeetsFarms();
+            await beetsBarService.cacheFbeetsApr();
+            await blocksSubgraphService.cacheAverageBlockTime();
         } catch (e) {}
     });
 
