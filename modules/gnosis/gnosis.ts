@@ -3,6 +3,8 @@ import { ethers, providers } from 'ethers';
 import { env } from '../../app/env';
 import { cache } from '../cache/cache';
 import { getAddress } from 'ethers/lib/utils';
+import { Cache, CacheClass } from 'memory-cache';
+import { GraphQLClient } from 'graphql-request';
 
 const CACHE_KEY_PREFIX = 'gnosis-address-is-multisig_';
 const TIMEOUT = 2592000; //30 days

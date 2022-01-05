@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
 import {
     BeetsBarFragment,
     BeetsBarUserFragment,
@@ -8,9 +8,8 @@ import {
     getSdk,
 } from './generated/beets-bar-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
-import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
+import { twentyFourHoursInMs } from '../util/time';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
@@ -80,7 +79,7 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBar(block?: number): Promise<BeetsBarFragment> {
-        const cached = await cache.getObjectValue<BeetsBarFragment>(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`);
+        const cached = this.cache.get(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`) as BeetsBarFragment | null;
 
         if (cached) {
             return cached;
@@ -88,7 +87,7 @@ export class BeetsBarSubgraphService {
 
         const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS, block: { number: block } });
 
-        await cache.putObjectValue(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar);
+        this.cache.put(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar, twentyFourHoursInMs);
 
         if (!bar) {
             return this.emptyBeetsBar;
@@ -102,18 +101,9 @@ export class BeetsBarSubgraphService {
     }
 
     public async getUserAtBlock(address: string, block: number): Promise<BeetsBarUserFragment | null> {
-        const users = await this.getAllUsersAtBlock(block);
+        const { users } = await this.sdk.BeetsBarUsers({ where: { address }, block: { number: block } });
 
         return users.find((user) => user.id === address) || null;
-    }
-
-    public async getAllUsersAtBlock(block: number): Promise<BeetsBarUserFragment[]> {
-        return subgraphLoadAllAtBlock<BeetsBarUserFragment>(
-            this.sdk.BeetsBarUsers,
-            'users',
-            block,
-            ALL_USERS_CACHE_KEY,
-        );
     }
 
     public async clearCacheAtBlock(block: number) {

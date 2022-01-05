@@ -27,27 +27,6 @@ export async function subgraphLoadAll<T>(
     return all;
 }
 
-export async function subgraphLoadAllAtBlock<T>(
-    request: (variables: any) => Promise<any>,
-    resultKey: string,
-    block: number,
-    cacheKey: string,
-    args: any = {},
-    cacheTimeout: number = thirtyDaysInSeconds,
-): Promise<T[]> {
-    const cachedResults = await cache.getObjectValue<T[]>(`${cacheKey}_${block}`);
-
-    if (cachedResults) {
-        return cachedResults;
-    }
-
-    const results = await subgraphLoadAll<T>(request, resultKey, { ...args, block: { number: block } });
-
-    await cache.putObjectValue(`${cacheKey}_${block}`, results, cacheTimeout);
-
-    return results;
-}
-
 export async function subgraphPurgeCacheKeyAtBlock(cacheKey: string, block: number): Promise<number> {
     return cache.deleteKey(`${cacheKey}_${block}`);
 }

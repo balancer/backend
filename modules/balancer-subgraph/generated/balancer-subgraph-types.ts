@@ -280,213 +280,6 @@ export enum Balancer_OrderBy {
     TotalSwapVolume = 'totalSwapVolume',
 }
 
-export type BatchSwap = {
-    __typename?: 'BatchSwap';
-    id: Scalars['ID'];
-    routes: Array<BatchSwapRoute>;
-    swaps: Array<Swap>;
-    timestamp: Scalars['Int'];
-    user: User;
-    valueUSD: Scalars['BigDecimal'];
-};
-
-export type BatchSwapRoutesArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type BatchSwapSwapsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Swap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<Swap_Filter>;
-};
-
-export type BatchSwapRoute = {
-    __typename?: 'BatchSwapRoute';
-    batchSwap: BatchSwap;
-    id: Scalars['ID'];
-    /** Swaps in this route, properly ordered */
-    swaps: Array<Swap>;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['BigDecimal'];
-    tokenAmountOut: Scalars['BigDecimal'];
-    tokenIn: Token;
-    tokenOut: Token;
-    valueUSD: Scalars['BigDecimal'];
-};
-
-export type BatchSwapRouteSwapsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Swap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<Swap_Filter>;
-};
-
-export type BatchSwapRoute_Filter = {
-    batchSwap?: InputMaybe<Scalars['String']>;
-    batchSwap_contains?: InputMaybe<Scalars['String']>;
-    batchSwap_ends_with?: InputMaybe<Scalars['String']>;
-    batchSwap_gt?: InputMaybe<Scalars['String']>;
-    batchSwap_gte?: InputMaybe<Scalars['String']>;
-    batchSwap_in?: InputMaybe<Array<Scalars['String']>>;
-    batchSwap_lt?: InputMaybe<Scalars['String']>;
-    batchSwap_lte?: InputMaybe<Scalars['String']>;
-    batchSwap_not?: InputMaybe<Scalars['String']>;
-    batchSwap_not_contains?: InputMaybe<Scalars['String']>;
-    batchSwap_not_ends_with?: InputMaybe<Scalars['String']>;
-    batchSwap_not_in?: InputMaybe<Array<Scalars['String']>>;
-    batchSwap_not_starts_with?: InputMaybe<Scalars['String']>;
-    batchSwap_starts_with?: InputMaybe<Scalars['String']>;
-    id?: InputMaybe<Scalars['ID']>;
-    id_gt?: InputMaybe<Scalars['ID']>;
-    id_gte?: InputMaybe<Scalars['ID']>;
-    id_in?: InputMaybe<Array<Scalars['ID']>>;
-    id_lt?: InputMaybe<Scalars['ID']>;
-    id_lte?: InputMaybe<Scalars['ID']>;
-    id_not?: InputMaybe<Scalars['ID']>;
-    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
-    swaps?: InputMaybe<Array<Scalars['String']>>;
-    swaps_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    timestamp?: InputMaybe<Scalars['Int']>;
-    timestamp_gt?: InputMaybe<Scalars['Int']>;
-    timestamp_gte?: InputMaybe<Scalars['Int']>;
-    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
-    timestamp_lt?: InputMaybe<Scalars['Int']>;
-    timestamp_lte?: InputMaybe<Scalars['Int']>;
-    timestamp_not?: InputMaybe<Scalars['Int']>;
-    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
-    tokenAmountIn?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_gt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_gte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountIn_lt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_lte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_not?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountIn_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountOut?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_gt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_gte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenAmountOut_lt?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_lte?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_not?: InputMaybe<Scalars['BigDecimal']>;
-    tokenAmountOut_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    tokenIn?: InputMaybe<Scalars['String']>;
-    tokenIn_contains?: InputMaybe<Scalars['String']>;
-    tokenIn_ends_with?: InputMaybe<Scalars['String']>;
-    tokenIn_gt?: InputMaybe<Scalars['String']>;
-    tokenIn_gte?: InputMaybe<Scalars['String']>;
-    tokenIn_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenIn_lt?: InputMaybe<Scalars['String']>;
-    tokenIn_lte?: InputMaybe<Scalars['String']>;
-    tokenIn_not?: InputMaybe<Scalars['String']>;
-    tokenIn_not_contains?: InputMaybe<Scalars['String']>;
-    tokenIn_not_ends_with?: InputMaybe<Scalars['String']>;
-    tokenIn_not_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenIn_not_starts_with?: InputMaybe<Scalars['String']>;
-    tokenIn_starts_with?: InputMaybe<Scalars['String']>;
-    tokenOut?: InputMaybe<Scalars['String']>;
-    tokenOut_contains?: InputMaybe<Scalars['String']>;
-    tokenOut_ends_with?: InputMaybe<Scalars['String']>;
-    tokenOut_gt?: InputMaybe<Scalars['String']>;
-    tokenOut_gte?: InputMaybe<Scalars['String']>;
-    tokenOut_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenOut_lt?: InputMaybe<Scalars['String']>;
-    tokenOut_lte?: InputMaybe<Scalars['String']>;
-    tokenOut_not?: InputMaybe<Scalars['String']>;
-    tokenOut_not_contains?: InputMaybe<Scalars['String']>;
-    tokenOut_not_ends_with?: InputMaybe<Scalars['String']>;
-    tokenOut_not_in?: InputMaybe<Array<Scalars['String']>>;
-    tokenOut_not_starts_with?: InputMaybe<Scalars['String']>;
-    tokenOut_starts_with?: InputMaybe<Scalars['String']>;
-    valueUSD?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    valueUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-};
-
-export enum BatchSwapRoute_OrderBy {
-    BatchSwap = 'batchSwap',
-    Id = 'id',
-    Swaps = 'swaps',
-    Timestamp = 'timestamp',
-    TokenAmountIn = 'tokenAmountIn',
-    TokenAmountOut = 'tokenAmountOut',
-    TokenIn = 'tokenIn',
-    TokenOut = 'tokenOut',
-    ValueUsd = 'valueUSD',
-}
-
-export type BatchSwap_Filter = {
-    id?: InputMaybe<Scalars['ID']>;
-    id_gt?: InputMaybe<Scalars['ID']>;
-    id_gte?: InputMaybe<Scalars['ID']>;
-    id_in?: InputMaybe<Array<Scalars['ID']>>;
-    id_lt?: InputMaybe<Scalars['ID']>;
-    id_lte?: InputMaybe<Scalars['ID']>;
-    id_not?: InputMaybe<Scalars['ID']>;
-    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
-    routes?: InputMaybe<Array<Scalars['String']>>;
-    routes_contains?: InputMaybe<Array<Scalars['String']>>;
-    routes_not?: InputMaybe<Array<Scalars['String']>>;
-    routes_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps?: InputMaybe<Array<Scalars['String']>>;
-    swaps_contains?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not?: InputMaybe<Array<Scalars['String']>>;
-    swaps_not_contains?: InputMaybe<Array<Scalars['String']>>;
-    timestamp?: InputMaybe<Scalars['Int']>;
-    timestamp_gt?: InputMaybe<Scalars['Int']>;
-    timestamp_gte?: InputMaybe<Scalars['Int']>;
-    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
-    timestamp_lt?: InputMaybe<Scalars['Int']>;
-    timestamp_lte?: InputMaybe<Scalars['Int']>;
-    timestamp_not?: InputMaybe<Scalars['Int']>;
-    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
-    user?: InputMaybe<Scalars['String']>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    valueUSD?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    valueUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not?: InputMaybe<Scalars['BigDecimal']>;
-    valueUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-};
-
-export enum BatchSwap_OrderBy {
-    Id = 'id',
-    Routes = 'routes',
-    Swaps = 'swaps',
-    Timestamp = 'timestamp',
-    User = 'user',
-    ValueUsd = 'valueUSD',
-}
-
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
@@ -700,9 +493,7 @@ export type JoinExit_Filter = {
     tx_not_contains?: InputMaybe<Scalars['Bytes']>;
     tx_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     type?: InputMaybe<InvestType>;
-    type_in?: InputMaybe<Array<InvestType>>;
     type_not?: InputMaybe<InvestType>;
-    type_not_in?: InputMaybe<Array<InvestType>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
@@ -1738,10 +1529,6 @@ export type Query = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
-    batchSwap?: Maybe<BatchSwap>;
-    batchSwapRoute?: Maybe<BatchSwapRoute>;
-    batchSwapRoutes: Array<BatchSwapRoute>;
-    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -1824,34 +1611,6 @@ export type QueryBalancersArgs = {
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<Balancer_Filter>;
-};
-
-export type QueryBatchSwapArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-};
-
-export type QueryBatchSwapRouteArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-};
-
-export type QueryBatchSwapRoutesArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type QueryBatchSwapsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwap_Filter>;
 };
 
 export type QueryGradualWeightUpdateArgs = {
@@ -2116,10 +1875,6 @@ export type Subscription = {
     balancerSnapshot?: Maybe<BalancerSnapshot>;
     balancerSnapshots: Array<BalancerSnapshot>;
     balancers: Array<Balancer>;
-    batchSwap?: Maybe<BatchSwap>;
-    batchSwapRoute?: Maybe<BatchSwapRoute>;
-    batchSwapRoutes: Array<BatchSwapRoute>;
-    batchSwaps: Array<BatchSwap>;
     gradualWeightUpdate?: Maybe<GradualWeightUpdate>;
     gradualWeightUpdates: Array<GradualWeightUpdate>;
     investment?: Maybe<Investment>;
@@ -2202,34 +1957,6 @@ export type SubscriptionBalancersArgs = {
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<Balancer_Filter>;
-};
-
-export type SubscriptionBatchSwapArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-};
-
-export type SubscriptionBatchSwapRouteArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-};
-
-export type SubscriptionBatchSwapRoutesArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwapRoute_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwapRoute_Filter>;
-};
-
-export type SubscriptionBatchSwapsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<BatchSwap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<BatchSwap_Filter>;
 };
 
 export type SubscriptionGradualWeightUpdateArgs = {

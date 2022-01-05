@@ -13,7 +13,7 @@ import {
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
 import { BalancerUserFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
@@ -58,15 +58,6 @@ export class MasterchefSubgraphService {
 
     public getFarmForPoolAddress(poolAddress: string, farms: FarmFragment[]): FarmFragment | null {
         return farms.find((farm) => farm.pair.toLowerCase() === poolAddress.toLowerCase()) || null;
-    }
-
-    public async getAllFarmUsersAtBlock(block: number): Promise<FarmUserFragment[]> {
-        return subgraphLoadAllAtBlock<FarmUserFragment>(
-            this.sdk.MasterchefUsers,
-            'farmUsers',
-            block,
-            ALL_FARM_USERS_CACHE_KEY,
-        );
     }
 
     public async clearCacheAtBlock(block: number) {
