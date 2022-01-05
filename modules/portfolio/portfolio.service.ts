@@ -24,7 +24,7 @@ import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/ge
 import { cache } from '../cache/cache';
 import { thirtyDaysInMinutes } from '../util/time';
 
-const CACHE_KEY_PREFIX = 'user-portfolio:';
+const CACHE_KEY_PREFIX = 'user-portfolio-history:';
 
 class PortfolioService {
     constructor() {}
