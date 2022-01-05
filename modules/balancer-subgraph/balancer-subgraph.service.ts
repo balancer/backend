@@ -135,7 +135,11 @@ export class BalancerSubgraphService {
             return cached;
         }
 
-        const { pools } = await this.sdk.BalancerPools({ where: { totalShares_gt: '0' }, block: { number: block } });
+        const { pools } = await this.sdk.BalancerPools({
+            first: 1000,
+            where: { totalShares_gt: '0' },
+            block: { number: block },
+        });
 
         this.cache.put(`${ALL_POOLS_CACHE_KEY}:${block}`, pools, twentyFourHoursInMs);
 
