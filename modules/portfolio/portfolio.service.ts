@@ -24,7 +24,7 @@ import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/ge
 import { cache } from '../cache/cache';
 import { thirtyDaysInMinutes } from '../util/time';
 
-const CACHE_KEY_PREFIX = 'portfolio:';
+const CACHE_KEY_PREFIX = 'user-portfolio:';
 
 class PortfolioService {
     constructor() {}
@@ -97,6 +97,11 @@ class PortfolioService {
         const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const portfolioHistories: UserPortfolioData[] = [];
 
+        //historical token prices haven't yet loaded, bail out of here
+        if (Object.keys(historicalTokenPrices).length === 0) {
+            return [];
+        }
+
         for (let i = 0; i < blocks.length - 1; i++) {
             const block = blocks[i];
             const previousBlock = blocks[i + 1];
@@ -120,24 +125,28 @@ class PortfolioService {
                 where: { address },
                 block: { number: blockNumber },
             });
-            const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
-            const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
-            const { farmUsers: previousFarmUsers } = await masterchefService.getFarmUsers({
-                where: { address },
-                block: { number: parseInt(previousBlock.number) },
-            });
             const previousUser = await balancerSubgraphService.getUserAtBlock(address, parseInt(previousBlock.number));
-            const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
-                previousBlock.timestamp,
-                historicalTokenPrices,
-            );
-            const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
-            const previousBeetsBar = await beetsBarService.getBeetsBar(parseInt(previousBlock.number));
-            const beetsBarUser = await beetsBarService.getUserAtBlock(address, blockNumber);
-            const previousBeetsBarUser = await beetsBarService.getUserAtBlock(address, parseInt(previousBlock.number));
-            //const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
 
             if (user && previousUser) {
+                const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
+                const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+                const { farmUsers: previousFarmUsers } = await masterchefService.getFarmUsers({
+                    where: { address },
+                    block: { number: parseInt(previousBlock.number) },
+                });
+                const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
+                    previousBlock.timestamp,
+                    historicalTokenPrices,
+                );
+                const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
+                const previousBeetsBar = await beetsBarService.getBeetsBar(parseInt(previousBlock.number));
+                const beetsBarUser = await beetsBarService.getUserAtBlock(address, blockNumber);
+                const previousBeetsBarUser = await beetsBarService.getUserAtBlock(
+                    address,
+                    parseInt(previousBlock.number),
+                );
+                //const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
+
                 const poolData = this.getUserPoolData(
                     user,
                     previousUser,
@@ -174,12 +183,10 @@ class PortfolioService {
                     portfolioHistories.push(data);
 
                     await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, data, thirtyDaysInMinutes);
-
-                    continue;
                 }
+            } else {
+                await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
             }
-
-            await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
         }
 
         return portfolioHistories;

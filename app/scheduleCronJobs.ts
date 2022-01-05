@@ -8,7 +8,7 @@ import { beetsBarService } from '../modules/beets-bar-subgraph/beets-bar.service
 
 export function scheduleCronJobs() {
     //every 20 seconds
-    cron.schedule('*/45 * * * * *', async () => {
+    cron.schedule('*/20 * * * * *', async () => {
         try {
             await tokenPriceService.cacheTokenPrices();
         } catch (e) {}
@@ -18,8 +18,23 @@ export function scheduleCronJobs() {
     cron.schedule('*/5 * * * *', async () => {
         try {
             await tokenPriceService.cacheHistoricalTokenPrices();
+        } catch (e) {}
+    });
+
+    cron.schedule('*/5 * * * *', async () => {
+        try {
             await beetsService.cacheBeetsFarms();
+        } catch (e) {}
+    });
+
+    cron.schedule('*/5 * * * *', async () => {
+        try {
             await beetsBarService.cacheFbeetsApr();
+        } catch (e) {}
+    });
+
+    cron.schedule('*/5 * * * *', async () => {
+        try {
             await blocksSubgraphService.cacheAverageBlockTime();
         } catch (e) {}
     });
