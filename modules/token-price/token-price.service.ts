@@ -6,7 +6,8 @@ import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
-import { Cache, CacheClass } from 'memory-cache';
+import { cache } from '../cache/cache';
+import { CacheClass, Cache } from 'memory-cache';
 import { thirtyMinInMs } from '../util/time';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
@@ -20,13 +21,33 @@ export class TokenPriceService {
     }
 
     public async getTokenPrices(): Promise<TokenPrices> {
-        const tokenPrices = this.cache.get(TOKEN_PRICES_CACHE_KEY) as TokenPrices | null;
+        const memCached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as TokenPrices | null;
+
+        if (memCached) {
+            return memCached;
+        }
+
+        const tokenPrices = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices);
+        }
 
         return tokenPrices || {};
     }
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
-        const tokenPrices = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
+        const memCached = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
+
+        if (memCached) {
+            return memCached;
+        }
+
+        const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
+        }
 
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
@@ -70,6 +91,7 @@ export class TokenPriceService {
         };
 
         this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, thirtyMinInMs);
+        await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
 
         return tokenPrices;
     }
@@ -99,6 +121,7 @@ export class TokenPriceService {
         }
 
         this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
+        await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;
     }
