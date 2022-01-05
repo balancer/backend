@@ -16,13 +16,11 @@ const resolvers: Resolvers = {
             return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
+            const accountAddress = getRequiredAccountAddress(context);
 
             const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
 
-            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));*/
-
-            return [];
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
     },
     //we're forced to have at least one mutation

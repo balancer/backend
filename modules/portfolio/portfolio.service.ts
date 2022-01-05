@@ -14,17 +14,25 @@ import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
+import {
+    PortfolioCachedUserData,
+    PortfolioCachedUserDataEntry,
+    UserPoolData,
+    UserPortfolioData,
+    UserTokenData,
+} from './portfolio-types';
 import moment from 'moment-timezone';
 import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
+import { sanityClient } from '../sanity/sanity';
+import { BlockFragment } from '../blocks-subgraph/generated/blocks-subgraph-types';
 import { cache } from '../cache/cache';
-import { thirtyDaysInMinutes } from '../util/time';
+import { oneDayInMinutes } from '../util/time';
 
-const CACHE_KEY_PREFIX = 'user-portfolio-history:';
+const CACHE_KEY_PREFIX = 'user-portfolio-history-all:';
 
 class PortfolioService {
     constructor() {}
@@ -93,6 +101,12 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
+        const cachedPortfolioHistory = await this.getCachedPortfolioHistory(address);
+
+        if (cachedPortfolioHistory) {
+            return cachedPortfolioHistory;
+        }
+
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const portfolioHistories: UserPortfolioData[] = [];
@@ -102,18 +116,18 @@ class PortfolioService {
             return [];
         }
 
+        const cachedUserData = await this.getCachedPortfolioData(address);
+
         for (let i = 0; i < blocks.length - 1; i++) {
             const block = blocks[i];
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
             const date = moment.unix(parseInt(block.timestamp)).subtract(1, 'day').format('YYYY-MM-DD');
-            const cachedData = await cache.getObjectValue<UserPortfolioData | 'empty'>(
-                `${CACHE_KEY_PREFIX}${date}:${address}`,
-            );
+            const cachedData = this.getPortfolioHistoryEntryForDate(cachedUserData, date);
 
             if (cachedData) {
-                if (cachedData !== 'empty') {
-                    portfolioHistories.push(cachedData);
+                if (!cachedData.empty) {
+                    portfolioHistories.push(JSON.parse(cachedData.data));
                 }
 
                 continue;
@@ -162,8 +176,6 @@ class PortfolioService {
                     previousBeetsBarUser,
                 );
                 const tokens = this.tokensFromUserPoolData(poolData);
-                //const joinExits = allJoinExits.filter((joinExit) => joinExit.user.id === user.id);
-                //const summedJoinExits = this.sumJoinExits(joinExits, tokenPrices);
 
                 const totalValue = _.sumBy(poolData, 'totalValue');
 
@@ -182,12 +194,14 @@ class PortfolioService {
 
                     portfolioHistories.push(data);
 
-                    await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, data, thirtyDaysInMinutes);
+                    this.cachePortfolioHistoryEntry(address, date, block, data).catch();
                 }
             } else {
-                await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
+                this.cachePortfolioHistoryEntry(address, date, block).catch();
             }
         }
+
+        await this.cachePortfolioHistory(address, portfolioHistories);
 
         return portfolioHistories;
     }
@@ -422,6 +436,78 @@ class PortfolioService {
             pricePerToken: `${token.pricePerToken}`,
             totalValue: `${token.totalValue}`,
         };
+    }
+
+    private async getCachedPortfolioData(address: string): Promise<PortfolioCachedUserData> {
+        const id = `${env.CHAIN_ID}_${address}`;
+        const cachedUserData = await sanityClient.fetch(`*[_type == "userData" && _id == "${id}"][0]`);
+
+        if (cachedUserData) {
+            return cachedUserData;
+        }
+
+        return sanityClient.create({
+            _type: 'userData',
+            _id: id,
+            address,
+            chainId: parseInt(env.CHAIN_ID),
+            entries: [],
+        });
+    }
+
+    private getPortfolioHistoryEntryForDate(
+        userData: PortfolioCachedUserData,
+        date: string,
+    ): PortfolioCachedUserDataEntry | null {
+        return userData.entries.find((entry) => entry.date === date) ?? null;
+    }
+
+    private async cachePortfolioHistoryEntry(
+        address: string,
+        date: string,
+        block: BlockFragment,
+        data?: UserPortfolioData,
+    ) {
+        await sanityClient.mutate([
+            {
+                patch: {
+                    id: `${env.CHAIN_ID}_${address}`,
+                    insert: {
+                        before: 'entries[-1]',
+                        items: [
+                            {
+                                _key: date,
+                                date,
+                                timestamp: parseInt(block.timestamp),
+                                block: parseInt(block.number),
+                                empty: !data,
+                                data: data ? JSON.stringify(data, null, 4) : undefined,
+                            },
+                        ],
+                    },
+                },
+            },
+        ]);
+    }
+
+    private async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
+        const today = moment.tz('GMT').format('YYYY-MM-DD');
+
+        const cachedPortfolioHistory = await cache.getObjectValue<UserPortfolioData[]>(
+            `${CACHE_KEY_PREFIX}:${today}:${address}`,
+        );
+
+        if (cachedPortfolioHistory) {
+            return cachedPortfolioHistory;
+        }
+
+        return null;
+    }
+
+    private async cachePortfolioHistory(address: string, data: UserPortfolioData[]): Promise<void> {
+        const today = moment.tz('GMT').format('YYYY-MM-DD');
+
+        await cache.putObjectValue(`${CACHE_KEY_PREFIX}:${today}:${address}`, data);
     }
 }
 
