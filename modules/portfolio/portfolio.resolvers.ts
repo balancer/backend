@@ -9,24 +9,18 @@ import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.servic
 const resolvers: Resolvers = {
     Query: {
         portfolioGetUserPortfolio: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
-
-            //console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
+            const accountAddress = getRequiredAccountAddress(context);
 
             const portfolioData = await portfolioService.getPortfolio(accountAddress);
 
-            return portfolioService.mapPortfolioDataToGql(portfolioData);*/
-
-            throw new Error('disabled');
+            return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
+            const accountAddress = getRequiredAccountAddress(context);
 
             const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
 
-            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));*/
-
-            throw new Error('disabled');
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
     },
     //we're forced to have at least one mutation

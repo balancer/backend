@@ -9,23 +9,22 @@ import {
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmUserFragment } from '../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BigNumber } from 'ethers';
-import { bn, fromFp } from '../util/numbers';
+import { fromFp } from '../util/numbers';
 import _ from 'lodash';
 import { TokenPrices } from '../token-price/token-price-types';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { UserPoolData, UserPortfolioData, UserTokenData } from './portfolio-types';
 import moment from 'moment-timezone';
-import { GqlBalancerPool, GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
+import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { cache } from '../cache/cache';
-import { oneDayInMinutes, thirtyDaysInMinutes } from '../util/time';
+import { thirtyDaysInMinutes } from '../util/time';
 
 const CACHE_KEY_PREFIX = 'portfolio:';
-const USER_HISTORY_CACHE_KEY_PREFIX = 'portfolio:history:';
 
 class PortfolioService {
     constructor() {}
@@ -94,16 +93,6 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
-        const today = moment.utc().format('YYYY-MM-DD');
-
-        const cached = await cache.getObjectValue<UserPortfolioData[]>(
-            `${USER_HISTORY_CACHE_KEY_PREFIX}${address}:${today}`,
-        );
-
-        if (cached) {
-            return cached;
-        }
-
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
         const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const portfolioHistories: UserPortfolioData[] = [];
@@ -127,10 +116,16 @@ class PortfolioService {
 
             const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(block.timestamp, historicalTokenPrices);
             const user = await balancerSubgraphService.getUserAtBlock(address, blockNumber);
-            const allFarmUsers = await masterchefService.getAllFarmUsersAtBlock(blockNumber);
+            const { farmUsers } = await masterchefService.getFarmUsers({
+                where: { address },
+                block: { number: blockNumber },
+            });
             const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
             const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
-            const allPreviousFarmUsers = await masterchefService.getAllFarmUsersAtBlock(parseInt(previousBlock.number));
+            const { farmUsers: previousFarmUsers } = await masterchefService.getFarmUsers({
+                where: { address },
+                block: { number: parseInt(previousBlock.number) },
+            });
             const previousUser = await balancerSubgraphService.getUserAtBlock(address, parseInt(previousBlock.number));
             const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
                 previousBlock.timestamp,
@@ -143,8 +138,6 @@ class PortfolioService {
             //const allJoinExits = await balancerService.getAllJoinExitsAtBlock(blockNumber);
 
             if (user && previousUser) {
-                const farmUsers = allFarmUsers.filter((famUser) => famUser.address === user.id);
-                const previousFarmUsers = allPreviousFarmUsers.filter((famUser) => famUser.address === user.id);
                 const poolData = this.getUserPoolData(
                     user,
                     previousUser,
@@ -188,12 +181,6 @@ class PortfolioService {
 
             await cache.putObjectValue(`${CACHE_KEY_PREFIX}${date}:${address}`, 'empty', thirtyDaysInMinutes);
         }
-
-        await cache.putObjectValue(
-            `${USER_HISTORY_CACHE_KEY_PREFIX}${address}:${today}`,
-            portfolioHistories,
-            oneDayInMinutes,
-        );
 
         return portfolioHistories;
     }

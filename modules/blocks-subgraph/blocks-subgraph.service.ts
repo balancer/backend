@@ -14,6 +14,7 @@ import {
     getDailyTimestampsWithBuffer,
     getHourlyTimestampsForDays,
     getHourlyTimestampsWithBuffer,
+    twentyFourHoursInMs,
     twentyFourHoursInSecs,
 } from '../util/time';
 import { subgraphLoadAll } from '../util/subgraph-util';
@@ -140,6 +141,7 @@ export class BlocksSubgraphService {
     }
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
+        const today = moment.tz('GMT').format('YYYY-MM-DD');
         const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');
         numDays = maxDays < numDays ? maxDays : numDays;
 
@@ -155,10 +157,10 @@ export class BlocksSubgraphService {
             },
         };
 
-        const cacheResult = await cache.getValueKeyedOnObject(`${DAILY_BLOCKS_CACHE_KEY}:${numDays}`, args);
+        const cacheResult = this.cache.get(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`) as BlockFragment[] | null;
 
         if (cacheResult) {
-            return JSON.parse(cacheResult);
+            return cacheResult;
         }
 
         const allBlocks = await this.getAllBlocks(args);
@@ -176,12 +178,7 @@ export class BlocksSubgraphService {
             }
         }
 
-        await cache.putValueKeyedOnObject(
-            `${DAILY_BLOCKS_CACHE_KEY}:${numDays}`,
-            args,
-            JSON.stringify(blocks),
-            twentyFourHoursInSecs,
-        );
+        this.cache.put(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, twentyFourHoursInMs);
 
         return blocks;
     }

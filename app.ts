@@ -20,7 +20,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(accountMiddleware);
 
-    startWorker(app);
+    //startWorker(app);
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
