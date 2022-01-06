@@ -38,3 +38,18 @@ export interface UserTokenData {
     totalValue: number;
     percentOfPortfolio: number;
 }
+
+export interface PortfolioCachedUserData {
+    _id: string;
+    address: string;
+    chainId: number;
+    entries: PortfolioCachedUserDataEntry[];
+}
+
+export interface PortfolioCachedUserDataEntry {
+    date: string;
+    timestamp: number;
+    block: number;
+    empty: boolean;
+    data: string;
+}
