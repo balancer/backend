@@ -34,15 +34,11 @@ const resolvers: Resolvers = {
 
             let obj = moment.tz(date, 'GMT');
 
-            try {
-                for (let i = 0; i < 10; i++) {
-                    console.log(obj.format('YYYY-MM-DD'));
-                    await portfolioService.cacheRawDataForTimestamp(obj.startOf('day').unix());
+            for (let i = 0; i < 10; i++) {
+                console.log(obj.format('YYYY-MM-DD'));
+                await portfolioService.cacheRawDataForTimestamp(obj.startOf('day').unix());
 
-                    obj = obj.subtract(1, 'day');
-                }
-            } catch (e) {
-                console.log(e);
+                obj = obj.subtract(1, 'day');
             }
 
             return true;
