@@ -176,7 +176,7 @@ export class PortfolioDataService {
         );
     }
 
-    public async setLatestBlockCachedTimestamp(): Promise<void> {
+    /*public async setLatestBlockCachedTimestamp(): Promise<void> {
         const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
 
         if (!timestamp) {
@@ -184,7 +184,7 @@ export class PortfolioDataService {
         }
 
         return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
-    }
+    }*/
 
     private async deleteSnapshotsForBlock(blockNumber: number) {
         await prisma.prismaBalancerPoolTokenSnapshot.deleteMany({ where: { blockNumber } });
