@@ -1,3 +1,12 @@
+import {
+    Prisma,
+    PrismaBalancerPoolSnapshot,
+    PrismaBalancerPoolTokenSnapshot,
+    PrismaFarm,
+    PrismaFarmUserSnapshot,
+    PrismaToken,
+} from '@prisma/client';
+
 export interface UserPortfolioData {
     date: string;
     timestamp: number;
@@ -39,17 +48,18 @@ export interface UserTokenData {
     percentOfPortfolio: number;
 }
 
-export interface PortfolioCachedUserData {
-    _id: string;
-    address: string;
-    chainId: number;
-    entries: PortfolioCachedUserDataEntry[];
-}
+export type PrismaFarmUserSnapshotWithFarm = PrismaFarmUserSnapshot & { farm: PrismaFarm };
+export type PrismaBalancerPoolTokenSnapshotWithToken = PrismaBalancerPoolTokenSnapshot & { token: PrismaToken };
+export type PrismaBalancerPoolSnapshotWithTokens = PrismaBalancerPoolSnapshot & {
+    tokens: PrismaBalancerPoolTokenSnapshotWithToken[];
+};
 
-export interface PortfolioCachedUserDataEntry {
-    date: string;
-    timestamp: number;
-    block: number;
-    empty: boolean;
-    data: string;
-}
+export type PrismaBlockExtended = Prisma.PrismaBlockGetPayload<{
+    include: {
+        poolShares: true;
+        pools: { include: { tokens: { include: { token: true } } } };
+        farmUsers: { include: { farm: true } };
+        beetsBar: true;
+        beetsBarUsers: true;
+    };
+}>;

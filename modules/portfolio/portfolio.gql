@@ -1,10 +1,11 @@
 extend type Query {
     portfolioGetUserPortfolio: GqlUserPortfolioData!
     portfolioGetUserPortfolioHistory: [GqlUserPortfolioData!]!
+    portfolioGetUserPortfolioHistoryAdmin: [GqlUserPortfolioData!]!
 }
 
 extend type Mutation {
-    emptyMutation: Boolean!
+    cachePortfolioHistoryForDate(date: String!): Boolean!
     clearCacheAtBlock(block: Int!): Boolean!
     clearCachedPools: Boolean!
 }

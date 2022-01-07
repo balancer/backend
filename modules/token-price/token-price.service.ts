@@ -53,8 +53,8 @@ export class TokenPriceService {
         return tokenPrices || {};
     }
 
-    public getTokenPricesForTimestamp(timestamp: string, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
-        const msTimestamp = parseInt(timestamp) * 1000;
+    public getTokenPricesForTimestamp(timestamp: number, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
+        const msTimestamp = timestamp * 1000;
         return _.mapValues(tokenHistoricalPrices, (tokenPrices) => {
             if (tokenPrices.length === 0) {
                 return { usd: 0 };

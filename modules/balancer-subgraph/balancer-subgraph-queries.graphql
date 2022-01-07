@@ -51,6 +51,7 @@ query BalancerUsers(
 fragment BalancerUser on User {
     id
     sharesOwned(first: 1000) {
+        id
         balance
         poolId {
             id

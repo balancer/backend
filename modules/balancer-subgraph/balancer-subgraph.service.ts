@@ -30,6 +30,7 @@ import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-
 import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
+import { BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -147,7 +148,15 @@ export class BalancerSubgraphService {
     }
 
     public async getUserAtBlock(address: string, block: number): Promise<BalancerUserFragment | null> {
-        const { users } = await this.sdk.BalancerUsers({ where: { id: address }, block: { number: block } });
+        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${block}`) as BalancerUserFragment[] | null;
+
+        if (cachedUsers) {
+            return cachedUsers.find((user) => user.id === address) || null;
+        }
+
+        const users = await this.getAllUsers({ block: { number: block } });
+
+        this.cache.put(`${ALL_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
 
         return users.find((user) => user.id === address) || null;
     }

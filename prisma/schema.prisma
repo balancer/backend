@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PrismaBlock {
+    number              Int                 @id
+    id                  String              @unique
+    timestamp           Int
+
+    pools               PrismaBalancerPoolSnapshot[]
+    poolTokens          PrismaBalancerPoolTokenSnapshot[]
+    poolShares          PrismaBalancerPoolShareSnapshot[]
+    farmUsers           PrismaFarmUserSnapshot[]
+    beetsBar            PrismaBeetsBarSnapshot?
+    beetsBarUsers       PrismaBeetsBarUserSnapshot[]
+}
+
+model PrismaToken {
+    address             String              @id
+    symbol              String
+    name                String
+
+    prices              PrismaTokenPrice[]
+    poolTokenSnapshots  PrismaBalancerPoolTokenSnapshot[]
+}
+
+model PrismaTokenPrice {
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    timestamp           Int
+    price               String
+
+    @@unique([tokenAddress, timestamp])
+}
+
+model PrismaUser {
+    address             String              @id
+    farms               PrismaFarmUser[]
+    sharesOwnedSnapshots PrismaBalancerPoolShareSnapshot[]
+    farmSnapshots       PrismaFarmUserSnapshot[]
+    beetsBarSnapshots   PrismaBeetsBarUserSnapshot[]
+}
+
+model PrismaBalancerPool {
+    id                  String              @id
+    address             String              @unique
+    symbol              String
+    name                String
+    owner               String?
+    farm                PrismaFarm?
+
+    shares              PrismaBalancerPoolShareSnapshot[]
+    snapshots           PrismaBalancerPoolSnapshot[]
+    tokenSnapshots      PrismaBalancerPoolTokenSnapshot[]
+}
+
+model PrismaBalancerPoolSnapshot {
+    id                  String             @id
+    poolId              String
+    pool                PrismaBalancerPool @relation(fields:[poolId], references: [id])
+    blockNumber         Int
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+
+    swapFee             String
+    totalSwapVolume     String
+    totalSwapFee        String
+    totalLiquidity      String
+    totalShares         String
+    swapsCount          String
+    holdersCount        String
+    swapEnabled         Boolean
+    amp                 String?
+
+    tokens              PrismaBalancerPoolTokenSnapshot[]
+    shares              PrismaBalancerPoolShareSnapshot[]
+
+    @@unique([poolId, blockNumber])
+}
+
+model PrismaBalancerPoolTokenSnapshot {
+    id                  String          @id @default(uuid())
+    address             String
+    token               PrismaToken     @relation(fields:[address], references: [address])
+    snapshotId          String
+    snapshot            PrismaBalancerPoolSnapshot @relation(fields:[snapshotId], references: [id])
+    poolId              String
+    pool                PrismaBalancerPool @relation(fields:[poolId], references: [id])
+    blockNumber         Int
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+
+    balance             String
+    invested            String
+}
+
+model PrismaBalancerPoolShareSnapshot {
+    userAddress         String
+    user                PrismaUser         @relation(fields:[userAddress], references: [address])
+    poolId              String
+    pool                PrismaBalancerPool @relation(fields:[poolId], references: [id])
+    poolSnapshotId      String
+    poolSnapshot        PrismaBalancerPoolSnapshot @relation(fields:[poolSnapshotId], references: [id])
+    blockNumber         Int
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+
+    balance             String
+
+    @@id([userAddress, poolId, blockNumber])
+}
+
+model PrismaFarm {
+    id                  String                  @id
+    pair                String                  @unique
+    poolId              String?
+    pool                PrismaBalancerPool?     @relation(fields:[poolId], references: [id])
+    users               PrismaFarmUser[]
+    userSnapshots       PrismaFarmUserSnapshot[]
+}
+
+model PrismaFarmUser {
+    id                  String             @id
+    userAddress         String
+    user                PrismaUser         @relation(fields:[userAddress], references: [address])
+    farmId              String
+    farm                PrismaFarm         @relation(fields:[farmId], references: [id])
+    snapshots           PrismaFarmUserSnapshot[]
+
+    @@unique([userAddress, farmId])
+}
+
+model PrismaFarmUserSnapshot {
+    userAddress         String
+    user                PrismaUser         @relation(fields:[userAddress], references: [address])
+    farmUserId          String
+    farmUser            PrismaFarmUser     @relation(fields:[farmUserId], references: [id])
+    blockNumber         Int
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+    farmId              String
+    farm                PrismaFarm         @relation(fields:[farmId], references: [id])
+
+    amount              String
+    rewardDebt          String
+    beetsHarvested      String
+
+    @@id([userAddress, farmUserId, farmId, blockNumber])
+}
+
+model PrismaBeetsBarSnapshot {
+    blockNumber         Int                @id
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+
+    fBeetsBurned        String
+    fBeetsMinted        String
+    ratio               String
+    totalSupply         String
+    vestingTokenStaked  String
+    sharedVestingTokenRevenue String
+}
+
+model PrismaBeetsBarUserSnapshot {
+    address             String
+    user                PrismaUser         @relation(fields:[address], references: [address])
+    blockNumber         Int
+    block               PrismaBlock        @relation(fields:[blockNumber], references: [number])
+
+    fBeets              String
+    vestingTokenHarvested String
+    vestingTokenIn      String
+    vestingTokenOut     String
+
+    @@id([address, blockNumber])
+}

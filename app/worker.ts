@@ -10,7 +10,7 @@ export function startWorker(app: Express) {
     app.use(express.json());
     app.listen(port);*/
 
-    app.post('/cache-token-prices', async (req, res) => {
+    app.get('/cache-token-prices', async (req, res) => {
         try {
             //3 times per minute
             for (let i = 0; i < 3; i++) {
@@ -24,7 +24,7 @@ export function startWorker(app: Express) {
         }
     });
 
-    app.post('/cache-historical-token-prices', async (req, res) => {
+    app.get('/cache-historical-token-prices', async (req, res) => {
         try {
             console.log('cache-historical-token-prices');
             await tokenPriceService.cacheHistoricalTokenPrices();
