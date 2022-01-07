@@ -56,8 +56,7 @@ export type PrismaBalancerPoolSnapshotWithTokens = PrismaBalancerPoolSnapshot & 
 
 export type PrismaBlockExtended = Prisma.PrismaBlockGetPayload<{
     include: {
-        poolShares: true;
-        pools: { include: { tokens: { include: { token: true } } } };
+        poolShares: { include: { poolSnapshot: { include: { tokens: { include: { token: true } } } } } };
         farmUsers: { include: { farm: true } };
         beetsBar: true;
         beetsBarUsers: true;
