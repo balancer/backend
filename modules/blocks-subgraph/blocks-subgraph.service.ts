@@ -140,6 +140,21 @@ export class BlocksSubgraphService {
         return allBlocks[0];
     }
 
+    public async getBlockForTimestamp(timestamp: number): Promise<BlockFragment> {
+        const args: BlocksQueryVariables = {
+            orderDirection: OrderDirection.Desc,
+            orderBy: Block_OrderBy.Timestamp,
+            where: {
+                timestamp_gt: `${timestamp - 3}`,
+                timestamp_lt: `${timestamp + 3}`,
+            },
+        };
+
+        const allBlocks = await this.getAllBlocks(args);
+
+        return allBlocks[0];
+    }
+
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
         const today = moment.tz('GMT').format('YYYY-MM-DD');
         const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');

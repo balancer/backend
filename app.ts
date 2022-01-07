@@ -11,7 +11,8 @@ import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleCronJobs } from './app/scheduleCronJobs';
 import { startWorker } from './app/worker';
-import { redisRead, redisWrite } from './modules/cache/redis';
+import { redis } from './modules/cache/redis';
+import { prisma } from './modules/prisma/prisma-client';
 
 async function startServer() {
     const app = createExpressApp();
@@ -36,12 +37,14 @@ async function startServer() {
 
     scheduleCronJobs();
 
-    await redisRead.connect();
-    await redisWrite.connect();
+    await redis.connect();
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 
 //
-startServer().finally(async () => {});
+startServer().finally(async () => {
+    //await prisma.$disconnect();
+    //await redis.disconnect();
+});

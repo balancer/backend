@@ -4,7 +4,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    emptyMutation: Boolean!
+    cachePortfolioHistoryForDate(date: String!): Boolean!
     clearCacheAtBlock(block: Int!): Boolean!
     clearCachedPools: Boolean!
 }

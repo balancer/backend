@@ -5,6 +5,9 @@ import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-s
 import { balancerService } from '../modules/balancer/balancer.service';
 import { beetsService } from '../modules/beets/beets.service';
 import { beetsBarService } from '../modules/beets-bar-subgraph/beets-bar.service';
+import { portfolioService } from '../modules/portfolio/portfolio.service';
+import moment from 'moment-timezone';
+import { sleep } from '../modules/util/promise';
 
 export function scheduleCronJobs() {
     //every 20 seconds
@@ -60,6 +63,23 @@ export function scheduleCronJobs() {
             await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
             await balancerService.cachePastPools();
             await beetsService.cacheProtocolData();
+        } catch (e) {}
+    });
+
+    //once a day
+    cron.schedule('5 0 * * *', async () => {
+        try {
+            const timestamp = moment.tz('GMT').startOf('day').unix();
+
+            //retry loop in case of timeouts from the subgraph
+            for (let i = 0; i < 10; i++) {
+                try {
+                    await portfolioService.cacheRawDataForTimestamp(timestamp);
+                    break;
+                } catch {
+                    await sleep(5000);
+                }
+            }
         } catch (e) {}
     });
 

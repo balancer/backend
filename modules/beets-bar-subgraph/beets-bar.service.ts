@@ -101,7 +101,15 @@ export class BeetsBarSubgraphService {
     }
 
     public async getUserAtBlock(address: string, block: number): Promise<BeetsBarUserFragment | null> {
-        const { users } = await this.sdk.BeetsBarUsers({ where: { address }, block: { number: block } });
+        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${block}`) as BeetsBarUserFragment[] | null;
+
+        if (cachedUsers) {
+            return cachedUsers.find((user) => user.id === address) || null;
+        }
+
+        const users = await this.getAllUsers({ block: { number: block } });
+
+        this.cache.put(`${ALL_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
 
         return users.find((user) => user.id === address) || null;
     }

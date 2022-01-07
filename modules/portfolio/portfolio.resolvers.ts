@@ -5,6 +5,7 @@ import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import moment from 'moment-timezone';
 
 const resolvers: Resolvers = {
     Query: {
@@ -23,9 +24,27 @@ const resolvers: Resolvers = {
             return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
     },
-    //we're forced to have at least one mutation
     Mutation: {
-        emptyMutation: async () => true,
+        cachePortfolioHistoryForDate: async (parent, { date }, context) => {
+            isAdminRoute(context);
+
+            //await portfolioService.cacheRawDataForTimestamp(moment.tz(date, 'GMT').startOf('day').unix());
+
+            let obj = moment.tz(date, 'GMT');
+
+            try {
+                for (let i = 0; i < 10; i++) {
+                    console.log(obj.format('YYYY-MM-DD'));
+                    await portfolioService.cacheRawDataForTimestamp(obj.startOf('day').unix());
+
+                    obj = obj.subtract(1, 'day');
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+            return true;
+        },
         clearCacheAtBlock: async (parent, { block }, context) => {
             isAdminRoute(context);
 
