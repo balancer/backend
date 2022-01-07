@@ -1,6 +1,7 @@
 extend type Query {
     portfolioGetUserPortfolio: GqlUserPortfolioData!
     portfolioGetUserPortfolioHistory: [GqlUserPortfolioData!]!
+    portfolioGetUserPortfolioHistoryAdmin: [GqlUserPortfolioData!]!
 }
 
 extend type Mutation {

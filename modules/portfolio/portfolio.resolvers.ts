@@ -25,6 +25,15 @@ const resolvers: Resolvers = {
 
             return [];
         },
+        portfolioGetUserPortfolioHistoryAdmin: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            const accountAddress = getRequiredAccountAddress(context);
+
+            const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
+
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
+        },
     },
     Mutation: {
         cachePortfolioHistoryForDate: async (parent, { date }, context) => {
