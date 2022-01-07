@@ -17,13 +17,11 @@ const resolvers: Resolvers = {
             return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
+            const accountAddress = getRequiredAccountAddress(context);
 
             const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
 
-            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));*/
-
-            return [];
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
         portfolioGetUserPortfolioHistoryAdmin: async (parent, {}, context) => {
             isAdminRoute(context);

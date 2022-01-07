@@ -121,9 +121,7 @@ export class PortfolioDataService {
     }
 
     public async cacheRawDataForTimestamp(timestamp: number): Promise<void> {
-        console.log('fetching');
         const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
-        console.log();
         const blockNumber = parseInt(block.number);
         const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
         const farms = await masterchefService.getAllFarms({ block: { number: blockNumber } });
@@ -131,25 +129,16 @@ export class PortfolioDataService {
         const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
         const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
         const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
-        console.log('done fetching');
 
         await this.deleteSnapshotsForBlock(blockNumber);
-        console.log('done deleteSnapshotsForBlock');
         await this.saveBlock(block, timestamp);
-        console.log('done saveBlock');
         await this.saveAnyNewPools(pools);
-        console.log('done saveAnyNewPools');
         await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
-        console.log('done saveAnyNewUsers');
         await this.saveAnyNewTokens(pools);
-        console.log('done saveAnyNewTokens');
 
         await this.savePoolSnapshots(blockNumber, pools, users);
-        console.log('done savePoolSnapshots');
         await this.saveFarms(blockNumber, farms, farmUsers);
-        console.log('done saveFarms');
         await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
-        console.log('done saveBeetsBar');
 
         const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
 
