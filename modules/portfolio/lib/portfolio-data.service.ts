@@ -3,13 +3,18 @@ import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgra
 import { masterchefService } from '../../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../../beets-bar-subgraph/beets-bar.service';
 import { prisma } from '../../prisma/prisma-client';
-import _ from 'lodash';
+import _, { parseInt } from 'lodash';
 import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-types';
 import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
-import { PrismaBlockExtended } from '../portfolio-types';
+import { PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
 import { PrismaBalancerPool } from '@prisma/client';
+import { cache } from '../../cache/cache';
+import { oneDayInMinutes } from '../../util/time';
+
+const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
+const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
 
 export class PortfolioDataService {
     public async getPortfolioDataForNow(
@@ -116,9 +121,7 @@ export class PortfolioDataService {
     }
 
     public async cacheRawDataForTimestamp(timestamp: number): Promise<void> {
-        console.log('fetching');
         const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
-        console.log();
         const blockNumber = parseInt(block.number);
         const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
         const farms = await masterchefService.getAllFarms({ block: { number: blockNumber } });
@@ -126,26 +129,51 @@ export class PortfolioDataService {
         const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
         const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
         const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
-        console.log('done fetching');
 
         await this.deleteSnapshotsForBlock(blockNumber);
-        console.log('done deleteSnapshotsForBlock');
         await this.saveBlock(block, timestamp);
-        console.log('done saveBlock');
         await this.saveAnyNewPools(pools);
-        console.log('done saveAnyNewPools');
         await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
-        console.log('done saveAnyNewUsers');
         await this.saveAnyNewTokens(pools);
-        console.log('done saveAnyNewTokens');
 
         await this.savePoolSnapshots(blockNumber, pools, users);
-        console.log('done savePoolSnapshots');
         await this.saveFarms(blockNumber, farms, farmUsers);
-        console.log('done saveFarms');
         await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
-        console.log('done saveBeetsBar');
+
+        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
+
+        if (latestBlock) {
+            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
+        }
     }
+
+    public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
+        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+
+        if (!timestamp) {
+            return null;
+        }
+
+        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
+    }
+
+    public async cachePortfolioHistory(address: string, timestamp: number, data: UserPortfolioData[]): Promise<void> {
+        await cache.putObjectValue<UserPortfolioData[]>(
+            `${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`,
+            data,
+            oneDayInMinutes,
+        );
+    }
+
+    /*public async setLatestBlockCachedTimestamp(): Promise<void> {
+        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+
+        if (!timestamp) {
+            return null;
+        }
+
+        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
+    }*/
 
     private async deleteSnapshotsForBlock(blockNumber: number) {
         await prisma.prismaBalancerPoolTokenSnapshot.deleteMany({ where: { blockNumber } });
