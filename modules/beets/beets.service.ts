@@ -5,6 +5,7 @@ import { getCirculatingSupply } from './beets';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
+import { balancerService } from '../balancer/balancer.service';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
@@ -115,15 +116,20 @@ export class BeetsService {
     }
 
     private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
-        const { latestPrices } = await balancerSubgraphService.getLatestPrices({
-            where: { poolId: env.FBEETS_POOL_ID.toLowerCase(), asset: env.BEETS_ADDRESS.toLowerCase() },
-        });
+        const pools = await balancerService.getPools();
+        const beetsUsdcPool = pools.find(
+            (pool) => pool.id === '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
+        );
+        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
+        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
 
-        if (latestPrices.length === 0) {
+        if (!beets || !usdc) {
             throw new Error('did not find price for beets');
         }
 
-        const beetsPrice = parseFloat(latestPrices[0].priceUSD);
+        const beetsPrice =
+            ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
+            parseFloat(beets.balance);
         const circulatingSupply = parseFloat(await getCirculatingSupply());
 
         return {
