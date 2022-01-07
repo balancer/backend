@@ -161,8 +161,6 @@ export class PortfolioDataService {
     public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
         const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
 
-        console.log('timestamp', timestamp);
-
         if (!timestamp) {
             return null;
         }
@@ -176,6 +174,16 @@ export class PortfolioDataService {
             data,
             oneDayInMinutes,
         );
+    }
+
+    public async setLatestBlockCachedTimestamp(): Promise<void> {
+        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+
+        if (!timestamp) {
+            return null;
+        }
+
+        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
     }
 
     private async deleteSnapshotsForBlock(blockNumber: number) {
