@@ -82,12 +82,6 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string, useCache = true): Promise<UserPortfolioData[]> {
-        const cached = await this.dataService.getCachedPortfolioHistory(address);
-
-        if (cached && useCache) {
-            return cached;
-        }
-
         const timestamp = moment.tz('GMT').startOf('day').subtract(30, 'days').unix();
         const portfolioHistories: UserPortfolioData[] = [];
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
@@ -95,8 +89,10 @@ class PortfolioService {
         const blocks = await prisma.prismaBlock.findMany({
             where: { timestamp: { gte: timestamp } },
             include: {
-                poolShares: { where: { userAddress: address } },
-                pools: { include: { tokens: { include: { token: true } } } },
+                poolShares: {
+                    where: { userAddress: address },
+                    include: { poolSnapshot: { include: { tokens: { include: { token: true } } } } },
+                },
                 farmUsers: { where: { userAddress: address }, include: { farm: true } },
                 beetsBar: true,
                 beetsBarUsers: { where: { address } },
@@ -142,8 +138,6 @@ class PortfolioService {
             }
         }
 
-        await this.dataService.cachePortfolioHistory(address, blocks[0].timestamp, portfolioHistories);
-
         return portfolioHistories;
     }
 
@@ -157,14 +151,15 @@ class PortfolioService {
         const userPoolData: Omit<UserPoolData, 'percentOfPortfolio'>[] = [];
 
         for (const pool of pools) {
-            const snapshot = block.pools.find((snapshot) => snapshot.poolId === pool.id);
+            const snapshot = block.poolShares.find((share) => share.poolId === pool.id)?.poolSnapshot;
 
             if (!snapshot) {
                 continue;
             }
 
             //if no previous snapshot, it means this pool is less than 24 hours old. Use the current pool so we get zeros
-            const previousSnapshot = previousBlock.pools.find((snapshot) => snapshot.poolId === pool.id) || snapshot;
+            const previousSnapshot =
+                previousBlock.poolShares.find((share) => share.poolId === pool.id)?.poolSnapshot || snapshot;
 
             const { userNumShares, userPercentShare, userTotalValue, userTokens, pricePerShare } =
                 this.generatePoolIntermediates(

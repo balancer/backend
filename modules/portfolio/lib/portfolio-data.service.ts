@@ -8,8 +8,8 @@ import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-t
 import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
-import { PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
-import { PrismaBalancerPool } from '@prisma/client';
+import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
+import { PrismaBalancerPool, PrismaBalancerPoolSnapshot } from '@prisma/client';
 import { cache } from '../../cache/cache';
 import { oneDayInMinutes } from '../../util/time';
 
@@ -78,31 +78,44 @@ export class PortfolioDataService {
         beetsBarUser: BeetsBarUserFragment | null,
     ): PrismaBlockExtended {
         const blockNumber = parseInt(block.number);
+        const poolShares = [];
 
-        return {
-            id: block.id,
-            number: blockNumber,
-            timestamp: parseInt(block.timestamp),
-            pools: pools.map((pool) => ({
-                ...pool,
-                blockNumber,
+        for (const sharesOwned of user.sharesOwned ?? []) {
+            const pool = pools.find((pool) => pool.id === sharesOwned.poolId.id);
+
+            if (!pool) {
+                continue;
+            }
+
+            const poolSnapshot: PrismaBalancerPoolSnapshotWithTokens = {
+                ...pools.find((pool) => pool.id === sharesOwned.poolId.id)!,
                 poolId: pool.id,
                 amp: pool.amp ?? null,
+                blockNumber,
                 tokens: (pool.tokens ?? []).map((token) => ({
                     ...token,
                     snapshotId: '',
                     poolId: pool.id,
                     blockNumber,
-                    token,
+                    token: token,
                 })),
-            })),
-            poolShares: (user.sharesOwned ?? []).map((sharesOwned) => ({
+            };
+
+            poolShares.push({
                 ...sharesOwned,
                 userAddress,
                 blockNumber,
                 poolId: sharesOwned.poolId.id,
                 poolSnapshotId: '',
-            })),
+                poolSnapshot,
+            });
+        }
+
+        return {
+            id: block.id,
+            number: blockNumber,
+            timestamp: parseInt(block.timestamp),
+            poolShares,
             farmUsers: farmUsers.map((farmUser) => ({
                 ...farmUser,
                 blockNumber,
