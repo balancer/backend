@@ -3,13 +3,18 @@ import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgra
 import { masterchefService } from '../../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../../beets-bar-subgraph/beets-bar.service';
 import { prisma } from '../../prisma/prisma-client';
-import _ from 'lodash';
+import _, { parseInt } from 'lodash';
 import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-types';
 import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
 import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
-import { PrismaBlockExtended } from '../portfolio-types';
+import { PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
 import { PrismaBalancerPool } from '@prisma/client';
+import { cache } from '../../cache/cache';
+import { oneDayInMinutes } from '../../util/time';
+
+const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
+const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
 
 export class PortfolioDataService {
     public async getPortfolioDataForNow(
@@ -145,6 +150,32 @@ export class PortfolioDataService {
         console.log('done saveFarms');
         await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
         console.log('done saveBeetsBar');
+
+        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
+
+        if (latestBlock) {
+            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
+        }
+    }
+
+    public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
+        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+
+        console.log('timestamp', timestamp);
+
+        if (!timestamp) {
+            return null;
+        }
+
+        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
+    }
+
+    public async cachePortfolioHistory(address: string, timestamp: number, data: UserPortfolioData[]): Promise<void> {
+        await cache.putObjectValue<UserPortfolioData[]>(
+            `${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`,
+            data,
+            oneDayInMinutes,
+        );
     }
 
     private async deleteSnapshotsForBlock(blockNumber: number) {

@@ -26,8 +26,6 @@ import {
     PrismaBeetsBarUserSnapshot,
 } from '@prisma/client';
 
-const CACHE_KEY_PREFIX = 'user-portfolio-history-all:';
-
 class PortfolioService {
     dataService: PortfolioDataService;
 
@@ -84,9 +82,15 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
+        const cached = await this.dataService.getCachedPortfolioHistory(address);
+
+        if (cached) {
+            return cached;
+        }
+
+        const timestamp = moment.tz('GMT').startOf('day').subtract(30, 'days').unix();
         const portfolioHistories: UserPortfolioData[] = [];
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
-        const timestamp = moment.tz('GMT').startOf('day').subtract(30, 'days').unix();
         const pools = await prisma.prismaBalancerPool.findMany({});
         const blocks = await prisma.prismaBlock.findMany({
             where: { timestamp: { gte: timestamp } },
@@ -138,7 +142,7 @@ class PortfolioService {
             }
         }
 
-        //await this.cachePortfolioHistory(address, portfolioHistories);
+        await this.dataService.cachePortfolioHistory(address, blocks[0].timestamp, portfolioHistories);
 
         return portfolioHistories;
     }

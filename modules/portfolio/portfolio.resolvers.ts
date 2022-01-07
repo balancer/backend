@@ -17,13 +17,11 @@ const resolvers: Resolvers = {
             return portfolioService.mapPortfolioDataToGql(portfolioData);
         },
         portfolioGetUserPortfolioHistory: async (parent, {}, context) => {
-            /*const accountAddress = getRequiredAccountAddress(context);
+            const accountAddress = getRequiredAccountAddress(context);
 
             const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
 
-            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));*/
-
-            return [];
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
         portfolioGetUserPortfolioHistoryAdmin: async (parent, {}, context) => {
             isAdminRoute(context);
@@ -39,16 +37,7 @@ const resolvers: Resolvers = {
         cachePortfolioHistoryForDate: async (parent, { date }, context) => {
             isAdminRoute(context);
 
-            //await portfolioService.cacheRawDataForTimestamp(moment.tz(date, 'GMT').startOf('day').unix());
-
-            let obj = moment.tz(date, 'GMT');
-
-            for (let i = 0; i < 10; i++) {
-                console.log(obj.format('YYYY-MM-DD'));
-                await portfolioService.cacheRawDataForTimestamp(obj.startOf('day').unix());
-
-                obj = obj.subtract(1, 'day');
-            }
+            await portfolioService.cacheRawDataForTimestamp(moment.tz(date, 'GMT').startOf('day').unix());
 
             return true;
         },
