@@ -30,7 +30,7 @@ const resolvers: Resolvers = {
 
             const accountAddress = getRequiredAccountAddress(context);
 
-            const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress);
+            const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress, false);
 
             return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },

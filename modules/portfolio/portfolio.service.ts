@@ -81,10 +81,10 @@ class PortfolioService {
         await this.dataService.cacheRawDataForTimestamp(timestamp);
     }
 
-    public async getPortfolioHistory(address: string): Promise<UserPortfolioData[]> {
+    public async getPortfolioHistory(address: string, useCache = true): Promise<UserPortfolioData[]> {
         const cached = await this.dataService.getCachedPortfolioHistory(address);
 
-        if (cached) {
+        if (cached && useCache) {
             return cached;
         }
 
