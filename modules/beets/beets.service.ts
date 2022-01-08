@@ -6,6 +6,7 @@ import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
@@ -33,7 +34,10 @@ export class BeetsService {
         const { totalLiquidity, totalSwapFee, totalSwapVolume, poolCount } =
             await balancerSubgraphService.getProtocolData({});
 
-        const protocolData = {
+        const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
+        const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
+
+        const protocolData: GqlBeetsProtocolData = {
             totalLiquidity,
             totalSwapFee,
             totalSwapVolume,
@@ -41,6 +45,8 @@ export class BeetsService {
             marketCap,
             circulatingSupply,
             poolCount: `${poolCount}`,
+            swapVolume24h: `${parseFloat(totalSwapVolume) - parseFloat(prev.totalSwapVolume)}`,
+            swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,
         };
 
         this.cache.put(PROTOCOL_DATA_CACHE_KEY, protocolData, thirtyMinInMs);

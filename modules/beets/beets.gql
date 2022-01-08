@@ -13,6 +13,8 @@ type GqlBeetsProtocolData {
     beetsPrice: BigDecimal!
     circulatingSupply: BigDecimal!
     marketCap: BigDecimal!
+    swapFee24h: BigDecimal!
+    swapVolume24h: BigDecimal!
 }
 
 type GqlBeetsFarm {
