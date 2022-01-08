@@ -11,8 +11,8 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
-import { GqlBalancerPoolSnapshot } from '../../schema';
-import _ from 'lodash';
+import { GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
+import _, { parseInt } from 'lodash';
 import { twentyFourHoursInMs } from '../util/time';
 import { CacheClass, Cache } from 'memory-cache';
 
@@ -120,6 +120,28 @@ export class BalancerService {
         this.cache.put(PAST_POOLS_CACHE_KEY, filtered);
 
         return filtered;
+    }
+
+    public async poolGet24hData(poolId: string): Promise<GqlBalancerPool24h> {
+        const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
+        const pools = await this.getPools();
+        const pool = pools.find((pool) => pool.id === poolId);
+        const { pool: previousPool } = await balancerSubgraphService.getPool({
+            id: poolId,
+            block: { number: parseInt(previousBlock.number) },
+        });
+
+        if (!pool || !previousPool) {
+            throw new Error('could not find pool');
+        }
+
+        return {
+            ...pool,
+            __typename: 'GqlBalancerPool24h',
+            liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
+            swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
+            swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
+        };
     }
 
     public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {

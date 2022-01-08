@@ -50,6 +50,13 @@ const balancerResolvers: Resolvers = {
 
             return balancerService.getPoolSnapshots(poolId);
         },
+        poolGet24hData: async (parent, { poolId }, context) => {
+            if (poolId === '') {
+                throw new Error('invalid pool id');
+            }
+
+            return balancerService.poolGet24hData(poolId);
+        },
     },
 };
 
