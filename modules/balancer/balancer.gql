@@ -3,6 +3,7 @@ extend type Query {
     poolsPastPools: [GqlBalancerPool!]!
     latestPrice(id: ID!): GqlBalancerTokenLatestPrice
     poolSnapshots(poolId: ID!): [GqlBalancerPoolSnapshot!]!
+    poolGet24hData(poolId: ID!): GqlBalancerPool24h!
 }
 
 type GqlBalancerPool {
@@ -63,4 +64,16 @@ type GqlBalancerPoolSnapshot {
     swapFees24h: BigDecimal!
     liquidityChange24h: BigDecimal!
     tokens: [GqlBalancerPoolToken!]!
+}
+
+type GqlBalancerPool24h {
+    id: ID!
+    address: Bytes!
+    totalShares: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalLiquidity: BigDecimal!
+    swapVolume24h: BigDecimal!
+    swapFees24h: BigDecimal!
+    liquidityChange24h: BigDecimal!
 }
