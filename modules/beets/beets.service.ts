@@ -1,12 +1,13 @@
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { env } from '../../app/env';
-import { GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
+import { GqlBeetsConfig, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
 import { getCirculatingSupply } from './beets';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { sanityClient } from '../sanity/sanity';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
@@ -119,6 +120,26 @@ export class BeetsService {
         this.cache.put(FARM_USERS_CACHE_KEY, mapped, thirtyMinInMs);
 
         return mapped;
+    }
+
+    public async getConfig(): Promise<GqlBeetsConfig> {
+        const config = await sanityClient.fetch(`
+            *[_type == "config" && chainId == ${env.CHAIN_ID}][0]{
+                ...,
+                "homeFeaturedPools": homeFeaturedPools[]{
+                    ...,
+                    "image": image.asset->url
+                }
+            }
+        `);
+
+        return {
+            pausedPools: config?.pausedPools ?? [],
+            featuredPools: config?.featuredPools ?? [],
+            homeFeaturedPools: config?.homeFeaturedPools ?? [],
+            incentivizedPools: config?.incentivizedPools ?? [],
+            blacklistedPools: config?.blacklistedPools ?? [],
+        };
     }
 
     private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
