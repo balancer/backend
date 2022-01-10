@@ -129,6 +129,10 @@ export class BeetsService {
                 "homeFeaturedPools": homeFeaturedPools[]{
                     ...,
                     "image": image.asset->url
+                },
+                "homeNewsItems": homeNewsItems[]{
+                    ...,
+                    "image": image.asset->url
                 }
             }
         `);
