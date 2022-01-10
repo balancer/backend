@@ -60,6 +60,7 @@ type GqlBeetsConfig {
     featuredPools: [String!]!
     homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
     homeNewsItems: [GqlBeetsConfigNewsItem!]!
+    poolFilters: [GqlBeetsConfigPoolFilterItem!]!
 }
 
 type GqlBeetsConfigFeaturedPool {
@@ -74,4 +75,10 @@ type GqlBeetsConfigNewsItem {
     publishDate: String!
     url: String!
     description: String!
+}
+
+type GqlBeetsConfigPoolFilterItem {
+    id: ID!
+    title: String!
+    pools: [String!]!
 }

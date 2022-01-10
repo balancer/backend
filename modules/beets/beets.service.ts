@@ -144,6 +144,7 @@ export class BeetsService {
             incentivizedPools: config?.incentivizedPools ?? [],
             blacklistedPools: config?.blacklistedPools ?? [],
             homeNewsItems: config?.homeNewsItems ?? [],
+            poolFilters: config?.poolFilters ?? [],
         };
     }
 
