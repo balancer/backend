@@ -15,11 +15,24 @@ import { oneDayInMinutes } from '../../util/time';
 
 const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
 const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
+const PORTFOLIO_CACHE_KEY_PREFIX = 'portfolio:data:';
+
+interface PortfolioDataNow {
+    pools: PrismaBalancerPool[];
+    block: PrismaBlockExtended;
+    previousBlock: PrismaBlockExtended;
+}
 
 export class PortfolioDataService {
-    public async getPortfolioDataForNow(
-        userAddress: string,
-    ): Promise<{ pools: PrismaBalancerPool[]; block: PrismaBlockExtended; previousBlock: PrismaBlockExtended } | null> {
+    public async getPortfolioDataForNow(userAddress: string): Promise<PortfolioDataNow | null> {
+        const cached = await cache.getObjectValue<PortfolioDataNow | 'empty'>(
+            `${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`,
+        );
+
+        if (cached !== null) {
+            return cached === 'empty' ? null : cached;
+        }
+
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const { user, previousUser } = await balancerSubgraphService.getPortfolioData(
             userAddress,
@@ -40,7 +53,7 @@ export class PortfolioDataService {
         const { beetsBarUser, previousBeetsBarUser, beetsBar, previousBeetsBar } =
             await beetsBarService.getPortfolioData(userAddress, parseInt(previousBlock.number));
 
-        return {
+        const response = {
             pools: pools.map((pool) => ({
                 ...pool,
                 symbol: pool.symbol ?? '',
@@ -66,6 +79,10 @@ export class PortfolioDataService {
                 previousBeetsBarUser,
             ),
         };
+
+        await cache.putObjectValue(`${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`, response, 0.25);
+
+        return response;
     }
 
     public mapSubgraphDataToExtendedBlock(
