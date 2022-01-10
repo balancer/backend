@@ -71,6 +71,7 @@ type GqlBeetsConfigFeaturedPool {
 type GqlBeetsConfigNewsItem {
     title: String!
     image: String!
+    publishDate: String!
     url: String!
     description: String!
 }
