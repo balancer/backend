@@ -1,20 +1,27 @@
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { cache } from '../cache/cache';
 import { env } from '../../app/env';
-import { GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
+import { GqlBeetsConfig, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
 import { getCirculatingSupply } from './beets';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
-import { oneDayInMinutes } from '../util/time';
+import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
+import { Cache, CacheClass } from 'memory-cache';
+import { balancerService } from '../balancer/balancer.service';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { sanityClient } from '../sanity/sanity';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
 const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
 
 export class BeetsService {
-    constructor() {}
+    cache: CacheClass<string, any>;
+
+    constructor() {
+        this.cache = new Cache<string, any>();
+    }
 
     public async getProtocolData(): Promise<GqlBeetsProtocolData> {
-        const protocolData = await cache.getObjectValue<GqlBeetsProtocolData>(PROTOCOL_DATA_CACHE_KEY);
+        const protocolData = this.cache.get(PROTOCOL_DATA_CACHE_KEY) as GqlBeetsProtocolData | null;
 
         if (protocolData) {
             return protocolData;
@@ -28,7 +35,10 @@ export class BeetsService {
         const { totalLiquidity, totalSwapFee, totalSwapVolume, poolCount } =
             await balancerSubgraphService.getProtocolData({});
 
-        const protocolData = {
+        const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
+        const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
+
+        const protocolData: GqlBeetsProtocolData = {
             totalLiquidity,
             totalSwapFee,
             totalSwapVolume,
@@ -36,15 +46,17 @@ export class BeetsService {
             marketCap,
             circulatingSupply,
             poolCount: `${poolCount}`,
+            swapVolume24h: `${parseFloat(totalSwapVolume) - parseFloat(prev.totalSwapVolume)}`,
+            swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,
         };
 
-        await cache.putObjectValue(PROTOCOL_DATA_CACHE_KEY, protocolData, 30);
+        this.cache.put(PROTOCOL_DATA_CACHE_KEY, protocolData, thirtyMinInMs);
 
         return protocolData;
     }
 
     public async getBeetsFarms(): Promise<GqlBeetsFarm[]> {
-        const farms = await cache.getObjectValue<GqlBeetsFarm[]>(FARMS_CACHE_KEY);
+        const farms = this.cache.get(FARMS_CACHE_KEY) as GqlBeetsFarm[] | null;
 
         if (farms) {
             return farms;
@@ -67,13 +79,13 @@ export class BeetsService {
             rewarder: farm.rewarder ? { ...farm.rewarder, __typename: 'GqlBeetsRewarder' } : null,
         }));
 
-        await cache.putObjectValue(FARMS_CACHE_KEY, mapped, oneDayInMinutes);
+        this.cache.put(FARMS_CACHE_KEY, mapped, twentyFourHoursInMs);
 
         return mapped;
     }
 
     public async getBeetsFarmUsers(): Promise<GqlBeetsFarmUser[]> {
-        const farmUsers = await cache.getObjectValue<GqlBeetsFarmUser[]>(FARM_USERS_CACHE_KEY);
+        const farmUsers = this.cache.get(FARM_USERS_CACHE_KEY) as GqlBeetsFarmUser[] | null;
 
         if (farmUsers) {
             return farmUsers;
@@ -105,21 +117,52 @@ export class BeetsService {
             farmId: farmUser.pool?.id || '',
         }));
 
-        await cache.putObjectValue(FARM_USERS_CACHE_KEY, mapped, 30);
+        this.cache.put(FARM_USERS_CACHE_KEY, mapped, thirtyMinInMs);
 
         return mapped;
     }
 
-    private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
-        const { latestPrices } = await balancerSubgraphService.getLatestPrices({
-            where: { poolId: env.FBEETS_POOL_ID.toLowerCase(), asset: env.BEETS_ADDRESS.toLowerCase() },
-        });
+    public async getConfig(): Promise<GqlBeetsConfig> {
+        const config = await sanityClient.fetch(`
+            *[_type == "config" && chainId == ${env.CHAIN_ID}][0]{
+                ...,
+                "homeFeaturedPools": homeFeaturedPools[]{
+                    ...,
+                    "image": image.asset->url
+                },
+                "homeNewsItems": homeNewsItems[]{
+                    ...,
+                    "image": image.asset->url
+                }
+            }
+        `);
 
-        if (latestPrices.length === 0) {
+        return {
+            pausedPools: config?.pausedPools ?? [],
+            featuredPools: config?.featuredPools ?? [],
+            homeFeaturedPools: config?.homeFeaturedPools ?? [],
+            incentivizedPools: config?.incentivizedPools ?? [],
+            blacklistedPools: config?.blacklistedPools ?? [],
+            homeNewsItems: config?.homeNewsItems ?? [],
+            poolFilters: config?.poolFilters ?? [],
+        };
+    }
+
+    private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
+        const pools = await balancerService.getPools();
+        const beetsUsdcPool = pools.find(
+            (pool) => pool.id === '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
+        );
+        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
+        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
+
+        if (!beets || !usdc) {
             throw new Error('did not find price for beets');
         }
 
-        const beetsPrice = parseFloat(latestPrices[0].priceUSD);
+        const beetsPrice =
+            ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
+            parseFloat(beets.balance);
         const circulatingSupply = parseFloat(await getCirculatingSupply());
 
         return {

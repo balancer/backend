@@ -10,6 +10,9 @@ import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQL
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleCronJobs } from './app/scheduleCronJobs';
+import { startWorker } from './app/worker';
+import { redis } from './modules/cache/redis';
+import { prisma } from './modules/prisma/prisma-client';
 
 async function startServer() {
     const app = createExpressApp();
@@ -18,6 +21,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(accountMiddleware);
 
+    //startWorker(app);
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
@@ -33,8 +37,14 @@ async function startServer() {
 
     scheduleCronJobs();
 
+    await redis.connect();
+
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 
-startServer().finally(async () => {});
+//
+startServer().finally(async () => {
+    //await prisma.$disconnect();
+    //await redis.disconnect();
+});

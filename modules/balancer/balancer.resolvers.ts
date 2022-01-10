@@ -1,9 +1,11 @@
 import { Resolvers } from '../../schema';
 import { balancerService } from './balancer.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const balancerResolvers: Resolvers = {
     Query: {
         pools: async (parent, {}, context) => {
+            const id = uuidv4();
             const pools = await balancerService.getPools();
 
             return pools.map((pool) => ({
@@ -40,6 +42,10 @@ const balancerResolvers: Resolvers = {
             };
         },
         poolSnapshots: async (parent, { poolId }, context) => {
+            if (poolId === '') {
+                throw new Error('invalid pool id');
+            }
+
             return balancerService.getPoolSnapshots(poolId);
         },
         balancerGetTopTradingPairs: async (parent, {}, context) => {
@@ -63,6 +69,13 @@ const balancerResolvers: Resolvers = {
                     },
                 },
             }));
+        },
+        poolGet24hData: async (parent, { poolId }, context) => {
+            if (poolId === '') {
+                throw new Error('invalid pool id');
+            }
+
+            return balancerService.poolGet24hData(poolId);
         },
     },
 };

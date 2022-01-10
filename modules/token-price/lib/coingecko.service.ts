@@ -38,7 +38,7 @@ export class CoingeckoService {
             );
             return response[this.nativeAssetId];
         } catch (error) {
-            console.error('Unable to fetch Ether price', error);
+            //console.error('Unable to fetch Ether price', error);
             throw error;
         }
     }
@@ -82,7 +82,7 @@ export class CoingeckoService {
 
             return results;
         } catch (error) {
-            console.error('Unable to fetch token prices', addresses, error);
+            //console.error('Unable to fetch token prices', addresses, error);
             throw error;
         }
     }

@@ -5,13 +5,12 @@ import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import moment from 'moment-timezone';
 
 const resolvers: Resolvers = {
     Query: {
         portfolioGetUserPortfolio: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
-
-            //console.log(JSON.stringify(await portfolioService.getPortfolio(accountAddress), null, 4));
 
             const portfolioData = await portfolioService.getPortfolio(accountAddress);
 
@@ -24,10 +23,24 @@ const resolvers: Resolvers = {
 
             return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
         },
+        portfolioGetUserPortfolioHistoryAdmin: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            const accountAddress = getRequiredAccountAddress(context);
+
+            const portfolioHistoryData = await portfolioService.getPortfolioHistory(accountAddress, false);
+
+            return portfolioHistoryData.map((data) => portfolioService.mapPortfolioDataToGql(data));
+        },
     },
-    //we're forced to have at least one mutation
     Mutation: {
-        emptyMutation: async () => true,
+        cachePortfolioHistoryForDate: async (parent, { date }, context) => {
+            isAdminRoute(context);
+
+            await portfolioService.cacheRawDataForTimestamp(moment.tz(date, 'GMT').startOf('day').unix());
+
+            return true;
+        },
         clearCacheAtBlock: async (parent, { block }, context) => {
             isAdminRoute(context);
 

@@ -8,16 +8,18 @@ import {
     TradePairSnapshot_OrderBy,
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { sanityClient } from '../sanity/sanity';
-import { cache } from '../cache/cache';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
-import { GqlBalancerPoolSnapshot, GqlBalancerTradePairSnapshot } from '../../schema';
-import _ from 'lodash';
 import { oneDayInMinutes } from '../util/time';
 import moment from 'moment-timezone';
+import { GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
+import _, { parseInt } from 'lodash';
+import { twentyFourHoursInMs } from '../util/time';
+import { CacheClass, Cache } from 'memory-cache';
+import { cache } from '../cache/cache';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -26,10 +28,14 @@ const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
 
 export class BalancerService {
-    constructor() {}
+    cache: CacheClass<string, any>;
+
+    constructor() {
+        this.cache = new Cache<string, any>();
+    }
 
     public async getPools(): Promise<BalancerPoolFragment[]> {
-        const pools = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
+        const pools = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (pools) {
             return pools;
@@ -39,7 +45,7 @@ export class BalancerService {
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
-        const pools = await cache.getObjectValue<BalancerPoolFragment[]>(PAST_POOLS_CACHE_KEY);
+        const pools = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (pools) {
             return pools;
@@ -49,7 +55,7 @@ export class BalancerService {
     }
 
     public async getLatestPrice(id: string): Promise<BalancerLatestPriceFragment | null> {
-        const cached = await cache.getObjectValue<BalancerLatestPriceFragment>(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`);
+        const cached = this.cache.get(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`) as BalancerLatestPriceFragment | null;
 
         if (cached) {
             return cached;
@@ -58,7 +64,7 @@ export class BalancerService {
         const latestPrice = await balancerSubgraphService.getLatestPrice(id);
 
         if (latestPrice) {
-            await cache.putObjectValue(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
+            this.cache.put(`${LATEST_PRICE_CACHE_KEY_PREFIX}${id}`, latestPrice);
         }
 
         return latestPrice;
@@ -77,7 +83,7 @@ export class BalancerService {
                 return false;
             }
 
-            if (parseFloat(pool.totalShares) < 0.01) {
+            if (parseFloat(pool.totalShares) < 0.001) {
                 return false;
             }
 
@@ -91,7 +97,7 @@ export class BalancerService {
             provider,
         );
 
-        await cache.putObjectValue(POOLS_CACHE_KEY, filteredWithOnChainBalances, 30);
+        this.cache.put(POOLS_CACHE_KEY, filteredWithOnChainBalances);
 
         return filteredWithOnChainBalances;
     }
@@ -117,18 +123,40 @@ export class BalancerService {
             return true;
         });
 
-        await cache.putObjectValue(PAST_POOLS_CACHE_KEY, filtered, 30);
+        this.cache.put(PAST_POOLS_CACHE_KEY, filtered);
 
         return filtered;
+    }
+
+    public async poolGet24hData(poolId: string): Promise<GqlBalancerPool24h> {
+        const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
+        const pools = await this.getPools();
+        const pool = pools.find((pool) => pool.id === poolId);
+        const { pool: previousPool } = await balancerSubgraphService.getPool({
+            id: poolId,
+            block: { number: parseInt(previousBlock.number) },
+        });
+
+        if (!pool || !previousPool) {
+            throw new Error('could not find pool');
+        }
+
+        return {
+            ...pool,
+            __typename: 'GqlBalancerPool24h',
+            liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
+            swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
+            swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
+        };
     }
 
     public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {
         const snapshots: GqlBalancerPoolSnapshot[] = [];
         const blocks = await blocksSubgraphService.getDailyBlocks(60);
 
-        const cached = await cache.getObjectValue<GqlBalancerPoolSnapshot[]>(
-            `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
-        );
+        const cached = this.cache.get(`${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`) as
+            | GqlBalancerPoolSnapshot[]
+            | null;
 
         if (cached) {
             return cached;
@@ -180,10 +208,10 @@ export class BalancerService {
 
         const orderedSnapshots = _.orderBy(snapshots, 'timestamp', 'asc');
 
-        await cache.putObjectValue(
+        this.cache.put(
             `${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`,
             orderedSnapshots,
-            oneDayInMinutes,
+            twentyFourHoursInMs,
         );
 
         return orderedSnapshots;

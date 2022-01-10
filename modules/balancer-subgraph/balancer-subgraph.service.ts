@@ -28,8 +28,9 @@ import {
 } from './generated/balancer-subgraph-types';
 import { env } from '../../app/env';
 import _ from 'lodash';
-import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
-import { cache } from '../cache/cache';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { Cache, CacheClass } from 'memory-cache';
+import { fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -37,9 +38,11 @@ const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
 const PORTFOLIO_POOLS_CACHE_KEY = 'balance-subgraph_portfolio-pools';
 
 export class BalancerSubgraphService {
+    private cache: CacheClass<string, any>;
     private readonly client: GraphQLClient;
 
     constructor() {
+        this.cache = new Cache<string, any>();
         this.client = new GraphQLClient(env.BALANCER_SUBGRAPH);
     }
 
@@ -111,13 +114,13 @@ export class BalancerSubgraphService {
     public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
         const response = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
 
-        await cache.putObjectValue(PORTFOLIO_POOLS_CACHE_KEY, response, 5);
+        this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, response, fiveMinutesInSeconds * 1000);
 
         return response;
     }
 
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const cachedData = await cache.getObjectValue<BalancerPortfolioPoolsDataQuery>(PORTFOLIO_POOLS_CACHE_KEY);
+        const cachedData = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
 
         if (cachedData) {
             return cachedData;
@@ -126,54 +129,28 @@ export class BalancerSubgraphService {
         return this.cachePortfolioPoolsData(previousBlockNumber);
     }
 
-    public async getAllUsersAtBlock(block: number): Promise<BalancerUserFragment[]> {
-        const users = await subgraphLoadAllAtBlock<BalancerUserFragment>(
-            this.sdk.BalancerUsers,
-            'users',
-            block,
-            ALL_USERS_CACHE_KEY,
-        );
-
-        return users.map((user) => this.normalizeBalancerUser(user));
-    }
-
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
-        return subgraphLoadAllAtBlock<BalancerPoolFragment>(
-            this.sdk.BalancerPools,
-            'pools',
-            block,
-            ALL_POOLS_CACHE_KEY,
-            { where: { totalShares_gt: '0' } },
-        );
-    }
+        const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${block}`) as BalancerPoolFragment[] | null;
 
-    public async getUserAtBlock(address: string, block: number): Promise<BalancerUserFragment | null> {
-        const users = await this.getAllUsersAtBlock(block);
+        if (cached) {
+            return cached;
+        }
 
-        return users.find((user) => user.id === address) || null;
-    }
+        const { pools } = await this.sdk.BalancerPools({
+            first: 1000,
+            where: { totalShares_gt: '0' },
+            block: { number: block },
+        });
 
-    public async getJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
-        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
-    }
+        this.cache.put(`${ALL_POOLS_CACHE_KEY}:${block}`, pools, twentyFourHoursInMs);
 
-    public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
-        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
+        return pools;
     }
 
     public async getTradePairSnapshots(
         args: BalancerTradePairSnapshotsQueryVariables,
     ): Promise<BalancerTradePairSnapshotsQuery> {
         return this.sdk.BalancerTradePairSnapshots(args);
-    }
-
-    public async getAllJoinExitsAtBlock(block: number): Promise<BalancerJoinExitFragment[]> {
-        return subgraphLoadAllAtBlock<BalancerJoinExitFragment>(
-            this.sdk.BalancerJoinExits,
-            'joinExits',
-            block,
-            ALL_JOIN_EXITS_CACHE_KEY,
-        );
     }
 
     public async clearCacheAtBlock(block: number) {

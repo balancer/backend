@@ -22,6 +22,9 @@ const balancerResolvers: Resolvers = {
 
             return beetsService.getBeetsFarmsForUser(address);
         },
+        beetsGetConfig: async (parent, {}, context) => {
+            return beetsService.getConfig();
+        },
     },
 };
 

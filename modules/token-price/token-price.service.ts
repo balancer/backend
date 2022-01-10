@@ -2,31 +2,59 @@ import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { cache } from '../cache/cache';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
 import { balancerService } from '../balancer/balancer.service';
+import { cache } from '../cache/cache';
+import { CacheClass, Cache } from 'memory-cache';
+import { thirtyMinInMs } from '../util/time';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
 
 export class TokenPriceService {
+    cache: CacheClass<string, any>;
+
+    constructor() {
+        this.cache = new Cache<string, any>();
+    }
+
     public async getTokenPrices(): Promise<TokenPrices> {
+        const memCached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as TokenPrices | null;
+
+        if (memCached) {
+            return memCached;
+        }
+
         const tokenPrices = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices);
+        }
 
         return tokenPrices || {};
     }
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
+        const memCached = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
+
+        if (memCached) {
+            return memCached;
+        }
+
         const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
+        }
 
         //don't try to refetch the cache, it takes way too long
         return tokenPrices || {};
     }
 
-    public getTokenPricesForTimestamp(timestamp: string, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
-        const msTimestamp = parseInt(timestamp) * 1000;
+    public getTokenPricesForTimestamp(timestamp: number, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
+        const msTimestamp = timestamp * 1000;
         return _.mapValues(tokenHistoricalPrices, (tokenPrices) => {
             if (tokenPrices.length === 0) {
                 return { usd: 0 };
@@ -62,6 +90,7 @@ export class TokenPriceService {
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
         };
 
+        this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, thirtyMinInMs);
         await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
 
         return tokenPrices;
@@ -91,6 +120,7 @@ export class TokenPriceService {
             });
         }
 
+        this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
         await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;

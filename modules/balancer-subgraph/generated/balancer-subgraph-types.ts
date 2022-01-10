@@ -3017,7 +3017,12 @@ export type BalancerUserQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3040,7 +3045,12 @@ export type BalancerUsersQuery = {
         __typename?: 'User';
         id: string;
         sharesOwned?:
-            | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+            | Array<{
+                  __typename?: 'PoolShare';
+                  id: string;
+                  balance: string;
+                  poolId: { __typename?: 'Pool'; id: string };
+              }>
             | null
             | undefined;
     }>;
@@ -3050,7 +3060,7 @@ export type BalancerUserFragment = {
     __typename?: 'User';
     id: string;
     sharesOwned?:
-        | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+        | Array<{ __typename?: 'PoolShare'; id: string; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
         | null
         | undefined;
 };
@@ -3413,7 +3423,12 @@ export type BalancerPortfolioDataQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3424,7 +3439,12 @@ export type BalancerPortfolioDataQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3564,6 +3584,7 @@ export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
         sharesOwned(first: 1000) {
+            id
             balance
             poolId {
                 id

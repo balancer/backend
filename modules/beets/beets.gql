@@ -3,6 +3,7 @@ extend type Query {
     beetsGetBeetsFarms: [GqlBeetsFarm!]!
     beetsGetUserDataForFarm(farmId: String!): GqlBeetsFarmUser
     beetsGetUserDataForAllFarms: [GqlBeetsFarmUser!]!
+    beetsGetConfig: GqlBeetsConfig!
 }
 
 type GqlBeetsProtocolData {
@@ -13,6 +14,8 @@ type GqlBeetsProtocolData {
     beetsPrice: BigDecimal!
     circulatingSupply: BigDecimal!
     marketCap: BigDecimal!
+    swapFee24h: BigDecimal!
+    swapVolume24h: BigDecimal!
 }
 
 type GqlBeetsFarm {
@@ -48,4 +51,34 @@ type GqlBeetsFarmUser {
     farmId: ID!
     rewardDebt: BigInt!
     timestamp: BigInt!
+}
+
+type GqlBeetsConfig {
+    incentivizedPools: [String!]!
+    pausedPools: [String!]!
+    blacklistedPools: [String!]!
+    featuredPools: [String!]!
+    homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
+    homeNewsItems: [GqlBeetsConfigNewsItem!]!
+    poolFilters: [GqlBeetsConfigPoolFilterItem!]!
+}
+
+type GqlBeetsConfigFeaturedPool {
+    poolId: String!
+    image: String!
+    description: String
+}
+
+type GqlBeetsConfigNewsItem {
+    title: String!
+    image: String!
+    publishDate: String!
+    url: String!
+    description: String!
+}
+
+type GqlBeetsConfigPoolFilterItem {
+    id: ID!
+    title: String!
+    pools: [String!]!
 }

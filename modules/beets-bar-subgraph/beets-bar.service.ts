@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
 import {
     BeetsBarFragment,
     BeetsBarUserFragment,
@@ -8,17 +8,33 @@ import {
     getSdk,
 } from './generated/beets-bar-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { Cache, CacheClass } from 'memory-cache';
+import { twentyFourHoursInMs } from '../util/time';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
+const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
+const FBEETS_APR_CACHE_KEY = 'beets-bar:getFbeetsApr';
 
 export class BeetsBarSubgraphService {
+    cache: CacheClass<string, any>;
     private readonly client: GraphQLClient;
 
     constructor() {
+        this.cache = new Cache<string, any>();
         this.client = new GraphQLClient(env.BEETS_BAR_SUBGRAPH);
     }
 
-    public async getFbeetsApr() {
+    public async getFbeetsApr(): Promise<number> {
+        const cached = this.cache.get(FBEETS_APR_CACHE_KEY) as number | null;
+
+        if (cached !== null) {
+            return cached;
+        }
+
+        return this.cacheFbeetsApr();
+    }
+
+    public async cacheFbeetsApr(): Promise<number> {
         const blocks = await blocksSubgraphService.getDailyBlocks(30);
         const block = blocks[blocks.length - 1]; //take the block from 30 days ago
 
@@ -31,6 +47,8 @@ export class BeetsBarSubgraphService {
 
         const diff = ratio - prevRatio;
         const estimatedYield = diff * 12;
+
+        this.cache.put(FBEETS_APR_CACHE_KEY, estimatedYield / prevRatio, twentyFourHoursInMs);
 
         return estimatedYield / prevRatio;
     }
@@ -61,7 +79,15 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBar(block?: number): Promise<BeetsBarFragment> {
+        const cached = this.cache.get(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`) as BeetsBarFragment | null;
+
+        if (cached) {
+            return cached;
+        }
+
         const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS, block: { number: block } });
+
+        this.cache.put(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar, twentyFourHoursInMs);
 
         if (!bar) {
             return this.emptyBeetsBar;
@@ -75,18 +101,17 @@ export class BeetsBarSubgraphService {
     }
 
     public async getUserAtBlock(address: string, block: number): Promise<BeetsBarUserFragment | null> {
-        const users = await this.getAllUsersAtBlock(block);
+        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${block}`) as BeetsBarUserFragment[] | null;
+
+        if (cachedUsers) {
+            return cachedUsers.find((user) => user.id === address) || null;
+        }
+
+        const users = await this.getAllUsers({ block: { number: block } });
+
+        this.cache.put(`${ALL_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
 
         return users.find((user) => user.id === address) || null;
-    }
-
-    public async getAllUsersAtBlock(block: number): Promise<BeetsBarUserFragment[]> {
-        return subgraphLoadAllAtBlock<BeetsBarUserFragment>(
-            this.sdk.BeetsBarUsers,
-            'users',
-            block,
-            ALL_USERS_CACHE_KEY,
-        );
     }
 
     public async clearCacheAtBlock(block: number) {
