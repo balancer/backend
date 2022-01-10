@@ -59,10 +59,18 @@ type GqlBeetsConfig {
     blacklistedPools: [String!]!
     featuredPools: [String!]!
     homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
+    homeNewsItems: [GqlBeetsConfigNewsItem!]!
 }
 
 type GqlBeetsConfigFeaturedPool {
     poolId: String!
     image: String!
     description: String
+}
+
+type GqlBeetsConfigNewsItem {
+    title: String!
+    image: String!
+    url: String!
+    description: String!
 }
