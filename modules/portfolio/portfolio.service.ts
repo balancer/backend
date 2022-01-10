@@ -82,6 +82,14 @@ class PortfolioService {
     }
 
     public async getPortfolioHistory(address: string, useCache = true): Promise<UserPortfolioData[]> {
+        if (useCache) {
+            const cached = await this.dataService.getCachedPortfolioHistory(address);
+
+            if (cached !== null) {
+                return cached;
+            }
+        }
+
         const timestamp = moment.tz('GMT').startOf('day').subtract(30, 'days').unix();
         const portfolioHistories: UserPortfolioData[] = [];
         const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
@@ -136,6 +144,10 @@ class PortfolioService {
 
                 portfolioHistories.push(data);
             }
+        }
+
+        if (blocks.length > 0) {
+            await this.dataService.cachePortfolioHistory(address, blocks[0].timestamp, portfolioHistories);
         }
 
         return portfolioHistories;
