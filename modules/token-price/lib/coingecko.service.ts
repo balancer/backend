@@ -15,12 +15,12 @@ interface MappedToken {
 }
 
 export class CoingeckoService {
-    baseUrl: string;
-    fiatParam: string;
-    chainId: string;
-    platformId: string;
-    nativeAssetId: string;
-    nativeAssetAddress: string;
+    private readonly baseUrl: string;
+    private readonly fiatParam: string;
+    private readonly chainId: string;
+    private readonly platformId: string;
+    private readonly nativeAssetId: string;
+    private readonly nativeAssetAddress: string;
 
     constructor() {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
