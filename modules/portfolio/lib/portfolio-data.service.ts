@@ -80,7 +80,7 @@ export class PortfolioDataService {
             ),
         };
 
-        await cache.putObjectValue(`${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`, response, 0.25);
+        await cache.putObjectValue(`${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`, response, 0.5);
 
         return response;
     }
