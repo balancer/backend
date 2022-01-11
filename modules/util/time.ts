@@ -2,6 +2,7 @@ import moment from 'moment-timezone';
 
 export const oneMinuteInSeconds = 60;
 export const fiveMinutesInSeconds = oneMinuteInSeconds * 5;
+export const fiveMinutesInMs = fiveMinutesInSeconds * 1000;
 
 export const oneSecondInMs = 1000;
 export const oneMinInMs = 60 * oneSecondInMs;
