@@ -130,7 +130,9 @@ export class CoingeckoService {
         if (token && token.coingeckoPlatformId && token.coingeckoContractAddress) {
             return {
                 platform: token.coingeckoPlatformId,
-                address: token.coingeckoContractAddress.toLowerCase(),
+                address: isAddress(token.coingeckoContractAddress)
+                    ? token.coingeckoContractAddress.toLowerCase()
+                    : token.coingeckoContractAddress,
                 originalAddress: address.toLowerCase(),
             };
         }
