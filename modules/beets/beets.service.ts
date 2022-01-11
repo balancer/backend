@@ -3,7 +3,7 @@ import { env } from '../../app/env';
 import { GqlBeetsConfig, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
 import { getCirculatingSupply } from './beets';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
-import { thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
+import { fiveMinutesInMs, fiveMinutesInSeconds, thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
@@ -12,6 +12,7 @@ import { sanityClient } from '../sanity/sanity';
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
 const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
+const CONFIG_CACHE_KEY = 'beetsConfig';
 
 export class BeetsService {
     cache: CacheClass<string, any>;
@@ -123,6 +124,12 @@ export class BeetsService {
     }
 
     public async getConfig(): Promise<GqlBeetsConfig> {
+        const cached = this.cache.get(CONFIG_CACHE_KEY) as GqlBeetsConfig | null;
+
+        if (cached) {
+            return cached;
+        }
+
         const config = await sanityClient.fetch(`
             *[_type == "config" && chainId == ${env.CHAIN_ID}][0]{
                 ...,
@@ -137,7 +144,7 @@ export class BeetsService {
             }
         `);
 
-        return {
+        const beetsConfig: GqlBeetsConfig = {
             pausedPools: config?.pausedPools ?? [],
             featuredPools: config?.featuredPools ?? [],
             homeFeaturedPools: config?.homeFeaturedPools ?? [],
@@ -146,6 +153,10 @@ export class BeetsService {
             homeNewsItems: config?.homeNewsItems ?? [],
             poolFilters: config?.poolFilters ?? [],
         };
+
+        this.cache.put(CONFIG_CACHE_KEY, beetsConfig, fiveMinutesInMs);
+
+        return beetsConfig;
     }
 
     private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
