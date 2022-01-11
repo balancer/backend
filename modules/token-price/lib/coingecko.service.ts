@@ -1,15 +1,23 @@
 import axios from 'axios';
 import { twentyFourHoursInSecs } from '../../util/time';
-import { fromPairs, invert } from 'lodash';
+import _ from 'lodash';
 import { env } from '../../../app/env';
-import { coinGeckoTokenMappings } from './coingecko-token-mappings';
 import { HistoricalPrice, HistoricalPriceResponse, Price, PriceResponse, TokenPrices } from '../token-price-types';
 import moment from 'moment-timezone';
+import { tokenService } from '../../token/token.service';
+import { TokenDefinition } from '../../token/token-types';
+import { getAddress, isAddress } from 'ethers/lib/utils';
+
+interface MappedToken {
+    platform: string;
+    address: string;
+    originalAddress?: string;
+}
 
 export class CoingeckoService {
     baseUrl: string;
     fiatParam: string;
-    appNetwork: string;
+    chainId: string;
     platformId: string;
     nativeAssetId: string;
     nativeAssetAddress: string;
@@ -17,7 +25,7 @@ export class CoingeckoService {
     constructor() {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
-        this.appNetwork = env.CHAIN_ID;
+        this.chainId = env.CHAIN_ID;
         this.platformId = env.COINGECKO_PLATFORM_ID;
         this.nativeAssetId = env.COINGECKO_NATIVE_ASSET_ID;
         this.nativeAssetAddress = env.NATIVE_ASSET_ADDRESS;
@@ -42,34 +50,30 @@ export class CoingeckoService {
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
 
-            addresses = addresses.map((address) => this.addressMapIn(address));
-            const addressesWithCustomPlatform = addresses
-                .filter((address) => coinGeckoTokenMappings.Prices.CustomPlatformId[address.toLowerCase()])
-                .map((address) => address.toLowerCase());
+            const tokenDefinitions = await tokenService.getTokens();
+            const mapped = addresses.map((address) => this.getMappedTokenDetails(address, tokenDefinitions));
+            const groupedByPlatform = _.groupBy(mapped, 'platform');
 
-            addresses = addresses.filter((address) => !addressesWithCustomPlatform.includes(address.toLowerCase()));
-
-            const pageCount = Math.ceil(addresses.length / addressesPerRequest);
-            const pages = Array.from(Array(pageCount).keys());
             const requests: Promise<PriceResponse>[] = [];
 
-            pages.forEach((page) => {
-                const addressString = addresses.slice(addressesPerRequest * page, addressesPerRequest * (page + 1));
-                const endpoint = `/simple/token_price/${this.platformId}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
-                const request = this.get<PriceResponse>(endpoint);
-                requests.push(request);
-            });
+            _.forEach(groupedByPlatform, (tokens, platform) => {
+                const mappedAddresses = tokens.map((token) => token.address);
+                const pageCount = Math.ceil(mappedAddresses.length / addressesPerRequest);
+                const pages = Array.from(Array(pageCount).keys());
 
-            addressesWithCustomPlatform.forEach((address) => {
-                const endpoint = `/simple/token_price/${this.getPlatformIdForAddress(
-                    address,
-                )}?contract_addresses=${address}&vs_currencies=${this.fiatParam}`;
-                const request = this.get<PriceResponse>(endpoint);
-                requests.push(request);
+                pages.forEach((page) => {
+                    const addressString = mappedAddresses.slice(
+                        addressesPerRequest * page,
+                        addressesPerRequest * (page + 1),
+                    );
+                    const endpoint = `/simple/token_price/${platform}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
+                    const request = this.get<PriceResponse>(endpoint);
+                    requests.push(request);
+                });
             });
 
             const paginatedResults = await Promise.all(requests);
-            const results = this.parsePaginatedTokens(paginatedResults);
+            const results = this.parsePaginatedTokens(paginatedResults, mapped);
 
             // Inject native asset price if included in requested addresses
             if (addresses.includes(this.nativeAssetAddress)) {
@@ -87,12 +91,10 @@ export class CoingeckoService {
         const now = Math.floor(Date.now() / 1000);
         const end = now;
         const start = end - days * twentyFourHoursInSecs;
+        const tokenDefinitions = await tokenService.getTokens();
+        const mapped = this.getMappedTokenDetails(address, tokenDefinitions);
 
-        const mappedAddress = this.addressMapIn(address).toLowerCase();
-
-        const endpoint = `/coins/${this.getPlatformIdForAddress(
-            mappedAddress,
-        )}/contract/${mappedAddress}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;
+        const endpoint = `/coins/${mapped.platform}/contract/${mapped.address}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;
 
         const result = await this.get<HistoricalPriceResponse>(endpoint);
 
@@ -107,40 +109,42 @@ export class CoingeckoService {
         }));
     }
 
-    private parsePaginatedTokens(paginatedResults: TokenPrices[]): TokenPrices {
+    private parsePaginatedTokens(paginatedResults: TokenPrices[], mappedTokens: MappedToken[]): TokenPrices {
         const results = paginatedResults.reduce((result, page) => ({ ...result, ...page }), {});
-        const entries = Object.entries(results)
-            .filter((result) => Object.keys(result[1]).length > 0)
+        const prices: TokenPrices = _.mapKeys(results, (val, address) => this.getAddress(address));
 
-            .map((result) => [this.addressMapOut(result[0]), result[1]]);
+        for (const mappedToken of mappedTokens) {
+            if (mappedToken.originalAddress && results[mappedToken.address]) {
+                prices[this.getAddress(mappedToken.originalAddress)] = results[mappedToken.address];
+            }
+        }
 
-        return fromPairs(entries);
-    }
-
-    /**
-     * Map address to mainnet address if app network is a testnet
-     */
-    public addressMapIn(address: string): string {
-        const addressMap = coinGeckoTokenMappings.Prices.ChainMap[this.appNetwork];
-        if (!addressMap) return address;
-        return addressMap[address.toLowerCase()] || address;
-    }
-
-    /**
-     * Map mainnet address back to testnet address
-     */
-    public addressMapOut(address: string): string {
-        const addressMap = coinGeckoTokenMappings.Prices.ChainMap[this.appNetwork];
-        if (!addressMap) return address;
-        return invert(addressMap)[address.toLowerCase()] || address;
+        return prices;
     }
 
     /**
      * Support instances where a token address is not supported by the platform id, provide the option to use a different platform
-     * @param address
      */
-    public getPlatformIdForAddress(address: string): string {
-        return coinGeckoTokenMappings.Prices.CustomPlatformId[address] || this.platformId;
+    public getMappedTokenDetails(address: string, tokens: TokenDefinition[]): MappedToken {
+        const token = tokens.find((token) => token.address.toLowerCase() === address.toLowerCase());
+        if (token && token.coingeckoPlatformId && token.coingeckoContractAddress) {
+            return {
+                platform: token.coingeckoPlatformId,
+                address: isAddress(token.coingeckoContractAddress)
+                    ? token.coingeckoContractAddress.toLowerCase()
+                    : token.coingeckoContractAddress,
+                originalAddress: address.toLowerCase(),
+            };
+        }
+
+        return {
+            platform: this.platformId,
+            address: address.toLowerCase(),
+        };
+    }
+
+    private getAddress(address: string) {
+        return isAddress(address) ? getAddress(address) : address;
     }
 
     private async get<T>(endpoint: string): Promise<T> {
