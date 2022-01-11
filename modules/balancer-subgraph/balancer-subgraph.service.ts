@@ -20,6 +20,8 @@ import {
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
+    BalancerTradePairSnapshotsQuery,
+    BalancerTradePairSnapshotsQueryVariables,
     BalancerUserFragment,
     BalancerUsersQueryVariables,
     getSdk,
@@ -27,10 +29,8 @@ import {
 import { env } from '../../app/env';
 import _ from 'lodash';
 import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
-import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
-import { BeetsBarUserFragment } from '../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -147,26 +147,10 @@ export class BalancerSubgraphService {
         return pools;
     }
 
-    public async getUserAtBlock(address: string, block: number): Promise<BalancerUserFragment | null> {
-        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${block}`) as BalancerUserFragment[] | null;
-
-        if (cachedUsers) {
-            return cachedUsers.find((user) => user.id === address) || null;
-        }
-
-        const users = await this.getAllUsers({ block: { number: block } });
-
-        this.cache.put(`${ALL_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
-
-        return users.find((user) => user.id === address) || null;
-    }
-
-    public async getJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
-        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
-    }
-
-    public async getAllJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitFragment[]> {
-        return subgraphLoadAll<BalancerJoinExitFragment>(this.sdk.BalancerJoinExits, 'joinExits', args);
+    public async getTradePairSnapshots(
+        args: BalancerTradePairSnapshotsQueryVariables,
+    ): Promise<BalancerTradePairSnapshotsQuery> {
+        return this.sdk.BalancerTradePairSnapshots(args);
     }
 
     public async clearCacheAtBlock(block: number) {

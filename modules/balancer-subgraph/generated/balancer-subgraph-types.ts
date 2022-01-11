@@ -3542,6 +3542,44 @@ export type BalancerPortfolioPoolsDataQuery = {
     }>;
 };
 
+export type BalancerTradePairSnapshotsQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<TradePairSnapshot_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<TradePairSnapshot_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerTradePairSnapshotsQuery = {
+    __typename?: 'Query';
+    tradePairSnapshots: Array<{
+        __typename?: 'TradePairSnapshot';
+        id: string;
+        totalSwapFee: string;
+        totalSwapVolume: string;
+        timestamp: number;
+        pair: {
+            __typename?: 'TradePair';
+            token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+            token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        };
+    }>;
+};
+
+export type BalancerTradePairSnapshotFragment = {
+    __typename?: 'TradePairSnapshot';
+    id: string;
+    totalSwapFee: string;
+    totalSwapVolume: string;
+    timestamp: number;
+    pair: {
+        __typename?: 'TradePair';
+        token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+    };
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
@@ -3652,6 +3690,24 @@ export const BalancerJoinExitFragmentDoc = gql`
         pool {
             id
             tokensList
+        }
+    }
+`;
+export const BalancerTradePairSnapshotFragmentDoc = gql`
+    fragment BalancerTradePairSnapshot on TradePairSnapshot {
+        id
+        totalSwapFee
+        totalSwapVolume
+        timestamp
+        pair {
+            token0 {
+                address
+                symbol
+            }
+            token1 {
+                address
+                symbol
+            }
         }
     }
 `;
@@ -3887,6 +3943,28 @@ export const BalancerPortfolioPoolsDataDocument = gql`
     }
     ${BalancerPoolFragmentDoc}
 `;
+export const BalancerTradePairSnapshotsDocument = gql`
+    query BalancerTradePairSnapshots(
+        $skip: Int
+        $first: Int
+        $orderBy: TradePairSnapshot_orderBy
+        $orderDirection: OrderDirection
+        $where: TradePairSnapshot_filter
+        $block: Block_height
+    ) {
+        tradePairSnapshots(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerTradePairSnapshot
+        }
+    }
+    ${BalancerTradePairSnapshotFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -4065,6 +4143,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerPortfolioPoolsData',
+            );
+        },
+        BalancerTradePairSnapshots(
+            variables?: BalancerTradePairSnapshotsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerTradePairSnapshotsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerTradePairSnapshotsQuery>(BalancerTradePairSnapshotsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerTradePairSnapshots',
             );
         },
     };

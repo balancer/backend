@@ -2,8 +2,10 @@ import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.
 import {
     BalancerLatestPriceFragment,
     BalancerPoolFragment,
+    BalancerTradePairSnapshotFragment,
     OrderDirection,
     Pool_OrderBy,
+    TradePairSnapshot_OrderBy,
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { sanityClient } from '../sanity/sanity';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
@@ -11,15 +13,19 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
+import { oneDayInMinutes } from '../util/time';
+import moment from 'moment-timezone';
 import { GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
 import _, { parseInt } from 'lodash';
 import { twentyFourHoursInMs } from '../util/time';
 import { CacheClass, Cache } from 'memory-cache';
+import { cache } from '../cache/cache';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
+const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
 
 export class BalancerService {
     cache: CacheClass<string, any>;
@@ -209,6 +215,31 @@ export class BalancerService {
         );
 
         return orderedSnapshots;
+    }
+
+    public async getTopTradingPairs(): Promise<BalancerTradePairSnapshotFragment[]> {
+        const cached = await cache.getObjectValue<BalancerTradePairSnapshotFragment[]>(TOP_TRADE_PAIRS_CACHE_KEY);
+
+        if (cached) {
+            return cached;
+        }
+
+        return this.cacheTopTradingPairs();
+    }
+
+    public async cacheTopTradingPairs(): Promise<BalancerTradePairSnapshotFragment[]> {
+        const timestamp = moment().utc().startOf('day').unix();
+
+        const { tradePairSnapshots } = await balancerSubgraphService.getTradePairSnapshots({
+            first: 5,
+            orderBy: TradePairSnapshot_OrderBy.TotalSwapVolume,
+            orderDirection: OrderDirection.Desc,
+            where: { timestamp_gt: timestamp },
+        });
+
+        await cache.putObjectValue(TOP_TRADE_PAIRS_CACHE_KEY, tradePairSnapshots, oneDayInMinutes);
+
+        return tradePairSnapshots;
     }
 
     private async getBlacklistedPools() {

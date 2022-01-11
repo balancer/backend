@@ -1,5 +1,4 @@
 import { redis } from './redis';
-import { v4 as uuidv4 } from 'uuid';
 
 export const cache = {
     async putObjectValue<T extends Object>(key: string, object: T, timeoutInMinutes?: number): Promise<void> {
@@ -12,14 +11,9 @@ export const cache = {
     },
 
     async getObjectValue<T extends Object>(key: string): Promise<T | null> {
-        const id = uuidv4();
-        console.time('cache getObjectValue ' + key + ' ' + id);
         const response = await redis.get(key);
-        console.timeEnd('cache getObjectValue ' + key + ' ' + id);
 
-        const parsed = response ? JSON.parse(response) : null;
-
-        return parsed;
+        return response ? JSON.parse(response) : null;
     },
 
     async putValueKeyedOnObject<T extends Object>(
