@@ -6,8 +6,6 @@ type Env = EnvType<typeof schema>;
 export const schema = {
     REDIS_URL: String,
     REDIS_PORT: Number,
-    REDIS_WRITE_URL: String,
-    REDIS_WRITE_PORT: Number,
     PORT: Number,
     NODE_ENV: String,
     BALANCER_SUBGRAPH: String,
