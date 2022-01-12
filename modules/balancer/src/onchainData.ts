@@ -121,6 +121,7 @@ export async function getOnChainBalances(
             }
         >;
     } catch (err) {
+        console.error(err)
         throw `Issue with multicall execution.`;
     }
 
