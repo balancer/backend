@@ -15,7 +15,6 @@ import { oneDayInMinutes } from '../../util/time';
 
 const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
 const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
-const PORTFOLIO_CACHE_KEY_PREFIX = 'portfolio:data:';
 
 interface PortfolioDataNow {
     pools: PrismaBalancerPool[];
@@ -25,14 +24,6 @@ interface PortfolioDataNow {
 
 export class PortfolioDataService {
     public async getPortfolioDataForNow(userAddress: string): Promise<PortfolioDataNow | null> {
-        const cached = await cache.getObjectValue<PortfolioDataNow | 'empty'>(
-            `${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`,
-        );
-
-        if (cached !== null) {
-            return cached === 'empty' ? null : cached;
-        }
-
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const { user, previousUser } = await balancerSubgraphService.getPortfolioData(
             userAddress,
@@ -79,8 +70,6 @@ export class PortfolioDataService {
                 previousBeetsBarUser,
             ),
         };
-
-        await cache.putObjectValue(`${PORTFOLIO_CACHE_KEY_PREFIX}${userAddress}`, response, 0.5);
 
         return response;
     }
