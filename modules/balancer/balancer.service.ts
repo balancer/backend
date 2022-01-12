@@ -35,20 +35,36 @@ export class BalancerService {
     }
 
     public async getPools(): Promise<BalancerPoolFragment[]> {
-        const pools = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
+        const memCached = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
-        if (pools) {
-            return pools;
+        if (memCached) {
+            return memCached;
+        }
+
+        const cached = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
+
+        if (cached) {
+            this.cache.put(POOLS_CACHE_KEY, cached, 15000);
+
+            return cached;
         }
 
         return this.cachePools();
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
-        const pools = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
+        const memCached = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
-        if (pools) {
-            return pools;
+        if (memCached) {
+            return memCached;
+        }
+
+        const cached = await cache.getObjectValue<BalancerPoolFragment[]>(PAST_POOLS_CACHE_KEY);
+
+        if (cached) {
+            this.cache.put(PAST_POOLS_CACHE_KEY, cached, 15000);
+
+            return cached;
         }
 
         return this.cachePastPools();
@@ -97,7 +113,7 @@ export class BalancerService {
             provider,
         );
 
-        this.cache.put(POOLS_CACHE_KEY, filteredWithOnChainBalances);
+        await cache.putObjectValue(POOLS_CACHE_KEY, filteredWithOnChainBalances);
 
         return filteredWithOnChainBalances;
     }
@@ -123,7 +139,7 @@ export class BalancerService {
             return true;
         });
 
-        this.cache.put(PAST_POOLS_CACHE_KEY, filtered);
+        await cache.putObjectValue(PAST_POOLS_CACHE_KEY, filtered);
 
         return filtered;
     }

@@ -30,7 +30,8 @@ import { env } from '../../app/env';
 import _ from 'lodash';
 import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
-import { fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
+import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
+import { cache } from '../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -114,16 +115,24 @@ export class BalancerSubgraphService {
     public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
         const response = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
 
-        this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, response, fiveMinutesInSeconds * 1000);
+        await cache.putObjectValue(PORTFOLIO_POOLS_CACHE_KEY, response, 5);
 
         return response;
     }
 
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const cachedData = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
+        const memCached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
 
-        if (cachedData) {
-            return cachedData;
+        if (memCached) {
+            return memCached;
+        }
+
+        const cached = await cache.getObjectValue<BalancerPortfolioPoolsDataQuery>(PORTFOLIO_POOLS_CACHE_KEY);
+
+        if (cached) {
+            this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, cached, fiveMinutesInMs);
+
+            return cached;
         }
 
         return this.cachePortfolioPoolsData(previousBlockNumber);

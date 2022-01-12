@@ -9,7 +9,8 @@ import {
 } from './generated/beets-bar-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { twentyFourHoursInMs } from '../util/time';
+import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
+import { cache } from '../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
@@ -25,10 +26,10 @@ export class BeetsBarSubgraphService {
     }
 
     public async getFbeetsApr(): Promise<number> {
-        const cached = this.cache.get(FBEETS_APR_CACHE_KEY) as number | null;
+        const cached = await cache.getValue(FBEETS_APR_CACHE_KEY);
 
         if (cached !== null) {
-            return cached;
+            return parseFloat(cached);
         }
 
         return this.cacheFbeetsApr();
@@ -48,7 +49,7 @@ export class BeetsBarSubgraphService {
         const diff = ratio - prevRatio;
         const estimatedYield = diff * 12;
 
-        this.cache.put(FBEETS_APR_CACHE_KEY, estimatedYield / prevRatio, twentyFourHoursInMs);
+        await cache.putValue(FBEETS_APR_CACHE_KEY, `${estimatedYield / prevRatio}`, oneDayInMinutes);
 
         return estimatedYield / prevRatio;
     }

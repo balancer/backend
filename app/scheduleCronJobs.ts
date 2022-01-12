@@ -54,7 +54,6 @@ export function scheduleCronJobs() {
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
-            await balancerService.cachePools();
             await beetsService.cacheBeetsFarmUsers();
         } catch (e) {}
     });
