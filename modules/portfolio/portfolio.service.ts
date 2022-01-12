@@ -25,6 +25,9 @@ import {
     PrismaBeetsBarSnapshot,
     PrismaBeetsBarUserSnapshot,
 } from '@prisma/client';
+import { cache } from '../cache/cache';
+
+const PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX = 'portfolio:user-data:';
 
 class PortfolioService {
     dataService: PortfolioDataService;
@@ -34,19 +37,20 @@ class PortfolioService {
     }
 
     public async getPortfolio(address: string): Promise<UserPortfolioData> {
+        const cached = await cache.getObjectValue<UserPortfolioData | { empty: true }>(
+            `${PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX}${address}`,
+        );
+
+        if (cached !== null) {
+            return 'empty' in cached ? this.emptyPortfolioData : cached;
+        }
+
         const data = await this.dataService.getPortfolioDataForNow(address);
 
         if (data === null) {
-            return {
-                date: '',
-                pools: [],
-                tokens: [],
-                totalValue: 0,
-                totalSwapFees: 0,
-                totalSwapVolume: 0,
-                timestamp: 0,
-                myFees: 0,
-            };
+            await cache.putObjectValue(`${PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX}${address}`, { empty: true }, 0.5);
+
+            return this.emptyPortfolioData;
         }
 
         const tokenPrices = await tokenPriceService.getTokenPrices();
@@ -65,7 +69,7 @@ class PortfolioService {
         );
         const tokens = this.tokensFromUserPoolData(poolData);
 
-        return {
+        const response: UserPortfolioData = {
             pools: poolData,
             tokens,
             timestamp: moment().unix(),
@@ -75,6 +79,10 @@ class PortfolioService {
             totalSwapVolume: _.sumBy(poolData, 'swapVolume'),
             myFees: _.sumBy(poolData, 'myFees'),
         };
+
+        await cache.putObjectValue(`${PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX}${address}`, response, 0.5);
+
+        return response;
     }
 
     public async cacheRawDataForTimestamp(timestamp: number): Promise<void> {
@@ -394,6 +402,19 @@ class PortfolioService {
             balance: `${token.balance}`,
             pricePerToken: `${token.pricePerToken}`,
             totalValue: `${token.totalValue}`,
+        };
+    }
+
+    private get emptyPortfolioData(): UserPortfolioData {
+        return {
+            date: '',
+            pools: [],
+            tokens: [],
+            totalValue: 0,
+            totalSwapFees: 0,
+            totalSwapVolume: 0,
+            timestamp: 0,
+            myFees: 0,
         };
     }
 }
