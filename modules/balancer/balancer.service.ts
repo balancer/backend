@@ -172,7 +172,7 @@ export class BalancerService {
             swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
         };
 
-        await cache.putObjectValue(`${POOLS_24H_CACHE_KEY}${poolId}`, data, 1);
+        await cache.putObjectValue(`${POOLS_24H_CACHE_KEY}${poolId}`, data, 5);
 
         return data;
     }
