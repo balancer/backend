@@ -20,6 +20,7 @@ import _, { parseInt } from 'lodash';
 import { twentyFourHoursInMs } from '../util/time';
 import { CacheClass, Cache } from 'memory-cache';
 import { cache } from '../cache/cache';
+import { tokenPriceService } from '../token-price/token-price.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -267,6 +268,19 @@ export class BalancerService {
         await cache.putObjectValue(TOP_TRADE_PAIRS_CACHE_KEY, tradePairSnapshots, oneDayInMinutes);
 
         return tradePairSnapshots;
+    }
+
+    public async getLateQuartetBptPrice(): Promise<number> {
+        const pools = await this.getPools();
+        const lateQuartet = pools.find(
+            (pool) => pool.id === '0xf3a602d30dcb723a74a0198313a7551feaca7dac00010000000000000000005f',
+        );
+
+        if (!lateQuartet) {
+            throw new Error('pool not found');
+        }
+
+        return parseFloat(lateQuartet.totalLiquidity) / parseFloat(lateQuartet.totalShares);
     }
 
     private async getBlacklistedPools() {
