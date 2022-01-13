@@ -121,11 +121,7 @@ export async function getOnChainBalances(
             }
         >;
     } catch (err) {
-<<<<<<< HEAD
-        console.error(err)
-=======
         console.error(err);
->>>>>>> canary
         throw `Issue with multicall execution.`;
     }
 
