@@ -3,11 +3,19 @@ import { env } from '../../app/env';
 import { GqlBeetsConfig, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
 import { getCirculatingSupply } from './beets';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
-import { fiveMinutesInMs, fiveMinutesInSeconds, thirtyMinInMs, twentyFourHoursInMs } from '../util/time';
+import {
+    fiveMinutesInMs,
+    fiveMinutesInSeconds,
+    oneDayInMinutes,
+    thirtyMinInMs,
+    twentyFourHoursInMs,
+} from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { sanityClient } from '../sanity/sanity';
+import { cache } from '../cache/cache';
+import { map } from 'lodash';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
@@ -22,10 +30,18 @@ export class BeetsService {
     }
 
     public async getProtocolData(): Promise<GqlBeetsProtocolData> {
-        const protocolData = this.cache.get(PROTOCOL_DATA_CACHE_KEY) as GqlBeetsProtocolData | null;
+        const memCached = this.cache.get(PROTOCOL_DATA_CACHE_KEY) as GqlBeetsProtocolData | null;
 
-        if (protocolData) {
-            return protocolData;
+        if (memCached) {
+            return memCached;
+        }
+
+        const cached = await cache.getObjectValue<GqlBeetsProtocolData>(PROTOCOL_DATA_CACHE_KEY);
+
+        if (cached) {
+            this.cache.put(PROTOCOL_DATA_CACHE_KEY, cached, 15000);
+
+            return cached;
         }
 
         return this.cacheProtocolData();
@@ -51,13 +67,13 @@ export class BeetsService {
             swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,
         };
 
-        this.cache.put(PROTOCOL_DATA_CACHE_KEY, protocolData, thirtyMinInMs);
+        await cache.putObjectValue(PROTOCOL_DATA_CACHE_KEY, protocolData, 30);
 
         return protocolData;
     }
 
     public async getBeetsFarms(): Promise<GqlBeetsFarm[]> {
-        const farms = this.cache.get(FARMS_CACHE_KEY) as GqlBeetsFarm[] | null;
+        const farms = await cache.getObjectValue<GqlBeetsFarm[]>(FARMS_CACHE_KEY);
 
         if (farms) {
             return farms;
@@ -80,16 +96,24 @@ export class BeetsService {
             rewarder: farm.rewarder ? { ...farm.rewarder, __typename: 'GqlBeetsRewarder' } : null,
         }));
 
-        this.cache.put(FARMS_CACHE_KEY, mapped, twentyFourHoursInMs);
+        await cache.putObjectValue(FARMS_CACHE_KEY, mapped, oneDayInMinutes);
 
         return mapped;
     }
 
     public async getBeetsFarmUsers(): Promise<GqlBeetsFarmUser[]> {
-        const farmUsers = this.cache.get(FARM_USERS_CACHE_KEY) as GqlBeetsFarmUser[] | null;
+        const memCached = this.cache.get(FARM_USERS_CACHE_KEY) as GqlBeetsFarmUser[] | null;
 
-        if (farmUsers) {
-            return farmUsers;
+        if (memCached) {
+            return memCached;
+        }
+
+        const cached = await cache.getObjectValue<GqlBeetsFarmUser[]>(FARM_USERS_CACHE_KEY);
+
+        if (cached) {
+            this.cache.put(FARM_USERS_CACHE_KEY, cached, 15000);
+
+            return cached;
         }
 
         return this.cacheBeetsFarmUsers();
@@ -118,7 +142,7 @@ export class BeetsService {
             farmId: farmUser.pool?.id || '',
         }));
 
-        this.cache.put(FARM_USERS_CACHE_KEY, mapped, thirtyMinInMs);
+        await cache.putObjectValue(FARM_USERS_CACHE_KEY, mapped, 30);
 
         return mapped;
     }

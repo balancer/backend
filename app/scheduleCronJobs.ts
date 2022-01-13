@@ -47,7 +47,7 @@ export function scheduleCronJobs() {
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
-            await balancerService.cachePools();
+            await blocksSubgraphService.cacheBlockFrom24HoursAgo();
         } catch (e) {}
     });
 
@@ -55,6 +55,12 @@ export function scheduleCronJobs() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             await balancerService.cachePools();
+        } catch (e) {}
+    });
+
+    //every 5 seconds
+    cron.schedule('*/5 * * * * *', async () => {
+        try {
             await beetsService.cacheBeetsFarmUsers();
         } catch (e) {}
     });
