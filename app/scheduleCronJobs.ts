@@ -47,6 +47,13 @@ export function scheduleCronJobs() {
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
+            await blocksSubgraphService.cacheBlockFrom24HoursAgo();
+        } catch (e) {}
+    });
+
+    //every 5 seconds
+    cron.schedule('*/5 * * * * *', async () => {
+        try {
             await balancerService.cachePools();
         } catch (e) {}
     });

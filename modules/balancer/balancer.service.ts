@@ -26,6 +26,7 @@ const PAST_POOLS_CACHE_KEY = 'pools:24h';
 const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
+const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
 
 export class BalancerService {
     cache: CacheClass<string, any>;
@@ -145,6 +146,12 @@ export class BalancerService {
     }
 
     public async poolGet24hData(poolId: string): Promise<GqlBalancerPool24h> {
+        const cached = await cache.getObjectValue<GqlBalancerPool24h>(`${POOLS_24H_CACHE_KEY}${poolId}`);
+
+        if (cached) {
+            return cached;
+        }
+
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const pools = await this.getPools();
         const pool = pools.find((pool) => pool.id === poolId);
@@ -157,13 +164,17 @@ export class BalancerService {
             throw new Error('could not find pool');
         }
 
-        return {
+        const data: GqlBalancerPool24h = {
             ...pool,
             __typename: 'GqlBalancerPool24h',
             liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
             swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
             swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
         };
+
+        await cache.putObjectValue(`${POOLS_24H_CACHE_KEY}${poolId}`, data, 1);
+
+        return data;
     }
 
     public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {

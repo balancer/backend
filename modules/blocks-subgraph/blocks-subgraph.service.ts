@@ -25,6 +25,7 @@ import { Cache, CacheClass } from 'memory-cache';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
+const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 
 export class BlocksSubgraphService {
     private readonly client: GraphQLClient;
@@ -118,6 +119,16 @@ export class BlocksSubgraphService {
     }*/
 
     public async getBlockFrom24HoursAgo(): Promise<BlockFragment> {
+        const cached = await cache.getObjectValue<BlockFragment>(BLOCK_24H_AGO);
+
+        if (cached) {
+            return cached;
+        }
+
+        return this.cacheBlockFrom24HoursAgo();
+    }
+
+    public async cacheBlockFrom24HoursAgo(): Promise<BlockFragment> {
         const args = {
             orderDirection: OrderDirection.Desc,
             orderBy: Block_OrderBy.Timestamp,
@@ -135,6 +146,10 @@ export class BlocksSubgraphService {
         };
 
         const allBlocks = await this.getAllBlocks(args);
+
+        if (allBlocks.length > 0) {
+            await cache.putObjectValue(BLOCK_24H_AGO, allBlocks[0], 0.25);
+        }
 
         return allBlocks[0];
     }
