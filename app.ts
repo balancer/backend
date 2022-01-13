@@ -6,7 +6,11 @@ import { contextMiddleware } from './app/middleware/contextMiddleware';
 import { accountMiddleware } from './app/middleware/accountMiddleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import {
+    ApolloServerPluginDrainHttpServer,
+    ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginUsageReporting,
+} from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleCronJobs } from './app/scheduleCronJobs';
@@ -29,7 +33,14 @@ async function startServer() {
         resolvers: resolvers,
         typeDefs: schema,
         introspection: true,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ApolloServerPluginLandingPageGraphQLPlayground()],
+        plugins: [
+            ApolloServerPluginDrainHttpServer({ httpServer }),
+            ApolloServerPluginLandingPageGraphQLPlayground(),
+            ApolloServerPluginUsageReporting({
+                sendVariableValues: { all: true },
+                sendHeaders: { onlyNames: ['AccountAddress'] },
+            }),
+        ],
         context: ({ req }) => req.context,
     });
     await server.start();
