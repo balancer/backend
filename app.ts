@@ -6,10 +6,17 @@ import { contextMiddleware } from './app/middleware/contextMiddleware';
 import { accountMiddleware } from './app/middleware/accountMiddleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
-import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import {
+    ApolloServerPluginDrainHttpServer,
+    ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginUsageReporting,
+} from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleCronJobs } from './app/scheduleCronJobs';
+import { startWorker } from './app/worker';
+import { redis } from './modules/cache/redis';
+import { prisma } from './modules/prisma/prisma-client';
 
 async function startServer() {
     const app = createExpressApp();
@@ -18,6 +25,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(accountMiddleware);
 
+    //startWorker(app);
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
@@ -25,16 +33,31 @@ async function startServer() {
         resolvers: resolvers,
         typeDefs: schema,
         introspection: true,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ApolloServerPluginLandingPageGraphQLPlayground()],
+        plugins: [
+            ApolloServerPluginDrainHttpServer({ httpServer }),
+            ApolloServerPluginLandingPageGraphQLPlayground(),
+            ApolloServerPluginUsageReporting({
+                sendVariableValues: { all: true },
+                sendHeaders: { onlyNames: ['AccountAddress'] },
+            }),
+        ],
         context: ({ req }) => req.context,
     });
     await server.start();
     server.applyMiddleware({ app });
 
-    scheduleCronJobs();
+    await redis.connect();
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
+
+    if (process.env.WORKER === 'true') {
+        scheduleCronJobs();
+    }
 }
 
-startServer().finally(async () => {});
+//
+startServer().finally(async () => {
+    //await prisma.$disconnect();
+    //await redis.disconnect();
+});

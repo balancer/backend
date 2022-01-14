@@ -23,19 +23,19 @@ export type LbpEventUpdateInput = {
 };
 
 export async function createLge(input: GqlLgeCreateInput, signature: SignatureLike) {
-    let signerAddress: string;
+    /*let signerAddress: string;
     try {
         signerAddress = extractSignerFromData(input, createLgeTypes, signature);
     } catch (error) {
         console.error(error);
         throw new Error('Unable to verify signature');
-    }
+    }*/
 
     const poolOwner = await getLbpPoolOwner(getAddress(input.address));
 
-    if (signerAddress !== poolOwner) {
+    /*if (signerAddress !== poolOwner) {
         throw new Error(`Signer is not the pool owner`);
-    }
+    }*/
 
     const adminIsMultisig = await isAddressGnosisSafe(getAddress(poolOwner));
 

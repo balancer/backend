@@ -3154,7 +3154,12 @@ export type BalancerUserQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3177,7 +3182,12 @@ export type BalancerUsersQuery = {
         __typename?: 'User';
         id: string;
         sharesOwned?:
-            | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+            | Array<{
+                  __typename?: 'PoolShare';
+                  id: string;
+                  balance: string;
+                  poolId: { __typename?: 'Pool'; id: string };
+              }>
             | null
             | undefined;
     }>;
@@ -3187,7 +3197,7 @@ export type BalancerUserFragment = {
     __typename?: 'User';
     id: string;
     sharesOwned?:
-        | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+        | Array<{ __typename?: 'PoolShare'; id: string; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
         | null
         | undefined;
 };
@@ -3248,7 +3258,6 @@ export type BalancerPoolFragment = {
     createTime: number;
     swapEnabled: boolean;
     tokensList: Array<string>;
-    amp?: string | null | undefined;
     lowerTarget?: string | null | undefined;
     upperTarget?: string | null | undefined;
     mainIndex?: number | null | undefined;
@@ -3259,6 +3268,7 @@ export type BalancerPoolFragment = {
     principalToken?: string | null | undefined;
     baseToken?: string | null | undefined;
     owner?: string | null | undefined;
+    amp?: string | null | undefined;
     tokens?:
         | Array<{
               __typename?: 'PoolToken';
@@ -3318,7 +3328,6 @@ export type BalancerPoolsQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
         lowerTarget?: string | null | undefined;
         upperTarget?: string | null | undefined;
         mainIndex?: number | null | undefined;
@@ -3329,6 +3338,7 @@ export type BalancerPoolsQuery = {
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3373,7 +3383,6 @@ export type BalancerPoolQuery = {
               createTime: number;
               swapEnabled: boolean;
               tokensList: Array<string>;
-              amp?: string | null | undefined;
               lowerTarget?: string | null | undefined;
               upperTarget?: string | null | undefined;
               mainIndex?: number | null | undefined;
@@ -3384,6 +3393,7 @@ export type BalancerPoolQuery = {
               principalToken?: string | null | undefined;
               baseToken?: string | null | undefined;
               owner?: string | null | undefined;
+              amp?: string | null | undefined;
               tokens?:
                   | Array<{
                         __typename?: 'PoolToken';
@@ -3562,7 +3572,12 @@ export type BalancerPortfolioDataQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3573,7 +3588,12 @@ export type BalancerPortfolioDataQuery = {
               __typename?: 'User';
               id: string;
               sharesOwned?:
-                  | Array<{ __typename?: 'PoolShare'; balance: string; poolId: { __typename?: 'Pool'; id: string } }>
+                  | Array<{
+                        __typename?: 'PoolShare';
+                        id: string;
+                        balance: string;
+                        poolId: { __typename?: 'Pool'; id: string };
+                    }>
                   | null
                   | undefined;
           }
@@ -3605,7 +3625,6 @@ export type BalancerPortfolioPoolsDataQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
         lowerTarget?: string | null | undefined;
         upperTarget?: string | null | undefined;
         mainIndex?: number | null | undefined;
@@ -3616,6 +3635,7 @@ export type BalancerPortfolioPoolsDataQuery = {
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3650,7 +3670,6 @@ export type BalancerPortfolioPoolsDataQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
         lowerTarget?: string | null | undefined;
         upperTarget?: string | null | undefined;
         mainIndex?: number | null | undefined;
@@ -3661,6 +3680,7 @@ export type BalancerPortfolioPoolsDataQuery = {
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3679,10 +3699,49 @@ export type BalancerPortfolioPoolsDataQuery = {
     }>;
 };
 
+export type BalancerTradePairSnapshotsQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<TradePairSnapshot_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<TradePairSnapshot_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerTradePairSnapshotsQuery = {
+    __typename?: 'Query';
+    tradePairSnapshots: Array<{
+        __typename?: 'TradePairSnapshot';
+        id: string;
+        totalSwapFee: string;
+        totalSwapVolume: string;
+        timestamp: number;
+        pair: {
+            __typename?: 'TradePair';
+            token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+            token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        };
+    }>;
+};
+
+export type BalancerTradePairSnapshotFragment = {
+    __typename?: 'TradePairSnapshot';
+    id: string;
+    totalSwapFee: string;
+    totalSwapVolume: string;
+    timestamp: number;
+    pair: {
+        __typename?: 'TradePair';
+        token0: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+        token1: { __typename?: 'Token'; address: string; symbol?: string | null | undefined };
+    };
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
         sharesOwned(first: 1000) {
+            id
             balance
             poolId {
                 id
@@ -3736,7 +3795,6 @@ export const BalancerPoolFragmentDoc = gql`
         createTime
         swapEnabled
         tokensList
-        amp
         lowerTarget
         upperTarget
         mainIndex
@@ -3747,6 +3805,7 @@ export const BalancerPoolFragmentDoc = gql`
         principalToken
         baseToken
         owner
+        amp
         tokens(first: 1000) {
             ...BalancerPoolToken
         }
@@ -3792,6 +3851,24 @@ export const BalancerJoinExitFragmentDoc = gql`
         pool {
             id
             tokensList
+        }
+    }
+`;
+export const BalancerTradePairSnapshotFragmentDoc = gql`
+    fragment BalancerTradePairSnapshot on TradePairSnapshot {
+        id
+        totalSwapFee
+        totalSwapVolume
+        timestamp
+        pair {
+            token0 {
+                address
+                symbol
+            }
+            token1 {
+                address
+                symbol
+            }
         }
     }
 `;
@@ -4027,6 +4104,28 @@ export const BalancerPortfolioPoolsDataDocument = gql`
     }
     ${BalancerPoolFragmentDoc}
 `;
+export const BalancerTradePairSnapshotsDocument = gql`
+    query BalancerTradePairSnapshots(
+        $skip: Int
+        $first: Int
+        $orderBy: TradePairSnapshot_orderBy
+        $orderDirection: OrderDirection
+        $where: TradePairSnapshot_filter
+        $block: Block_height
+    ) {
+        tradePairSnapshots(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerTradePairSnapshot
+        }
+    }
+    ${BalancerTradePairSnapshotFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -4205,6 +4304,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerPortfolioPoolsData',
+            );
+        },
+        BalancerTradePairSnapshots(
+            variables?: BalancerTradePairSnapshotsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerTradePairSnapshotsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerTradePairSnapshotsQuery>(BalancerTradePairSnapshotsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerTradePairSnapshots',
             );
         },
     };

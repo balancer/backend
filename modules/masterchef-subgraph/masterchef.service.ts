@@ -13,15 +13,18 @@ import {
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphLoadAllAtBlock, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
-import { BalancerUserFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { twentyFourHoursInMs } from '../util/time';
+import { Cache, CacheClass } from 'memory-cache';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
 
 export class MasterchefSubgraphService {
+    private readonly cache: CacheClass<string, any>;
     private readonly client: GraphQLClient;
 
     constructor() {
+        this.cache = new Cache<string, any>();
         this.client = new GraphQLClient(env.MASTERCHEF_SUBGRAPH);
     }
 
@@ -44,8 +47,22 @@ export class MasterchefSubgraphService {
         return this.sdk.MasterchefUsers(args);
     }
 
+    public async getFarmUsersAtBlock(address: string, block: number): Promise<FarmUserFragment[]> {
+        const cachedUsers = this.cache.get(`${ALL_FARM_USERS_CACHE_KEY}:${block}`) as FarmUserFragment[] | null;
+
+        if (cachedUsers) {
+            return cachedUsers.filter((user) => user.address === address) || null;
+        }
+
+        const users = await this.getAllFarmUsers({ block: { number: block } });
+
+        this.cache.put(`${ALL_FARM_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
+
+        return users.filter((user) => user.id === address);
+    }
+
     public async getAllFarms(args: MasterchefFarmsQueryVariables): Promise<FarmFragment[]> {
-        return subgraphLoadAll<FarmFragment>(this.sdk.MasterchefUsers, 'farms', args);
+        return subgraphLoadAll<FarmFragment>(this.sdk.MasterchefFarms, 'farms', args);
     }
 
     public async getAllFarmUsers(args: MasterchefUsersQueryVariables): Promise<FarmUserFragment[]> {
@@ -58,15 +75,6 @@ export class MasterchefSubgraphService {
 
     public getFarmForPoolAddress(poolAddress: string, farms: FarmFragment[]): FarmFragment | null {
         return farms.find((farm) => farm.pair.toLowerCase() === poolAddress.toLowerCase()) || null;
-    }
-
-    public async getAllFarmUsersAtBlock(block: number): Promise<FarmUserFragment[]> {
-        return subgraphLoadAllAtBlock<FarmUserFragment>(
-            this.sdk.MasterchefUsers,
-            'farmUsers',
-            block,
-            ALL_FARM_USERS_CACHE_KEY,
-        );
     }
 
     public async clearCacheAtBlock(block: number) {

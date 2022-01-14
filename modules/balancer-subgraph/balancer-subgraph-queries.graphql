@@ -51,6 +51,7 @@ query BalancerUsers(
 fragment BalancerUser on User {
     id
     sharesOwned(first: 1000) {
+        id
         balance
         poolId {
             id
@@ -109,7 +110,6 @@ fragment BalancerPool on Pool {
     createTime
     swapEnabled
     tokensList
-    amp
     lowerTarget
     upperTarget
     mainIndex
@@ -120,6 +120,7 @@ fragment BalancerPool on Pool {
     principalToken
     baseToken
     owner
+    amp
 
     tokens(first: 1000) {
         ...BalancerPoolToken
@@ -313,5 +314,42 @@ query BalancerPortfolioPoolsData($previousBlockNumber: Int!) {
 
     previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
         ...BalancerPool
+    }
+}
+
+query BalancerTradePairSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: TradePairSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: TradePairSnapshot_filter
+    $block: Block_height
+) {
+    tradePairSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerTradePairSnapshot
+    }
+}
+
+fragment BalancerTradePairSnapshot on TradePairSnapshot {
+    id
+    totalSwapFee
+    totalSwapVolume
+    timestamp
+    pair {
+        token0 {
+            address
+            symbol
+        }
+        token1 {
+            address
+            symbol
+        }
     }
 }

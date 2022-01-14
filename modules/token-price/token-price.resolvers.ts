@@ -1,14 +1,23 @@
-import { Resolvers } from '../../schema';
+import { GqlTokenPrice, Resolvers } from '../../schema';
 import { tokenPriceService } from './token-price.service';
 import _ from 'lodash';
 import { isAdminRoute } from '../util/resolver-util';
+import { isAddress } from 'ethers/lib/utils';
 
 const resolvers: Resolvers = {
     Query: {
         tokenPriceGetCurrentPrices: async (parent, {}, context) => {
             const tokenPrices = await tokenPriceService.getTokenPrices();
+            const keys = Object.keys(tokenPrices);
+            const prices: GqlTokenPrice[] = [];
 
-            return _.map(tokenPrices, (price, address) => ({ address, price: price.usd }));
+            for (const address of keys) {
+                if (isAddress(address)) {
+                    prices.push({ address, price: tokenPrices[address].usd });
+                }
+            }
+
+            return prices;
         },
         tokenPriceGetHistoricalPrices: async (parent, { addresses }, context) => {
             const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();

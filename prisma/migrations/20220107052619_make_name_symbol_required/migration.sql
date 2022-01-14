@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "PrismaToken" ALTER COLUMN "name" DROP DEFAULT,
+ALTER COLUMN "symbol" DROP DEFAULT;

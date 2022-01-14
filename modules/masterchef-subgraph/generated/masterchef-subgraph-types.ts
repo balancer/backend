@@ -658,6 +658,11 @@ export type MasterchefFarmsQuery = {
         userCount: string;
         timestamp: string;
         block: string;
+        masterChef: { __typename?: 'MasterChef'; id: string; totalAllocPoint: string; beetsPerBlock: string };
+        rewarder?:
+            | { __typename?: 'Rewarder'; id: string; rewardToken: string; rewardPerSecond: string }
+            | null
+            | undefined;
     }>;
 };
 
@@ -672,6 +677,8 @@ export type FarmFragment = {
     userCount: string;
     timestamp: string;
     block: string;
+    masterChef: { __typename?: 'MasterChef'; id: string; totalAllocPoint: string; beetsPerBlock: string };
+    rewarder?: { __typename?: 'Rewarder'; id: string; rewardToken: string; rewardPerSecond: string } | null | undefined;
 };
 
 export type MasterchefPortfolioDataQueryVariables = Exact<{
@@ -728,6 +735,16 @@ export const FarmFragmentDoc = gql`
         userCount
         timestamp
         block
+        masterChef {
+            id
+            totalAllocPoint
+            beetsPerBlock
+        }
+        rewarder {
+            id
+            rewardToken
+            rewardPerSecond
+        }
     }
 `;
 export const MasterchefUsersDocument = gql`

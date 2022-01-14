@@ -2,8 +2,9 @@ import { redis } from './redis';
 
 export const cache = {
     async putObjectValue<T extends Object>(key: string, object: T, timeoutInMinutes?: number): Promise<void> {
+        console.log('putObjectValue ' + key);
         if (timeoutInMinutes) {
-            await redis.setex(key, timeoutInMinutes * 60, JSON.stringify(object));
+            await redis.setEx(key, timeoutInMinutes * 60, JSON.stringify(object));
         } else {
             await redis.set(key, JSON.stringify(object));
         }
@@ -21,7 +22,8 @@ export const cache = {
         value: string,
         timeoutInMinutes: number,
     ): Promise<void> {
-        await redis.setex(`${keyPrefix}${JSON.stringify(object)}`, timeoutInMinutes * 60, value);
+        console.log('putValueKeyedOnObject', `${keyPrefix}${JSON.stringify(object)}`);
+        await redis.setEx(`${keyPrefix}${JSON.stringify(object)}`, Math.round(timeoutInMinutes * 60), value);
     },
 
     async getValueKeyedOnObject<T extends Object>(keyPrefix: string, object: T) {
@@ -33,8 +35,9 @@ export const cache = {
     },
 
     async putValue(key: string, value: string, timeoutInMinutes?: number): Promise<void> {
+        console.log('putValue', key);
         if (timeoutInMinutes) {
-            await redis.setex(key, timeoutInMinutes * 60, value);
+            await redis.setEx(key, Math.round(timeoutInMinutes * 60), value);
         } else {
             await redis.set(key, value);
         }
