@@ -8,6 +8,7 @@ extend type Mutation {
     cachePortfolioHistoryForDate(date: String!): Boolean!
     clearCacheAtBlock(block: Int!): Boolean!
     clearCachedPools: Boolean!
+    clearCachedPortfolioHistories: Boolean!
 }
 
 type GqlUserPortfolioData {
