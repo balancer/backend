@@ -179,6 +179,7 @@ export class PortfolioDataService {
 
     public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
         const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+        console.log('last block cached timestamp', timestamp);
 
         if (!timestamp) {
             return null;
