@@ -6,6 +6,7 @@ import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
+import { cache } from '../cache/cache';
 
 const resolvers: Resolvers = {
     Query: {
@@ -38,6 +39,13 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
 
             await portfolioService.cacheRawDataForTimestamp(moment.tz(date, 'GMT').startOf('day').unix());
+
+            return true;
+        },
+        clearCachedPortfolioHistories: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await cache.deleteAllMatchingPattern('portfolio:data:history:*');
 
             return true;
         },

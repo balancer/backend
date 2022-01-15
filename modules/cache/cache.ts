@@ -46,4 +46,14 @@ export const cache = {
     async getValue(key: string) {
         return redis.get(key);
     },
+
+    async deleteAllMatchingPattern(pattern: string) {
+        const keys = await redis.keys(pattern);
+
+        console.log('keys', keys);
+
+        for (const key of keys) {
+            await redis.del(key);
+        }
+    },
 };
