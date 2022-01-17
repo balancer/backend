@@ -61,8 +61,6 @@ class PortfolioService {
             historicalTokenPrices,
         );
 
-        console.log('token', tokenPrices);
-
         const poolData = this.getUserPoolData(
             data.pools,
             data.block,
@@ -220,7 +218,8 @@ class PortfolioService {
                     pricePerShare: userTotalValue / userNumShares,
                     tokens: userTokens.map((token) => ({
                         ...token,
-                        percentOfPortfolio: token.totalValue / userTotalValue,
+                        percentOfPortfolio:
+                            token.totalValue > 0 && userTotalValue > 0 ? token.totalValue / userTotalValue : 0,
                     })),
                     swapFees,
                     swapVolume: parseFloat(snapshot.totalSwapVolume) - parseFloat(previousSnapshot.totalSwapVolume),
@@ -241,8 +240,12 @@ class PortfolioService {
 
         return _.orderBy(userPoolData, 'totalValue', 'desc').map((pool) => ({
             ...pool,
-            percentOfPortfolio: pool.totalValue / totalValue,
+            percentOfPortfolio: pool.totalValue > 0 && totalValue > 0 ? pool.totalValue / totalValue : 0,
         }));
+    }
+
+    public async refreshLatestBlockCachedTimestamp(): Promise<void> {
+        await this.dataService.refreshLatestBlockCachedTimestamp();
     }
 
     private mapPoolTokenToUserPoolTokenData(

@@ -170,11 +170,7 @@ export class PortfolioDataService {
         await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
 
         console.log('portfolio cache: saving latest block');
-        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
-
-        if (latestBlock) {
-            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
-        }
+        await this.refreshLatestBlockCachedTimestamp();
     }
 
     public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
@@ -196,15 +192,13 @@ export class PortfolioDataService {
         );
     }
 
-    /*public async setLatestBlockCachedTimestamp(): Promise<void> {
-        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+    public async refreshLatestBlockCachedTimestamp(): Promise<void> {
+        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
 
-        if (!timestamp) {
-            return null;
+        if (latestBlock) {
+            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
         }
-
-        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
-    }*/
+    }
 
     private async deleteSnapshotsForBlock(blockNumber: number) {
         await prisma.prismaBalancerPoolTokenSnapshot.deleteMany({ where: { blockNumber } });

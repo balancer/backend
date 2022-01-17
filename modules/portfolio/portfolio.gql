@@ -9,6 +9,7 @@ extend type Mutation {
     clearCacheAtBlock(block: Int!): Boolean!
     clearCachedPools: Boolean!
     clearCachedPortfolioHistories: Boolean!
+    refreshLatestBlockCachedKey: Boolean!
 }
 
 type GqlUserPortfolioData {
