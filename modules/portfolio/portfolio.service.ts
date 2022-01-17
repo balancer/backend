@@ -61,8 +61,6 @@ class PortfolioService {
             historicalTokenPrices,
         );
 
-        console.log('token', tokenPrices);
-
         const poolData = this.getUserPoolData(
             data.pools,
             data.block,
@@ -244,6 +242,10 @@ class PortfolioService {
             ...pool,
             percentOfPortfolio: pool.totalValue > 0 && totalValue > 0 ? pool.totalValue / totalValue : 0,
         }));
+    }
+
+    public async refreshLatestBlockCachedTimestamp(): Promise<void> {
+        await this.dataService.refreshLatestBlockCachedTimestamp();
     }
 
     private mapPoolTokenToUserPoolTokenData(

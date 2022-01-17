@@ -69,6 +69,13 @@ const resolvers: Resolvers = {
 
             return true;
         },
+        refreshLatestBlockCachedKey: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await portfolioService.refreshLatestBlockCachedTimestamp();
+
+            return true;
+        },
     },
 };
 
