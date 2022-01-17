@@ -26,6 +26,7 @@ import {
     PrismaBeetsBarUserSnapshot,
 } from '@prisma/client';
 import { cache } from '../cache/cache';
+import { getAddress } from 'ethers/lib/utils';
 
 const PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX = 'portfolio:user-data:';
 
@@ -59,6 +60,8 @@ class PortfolioService {
             data.previousBlock.timestamp,
             historicalTokenPrices,
         );
+
+        console.log('token', tokenPrices);
 
         const poolData = this.getUserPoolData(
             data.pools,
@@ -249,7 +252,11 @@ class PortfolioService {
         tokenPrices: TokenPrices,
     ): Omit<UserTokenData, 'percentOfPortfolio'> {
         const token = snapshot.token;
-        const pricePerToken = tokenPrices[token.address.toLowerCase()]?.usd || 0;
+        const pricePerToken =
+            tokenPrices[token.address]?.usd ||
+            tokenPrices[getAddress(token.address)]?.usd ||
+            tokenPrices[token.address.toLowerCase()]?.usd ||
+            0;
         const balance = parseFloat(snapshot.balance) * percentShare;
 
         return {
