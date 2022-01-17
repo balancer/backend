@@ -12,7 +12,7 @@ const resolvers: Resolvers = {
             const prices: GqlTokenPrice[] = [];
 
             for (const address of keys) {
-                if (isAddress(address)) {
+                if (isAddress(address) && tokenPrices[address].usd !== null) {
                     prices.push({ address, price: tokenPrices[address].usd });
                 }
             }
