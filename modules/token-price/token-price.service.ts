@@ -67,13 +67,14 @@ export class TokenPriceService {
         });
     }
 
-    public async cacheTokenPrices(): Promise<TokenPrices> {
+    public async cacheTokenPrices(): Promise<void> {
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
         const addresses = await this.getTokenAddresses();
         let coingeckoTokenPrices: TokenPrices = {};
         let nativeAssetPrice: Price | null = null;
 
         try {
+            //rate limiting happens quite often, we try to handle it gracefully below
             coingeckoTokenPrices = await coingeckoService.getTokenPrices(addresses);
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
@@ -89,9 +90,13 @@ export class TokenPriceService {
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
         };
 
-        await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
+        const cached = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
+        const coingeckoRequestSuccessful = Object.keys(coingeckoTokenPrices).length > 0;
 
-        return tokenPrices;
+        //recache if the coingecko request was successful, or if there are no cached token prices
+        if (coingeckoRequestSuccessful || cached === null) {
+            await cache.putObjectValue(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30);
+        }
     }
 
     public async cacheHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
