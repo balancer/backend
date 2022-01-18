@@ -140,34 +140,47 @@ export class PortfolioDataService {
     }
 
     public async cacheRawDataForTimestamp(timestamp: number): Promise<void> {
-        const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
-        const blockNumber = parseInt(block.number);
-        const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
-        const farms = await masterchefService.getAllFarms({ block: { number: blockNumber } });
-        const farmUsers = await masterchefService.getAllFarmUsers({ block: { number: blockNumber } });
-        const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
-        const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
-        const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
+        try {
+            console.log('portfolio cache: fetching data');
+            const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
+            const blockNumber = parseInt(block.number);
+            const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
+            const farms = await masterchefService.getAllFarms({ block: { number: blockNumber } });
+            const farmUsers = await masterchefService.getAllFarmUsers({ block: { number: blockNumber } });
+            const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
+            const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
+            const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
+            console.log('portfolio cache: done fetching data');
 
-        await this.deleteSnapshotsForBlock(blockNumber);
-        await this.saveBlock(block, timestamp);
-        await this.saveAnyNewPools(pools);
-        await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
-        await this.saveAnyNewTokens(pools);
+            console.log('portfolio cache: deleting snapshots');
+            await this.deleteSnapshotsForBlock(blockNumber);
+            console.log('portfolio cache: saving block');
+            await this.saveBlock(block, timestamp);
+            console.log('portfolio cache: saving new pools');
+            await this.saveAnyNewPools(pools);
+            console.log('portfolio cache: saving new users');
+            await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
+            console.log('portfolio cache: saving new tokens');
+            await this.saveAnyNewTokens(pools);
 
-        await this.savePoolSnapshots(blockNumber, pools, users);
-        await this.saveFarms(blockNumber, farms, farmUsers);
-        await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
+            console.log('portfolio cache: saving pool  snapshots');
+            await this.savePoolSnapshots(blockNumber, pools, users);
+            console.log('portfolio cache: saving farms');
+            await this.saveFarms(blockNumber, farms, farmUsers);
+            console.log('portfolio cache: saving beets bar');
+            await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
 
-        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
-
-        if (latestBlock) {
-            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
+            console.log('portfolio cache: saving latest block');
+            await this.refreshLatestBlockCachedTimestamp();
+        } catch (e) {
+            console.log('error', e);
+            throw e;
         }
     }
 
     public async getCachedPortfolioHistory(address: string): Promise<UserPortfolioData[] | null> {
         const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+        console.log('last block cached timestamp', timestamp);
 
         if (!timestamp) {
             return null;
@@ -184,15 +197,13 @@ export class PortfolioDataService {
         );
     }
 
-    /*public async setLatestBlockCachedTimestamp(): Promise<void> {
-        const timestamp = await cache.getValue(LAST_BLOCK_CACHED_KEY);
+    public async refreshLatestBlockCachedTimestamp(): Promise<void> {
+        const latestBlock = await prisma.prismaBlock.findFirst({ orderBy: { timestamp: 'desc' } });
 
-        if (!timestamp) {
-            return null;
+        if (latestBlock) {
+            await cache.putValue(LAST_BLOCK_CACHED_KEY, `${latestBlock.timestamp}`);
         }
-
-        return cache.getObjectValue<UserPortfolioData[]>(`${HISTORY_CACHE_KEY_PREFIX}${timestamp}:${address}`);
-    }*/
+    }
 
     private async deleteSnapshotsForBlock(blockNumber: number) {
         await prisma.prismaBalancerPoolTokenSnapshot.deleteMany({ where: { blockNumber } });
