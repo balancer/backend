@@ -8,6 +8,8 @@ import { env } from '../../app/env';
 import { balancerService } from '../balancer/balancer.service';
 import { cache } from '../cache/cache';
 import { CacheClass, Cache } from 'memory-cache';
+import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
+import { GqlBalancerPool } from '../../schema';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -126,7 +128,7 @@ export class TokenPriceService {
     private async getTokenAddresses(): Promise<string[]> {
         const pools = await balancerService.getPools();
 
-        return balancerSubgraphService.getUniqueTokenAddressesFromPools(pools);
+        return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
     }
 }
 

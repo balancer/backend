@@ -15,7 +15,7 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { oneDayInMinutes } from '../util/time';
 import moment from 'moment-timezone';
-import { GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
+import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
 import _, { parseInt } from 'lodash';
 import { twentyFourHoursInMs } from '../util/time';
 import { CacheClass, Cache } from 'memory-cache';
@@ -36,14 +36,14 @@ export class BalancerService {
         this.cache = new Cache<string, any>();
     }
 
-    public async getPools(): Promise<BalancerPoolFragment[]> {
-        const memCached = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
+    public async getPools(): Promise<GqlBalancerPool[]> {
+        const memCached = this.cache.get(POOLS_CACHE_KEY) as GqlBalancerPool[] | null;
 
         if (memCached) {
             return memCached;
         }
 
-        const cached = await cache.getObjectValue<BalancerPoolFragment[]>(POOLS_CACHE_KEY);
+        const cached = await cache.getObjectValue<GqlBalancerPool[]>(POOLS_CACHE_KEY);
 
         if (cached) {
             this.cache.put(POOLS_CACHE_KEY, cached, 15000);
@@ -55,6 +55,7 @@ export class BalancerService {
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
+        await this.cachePastPools();
         const memCached = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (memCached) {
@@ -88,7 +89,7 @@ export class BalancerService {
         return latestPrice;
     }
 
-    public async cachePools(): Promise<BalancerPoolFragment[]> {
+    public async cachePools(): Promise<GqlBalancerPool[]> {
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
         const pools = await balancerSubgraphService.getAllPools({
@@ -96,17 +97,26 @@ export class BalancerService {
             orderDirection: OrderDirection.Desc,
         });
 
-        const filtered = pools.filter((pool) => {
-            if (blacklistedPools.includes(pool.id)) {
-                return false;
-            }
+        const filtered: GqlBalancerPool[] = pools
+            .filter((pool) => {
+                if (blacklistedPools.includes(pool.id)) {
+                    return false;
+                }
 
-            if (parseFloat(pool.totalShares) < 0.001) {
-                return false;
-            }
+                if (parseFloat(pool.totalShares) < 0.001) {
+                    return false;
+                }
 
-            return true;
-        });
+                return true;
+            })
+            .map((pool) => ({
+                ...pool,
+                __typename: 'GqlBalancerPool',
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+            }));
 
         const filteredWithOnChainBalances = await getOnChainBalances(
             filtered,

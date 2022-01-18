@@ -184,6 +184,10 @@ export class BeetsService {
     }
 
     private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
+        if (env.CHAIN_ID !== '250') {
+            return { beetsPrice: '0', marketCap: '0', circulatingSupply: '0' };
+        }
+
         const pools = await balancerService.getPools();
         const beetsUsdcPool = pools.find(
             (pool) => pool.id === '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',

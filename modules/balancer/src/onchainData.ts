@@ -6,10 +6,12 @@ import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
+import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import { getAddress } from 'ethers/lib/utils';
-import { BalancerPoolFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
 import { Multicaller } from '../../util/multicaller';
+import { GqlBalancerPool } from '../../../schema';
+import { BigNumber } from 'ethers';
 
 enum PoolFilter {
     All = 'All',
@@ -23,12 +25,36 @@ enum PoolFilter {
     StablePhantom = 'StablePhantom',
 }
 
+interface MulticallExecuteResult {
+    amp?: string[];
+    swapFee: string;
+    totalSupply: string;
+    weights?: string[];
+    targets?: string[];
+    poolTokens: {
+        tokens: string[];
+        balances: string[];
+    };
+    rate?: string;
+    swapEnabled?: boolean;
+    linearPools?: Record<
+        string,
+        {
+            id: string;
+            priceRate: string;
+            totalSupply: string;
+            mainToken: { address: string; index: BigNumber };
+            wrappedToken: { address: string; index: BigNumber; rate: string };
+        }
+    >;
+}
+
 export async function getOnChainBalances(
-    subgraphPoolsOriginal: BalancerPoolFragment[],
+    subgraphPoolsOriginal: GqlBalancerPool[],
     multiAddress: string,
     vaultAddress: string,
     provider: Provider,
-): Promise<BalancerPoolFragment[]> {
+): Promise<GqlBalancerPool[]> {
     if (subgraphPoolsOriginal.length === 0) return [];
 
     const abis: any = Object.values(
@@ -42,6 +68,7 @@ export async function getOnChainBalances(
                 ...ElementPoolAbi,
                 ...LinearPoolAbi,
                 ...LiquidityBootstrappingPoolAbi,
+                ...StablePhantomPoolAbi,
             ].map((row) => [row.name, row]),
         ),
     );
@@ -49,7 +76,8 @@ export async function getOnChainBalances(
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
     const supportedPoolTypes: string[] = Object.values(PoolFilter);
-    const subgraphPools: BalancerPoolFragment[] = [];
+    const subgraphPools: GqlBalancerPool[] = [];
+
     subgraphPoolsOriginal.forEach((pool) => {
         if (!supportedPoolTypes.includes(pool.poolType || '')) {
             console.error(`Unknown pool type: ${pool.poolType} ${pool.id}`);
@@ -85,47 +113,39 @@ export async function getOnChainBalances(
         if (pool.poolType === 'LiquidityBootstrapping' || pool.poolType === 'Investment') {
             multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
         }
+
+        if (pool.poolType === 'StablePhantom') {
+            // Overwrite totalSupply with virtualSupply for StablePhantom pools
+            multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
+            const tokenAddresses = (pool.tokens || []).map((token) => token.address);
+
+            tokenAddresses.forEach((token, i) => {
+                multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getTokenRate', [token]);
+
+                if (token.toLowerCase() !== pool.address.toLowerCase()) {
+                    multiPool.call(`${pool.id}.linearPools.${token}.id`, token, 'getPoolId');
+                    multiPool.call(`${pool.id}.linearPools.${token}.priceRate`, token, 'getRate');
+                    multiPool.call(`${pool.id}.linearPools.${token}.totalSupply`, token, 'getVirtualSupply');
+                    multiPool.call(`${pool.id}.linearPools.${token}.mainToken.address`, token, 'getMainToken');
+                    multiPool.call(`${pool.id}.linearPools.${token}.mainToken.index`, token, 'getMainIndex');
+                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.address`, token, 'getWrappedToken');
+                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.index`, token, 'getWrappedIndex');
+                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.rate`, token, 'getWrappedTokenRate');
+                }
+            });
+        }
     });
 
-    let pools = {} as Record<
-        string,
-        {
-            amp?: string[];
-            swapFee: string;
-            totalSupply: string;
-            weights?: string[];
-            targets?: string[];
-            poolTokens: {
-                tokens: string[];
-                balances: string[];
-            };
-            rate?: string;
-            swapEnabled?: boolean;
-        }
-    >;
+    let pools = {} as Record<string, MulticallExecuteResult>;
 
     try {
-        pools = (await multiPool.execute()) as Record<
-            string,
-            {
-                amp?: string[];
-                swapFee: string;
-                totalSupply: string;
-                weights?: string[];
-                poolTokens: {
-                    tokens: string[];
-                    balances: string[];
-                };
-                rate?: string;
-                swapEnabled?: boolean;
-            }
-        >;
+        pools = (await multiPool.execute()) as Record<string, MulticallExecuteResult>;
     } catch (err) {
         console.error(err);
         throw `Issue with multicall execution.`;
     }
 
-    const onChainPools: BalancerPoolFragment[] = [];
+    const onChainPools: GqlBalancerPool[] = [];
 
     Object.entries(pools).forEach(([poolId, onchainData], index) => {
         try {
@@ -146,7 +166,7 @@ export async function getOnChainBalances(
                 }
             }
 
-            /*if (subgraphPools[index].poolType === 'AaveLinear') {
+            if (subgraphPools[index].poolType === 'Linear') {
                 if (!onchainData.targets) {
                     console.error(`Linear Pool Missing Targets: ${poolId}`);
                     return;
@@ -160,9 +180,14 @@ export async function getOnChainBalances(
                     console.error(`Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`);
                     return;
                 }
+
                 // Update priceRate of wrappedToken
-                subgraphPools[index].tokens[wrappedIndex].priceRate = formatFixed(onchainData.rate, 18);
-            }*/
+                const tokens = subgraphPools[index].tokens;
+
+                if (tokens && typeof wrappedIndex === 'number' && tokens[wrappedIndex]) {
+                    tokens[wrappedIndex].priceRate = formatFixed(onchainData.rate, 18);
+                }
+            }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
             subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
@@ -178,6 +203,52 @@ export async function getOnChainBalances(
                     T.weight = formatFixed(weights[i], 18);
                 }
             });
+
+            if (onchainData.linearPools) {
+                subgraphPools[index].linearPools = Object.entries(onchainData.linearPools).map(([address, data]) => {
+                    const linearPool = pools[data.id];
+                    const mainTokenIdx = data.mainToken.index.toNumber();
+                    const wrappedTokenIdx = data.wrappedToken.index.toNumber();
+                    const mainTokenBalance = linearPool.poolTokens.balances[mainTokenIdx];
+                    const wrappedTokenBalance = linearPool.poolTokens.balances[wrappedTokenIdx];
+                    const subgraphLinearPool = subgraphPools.find((pool) => pool.id === data.id);
+                    const mainPoolToken = (subgraphLinearPool?.tokens || []).find((t) =>
+                        isSameAddress(t.address, linearPool.poolTokens.tokens[mainTokenIdx]),
+                    );
+                    const wrappedPoolToken = (subgraphLinearPool?.tokens || []).find((t) =>
+                        isSameAddress(t.address, linearPool.poolTokens.tokens[wrappedTokenIdx]),
+                    );
+
+                    if (!mainPoolToken || !wrappedPoolToken) {
+                        throw `Could not find linear pool tokens in the subgraph pools: ${data.id}`;
+                    }
+
+                    return {
+                        id: data.id,
+                        address,
+                        priceRate: formatFixed(data.priceRate, 18),
+                        totalSupply: formatFixed(data.totalSupply, 18),
+                        unwrappedTokenAddress: data.mainToken.address,
+                        mainToken: {
+                            index: mainTokenIdx,
+                            address: data.mainToken.address,
+                            balance: formatFixed(mainTokenBalance, mainPoolToken.decimals),
+                            name: mainPoolToken.name,
+                            symbol: mainPoolToken.symbol,
+                            decimals: mainPoolToken.decimals,
+                        },
+                        wrappedToken: {
+                            index: wrappedTokenIdx,
+                            address: data.wrappedToken.address,
+                            balance: formatFixed(wrappedTokenBalance, wrappedPoolToken.decimals),
+                            priceRate: formatFixed(data.wrappedToken.rate, wrappedPoolToken.decimals),
+                            name: wrappedPoolToken.name,
+                            symbol: wrappedPoolToken.symbol,
+                            decimals: wrappedPoolToken.decimals,
+                        },
+                    };
+                });
+            }
 
             onChainPools.push(subgraphPools[index]);
         } catch (err) {
