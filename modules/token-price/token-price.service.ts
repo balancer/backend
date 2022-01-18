@@ -10,6 +10,7 @@ import { cache } from '../cache/cache';
 import { CacheClass, Cache } from 'memory-cache';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { GqlBalancerPool } from '../../schema';
+import { getAddress } from 'ethers/lib/utils';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -81,7 +82,12 @@ export class TokenPriceService {
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
 
-        const missingTokens = addresses.filter((token) => !coingeckoTokenPrices[token]);
+        const missingTokens = addresses.filter(
+            (token) =>
+                !coingeckoTokenPrices[token] &&
+                !coingeckoTokenPrices[getAddress(token)] &&
+                !coingeckoTokenPrices[token.toLowerCase()],
+        );
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
             [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
