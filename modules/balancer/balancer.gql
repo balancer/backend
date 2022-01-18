@@ -39,6 +39,7 @@ type GqlBalancerPool {
     upperTarget: String
     lowerTarget: String
     linearPools: [GqlBalancerPoolLinearPoolData!]
+    tokenRates: [String!]
 }
 
 type GqlBalancerPoolToken {

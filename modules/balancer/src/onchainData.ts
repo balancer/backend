@@ -37,6 +37,7 @@ interface MulticallExecuteResult {
     };
     rate?: string;
     swapEnabled?: boolean;
+    tokenRates?: BigNumber[];
     linearPools?: Record<
         string,
         {
@@ -203,6 +204,10 @@ export async function getOnChainBalances(
                     T.weight = formatFixed(weights[i], 18);
                 }
             });
+
+            if (onchainData.tokenRates) {
+                subgraphPools[index].tokenRates = onchainData.tokenRates?.map((rate) => formatFixed(rate, 18));
+            }
 
             if (onchainData.linearPools) {
                 subgraphPools[index].linearPools = Object.entries(onchainData.linearPools).map(([address, data]) => {
