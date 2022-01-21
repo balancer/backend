@@ -34,7 +34,10 @@ export class BeetsService {
         const memCached = this.cache.get(PROTOCOL_DATA_CACHE_KEY) as GqlBeetsProtocolData | null;
 
         if (memCached) {
-            return memCached;
+            return {
+                ...memCached,
+                fbeetsPrice: memCached.fbeetsPrice ?? '0',
+            };
         }
 
         const cached = await cache.getObjectValue<GqlBeetsProtocolData>(PROTOCOL_DATA_CACHE_KEY);
@@ -42,7 +45,10 @@ export class BeetsService {
         if (cached) {
             this.cache.put(PROTOCOL_DATA_CACHE_KEY, cached, 15000);
 
-            return cached;
+            return {
+                ...cached,
+                fbeetsPrice: cached.fbeetsPrice ?? '0',
+            };
         }
 
         return this.cacheProtocolData();
@@ -223,7 +229,7 @@ export class BeetsService {
             beetsPrice: `${beetsPrice}`,
             marketCap: `${beetsPrice * circulatingSupply}`,
             circulatingSupply: `${circulatingSupply}`,
-            fbeetsPrice: `${fbeetsPrice}`,
+            fbeetsPrice: `0`,
         };
     }
 }
