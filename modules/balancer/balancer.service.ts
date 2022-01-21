@@ -55,7 +55,6 @@ export class BalancerService {
     }
 
     public async getPastPools(): Promise<BalancerPoolFragment[]> {
-        await this.cachePastPools();
         const memCached = this.cache.get(PAST_POOLS_CACHE_KEY) as BalancerPoolFragment[] | null;
 
         if (memCached) {
@@ -295,7 +294,7 @@ export class BalancerService {
 
     private async getBlacklistedPools() {
         const response = await sanityClient.fetch<string[] | null>(
-            `*[_type == "config" && chainId == 250][0].blacklistedPools`,
+            `*[_type == "config" && chainId == ${env.CHAIN_ID}][0].blacklistedPools`,
         );
 
         return response || [];
