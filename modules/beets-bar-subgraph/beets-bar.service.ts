@@ -99,6 +99,16 @@ export class BeetsBarSubgraphService {
         return bar;
     }
 
+    public async getBeetsBarNow(): Promise<BeetsBarFragment> {
+        const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS });
+
+        if (!bar) {
+            return this.emptyBeetsBar;
+        }
+
+        return bar;
+    }
+
     public async getAllUsers(args: BeetsBarUsersQueryVariables): Promise<BeetsBarUserFragment[]> {
         return subgraphLoadAll<BeetsBarUserFragment>(this.sdk.BeetsBarUsers, 'users', args);
     }
