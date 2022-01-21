@@ -246,7 +246,7 @@ export async function getOnChainBalances(
                             index: wrappedTokenIdx,
                             address: data.wrappedToken.address,
                             balance: formatFixed(wrappedTokenBalance, wrappedPoolToken.decimals),
-                            priceRate: formatFixed(data.wrappedToken.rate, wrappedPoolToken.decimals),
+                            priceRate: formatFixed(data.wrappedToken.rate, 18),
                             name: wrappedPoolToken.name,
                             symbol: wrappedPoolToken.symbol,
                             decimals: wrappedPoolToken.decimals,
