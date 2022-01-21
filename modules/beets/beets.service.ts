@@ -16,6 +16,7 @@ import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.servic
 import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
 import { map } from 'lodash';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const FARMS_CACHE_KEY = 'beetsFarms';
@@ -48,7 +49,7 @@ export class BeetsService {
     }
 
     public async cacheProtocolData(): Promise<GqlBeetsProtocolData> {
-        const { beetsPrice, marketCap, circulatingSupply } = await this.getBeetsData();
+        const { beetsPrice, marketCap, circulatingSupply, fbeetsPrice } = await this.getBeetsData();
         const { totalLiquidity, totalSwapFee, totalSwapVolume, poolCount } =
             await balancerSubgraphService.getProtocolData({});
 
@@ -60,6 +61,7 @@ export class BeetsService {
             totalSwapFee,
             totalSwapVolume,
             beetsPrice,
+            fbeetsPrice,
             marketCap,
             circulatingSupply,
             poolCount: `${poolCount}`,
@@ -183,7 +185,16 @@ export class BeetsService {
         return beetsConfig;
     }
 
-    private async getBeetsData(): Promise<{ beetsPrice: string; marketCap: string; circulatingSupply: string }> {
+    private async getBeetsData(): Promise<{
+        beetsPrice: string;
+        marketCap: string;
+        circulatingSupply: string;
+        fbeetsPrice: string;
+    }> {
+        if (env.CHAIN_ID !== '250') {
+            return { beetsPrice: '0', marketCap: '0', circulatingSupply: '0', fbeetsPrice: '0' };
+        }
+
         const pools = await balancerService.getPools();
         const beetsUsdcPool = pools.find(
             (pool) => pool.id === '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
@@ -191,9 +202,17 @@ export class BeetsService {
         const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
         const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
 
-        if (!beets || !usdc) {
+        const beetsFtmPool = pools.find(
+            (pool) => pool.id === '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+        );
+
+        if (!beets || !usdc || !beetsFtmPool) {
             throw new Error('did not find price for beets');
         }
+
+        const bptPrice = parseFloat(beetsFtmPool.totalLiquidity) / parseFloat(beetsFtmPool.totalShares);
+        const beetsBar = await beetsBarService.getBeetsBar();
+        const fbeetsPrice = bptPrice * parseFloat(beetsBar.ratio);
 
         const beetsPrice =
             ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
@@ -204,6 +223,7 @@ export class BeetsService {
             beetsPrice: `${beetsPrice}`,
             marketCap: `${beetsPrice * circulatingSupply}`,
             circulatingSupply: `${circulatingSupply}`,
+            fbeetsPrice: `${fbeetsPrice}`,
         };
     }
 }
