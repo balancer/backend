@@ -93,5 +93,6 @@ export function scheduleCronJobs() {
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
+    beetsService.cacheProtocolData().catch();
     console.log('scheduled cron jobs');
 }
