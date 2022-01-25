@@ -15,6 +15,8 @@ import {
     getHourlyTimestampsForDays,
     getHourlyTimestampsWithBuffer,
     oneDayInMinutes,
+    secondsPerDay,
+    secondsPerYear,
     twentyFourHoursInMs,
     twentyFourHoursInSecs,
 } from '../util/time';
@@ -212,6 +214,18 @@ export class BlocksSubgraphService {
         await cache.putObjectValue(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, oneDayInMinutes);
 
         return blocks;
+    }
+
+    public async getBlocksPerDay() {
+        const blockTime = await this.getAverageBlockTime();
+
+        return secondsPerDay / blockTime;
+    }
+
+    public async getBlocksPerYear() {
+        const blockTime = await this.getAverageBlockTime();
+
+        return secondsPerYear / blockTime;
     }
 
     public get sdk() {

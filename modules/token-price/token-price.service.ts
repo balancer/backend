@@ -8,6 +8,7 @@ import { env } from '../../app/env';
 import { balancerService } from '../balancer/balancer.service';
 import { cache } from '../cache/cache';
 import { CacheClass, Cache } from 'memory-cache';
+import { getAddress } from 'ethers/lib/utils';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -126,6 +127,15 @@ export class TokenPriceService {
         await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;
+    }
+
+    public getPriceForToken(tokenPrices: TokenPrices, address: string): number {
+        return (
+            tokenPrices[address]?.usd ||
+            tokenPrices[getAddress(address)]?.usd ||
+            tokenPrices[address.toLowerCase()]?.usd ||
+            0
+        );
     }
 
     private async getTokenAddresses(): Promise<string[]> {
