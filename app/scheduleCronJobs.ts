@@ -9,6 +9,7 @@ import { portfolioService } from '../modules/portfolio/portfolio.service';
 import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
+import { beetsFarmService } from '../modules/beets/beets-farm.service';
 
 export function scheduleCronJobs() {
     //every 20 seconds
@@ -27,7 +28,6 @@ export function scheduleCronJobs() {
 
     cron.schedule('*/5 * * * *', async () => {
         try {
-            await beetsService.cacheBeetsFarms();
             await tokenService.cacheTokens();
         } catch (e) {}
     });
@@ -55,13 +55,21 @@ export function scheduleCronJobs() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             await balancerService.cachePools();
+            await beetsFarmService.cacheBeetsFarms();
+        } catch (e) {}
+    });
+
+    //every 30 seconds
+    cron.schedule('*/30 * * * * *', async () => {
+        try {
+            await beetsFarmService.cacheBeetsFarms();
         } catch (e) {}
     });
 
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
-            await beetsService.cacheBeetsFarmUsers();
+            await beetsFarmService.cacheBeetsFarmUsers();
         } catch (e) {}
     });
 

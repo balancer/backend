@@ -4,6 +4,7 @@ import { beetsService } from '../modules/beets/beets.service';
 import { balancerService } from '../modules/balancer/balancer.service';
 import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgraph.service';
 import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-subgraph.service';
+import { beetsFarmService } from '../modules/beets/beets-farm.service';
 
 export function startWorker(app: Express) {
     /*const app = express();
@@ -37,7 +38,7 @@ export function startWorker(app: Express) {
     app.post('/cache-beet-farms', async (req, res) => {
         try {
             console.log('cache-beet-farms');
-            await beetsService.cacheBeetsFarms();
+            await beetsFarmService.cacheBeetsFarms();
             res.status(200).send({ message: 'success' });
         } catch (e: any) {
             res.status(500).send({ message: e.message });
@@ -64,7 +65,7 @@ export function startWorker(app: Express) {
             //20 times per minute
             for (let i = 0; i < 20; i++) {
                 console.log('cache-beet-farm-users ' + i);
-                await beetsService.cacheBeetsFarmUsers();
+                await beetsFarmService.cacheBeetsFarmUsers();
                 await delay(3000);
             }
 

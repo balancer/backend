@@ -1,26 +1,16 @@
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { env } from '../../app/env';
-import { GqlBeetsConfig, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsProtocolData } from '../../schema';
+import { GqlBeetsConfig, GqlBeetsProtocolData } from '../../schema';
 import { getCirculatingSupply } from './beets';
-import { masterchefService } from '../masterchef-subgraph/masterchef.service';
-import {
-    fiveMinutesInMs,
-    fiveMinutesInSeconds,
-    oneDayInMinutes,
-    thirtyMinInMs,
-    twentyFourHoursInMs,
-} from '../util/time';
+import { fiveMinutesInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
-import { map } from 'lodash';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
-const FARMS_CACHE_KEY = 'beetsFarms';
-const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
 const CONFIG_CACHE_KEY = 'beetsConfig';
 
 export class BeetsService {
@@ -72,81 +62,6 @@ export class BeetsService {
         await cache.putObjectValue(PROTOCOL_DATA_CACHE_KEY, protocolData, 30);
 
         return protocolData;
-    }
-
-    public async getBeetsFarms(): Promise<GqlBeetsFarm[]> {
-        const farms = await cache.getObjectValue<GqlBeetsFarm[]>(FARMS_CACHE_KEY);
-
-        if (farms) {
-            return farms;
-        }
-
-        return this.cacheBeetsFarms();
-    }
-
-    public async cacheBeetsFarms(): Promise<GqlBeetsFarm[]> {
-        const farms = await masterchefService.getAllFarms({});
-        const mapped: GqlBeetsFarm[] = farms.map((farm) => ({
-            ...farm,
-            __typename: 'GqlBeetsFarm',
-            allocPoint: parseInt(farm.allocPoint),
-            masterChef: {
-                ...farm.masterChef,
-                __typename: 'GqlBeetsMasterChef',
-                totalAllocPoint: parseInt(farm.masterChef.totalAllocPoint),
-            },
-            rewarder: farm.rewarder ? { ...farm.rewarder, __typename: 'GqlBeetsRewarder' } : null,
-        }));
-
-        await cache.putObjectValue(FARMS_CACHE_KEY, mapped, oneDayInMinutes);
-
-        return mapped;
-    }
-
-    public async getBeetsFarmUsers(): Promise<GqlBeetsFarmUser[]> {
-        const memCached = this.cache.get(FARM_USERS_CACHE_KEY) as GqlBeetsFarmUser[] | null;
-
-        if (memCached) {
-            return memCached;
-        }
-
-        const cached = await cache.getObjectValue<GqlBeetsFarmUser[]>(FARM_USERS_CACHE_KEY);
-
-        if (cached) {
-            this.cache.put(FARM_USERS_CACHE_KEY, cached, 15000);
-
-            return cached;
-        }
-
-        return this.cacheBeetsFarmUsers();
-    }
-
-    public async getBeetsFarmsForUser(userAddress: string): Promise<GqlBeetsFarmUser[]> {
-        const farmUsers = await this.getBeetsFarmUsers();
-
-        return farmUsers.filter((farmUser) => farmUser.address.toLowerCase() === userAddress);
-    }
-
-    public async getBeetsFarmUser(farmId: string, userAddress: string): Promise<GqlBeetsFarmUser | null> {
-        const farmUsers = await this.getBeetsFarmUsers();
-        const farmUser = farmUsers.find(
-            (farmUser) => farmUser.farmId === farmId.toLowerCase() && farmUser.address === userAddress.toLowerCase(),
-        );
-
-        return farmUser ?? null;
-    }
-
-    public async cacheBeetsFarmUsers(): Promise<GqlBeetsFarmUser[]> {
-        const farmUsers = await masterchefService.getAllFarmUsers({});
-        const mapped: GqlBeetsFarmUser[] = farmUsers.map((farmUser) => ({
-            ...farmUser,
-            __typename: 'GqlBeetsFarmUser',
-            farmId: farmUser.pool?.id || '',
-        }));
-
-        await cache.putObjectValue(FARM_USERS_CACHE_KEY, mapped, 30);
-
-        return mapped;
     }
 
     public async getConfig(): Promise<GqlBeetsConfig> {

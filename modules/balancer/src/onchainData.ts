@@ -19,8 +19,8 @@ enum PoolFilter {
     LBP = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
-    AaveLinear = 'AaveLinear',
-    StablePhantom = 'StablePhantom',
+    //Linear = 'Linear',
+    //StablePhantom = 'StablePhantom',
 }
 
 export async function getOnChainBalances(

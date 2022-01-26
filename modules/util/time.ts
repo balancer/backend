@@ -17,6 +17,9 @@ export const thirtyDaysInSeconds = 60 * 60 * 24;
 export const thirtyDaysInMinutes = oneDayInMinutes * 30;
 export const timeNowInMs = Math.floor(Date.now() / oneSecondInMs);
 
+export const secondsPerDay = 86400;
+export const secondsPerYear = secondsPerDay * 365;
+
 export function getDailyTimestampRanges(numDays: number): [number, number][] {
     const timestamps: [number, number][] = [];
     const endTime = moment.tz('GMT').subtract(numDays, 'days').startOf('day');
