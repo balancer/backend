@@ -103,12 +103,16 @@ export class BalancerService {
     }
 
     public async cachePools(): Promise<BalancerPoolWithFarm[]> {
+        console.log('cache pools');
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
+
+        console.log('fetch pools');
         const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
         });
+        console.log('done with pools length', pools.length);
 
         const filtered = pools.filter((pool) => {
             if (blacklistedPools.includes(pool.id)) {
@@ -122,13 +126,16 @@ export class BalancerService {
             return true;
         });
 
+        console.log('get on chain balances');
         const filteredWithOnChainBalances = await getOnChainBalances(
             filtered,
             BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
             BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].vault,
             provider,
         );
+        console.log('done');
 
+        console.log('do crazy stuff');
         const pastPools = await this.getPastPools();
         const farms = await beetsFarmService.getBeetsFarms();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
@@ -137,6 +144,7 @@ export class BalancerService {
         const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
         const tokenPrices = await tokenPriceService.getTokenPrices();
 
+        console.log('decorating pools');
         const decoratedPools = filteredWithOnChainBalances.map((pool): BalancerPoolWithFarm => {
             const farm = farms.find((farm) => {
                 if (pool.id === env.FBEETS_POOL_ID) {
@@ -178,6 +186,7 @@ export class BalancerService {
             };
         });
 
+        console.log('put to cache');
         await cache.putObjectValue(POOLS_CACHE_KEY, decoratedPools);
 
         return decoratedPools;
