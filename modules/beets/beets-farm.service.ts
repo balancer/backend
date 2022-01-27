@@ -53,7 +53,7 @@ export class BeetsFarmService {
                                       tokenPrices,
                                       farm.rewarder.rewardToken,
                                   ),
-                                  rewardPerSecond: farm.rewarder.rewardPerSecond,
+                                  rewardPerSecond: `${Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / 1e18)}`,
                                   symbol:
                                       tokens.find(
                                           (token) =>
