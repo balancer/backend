@@ -39,6 +39,17 @@ export class BalancerService {
         this.cache = new Cache<string, any>();
     }
 
+    public async getPool(id: string): Promise<BalancerPoolWithFarm> {
+        const pools = await this.getPools();
+        const pool = pools.find((pool) => pool.id === id);
+
+        if (!pool) {
+            throw new Error('no pool found with id');
+        }
+
+        return pool;
+    }
+
     public async getPools(): Promise<BalancerPoolWithFarm[]> {
         const memCached = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolWithFarm[] | null;
 
