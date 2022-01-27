@@ -4,6 +4,18 @@ import { v4 as uuidv4 } from 'uuid';
 
 const balancerResolvers: Resolvers = {
     Query: {
+        pool: async (parent, { id }, context) => {
+            const pool = await balancerService.getPool(id);
+
+            return {
+                ...pool,
+                __typename: 'GqlBalancerPool',
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+            };
+        },
         pools: async (parent, {}, context) => {
             const id = uuidv4();
             const pools = await balancerService.getPools();

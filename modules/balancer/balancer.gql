@@ -1,5 +1,6 @@
 extend type Query {
     pools: [GqlBalancerPool!]!
+    pool(id: String!): GqlBalancerPool!
     poolsPastPools: [GqlBalancerPool!]!
     latestPrice(id: ID!): GqlBalancerTokenLatestPrice
     poolSnapshots(poolId: ID!): [GqlBalancerPoolSnapshot!]!
