@@ -80,15 +80,27 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBar(block?: number): Promise<BeetsBarFragment> {
-        const cached = this.cache.get(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`) as BeetsBarFragment | null;
+        if (block) {
+            const cached = this.cache.get(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`) as BeetsBarFragment | null;
 
-        if (cached) {
-            return cached;
+            if (cached) {
+                return cached;
+            }
         }
 
         const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS, block: { number: block } });
 
         this.cache.put(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar, twentyFourHoursInMs);
+
+        if (!bar) {
+            return this.emptyBeetsBar;
+        }
+
+        return bar;
+    }
+
+    public async getBeetsBarNow(): Promise<BeetsBarFragment> {
+        const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS });
 
         if (!bar) {
             return this.emptyBeetsBar;

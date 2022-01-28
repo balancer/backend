@@ -13,14 +13,16 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
-import { oneDayInMinutes } from '../util/time';
+import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
 import moment from 'moment-timezone';
-import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
+import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot, GqlBalancePoolAprItem } from '../../schema';
 import _, { parseInt } from 'lodash';
-import { twentyFourHoursInMs } from '../util/time';
-import { CacheClass, Cache } from 'memory-cache';
+import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
+import { beetsService } from '../beets/beets.service';
 import { tokenPriceService } from '../token-price/token-price.service';
+import { TokenPrices } from '../token-price/token-price-types';
+import { beetsFarmService } from '../beets/beets-farm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -36,6 +38,17 @@ export class BalancerService {
         this.cache = new Cache<string, any>();
     }
 
+    public async getPool(id: string): Promise<GqlBalancerPool> {
+        const pools = await this.getPools();
+        const pool = pools.find((pool) => pool.id === id);
+
+        if (!pool) {
+            throw new Error('no pool found with id');
+        }
+
+        return pool;
+    }
+
     public async getPools(): Promise<GqlBalancerPool[]> {
         const memCached = this.cache.get(POOLS_CACHE_KEY) as GqlBalancerPool[] | null;
 
@@ -46,7 +59,7 @@ export class BalancerService {
         const cached = await cache.getObjectValue<GqlBalancerPool[]>(POOLS_CACHE_KEY);
 
         if (cached) {
-            this.cache.put(POOLS_CACHE_KEY, cached, 15000);
+            this.cache.put(POOLS_CACHE_KEY, cached, 10000);
 
             return cached;
         }
@@ -64,7 +77,7 @@ export class BalancerService {
         const cached = await cache.getObjectValue<BalancerPoolFragment[]>(PAST_POOLS_CACHE_KEY);
 
         if (cached) {
-            this.cache.put(PAST_POOLS_CACHE_KEY, cached, 15000);
+            this.cache.put(PAST_POOLS_CACHE_KEY, cached, 10000);
 
             return cached;
         }
@@ -91,6 +104,7 @@ export class BalancerService {
     public async cachePools(): Promise<GqlBalancerPool[]> {
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
+
         const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
@@ -115,6 +129,16 @@ export class BalancerService {
                     ...token,
                     __typename: 'GqlBalancerPoolToken',
                 })),
+                fees24h: '0',
+                volume24h: '0',
+                apr: {
+                    total: '0',
+                    hasRewardApr: false,
+                    items: [],
+                    swapApr: '0',
+                    beetsApr: '0',
+                    thirdPartyApr: '0',
+                },
             }));
 
         const filteredWithOnChainBalances = await getOnChainBalances(
@@ -124,9 +148,57 @@ export class BalancerService {
             provider,
         );
 
-        await cache.putObjectValue(POOLS_CACHE_KEY, filteredWithOnChainBalances);
+        const pastPools = await this.getPastPools();
+        const farms = await beetsFarmService.getBeetsFarms();
+        const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
+        const blocksPerYear = blocksPerDay * 365;
+        const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
+        const tokenPrices = await tokenPriceService.getTokenPrices();
 
-        return filteredWithOnChainBalances;
+        const decoratedPools = filteredWithOnChainBalances.map((pool): GqlBalancerPool => {
+            const farm = farms.find((farm) => {
+                if (pool.id === env.FBEETS_POOL_ID) {
+                    return farm.id === env.FBEETS_FARM_ID;
+                }
+
+                return farm.pair.toLowerCase() === pool.address.toLowerCase();
+            });
+            const pastPool = pastPools.find((pastPool) => pastPool.id === pool.id);
+            const totalLiquidity = this.calculatePoolLiquidity(pool, tokenPrices);
+            const farmTvl =
+                (Number(parseInt(farm?.slpBalance || '0') / 1e18) / parseFloat(pool.totalShares)) * totalLiquidity;
+            const swapFee24h = parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0');
+            const swapApr = totalLiquidity > 0 ? (swapFee24h / totalLiquidity) * 365 : 0;
+            const {
+                thirdPartyApr,
+                beetsApr,
+                items: farmAprItems,
+            } = farm
+                ? beetsFarmService.calculateFarmApr(farm, farmTvl, blocksPerYear, beetsPrice)
+                : { items: [], thirdPartyApr: '0', beetsApr: '0' };
+            const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }, ...farmAprItems];
+
+            return {
+                ...pool,
+                farm,
+                apr: {
+                    total: `${_.sumBy(items, (item) => parseFloat(item.apr))}`,
+                    hasRewardApr: items.length > 1,
+                    items,
+                    swapApr: `${swapApr}`,
+                    beetsApr,
+                    thirdPartyApr,
+                },
+                isNewPool: moment().diff(moment.unix(pool.createTime), 'weeks') === 0,
+                volume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(pastPool?.totalSwapVolume || '0')}`,
+                fees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0')}`,
+                totalLiquidity: `${totalLiquidity}`,
+            };
+        });
+
+        await cache.putObjectValue(POOLS_CACHE_KEY, decoratedPools);
+
+        return decoratedPools;
     }
 
     public async cachePastPools(): Promise<BalancerPoolFragment[]> {
@@ -298,6 +370,17 @@ export class BalancerService {
         );
 
         return response || [];
+    }
+
+    private calculatePoolLiquidity(pool: GqlBalancerPool, tokenPrices: TokenPrices) {
+        const tokens = pool.tokens || [];
+
+        return _.sumBy(tokens, (token) => {
+            const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
+            const balance = parseFloat(token.balance) > 0 ? parseFloat(token.balance) : 0;
+
+            return tokenPrice * balance;
+        });
     }
 }
 

@@ -283,7 +283,6 @@ export enum Balancer_OrderBy {
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
-    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
 export type GradualWeightUpdate = {
@@ -494,9 +493,7 @@ export type JoinExit_Filter = {
     tx_not_contains?: InputMaybe<Scalars['Bytes']>;
     tx_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     type?: InputMaybe<InvestType>;
-    type_in?: InputMaybe<Array<InvestType>>;
     type_not?: InputMaybe<InvestType>;
-    type_not_in?: InputMaybe<Array<InvestType>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
@@ -1627,7 +1624,6 @@ export type Query_MetaArgs = {
 export type QueryAmpUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryAmpUpdatesArgs = {
@@ -1636,20 +1632,17 @@ export type QueryAmpUpdatesArgs = {
     orderBy?: InputMaybe<AmpUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<AmpUpdate_Filter>;
 };
 
 export type QueryBalancerArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBalancerSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBalancerSnapshotsArgs = {
@@ -1658,7 +1651,6 @@ export type QueryBalancerSnapshotsArgs = {
     orderBy?: InputMaybe<BalancerSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<BalancerSnapshot_Filter>;
 };
 
@@ -1668,14 +1660,12 @@ export type QueryBalancersArgs = {
     orderBy?: InputMaybe<Balancer_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Balancer_Filter>;
 };
 
 export type QueryGradualWeightUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryGradualWeightUpdatesArgs = {
@@ -1684,14 +1674,12 @@ export type QueryGradualWeightUpdatesArgs = {
     orderBy?: InputMaybe<GradualWeightUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<GradualWeightUpdate_Filter>;
 };
 
 export type QueryInvestmentArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryInvestmentsArgs = {
@@ -1700,14 +1688,12 @@ export type QueryInvestmentsArgs = {
     orderBy?: InputMaybe<Investment_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Investment_Filter>;
 };
 
 export type QueryJoinExitArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryJoinExitsArgs = {
@@ -1716,14 +1702,12 @@ export type QueryJoinExitsArgs = {
     orderBy?: InputMaybe<JoinExit_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<JoinExit_Filter>;
 };
 
 export type QueryLatestPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryLatestPricesArgs = {
@@ -1732,14 +1716,12 @@ export type QueryLatestPricesArgs = {
     orderBy?: InputMaybe<LatestPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<LatestPrice_Filter>;
 };
 
 export type QueryPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolHistoricalLiquiditiesArgs = {
@@ -1748,20 +1730,17 @@ export type QueryPoolHistoricalLiquiditiesArgs = {
     orderBy?: InputMaybe<PoolHistoricalLiquidity_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolHistoricalLiquidity_Filter>;
 };
 
 export type QueryPoolHistoricalLiquidityArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolShareArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolSharesArgs = {
@@ -1770,14 +1749,12 @@ export type QueryPoolSharesArgs = {
     orderBy?: InputMaybe<PoolShare_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolShare_Filter>;
 };
 
 export type QueryPoolSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolSnapshotsArgs = {
@@ -1786,14 +1763,12 @@ export type QueryPoolSnapshotsArgs = {
     orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolSnapshot_Filter>;
 };
 
 export type QueryPoolTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolTokensArgs = {
@@ -1802,7 +1777,6 @@ export type QueryPoolTokensArgs = {
     orderBy?: InputMaybe<PoolToken_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolToken_Filter>;
 };
 
@@ -1812,14 +1786,12 @@ export type QueryPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type QueryPriceRateProviderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPriceRateProvidersArgs = {
@@ -1828,14 +1800,12 @@ export type QueryPriceRateProvidersArgs = {
     orderBy?: InputMaybe<PriceRateProvider_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PriceRateProvider_Filter>;
 };
 
 export type QuerySwapArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QuerySwapsArgs = {
@@ -1844,20 +1814,17 @@ export type QuerySwapsArgs = {
     orderBy?: InputMaybe<Swap_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Swap_Filter>;
 };
 
 export type QueryTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenPricesArgs = {
@@ -1866,14 +1833,12 @@ export type QueryTokenPricesArgs = {
     orderBy?: InputMaybe<TokenPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenPrice_Filter>;
 };
 
 export type QueryTokenSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTokenSnapshotsArgs = {
@@ -1882,7 +1847,6 @@ export type QueryTokenSnapshotsArgs = {
     orderBy?: InputMaybe<TokenSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenSnapshot_Filter>;
 };
 
@@ -1892,20 +1856,17 @@ export type QueryTokensArgs = {
     orderBy?: InputMaybe<Token_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Token_Filter>;
 };
 
 export type QueryTradePairArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTradePairSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryTradePairSnapshotsArgs = {
@@ -1914,7 +1875,6 @@ export type QueryTradePairSnapshotsArgs = {
     orderBy?: InputMaybe<TradePairSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePairSnapshot_Filter>;
 };
 
@@ -1924,20 +1884,17 @@ export type QueryTradePairsArgs = {
     orderBy?: InputMaybe<TradePair_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePair_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUserInternalBalanceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUserInternalBalancesArgs = {
@@ -1946,7 +1903,6 @@ export type QueryUserInternalBalancesArgs = {
     orderBy?: InputMaybe<UserInternalBalance_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<UserInternalBalance_Filter>;
 };
 
@@ -1956,7 +1912,6 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -2015,7 +1970,6 @@ export type Subscription_MetaArgs = {
 export type SubscriptionAmpUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionAmpUpdatesArgs = {
@@ -2024,20 +1978,17 @@ export type SubscriptionAmpUpdatesArgs = {
     orderBy?: InputMaybe<AmpUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<AmpUpdate_Filter>;
 };
 
 export type SubscriptionBalancerArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBalancerSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBalancerSnapshotsArgs = {
@@ -2046,7 +1997,6 @@ export type SubscriptionBalancerSnapshotsArgs = {
     orderBy?: InputMaybe<BalancerSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<BalancerSnapshot_Filter>;
 };
 
@@ -2056,14 +2006,12 @@ export type SubscriptionBalancersArgs = {
     orderBy?: InputMaybe<Balancer_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Balancer_Filter>;
 };
 
 export type SubscriptionGradualWeightUpdateArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionGradualWeightUpdatesArgs = {
@@ -2072,14 +2020,12 @@ export type SubscriptionGradualWeightUpdatesArgs = {
     orderBy?: InputMaybe<GradualWeightUpdate_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<GradualWeightUpdate_Filter>;
 };
 
 export type SubscriptionInvestmentArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionInvestmentsArgs = {
@@ -2088,14 +2034,12 @@ export type SubscriptionInvestmentsArgs = {
     orderBy?: InputMaybe<Investment_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Investment_Filter>;
 };
 
 export type SubscriptionJoinExitArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionJoinExitsArgs = {
@@ -2104,14 +2048,12 @@ export type SubscriptionJoinExitsArgs = {
     orderBy?: InputMaybe<JoinExit_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<JoinExit_Filter>;
 };
 
 export type SubscriptionLatestPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionLatestPricesArgs = {
@@ -2120,14 +2062,12 @@ export type SubscriptionLatestPricesArgs = {
     orderBy?: InputMaybe<LatestPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<LatestPrice_Filter>;
 };
 
 export type SubscriptionPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolHistoricalLiquiditiesArgs = {
@@ -2136,20 +2076,17 @@ export type SubscriptionPoolHistoricalLiquiditiesArgs = {
     orderBy?: InputMaybe<PoolHistoricalLiquidity_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolHistoricalLiquidity_Filter>;
 };
 
 export type SubscriptionPoolHistoricalLiquidityArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolShareArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolSharesArgs = {
@@ -2158,14 +2095,12 @@ export type SubscriptionPoolSharesArgs = {
     orderBy?: InputMaybe<PoolShare_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolShare_Filter>;
 };
 
 export type SubscriptionPoolSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolSnapshotsArgs = {
@@ -2174,14 +2109,12 @@ export type SubscriptionPoolSnapshotsArgs = {
     orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolSnapshot_Filter>;
 };
 
 export type SubscriptionPoolTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolTokensArgs = {
@@ -2190,7 +2123,6 @@ export type SubscriptionPoolTokensArgs = {
     orderBy?: InputMaybe<PoolToken_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PoolToken_Filter>;
 };
 
@@ -2200,14 +2132,12 @@ export type SubscriptionPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type SubscriptionPriceRateProviderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPriceRateProvidersArgs = {
@@ -2216,14 +2146,12 @@ export type SubscriptionPriceRateProvidersArgs = {
     orderBy?: InputMaybe<PriceRateProvider_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<PriceRateProvider_Filter>;
 };
 
 export type SubscriptionSwapArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionSwapsArgs = {
@@ -2232,20 +2160,17 @@ export type SubscriptionSwapsArgs = {
     orderBy?: InputMaybe<Swap_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Swap_Filter>;
 };
 
 export type SubscriptionTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenPriceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenPricesArgs = {
@@ -2254,14 +2179,12 @@ export type SubscriptionTokenPricesArgs = {
     orderBy?: InputMaybe<TokenPrice_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenPrice_Filter>;
 };
 
 export type SubscriptionTokenSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTokenSnapshotsArgs = {
@@ -2270,7 +2193,6 @@ export type SubscriptionTokenSnapshotsArgs = {
     orderBy?: InputMaybe<TokenSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TokenSnapshot_Filter>;
 };
 
@@ -2280,20 +2202,17 @@ export type SubscriptionTokensArgs = {
     orderBy?: InputMaybe<Token_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Token_Filter>;
 };
 
 export type SubscriptionTradePairArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTradePairSnapshotArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionTradePairSnapshotsArgs = {
@@ -2302,7 +2221,6 @@ export type SubscriptionTradePairSnapshotsArgs = {
     orderBy?: InputMaybe<TradePairSnapshot_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePairSnapshot_Filter>;
 };
 
@@ -2312,20 +2230,17 @@ export type SubscriptionTradePairsArgs = {
     orderBy?: InputMaybe<TradePair_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<TradePair_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUserInternalBalanceArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUserInternalBalancesArgs = {
@@ -2334,7 +2249,6 @@ export type SubscriptionUserInternalBalancesArgs = {
     orderBy?: InputMaybe<UserInternalBalance_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<UserInternalBalance_Filter>;
 };
 
@@ -2344,7 +2258,6 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
