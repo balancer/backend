@@ -15,15 +15,14 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
 import moment from 'moment-timezone';
-import { GqlBalancePoolAprItem, GqlBalancerPool24h, GqlBalancerPoolSnapshot } from '../../schema';
+import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot, GqlBalancePoolAprItem } from '../../schema';
 import _, { parseInt } from 'lodash';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
-import { BalancerPoolWithFarm } from './balancer-types';
-import { beetsFarmService } from '../beets/beets-farm.service';
 import { beetsService } from '../beets/beets.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
+import { beetsFarmService } from '../beets/beets-farm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -39,7 +38,7 @@ export class BalancerService {
         this.cache = new Cache<string, any>();
     }
 
-    public async getPool(id: string): Promise<BalancerPoolWithFarm> {
+    public async getPool(id: string): Promise<GqlBalancerPool> {
         const pools = await this.getPools();
         const pool = pools.find((pool) => pool.id === id);
 
@@ -50,14 +49,14 @@ export class BalancerService {
         return pool;
     }
 
-    public async getPools(): Promise<BalancerPoolWithFarm[]> {
-        const memCached = this.cache.get(POOLS_CACHE_KEY) as BalancerPoolWithFarm[] | null;
+    public async getPools(): Promise<GqlBalancerPool[]> {
+        const memCached = this.cache.get(POOLS_CACHE_KEY) as GqlBalancerPool[] | null;
 
         if (memCached) {
             return memCached;
         }
 
-        const cached = await cache.getObjectValue<BalancerPoolWithFarm[]>(POOLS_CACHE_KEY);
+        const cached = await cache.getObjectValue<GqlBalancerPool[]>(POOLS_CACHE_KEY);
 
         if (cached) {
             this.cache.put(POOLS_CACHE_KEY, cached, 10000);
@@ -102,25 +101,45 @@ export class BalancerService {
         return latestPrice;
     }
 
-    public async cachePools(): Promise<BalancerPoolWithFarm[]> {
+    public async cachePools(): Promise<GqlBalancerPool[]> {
         const provider = new providers.JsonRpcProvider(env.RPC_URL);
         const blacklistedPools = await this.getBlacklistedPools();
+
         const pools = await balancerSubgraphService.getAllPools({
             orderBy: Pool_OrderBy.TotalLiquidity,
             orderDirection: OrderDirection.Desc,
         });
 
-        const filtered = pools.filter((pool) => {
-            if (blacklistedPools.includes(pool.id)) {
-                return false;
-            }
+        const filtered: GqlBalancerPool[] = pools
+            .filter((pool) => {
+                if (blacklistedPools.includes(pool.id)) {
+                    return false;
+                }
 
-            if (parseFloat(pool.totalShares) < 0.001) {
-                return false;
-            }
+                if (parseFloat(pool.totalShares) < 0.001) {
+                    return false;
+                }
 
-            return true;
-        });
+                return true;
+            })
+            .map((pool) => ({
+                ...pool,
+                __typename: 'GqlBalancerPool',
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+                fees24h: '0',
+                volume24h: '0',
+                apr: {
+                    total: '0',
+                    hasRewardApr: false,
+                    items: [],
+                    swapApr: '0',
+                    beetsApr: '0',
+                    thirdPartyApr: '0',
+                },
+            }));
 
         const filteredWithOnChainBalances = await getOnChainBalances(
             filtered,
@@ -133,11 +152,10 @@ export class BalancerService {
         const farms = await beetsFarmService.getBeetsFarms();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
-        //TODO: sad circular dependency :(
         const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
         const tokenPrices = await tokenPriceService.getTokenPrices();
 
-        const decoratedPools = filteredWithOnChainBalances.map((pool): BalancerPoolWithFarm => {
+        const decoratedPools = filteredWithOnChainBalances.map((pool): GqlBalancerPool => {
             const farm = farms.find((farm) => {
                 if (pool.id === env.FBEETS_POOL_ID) {
                     return farm.id === env.FBEETS_FARM_ID;
@@ -348,13 +366,13 @@ export class BalancerService {
 
     private async getBlacklistedPools() {
         const response = await sanityClient.fetch<string[] | null>(
-            `*[_type == "config" && chainId == 250][0].blacklistedPools`,
+            `*[_type == "config" && chainId == ${env.CHAIN_ID}][0].blacklistedPools`,
         );
 
         return response || [];
     }
 
-    private calculatePoolLiquidity(pool: BalancerPoolFragment, tokenPrices: TokenPrices) {
+    private calculatePoolLiquidity(pool: GqlBalancerPool, tokenPrices: TokenPrices) {
         const tokens = pool.tokens || [];
 
         return _.sumBy(tokens, (token) => {

@@ -12,22 +12,22 @@ import {
     fiveMinutesInSeconds,
     getDailyTimestampsForDays,
     getDailyTimestampsWithBuffer,
-    getHourlyTimestampsForDays,
-    getHourlyTimestampsWithBuffer,
     oneDayInMinutes,
     secondsPerDay,
     secondsPerYear,
-    twentyFourHoursInMs,
-    twentyFourHoursInSecs,
 } from '../util/time';
 import { subgraphLoadAll } from '../util/subgraph-util';
 import { cache } from '../cache/cache';
 import moment from 'moment-timezone';
-import { Cache, CacheClass } from 'memory-cache';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
 const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
+
+const BLOCK_TIME_MAP: { [chainId: string]: number } = {
+    '250': 1,
+    '4': 15,
+};
 
 export class BlocksSubgraphService {
     private readonly client: GraphQLClient;
@@ -131,19 +131,22 @@ export class BlocksSubgraphService {
     }
 
     public async cacheBlockFrom24HoursAgo(): Promise<BlockFragment> {
-        const args = {
+        const blockTime = BLOCK_TIME_MAP[env.CHAIN_ID] ?? 1;
+
+        const args: BlocksQueryVariables = {
             orderDirection: OrderDirection.Desc,
             orderBy: Block_OrderBy.Timestamp,
             where: {
-                timestamp_in: [
-                    `${moment.tz('GMT').subtract(1, 'day').subtract(3, 'seconds').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').subtract(2, 'seconds').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').subtract(1, 'second').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').add(1, 'second').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').add(2, 'seconds').unix()}`,
-                    `${moment.tz('GMT').subtract(1, 'day').add(3, 'seconds').unix()}`,
-                ],
+                timestamp_gte: `${moment
+                    .tz('GMT')
+                    .subtract(1, 'day')
+                    .subtract(3 * blockTime, 'seconds')
+                    .unix()}`,
+                timestamp_lte: `${moment
+                    .tz('GMT')
+                    .subtract(1, 'day')
+                    .add(3 * blockTime, 'seconds')
+                    .unix()}`,
             },
         };
 
@@ -157,12 +160,14 @@ export class BlocksSubgraphService {
     }
 
     public async getBlockForTimestamp(timestamp: number): Promise<BlockFragment> {
+        const blockTime = BLOCK_TIME_MAP[env.CHAIN_ID] ?? 1;
+
         const args: BlocksQueryVariables = {
             orderDirection: OrderDirection.Desc,
             orderBy: Block_OrderBy.Timestamp,
             where: {
-                timestamp_gt: `${timestamp - 3}`,
-                timestamp_lt: `${timestamp + 3}`,
+                timestamp_gt: `${timestamp - 3 * blockTime}`,
+                timestamp_lt: `${timestamp + 3 * blockTime}`,
             },
         };
 

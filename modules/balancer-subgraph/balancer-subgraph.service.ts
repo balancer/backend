@@ -84,10 +84,6 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerPortfolioData({ id, previousBlockNumber });
     }
 
-    public getUniqueTokenAddressesFromPools(pools: BalancerPoolFragment[]): string[] {
-        return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
-    }
-
     public async getAllUsers(args: BalancerUsersQueryVariables): Promise<BalancerUserFragment[]> {
         const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
 

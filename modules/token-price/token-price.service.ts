@@ -1,13 +1,13 @@
 import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
 import { balancerService } from '../balancer/balancer.service';
 import { cache } from '../cache/cache';
-import { CacheClass, Cache } from 'memory-cache';
+import { Cache, CacheClass } from 'memory-cache';
+
 import { getAddress } from 'ethers/lib/utils';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
@@ -80,7 +80,12 @@ export class TokenPriceService {
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
 
-        const missingTokens = addresses.filter((token) => !coingeckoTokenPrices[token]);
+        const missingTokens = addresses.filter(
+            (token) =>
+                !coingeckoTokenPrices[token] &&
+                !coingeckoTokenPrices[getAddress(token)] &&
+                !coingeckoTokenPrices[token.toLowerCase()],
+        );
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
             [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
@@ -141,7 +146,7 @@ export class TokenPriceService {
     private async getTokenAddresses(): Promise<string[]> {
         const pools = await balancerService.getPools();
 
-        return balancerSubgraphService.getUniqueTokenAddressesFromPools(pools);
+        return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
     }
 }
 

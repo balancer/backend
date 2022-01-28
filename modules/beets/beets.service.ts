@@ -110,16 +110,16 @@ export class BeetsService {
             return { beetsPrice: '0', marketCap: '0', circulatingSupply: '0', fbeetsPrice: '0' };
         }
 
-        const pools = await balancerService.getPools();
-        const beetsUsdcPool = pools.find(
-            (pool) => pool.id === '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
-        );
+        const { pool: beetsUsdcPool } = await balancerSubgraphService.getPool({
+            id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
+        });
+
         const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
         const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
 
-        const beetsFtmPool = pools.find(
-            (pool) => pool.id === '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-        );
+        const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
+            id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+        });
 
         if (!beets || !usdc || !beetsFtmPool) {
             throw new Error('did not find price for beets');
