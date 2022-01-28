@@ -628,6 +628,8 @@ export type Pool = {
     historicalValues?: Maybe<Array<PoolHistoricalLiquidity>>;
     holdersCount: Scalars['BigInt'];
     id: Scalars['ID'];
+    lowerTarget?: Maybe<Scalars['BigDecimal']>;
+    mainIndex?: Maybe<Scalars['Int']>;
     managementFee?: Maybe<Scalars['BigDecimal']>;
     name?: Maybe<Scalars['String']>;
     owner?: Maybe<Scalars['Bytes']>;
@@ -650,8 +652,10 @@ export type Pool = {
     totalWeight?: Maybe<Scalars['BigDecimal']>;
     tx?: Maybe<Scalars['Bytes']>;
     unitSeconds?: Maybe<Scalars['BigInt']>;
+    upperTarget?: Maybe<Scalars['BigDecimal']>;
     vaultID: Balancer;
     weightUpdates?: Maybe<Array<GradualWeightUpdate>>;
+    wrappedIndex?: Maybe<Scalars['Int']>;
 };
 
 export type PoolHistoricalValuesArgs = {
@@ -873,6 +877,7 @@ export type PoolSnapshot = {
     amounts: Array<Scalars['BigDecimal']>;
     holdersCount: Scalars['BigInt'];
     id: Scalars['ID'];
+    liquidity: Scalars['BigDecimal'];
     pool: Pool;
     swapFees: Scalars['BigDecimal'];
     swapVolume: Scalars['BigDecimal'];
@@ -905,6 +910,14 @@ export type PoolSnapshot_Filter = {
     id_lte?: InputMaybe<Scalars['ID']>;
     id_not?: InputMaybe<Scalars['ID']>;
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
+    liquidity?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_gt?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_gte?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    liquidity_lt?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_lte?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_not?: InputMaybe<Scalars['BigDecimal']>;
+    liquidity_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     pool?: InputMaybe<Scalars['String']>;
     pool_contains?: InputMaybe<Scalars['String']>;
     pool_ends_with?: InputMaybe<Scalars['String']>;
@@ -989,6 +1002,7 @@ export enum PoolSnapshot_OrderBy {
     Amounts = 'amounts',
     HoldersCount = 'holdersCount',
     Id = 'id',
+    Liquidity = 'liquidity',
     Pool = 'pool',
     SwapFees = 'swapFees',
     SwapVolume = 'swapVolume',
@@ -1219,6 +1233,22 @@ export type Pool_Filter = {
     id_lte?: InputMaybe<Scalars['ID']>;
     id_not?: InputMaybe<Scalars['ID']>;
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
+    lowerTarget?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_gt?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_gte?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    lowerTarget_lt?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_lte?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_not?: InputMaybe<Scalars['BigDecimal']>;
+    lowerTarget_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    mainIndex?: InputMaybe<Scalars['Int']>;
+    mainIndex_gt?: InputMaybe<Scalars['Int']>;
+    mainIndex_gte?: InputMaybe<Scalars['Int']>;
+    mainIndex_in?: InputMaybe<Array<Scalars['Int']>>;
+    mainIndex_lt?: InputMaybe<Scalars['Int']>;
+    mainIndex_lte?: InputMaybe<Scalars['Int']>;
+    mainIndex_not?: InputMaybe<Scalars['Int']>;
+    mainIndex_not_in?: InputMaybe<Array<Scalars['Int']>>;
     managementFee?: InputMaybe<Scalars['BigDecimal']>;
     managementFee_gt?: InputMaybe<Scalars['BigDecimal']>;
     managementFee_gte?: InputMaybe<Scalars['BigDecimal']>;
@@ -1367,6 +1397,14 @@ export type Pool_Filter = {
     unitSeconds_lte?: InputMaybe<Scalars['BigInt']>;
     unitSeconds_not?: InputMaybe<Scalars['BigInt']>;
     unitSeconds_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    upperTarget?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_gt?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_gte?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    upperTarget_lt?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_lte?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_not?: InputMaybe<Scalars['BigDecimal']>;
+    upperTarget_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     vaultID?: InputMaybe<Scalars['String']>;
     vaultID_contains?: InputMaybe<Scalars['String']>;
     vaultID_ends_with?: InputMaybe<Scalars['String']>;
@@ -1381,6 +1419,14 @@ export type Pool_Filter = {
     vaultID_not_in?: InputMaybe<Array<Scalars['String']>>;
     vaultID_not_starts_with?: InputMaybe<Scalars['String']>;
     vaultID_starts_with?: InputMaybe<Scalars['String']>;
+    wrappedIndex?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_gt?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_gte?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_in?: InputMaybe<Array<Scalars['Int']>>;
+    wrappedIndex_lt?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_lte?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_not?: InputMaybe<Scalars['Int']>;
+    wrappedIndex_not_in?: InputMaybe<Array<Scalars['Int']>>;
 };
 
 export enum Pool_OrderBy {
@@ -1393,6 +1439,8 @@ export enum Pool_OrderBy {
     HistoricalValues = 'historicalValues',
     HoldersCount = 'holdersCount',
     Id = 'id',
+    LowerTarget = 'lowerTarget',
+    MainIndex = 'mainIndex',
     ManagementFee = 'managementFee',
     Name = 'name',
     Owner = 'owner',
@@ -1415,8 +1463,10 @@ export enum Pool_OrderBy {
     TotalWeight = 'totalWeight',
     Tx = 'tx',
     UnitSeconds = 'unitSeconds',
+    UpperTarget = 'upperTarget',
     VaultId = 'vaultID',
     WeightUpdates = 'weightUpdates',
+    WrappedIndex = 'wrappedIndex',
 }
 
 export type PriceRateProvider = {
@@ -3121,13 +3171,17 @@ export type BalancerPoolFragment = {
     createTime: number;
     swapEnabled: boolean;
     tokensList: Array<string>;
-    amp?: string | null | undefined;
+    lowerTarget?: string | null | undefined;
+    upperTarget?: string | null | undefined;
+    mainIndex?: number | null | undefined;
+    wrappedIndex?: number | null | undefined;
     factory?: string | null | undefined;
     expiryTime?: string | null | undefined;
     unitSeconds?: string | null | undefined;
     principalToken?: string | null | undefined;
     baseToken?: string | null | undefined;
     owner?: string | null | undefined;
+    amp?: string | null | undefined;
     tokens?:
         | Array<{
               __typename?: 'PoolToken';
@@ -3187,13 +3241,17 @@ export type BalancerPoolsQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
+        lowerTarget?: string | null | undefined;
+        upperTarget?: string | null | undefined;
+        mainIndex?: number | null | undefined;
+        wrappedIndex?: number | null | undefined;
         factory?: string | null | undefined;
         expiryTime?: string | null | undefined;
         unitSeconds?: string | null | undefined;
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3238,13 +3296,17 @@ export type BalancerPoolQuery = {
               createTime: number;
               swapEnabled: boolean;
               tokensList: Array<string>;
-              amp?: string | null | undefined;
+              lowerTarget?: string | null | undefined;
+              upperTarget?: string | null | undefined;
+              mainIndex?: number | null | undefined;
+              wrappedIndex?: number | null | undefined;
               factory?: string | null | undefined;
               expiryTime?: string | null | undefined;
               unitSeconds?: string | null | undefined;
               principalToken?: string | null | undefined;
               baseToken?: string | null | undefined;
               owner?: string | null | undefined;
+              amp?: string | null | undefined;
               tokens?:
                   | Array<{
                         __typename?: 'PoolToken';
@@ -3476,13 +3538,17 @@ export type BalancerPortfolioPoolsDataQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
+        lowerTarget?: string | null | undefined;
+        upperTarget?: string | null | undefined;
+        mainIndex?: number | null | undefined;
+        wrappedIndex?: number | null | undefined;
         factory?: string | null | undefined;
         expiryTime?: string | null | undefined;
         unitSeconds?: string | null | undefined;
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3517,13 +3583,17 @@ export type BalancerPortfolioPoolsDataQuery = {
         createTime: number;
         swapEnabled: boolean;
         tokensList: Array<string>;
-        amp?: string | null | undefined;
+        lowerTarget?: string | null | undefined;
+        upperTarget?: string | null | undefined;
+        mainIndex?: number | null | undefined;
+        wrappedIndex?: number | null | undefined;
         factory?: string | null | undefined;
         expiryTime?: string | null | undefined;
         unitSeconds?: string | null | undefined;
         principalToken?: string | null | undefined;
         baseToken?: string | null | undefined;
         owner?: string | null | undefined;
+        amp?: string | null | undefined;
         tokens?:
             | Array<{
                   __typename?: 'PoolToken';
@@ -3638,13 +3708,17 @@ export const BalancerPoolFragmentDoc = gql`
         createTime
         swapEnabled
         tokensList
-        amp
+        lowerTarget
+        upperTarget
+        mainIndex
+        wrappedIndex
         factory
         expiryTime
         unitSeconds
         principalToken
         baseToken
         owner
+        amp
         tokens(first: 1000) {
             ...BalancerPoolToken
         }

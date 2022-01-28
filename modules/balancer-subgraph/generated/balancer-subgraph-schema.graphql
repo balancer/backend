@@ -616,6 +616,8 @@ type Pool {
     ): [PoolHistoricalLiquidity!]
     holdersCount: BigInt!
     id: ID!
+    lowerTarget: BigDecimal
+    mainIndex: Int
     managementFee: BigDecimal
     name: String
     owner: Bytes
@@ -662,6 +664,7 @@ type Pool {
     totalWeight: BigDecimal
     tx: Bytes
     unitSeconds: BigInt
+    upperTarget: BigDecimal
     vaultID: Balancer!
     weightUpdates(
         first: Int = 100
@@ -670,6 +673,7 @@ type Pool {
         skip: Int = 0
         where: GradualWeightUpdate_filter
     ): [GradualWeightUpdate!]
+    wrappedIndex: Int
 }
 
 type PoolHistoricalLiquidity {
@@ -840,6 +844,7 @@ type PoolSnapshot {
     amounts: [BigDecimal!]!
     holdersCount: BigInt!
     id: ID!
+    liquidity: BigDecimal!
     pool: Pool!
     swapFees: BigDecimal!
     swapVolume: BigDecimal!
@@ -872,6 +877,14 @@ input PoolSnapshot_filter {
     id_lte: ID
     id_not: ID
     id_not_in: [ID!]
+    liquidity: BigDecimal
+    liquidity_gt: BigDecimal
+    liquidity_gte: BigDecimal
+    liquidity_in: [BigDecimal!]
+    liquidity_lt: BigDecimal
+    liquidity_lte: BigDecimal
+    liquidity_not: BigDecimal
+    liquidity_not_in: [BigDecimal!]
     pool: String
     pool_contains: String
     pool_ends_with: String
@@ -956,6 +969,7 @@ enum PoolSnapshot_orderBy {
     amounts
     holdersCount
     id
+    liquidity
     pool
     swapFees
     swapVolume
@@ -1183,6 +1197,22 @@ input Pool_filter {
     id_lte: ID
     id_not: ID
     id_not_in: [ID!]
+    lowerTarget: BigDecimal
+    lowerTarget_gt: BigDecimal
+    lowerTarget_gte: BigDecimal
+    lowerTarget_in: [BigDecimal!]
+    lowerTarget_lt: BigDecimal
+    lowerTarget_lte: BigDecimal
+    lowerTarget_not: BigDecimal
+    lowerTarget_not_in: [BigDecimal!]
+    mainIndex: Int
+    mainIndex_gt: Int
+    mainIndex_gte: Int
+    mainIndex_in: [Int!]
+    mainIndex_lt: Int
+    mainIndex_lte: Int
+    mainIndex_not: Int
+    mainIndex_not_in: [Int!]
     managementFee: BigDecimal
     managementFee_gt: BigDecimal
     managementFee_gte: BigDecimal
@@ -1331,6 +1361,14 @@ input Pool_filter {
     unitSeconds_lte: BigInt
     unitSeconds_not: BigInt
     unitSeconds_not_in: [BigInt!]
+    upperTarget: BigDecimal
+    upperTarget_gt: BigDecimal
+    upperTarget_gte: BigDecimal
+    upperTarget_in: [BigDecimal!]
+    upperTarget_lt: BigDecimal
+    upperTarget_lte: BigDecimal
+    upperTarget_not: BigDecimal
+    upperTarget_not_in: [BigDecimal!]
     vaultID: String
     vaultID_contains: String
     vaultID_ends_with: String
@@ -1345,6 +1383,14 @@ input Pool_filter {
     vaultID_not_in: [String!]
     vaultID_not_starts_with: String
     vaultID_starts_with: String
+    wrappedIndex: Int
+    wrappedIndex_gt: Int
+    wrappedIndex_gte: Int
+    wrappedIndex_in: [Int!]
+    wrappedIndex_lt: Int
+    wrappedIndex_lte: Int
+    wrappedIndex_not: Int
+    wrappedIndex_not_in: [Int!]
 }
 
 enum Pool_orderBy {
@@ -1357,6 +1403,8 @@ enum Pool_orderBy {
     historicalValues
     holdersCount
     id
+    lowerTarget
+    mainIndex
     managementFee
     name
     owner
@@ -1379,8 +1427,10 @@ enum Pool_orderBy {
     totalWeight
     tx
     unitSeconds
+    upperTarget
     vaultID
     weightUpdates
+    wrappedIndex
 }
 
 type PriceRateProvider {

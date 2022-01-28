@@ -25,6 +25,8 @@ type GqlBalancerPool {
     baseToken: Bytes
     swapEnabled: Boolean!
 
+    swapsCount: BigInt!
+    holdersCount: BigInt!
     totalLiquidity: BigDecimal!
     totalShares: BigDecimal!
     totalSwapFee: BigDecimal!
@@ -32,6 +34,12 @@ type GqlBalancerPool {
     owner: Bytes
     factory: Bytes
     createTime: Int!
+    mainIndex: Int
+    wrappedIndex: Int
+    upperTarget: String
+    lowerTarget: String
+    linearPools: [GqlBalancerPoolLinearPoolData!]
+    tokenRates: [String!]
     farm: GqlBeetsFarm
     apr: GqlBalancePoolApr!
     isNewPool: Boolean
@@ -48,6 +56,35 @@ type GqlBalancerPoolToken {
     priceRate: BigDecimal!
     name: String!
     symbol: String!
+}
+
+type GqlBalancerPoolLinearPoolData {
+    id: ID!
+    address: String!
+    priceRate: String!
+    mainToken: GqlBalancerPoolLinearPoolMainToken!
+    wrappedToken: GqlBalancerPoolLinearPoolWrappedToken!
+    unwrappedTokenAddress: String!
+    totalSupply: String!
+}
+
+type GqlBalancerPoolLinearPoolMainToken {
+    address: String!
+    index: Int!
+    balance: String!
+    name: String!
+    symbol: String!
+    decimals: Int!
+}
+
+type GqlBalancerPoolLinearPoolWrappedToken {
+    address: String!
+    index: Int!
+    balance: String!
+    priceRate: String!
+    name: String!
+    symbol: String!
+    decimals: Int!
 }
 
 type GqlBalancerTokenLatestPrice {

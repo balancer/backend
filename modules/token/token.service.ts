@@ -29,7 +29,7 @@ export class TokenService {
                 address,
                 symbol,
                 decimals,
-                "chainId": 250,
+                "chainId": ${env.CHAIN_ID},
                 logoURI,
                 coingeckoPlatformId,
                 coingeckoContractAddress
