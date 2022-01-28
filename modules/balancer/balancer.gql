@@ -1,5 +1,6 @@
 extend type Query {
     pools: [GqlBalancerPool!]!
+    pool(id: String!): GqlBalancerPool!
     poolsPastPools: [GqlBalancerPool!]!
     latestPrice(id: ID!): GqlBalancerTokenLatestPrice
     poolSnapshots(poolId: ID!): [GqlBalancerPoolSnapshot!]!
@@ -33,13 +34,17 @@ type GqlBalancerPool {
     owner: Bytes
     factory: Bytes
     createTime: Int!
-
     mainIndex: Int
     wrappedIndex: Int
     upperTarget: String
     lowerTarget: String
     linearPools: [GqlBalancerPoolLinearPoolData!]
     tokenRates: [String!]
+    farm: GqlBeetsFarm
+    apr: GqlBalancePoolApr!
+    isNewPool: Boolean
+    volume24h: BigDecimal!
+    fees24h: BigDecimal!
 }
 
 type GqlBalancerPoolToken {
@@ -133,4 +138,24 @@ type GqlBalancerPool24h {
     swapVolume24h: BigDecimal!
     swapFees24h: BigDecimal!
     liquidityChange24h: BigDecimal!
+}
+
+type GqlBalancePoolApr {
+    total: BigDecimal!
+    swapApr: BigDecimal!
+    beetsApr: BigDecimal!
+    thirdPartyApr: BigDecimal!
+    items: [GqlBalancePoolAprItem!]!
+    hasRewardApr: Boolean!
+}
+
+type GqlBalancePoolAprItem {
+    title: String!
+    apr: BigDecimal!
+    subItems: [GqlBalancePoolAprSubItem!]
+}
+
+type GqlBalancePoolAprSubItem {
+    title: String!
+    apr: BigDecimal!
 }

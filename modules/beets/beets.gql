@@ -12,6 +12,7 @@ type GqlBeetsProtocolData {
     totalSwapFee: BigDecimal!
     poolCount: BigInt!
     beetsPrice: BigDecimal!
+    fbeetsPrice: BigDecimal!
     circulatingSupply: BigDecimal!
     marketCap: BigDecimal!
     swapFee24h: BigDecimal!
@@ -41,6 +42,14 @@ type GqlBeetsRewarder {
     id: ID!
     rewardPerSecond: BigInt!
     rewardToken: Bytes!
+    tokens: [GqlBeetsRewarderToken!]!
+}
+
+type GqlBeetsRewarderToken {
+    token: Bytes!
+    symbol: String!
+    tokenPrice: Float!
+    rewardPerSecond: BigInt!
 }
 
 type GqlBeetsFarmUser {

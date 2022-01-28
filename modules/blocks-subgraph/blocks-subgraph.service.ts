@@ -13,6 +13,8 @@ import {
     getDailyTimestampsForDays,
     getDailyTimestampsWithBuffer,
     oneDayInMinutes,
+    secondsPerDay,
+    secondsPerYear,
 } from '../util/time';
 import { subgraphLoadAll } from '../util/subgraph-util';
 import { cache } from '../cache/cache';
@@ -217,6 +219,18 @@ export class BlocksSubgraphService {
         await cache.putObjectValue(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, oneDayInMinutes);
 
         return blocks;
+    }
+
+    public async getBlocksPerDay() {
+        const blockTime = await this.getAverageBlockTime();
+
+        return secondsPerDay / blockTime;
+    }
+
+    public async getBlocksPerYear() {
+        const blockTime = await this.getAverageBlockTime();
+
+        return secondsPerYear / blockTime;
     }
 
     public get sdk() {
