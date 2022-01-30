@@ -50,15 +50,23 @@ export class BlocksSubgraphService {
         const start = moment().startOf('hour').subtract(6, 'hours').unix();
         const end = moment().startOf('hour').unix();
 
-        const blocks = (
-            await this.sdk.Blocks({
+        let blocks: BlockFragment[] = [];
+
+        for (let i = 0; i < 10; i++) {
+            const result = await this.sdk.Blocks({
                 first: 1000,
-                skip: 0,
+                skip: i * 1000,
                 orderBy: Block_OrderBy.Number,
                 orderDirection: OrderDirection.Desc,
                 where: { timestamp_gt: `${start}`, timestamp_lt: `${end}` },
-            })
-        ).blocks;
+            });
+
+            if (result.blocks.length === 0) {
+                break;
+            }
+
+            blocks = [...blocks, ...result.blocks];
+        }
 
         if (blocks.length === 0) {
             console.error('Unable to retrieve the blocks, returning a default value of 1 second per block');
