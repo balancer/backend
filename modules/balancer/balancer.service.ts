@@ -118,9 +118,9 @@ export class BalancerService {
                     return false;
                 }
 
-                /*if (parseFloat(pool.totalShares) < 0.001) {
+                if (parseFloat(pool.totalShares) < 0.001 && pool.poolType !== 'LiquidityBootstrapping') {
                     return false;
-                }*/
+                }
 
                 return true;
             })
