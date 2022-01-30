@@ -24,6 +24,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { yearnVaultService } from '../yearn/yearn-vault.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -117,9 +118,9 @@ export class BalancerService {
                     return false;
                 }
 
-                if (parseFloat(pool.totalShares) < 0.001) {
+                /*if (parseFloat(pool.totalShares) < 0.001) {
                     return false;
-                }
+                }*/
 
                 return true;
             })
@@ -155,6 +156,7 @@ export class BalancerService {
         const blocksPerYear = blocksPerDay * 365;
         const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
         const tokenPrices = await tokenPriceService.getTokenPrices();
+        await yearnVaultService.cacheYearnVaults();
 
         const decoratedPools = filteredWithOnChainBalances.map((pool): GqlBalancerPool => {
             const farm = farms.find((farm) => {
@@ -177,7 +179,11 @@ export class BalancerService {
             } = farm
                 ? beetsFarmService.calculateFarmApr(farm, farmTvl, blocksPerYear, beetsPrice)
                 : { items: [], thirdPartyApr: '0', beetsApr: '0' };
-            const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }, ...farmAprItems];
+            const items: GqlBalancePoolAprItem[] = [
+                { title: 'Swap fees APR', apr: `${swapApr}` },
+                ...farmAprItems,
+                ...this.getThirdPartyApr(pool),
+            ];
 
             return {
                 ...pool,
@@ -281,10 +287,6 @@ export class BalancerService {
             const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
             const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(
                 parseInt(block.timestamp),
-                historicalTokenPrices,
-            );
-            const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
-                parseInt(previousBlock.timestamp),
                 historicalTokenPrices,
             );
 
@@ -397,7 +399,7 @@ export class BalancerService {
         });
     }
 
-    private isPhantomStablePool(pool: BalancerPoolFragment) {
+    private isPhantomStablePool(pool: BalancerPoolFragment | GqlBalancerPool) {
         return pool.poolType === 'StablePhantom';
     }
 
@@ -431,6 +433,20 @@ export class BalancerService {
             parseFloat(wrappedToken.balance) * parseFloat(wrappedToken.priceRate ?? '0') * mainTokenPrice;
 
         return mainTokenValue + wrappedTokenValue;
+    }
+
+    private getThirdPartyApr(pool: GqlBalancerPool): GqlBalancePoolAprItem[] {
+        let items: GqlBalancePoolAprItem[] = [];
+
+        if (this.isPhantomStablePool(pool)) {
+            const aprItem = yearnVaultService.getAprItemForPhantomStablePool(pool);
+
+            if (aprItem) {
+                items.push(aprItem);
+            }
+        }
+
+        return items;
     }
 }
 
