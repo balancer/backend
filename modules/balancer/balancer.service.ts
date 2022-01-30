@@ -23,6 +23,7 @@ import { beetsService } from '../beets/beets.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -262,6 +263,7 @@ export class BalancerService {
     public async getPoolSnapshots(poolId: string): Promise<GqlBalancerPoolSnapshot[]> {
         const snapshots: GqlBalancerPoolSnapshot[] = [];
         const blocks = await blocksSubgraphService.getDailyBlocks(60);
+        const historicalTokenPrices = await tokenPriceService.getHistoricalTokenPrices();
 
         const cached = this.cache.get(`${POOL_SNAPSHOTS_CACHE_KEY_PREFIX}:${poolId}:${blocks[0].number}`) as
             | GqlBalancerPoolSnapshot[]
@@ -277,12 +279,24 @@ export class BalancerService {
             const blockNumber = parseInt(block.number);
             const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
             const previousPools = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(previousBlock.number));
+            const tokenPrices = tokenPriceService.getTokenPricesForTimestamp(
+                parseInt(block.timestamp),
+                historicalTokenPrices,
+            );
+            const previousTokenPrices = tokenPriceService.getTokenPricesForTimestamp(
+                parseInt(previousBlock.timestamp),
+                historicalTokenPrices,
+            );
 
             const pool = pools.find((pool) => pool.id === poolId);
             const previousPool = previousPools.find((previousPool) => previousPool.id === poolId);
 
             if (!pool || !previousPool) {
                 break;
+            }
+
+            if (this.isPhantomStablePool(pool)) {
+                pool.totalLiquidity = `${this.calculatePhantomStablePoolLiquidity(pool, pools, tokenPrices)}`;
             }
 
             const swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
@@ -381,6 +395,42 @@ export class BalancerService {
 
             return tokenPrice * balance;
         });
+    }
+
+    private isPhantomStablePool(pool: BalancerPoolFragment) {
+        return pool.poolType === 'StablePhantom';
+    }
+
+    private calculatePhantomStablePoolLiquidity(
+        phantomStable: BalancerPoolFragment,
+        pools: BalancerPoolFragment[],
+        tokenPrices: TokenPrices,
+    ): number {
+        const linearPools = pools.filter(
+            (pool) => phantomStable.tokensList.includes(pool.address) && pool.id !== phantomStable.id,
+        );
+
+        const liquidities = linearPools.map((linearPool) => this.calculateLinearPoolLiquidity(linearPool, tokenPrices));
+
+        return _.sum(liquidities);
+    }
+
+    private calculateLinearPoolLiquidity(pool: BalancerPoolFragment, tokenPrices: TokenPrices): number {
+        const tokens = pool.tokens || [];
+        const mainToken = typeof pool.mainIndex === 'number' ? tokens[pool.mainIndex] : null;
+        const wrappedToken = typeof pool.wrappedIndex === 'number' ? tokens[pool.wrappedIndex] : null;
+
+        if (!mainToken || !wrappedToken) {
+            return 0;
+        }
+
+        const mainTokenPrice = tokenPriceService.getPriceForToken(tokenPrices, mainToken.address);
+
+        const mainTokenValue = parseFloat(mainToken.balance) * mainTokenPrice;
+        const wrappedTokenValue =
+            parseFloat(wrappedToken.balance) * parseFloat(wrappedToken.priceRate ?? '0') * mainTokenPrice;
+
+        return mainTokenValue + wrappedTokenValue;
     }
 }
 
