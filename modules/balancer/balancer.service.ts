@@ -23,7 +23,6 @@ import { beetsService } from '../beets/beets.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { yearnVaultService } from '../yearn/yearn-vault.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
@@ -118,7 +117,11 @@ export class BalancerService {
                     return false;
                 }
 
-                if (parseFloat(pool.totalShares) < 0.001 && pool.poolType !== 'LiquidityBootstrapping') {
+                /*if (parseFloat(pool.totalShares) < 0.001 && pool.poolType !== 'LiquidityBootstrapping') {
+                    return false;
+                }*/
+
+                if (parseFloat(pool.totalShares) < 0.001) {
                     return false;
                 }
 
