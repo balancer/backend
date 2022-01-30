@@ -185,7 +185,7 @@ export class BalancerService {
             const items: GqlBalancePoolAprItem[] = [
                 { title: 'Swap fees APR', apr: `${swapApr}` },
                 ...farmAprItems,
-                ...this.getThirdPartyApr(pool),
+                ...this.getThirdPartyApr(pool, tokenPrices),
             ];
 
             return {
@@ -438,11 +438,11 @@ export class BalancerService {
         return mainTokenValue + wrappedTokenValue;
     }
 
-    private getThirdPartyApr(pool: GqlBalancerPool): GqlBalancePoolAprItem[] {
+    private getThirdPartyApr(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem[] {
         let items: GqlBalancePoolAprItem[] = [];
 
         if (this.isPhantomStablePool(pool)) {
-            const aprItem = yearnVaultService.getAprItemForPhantomStablePool(pool);
+            const aprItem = yearnVaultService.getAprItemForPhantomStablePool(pool, tokenPrices);
 
             if (aprItem) {
                 items.push(aprItem);

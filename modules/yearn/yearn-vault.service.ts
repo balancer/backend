@@ -4,6 +4,8 @@ import { YearnVault } from './yearn-types';
 import { GqlBalancePoolAprItem, GqlBalancePoolAprSubItem, GqlBalancerPool } from '../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import _ from 'lodash';
+import { TokenPrices } from '../token-price/token-price-types';
+import { tokenPriceService } from '../token-price/token-price.service';
 
 const VAULTS_CACHE_KEY = 'yearn:vaults';
 
@@ -25,8 +27,11 @@ export class YearnVaultService {
         return cached || [];
     }
 
-    public getAprItemForPhantomStablePool(pool: GqlBalancerPool): GqlBalancePoolAprItem | null {
-        const subItems: GqlBalancePoolAprSubItem[] = [];
+    public getAprItemForPhantomStablePool(
+        pool: GqlBalancerPool,
+        tokenPrices: TokenPrices,
+    ): GqlBalancePoolAprItem | null {
+        const items: { title: string; apr: number; totalLiquidity: number; wrappedLiquidity: number }[] = [];
         const vaults = this.getYearnVaults();
 
         for (const linearPool of pool.linearPools || []) {
@@ -35,23 +40,31 @@ export class YearnVaultService {
             );
 
             if (vault) {
+                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
                 const mainTokens = parseFloat(linearPool.mainToken.balance);
                 const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
                 const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
                 const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
 
-                subItems.push({
+                items.push({
                     title: `${vault.symbol} APR`,
-                    apr: `${vault.apy.net_apy * percentWrapped}`,
+                    apr: vault.apy.net_apy * percentWrapped,
+                    totalLiquidity: mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice,
+                    wrappedLiquidity: wrappedTokens * priceRate * tokenPrice,
                 });
             }
         }
 
-        if (subItems.length > 0) {
+        if (items.length > 0) {
+            const totalLiquidity = _.sumBy(items, (item) => item.totalLiquidity);
+
             return {
                 title: 'Yearn boosted APR',
-                apr: `${_.sumBy(subItems, (subItem) => parseFloat(subItem.apr))}`,
-                subItems,
+                apr: `${_.sumBy(items, (item) => (item.wrappedLiquidity / totalLiquidity) * item.apr)}`,
+                subItems: items.map((item) => ({
+                    ...item,
+                    apr: `${(item.wrappedLiquidity / totalLiquidity) * item.apr}`,
+                })),
             };
         }
 
