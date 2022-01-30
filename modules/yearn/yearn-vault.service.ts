@@ -41,7 +41,7 @@ export class YearnVaultService {
                 const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
 
                 subItems.push({
-                    title: `${vault.token.symbol} APR`,
+                    title: `${vault.symbol} APR`,
                     apr: `${vault.apy.net_apy * percentWrapped}`,
                 });
             }
