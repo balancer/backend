@@ -9,7 +9,7 @@ import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgr
 import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
 import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
-import { PrismaBalancerPool, PrismaBalancerPoolSnapshot } from '@prisma/client';
+import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';
 import { oneDayInMinutes } from '../../util/time';
 
@@ -98,7 +98,7 @@ export class PortfolioDataService {
                 poolId: pool.id,
                 amp: pool.amp ?? null,
                 blockNumber,
-                tokens: (pool.tokens ?? []).map((token) => ({
+                tokens: this.getPoolTokens(pool, pools).map((token) => ({
                     ...token,
                     snapshotId: '',
                     poolId: pool.id,
@@ -258,7 +258,7 @@ export class PortfolioDataService {
     }
 
     private async saveAnyNewTokens(pools: BalancerPoolFragment[]) {
-        const tokens = _.uniq(_.flatten(pools.map((pool) => pool.tokens ?? [])));
+        const tokens = _.uniq(_.flatten(pools.map((pool) => this.getPoolTokens(pool, pools))));
 
         for (const token of tokens) {
             await prisma.prismaToken.upsert({
@@ -302,7 +302,7 @@ export class PortfolioDataService {
                     amp: pool.amp,
                     tokens: {
                         createMany: {
-                            data: (pool.tokens ?? []).map((token) => ({
+                            data: this.getPoolTokens(pool, pools).map((token) => ({
                                 address: token.address,
                                 balance: token.balance,
                                 invested: token.invested,
@@ -379,5 +379,31 @@ export class PortfolioDataService {
                 blockNumber,
             })),
         });
+    }
+
+    private getPoolTokens(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[]) {
+        const tokens = pool.tokens ?? [];
+
+        return tokens
+            .filter((token) => token.address !== pool.address)
+            .map((token) => {
+                const nestedPool = allPools.find((p) => token.address === p.address);
+
+                if (nestedPool && nestedPool.poolType === 'Linear' && nestedPool.tokens) {
+                    const nestedPoolTokens = nestedPool.tokens ?? [];
+                    const mainToken = nestedPoolTokens[nestedPool.mainIndex || 0];
+                    const wrappedToken = nestedPoolTokens[nestedPool.wrappedIndex || 0];
+
+                    return {
+                        ...mainToken,
+                        balance: `${
+                            parseFloat(mainToken.balance) +
+                            parseFloat(wrappedToken.balance) * parseFloat(wrappedToken.priceRate)
+                        }`,
+                    };
+                }
+
+                return token;
+            });
     }
 }
