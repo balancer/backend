@@ -394,12 +394,25 @@ export class BalancerService {
     private calculatePoolLiquidity(pool: GqlBalancerPool, tokenPrices: TokenPrices) {
         const tokens = pool.tokens || [];
 
-        return _.sumBy(tokens, (token) => {
+        const linearLiquidity = _.sum(
+            (pool.linearPools ?? []).map((linearPool) => {
+                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
+                const mainTokens = parseFloat(linearPool.mainToken.balance);
+                const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
+                const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
+
+                return mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+            }),
+        );
+
+        const poolLiquidity = _.sumBy(tokens, (token) => {
             const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
             const balance = parseFloat(token.balance) > 0 ? parseFloat(token.balance) : 0;
 
             return tokenPrice * balance;
         });
+
+        return linearLiquidity + poolLiquidity;
     }
 
     private isPhantomStablePool(pool: BalancerPoolFragment | GqlBalancerPool) {
