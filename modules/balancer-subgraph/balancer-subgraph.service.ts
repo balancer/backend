@@ -17,6 +17,7 @@ import {
     BalancerPortfolioDataQuery,
     BalancerPortfolioPoolsDataQuery,
     BalancerProtocolDataQueryVariables,
+    BalancerSwapFragment,
     BalancerSwapsQuery,
     BalancerSwapsQueryVariables,
     BalancerTokenPriceFragment,
@@ -80,6 +81,10 @@ export class BalancerSubgraphService {
 
     public async getSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapsQuery> {
         return this.sdk.BalancerSwaps(args);
+    }
+
+    public async getAllSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapFragment[]> {
+        return subgraphLoadAll<BalancerSwapFragment>(this.sdk.BalancerSwaps, 'swaps', args);
     }
 
     public async getPool(args: BalancerPoolQueryVariables): Promise<BalancerPoolQuery> {
