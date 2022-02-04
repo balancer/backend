@@ -14,13 +14,13 @@ export class BalancerPhantomStableService {
     }
 
     public async calculatePoolData(
-        phantomStable: GqlBalancerPool,
+        phantomStable: GqlBalancerPool | BalancerPoolFragment,
         startTime: number,
         endTime: number,
-        pools: GqlBalancerPool[],
+        pools: (GqlBalancerPool | BalancerPoolFragment)[],
         tokenPrices: TokenPrices,
     ): Promise<{ volume: number; swapFees: number }> {
-        const { swaps } = await balancerSubgraphService.getSwaps({
+        const swaps = await balancerSubgraphService.getAllSwaps({
             where: {
                 poolId: phantomStable.id,
                 tokenIn_not: phantomStable.address,

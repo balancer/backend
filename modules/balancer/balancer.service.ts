@@ -319,13 +319,23 @@ export class BalancerService {
                 break;
             }
 
+            let swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
+            let swapVolume24h = parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume);
+
             if (this.phantomStableService.isPhantomStablePool(pool)) {
                 pool.totalLiquidity = `${this.phantomStableService.calculatePoolLiquidity(pool, pools, tokenPrices)}`;
-            } else {
-            }
 
-            const swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
-            const swapVolume24h = parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume);
+                const data = await this.phantomStableService.calculatePoolData(
+                    pool,
+                    parseInt(previousBlock.timestamp),
+                    parseInt(block.timestamp),
+                    pools,
+                    tokenPrices,
+                );
+
+                swapVolume24h = data.volume;
+                swapFees24h = data.swapFees;
+            }
 
             if (
                 Math.abs(swapFees24h) > 500_000_000 ||
@@ -344,8 +354,8 @@ export class BalancerService {
                 totalSwapFee: pool.totalSwapFee,
                 totalSwapVolume: pool.totalSwapVolume,
                 totalLiquidity: pool.totalLiquidity,
-                swapFees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee)}`,
-                swapVolume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume)}`,
+                swapFees24h: `${swapFees24h}`,
+                swapVolume24h: `${swapVolume24h}`,
                 liquidityChange24h: `${parseFloat(pool.totalLiquidity) - parseFloat(previousPool.totalLiquidity)}`,
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,
