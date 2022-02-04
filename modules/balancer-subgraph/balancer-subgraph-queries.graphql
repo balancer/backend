@@ -353,3 +353,43 @@ fragment BalancerTradePairSnapshot on TradePairSnapshot {
         }
     }
 }
+
+query BalancerSwaps(
+    $skip: Int
+    $first: Int
+    $orderBy: Swap_orderBy
+    $orderDirection: OrderDirection
+    $where: Swap_filter
+    $block: Block_height
+) {
+    swaps(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerSwap
+    }
+}
+
+fragment BalancerSwap on Swap {
+    id
+    caller
+    tokenIn
+    tokenInSym
+    tokenOut
+    tokenOutSym
+    tokenAmountIn
+    tokenAmountOut
+    poolId {
+        id
+    }
+    userAddress {
+        id
+    }
+    timestamp
+    tx
+    valueUSD
+}

@@ -24,6 +24,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
 import { yearnVaultService } from '../yearn/yearn-vault.service';
+import { BalancerPhantomStableService } from './src/balancer-phantom-stable.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -35,7 +36,7 @@ const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
 export class BalancerService {
     cache: CacheClass<string, any>;
 
-    constructor() {
+    constructor(private readonly phantomStableService: BalancerPhantomStableService) {
         this.cache = new Cache<string, any>();
     }
 
@@ -155,13 +156,16 @@ export class BalancerService {
 
         const pastPools = await this.getPastPools();
         const farms = await beetsFarmService.getBeetsFarms();
+        const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
         const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
         const tokenPrices = await tokenPriceService.getTokenPrices();
         await yearnVaultService.cacheYearnVaults();
 
-        const decoratedPools = filteredWithOnChainBalances.map((pool): GqlBalancerPool => {
+        const decoratedPools: GqlBalancerPool[] = [];
+
+        for (const pool of filteredWithOnChainBalances) {
             const farm = farms.find((farm) => {
                 if (pool.id === env.FBEETS_POOL_ID) {
                     return farm.id === env.FBEETS_FARM_ID;
@@ -173,7 +177,22 @@ export class BalancerService {
             const totalLiquidity = this.calculatePoolLiquidity(pool, tokenPrices);
             const farmTvl =
                 (Number(parseInt(farm?.slpBalance || '0') / 1e18) / parseFloat(pool.totalShares)) * totalLiquidity;
-            const swapFee24h = parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0');
+            let swapFee24h = parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0');
+            let volume24h = parseFloat(pool.totalSwapVolume) - parseFloat(pastPool?.totalSwapVolume || '0');
+
+            if (this.phantomStableService.isPhantomStablePool(pool)) {
+                const data = await this.phantomStableService.calculatePoolData(
+                    pool,
+                    parseInt(previousBlock.timestamp),
+                    moment().unix(),
+                    filteredWithOnChainBalances,
+                    tokenPrices,
+                );
+
+                swapFee24h = data.swapFees;
+                volume24h = data.volume;
+            }
+
             const swapApr = totalLiquidity > 0 ? (swapFee24h / totalLiquidity) * 365 : 0;
             const {
                 thirdPartyApr,
@@ -188,7 +207,7 @@ export class BalancerService {
                 ...this.getThirdPartyApr(pool, tokenPrices),
             ];
 
-            return {
+            decoratedPools.push({
                 ...pool,
                 farm,
                 apr: {
@@ -200,11 +219,11 @@ export class BalancerService {
                     thirdPartyApr,
                 },
                 isNewPool: moment().diff(moment.unix(pool.createTime), 'weeks') === 0,
-                volume24h: `${parseFloat(pool.totalSwapVolume) - parseFloat(pastPool?.totalSwapVolume || '0')}`,
-                fees24h: `${parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0')}`,
+                volume24h: `${volume24h}`,
+                fees24h: `${swapFee24h}`,
                 totalLiquidity: `${totalLiquidity}`,
-            };
-        });
+            });
+        }
 
         await cache.putObjectValue(POOLS_CACHE_KEY, decoratedPools);
 
@@ -300,8 +319,9 @@ export class BalancerService {
                 break;
             }
 
-            if (this.isPhantomStablePool(pool)) {
-                pool.totalLiquidity = `${this.calculatePhantomStablePoolLiquidity(pool, pools, tokenPrices)}`;
+            if (this.phantomStableService.isPhantomStablePool(pool)) {
+                pool.totalLiquidity = `${this.phantomStableService.calculatePoolLiquidity(pool, pools, tokenPrices)}`;
+            } else {
             }
 
             const swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
@@ -415,46 +435,10 @@ export class BalancerService {
         return linearLiquidity + poolLiquidity;
     }
 
-    private isPhantomStablePool(pool: BalancerPoolFragment | GqlBalancerPool) {
-        return pool.poolType === 'StablePhantom';
-    }
-
-    private calculatePhantomStablePoolLiquidity(
-        phantomStable: BalancerPoolFragment,
-        pools: BalancerPoolFragment[],
-        tokenPrices: TokenPrices,
-    ): number {
-        const linearPools = pools.filter(
-            (pool) => phantomStable.tokensList.includes(pool.address) && pool.id !== phantomStable.id,
-        );
-
-        const liquidities = linearPools.map((linearPool) => this.calculateLinearPoolLiquidity(linearPool, tokenPrices));
-
-        return _.sum(liquidities);
-    }
-
-    private calculateLinearPoolLiquidity(pool: BalancerPoolFragment, tokenPrices: TokenPrices): number {
-        const tokens = pool.tokens || [];
-        const mainToken = typeof pool.mainIndex === 'number' ? tokens[pool.mainIndex] : null;
-        const wrappedToken = typeof pool.wrappedIndex === 'number' ? tokens[pool.wrappedIndex] : null;
-
-        if (!mainToken || !wrappedToken) {
-            return 0;
-        }
-
-        const mainTokenPrice = tokenPriceService.getPriceForToken(tokenPrices, mainToken.address);
-
-        const mainTokenValue = parseFloat(mainToken.balance) * mainTokenPrice;
-        const wrappedTokenValue =
-            parseFloat(wrappedToken.balance) * parseFloat(wrappedToken.priceRate ?? '0') * mainTokenPrice;
-
-        return mainTokenValue + wrappedTokenValue;
-    }
-
     private getThirdPartyApr(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem[] {
         let items: GqlBalancePoolAprItem[] = [];
 
-        if (this.isPhantomStablePool(pool)) {
+        if (this.phantomStableService.isPhantomStablePool(pool)) {
             const aprItem = yearnVaultService.getAprItemForPhantomStablePool(pool, tokenPrices);
 
             if (aprItem) {
@@ -466,4 +450,4 @@ export class BalancerService {
     }
 }
 
-export const balancerService = new BalancerService();
+export const balancerService = new BalancerService(new BalancerPhantomStableService());
