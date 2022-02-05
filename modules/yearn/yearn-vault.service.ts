@@ -60,7 +60,7 @@ export class YearnVaultService {
 
             return {
                 title: 'Yearn boosted APR',
-                apr: `${_.sumBy(items, (item) => (item.wrappedLiquidity / totalLiquidity) * item.apr)}`,
+                apr: `${_.sumBy(items, (item) => (item.totalLiquidity / totalLiquidity) * item.apr)}`,
                 subItems: items.map((item) => ({
                     ...item,
                     apr: `${(item.totalLiquidity / totalLiquidity) * item.apr}`,
