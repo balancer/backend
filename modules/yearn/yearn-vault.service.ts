@@ -63,7 +63,7 @@ export class YearnVaultService {
                 apr: `${_.sumBy(items, (item) => (item.wrappedLiquidity / totalLiquidity) * item.apr)}`,
                 subItems: items.map((item) => ({
                     ...item,
-                    apr: `${(item.wrappedLiquidity / totalLiquidity) * item.apr}`,
+                    apr: `${(item.totalLiquidity / totalLiquidity) * item.apr}`,
                 })),
             };
         }
