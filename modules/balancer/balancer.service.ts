@@ -130,6 +130,10 @@ export class BalancerService {
             })
             .map((pool) => ({
                 ...pool,
+                name:
+                    pool.id === '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187'
+                        ? 'Steady Beets, Yearn Boosted'
+                        : pool.name,
                 __typename: 'GqlBalancerPool',
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,
