@@ -12,6 +12,8 @@ import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfoli
 import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';
 import { oneDayInMinutes } from '../../util/time';
+import { balancerService } from '../../balancer/balancer.service';
+import { GqlBalancerPool } from '../../../schema';
 
 const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
 const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
@@ -34,9 +36,13 @@ export class PortfolioDataService {
             return null;
         }
 
-        const { pools, previousPools } = await balancerSubgraphService.getPortfolioPoolsData(
-            parseInt(previousBlock.number),
-        );
+        const cachedPools = await balancerService.getPools();
+        const { pools: subgraphPools, previousPools: subgraphPreviousPools } =
+            await balancerSubgraphService.getPortfolioPoolsData(parseInt(previousBlock.number));
+
+        const pools = this.injectTokenPriceRates(subgraphPools, cachedPools);
+        const previousPools = this.injectTokenPriceRates(subgraphPreviousPools, cachedPools);
+
         const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
             address: userAddress,
             previousBlockNumber: parseInt(previousBlock.number),
@@ -405,5 +411,21 @@ export class PortfolioDataService {
 
                 return token;
             });
+    }
+
+    private injectTokenPriceRates(pools: BalancerPoolFragment[], poolsWithOnchainData: GqlBalancerPool[]) {
+        const onChainTokens = _.keyBy(_.flatten(poolsWithOnchainData.map((pool) => pool.tokens)), 'address');
+
+        return pools.map((pool) => {
+            return {
+                ...pool,
+                tokens: (pool.tokens || []).map((token) => {
+                    return {
+                        ...token,
+                        priceRate: onChainTokens[token.address]?.priceRate || token.priceRate,
+                    };
+                }),
+            };
+        });
     }
 }
