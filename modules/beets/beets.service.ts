@@ -9,6 +9,8 @@ import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.servic
 import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { tokenPriceService } from '../token-price/token-price.service';
+import _ from 'lodash';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const CONFIG_CACHE_KEY = 'beetsConfig';
@@ -39,21 +41,26 @@ export class BeetsService {
     }
 
     public async cacheProtocolData(): Promise<GqlBeetsProtocolData> {
-        const { beetsPrice, marketCap, circulatingSupply, fbeetsPrice } = await this.getBeetsData();
-        const { totalLiquidity, totalSwapFee, totalSwapVolume, poolCount } =
-            await balancerSubgraphService.getProtocolData({});
+        const { totalSwapFee, totalSwapVolume, poolCount } = await balancerSubgraphService.getProtocolData({});
 
+        const { beetsPrice, fbeetsPrice } = await tokenPriceService.getBeetsPrice();
+        const circulatingSupply = parseFloat(await getCirculatingSupply());
         const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
+        const pools = await balancerService.getPools();
+        const { excludedPools } = await this.getConfig();
+        const totalLiquidity = _.sumBy(pools, (pool) =>
+            excludedPools.includes(pool.id) ? 0 : parseFloat(pool.totalLiquidity),
+        );
 
         const protocolData: GqlBeetsProtocolData = {
-            totalLiquidity,
+            totalLiquidity: `${totalLiquidity}`,
             totalSwapFee,
             totalSwapVolume,
-            beetsPrice,
-            fbeetsPrice,
-            marketCap,
-            circulatingSupply,
+            beetsPrice: `${beetsPrice}`,
+            fbeetsPrice: `${fbeetsPrice}`,
+            marketCap: `${beetsPrice * circulatingSupply}`,
+            circulatingSupply: `${circulatingSupply}`,
             poolCount: `${poolCount}`,
             swapVolume24h: `${parseFloat(totalSwapVolume) - parseFloat(prev.totalSwapVolume)}`,
             swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,
@@ -93,53 +100,12 @@ export class BeetsService {
             blacklistedPools: config?.blacklistedPools ?? [],
             homeNewsItems: config?.homeNewsItems ?? [],
             poolFilters: config?.poolFilters ?? [],
+            excludedPools: config?.excludedPools ?? [],
         };
 
         this.cache.put(CONFIG_CACHE_KEY, beetsConfig, fiveMinutesInMs);
 
         return beetsConfig;
-    }
-
-    private async getBeetsData(): Promise<{
-        beetsPrice: string;
-        marketCap: string;
-        circulatingSupply: string;
-        fbeetsPrice: string;
-    }> {
-        if (env.CHAIN_ID !== '250') {
-            return { beetsPrice: '0', marketCap: '0', circulatingSupply: '0', fbeetsPrice: '0' };
-        }
-
-        const { pool: beetsUsdcPool } = await balancerSubgraphService.getPool({
-            id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
-        });
-
-        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
-        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
-
-        const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
-            id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-        });
-
-        if (!beets || !usdc || !beetsFtmPool) {
-            throw new Error('did not find price for beets');
-        }
-
-        const bptPrice = parseFloat(beetsFtmPool.totalLiquidity) / parseFloat(beetsFtmPool.totalShares);
-        const beetsBar = await beetsBarService.getBeetsBarNow();
-        const fbeetsPrice = bptPrice * parseFloat(beetsBar.ratio);
-
-        const beetsPrice =
-            ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
-            parseFloat(beets.balance);
-        const circulatingSupply = parseFloat(await getCirculatingSupply());
-
-        return {
-            beetsPrice: `${beetsPrice}`,
-            marketCap: `${beetsPrice * circulatingSupply}`,
-            circulatingSupply: `${circulatingSupply}`,
-            fbeetsPrice: `${fbeetsPrice}`,
-        };
     }
 }
 

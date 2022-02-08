@@ -19,7 +19,6 @@ import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot, GqlBalanc
 import _, { parseInt } from 'lodash';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
-import { beetsService } from '../beets/beets.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
@@ -163,7 +162,7 @@ export class BalancerService {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
-        const beetsPrice = parseFloat((await beetsService.getProtocolData()).beetsPrice);
+        const { beetsPrice } = await tokenPriceService.getBeetsPrice();
         const tokenPrices = await tokenPriceService.getTokenPrices();
         await yearnVaultService.cacheYearnVaults();
 

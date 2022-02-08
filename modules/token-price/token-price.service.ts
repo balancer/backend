@@ -9,9 +9,13 @@ import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
+const BEETS_PRICE_CACHE_KEY = 'token-prices:beets-price';
+const FBEETS_PRICE_CACHE_KEY = 'token-prices:fbeets-price';
 
 export class TokenPriceService {
     cache: CacheClass<string, any>;
@@ -141,6 +145,51 @@ export class TokenPriceService {
             tokenPrices[address.toLowerCase()]?.usd ||
             0
         );
+    }
+
+    public async getBeetsPrice(): Promise<{
+        beetsPrice: number;
+        fbeetsPrice: number;
+    }> {
+        const beetsPrice = await cache.getValue(BEETS_PRICE_CACHE_KEY);
+        const fbeetsPrice = await cache.getValue(FBEETS_PRICE_CACHE_KEY);
+
+        if (!beetsPrice || !fbeetsPrice) {
+            throw new Error('did not find price for beets');
+        }
+
+        return {
+            beetsPrice: parseFloat(beetsPrice),
+            fbeetsPrice: parseFloat(fbeetsPrice),
+        };
+    }
+
+    public async cacheBeetsPrice() {
+        const { pool: beetsUsdcPool } = await balancerSubgraphService.getPool({
+            id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
+        });
+
+        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
+        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
+
+        const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
+            id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+        });
+
+        if (!beets || !usdc || !beetsFtmPool) {
+            throw new Error('did not find price for beets');
+        }
+
+        const bptPrice = parseFloat(beetsFtmPool.totalLiquidity) / parseFloat(beetsFtmPool.totalShares);
+        const beetsBar = await beetsBarService.getBeetsBarNow();
+        const fbeetsPrice = bptPrice * parseFloat(beetsBar.ratio);
+
+        const beetsPrice =
+            ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
+            parseFloat(beets.balance);
+
+        await cache.putValue(BEETS_PRICE_CACHE_KEY, `${beetsPrice}`, 30);
+        await cache.putValue(FBEETS_PRICE_CACHE_KEY, `${fbeetsPrice}`, 30);
     }
 
     private async getTokenAddresses(): Promise<string[]> {
