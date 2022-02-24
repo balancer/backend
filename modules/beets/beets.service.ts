@@ -49,9 +49,23 @@ export class BeetsService {
         const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
         const pools = await balancerService.getPools();
         const { excludedPools } = await this.getConfig();
-        const totalLiquidity = _.sumBy(pools, (pool) =>
-            excludedPools.includes(pool.id) ? 0 : parseFloat(pool.totalLiquidity),
+        const totalLiquidity = _.sumBy(
+            pools.filter(
+                (pool) =>
+                    ![
+                        '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e',
+                        '0x3b998ba87b11a1c5bc1770de9793b17a0da61561000000000000000000000185',
+                        '0x2ff1552dd09f87d6774229ee5eca60cf570ae291000000000000000000000186',
+                    ].includes(pool.id),
+            ),
+            (pool) => (excludedPools.includes(pool.id) ? 0 : parseFloat(pool.totalLiquidity)),
         );
+
+        for (const pool of pools) {
+            if (parseFloat(pool.totalLiquidity) > 10_000_000) {
+                console.log(pool.name, pool.id);
+            }
+        }
 
         const protocolData: GqlBeetsProtocolData = {
             totalLiquidity: `${totalLiquidity}`,
