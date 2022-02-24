@@ -12,6 +12,7 @@ import { getAddress } from 'ethers/lib/utils';
 import { Multicaller } from '../../util/multicaller';
 import { GqlBalancerPool } from '../../../schema';
 import { BigNumber } from 'ethers';
+import _ from 'lodash';
 
 enum PoolFilter {
     All = 'All',
@@ -78,6 +79,14 @@ export async function getOnChainBalances(
 
     const supportedPoolTypes: string[] = Object.values(PoolFilter);
     const subgraphPools: GqlBalancerPool[] = [];
+    const linearPoolMap = _.keyBy(
+        subgraphPoolsOriginal.filter((pool) => pool.poolType === 'Linear'),
+        (pool) => pool.address.toLowerCase(),
+    );
+    const stablePhantomMap = _.keyBy(
+        subgraphPoolsOriginal.filter((pool) => pool.poolType === 'StablePhantom'),
+        (pool) => pool.address.toLowerCase(),
+    );
 
     subgraphPoolsOriginal.forEach((pool) => {
         if (!supportedPoolTypes.includes(pool.poolType || '')) {
@@ -122,19 +131,28 @@ export async function getOnChainBalances(
 
             tokenAddresses.forEach((token, i) => {
                 multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getTokenRate', [token]);
-
-                if (token.toLowerCase() !== pool.address.toLowerCase()) {
-                    multiPool.call(`${pool.id}.linearPools.${token}.id`, token, 'getPoolId');
-                    multiPool.call(`${pool.id}.linearPools.${token}.priceRate`, token, 'getRate');
-                    multiPool.call(`${pool.id}.linearPools.${token}.totalSupply`, token, 'getVirtualSupply');
-                    multiPool.call(`${pool.id}.linearPools.${token}.mainToken.address`, token, 'getMainToken');
-                    multiPool.call(`${pool.id}.linearPools.${token}.mainToken.index`, token, 'getMainIndex');
-                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.address`, token, 'getWrappedToken');
-                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.index`, token, 'getWrappedIndex');
-                    multiPool.call(`${pool.id}.linearPools.${token}.wrappedToken.rate`, token, 'getWrappedTokenRate');
-                }
             });
         }
+
+        const tokenAddresses = (pool.tokens || []).map((token) => token.address);
+
+        tokenAddresses.forEach((token, i) => {
+            if (linearPoolMap[token.toLowerCase()]) {
+                addLinearPoolCalls(multiPool, pool.id, token);
+            }
+
+            if (stablePhantomMap[token.toLowerCase()]) {
+                const stablePhantomTokenAddresses = (stablePhantomMap[token.toLowerCase()].tokens || []).map(
+                    (token) => token.address,
+                );
+
+                for (const stablePhantomToken of stablePhantomTokenAddresses) {
+                    if (linearPoolMap[stablePhantomToken.toLowerCase()]) {
+                        addLinearPoolCalls(multiPool, pool.id, stablePhantomToken.toLowerCase());
+                    }
+                }
+            }
+        });
     });
 
     let pools = {} as Record<string, MulticallExecuteResult>;
@@ -158,6 +176,7 @@ export async function getOnChainBalances(
                 subgraphPools[index].poolType === 'StablePhantom'
             ) {
                 if (!onchainData.amp) {
+                    console.log('onchain data', onchainData);
                     console.error(`Stable Pool Missing Amp: ${poolId}`);
                     return;
                 } else {
@@ -210,7 +229,13 @@ export async function getOnChainBalances(
             }
 
             if (onchainData.linearPools) {
+                //TODO: will also need to support non linear bpts in something like bb-yv-USD / TUSD
+                subgraphPools[index].mainTokens = Object.entries(onchainData.linearPools).map(
+                    ([address, data]) => data.mainToken.address,
+                );
+
                 subgraphPools[index].linearPools = Object.entries(onchainData.linearPools).map(([address, data]) => {
+                    const poolTokens = _.keyBy(subgraphPools[index].tokens, 'address');
                     const linearPool = pools[data.id];
                     const mainTokenIdx = data.mainToken.index.toNumber();
                     const wrappedTokenIdx = data.wrappedToken.index.toNumber();
@@ -228,11 +253,35 @@ export async function getOnChainBalances(
                         throw `Could not find linear pool tokens in the subgraph pools: ${data.id}`;
                     }
 
+                    let balance = poolTokens[address]?.balance || '0';
+                    const totalSupply = formatFixed(data.totalSupply, 18);
+                    let poolToken = address;
+
+                    if (!poolTokens[address]) {
+                        //the linear pool is nested in a stable phantom pool.
+                        const stablePhantomToken = subgraphPools[index].tokens.find(
+                            (token) => stablePhantomMap[token.address],
+                        );
+                        const phantonOnChainData = _.find(pools, (pool, id) =>
+                            id.startsWith(stablePhantomToken?.address || ''),
+                        );
+
+                        const virtualSupply = formatFixed(phantonOnChainData?.totalSupply || '0', 18);
+
+                        const percentOfSupply =
+                            parseFloat(stablePhantomToken?.balance || '0') / parseFloat(virtualSupply);
+
+                        poolToken = stablePhantomToken?.address || '';
+                        balance = `${parseFloat(totalSupply) * percentOfSupply}`;
+                    }
+
                     return {
                         id: data.id,
                         address,
+                        symbol: subgraphLinearPool?.symbol || '',
                         priceRate: formatFixed(data.priceRate, 18),
-                        totalSupply: formatFixed(data.totalSupply, 18),
+                        balance,
+                        totalSupply,
                         unwrappedTokenAddress: data.mainToken.address,
                         mainToken: {
                             index: mainTokenIdx,
@@ -251,6 +300,7 @@ export async function getOnChainBalances(
                             symbol: wrappedPoolToken.symbol,
                             decimals: wrappedPoolToken.decimals,
                         },
+                        poolToken,
                     };
                 });
             }
@@ -267,4 +317,15 @@ export async function getOnChainBalances(
 
 function isSameAddress(address1: string, address2: string): boolean {
     return getAddress(address1) === getAddress(address2);
+}
+
+function addLinearPoolCalls(multiPool: Multicaller, poolId: string, token: string) {
+    multiPool.call(`${poolId}.linearPools.${token}.id`, token, 'getPoolId');
+    multiPool.call(`${poolId}.linearPools.${token}.priceRate`, token, 'getRate');
+    multiPool.call(`${poolId}.linearPools.${token}.totalSupply`, token, 'getVirtualSupply');
+    multiPool.call(`${poolId}.linearPools.${token}.mainToken.address`, token, 'getMainToken');
+    multiPool.call(`${poolId}.linearPools.${token}.mainToken.index`, token, 'getMainIndex');
+    multiPool.call(`${poolId}.linearPools.${token}.wrappedToken.address`, token, 'getWrappedToken');
+    multiPool.call(`${poolId}.linearPools.${token}.wrappedToken.index`, token, 'getWrappedIndex');
+    multiPool.call(`${poolId}.linearPools.${token}.wrappedToken.rate`, token, 'getWrappedTokenRate');
 }
