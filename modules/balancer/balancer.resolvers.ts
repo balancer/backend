@@ -34,6 +34,7 @@ const balancerResolvers: Resolvers = {
 
             return pools.map((pool) => ({
                 ...pool,
+                symbol: pool.symbol || '',
                 __typename: 'GqlBalancerPool',
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,

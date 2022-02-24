@@ -11,11 +11,13 @@ extend type Query {
 type GqlBalancerPool {
     id: ID!
     name: String
+    symbol: String!
     address: Bytes!
     poolType: String
     swapFee: BigDecimal!
     totalShares: BigDecimal!
     tokens: [GqlBalancerPoolToken!]!
+    mainTokens: [String!]
     tokensList: [Bytes!]!
     totalWeight: BigDecimal
     amp: BigInt
@@ -61,11 +63,14 @@ type GqlBalancerPoolToken {
 type GqlBalancerPoolLinearPoolData {
     id: ID!
     address: String!
+    symbol: String!
     priceRate: String!
     mainToken: GqlBalancerPoolLinearPoolMainToken!
     wrappedToken: GqlBalancerPoolLinearPoolWrappedToken!
     unwrappedTokenAddress: String!
     totalSupply: String!
+    balance: String!
+    poolToken: String!
 }
 
 type GqlBalancerPoolLinearPoolMainToken {
