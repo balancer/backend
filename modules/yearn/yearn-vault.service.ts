@@ -27,10 +27,7 @@ export class YearnVaultService {
         return cached || [];
     }
 
-    public getAprItemForPhantomStablePool(
-        pool: GqlBalancerPool,
-        tokenPrices: TokenPrices,
-    ): GqlBalancePoolAprItem | null {
+    public getAprItemForBoostedPool(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem | null {
         const items: { title: string; apr: number; totalLiquidity: number; wrappedLiquidity: number }[] = [];
         const vaults = this.getYearnVaults();
 
