@@ -426,6 +426,10 @@ export class BalancerService {
     }
 
     private calculatePoolLiquidity(pool: GqlBalancerPool, tokenPrices: TokenPrices) {
+        if (pool.poolType === 'Linear') {
+            return 0;
+        }
+
         const tokens = pool.tokens || [];
 
         const linearLiquidity = _.sum(
@@ -434,8 +438,9 @@ export class BalancerService {
                 const mainTokens = parseFloat(linearPool.mainToken.balance);
                 const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
                 const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
+                const totalLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
 
-                return mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+                return totalLiquidity * (parseFloat(linearPool.balance) / parseFloat(linearPool.totalSupply));
             }),
         );
 
@@ -452,8 +457,8 @@ export class BalancerService {
     private getThirdPartyApr(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem[] {
         let items: GqlBalancePoolAprItem[] = [];
 
-        if (this.phantomStableService.isPhantomStablePool(pool)) {
-            const aprItem = yearnVaultService.getAprItemForPhantomStablePool(pool, tokenPrices);
+        if (pool.linearPools && pool.linearPools.length > 0) {
+            const aprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices);
 
             if (aprItem) {
                 items.push(aprItem);
