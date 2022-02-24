@@ -61,12 +61,6 @@ export class BeetsService {
             (pool) => (excludedPools.includes(pool.id) ? 0 : parseFloat(pool.totalLiquidity)),
         );
 
-        for (const pool of pools) {
-            if (parseFloat(pool.totalLiquidity) > 10_000_000) {
-                console.log(pool.name, pool.id);
-            }
-        }
-
         const protocolData: GqlBeetsProtocolData = {
             totalLiquidity: `${totalLiquidity}`,
             totalSwapFee,
