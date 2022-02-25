@@ -84,12 +84,16 @@ export class TokenPriceService {
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
 
-        const missingTokens = addresses.filter(
-            (token) =>
-                !coingeckoTokenPrices[token] &&
-                !coingeckoTokenPrices[getAddress(token)] &&
-                !coingeckoTokenPrices[token.toLowerCase()],
-        );
+        const missingTokens = addresses.filter((token) => {
+            const tokenPrice =
+                coingeckoTokenPrices[token] ||
+                coingeckoTokenPrices[getAddress(token)] ||
+                coingeckoTokenPrices[token.toLowerCase()];
+
+            return !tokenPrice || !tokenPrice.usd;
+        });
+
+        console.log('missingTokens', missingTokens);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
             [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
