@@ -93,7 +93,6 @@ export class TokenPriceService {
             return !tokenPrice || !tokenPrice.usd;
         });
 
-        console.log('missingTokens', missingTokens);
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
             [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
