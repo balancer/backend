@@ -70,6 +70,7 @@ type GqlBeetsConfig {
     featuredPools: [String!]!
     homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
     homeNewsItems: [GqlBeetsConfigNewsItem!]!
+    homeEducationItems: [GqlBeetsConfigNewsItem!]!
     poolFilters: [GqlBeetsConfigPoolFilterItem!]!
 }
 
