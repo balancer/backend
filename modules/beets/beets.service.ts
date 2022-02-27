@@ -88,6 +88,10 @@ export class BeetsService {
                 "homeNewsItems": homeNewsItems[]{
                     ...,
                     "image": image.asset->url
+                },
+                "homeEducationItems": homeEducationItems[]{
+                    ...,
+                    "image": image.asset->url
                 }
             }
         `);
@@ -99,6 +103,7 @@ export class BeetsService {
             incentivizedPools: config?.incentivizedPools ?? [],
             blacklistedPools: config?.blacklistedPools ?? [],
             homeNewsItems: config?.homeNewsItems ?? [],
+            homeEducationItems: config?.homeEducationItems ?? [],
             poolFilters: config?.poolFilters ?? [],
             excludedPools: config?.excludedPools ?? [],
         };
