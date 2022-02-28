@@ -93,6 +93,9 @@ const balancerResolvers: Resolvers = {
 
             return balancerService.poolGet24hData(poolId);
         },
+        balancerGetPoolActivities: async (parent, { input }, context) => {
+            return balancerService.getPoolActivities(input);
+        },
     },
 };
 

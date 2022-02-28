@@ -3445,6 +3445,7 @@ export type BalancerJoinExitsQuery = {
         timestamp: number;
         tx: string;
         type: InvestType;
+        valueUSD: string;
         user: { __typename?: 'User'; id: string };
         pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
     }>;
@@ -3469,6 +3470,7 @@ export type BalancerJoinExitFragment = {
     timestamp: number;
     tx: string;
     type: InvestType;
+    valueUSD: string;
     user: { __typename?: 'User'; id: string };
     pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
 };
@@ -3811,6 +3813,7 @@ export const BalancerJoinExitFragmentDoc = gql`
             id
             tokensList
         }
+        valueUSD
     }
 `;
 export const BalancerTradePairSnapshotFragmentDoc = gql`

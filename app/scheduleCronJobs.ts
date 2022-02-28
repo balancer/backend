@@ -28,6 +28,12 @@ export function scheduleCronJobs() {
 
     cron.schedule('*/5 * * * *', async () => {
         try {
+            await tokenPriceService.cacheHistoricalNestedBptPrices();
+        } catch (e) {}
+    });
+
+    cron.schedule('*/5 * * * *', async () => {
+        try {
             await tokenService.cacheTokens();
         } catch (e) {}
     });
