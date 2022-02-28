@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
     Balancer,
     BalancerJoinExitFragment,
+    BalancerJoinExitsQuery,
     BalancerJoinExitsQueryVariables,
     BalancerLatestPriceFragment,
     BalancerLatestPricesQuery,
@@ -117,6 +118,10 @@ export class BalancerSubgraphService {
 
     public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', args);
+    }
+
+    public async getPoolJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitsQuery> {
+        return this.sdk.BalancerJoinExits(args);
     }
 
     public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {

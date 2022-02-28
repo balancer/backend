@@ -6,6 +6,7 @@ extend type Query {
     poolSnapshots(poolId: ID!): [GqlBalancerPoolSnapshot!]!
     poolGet24hData(poolId: ID!): GqlBalancerPool24h!
     balancerGetTopTradingPairs: [GqlBalancerTradePairSnapshot!]!
+    balancerGetPoolActivities(input: GqlBalancerGetPoolActivitiesInput!): [GqlBalancerPoolActivity!]!
 }
 
 type GqlBalancerPool {
@@ -163,4 +164,27 @@ type GqlBalancePoolAprItem {
 type GqlBalancePoolAprSubItem {
     title: String!
     apr: BigDecimal!
+}
+
+type GqlBalancerPoolActivity {
+    id: ID!
+    amounts: [BigDecimal!]!
+    poolId: String!
+    sender: Bytes!
+    timestamp: Int!
+    tx: Bytes!
+    type: GqlBalancerPoolActivityType!
+    valueUSD: BigDecimal!
+}
+
+enum GqlBalancerPoolActivityType {
+    Join
+    Exit
+}
+
+input GqlBalancerGetPoolActivitiesInput {
+    poolId: ID!
+    first: Int!
+    skip: Int!
+    sender: String
 }

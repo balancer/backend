@@ -3,6 +3,7 @@ import {
     BalancerLatestPriceFragment,
     BalancerPoolFragment,
     BalancerTradePairSnapshotFragment,
+    JoinExit_OrderBy,
     OrderDirection,
     Pool_OrderBy,
     TradePairSnapshot_OrderBy,
@@ -15,15 +16,22 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
 import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
 import moment from 'moment-timezone';
-import { GqlBalancerPool, GqlBalancerPool24h, GqlBalancerPoolSnapshot, GqlBalancePoolAprItem } from '../../schema';
-import _, { parseInt } from 'lodash';
+import {
+    GqlBalancePoolAprItem,
+    GqlBalancerGetPoolActivitiesInput,
+    GqlBalancerPool,
+    GqlBalancerPool24h,
+    GqlBalancerPoolActivity,
+    GqlBalancerPoolSnapshot,
+} from '../../schema';
+import _ from 'lodash';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
 import { yearnVaultService } from '../yearn/yearn-vault.service';
-import { BalancerPhantomStableService } from './src/balancer-phantom-stable.service';
+import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -35,7 +43,7 @@ const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
 export class BalancerService {
     cache: CacheClass<string, any>;
 
-    constructor(private readonly phantomStableService: BalancerPhantomStableService) {
+    constructor(private readonly boostedPoolService: BalancerBoostedPoolService) {
         this.cache = new Cache<string, any>();
     }
 
@@ -184,8 +192,8 @@ export class BalancerService {
             let swapFee24h = parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0');
             let volume24h = parseFloat(pool.totalSwapVolume) - parseFloat(pastPool?.totalSwapVolume || '0');
 
-            if (this.phantomStableService.isPhantomStablePool(pool)) {
-                const data = await this.phantomStableService.calculatePoolData(
+            if (pool.linearPools && pool.linearPools.length > 0) {
+                const data = await this.boostedPoolService.calculatePoolData(
                     pool,
                     parseInt(previousBlock.timestamp),
                     moment().unix(),
@@ -307,6 +315,7 @@ export class BalancerService {
 
         for (let i = 0; i < blocks.length - 1; i++) {
             const block = blocks[i];
+
             const previousBlock = blocks[i + 1];
             const blockNumber = parseInt(block.number);
             const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
@@ -326,10 +335,10 @@ export class BalancerService {
             let swapFees24h = parseFloat(pool.totalSwapFee) - parseFloat(previousPool.totalSwapFee);
             let swapVolume24h = parseFloat(pool.totalSwapVolume) - parseFloat(previousPool.totalSwapVolume);
 
-            if (this.phantomStableService.isPhantomStablePool(pool)) {
-                pool.totalLiquidity = `${this.phantomStableService.calculatePoolLiquidity(pool, pools, tokenPrices)}`;
+            if (this.boostedPoolService.hasNestedBpt(pool, pools)) {
+                pool.totalLiquidity = `${this.boostedPoolService.calculatePoolLiquidity(pool, tokenPrices)}`;
 
-                const data = await this.phantomStableService.calculatePoolData(
+                const data = await this.boostedPoolService.calculatePoolData(
                     pool,
                     parseInt(previousBlock.timestamp),
                     parseInt(block.timestamp),
@@ -404,6 +413,44 @@ export class BalancerService {
         return tradePairSnapshots;
     }
 
+    public async getPoolActivities({
+        poolId,
+        first,
+        skip,
+        sender,
+    }: GqlBalancerGetPoolActivitiesInput): Promise<GqlBalancerPoolActivity[]> {
+        const pool = await this.getPool(poolId);
+        const tokenPrices = await tokenPriceService.getTokenPrices();
+
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
+            where: { pool: poolId, sender: sender?.toLowerCase() },
+            first,
+            skip,
+            orderBy: JoinExit_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Desc,
+        });
+
+        return joinExits.map((activity) => {
+            const valueUSD =
+                activity.valueUSD !== '0'
+                    ? activity.valueUSD
+                    : _.sum(
+                          activity.amounts.map(
+                              (amount, index) =>
+                                  tokenPriceService.getPriceForToken(tokenPrices, pool.tokensList[index]) *
+                                  parseFloat(amount),
+                          ),
+                      );
+
+            return {
+                ...activity,
+                __typename: 'GqlBalancerPoolActivity',
+                poolId: activity.pool.id,
+                valueUSD: `${valueUSD}`,
+            };
+        });
+    }
+
     public async getLateQuartetBptPrice(): Promise<number> {
         const pools = await this.getPools();
         const lateQuartet = pools.find(
@@ -432,26 +479,16 @@ export class BalancerService {
 
         const tokens = pool.tokens || [];
 
-        const linearLiquidity = _.sum(
-            (pool.linearPools ?? []).map((linearPool) => {
-                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
-                const mainTokens = parseFloat(linearPool.mainToken.balance);
-                const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
-                const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
-                const totalLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+        return _.sumBy(tokens, (token) => {
+            if (token.address === pool.address) {
+                return 0;
+            }
 
-                return totalLiquidity * (parseFloat(linearPool.balance) / parseFloat(linearPool.totalSupply));
-            }),
-        );
-
-        const poolLiquidity = _.sumBy(tokens, (token) => {
             const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
             const balance = parseFloat(token.balance) > 0 ? parseFloat(token.balance) : 0;
 
             return tokenPrice * balance;
         });
-
-        return linearLiquidity + poolLiquidity;
     }
 
     private getThirdPartyApr(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem[] {
@@ -469,4 +506,4 @@ export class BalancerService {
     }
 }
 
-export const balancerService = new BalancerService(new BalancerPhantomStableService());
+export const balancerService = new BalancerService(new BalancerBoostedPoolService());

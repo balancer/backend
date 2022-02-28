@@ -4,16 +4,22 @@ import { balancerPriceService } from './lib/balancer-price.service';
 import { sleep } from '../util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
-import { balancerService } from '../balancer/balancer.service';
 import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { getContractAt } from '../ethers/ethers';
+import LinearPoolAbi from '../balancer/abi/LinearPool.json';
+import { formatFixed } from '@ethersproject/bignumber';
+import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import moment from 'moment-timezone';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
+const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
 const BEETS_PRICE_CACHE_KEY = 'token-prices:beets-price';
 const FBEETS_PRICE_CACHE_KEY = 'token-prices:fbeets-price';
 
@@ -48,13 +54,16 @@ export class TokenPriceService {
         }
 
         const tokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+        const nestedBptPrices = await cache.getObjectValue<TokenHistoricalPrices>(
+            NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY,
+        );
 
         if (tokenPrices) {
-            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices, 60000);
+            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, { ...tokenPrices, ...nestedBptPrices }, 60000);
         }
 
         //don't try to refetch the cache, it takes way too long
-        return tokenPrices || {};
+        return { ...tokenPrices, ...nestedBptPrices };
     }
 
     public getTokenPricesForTimestamp(timestamp: number, tokenHistoricalPrices: TokenHistoricalPrices): TokenPrices {
@@ -73,18 +82,19 @@ export class TokenPriceService {
     }
 
     public async cacheTokenPrices(): Promise<void> {
+        const pools = await balancerSubgraphService.getAllPools({});
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
-        const addresses = await this.getTokenAddresses();
+        const { tokenAddresses, nestedBptAddresses } = await this.getTokenAddresses(pools);
         let coingeckoTokenPrices: TokenPrices = {};
         let nativeAssetPrice: Price | null = null;
 
         try {
             //rate limiting happens quite often, we try to handle it gracefully below
-            coingeckoTokenPrices = await coingeckoService.getTokenPrices(addresses);
+            coingeckoTokenPrices = await coingeckoService.getTokenPrices(tokenAddresses);
             nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
 
-        const missingTokens = addresses.filter((token) => {
+        const missingTokens = tokenAddresses.filter((token) => {
             const tokenPrice =
                 coingeckoTokenPrices[token] ||
                 coingeckoTokenPrices[getAddress(token)] ||
@@ -97,9 +107,16 @@ export class TokenPriceService {
             [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
             coingeckoTokenPrices,
         );
+
+        const nestedBptPrices = await this.getNestedBptPrices(nestedBptAddresses, pools, {
+            ...coingeckoTokenPrices,
+            ...balancerTokenPrices,
+        });
+
         const tokenPrices = {
             ...coingeckoTokenPrices,
             ...balancerTokenPrices,
+            ...nestedBptPrices,
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
         };
 
@@ -113,11 +130,12 @@ export class TokenPriceService {
     }
 
     public async cacheHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
-        const addresses = await this.getTokenAddresses();
+        const pools = await balancerSubgraphService.getAllPools({});
+        const { tokenAddresses } = await this.getTokenAddresses(pools);
         const missingTokens: string[] = [];
         const tokenPrices: TokenHistoricalPrices = {};
 
-        for (const token of addresses) {
+        for (const token of tokenAddresses) {
             try {
                 tokenPrices[token] = await coingeckoService.getTokenHistoricalPrices(token, 30);
             } catch {
@@ -139,6 +157,44 @@ export class TokenPriceService {
         await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;
+    }
+
+    public async cacheHistoricalNestedBptPrices() {
+        const pools = await balancerSubgraphService.getAllPools({});
+        const { nestedBptAddresses } = await this.getTokenAddresses(pools);
+        const historicalTokenPrices = await cache.getObjectValue<TokenHistoricalPrices>(
+            TOKEN_HISTORICAL_PRICES_CACHE_KEY,
+        );
+
+        if (!historicalTokenPrices) {
+            return;
+        }
+
+        const nestedBptHistoricalPrices: TokenHistoricalPrices = {};
+
+        const blocks = await blocksSubgraphService.getDailyBlocks(30);
+
+        for (const block of blocks) {
+            const timestamp = parseInt(block.timestamp);
+            const poolsAtBlock = await balancerSubgraphService.getAllPoolsAtBlock(parseInt(block.number));
+            const tokenPricesAtBlock = this.getTokenPricesForTimestamp(timestamp, historicalTokenPrices);
+            const nestedBptPrices = await this.getNestedBptPrices(nestedBptAddresses, poolsAtBlock, tokenPricesAtBlock);
+
+            for (const nestedBpt of nestedBptAddresses) {
+                if (!nestedBptHistoricalPrices[nestedBpt]) {
+                    nestedBptHistoricalPrices[nestedBpt] = [];
+                }
+
+                if (nestedBptPrices[nestedBpt]) {
+                    nestedBptHistoricalPrices[nestedBpt].push({
+                        timestamp: timestamp * 1000,
+                        price: nestedBptPrices[nestedBpt].usd,
+                    });
+                }
+            }
+        }
+
+        await cache.putObjectValue(NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY, nestedBptHistoricalPrices);
     }
 
     public getPriceForToken(tokenPrices: TokenPrices, address: string): number {
@@ -195,10 +251,67 @@ export class TokenPriceService {
         await cache.putValue(FBEETS_PRICE_CACHE_KEY, `${fbeetsPrice}`, 30);
     }
 
-    private async getTokenAddresses(): Promise<string[]> {
-        const pools = await balancerService.getPools();
+    public async getTokenAddresses(
+        pools: BalancerPoolFragment[],
+    ): Promise<{ tokenAddresses: string[]; nestedBptAddresses: string[] }> {
+        const allTokens = _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
+        const nestedBptAddresses = allTokens.filter((token) => this.isTokenNestedBpt(token, pools));
+        const tokenAddresses = allTokens.filter((token) => !nestedBptAddresses.includes(token));
 
-        return _.uniq(_.flatten(pools.map((pool) => (pool.tokens || []).map((token) => token.address))));
+        return { tokenAddresses, nestedBptAddresses };
+    }
+
+    private isTokenNestedBpt(token: string, pools: BalancerPoolFragment[]): boolean {
+        return !!pools.find((pool) => token === pool.address);
+    }
+
+    public async getNestedBptPrices(
+        nestedBptAddresses: string[],
+        pools: BalancerPoolFragment[],
+        tokenPrices: TokenPrices,
+    ): Promise<TokenPrices> {
+        const nestedBptTokenPrices: TokenPrices = {};
+
+        for (const nestedBptAddress of nestedBptAddresses) {
+            const pool = pools.find((pool) => pool.address === nestedBptAddress);
+
+            if (pool?.poolType === 'Linear') {
+                const linearPool = getContractAt(pool.address, LinearPoolAbi);
+                const rate = await linearPool.getRate();
+                const formattedRate = formatFixed(rate, 18);
+                const mainTokenPrice = this.getPriceForToken(tokenPrices, pool.tokensList[pool.mainIndex || 0]);
+
+                nestedBptTokenPrices[nestedBptAddress] = {
+                    usd: parseFloat(formattedRate) * mainTokenPrice,
+                };
+            }
+        }
+
+        for (const nestedBptAddress of nestedBptAddresses) {
+            const pool = pools.find((pool) => pool.address === nestedBptAddress);
+
+            //TODO: chance this can fail for stable phantom nested in stable phantom, depending on ordering
+            if (pool?.poolType === 'StablePhantom') {
+                const totalLiquidity = _.sum(
+                    pool.tokens?.map((token) => {
+                        const tokenPrice =
+                            this.getPriceForToken(tokenPrices, token.address) ||
+                            nestedBptTokenPrices[token.address]?.usd ||
+                            0;
+
+                        return parseFloat(token.balance) * tokenPrice;
+                    }),
+                );
+
+                if (totalLiquidity > 0 && parseFloat(pool.totalShares) > 0) {
+                    nestedBptTokenPrices[nestedBptAddress] = {
+                        usd: totalLiquidity / parseFloat(pool.totalShares),
+                    };
+                }
+            }
+        }
+
+        return nestedBptTokenPrices;
     }
 }
 

@@ -36,6 +36,7 @@ interface MulticallExecuteResult {
         tokens: string[];
         balances: string[];
     };
+    wrappedTokenRate?: string;
     rate?: string;
     swapEnabled?: boolean;
     tokenRates?: BigNumber[];
@@ -117,7 +118,8 @@ export async function getOnChainBalances(
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-            multiPool.call(`${pool.id}.rate`, pool.address, 'getWrappedTokenRate');
+            multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
+            multiPool.call(`${pool.id}.wrappedTokenRate`, pool.address, 'getWrappedTokenRate');
         }
 
         if (pool.poolType === 'LiquidityBootstrapping' || pool.poolType === 'Investment') {
@@ -196,7 +198,7 @@ export async function getOnChainBalances(
                 }
 
                 const wrappedIndex = subgraphPools[index].wrappedIndex;
-                if (wrappedIndex === undefined || onchainData.rate === undefined) {
+                if (wrappedIndex === undefined || onchainData.wrappedTokenRate === undefined) {
                     console.error(`Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`);
                     return;
                 }
@@ -205,7 +207,13 @@ export async function getOnChainBalances(
                 const tokens = subgraphPools[index].tokens;
 
                 if (tokens && typeof wrappedIndex === 'number' && tokens[wrappedIndex]) {
-                    tokens[wrappedIndex].priceRate = formatFixed(onchainData.rate, 18);
+                    tokens[wrappedIndex].priceRate = formatFixed(onchainData.wrappedTokenRate, 18);
+                }
+
+                const phantomIdx = tokens.findIndex((token) => token.address === subgraphPools[index].address);
+
+                if (phantomIdx !== -1 && onchainData.rate) {
+                    tokens[phantomIdx].priceRate = formatFixed(onchainData.rate, 18);
                 }
             }
 
