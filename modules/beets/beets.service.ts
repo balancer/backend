@@ -106,6 +106,7 @@ export class BeetsService {
             homeEducationItems: config?.homeEducationItems ?? [],
             poolFilters: config?.poolFilters ?? [],
             excludedPools: config?.excludedPools ?? [],
+            blacklistedTokens: config?.blacklistedTokens ?? [],
         };
 
         this.cache.put(CONFIG_CACHE_KEY, beetsConfig, fiveMinutesInMs);
