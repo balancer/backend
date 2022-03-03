@@ -40,6 +40,11 @@ const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
 const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
 
+const BOOSTED_POOLS = [
+    '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e',
+    '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187',
+];
+
 export class BalancerService {
     cache: CacheClass<string, any>;
 
@@ -432,15 +437,16 @@ export class BalancerService {
 
         return joinExits.map((activity) => {
             const valueUSD =
-                activity.valueUSD !== '0'
-                    ? activity.valueUSD
-                    : _.sum(
-                          activity.amounts.map(
-                              (amount, index) =>
+                activity.valueUSD === '0' || BOOSTED_POOLS.includes(poolId)
+                    ? _.sum(
+                          activity.amounts.map((amount, index) => {
+                              return (
                                   tokenPriceService.getPriceForToken(tokenPrices, pool.tokensList[index]) *
-                                  parseFloat(amount),
-                          ),
-                      );
+                                  parseFloat(amount)
+                              );
+                          }),
+                      )
+                    : activity.valueUSD;
 
             return {
                 ...activity,
