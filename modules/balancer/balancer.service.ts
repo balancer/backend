@@ -213,6 +213,7 @@ export class BalancerService {
                 volume24h = data.volume;
             }
 
+            pool.totalLiquidity = `${totalLiquidity}`;
             const swapApr = totalLiquidity > 0 ? (swapFee24h / totalLiquidity) * 365 : 0;
             const {
                 thirdPartyApr,
@@ -510,7 +511,7 @@ export class BalancerService {
                 items.push(yearnAprItem);
             }
 
-            const spookyAprItem = spookySwapService.getAprItemForBoostedPool(pool);
+            const spookyAprItem = spookySwapService.getAprItemForBoostedPool(pool, tokenPrices);
 
             if (spookyAprItem) {
                 items.push(spookyAprItem);
