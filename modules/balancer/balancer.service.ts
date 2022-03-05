@@ -30,8 +30,9 @@ import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { beetsFarmService } from '../beets/beets-farm.service';
-import { yearnVaultService } from '../yearn/yearn-vault.service';
+import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
+import { spookySwapService } from '../boosted/spooky-swap.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -180,6 +181,7 @@ export class BalancerService {
         const { beetsPrice } = await tokenPriceService.getBeetsPrice();
         const tokenPrices = await tokenPriceService.getTokenPrices();
         await yearnVaultService.cacheYearnVaults();
+        await spookySwapService.cacheSpookySwapData();
 
         const decoratedPools: GqlBalancerPool[] = [];
 
@@ -502,10 +504,16 @@ export class BalancerService {
         let items: GqlBalancePoolAprItem[] = [];
 
         if (pool.linearPools && pool.linearPools.length > 0) {
-            const aprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices);
+            const yearnAprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices);
 
-            if (aprItem) {
-                items.push(aprItem);
+            if (yearnAprItem) {
+                items.push(yearnAprItem);
+            }
+
+            const spookyAprItem = spookySwapService.getAprItemForBoostedPool(pool);
+
+            if (spookyAprItem) {
+                items.push(spookyAprItem);
             }
         }
 
