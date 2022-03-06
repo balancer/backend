@@ -46,6 +46,7 @@ const BOOSTED_POOLS = [
     '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187',
     '0x56897add6dc6abccf0ada1eb83d936818bc6ca4d0002000000000000000002e8',
 ];
+const BB_YV_USD = '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187';
 
 export class BalancerService {
     cache: CacheClass<string, any>;
@@ -127,6 +128,16 @@ export class BalancerService {
         });
 
         const filtered: GqlBalancerPool[] = pools
+            //sort bb-yv-USD to the front
+            .sort((pool1, pool2) => {
+                if (pool1.id === BB_YV_USD) {
+                    return -1;
+                } else if (pool2.id === BB_YV_USD) {
+                    return 1;
+                }
+
+                return 0;
+            })
             .filter((pool) => {
                 if (blacklistedPools.includes(pool.id)) {
                     return false;
@@ -225,7 +236,7 @@ export class BalancerService {
             const items: GqlBalancePoolAprItem[] = [
                 { title: 'Swap fees APR', apr: `${swapApr}` },
                 ...farmAprItems,
-                ...this.getThirdPartyApr(pool, tokenPrices),
+                ...this.getThirdPartyApr(pool, tokenPrices, decoratedPools.length === 0 ? pool : decoratedPools[0]),
             ];
 
             decoratedPools.push({
@@ -501,11 +512,15 @@ export class BalancerService {
         });
     }
 
-    private getThirdPartyApr(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem[] {
+    private getThirdPartyApr(
+        pool: GqlBalancerPool,
+        tokenPrices: TokenPrices,
+        bbyvUsd: GqlBalancerPool,
+    ): GqlBalancePoolAprItem[] {
         let items: GqlBalancePoolAprItem[] = [];
 
         if (pool.linearPools && pool.linearPools.length > 0) {
-            const yearnAprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices);
+            const yearnAprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices, bbyvUsd);
 
             if (yearnAprItem) {
                 items.push(yearnAprItem);

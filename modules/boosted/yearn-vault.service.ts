@@ -27,8 +27,12 @@ export class YearnVaultService {
         return cached || [];
     }
 
-    public getAprItemForBoostedPool(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem | null {
-        const items: { title: string; apr: number; totalLiquidity: number; wrappedLiquidity: number }[] = [];
+    public getAprItemForBoostedPool(
+        pool: GqlBalancerPool,
+        tokenPrices: TokenPrices,
+        bbyvUsd: GqlBalancerPool,
+    ): GqlBalancePoolAprItem | null {
+        const subItems: GqlBalancePoolAprSubItem[] = [];
         const vaults = this.getYearnVaults();
 
         for (const linearPool of pool.linearPools || []) {
@@ -36,32 +40,49 @@ export class YearnVaultService {
                 (vault) => vault.address.toLowerCase() === linearPool.wrappedToken.address.toLowerCase(),
             );
 
-            if (vault) {
-                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
-                const mainTokens = parseFloat(linearPool.mainToken.balance);
-                const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
-                const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
-                const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
-
-                items.push({
-                    title: `${vault.symbol} APR`,
-                    apr: vault.apy.net_apy * percentWrapped,
-                    totalLiquidity: mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice,
-                    wrappedLiquidity: wrappedTokens * priceRate * tokenPrice,
-                });
+            if (!vault) {
+                continue;
             }
+
+            const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
+            const mainTokens = parseFloat(linearPool.mainToken.balance);
+            const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
+            const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
+            //percent of pool wrapped
+            const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
+            const totalLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+            const linearPoolApr = vault.apy.net_apy * percentWrapped;
+
+            let poolToken = pool.tokens.find((token) => token.address === linearPool.address);
+            let percentOfWhole = 1;
+            let poolTotalLiquidity = parseFloat(pool.totalLiquidity);
+
+            //TODO: this works, but its fugly as hell, revisit this.
+            if (!poolToken) {
+                //the linear bpt is nested in bbyvUsd
+                poolToken = bbyvUsd.tokens.find((token) => token.address === linearPool.address);
+
+                const bbyvUsdBalance = parseFloat(
+                    pool.tokens.find((token) => token.address === bbyvUsd.address)?.balance || '0',
+                );
+
+                const bbyvUsdLiquidity =
+                    (bbyvUsdBalance / parseFloat(bbyvUsd.totalShares)) * parseFloat(bbyvUsd.totalLiquidity);
+                percentOfWhole = bbyvUsdLiquidity / parseFloat(pool.totalLiquidity);
+                poolTotalLiquidity = parseFloat(bbyvUsd.totalLiquidity);
+            }
+
+            subItems.push({
+                title: `${vault.symbol} APR`,
+                apr: `${linearPoolApr * (totalLiquidity / poolTotalLiquidity) * percentOfWhole}`,
+            });
         }
 
-        if (items.length > 0) {
-            const totalLiquidity = _.sumBy(items, (item) => item.totalLiquidity);
-
+        if (subItems.length > 0) {
             return {
                 title: 'Yearn boosted APR',
-                apr: `${_.sumBy(items, (item) => (item.totalLiquidity / totalLiquidity) * item.apr)}`,
-                subItems: items.map((item) => ({
-                    ...item,
-                    apr: `${(item.totalLiquidity / totalLiquidity) * item.apr}`,
-                })),
+                apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
+                subItems,
             };
         }
 

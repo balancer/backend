@@ -48,7 +48,7 @@ export class SpookySwapService {
         const sevenDayVolume = _.sum(
             data.data.uniswapDayDatas.map((item, index) => {
                 if (index === 0) {
-                    return percentElapsedToday === 1 ? 0 : parseFloat(item.dailyVolumeUSD) * (1 - percentElapsedToday);
+                    return parseFloat(item.dailyVolumeUSD) * (1 - percentElapsedToday);
                 }
 
                 return parseFloat(item.dailyVolumeUSD);
