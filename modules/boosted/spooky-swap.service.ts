@@ -29,7 +29,7 @@ export class SpookySwapService {
     public async cacheSpookySwapData(): Promise<void> {
         const { data } = await axios.get<string>('https://api.spookyswap.finance/api/xboo', {});
 
-        this.cache.put(SPOOKY_SWAP_CACHE_KEY, { xBooApr: parseFloat(data) }, 120000);
+        this.cache.put(SPOOKY_SWAP_CACHE_KEY, { xBooApr: parseFloat(data) / 100 }, 120000);
     }
 
     public getSpookySwapData(): SpookySwapData {
