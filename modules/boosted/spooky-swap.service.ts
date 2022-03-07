@@ -27,42 +27,9 @@ export class SpookySwapService {
     }
 
     public async cacheSpookySwapData(): Promise<void> {
-        const startTime = moment.tz('GMT').startOf('day').subtract(8, 'days').unix();
+        const { data } = await axios.get<string>('https://api.spookyswap.finance/api/xboo', {});
 
-        const { data } = await axios.post<{
-            data: { uniswapDayDatas: { id: string; date: number; dailyVolumeUSD: string }[] };
-        }>('https://api.thegraph.com/subgraphs/name/eerieeight/spookyswap', {
-            operationName: 'uniswapDayDatas',
-            query: `query uniswapDayDatas($startTime: Int!) {
-                uniswapDayDatas(first: 8, where: {date_gt: $startTime}, orderBy: date, orderDirection: asc) {
-                    id
-                    date
-                    dailyVolumeUSD
-                }
-            }`,
-            variables: { startTime },
-        });
-
-        const timeElapsedToday = moment.tz('GMT').unix() - moment.tz('GMT').startOf('day').unix();
-        const percentElapsedToday = timeElapsedToday / 86400;
-        const sevenDayVolume = _.sum(
-            data.data.uniswapDayDatas.map((item, index) => {
-                if (index === 0) {
-                    return parseFloat(item.dailyVolumeUSD) * (1 - percentElapsedToday);
-                }
-
-                return parseFloat(item.dailyVolumeUSD);
-            }),
-        );
-
-        const tokenPrices = await tokenPriceService.getTokenPrices();
-        const booPrice = tokenPriceService.getPriceForToken(tokenPrices, BOO_TOKEN_ADDRESS);
-        const feeYearly = sevenDayVolume * 0.0003 * (365 / 7);
-        const booStakedBigNumber = await booTokenContract.balanceOf(XBOO_TOKEN_ADDRESS);
-        const booStaked = parseFloat(formatFixed(booStakedBigNumber.toString(), 18));
-        const xBooTvl = booStaked * booPrice;
-
-        this.cache.put(SPOOKY_SWAP_CACHE_KEY, { xBooApr: feeYearly / xBooTvl }, 120000);
+        this.cache.put(SPOOKY_SWAP_CACHE_KEY, { xBooApr: parseFloat(data) }, 120000);
     }
 
     public getSpookySwapData(): SpookySwapData {
