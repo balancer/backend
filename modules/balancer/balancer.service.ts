@@ -147,7 +147,7 @@ export class BalancerService {
                     return false;
                 }*/
 
-                if (parseFloat(pool.totalShares) < 0.001) {
+                if (parseFloat(pool.totalShares) < 0.0001) {
                     return false;
                 }
 
