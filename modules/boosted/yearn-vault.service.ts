@@ -50,12 +50,13 @@ export class YearnVaultService {
             const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
             //percent of pool wrapped
             const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
-            const totalLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+            const linearPoolLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
             const linearPoolApr = vault.apy.net_apy * percentWrapped;
 
             let poolToken = pool.tokens.find((token) => token.address === linearPool.address);
             let percentOfWhole = 1;
             let poolTotalLiquidity = parseFloat(pool.totalLiquidity);
+            let linearLiquidityInPool = linearPoolLiquidity;
 
             //TODO: this works, but its fugly as hell, revisit this.
             if (!poolToken) {
@@ -70,11 +71,15 @@ export class YearnVaultService {
                     (bbyvUsdBalance / parseFloat(bbyvUsd.totalShares)) * parseFloat(bbyvUsd.totalLiquidity);
                 percentOfWhole = bbyvUsdLiquidity / parseFloat(pool.totalLiquidity);
                 poolTotalLiquidity = parseFloat(bbyvUsd.totalLiquidity);
+            } else {
+                //pool
+                linearLiquidityInPool =
+                    linearPoolLiquidity * (parseFloat(poolToken.balance) / parseFloat(linearPool.totalSupply));
             }
 
             subItems.push({
                 title: `${vault.symbol} APR`,
-                apr: `${linearPoolApr * (totalLiquidity / poolTotalLiquidity) * percentOfWhole}`,
+                apr: `${linearPoolApr * (linearLiquidityInPool / poolTotalLiquidity) * percentOfWhole}`,
             });
         }
 
