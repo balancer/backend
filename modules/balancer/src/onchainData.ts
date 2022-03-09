@@ -237,10 +237,17 @@ export async function getOnChainBalances(
             }
 
             if (onchainData.linearPools) {
-                //TODO: will also need to support non linear bpts in something like bb-yv-USD / TUSD
-                subgraphPools[index].mainTokens = Object.entries(onchainData.linearPools).map(
-                    ([address, data]) => data.mainToken.address,
-                );
+                subgraphPools[index].mainTokens = [
+                    //filter for any main tokens in the tokensList. ie: bb-yv-USD / TUSD
+                    ...subgraphPools[index].tokensList.filter(
+                        (token) =>
+                            subgraphPools[index].poolType !== 'Linear' &&
+                            !linearPoolMap[token] &&
+                            !stablePhantomMap[token],
+                    ),
+                    //map linear pools to their main token
+                    ...Object.entries(onchainData.linearPools).map(([address, data]) => data.mainToken.address),
+                ];
 
                 subgraphPools[index].linearPools = Object.entries(onchainData.linearPools).map(([address, data]) => {
                     const poolTokens = _.keyBy(subgraphPools[index].tokens, 'address');
@@ -267,14 +274,14 @@ export async function getOnChainBalances(
 
                     if (!poolTokens[address]) {
                         //the linear pool is nested in a stable phantom pool.
-                        const stablePhantomToken = subgraphPools[index].tokens.find(
-                            (token) => stablePhantomMap[token.address],
-                        );
-                        const phantonOnChainData = _.find(pools, (pool, id) =>
+                        const stablePhantomToken = subgraphPools[index].tokens.find((token) => {
+                            return subgraphPools[index].address !== token.address && stablePhantomMap[token.address];
+                        });
+                        const phantomOnChainData = _.find(pools, (pool, id) =>
                             id.startsWith(stablePhantomToken?.address || ''),
                         );
 
-                        const virtualSupply = formatFixed(phantonOnChainData?.totalSupply || '0', 18);
+                        const virtualSupply = formatFixed(phantomOnChainData?.totalSupply || '0', 18);
 
                         const percentOfSupply =
                             parseFloat(stablePhantomToken?.balance || '0') / parseFloat(virtualSupply);

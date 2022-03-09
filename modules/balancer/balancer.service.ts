@@ -144,13 +144,6 @@ export class BalancerService {
                     return false;
                 }
 
-                if (
-                    pool.id.toLowerCase() ===
-                    '0x31adc46737ebb8e0e4a391ec6c26438badaee8ca000000000000000000000306'.toLowerCase()
-                ) {
-                    return false;
-                }
-
                 /*if (parseFloat(pool.totalShares) < 0.001 && pool.poolType !== 'LiquidityBootstrapping') {
                     return false;
                 }*/
@@ -172,6 +165,8 @@ export class BalancerService {
                 tokens: (pool.tokens || []).map((token) => ({
                     ...token,
                     __typename: 'GqlBalancerPoolToken',
+                    isBpt: token.address !== pool.address && !!pools.find((pool) => pool.address === token.address),
+                    isPhantomBpt: token.address === pool.address,
                 })),
                 fees24h: '0',
                 volume24h: '0',
