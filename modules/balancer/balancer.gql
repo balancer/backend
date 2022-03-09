@@ -59,6 +59,8 @@ type GqlBalancerPoolToken {
     priceRate: BigDecimal!
     name: String!
     symbol: String!
+    isBpt: Boolean
+    isPhantomBpt: Boolean
 }
 
 type GqlBalancerPoolLinearPoolData {
