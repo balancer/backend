@@ -147,7 +147,7 @@ export class PortfolioDataService {
 
     public async cacheRawDataForTimestamp(timestamp: number): Promise<void> {
         try {
-            console.log('portfolio cache: fetching data');
+            console.log(`portfolio cache <${timestamp}>: fetching data`);
             const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
             const blockNumber = parseInt(block.number);
             const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
@@ -156,30 +156,31 @@ export class PortfolioDataService {
             const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
             const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
             const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
-            console.log('portfolio cache: done fetching data');
+            console.log(`portfolio cache <${timestamp}>: done fetching data`);
 
-            console.log('portfolio cache: deleting snapshots');
+            console.log(`portfolio cache <${timestamp}>: deleting snapshots`);
             await this.deleteSnapshotsForBlock(blockNumber);
-            console.log('portfolio cache: saving block');
+            console.log(`portfolio cache <${timestamp}>: saving block`);
             await this.saveBlock(block, timestamp);
-            console.log('portfolio cache: saving new pools');
+            console.log(`portfolio cache <${timestamp}>: saving new pools`);
             await this.saveAnyNewPools(pools);
-            console.log('portfolio cache: saving new users');
+            console.log(`portfolio cache <${timestamp}>: saving new users`);
             await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
-            console.log('portfolio cache: saving new tokens');
+            console.log(`portfolio cache <${timestamp}>: saving new tokens`);
             await this.saveAnyNewTokens(pools);
 
-            console.log('portfolio cache: saving pool  snapshots');
+            console.log(`portfolio cache <${timestamp}>: saving pool  snapshots`);
             await this.savePoolSnapshots(blockNumber, pools, users);
-            console.log('portfolio cache: saving farms');
+            console.log(`portfolio cache <${timestamp}>: saving farms`);
             await this.saveFarms(blockNumber, farms, farmUsers);
-            console.log('portfolio cache: saving beets bar');
+            console.log(`portfolio cache <${timestamp}>: saving beets bar`);
             await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
 
-            console.log('portfolio cache: saving latest block');
+            console.log(`portfolio cache <${timestamp}>: saving latest block`);
             await this.refreshLatestBlockCachedTimestamp();
+            console.log(`portfolio cache <${timestamp}>: done`);
         } catch (e) {
-            console.log('error', e);
+            console.log(`error <${timestamp}>`, e);
             throw e;
         }
     }
