@@ -10,6 +10,7 @@ export const schema = {
     NODE_ENV: String,
     BALANCER_SUBGRAPH: String,
     MASTERCHEF_SUBGRAPH: String,
+    LOCKING_SUBGRAPH: String,
     BLOCKS_SUBGRAPH: String,
     CHAIN_ID: String,
     CHAIN_SLUG: String,
