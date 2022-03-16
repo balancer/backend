@@ -1,4 +1,5 @@
 type GqlLocker {
+    totalLockedPercentage: BigDecimal!
     totalLockedAmount: BigDecimal!
     totalLockedUsd: BigDecimal!
     timestamp: BigInt!

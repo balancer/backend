@@ -5,8 +5,10 @@ import { lockingSubgraph } from './locking-subgraph';
 import { getContractAt } from '../ethers/ethers';
 import { env } from '../../app/env';
 import lockingContractAbi from './abi/FBeetsLocker.json';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 export type Locker = {
+    totalPercentageLocked: string;
     totalLockedAmount: string;
     totalLockedUsd: string;
     timestamp: string;
@@ -57,10 +59,17 @@ class LockingService {
 
     public async getLocker(args: QueryLockersArgs): Promise<Locker> {
         const locker = await lockingSubgraph.getLocker(args);
+
         const fBeetsPrice = await beetsService.getFBeetsPrice();
-        const totalLockedUsd = parseFloat(locker.totalLockedAmount) * fBeetsPrice;
+        const totalLockedAmount = parseFloat(locker.totalLockedAmount);
+        const totalLockedUsd = totalLockedAmount * fBeetsPrice;
+
+        const beetsBar = await beetsBarService.getBeetsBarNow();
+        const totalPercentageLocked = (parseFloat(beetsBar.totalSupply) / totalLockedAmount).toString();
+
         return {
             ...locker,
+            totalPercentageLocked,
             totalLockedUsd: totalLockedUsd.toString(),
         };
     }
