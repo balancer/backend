@@ -24,6 +24,7 @@ query Lockers(
 }
 
 fragment UserPartial on User {
+    id
     address
     totalLockedAmount
     lockingPeriods {
@@ -62,7 +63,7 @@ query Users(
 
 query User($id: ID!, $block: Block_height) {
     user(id: $id, block: $block) {
-        id
+        ...UserPartial
     }
 }
 

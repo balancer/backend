@@ -2,16 +2,16 @@ import { GraphQLClient } from 'graphql-request';
 import { env } from '../../app/env';
 import { subgraphLoadAll } from '../util/subgraph-util';
 import {
+    getSdk,
     LockerPartialFragment,
-    QueryLockerArgs,
-    QueryRewardTokenArgs,
+    QueryLockersArgs,
+    QueryRewardTokensArgs,
     QueryUserArgs,
     QueryUsersArgs,
     RewardTokensQuery,
     UserPartialFragment,
     UserQuery,
     UsersQuery,
-    getSdk,
 } from './generated/locking-subgraph-types';
 
 export class LockingSubgraph {
@@ -21,7 +21,7 @@ export class LockingSubgraph {
         this.client = new GraphQLClient(env.LOCKING_SUBGRAPH);
     }
 
-    public async getLocker(args: QueryLockerArgs): Promise<LockerPartialFragment> {
+    public async getLocker(args: QueryLockersArgs): Promise<LockerPartialFragment> {
         const response = await this.sdk.Lockers(args);
 
         if (!response || response.lockers.length === 0) {
@@ -44,7 +44,7 @@ export class LockingSubgraph {
         return this.sdk.User(args);
     }
 
-    public async getRewardTokens(args: QueryRewardTokenArgs): Promise<RewardTokensQuery> {
+    public async getRewardTokens(args: QueryRewardTokensArgs): Promise<RewardTokensQuery> {
         return this.sdk.RewardTokens(args);
     }
 
@@ -53,4 +53,4 @@ export class LockingSubgraph {
     }
 }
 
-export const masterchefService = new LockingSubgraph();
+export const lockingSubgraph = new LockingSubgraph();

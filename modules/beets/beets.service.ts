@@ -1,16 +1,15 @@
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
+import _ from 'lodash';
+import { Cache, CacheClass } from 'memory-cache';
 import { env } from '../../app/env';
 import { GqlBeetsConfig, GqlBeetsProtocolData } from '../../schema';
-import { getCirculatingSupply } from './beets';
-import { fiveMinutesInMs } from '../util/time';
-import { Cache, CacheClass } from 'memory-cache';
+import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { sanityClient } from '../sanity/sanity';
 import { tokenPriceService } from '../token-price/token-price.service';
-import _ from 'lodash';
+import { fiveMinutesInMs } from '../util/time';
+import { getCirculatingSupply } from './beets';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
 const CONFIG_CACHE_KEY = 'beetsConfig';
@@ -20,6 +19,11 @@ export class BeetsService {
 
     constructor() {
         this.cache = new Cache<string, any>();
+    }
+
+    public async getFBeetsPrice(): Promise<number> {
+        const protocolData = await this.getProtocolData();
+        return parseFloat(protocolData.beetsPrice);
     }
 
     public async getProtocolData(): Promise<GqlBeetsProtocolData> {

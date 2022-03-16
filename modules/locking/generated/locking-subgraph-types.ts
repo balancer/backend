@@ -823,6 +823,7 @@ export type LockersQuery = {
 
 export type UserPartialFragment = {
     __typename?: 'User';
+    id: string;
     address: string;
     totalLockedAmount: string;
     collectedKickRewardAmount: string;
@@ -846,6 +847,7 @@ export type UsersQuery = {
     __typename?: 'Query';
     users: Array<{
         __typename?: 'User';
+        id: string;
         address: string;
         totalLockedAmount: string;
         collectedKickRewardAmount: string;
@@ -862,7 +864,24 @@ export type UserQueryVariables = Exact<{
     block?: Maybe<Block_Height>;
 }>;
 
-export type UserQuery = { __typename?: 'Query'; user?: { __typename?: 'User'; id: string } | null | undefined };
+export type UserQuery = {
+    __typename?: 'Query';
+    user?:
+        | {
+              __typename?: 'User';
+              id: string;
+              address: string;
+              totalLockedAmount: string;
+              collectedKickRewardAmount: string;
+              totalLostThroughKick: string;
+              block: string;
+              timestamp: string;
+              lockingPeriods: Array<{ __typename?: 'LockingPeriod'; lockAmount: string; epoch: string }>;
+              claimedRewards: Array<{ __typename?: 'ClaimedReward'; amount: string; token: string }>;
+          }
+        | null
+        | undefined;
+};
 
 export type RewardTokenPartialFragment = {
     __typename?: 'RewardToken';
@@ -905,6 +924,7 @@ export const LockerPartialFragmentDoc = gql`
 `;
 export const UserPartialFragmentDoc = gql`
     fragment UserPartial on User {
+        id
         address
         totalLockedAmount
         lockingPeriods {
@@ -978,9 +998,10 @@ export const UsersDocument = gql`
 export const UserDocument = gql`
     query User($id: ID!, $block: Block_height) {
         user(id: $id, block: $block) {
-            id
+            ...UserPartial
         }
     }
+    ${UserPartialFragmentDoc}
 `;
 export const RewardTokensDocument = gql`
     query RewardTokens(

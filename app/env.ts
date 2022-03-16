@@ -11,6 +11,7 @@ export const schema = {
     BALANCER_SUBGRAPH: String,
     MASTERCHEF_SUBGRAPH: String,
     LOCKING_SUBGRAPH: String,
+    LOCKING_CONTRACT_ADDRESS: String,
     BLOCKS_SUBGRAPH: String,
     CHAIN_ID: String,
     CHAIN_SLUG: String,

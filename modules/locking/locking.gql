@@ -1,0 +1,51 @@
+type GqlLocker {
+    totalLockedAmount: BigDecimal!
+    totalLockedUsd: BigDecimal!
+    timestamp: BigInt!
+    block: BigInt!
+}
+
+type GqlLockingReward {
+    amount: BigDecimal!
+    amountUsd: BigDecimal!
+    token: Bytes!
+}
+
+type GqlLockingPeriod {
+    epoch: BigInt!
+    lockAmount: BigDecimal!
+    lockAmountUsd: BigDecimal!
+}
+
+type GqlRewardToken {
+    rewardPeriodFinish: BigInt!
+    rewardRate: BigDecimal!
+    rewardToken: Bytes!
+    totalRewardAmount: BigDecimal!
+    totalRewardAmountUsd: BigDecimal!
+    apr: BigDecimal!
+}
+
+type GqlLockingUser {
+    id: ID!
+    address: Bytes!
+    claimedRewards: [GqlLockingReward!]!
+    collectedKickRewardAmount: BigDecimal!
+    collectedKickRewardAmountUsd: BigDecimal!
+    lockingPeriods: [GqlLockingPeriod!]!
+    totalClaimedRewardsUsd: BigDecimal!
+    totalLockedAmount: BigDecimal!
+    totalLostThroughKick: BigDecimal!
+    totalLostThroughKickUsd: BigDecimal!
+    totalUnlockedAmount: BigDecimal!
+    timestamp: BigInt!
+    block: BigInt!
+}
+
+extend type Query {
+    locker: GqlLocker!
+    lockingUser: GqlLockingUser!
+    lockingRewardTokens: [GqlRewardToken!]!
+    lockingUserVotingPower: BigDecimal!
+    lockingPendingRewards: [GqlLockingReward!]!
+}
