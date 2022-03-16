@@ -36,9 +36,11 @@ type GqlLockingUser {
     lockingPeriods: [GqlLockingPeriod!]!
     totalClaimedRewardsUsd: BigDecimal!
     totalLockedAmount: BigDecimal!
+    totalLockedAmountUsd: BigDecimal!
+    totalUnlockedAmount: BigDecimal!
+    totalUnlockedAmountUsd: BigDecimal!
     totalLostThroughKick: BigDecimal!
     totalLostThroughKickUsd: BigDecimal!
-    totalUnlockedAmount: BigDecimal!
     timestamp: BigInt!
     block: BigInt!
 }

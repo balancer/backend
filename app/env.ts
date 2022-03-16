@@ -12,6 +12,7 @@ export const schema = {
     MASTERCHEF_SUBGRAPH: String,
     LOCKING_SUBGRAPH: String,
     LOCKING_CONTRACT_ADDRESS: String,
+    LOCKING_DURATION: Number,
     BLOCKS_SUBGRAPH: String,
     CHAIN_ID: String,
     CHAIN_SLUG: String,

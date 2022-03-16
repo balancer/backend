@@ -1,14 +1,15 @@
+import moment from 'moment-timezone';
+import { env } from '../../app/env';
+import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { beetsService } from '../beets/beets.service';
+import { getContractAt } from '../ethers/ethers';
 import { tokenPriceService } from '../token-price/token-price.service';
+import lockingContractAbi from './abi/FBeetsLocker.json';
 import { QueryLockersArgs } from './generated/locking-subgraph-types';
 import { lockingSubgraph } from './locking-subgraph';
-import { getContractAt } from '../ethers/ethers';
-import { env } from '../../app/env';
-import lockingContractAbi from './abi/FBeetsLocker.json';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 
 export type Locker = {
-    totalPercentageLocked: string;
+    totalLockedPercentage: string;
     totalLockedAmount: string;
     totalLockedUsd: string;
     timestamp: string;
@@ -36,9 +37,11 @@ export type LockingUser = {
     lockingPeriods: LockingPeriod[];
     totalClaimedRewardsUsd: string;
     totalLockedAmount: string;
+    totalLockedAmountUsd: string;
+    totalUnlockedAmount: string;
+    totalUnlockedAmountUsd: string;
     totalLostThroughKick: string;
     totalLostThroughKickUsd: string;
-    totalUnlockedAmount: string;
     timestamp: string;
     block: string;
 };
@@ -65,11 +68,11 @@ class LockingService {
         const totalLockedUsd = totalLockedAmount * fBeetsPrice;
 
         const beetsBar = await beetsBarService.getBeetsBarNow();
-        const totalPercentageLocked = (parseFloat(beetsBar.totalSupply) / totalLockedAmount).toString();
+        const totalLockedPercentage = (parseFloat(beetsBar.totalSupply) / totalLockedAmount).toString();
 
         return {
             ...locker,
-            totalPercentageLocked,
+            totalLockedPercentage,
             totalLockedUsd: totalLockedUsd.toString(),
         };
     }
@@ -83,27 +86,45 @@ class LockingService {
         const latestTokenPrices = await tokenPriceService.getTokenPrices();
 
         const claimedRewards: LockingReward[] = [];
+        let totalClaimedRewardsUsd = 0;
         for (let reward of user.claimedRewards) {
             const { token, amount } = reward;
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, token);
+            const usdValue = parseFloat(amount) * tokenPrice;
             claimedRewards.push({
                 token,
                 amount,
-                amountUsd: (parseFloat(amount) * tokenPrice).toString(),
+                amountUsd: usdValue.toString(),
             });
+            totalClaimedRewardsUsd += usdValue;
+        }
+
+        const lockingPeriods: LockingPeriod[] = [];
+        let totalUnlockAmount = 0;
+        let totalUnlockAmountUsd = 0;
+
+        for (let lockingPeriod of user.lockingPeriods) {
+            const usdValue = parseFloat(lockingPeriod.lockAmount) * fBeetsPrice;
+            lockingPeriods.push({
+                epoch: lockingPeriod.epoch,
+                lockAmount: lockingPeriod.lockAmount,
+                lockAmountUsd: usdValue.toString(),
+            });
+            if (moment.unix(parseInt(lockingPeriod.epoch) + env.LOCKING_DURATION).isBefore(moment.now())) {
+                totalUnlockAmount += parseFloat(lockingPeriod.lockAmount);
+                totalUnlockAmountUsd += usdValue;
+            }
         }
 
         return {
             ...user,
-            totalUnlockedAmount: '',
-            totalLostThroughKickUsd: '',
-            totalClaimedRewardsUsd: '',
-            collectedKickRewardAmountUsd: '',
-            lockingPeriods: user.lockingPeriods.map((period) => ({
-                epoch: period.epoch,
-                lockAmount: period.lockAmount,
-                lockAmountUsd: (parseFloat(period.lockAmount) * fBeetsPrice).toString(),
-            })),
+            totalLockedAmountUsd: (parseFloat(user.totalLockedAmount) * fBeetsPrice).toString(),
+            totalUnlockedAmount: totalUnlockAmount.toString(),
+            totalUnlockedAmountUsd: totalUnlockAmountUsd.toString(),
+            totalLostThroughKickUsd: (parseFloat(user.totalLostThroughKick) * fBeetsPrice).toString(),
+            totalClaimedRewardsUsd: totalClaimedRewardsUsd.toString(),
+            collectedKickRewardAmountUsd: (parseFloat(user.collectedKickRewardAmount) * fBeetsPrice).toString(),
+            lockingPeriods,
             claimedRewards,
         };
     }
