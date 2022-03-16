@@ -1,0 +1,97 @@
+fragment LockerPartial on Locker {
+    totalLockedAmount
+    timestamp
+    block
+}
+query Lockers(
+    $skip: Int
+    $first: Int
+    $orderBy: Locker_orderBy
+    $orderDirection: OrderDirection
+    $where: Locker_filter
+    $block: Block_height
+) {
+    lockers(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...LockerPartial
+    }
+}
+
+fragment UserPartial on User {
+    id
+    address
+    totalLockedAmount
+    lockingPeriods {
+        lockAmount
+        epoch
+    }
+    claimedRewards {
+        amount
+        token
+    }
+    collectedKickRewardAmount
+    totalLostThroughKick
+    block
+    timestamp
+}
+
+query Users(
+    $skip: Int
+    $first: Int
+    $orderBy: User_orderBy
+    $orderDirection: OrderDirection
+    $where: User_filter
+    $block: Block_height
+) {
+    users(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...UserPartial
+    }
+}
+
+query User($id: ID!, $block: Block_height) {
+    user(id: $id, block: $block) {
+        ...UserPartial
+    }
+}
+
+fragment RewardTokenPartial on RewardToken {
+    rewardToken
+    rewardRate
+    rewardPeriodFinish
+    totalRewardAmount
+    block
+    timestamp
+}
+
+query RewardTokens(
+    $skip: Int
+    $first: Int
+    $orderBy: RewardToken_orderBy
+    $orderDirection: OrderDirection
+    $where: RewardToken_filter
+    $block: Block_height
+) {
+    rewardTokens(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...RewardTokenPartial
+    }
+}

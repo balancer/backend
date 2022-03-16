@@ -1,0 +1,907 @@
+"""
+creates a virtual field on the entity that may be queried but cannot be set manually through the mappings API.
+"""
+directive @derivedFrom(field: String!) on FIELD_DEFINITION
+
+"""
+Marks the GraphQL type as indexable entity.  Each type that should be an entity is required to be annotated with this directive.
+"""
+directive @entity on OBJECT
+
+"""
+Defined a Subgraph ID for an object type
+"""
+directive @subgraphId(id: String!) on OBJECT
+
+scalar BigDecimal
+
+scalar BigInt
+
+"""
+The block at which the query should be executed.
+"""
+input Block_height {
+    """
+    Value containing a block hash
+    """
+    hash: Bytes
+
+    """
+    Value containing a block number
+    """
+    number: Int
+
+    """
+    Value containing the minimum block number.
+    In the case of `number_gte`, the query will be executed on the latest block only if
+    the subgraph has progressed to or past the minimum block number.
+    Defaults to the latest block when omitted.
+    """
+    number_gte: Int
+}
+
+scalar Bytes
+
+type ClaimedReward {
+    amount: BigDecimal!
+    block: BigInt!
+    id: ID!
+    timestamp: BigInt!
+    token: Bytes!
+    user: User!
+}
+
+input ClaimedReward_filter {
+    amount: BigDecimal
+    amount_gt: BigDecimal
+    amount_gte: BigDecimal
+    amount_in: [BigDecimal!]
+    amount_lt: BigDecimal
+    amount_lte: BigDecimal
+    amount_not: BigDecimal
+    amount_not_in: [BigDecimal!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    token: Bytes
+    token_contains: Bytes
+    token_in: [Bytes!]
+    token_not: Bytes
+    token_not_contains: Bytes
+    token_not_in: [Bytes!]
+    user: String
+    user_contains: String
+    user_ends_with: String
+    user_gt: String
+    user_gte: String
+    user_in: [String!]
+    user_lt: String
+    user_lte: String
+    user_not: String
+    user_not_contains: String
+    user_not_ends_with: String
+    user_not_in: [String!]
+    user_not_starts_with: String
+    user_starts_with: String
+}
+
+enum ClaimedReward_orderBy {
+    amount
+    block
+    id
+    timestamp
+    token
+    user
+}
+
+type Locker {
+    address: Bytes!
+    block: BigInt!
+    decimals: Int!
+    epochDuration: BigInt!
+    id: ID!
+    kickRewardEpochDelay: BigInt!
+    kickRewardPerEpoch: BigInt!
+    lockDuration: BigInt!
+    name: String!
+    rewardTokens(
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: RewardToken_filter
+    ): [RewardToken!]
+    symbol: String!
+    timestamp: BigInt!
+    totalLockedAmount: BigDecimal!
+    users(
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: User_filter
+    ): [User!]!
+}
+
+input Locker_filter {
+    address: Bytes
+    address_contains: Bytes
+    address_in: [Bytes!]
+    address_not: Bytes
+    address_not_contains: Bytes
+    address_not_in: [Bytes!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    decimals: Int
+    decimals_gt: Int
+    decimals_gte: Int
+    decimals_in: [Int!]
+    decimals_lt: Int
+    decimals_lte: Int
+    decimals_not: Int
+    decimals_not_in: [Int!]
+    epochDuration: BigInt
+    epochDuration_gt: BigInt
+    epochDuration_gte: BigInt
+    epochDuration_in: [BigInt!]
+    epochDuration_lt: BigInt
+    epochDuration_lte: BigInt
+    epochDuration_not: BigInt
+    epochDuration_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    kickRewardEpochDelay: BigInt
+    kickRewardEpochDelay_gt: BigInt
+    kickRewardEpochDelay_gte: BigInt
+    kickRewardEpochDelay_in: [BigInt!]
+    kickRewardEpochDelay_lt: BigInt
+    kickRewardEpochDelay_lte: BigInt
+    kickRewardEpochDelay_not: BigInt
+    kickRewardEpochDelay_not_in: [BigInt!]
+    kickRewardPerEpoch: BigInt
+    kickRewardPerEpoch_gt: BigInt
+    kickRewardPerEpoch_gte: BigInt
+    kickRewardPerEpoch_in: [BigInt!]
+    kickRewardPerEpoch_lt: BigInt
+    kickRewardPerEpoch_lte: BigInt
+    kickRewardPerEpoch_not: BigInt
+    kickRewardPerEpoch_not_in: [BigInt!]
+    lockDuration: BigInt
+    lockDuration_gt: BigInt
+    lockDuration_gte: BigInt
+    lockDuration_in: [BigInt!]
+    lockDuration_lt: BigInt
+    lockDuration_lte: BigInt
+    lockDuration_not: BigInt
+    lockDuration_not_in: [BigInt!]
+    name: String
+    name_contains: String
+    name_ends_with: String
+    name_gt: String
+    name_gte: String
+    name_in: [String!]
+    name_lt: String
+    name_lte: String
+    name_not: String
+    name_not_contains: String
+    name_not_ends_with: String
+    name_not_in: [String!]
+    name_not_starts_with: String
+    name_starts_with: String
+    symbol: String
+    symbol_contains: String
+    symbol_ends_with: String
+    symbol_gt: String
+    symbol_gte: String
+    symbol_in: [String!]
+    symbol_lt: String
+    symbol_lte: String
+    symbol_not: String
+    symbol_not_contains: String
+    symbol_not_ends_with: String
+    symbol_not_in: [String!]
+    symbol_not_starts_with: String
+    symbol_starts_with: String
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    totalLockedAmount: BigDecimal
+    totalLockedAmount_gt: BigDecimal
+    totalLockedAmount_gte: BigDecimal
+    totalLockedAmount_in: [BigDecimal!]
+    totalLockedAmount_lt: BigDecimal
+    totalLockedAmount_lte: BigDecimal
+    totalLockedAmount_not: BigDecimal
+    totalLockedAmount_not_in: [BigDecimal!]
+}
+
+enum Locker_orderBy {
+    address
+    block
+    decimals
+    epochDuration
+    id
+    kickRewardEpochDelay
+    kickRewardPerEpoch
+    lockDuration
+    name
+    rewardTokens
+    symbol
+    timestamp
+    totalLockedAmount
+    users
+}
+
+type LockingPeriod {
+    block: BigInt!
+    epoch: BigInt!
+    id: ID!
+    lockAmount: BigDecimal!
+    timestamp: BigInt!
+    user: User!
+}
+
+input LockingPeriod_filter {
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    epoch: BigInt
+    epoch_gt: BigInt
+    epoch_gte: BigInt
+    epoch_in: [BigInt!]
+    epoch_lt: BigInt
+    epoch_lte: BigInt
+    epoch_not: BigInt
+    epoch_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    lockAmount: BigDecimal
+    lockAmount_gt: BigDecimal
+    lockAmount_gte: BigDecimal
+    lockAmount_in: [BigDecimal!]
+    lockAmount_lt: BigDecimal
+    lockAmount_lte: BigDecimal
+    lockAmount_not: BigDecimal
+    lockAmount_not_in: [BigDecimal!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    user: String
+    user_contains: String
+    user_ends_with: String
+    user_gt: String
+    user_gte: String
+    user_in: [String!]
+    user_lt: String
+    user_lte: String
+    user_not: String
+    user_not_contains: String
+    user_not_ends_with: String
+    user_not_in: [String!]
+    user_not_starts_with: String
+    user_starts_with: String
+}
+
+enum LockingPeriod_orderBy {
+    block
+    epoch
+    id
+    lockAmount
+    timestamp
+    user
+}
+
+"""
+Defines the order direction, either ascending or descending
+"""
+enum OrderDirection {
+    asc
+    desc
+}
+
+type Query {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    claimedReward(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): ClaimedReward
+    claimedRewards(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: ClaimedReward_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: ClaimedReward_filter
+    ): [ClaimedReward!]!
+    locker(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): Locker
+    lockers(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Locker_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: Locker_filter
+    ): [Locker!]!
+    lockingPeriod(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): LockingPeriod
+    lockingPeriods(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: LockingPeriod_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: LockingPeriod_filter
+    ): [LockingPeriod!]!
+    rewardToken(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): RewardToken
+    rewardTokens(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: RewardToken_filter
+    ): [RewardToken!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): User
+    users(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: User_filter
+    ): [User!]!
+}
+
+type RewardToken {
+    block: BigInt!
+    decimals: Int!
+    id: ID!
+    locker: Locker!
+    rewardPeriodFinish: BigInt!
+    rewardRate: BigDecimal!
+    rewardToken: Bytes!
+    timestamp: BigInt!
+    totalRewardAmount: BigDecimal!
+}
+
+input RewardToken_filter {
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    decimals: Int
+    decimals_gt: Int
+    decimals_gte: Int
+    decimals_in: [Int!]
+    decimals_lt: Int
+    decimals_lte: Int
+    decimals_not: Int
+    decimals_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    locker: String
+    locker_contains: String
+    locker_ends_with: String
+    locker_gt: String
+    locker_gte: String
+    locker_in: [String!]
+    locker_lt: String
+    locker_lte: String
+    locker_not: String
+    locker_not_contains: String
+    locker_not_ends_with: String
+    locker_not_in: [String!]
+    locker_not_starts_with: String
+    locker_starts_with: String
+    rewardPeriodFinish: BigInt
+    rewardPeriodFinish_gt: BigInt
+    rewardPeriodFinish_gte: BigInt
+    rewardPeriodFinish_in: [BigInt!]
+    rewardPeriodFinish_lt: BigInt
+    rewardPeriodFinish_lte: BigInt
+    rewardPeriodFinish_not: BigInt
+    rewardPeriodFinish_not_in: [BigInt!]
+    rewardRate: BigDecimal
+    rewardRate_gt: BigDecimal
+    rewardRate_gte: BigDecimal
+    rewardRate_in: [BigDecimal!]
+    rewardRate_lt: BigDecimal
+    rewardRate_lte: BigDecimal
+    rewardRate_not: BigDecimal
+    rewardRate_not_in: [BigDecimal!]
+    rewardToken: Bytes
+    rewardToken_contains: Bytes
+    rewardToken_in: [Bytes!]
+    rewardToken_not: Bytes
+    rewardToken_not_contains: Bytes
+    rewardToken_not_in: [Bytes!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    totalRewardAmount: BigDecimal
+    totalRewardAmount_gt: BigDecimal
+    totalRewardAmount_gte: BigDecimal
+    totalRewardAmount_in: [BigDecimal!]
+    totalRewardAmount_lt: BigDecimal
+    totalRewardAmount_lte: BigDecimal
+    totalRewardAmount_not: BigDecimal
+    totalRewardAmount_not_in: [BigDecimal!]
+}
+
+enum RewardToken_orderBy {
+    block
+    decimals
+    id
+    locker
+    rewardPeriodFinish
+    rewardRate
+    rewardToken
+    timestamp
+    totalRewardAmount
+}
+
+type Subscription {
+    """
+    Access to subgraph metadata
+    """
+    _meta(block: Block_height): _Meta_
+    claimedReward(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): ClaimedReward
+    claimedRewards(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: ClaimedReward_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: ClaimedReward_filter
+    ): [ClaimedReward!]!
+    locker(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): Locker
+    lockers(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: Locker_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: Locker_filter
+    ): [Locker!]!
+    lockingPeriod(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): LockingPeriod
+    lockingPeriods(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: LockingPeriod_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: LockingPeriod_filter
+    ): [LockingPeriod!]!
+    rewardToken(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): RewardToken
+    rewardTokens(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: RewardToken_filter
+    ): [RewardToken!]!
+    user(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+    ): User
+    users(
+        """
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: User_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
+        where: User_filter
+    ): [User!]!
+}
+
+type User {
+    address: Bytes!
+    block: BigInt!
+    claimedRewards(
+        first: Int = 100
+        orderBy: ClaimedReward_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: ClaimedReward_filter
+    ): [ClaimedReward!]!
+    collectedKickRewardAmount: BigDecimal!
+    id: ID!
+    locker: Locker!
+    lockingPeriods(
+        first: Int = 100
+        orderBy: LockingPeriod_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: LockingPeriod_filter
+    ): [LockingPeriod!]!
+    timestamp: BigInt!
+    totalLockedAmount: BigDecimal!
+    totalLostThroughKick: BigDecimal!
+}
+
+input User_filter {
+    address: Bytes
+    address_contains: Bytes
+    address_in: [Bytes!]
+    address_not: Bytes
+    address_not_contains: Bytes
+    address_not_in: [Bytes!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    collectedKickRewardAmount: BigDecimal
+    collectedKickRewardAmount_gt: BigDecimal
+    collectedKickRewardAmount_gte: BigDecimal
+    collectedKickRewardAmount_in: [BigDecimal!]
+    collectedKickRewardAmount_lt: BigDecimal
+    collectedKickRewardAmount_lte: BigDecimal
+    collectedKickRewardAmount_not: BigDecimal
+    collectedKickRewardAmount_not_in: [BigDecimal!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    locker: String
+    locker_contains: String
+    locker_ends_with: String
+    locker_gt: String
+    locker_gte: String
+    locker_in: [String!]
+    locker_lt: String
+    locker_lte: String
+    locker_not: String
+    locker_not_contains: String
+    locker_not_ends_with: String
+    locker_not_in: [String!]
+    locker_not_starts_with: String
+    locker_starts_with: String
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    totalLockedAmount: BigDecimal
+    totalLockedAmount_gt: BigDecimal
+    totalLockedAmount_gte: BigDecimal
+    totalLockedAmount_in: [BigDecimal!]
+    totalLockedAmount_lt: BigDecimal
+    totalLockedAmount_lte: BigDecimal
+    totalLockedAmount_not: BigDecimal
+    totalLockedAmount_not_in: [BigDecimal!]
+    totalLostThroughKick: BigDecimal
+    totalLostThroughKick_gt: BigDecimal
+    totalLostThroughKick_gte: BigDecimal
+    totalLostThroughKick_in: [BigDecimal!]
+    totalLostThroughKick_lt: BigDecimal
+    totalLostThroughKick_lte: BigDecimal
+    totalLostThroughKick_not: BigDecimal
+    totalLostThroughKick_not_in: [BigDecimal!]
+}
+
+enum User_orderBy {
+    address
+    block
+    claimedRewards
+    collectedKickRewardAmount
+    id
+    locker
+    lockingPeriods
+    timestamp
+    totalLockedAmount
+    totalLostThroughKick
+}
+
+type _Block_ {
+    """
+    The hash of the block
+    """
+    hash: Bytes
+
+    """
+    The block number
+    """
+    number: Int!
+}
+
+"""
+The type for the top-level _meta field
+"""
+type _Meta_ {
+    """
+    Information about a specific subgraph block. The hash of the block
+    will be null if the _meta field has a block constraint that asks for
+    a block number. It will be filled if the _meta field has no block constraint
+    and therefore asks for the latest  block
+    """
+    block: _Block_!
+
+    """
+    The deployment ID
+    """
+    deployment: String!
+
+    """
+    If `true`, the subgraph encountered indexing errors at some past block
+    """
+    hasIndexingErrors: Boolean!
+}
+
+enum _SubgraphErrorPolicy_ {
+    """
+    Data will be returned even if the subgraph has indexing errors
+    """
+    allow
+
+    """
+    If the subgraph has indexing errors, data will be omitted. The default.
+    """
+    deny
+}
