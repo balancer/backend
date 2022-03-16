@@ -46,6 +46,7 @@ const BOOSTED_POOLS = [
     '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187',
     '0x56897add6dc6abccf0ada1eb83d936818bc6ca4d0002000000000000000002e8',
     '0x10441785a928040b456a179691141c48356eb3a50001000000000000000002fa',
+    '0x31adc46737ebb8e0e4a391ec6c26438badaee8ca000000000000000000000306',
 ];
 const BB_YV_USD = '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187';
 
@@ -160,6 +161,8 @@ export class BalancerService {
                 name:
                     pool.id === '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187'
                         ? 'Steady Beets, Yearn Boosted'
+                        : pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e'
+                        ? 'Fantom Of The Opera, Yearn Boosted'
                         : pool.name,
                 __typename: 'GqlBalancerPool',
                 tokens: (pool.tokens || []).map((token) => ({

@@ -42,6 +42,7 @@ type GqlBalancerPool {
     upperTarget: String
     lowerTarget: String
     linearPools: [GqlBalancerPoolLinearPoolData!]
+    stablePhantomPools: [GqlBalancerPoolStablePhantomPoolData!]
     tokenRates: [String!]
     farm: GqlBeetsFarm
     apr: GqlBalancePoolApr!
@@ -74,12 +75,23 @@ type GqlBalancerPoolLinearPoolData {
     totalSupply: String!
     balance: String!
     poolToken: String!
+    mainTokenTotalBalance: String!
+}
+
+type GqlBalancerPoolStablePhantomPoolData {
+    id: ID!
+    address: String!
+    symbol: String!
+    tokens: [GqlBalancerPoolToken!]!
+    totalSupply: String!
+    balance: String!
 }
 
 type GqlBalancerPoolLinearPoolMainToken {
     address: String!
     index: Int!
     balance: String!
+    totalSupply: String!
     name: String!
     symbol: String!
     decimals: Int!
@@ -89,6 +101,7 @@ type GqlBalancerPoolLinearPoolWrappedToken {
     address: String!
     index: Int!
     balance: String!
+    totalSupply: String!
     priceRate: String!
     name: String!
     symbol: String!
