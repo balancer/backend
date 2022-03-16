@@ -92,6 +92,7 @@ export function scheduleCronJobs() {
 
     //once a day
     cron.schedule('5 0 * * *', async () => {
+        console.log("Starting new cron to cache daily data.")
         try {
             const timestamp = moment.tz('GMT').startOf('day').unix();
 
@@ -99,12 +100,15 @@ export function scheduleCronJobs() {
             for (let i = 0; i < 10; i++) {
                 try {
                     await portfolioService.cacheRawDataForTimestamp(timestamp);
+                    console.log("Finished cron to cache daily data.")
                     break;
-                } catch {
+                } catch (e) {
+                    console.log(`Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`, e)
                     await sleep(5000);
                 }
             }
-        } catch (e) {}
+        } catch (e) {
+            console.log(`Fatal error happened during daily caching.`, e)}
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
