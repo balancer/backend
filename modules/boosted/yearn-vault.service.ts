@@ -50,40 +50,24 @@ export class YearnVaultService {
             const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
             //percent of pool wrapped
             const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
-            const linearPoolLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+            const linearPoolLiquidity = parseFloat(linearPool.mainTokenTotalBalance) * tokenPrice;
             const linearPoolApr = vault.apy.net_apy * percentWrapped;
-
-            let poolToken = pool.tokens.find((token) => token.address === linearPool.address);
-            let percentOfWhole = 1;
-            let poolTotalLiquidity = parseFloat(pool.totalLiquidity);
-            let linearLiquidityInPool = linearPoolLiquidity;
-
-            //TODO: this works, but its fugly as hell, revisit this.
-            if (!poolToken) {
-                //the linear bpt is nested in bbyvUsd
-                poolToken = bbyvUsd.tokens.find((token) => token.address === linearPool.address);
-
-                const bbyvUsdBalance = parseFloat(
-                    pool.tokens.find((token) => token.address === bbyvUsd.address)?.balance || '0',
-                );
-
-                const bbyvUsdLiquidity =
-                    (bbyvUsdBalance / parseFloat(bbyvUsd.totalShares)) * parseFloat(bbyvUsd.totalLiquidity);
-                percentOfWhole = bbyvUsdLiquidity / parseFloat(pool.totalLiquidity);
-                poolTotalLiquidity = parseFloat(bbyvUsd.totalLiquidity);
-            } else {
-                //pool
-                linearLiquidityInPool =
-                    linearPoolLiquidity * (parseFloat(poolToken.balance) / parseFloat(linearPool.totalSupply));
-            }
 
             subItems.push({
                 title: `${vault.symbol} APR`,
-                apr: `${linearPoolApr * (linearLiquidityInPool / poolTotalLiquidity) * percentOfWhole}`,
+                apr: `${linearPoolApr * (linearPoolLiquidity / parseFloat(pool.totalLiquidity))}`,
             });
         }
 
         if (subItems.length > 0) {
+            if (pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e') {
+                console.log(pool.name, {
+                    title: 'Yearn boosted APR',
+                    apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
+                    subItems,
+                });
+            }
+
             return {
                 title: 'Yearn boosted APR',
                 apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
