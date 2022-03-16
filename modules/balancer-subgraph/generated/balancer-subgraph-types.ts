@@ -3445,6 +3445,7 @@ export type BalancerJoinExitsQuery = {
         timestamp: number;
         tx: string;
         type: InvestType;
+        valueUSD: string;
         user: { __typename?: 'User'; id: string };
         pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
     }>;
@@ -3469,6 +3470,7 @@ export type BalancerJoinExitFragment = {
     timestamp: number;
     tx: string;
     type: InvestType;
+    valueUSD: string;
     user: { __typename?: 'User'; id: string };
     pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
 };
@@ -3650,6 +3652,52 @@ export type BalancerTradePairSnapshotFragment = {
     };
 };
 
+export type BalancerSwapsQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<Swap_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<Swap_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerSwapsQuery = {
+    __typename?: 'Query';
+    swaps: Array<{
+        __typename?: 'Swap';
+        id: string;
+        caller: string;
+        tokenIn: string;
+        tokenInSym: string;
+        tokenOut: string;
+        tokenOutSym: string;
+        tokenAmountIn: string;
+        tokenAmountOut: string;
+        timestamp: number;
+        tx: string;
+        valueUSD: string;
+        poolId: { __typename?: 'Pool'; id: string };
+        userAddress: { __typename?: 'User'; id: string };
+    }>;
+};
+
+export type BalancerSwapFragment = {
+    __typename?: 'Swap';
+    id: string;
+    caller: string;
+    tokenIn: string;
+    tokenInSym: string;
+    tokenOut: string;
+    tokenOutSym: string;
+    tokenAmountIn: string;
+    tokenAmountOut: string;
+    timestamp: number;
+    tx: string;
+    valueUSD: string;
+    poolId: { __typename?: 'Pool'; id: string };
+    userAddress: { __typename?: 'User'; id: string };
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
@@ -3765,6 +3813,7 @@ export const BalancerJoinExitFragmentDoc = gql`
             id
             tokensList
         }
+        valueUSD
     }
 `;
 export const BalancerTradePairSnapshotFragmentDoc = gql`
@@ -3783,6 +3832,27 @@ export const BalancerTradePairSnapshotFragmentDoc = gql`
                 symbol
             }
         }
+    }
+`;
+export const BalancerSwapFragmentDoc = gql`
+    fragment BalancerSwap on Swap {
+        id
+        caller
+        tokenIn
+        tokenInSym
+        tokenOut
+        tokenOutSym
+        tokenAmountIn
+        tokenAmountOut
+        poolId {
+            id
+        }
+        userAddress {
+            id
+        }
+        timestamp
+        tx
+        valueUSD
     }
 `;
 export const BalancerProtocolDataDocument = gql`
@@ -4039,6 +4109,28 @@ export const BalancerTradePairSnapshotsDocument = gql`
     }
     ${BalancerTradePairSnapshotFragmentDoc}
 `;
+export const BalancerSwapsDocument = gql`
+    query BalancerSwaps(
+        $skip: Int
+        $first: Int
+        $orderBy: Swap_orderBy
+        $orderDirection: OrderDirection
+        $where: Swap_filter
+        $block: Block_height
+    ) {
+        swaps(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerSwap
+        }
+    }
+    ${BalancerSwapFragmentDoc}
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -4230,6 +4322,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerTradePairSnapshots',
+            );
+        },
+        BalancerSwaps(
+            variables?: BalancerSwapsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerSwapsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerSwapsQuery>(BalancerSwapsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerSwaps',
             );
         },
     };

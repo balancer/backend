@@ -380,7 +380,9 @@ class PortfolioService {
 
     private getPoolValue(pool: PrismaBalancerPoolSnapshotWithTokens, tokenPrices: TokenPrices): number {
         return _.sum(
-            (pool.tokens || []).map((token) => parseFloat(token.balance) * (tokenPrices[token.address]?.usd || 0)),
+            (pool.tokens || []).map((token) => {
+                return parseFloat(token.balance) * tokenPriceService.getPriceForToken(tokenPrices, token.address);
+            }),
         );
     }
 

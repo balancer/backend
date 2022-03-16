@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
     Balancer,
     BalancerJoinExitFragment,
+    BalancerJoinExitsQuery,
     BalancerJoinExitsQueryVariables,
     BalancerLatestPriceFragment,
     BalancerLatestPricesQuery,
@@ -17,6 +18,9 @@ import {
     BalancerPortfolioDataQuery,
     BalancerPortfolioPoolsDataQuery,
     BalancerProtocolDataQueryVariables,
+    BalancerSwapFragment,
+    BalancerSwapsQuery,
+    BalancerSwapsQueryVariables,
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
@@ -76,6 +80,14 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerPools(args);
     }
 
+    public async getSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapsQuery> {
+        return this.sdk.BalancerSwaps(args);
+    }
+
+    public async getAllSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapFragment[]> {
+        return subgraphLoadAll<BalancerSwapFragment>(this.sdk.BalancerSwaps, 'swaps', args);
+    }
+
     public async getPool(args: BalancerPoolQueryVariables): Promise<BalancerPoolQuery> {
         return this.sdk.BalancerPool(args);
     }
@@ -106,6 +118,10 @@ export class BalancerSubgraphService {
 
     public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', args);
+    }
+
+    public async getPoolJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitsQuery> {
+        return this.sdk.BalancerJoinExits(args);
     }
 
     public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {

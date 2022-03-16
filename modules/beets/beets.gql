@@ -66,10 +66,13 @@ type GqlBeetsConfig {
     incentivizedPools: [String!]!
     pausedPools: [String!]!
     blacklistedPools: [String!]!
+    excludedPools: [String!]!
     featuredPools: [String!]!
     homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
     homeNewsItems: [GqlBeetsConfigNewsItem!]!
+    homeEducationItems: [GqlBeetsConfigNewsItem!]!
     poolFilters: [GqlBeetsConfigPoolFilterItem!]!
+    blacklistedTokens: [String!]!
 }
 
 type GqlBeetsConfigFeaturedPool {

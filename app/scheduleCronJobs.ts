@@ -28,6 +28,12 @@ export function scheduleCronJobs() {
 
     cron.schedule('*/5 * * * *', async () => {
         try {
+            await tokenPriceService.cacheHistoricalNestedBptPrices();
+        } catch (e) {}
+    });
+
+    cron.schedule('*/5 * * * *', async () => {
+        try {
             await tokenService.cacheTokens();
         } catch (e) {}
     });
@@ -76,6 +82,7 @@ export function scheduleCronJobs() {
     //every 30 seconds
     cron.schedule('*/30 * * * * *', async () => {
         try {
+            await tokenPriceService.cacheBeetsPrice();
             const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
             await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
             await balancerService.cachePastPools();
@@ -101,6 +108,10 @@ export function scheduleCronJobs() {
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
-    beetsService.cacheProtocolData().catch();
+    tokenPriceService
+        .cacheBeetsPrice()
+        .then(() => beetsService.cacheProtocolData().catch())
+        .catch();
+
     console.log('scheduled cron jobs');
 }
