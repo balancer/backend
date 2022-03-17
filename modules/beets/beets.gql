@@ -73,6 +73,7 @@ type GqlBeetsConfig {
     homeEducationItems: [GqlBeetsConfigNewsItem!]!
     poolFilters: [GqlBeetsConfigPoolFilterItem!]!
     blacklistedTokens: [String!]!
+    boostedPools: [String!]!
 }
 
 type GqlBeetsConfigFeaturedPool {
