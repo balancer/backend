@@ -29,18 +29,23 @@ async function startServer() {
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
-    const server = new ApolloServer({
-        resolvers: resolvers,
-        typeDefs: schema,
-        introspection: true,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            ApolloServerPluginLandingPageGraphQLPlayground(),
+    const plugins = [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginLandingPageGraphQLPlayground(),
+    ];
+    if (env.NODE_ENV === 'production') {
+        plugins.push(
             ApolloServerPluginUsageReporting({
                 sendVariableValues: { all: true },
                 sendHeaders: { onlyNames: ['AccountAddress'] },
             }),
-        ],
+        );
+    }
+    const server = new ApolloServer({
+        resolvers: resolvers,
+        typeDefs: schema,
+        introspection: true,
+        plugins: plugins,
         context: ({ req }) => req.context,
     });
     await server.start();
