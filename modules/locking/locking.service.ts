@@ -1,9 +1,12 @@
+import { BigNumber } from 'ethers';
 import moment from 'moment-timezone';
 import { env } from '../../app/env';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { beetsService } from '../beets/beets.service';
 import { getContractAt } from '../ethers/ethers';
 import { tokenPriceService } from '../token-price/token-price.service';
+import { decimal, fp, fromFp } from '../util/numbers';
+import erc20ContractAbi from './abi/ERC20.json';
 import lockingContractAbi from './abi/FBeetsLocker.json';
 import { QueryLockersArgs } from './generated/locking-subgraph-types';
 import { lockingSubgraph } from './locking-subgraph';
@@ -64,11 +67,11 @@ class LockingService {
         const locker = await lockingSubgraph.getLocker(args);
 
         const fBeetsPrice = await beetsService.getFBeetsPrice();
-        const totalLockedAmount = parseFloat(locker.totalLockedAmount);
-        const totalLockedUsd = totalLockedAmount * fBeetsPrice;
+        const totalLockedAmount = decimal(locker.totalLockedAmount);
+        const totalLockedUsd = totalLockedAmount.mul(fBeetsPrice);
 
         const beetsBar = await beetsBarService.getBeetsBarNow();
-        const totalLockedPercentage = (parseFloat(beetsBar.totalSupply) / totalLockedAmount).toString();
+        const totalLockedPercentage = decimal(beetsBar.totalSupply).div(totalLockedAmount).toString();
 
         return {
             ...locker,
@@ -86,44 +89,44 @@ class LockingService {
         const latestTokenPrices = await tokenPriceService.getTokenPrices();
 
         const claimedRewards: LockingReward[] = [];
-        let totalClaimedRewardsUsd = 0;
+        let totalClaimedRewardsUsd = decimal(0);
         for (let reward of user.claimedRewards) {
             const { token, amount } = reward;
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, token);
-            const usdValue = parseFloat(amount) * tokenPrice;
+            const usdValue = decimal(amount).mul(tokenPrice);
             claimedRewards.push({
                 token,
                 amount,
                 amountUsd: usdValue.toString(),
             });
-            totalClaimedRewardsUsd += usdValue;
+            totalClaimedRewardsUsd = totalClaimedRewardsUsd.add(usdValue);
         }
 
         const lockingPeriods: LockingPeriod[] = [];
-        let totalUnlockAmount = 0;
-        let totalUnlockAmountUsd = 0;
+        let totalUnlockAmount = decimal(0);
+        let totalUnlockAmountUsd = decimal(0);
 
         for (let lockingPeriod of user.lockingPeriods) {
-            const usdValue = parseFloat(lockingPeriod.lockAmount) * fBeetsPrice;
+            const usdValue = decimal(lockingPeriod.lockAmount).mul(fBeetsPrice);
             lockingPeriods.push({
                 epoch: lockingPeriod.epoch,
                 lockAmount: lockingPeriod.lockAmount,
                 lockAmountUsd: usdValue.toString(),
             });
             if (moment.unix(parseInt(lockingPeriod.epoch) + env.LOCKING_DURATION).isBefore(moment.now())) {
-                totalUnlockAmount += parseFloat(lockingPeriod.lockAmount);
-                totalUnlockAmountUsd += usdValue;
+                totalUnlockAmount = totalUnlockAmount.add(lockingPeriod.lockAmount);
+                totalUnlockAmountUsd = totalUnlockAmountUsd.add(usdValue);
             }
         }
 
         return {
             ...user,
-            totalLockedAmountUsd: (parseFloat(user.totalLockedAmount) * fBeetsPrice).toString(),
+            totalLockedAmountUsd: decimal(user.totalLockedAmount).mul(fBeetsPrice).toString(),
             totalUnlockedAmount: totalUnlockAmount.toString(),
             totalUnlockedAmountUsd: totalUnlockAmountUsd.toString(),
-            totalLostThroughKickUsd: (parseFloat(user.totalLostThroughKick) * fBeetsPrice).toString(),
+            totalLostThroughKickUsd: decimal(user.totalLostThroughKick).mul(fBeetsPrice).toString(),
             totalClaimedRewardsUsd: totalClaimedRewardsUsd.toString(),
-            collectedKickRewardAmountUsd: (parseFloat(user.collectedKickRewardAmount) * fBeetsPrice).toString(),
+            collectedKickRewardAmountUsd: decimal(user.collectedKickRewardAmount).mul(fBeetsPrice).toString(),
             lockingPeriods,
             claimedRewards,
         };
@@ -139,11 +142,12 @@ class LockingService {
         for (let reward of rewardTokens) {
             const { rewardPeriodFinish, rewardRate, rewardToken, totalRewardAmount } = reward;
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, rewardToken);
-            const totalRewardAmountUsd = (parseFloat(totalRewardAmount) * tokenPrice).toString();
-            const apr = (
-                (parseFloat(rewardRate) * SECONDS_PER_YEAR * tokenPrice) /
-                parseFloat(locker.totalLockedUsd)
-            ).toString();
+            const totalRewardAmountUsd = decimal(totalRewardAmount).mul(tokenPrice).toString();
+            const apr = decimal(rewardRate)
+                .mul(SECONDS_PER_YEAR)
+                .mul(tokenPrice)
+                .div(decimal(locker.totalLockedUsd))
+                .toString();
 
             rewards.push({
                 rewardToken,
@@ -158,25 +162,30 @@ class LockingService {
     }
 
     public async getPendingRewards(accountAddress: string): Promise<LockingReward[]> {
-        const claimableRewards: { amount: string; token: string }[] = await this.lockingContract.claimableRewards(
+        const claimableRewards: { amount: BigNumber; token: string }[] = await this.lockingContract.claimableRewards(
             accountAddress,
         );
 
         const latestTokenPrices = await tokenPriceService.getTokenPrices();
         const rewards: LockingReward[] = [];
         for (let reward of claimableRewards) {
+            const erc20Contract = getContractAt(reward.token, erc20ContractAbi);
+            const decimals: BigNumber = erc20Contract.decimals();
+
+            const amount = decimal(reward.amount).div(decimal(`1e${decimals}`));
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, reward.token);
-            const amountUsd = (parseFloat(reward.amount) * tokenPrice).toString();
+            const amountUsd = amount.mul(tokenPrice).toString();
+
             rewards.push({
                 token: reward.token,
-                amount: reward.amount,
+                amount: amount.toString(),
                 amountUsd,
             });
         }
         return rewards;
     }
     public async getVotingPower(accountAddress: string): Promise<string> {
-        return this.lockingContract.balanceOf(accountAddress);
+        return fromFp(this.lockingContract.balanceOf(accountAddress)).toString();
     }
 }
 
