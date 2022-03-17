@@ -170,7 +170,7 @@ class LockingService {
         const rewards: LockingReward[] = [];
         for (let reward of claimableRewards) {
             const erc20Contract = getContractAt(reward.token, erc20ContractAbi);
-            const decimals: BigNumber = erc20Contract.decimals();
+            const decimals: BigNumber = await erc20Contract.decimals();
 
             const amount = decimal(reward.amount).div(decimal(`1e${decimals}`));
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, reward.token);
@@ -185,7 +185,7 @@ class LockingService {
         return rewards;
     }
     public async getVotingPower(accountAddress: string): Promise<string> {
-        return fromFp(this.lockingContract.balanceOf(accountAddress)).toFixed(18);
+        return fromFp(await this.lockingContract.balanceOf(accountAddress)).toFixed(18);
     }
 }
 
