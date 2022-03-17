@@ -225,14 +225,14 @@ export class TokenPriceService {
 
     public async cacheBeetsPrice() {
         const { pool: beetsUsdcPool } = await balancerSubgraphService.getPool({
-            id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
+            id: env.BEETS_USDC_POOL_ID,
         });
 
         const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
         const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
 
         const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
-            id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            id: env.BEETS_FTM_POOL_ID,
         });
 
         if (!beets || !usdc || !beetsFtmPool) {

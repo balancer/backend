@@ -26,6 +26,8 @@ export const schema = {
     FBEETS_ADDRESS: String,
     FBEETS_POOL_ID: String,
     FBEETS_FARM_ID: String,
+    BEETS_USDC_POOL_ID: String,
+    BEETS_FTM_POOL_ID: String,
     ADMIN_API_KEY: String,
     SANITY_PROJECT_ID: String,
     SANITY_DATASET: String,
