@@ -71,7 +71,10 @@ class LockingService {
         const totalLockedUsd = totalLockedAmount.mul(fBeetsPrice);
 
         const beetsBar = await beetsBarService.getBeetsBarNow();
-        const totalLockedPercentage = decimal(beetsBar.totalSupply).div(totalLockedAmount).toFixed();
+        const totalLockedPercentage = totalLockedAmount.div(decimal(beetsBar.totalSupply)).toFixed();
+        console.log(
+            `total supply ${beetsBar.totalSupply}, total locked ${locker.totalLockedAmount}, percentage ${totalLockedPercentage}`,
+        );
 
         return {
             ...locker,
