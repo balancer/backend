@@ -60,14 +60,6 @@ export class YearnVaultService {
         }
 
         if (subItems.length > 0) {
-            if (pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e') {
-                console.log(pool.name, {
-                    title: 'Yearn boosted APR',
-                    apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
-                    subItems,
-                });
-            }
-
             return {
                 title: 'Yearn boosted APR',
                 apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
