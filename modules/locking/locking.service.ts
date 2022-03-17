@@ -71,12 +71,12 @@ class LockingService {
         const totalLockedUsd = totalLockedAmount.mul(fBeetsPrice);
 
         const beetsBar = await beetsBarService.getBeetsBarNow();
-        const totalLockedPercentage = decimal(beetsBar.totalSupply).div(totalLockedAmount).toString();
+        const totalLockedPercentage = decimal(beetsBar.totalSupply).div(totalLockedAmount).toFixed(18);
 
         return {
             ...locker,
             totalLockedPercentage,
-            totalLockedUsd: totalLockedUsd.toString(),
+            totalLockedUsd: totalLockedUsd.toFixed(18),
         };
     }
     public async getUser(accountAddress: string): Promise<LockingUser> {
@@ -97,7 +97,7 @@ class LockingService {
             claimedRewards.push({
                 token,
                 amount,
-                amountUsd: usdValue.toString(),
+                amountUsd: usdValue.toFixed(18),
             });
             totalClaimedRewardsUsd = totalClaimedRewardsUsd.add(usdValue);
         }
@@ -111,7 +111,7 @@ class LockingService {
             lockingPeriods.push({
                 epoch: lockingPeriod.epoch,
                 lockAmount: lockingPeriod.lockAmount,
-                lockAmountUsd: usdValue.toString(),
+                lockAmountUsd: usdValue.toFixed(18),
             });
             if (moment.unix(parseInt(lockingPeriod.epoch) + env.LOCKING_DURATION).isBefore(moment.now())) {
                 totalUnlockAmount = totalUnlockAmount.add(lockingPeriod.lockAmount);
@@ -121,12 +121,12 @@ class LockingService {
 
         return {
             ...user,
-            totalLockedAmountUsd: decimal(user.totalLockedAmount).mul(fBeetsPrice).toString(),
-            totalUnlockedAmount: totalUnlockAmount.toString(),
-            totalUnlockedAmountUsd: totalUnlockAmountUsd.toString(),
-            totalLostThroughKickUsd: decimal(user.totalLostThroughKick).mul(fBeetsPrice).toString(),
-            totalClaimedRewardsUsd: totalClaimedRewardsUsd.toString(),
-            collectedKickRewardAmountUsd: decimal(user.collectedKickRewardAmount).mul(fBeetsPrice).toString(),
+            totalLockedAmountUsd: decimal(user.totalLockedAmount).mul(fBeetsPrice).toFixed(18),
+            totalUnlockedAmount: totalUnlockAmount.toFixed(18),
+            totalUnlockedAmountUsd: totalUnlockAmountUsd.toFixed(18),
+            totalLostThroughKickUsd: decimal(user.totalLostThroughKick).mul(fBeetsPrice).toFixed(18),
+            totalClaimedRewardsUsd: totalClaimedRewardsUsd.toFixed(18),
+            collectedKickRewardAmountUsd: decimal(user.collectedKickRewardAmount).mul(fBeetsPrice).toFixed(18),
             lockingPeriods,
             claimedRewards,
         };
@@ -142,12 +142,12 @@ class LockingService {
         for (let reward of rewardTokens) {
             const { rewardPeriodFinish, rewardRate, rewardToken, totalRewardAmount } = reward;
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, rewardToken);
-            const totalRewardAmountUsd = decimal(totalRewardAmount).mul(tokenPrice).toString();
+            const totalRewardAmountUsd = decimal(totalRewardAmount).mul(tokenPrice).toFixed(18);
             const apr = decimal(rewardRate)
                 .mul(SECONDS_PER_YEAR)
                 .mul(tokenPrice)
                 .div(decimal(locker.totalLockedUsd))
-                .toString();
+                .toFixed(18);
 
             rewards.push({
                 rewardToken,
@@ -174,18 +174,18 @@ class LockingService {
 
             const amount = decimal(reward.amount).div(decimal(`1e${decimals}`));
             const tokenPrice = tokenPriceService.getPriceForToken(latestTokenPrices, reward.token);
-            const amountUsd = amount.mul(tokenPrice).toString();
+            const amountUsd = amount.mul(tokenPrice).toFixed(18);
 
             rewards.push({
                 token: reward.token,
-                amount: amount.toString(),
+                amount: amount.toFixed(18),
                 amountUsd,
             });
         }
         return rewards;
     }
     public async getVotingPower(accountAddress: string): Promise<string> {
-        return fromFp(this.lockingContract.balanceOf(accountAddress)).toString();
+        return fromFp(this.lockingContract.balanceOf(accountAddress)).toFixed(18);
     }
 }
 
