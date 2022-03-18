@@ -52,7 +52,11 @@ async function startServer() {
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 
     if (process.env.WORKER === 'true') {
-        scheduleCronJobs();
+        try {
+            scheduleCronJobs();
+        } catch (e) {
+            console.log(`Fatal error happened during cron scheduling.`, e);
+        }
     }
 }
 
