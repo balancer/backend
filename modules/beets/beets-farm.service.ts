@@ -53,7 +53,9 @@ export class BeetsFarmService {
                                       tokenPrices,
                                       farm.rewarder.rewardToken,
                                   ),
-                                  rewardPerSecond: `${Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / 1e18)}`,
+                                  rewardPerSecond: `${Number(
+                                      parseInt(farm.rewarder?.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18),
+                                  )}`,
                                   symbol:
                                       tokens.find(
                                           (token) =>
@@ -142,7 +144,9 @@ export class BeetsFarmService {
         }
 
         (farm.rewarder?.tokens ?? []).forEach((rewardToken) => {
-            const rewardTokenPerYear = Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / 1e18) * secondsPerYear;
+            const rewardTokenPerYear =
+                Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18)) *
+                secondsPerYear;
             const rewardTokenValuePerYear = rewardToken.tokenPrice * rewardTokenPerYear;
             const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
