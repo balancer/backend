@@ -1,0 +1,61 @@
+extend type Query {
+    sorGetSwaps(input: GqlSorGetSwapsInput!): GqlSorGetSwapsResponse!
+}
+
+input GqlSorGetSwapsInput {
+    tokenIn: String!
+    tokenOut: String!
+    swapType: GqlSorSwapType!
+    swapAmount: BigDecimal! #expected in human readable form
+    swapOptions: GqlSorSwapOptionsInput!
+}
+
+enum GqlSorSwapType {
+    EXACT_IN
+    EXACT_OUT
+}
+
+input GqlSorSwapOptionsInput {
+    timestamp: Int #used for caching purposes
+    maxPools: Int
+    forceRefresh: Boolean #don't use any cached responses
+}
+
+type GqlSorGetSwapsResponse {
+    tokenIn: String!
+    tokenOut: String!
+    tokenAddresses: [String!]!
+    swaps: [GqlSorSwap!]!
+    swapAmount: BigDecimal!
+    swapAmountForSwaps: BigDecimal
+    returnAmount: BigDecimal!
+    returnAmountFromSwaps: BigDecimal
+    returnAmountConsideringFees: BigDecimal!
+    marketSp: String!
+    routes: [GqlSorSwapRoute!]!
+}
+
+type GqlSorSwap {
+    poolId: String!
+    assetInIndex: Int!
+    assetOutIndex: Int!
+    amount: String!
+    userData: String!
+}
+
+type GqlSorSwapRoute {
+    tokenIn: String!
+    tokenInAmount: BigDecimal!
+    tokenOut: String!
+    tokenOutAmount: BigDecimal!
+    share: Float!
+    hops: [GqlSorSwapRouteHop!]!
+}
+
+type GqlSorSwapRouteHop {
+    tokenIn: String!
+    tokenInAmount: BigDecimal!
+    tokenOut: String!
+    tokenOutAmount: BigDecimal!
+    poolId: String!
+}
