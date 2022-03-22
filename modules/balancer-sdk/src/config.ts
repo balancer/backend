@@ -59,8 +59,6 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                 getPools: async () => {
                     const pools = (await balancerService.getPools()) as SubgraphPoolBase[];
 
-                    console.log('returning pools in getPools');
-
                     return pools;
                 },
             },
