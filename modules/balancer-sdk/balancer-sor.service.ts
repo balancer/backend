@@ -43,6 +43,10 @@ export class BalancerSorService {
     }
 
     private getTokenDecimals(tokenAddress: string, pools: GqlBalancerPool[]): number {
+        if (tokenAddress === '0x0000000000000000000000000000000000000000') {
+            return 18;
+        }
+
         tokenAddress = tokenAddress.toLowerCase();
         const allTokens = _.flatten(pools.map((pool) => pool.tokens || []));
         const match = allTokens.find((token) => token.address === tokenAddress);
