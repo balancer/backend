@@ -13,10 +13,11 @@ import {
 } from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
-import { scheduleCronJobs } from './app/scheduleCronJobs';
+import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
 import { startWorker } from './app/worker';
 import { redis } from './modules/cache/redis';
 import { prisma } from './modules/prisma/prisma-client';
+import { scheduleMainTasks } from './app/scheduleMainTasks';
 
 async function startServer() {
     const app = createExpressApp();
@@ -53,10 +54,12 @@ async function startServer() {
 
     if (process.env.WORKER === 'true') {
         try {
-            scheduleCronJobs();
+            scheduleWorkerTasks();
         } catch (e) {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
+    } else {
+        scheduleMainTasks();
     }
 }
 

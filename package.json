@@ -14,6 +14,10 @@
         "generate": "graphql-codegen --config codegen.yml -r dotenv/config"
     },
     "dependencies": {
+        "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo",
+        "@ethersproject/address": "^5.6.0",
+        "@ethersproject/bignumber": "^5.6.0",
+        "@ethersproject/constants": "^5.6.0",
         "@gnosis.pm/safe-core-sdk": "^1.2.0",
         "@graphql-tools/load-files": "^6.5.2",
         "@graphql-tools/merge": "^8.2.1",
@@ -36,11 +40,11 @@
         "moment-timezone": "^0.5.34",
         "node-cron": "^3.0.0",
         "pino-http": "^6.0.0",
+        "prisma": "3.6.0",
         "redis": "^4.0.1",
         "safe-compare": "^1.1.4",
         "ts-dotenv": "^0.8.1",
-        "uuid": "^8.3.2",
-        "prisma": "3.6.0"
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@graphql-codegen/add": "^3.1.0",
@@ -56,6 +60,7 @@
         "@types/graphql-type-json": "^0.3.2",
         "@types/jest": "^27.0.3",
         "@types/lodash": "^4.14.177",
+        "@types/memory-cache": "^0.2.1",
         "@types/node": "^16.11.7",
         "@types/node-cron": "^3.0.0",
         "@types/pino-http": "^5.8.1",
@@ -71,7 +76,6 @@
         "testcontainers": "^8.0.0",
         "ts-jest": "^27.1.1",
         "ts-node": "^10.4.0",
-        "typescript": "^4.5.3",
-        "@types/memory-cache": "^0.2.1"
+        "typescript": "^4.5.3"
     }
 }

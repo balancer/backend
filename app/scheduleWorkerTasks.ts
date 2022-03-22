@@ -10,8 +10,9 @@ import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
+import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 
-export function scheduleCronJobs() {
+export function scheduleWorkerTasks() {
     //every 20 seconds
     cron.schedule('*/20 * * * * *', async () => {
         try {
@@ -62,7 +63,14 @@ export function scheduleCronJobs() {
         try {
             await balancerService.cachePools();
             await beetsFarmService.cacheBeetsFarms();
+
+            await balancerSdk.sor.fetchPools();
         } catch (e) {}
+    });
+
+    //once a minute
+    cron.schedule('* * * * *', async () => {
+        await balancerSdk.sor.reloadGraph();
     });
 
     //every 30 seconds
@@ -92,7 +100,7 @@ export function scheduleCronJobs() {
 
     //once a day
     cron.schedule('5 0 * * *', async () => {
-        console.log("Starting new cron to cache daily data.")
+        console.log('Starting new cron to cache daily data.');
         try {
             const timestamp = moment.tz('GMT').startOf('day').unix();
 
@@ -100,15 +108,19 @@ export function scheduleCronJobs() {
             for (let i = 0; i < 10; i++) {
                 try {
                     await portfolioService.cacheRawDataForTimestamp(timestamp);
-                    console.log("Finished cron to cache daily data.")
+                    console.log('Finished cron to cache daily data.');
                     break;
                 } catch (e) {
-                    console.log(`Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`, e)
+                    console.log(
+                        `Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`,
+                        e,
+                    );
                     await sleep(5000);
                 }
             }
         } catch (e) {
-            console.log(`Fatal error happened during daily caching.`, e)}
+            console.log(`Fatal error happened during daily caching.`, e);
+        }
     });
 
     tokenPriceService.cacheHistoricalTokenPrices().catch();
