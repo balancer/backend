@@ -96,6 +96,16 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerPortfolioData({ id, previousBlockNumber });
     }
 
+    public async getUser(userAddress: string): Promise<BalancerUserFragment | null> {
+        const { users } = await this.sdk.BalancerUsers({ where: { id: userAddress.toLowerCase() } });
+
+        if (users.length === 0) {
+            return null;
+        }
+
+        return this.normalizeBalancerUser(users[0]);
+    }
+
     public async getAllUsers(args: BalancerUsersQueryVariables): Promise<BalancerUserFragment[]> {
         const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
 
