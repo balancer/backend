@@ -111,6 +111,7 @@ export class BeetsFarmService {
             ...farmUser,
             __typename: 'GqlBeetsFarmUser',
             farmId: farmUser.pool?.id || '',
+            pair: farmUser?.pool?.pair || '',
         }));
 
         await cache.putObjectValue(FARM_USERS_CACHE_KEY, mapped, 30);

@@ -4,6 +4,7 @@ extend type Query {
     beetsGetUserDataForFarm(farmId: String!): GqlBeetsFarmUser
     beetsGetUserDataForAllFarms: [GqlBeetsFarmUser!]!
     beetsGetConfig: GqlBeetsConfig!
+    beetsGetUserPoolData: [GqlBeetsUserPoolData!]!
 }
 
 type GqlBeetsProtocolData {
@@ -60,6 +61,7 @@ type GqlBeetsFarmUser {
     farmId: ID!
     rewardDebt: BigInt!
     timestamp: BigInt!
+    pair: Bytes!
 }
 
 type GqlBeetsConfig {
@@ -94,4 +96,20 @@ type GqlBeetsConfigPoolFilterItem {
     id: ID!
     title: String!
     pools: [String!]!
+}
+
+type GqlBeetsUserPoolData {
+    poolId: String!
+    balance: BigDecimal!
+    balanceScaled: BigInt!
+    balanceUSD: BigDecimal!
+    tokens: [GqlBeetsUserPoolTokenData!]!
+    mainTokens: [GqlBeetsUserPoolTokenData!]
+}
+
+type GqlBeetsUserPoolTokenData {
+    address: String!
+    symbol: String!
+    balance: String!
+    balanceUSD: BigDecimal!
 }
