@@ -105,6 +105,7 @@ type GqlBeetsUserPoolData {
     balanceUSD: BigDecimal!
     tokens: [GqlBeetsUserPoolTokenData!]!
     mainTokens: [GqlBeetsUserPoolTokenData!]
+    hasUnstakedBpt: Boolean
 }
 
 type GqlBeetsUserPoolTokenData {

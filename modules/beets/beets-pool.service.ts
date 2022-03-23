@@ -20,14 +20,16 @@ export class BeetsPoolService {
         const sharesOwned = balancerUser?.sharesOwned || [];
         const tokenPrices = await tokenPriceService.getTokenPrices();
         const beetsBar = await beetsBarService.getBeetsBarNow();
+        const farms = await beetsFarmService.getBeetsFarms();
 
         const data: GqlBeetsUserPoolData[] = [];
 
         for (const pool of pools) {
             let balanceScaled = BigNumber.from(0);
-
+            const farm = farms.find((farm) => addressesMatch(farm.pair, pool.address));
             const userFarm = userFarms.find((userFarm) => addressesMatch(userFarm.pair, pool.address));
             const shares = sharesOwned.find((shares) => shares.poolId.id === pool.id);
+            const hasUnstakedBpt = farm && farm.allocPoint > 0 && userFarm && shares && parseFloat(shares.balance) > 0;
 
             if (userFarm) {
                 balanceScaled = balanceScaled.add(userFarm.amount);
@@ -71,6 +73,7 @@ export class BeetsPoolService {
                     balance,
                     balanceScaled: balanceScaled.toString(),
                     balanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+                    hasUnstakedBpt,
                     tokens,
                     mainTokens: pool.mainTokens?.map((mainToken) => {
                         const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, mainToken);
