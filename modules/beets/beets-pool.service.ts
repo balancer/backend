@@ -52,17 +52,19 @@ export class BeetsPoolService {
             if (balanceScaled.gt(0)) {
                 const balance = formatFixed(balanceScaled.toString(), 18).toString();
                 const userShareOfPool = parseFloat(balance) / parseFloat(pool.totalShares);
-                const tokens = pool.tokens.map((token) => {
-                    const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
-                    const balance = parseFloat(token.balance) * userShareOfPool;
+                const tokens = pool.tokens
+                    .filter((token) => token.address !== pool.address)
+                    .map((token) => {
+                        const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
+                        const balance = parseFloat(token.balance) * userShareOfPool;
 
-                    return {
-                        address: getAddress(token.address),
-                        symbol: token.symbol,
-                        balance: `${balance}`,
-                        balanceUSD: `${balance * tokenPrice}`,
-                    };
-                });
+                        return {
+                            address: getAddress(token.address),
+                            symbol: token.symbol,
+                            balance: `${balance}`,
+                            balanceUSD: `${balance * tokenPrice}`,
+                        };
+                    });
 
                 data.push({
                     poolId: pool.id,
