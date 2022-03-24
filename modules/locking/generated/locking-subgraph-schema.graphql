@@ -92,7 +92,9 @@ input ClaimedReward_filter {
     token_not_in: [Bytes!]
     user: String
     user_contains: String
+    user_contains_nocase: String
     user_ends_with: String
+    user_ends_with_nocase: String
     user_gt: String
     user_gte: String
     user_in: [String!]
@@ -100,10 +102,14 @@ input ClaimedReward_filter {
     user_lte: String
     user_not: String
     user_not_contains: String
+    user_not_contains_nocase: String
     user_not_ends_with: String
+    user_not_ends_with_nocase: String
     user_not_in: [String!]
     user_not_starts_with: String
+    user_not_starts_with_nocase: String
     user_starts_with: String
+    user_starts_with_nocase: String
 }
 
 enum ClaimedReward_orderBy {
@@ -209,7 +215,9 @@ input Locker_filter {
     lockDuration_not_in: [BigInt!]
     name: String
     name_contains: String
+    name_contains_nocase: String
     name_ends_with: String
+    name_ends_with_nocase: String
     name_gt: String
     name_gte: String
     name_in: [String!]
@@ -217,13 +225,19 @@ input Locker_filter {
     name_lte: String
     name_not: String
     name_not_contains: String
+    name_not_contains_nocase: String
     name_not_ends_with: String
+    name_not_ends_with_nocase: String
     name_not_in: [String!]
     name_not_starts_with: String
+    name_not_starts_with_nocase: String
     name_starts_with: String
+    name_starts_with_nocase: String
     symbol: String
     symbol_contains: String
+    symbol_contains_nocase: String
     symbol_ends_with: String
+    symbol_ends_with_nocase: String
     symbol_gt: String
     symbol_gte: String
     symbol_in: [String!]
@@ -231,10 +245,14 @@ input Locker_filter {
     symbol_lte: String
     symbol_not: String
     symbol_not_contains: String
+    symbol_not_contains_nocase: String
     symbol_not_ends_with: String
+    symbol_not_ends_with_nocase: String
     symbol_not_in: [String!]
     symbol_not_starts_with: String
+    symbol_not_starts_with_nocase: String
     symbol_starts_with: String
+    symbol_starts_with_nocase: String
     timestamp: BigInt
     timestamp_gt: BigInt
     timestamp_gte: BigInt
@@ -322,7 +340,9 @@ input LockingPeriod_filter {
     timestamp_not_in: [BigInt!]
     user: String
     user_contains: String
+    user_contains_nocase: String
     user_ends_with: String
+    user_ends_with_nocase: String
     user_gt: String
     user_gte: String
     user_in: [String!]
@@ -330,10 +350,14 @@ input LockingPeriod_filter {
     user_lte: String
     user_not: String
     user_not_contains: String
+    user_not_contains_nocase: String
     user_not_ends_with: String
+    user_not_ends_with_nocase: String
     user_not_in: [String!]
     user_not_starts_with: String
+    user_not_starts_with_nocase: String
     user_starts_with: String
+    user_starts_with_nocase: String
 }
 
 enum LockingPeriod_orderBy {
@@ -539,7 +563,9 @@ input RewardToken_filter {
     id_not_in: [ID!]
     locker: String
     locker_contains: String
+    locker_contains_nocase: String
     locker_ends_with: String
+    locker_ends_with_nocase: String
     locker_gt: String
     locker_gte: String
     locker_in: [String!]
@@ -547,10 +573,14 @@ input RewardToken_filter {
     locker_lte: String
     locker_not: String
     locker_not_contains: String
+    locker_not_contains_nocase: String
     locker_not_ends_with: String
+    locker_not_ends_with_nocase: String
     locker_not_in: [String!]
     locker_not_starts_with: String
+    locker_not_starts_with_nocase: String
     locker_starts_with: String
+    locker_starts_with_nocase: String
     rewardPeriodFinish: BigInt
     rewardPeriodFinish_gt: BigInt
     rewardPeriodFinish_gte: BigInt
@@ -808,7 +838,9 @@ input User_filter {
     id_not_in: [ID!]
     locker: String
     locker_contains: String
+    locker_contains_nocase: String
     locker_ends_with: String
+    locker_ends_with_nocase: String
     locker_gt: String
     locker_gte: String
     locker_in: [String!]
@@ -816,10 +848,14 @@ input User_filter {
     locker_lte: String
     locker_not: String
     locker_not_contains: String
+    locker_not_contains_nocase: String
     locker_not_ends_with: String
+    locker_not_ends_with_nocase: String
     locker_not_in: [String!]
     locker_not_starts_with: String
+    locker_not_starts_with_nocase: String
     locker_starts_with: String
+    locker_starts_with_nocase: String
     timestamp: BigInt
     timestamp_gt: BigInt
     timestamp_gte: BigInt

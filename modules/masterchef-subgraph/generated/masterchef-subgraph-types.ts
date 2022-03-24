@@ -18,9 +18,20 @@ export type Scalars = {
     Bytes: string;
 };
 
+/** The block at which the query should be executed. */
 export type Block_Height = {
+    /** Value containing a block hash */
     hash?: InputMaybe<Scalars['Bytes']>;
+    /** Value containing a block number */
     number?: InputMaybe<Scalars['Int']>;
+    /**
+     * Value containing the minimum block number.
+     * In the case of `number_gte`, the query will be executed on the latest block only if
+     * the subgraph has progressed to or past the minimum block number.
+     * Defaults to the latest block when omitted.
+     *
+     */
+    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
 export type MasterChef = {
@@ -103,6 +114,7 @@ export enum MasterChef_OrderBy {
     TotalAllocPoint = 'totalAllocPoint',
 }
 
+/** Defines the order direction, either ascending or descending */
 export enum OrderDirection {
     Asc = 'asc',
     Desc = 'desc',
@@ -175,7 +187,9 @@ export type Pool_Filter = {
     lastRewardBlock_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     masterChef?: InputMaybe<Scalars['String']>;
     masterChef_contains?: InputMaybe<Scalars['String']>;
+    masterChef_contains_nocase?: InputMaybe<Scalars['String']>;
     masterChef_ends_with?: InputMaybe<Scalars['String']>;
+    masterChef_ends_with_nocase?: InputMaybe<Scalars['String']>;
     masterChef_gt?: InputMaybe<Scalars['String']>;
     masterChef_gte?: InputMaybe<Scalars['String']>;
     masterChef_in?: InputMaybe<Array<Scalars['String']>>;
@@ -183,10 +197,14 @@ export type Pool_Filter = {
     masterChef_lte?: InputMaybe<Scalars['String']>;
     masterChef_not?: InputMaybe<Scalars['String']>;
     masterChef_not_contains?: InputMaybe<Scalars['String']>;
+    masterChef_not_contains_nocase?: InputMaybe<Scalars['String']>;
     masterChef_not_ends_with?: InputMaybe<Scalars['String']>;
+    masterChef_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     masterChef_not_in?: InputMaybe<Array<Scalars['String']>>;
     masterChef_not_starts_with?: InputMaybe<Scalars['String']>;
+    masterChef_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     masterChef_starts_with?: InputMaybe<Scalars['String']>;
+    masterChef_starts_with_nocase?: InputMaybe<Scalars['String']>;
     pair?: InputMaybe<Scalars['Bytes']>;
     pair_contains?: InputMaybe<Scalars['Bytes']>;
     pair_in?: InputMaybe<Array<Scalars['Bytes']>>;
@@ -195,7 +213,9 @@ export type Pool_Filter = {
     pair_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     rewarder?: InputMaybe<Scalars['String']>;
     rewarder_contains?: InputMaybe<Scalars['String']>;
+    rewarder_contains_nocase?: InputMaybe<Scalars['String']>;
     rewarder_ends_with?: InputMaybe<Scalars['String']>;
+    rewarder_ends_with_nocase?: InputMaybe<Scalars['String']>;
     rewarder_gt?: InputMaybe<Scalars['String']>;
     rewarder_gte?: InputMaybe<Scalars['String']>;
     rewarder_in?: InputMaybe<Array<Scalars['String']>>;
@@ -203,10 +223,14 @@ export type Pool_Filter = {
     rewarder_lte?: InputMaybe<Scalars['String']>;
     rewarder_not?: InputMaybe<Scalars['String']>;
     rewarder_not_contains?: InputMaybe<Scalars['String']>;
+    rewarder_not_contains_nocase?: InputMaybe<Scalars['String']>;
     rewarder_not_ends_with?: InputMaybe<Scalars['String']>;
+    rewarder_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     rewarder_not_in?: InputMaybe<Array<Scalars['String']>>;
     rewarder_not_starts_with?: InputMaybe<Scalars['String']>;
+    rewarder_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     rewarder_starts_with?: InputMaybe<Scalars['String']>;
+    rewarder_starts_with_nocase?: InputMaybe<Scalars['String']>;
     slpBalance?: InputMaybe<Scalars['BigInt']>;
     slpBalance_gt?: InputMaybe<Scalars['BigInt']>;
     slpBalance_gte?: InputMaybe<Scalars['BigInt']>;
@@ -269,6 +293,7 @@ export type Query_MetaArgs = {
 export type QueryMasterChefArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryMasterChefsArgs = {
@@ -277,12 +302,14 @@ export type QueryMasterChefsArgs = {
     orderBy?: InputMaybe<MasterChef_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<MasterChef_Filter>;
 };
 
 export type QueryPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryPoolsArgs = {
@@ -291,12 +318,14 @@ export type QueryPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type QueryRewarderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryRewardersArgs = {
@@ -305,12 +334,14 @@ export type QueryRewardersArgs = {
     orderBy?: InputMaybe<Rewarder_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Rewarder_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUsersArgs = {
@@ -319,6 +350,7 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -401,6 +433,7 @@ export type Subscription_MetaArgs = {
 export type SubscriptionMasterChefArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionMasterChefsArgs = {
@@ -409,12 +442,14 @@ export type SubscriptionMasterChefsArgs = {
     orderBy?: InputMaybe<MasterChef_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<MasterChef_Filter>;
 };
 
 export type SubscriptionPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionPoolsArgs = {
@@ -423,12 +458,14 @@ export type SubscriptionPoolsArgs = {
     orderBy?: InputMaybe<Pool_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
 };
 
 export type SubscriptionRewarderArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionRewardersArgs = {
@@ -437,12 +474,14 @@ export type SubscriptionRewardersArgs = {
     orderBy?: InputMaybe<Rewarder_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Rewarder_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUsersArgs = {
@@ -451,6 +490,7 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -507,7 +547,9 @@ export type User_Filter = {
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
     pool?: InputMaybe<Scalars['String']>;
     pool_contains?: InputMaybe<Scalars['String']>;
+    pool_contains_nocase?: InputMaybe<Scalars['String']>;
     pool_ends_with?: InputMaybe<Scalars['String']>;
+    pool_ends_with_nocase?: InputMaybe<Scalars['String']>;
     pool_gt?: InputMaybe<Scalars['String']>;
     pool_gte?: InputMaybe<Scalars['String']>;
     pool_in?: InputMaybe<Array<Scalars['String']>>;
@@ -515,10 +557,14 @@ export type User_Filter = {
     pool_lte?: InputMaybe<Scalars['String']>;
     pool_not?: InputMaybe<Scalars['String']>;
     pool_not_contains?: InputMaybe<Scalars['String']>;
+    pool_not_contains_nocase?: InputMaybe<Scalars['String']>;
     pool_not_ends_with?: InputMaybe<Scalars['String']>;
+    pool_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     pool_not_in?: InputMaybe<Array<Scalars['String']>>;
     pool_not_starts_with?: InputMaybe<Scalars['String']>;
+    pool_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     pool_starts_with?: InputMaybe<Scalars['String']>;
+    pool_starts_with_nocase?: InputMaybe<Scalars['String']>;
     rewardDebt?: InputMaybe<Scalars['BigInt']>;
     rewardDebt_gt?: InputMaybe<Scalars['BigInt']>;
     rewardDebt_gte?: InputMaybe<Scalars['BigInt']>;

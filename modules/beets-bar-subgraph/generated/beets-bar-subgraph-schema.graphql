@@ -1,8 +1,17 @@
-directive @derivedFrom(field: String) on FIELD_DEFINITION
+"""
+creates a virtual field on the entity that may be queried but cannot be set manually through the mappings API.
+"""
+directive @derivedFrom(field: String!) on FIELD_DEFINITION
 
+"""
+Marks the GraphQL type as indexable entity.  Each type that should be an entity is required to be annotated with this directive.
+"""
 directive @entity on OBJECT
 
-directive @subgraphId(id: String) on OBJECT
+"""
+Defined a Subgraph ID for an object type
+"""
+directive @subgraphId(id: String!) on OBJECT
 
 type Bar {
     address: Bytes!
@@ -77,7 +86,9 @@ input Bar_filter {
     id_not_in: [ID!]
     name: String
     name_contains: String
+    name_contains_nocase: String
     name_ends_with: String
+    name_ends_with_nocase: String
     name_gt: String
     name_gte: String
     name_in: [String!]
@@ -85,10 +96,14 @@ input Bar_filter {
     name_lte: String
     name_not: String
     name_not_contains: String
+    name_not_contains_nocase: String
     name_not_ends_with: String
+    name_not_ends_with_nocase: String
     name_not_in: [String!]
     name_not_starts_with: String
+    name_not_starts_with_nocase: String
     name_starts_with: String
+    name_starts_with_nocase: String
     ratio: BigDecimal
     ratio_gt: BigDecimal
     ratio_gte: BigDecimal
@@ -107,7 +122,9 @@ input Bar_filter {
     sharedVestingTokenRevenue_not_in: [BigDecimal!]
     symbol: String
     symbol_contains: String
+    symbol_contains_nocase: String
     symbol_ends_with: String
+    symbol_ends_with_nocase: String
     symbol_gt: String
     symbol_gte: String
     symbol_in: [String!]
@@ -115,10 +132,14 @@ input Bar_filter {
     symbol_lte: String
     symbol_not: String
     symbol_not_contains: String
+    symbol_not_contains_nocase: String
     symbol_not_ends_with: String
+    symbol_not_ends_with_nocase: String
     symbol_not_in: [String!]
     symbol_not_starts_with: String
+    symbol_not_starts_with_nocase: String
     symbol_starts_with: String
+    symbol_starts_with_nocase: String
     timestamp: BigInt
     timestamp_gt: BigInt
     timestamp_gte: BigInt
@@ -173,13 +194,34 @@ scalar BigDecimal
 
 scalar BigInt
 
+"""
+The block at which the query should be executed.
+"""
 input Block_height {
+    """
+    Value containing a block hash
+    """
     hash: Bytes
+
+    """
+    Value containing a block number
+    """
     number: Int
+
+    """
+    Value containing the minimum block number.
+    In the case of `number_gte`, the query will be executed on the latest block only if
+    the subgraph has progressed to or past the minimum block number.
+    Defaults to the latest block when omitted.
+    """
+    number_gte: Int
 }
 
 scalar Bytes
 
+"""
+Defines the order direction, either ascending or descending
+"""
 enum OrderDirection {
     asc
     desc
@@ -192,38 +234,58 @@ type Query {
     _meta(block: Block_height): _Meta_
     bar(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
     ): Bar
     bars(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         first: Int = 100
         orderBy: Bar_orderBy
         orderDirection: OrderDirection
         skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
         where: Bar_filter
     ): [Bar!]!
     user(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
     ): User
     users(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         first: Int = 100
         orderBy: User_orderBy
         orderDirection: OrderDirection
         skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
         where: User_filter
     ): [User!]!
 }
@@ -235,38 +297,58 @@ type Subscription {
     _meta(block: Block_height): _Meta_
     bar(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
     ): Bar
     bars(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         first: Int = 100
         orderBy: Bar_orderBy
         orderDirection: OrderDirection
         skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
         where: Bar_filter
     ): [Bar!]!
     user(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         id: ID!
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
     ): User
     users(
         """
-        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        The block at which the query should be executed. Can either be a `{ hash: Bytes }` value containing a block hash, a `{ number: Int }` containing the block number, or a `{ number_gte: Int }` containing the minimum block number. In the case of `number_gte`, the query will be executed on the latest block only if the subgraph has progressed to or past the minimum block number. Defaults to the latest block when omitted.
         """
         block: Block_height
         first: Int = 100
         orderBy: User_orderBy
         orderDirection: OrderDirection
         skip: Int = 0
+
+        """
+        Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+        """
+        subgraphError: _SubgraphErrorPolicy_! = deny
         where: User_filter
     ): [User!]!
 }
@@ -292,7 +374,9 @@ input User_filter {
     address_not_in: [Bytes!]
     bar: String
     bar_contains: String
+    bar_contains_nocase: String
     bar_ends_with: String
+    bar_ends_with_nocase: String
     bar_gt: String
     bar_gte: String
     bar_in: [String!]
@@ -300,10 +384,14 @@ input User_filter {
     bar_lte: String
     bar_not: String
     bar_not_contains: String
+    bar_not_contains_nocase: String
     bar_not_ends_with: String
+    bar_not_ends_with_nocase: String
     bar_not_in: [String!]
     bar_not_starts_with: String
+    bar_not_starts_with_nocase: String
     bar_starts_with: String
+    bar_starts_with_nocase: String
     block: BigInt
     block_gt: BigInt
     block_gte: BigInt
