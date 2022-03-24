@@ -10,6 +10,7 @@ import erc20ContractAbi from './abi/ERC20.json';
 import lockingContractAbi from './abi/FBeetsLocker.json';
 import { QueryLockersArgs } from './generated/locking-subgraph-types';
 import { lockingSubgraph } from './locking-subgraph';
+import { FBeetsLocker } from './types/FBeetsLocker';
 
 export type Locker = {
     totalLockedPercentage: string;
@@ -29,6 +30,7 @@ export type LockingPeriod = {
     epoch: string;
     lockAmount: string;
     lockAmountUsd: string;
+    withdrawn: boolean;
 };
 
 export type LockingUser = {
@@ -61,7 +63,7 @@ export type LockingRewardToken = {
 const SECONDS_PER_YEAR = 31557600;
 
 class LockingService {
-    private lockingContract = getContractAt(env.LOCKING_CONTRACT_ADDRESS, lockingContractAbi);
+    private lockingContract: FBeetsLocker = getContractAt(env.LOCKING_CONTRACT_ADDRESS, lockingContractAbi);
 
     public async getLocker(args: QueryLockersArgs): Promise<Locker> {
         const locker = await lockingSubgraph.getLocker(args);
@@ -109,14 +111,26 @@ class LockingService {
         let totalUnlockAmount = decimal(0);
         let totalUnlockAmountUsd = decimal(0);
 
+        const userBalance = await this.lockingContract.balances(user.address);
+        const lastProcessedUserLock = await this.lockingContract.userLocks(
+            user.address,
+            userBalance.nextUnlockIndex.toNumber() - 1,
+        );
+        const lastProcessedEpoch = lastProcessedUserLock.unlockTime.toNumber() - env.LOCKING_DURATION;
+
         for (let lockingPeriod of user.lockingPeriods) {
             const usdValue = decimal(lockingPeriod.lockAmount).mul(fBeetsPrice);
+            const withdrawn = Number(lockingPeriod.epoch) <= lastProcessedEpoch;
             lockingPeriods.push({
                 epoch: lockingPeriod.epoch,
                 lockAmount: lockingPeriod.lockAmount,
                 lockAmountUsd: usdValue.toFixed(),
+                withdrawn,
             });
-            if (moment.unix(parseInt(lockingPeriod.epoch) + env.LOCKING_DURATION).isBefore(moment.now())) {
+            if (
+                !withdrawn &&
+                moment.unix(parseInt(lockingPeriod.epoch) + env.LOCKING_DURATION).isBefore(moment.now())
+            ) {
                 totalUnlockAmount = totalUnlockAmount.add(lockingPeriod.lockAmount);
                 totalUnlockAmountUsd = totalUnlockAmountUsd.add(usdValue);
             }

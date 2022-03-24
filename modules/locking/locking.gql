@@ -16,6 +16,7 @@ type GqlLockingPeriod {
     epoch: BigInt!
     lockAmount: BigDecimal!
     lockAmountUsd: BigDecimal!
+    withdrawn: Boolean!
 }
 
 type GqlRewardToken {

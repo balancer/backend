@@ -85,7 +85,9 @@ export type ClaimedReward_Filter = {
     token_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
+    user_contains_nocase?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
+    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
     user_gt?: InputMaybe<Scalars['String']>;
     user_gte?: InputMaybe<Scalars['String']>;
     user_in?: InputMaybe<Array<Scalars['String']>>;
@@ -93,10 +95,14 @@ export type ClaimedReward_Filter = {
     user_lte?: InputMaybe<Scalars['String']>;
     user_not?: InputMaybe<Scalars['String']>;
     user_not_contains?: InputMaybe<Scalars['String']>;
+    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
     user_not_ends_with?: InputMaybe<Scalars['String']>;
+    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     user_not_in?: InputMaybe<Array<Scalars['String']>>;
     user_not_starts_with?: InputMaybe<Scalars['String']>;
+    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     user_starts_with?: InputMaybe<Scalars['String']>;
+    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
 };
 
 export enum ClaimedReward_OrderBy {
@@ -207,7 +213,9 @@ export type Locker_Filter = {
     lockDuration_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     name?: InputMaybe<Scalars['String']>;
     name_contains?: InputMaybe<Scalars['String']>;
+    name_contains_nocase?: InputMaybe<Scalars['String']>;
     name_ends_with?: InputMaybe<Scalars['String']>;
+    name_ends_with_nocase?: InputMaybe<Scalars['String']>;
     name_gt?: InputMaybe<Scalars['String']>;
     name_gte?: InputMaybe<Scalars['String']>;
     name_in?: InputMaybe<Array<Scalars['String']>>;
@@ -215,13 +223,19 @@ export type Locker_Filter = {
     name_lte?: InputMaybe<Scalars['String']>;
     name_not?: InputMaybe<Scalars['String']>;
     name_not_contains?: InputMaybe<Scalars['String']>;
+    name_not_contains_nocase?: InputMaybe<Scalars['String']>;
     name_not_ends_with?: InputMaybe<Scalars['String']>;
+    name_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     name_not_in?: InputMaybe<Array<Scalars['String']>>;
     name_not_starts_with?: InputMaybe<Scalars['String']>;
+    name_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     name_starts_with?: InputMaybe<Scalars['String']>;
+    name_starts_with_nocase?: InputMaybe<Scalars['String']>;
     symbol?: InputMaybe<Scalars['String']>;
     symbol_contains?: InputMaybe<Scalars['String']>;
+    symbol_contains_nocase?: InputMaybe<Scalars['String']>;
     symbol_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_ends_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_gt?: InputMaybe<Scalars['String']>;
     symbol_gte?: InputMaybe<Scalars['String']>;
     symbol_in?: InputMaybe<Array<Scalars['String']>>;
@@ -229,10 +243,14 @@ export type Locker_Filter = {
     symbol_lte?: InputMaybe<Scalars['String']>;
     symbol_not?: InputMaybe<Scalars['String']>;
     symbol_not_contains?: InputMaybe<Scalars['String']>;
+    symbol_not_contains_nocase?: InputMaybe<Scalars['String']>;
     symbol_not_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_not_in?: InputMaybe<Array<Scalars['String']>>;
     symbol_not_starts_with?: InputMaybe<Scalars['String']>;
+    symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_starts_with?: InputMaybe<Scalars['String']>;
+    symbol_starts_with_nocase?: InputMaybe<Scalars['String']>;
     timestamp?: InputMaybe<Scalars['BigInt']>;
     timestamp_gt?: InputMaybe<Scalars['BigInt']>;
     timestamp_gte?: InputMaybe<Scalars['BigInt']>;
@@ -321,7 +339,9 @@ export type LockingPeriod_Filter = {
     timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     user?: InputMaybe<Scalars['String']>;
     user_contains?: InputMaybe<Scalars['String']>;
+    user_contains_nocase?: InputMaybe<Scalars['String']>;
     user_ends_with?: InputMaybe<Scalars['String']>;
+    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
     user_gt?: InputMaybe<Scalars['String']>;
     user_gte?: InputMaybe<Scalars['String']>;
     user_in?: InputMaybe<Array<Scalars['String']>>;
@@ -329,10 +349,14 @@ export type LockingPeriod_Filter = {
     user_lte?: InputMaybe<Scalars['String']>;
     user_not?: InputMaybe<Scalars['String']>;
     user_not_contains?: InputMaybe<Scalars['String']>;
+    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
     user_not_ends_with?: InputMaybe<Scalars['String']>;
+    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     user_not_in?: InputMaybe<Array<Scalars['String']>>;
     user_not_starts_with?: InputMaybe<Scalars['String']>;
+    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     user_starts_with?: InputMaybe<Scalars['String']>;
+    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
 };
 
 export enum LockingPeriod_OrderBy {
@@ -490,7 +514,9 @@ export type RewardToken_Filter = {
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
     locker?: InputMaybe<Scalars['String']>;
     locker_contains?: InputMaybe<Scalars['String']>;
+    locker_contains_nocase?: InputMaybe<Scalars['String']>;
     locker_ends_with?: InputMaybe<Scalars['String']>;
+    locker_ends_with_nocase?: InputMaybe<Scalars['String']>;
     locker_gt?: InputMaybe<Scalars['String']>;
     locker_gte?: InputMaybe<Scalars['String']>;
     locker_in?: InputMaybe<Array<Scalars['String']>>;
@@ -498,10 +524,14 @@ export type RewardToken_Filter = {
     locker_lte?: InputMaybe<Scalars['String']>;
     locker_not?: InputMaybe<Scalars['String']>;
     locker_not_contains?: InputMaybe<Scalars['String']>;
+    locker_not_contains_nocase?: InputMaybe<Scalars['String']>;
     locker_not_ends_with?: InputMaybe<Scalars['String']>;
+    locker_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     locker_not_in?: InputMaybe<Array<Scalars['String']>>;
     locker_not_starts_with?: InputMaybe<Scalars['String']>;
+    locker_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     locker_starts_with?: InputMaybe<Scalars['String']>;
+    locker_starts_with_nocase?: InputMaybe<Scalars['String']>;
     rewardPeriodFinish?: InputMaybe<Scalars['BigInt']>;
     rewardPeriodFinish_gt?: InputMaybe<Scalars['BigInt']>;
     rewardPeriodFinish_gte?: InputMaybe<Scalars['BigInt']>;
@@ -717,7 +747,9 @@ export type User_Filter = {
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
     locker?: InputMaybe<Scalars['String']>;
     locker_contains?: InputMaybe<Scalars['String']>;
+    locker_contains_nocase?: InputMaybe<Scalars['String']>;
     locker_ends_with?: InputMaybe<Scalars['String']>;
+    locker_ends_with_nocase?: InputMaybe<Scalars['String']>;
     locker_gt?: InputMaybe<Scalars['String']>;
     locker_gte?: InputMaybe<Scalars['String']>;
     locker_in?: InputMaybe<Array<Scalars['String']>>;
@@ -725,10 +757,14 @@ export type User_Filter = {
     locker_lte?: InputMaybe<Scalars['String']>;
     locker_not?: InputMaybe<Scalars['String']>;
     locker_not_contains?: InputMaybe<Scalars['String']>;
+    locker_not_contains_nocase?: InputMaybe<Scalars['String']>;
     locker_not_ends_with?: InputMaybe<Scalars['String']>;
+    locker_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     locker_not_in?: InputMaybe<Array<Scalars['String']>>;
     locker_not_starts_with?: InputMaybe<Scalars['String']>;
+    locker_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     locker_starts_with?: InputMaybe<Scalars['String']>;
+    locker_starts_with_nocase?: InputMaybe<Scalars['String']>;
     timestamp?: InputMaybe<Scalars['BigInt']>;
     timestamp_gt?: InputMaybe<Scalars['BigInt']>;
     timestamp_gte?: InputMaybe<Scalars['BigInt']>;

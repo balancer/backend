@@ -3,6 +3,6 @@ import { env } from '../../app/env';
 
 const jsonRpcProvider = new ethers.providers.JsonRpcProvider(env.RPC_URL);
 
-export function getContractAt(address: string, abi: any): Contract {
-    return new Contract(address, abi, jsonRpcProvider);
+export function getContractAt<T extends Contract = Contract>(address: string, abi: any): T {
+    return new Contract(address, abi, jsonRpcProvider) as T;
 }
