@@ -1,10 +1,17 @@
-import { GqlBalancePoolAprItem, GqlBeetsFarm, GqlBeetsFarmUser } from '../../schema';
+import { GqlBalancePoolAprItem, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsUserPendingFarmRewards } from '../../schema';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { oneDayInMinutes, secondsPerYear } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { tokenService } from '../token/token.service';
+import { masterChefContractService } from '../masterchef/master-chef-contract.service';
+import { env } from '../../app/env';
+import { formatFixed } from '@ethersproject/bignumber';
+import _ from 'lodash';
+import { getAddress } from '@ethersproject/address';
+import { addressesMatch } from '../util/addresses';
+import { BigNumber } from 'ethers';
 
 const FARMS_CACHE_KEY = 'beetsFarms';
 const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
@@ -32,40 +39,42 @@ export class BeetsFarmService {
         const tokens = await tokenService.getTokens();
         const farms = await masterchefService.getAllFarms({});
 
-        const mapped: GqlBeetsFarm[] = farms.map((farm) => ({
-            ...farm,
-            __typename: 'GqlBeetsFarm',
-            allocPoint: parseInt(farm.allocPoint),
-            masterChef: {
-                ...farm.masterChef,
-                __typename: 'GqlBeetsMasterChef',
-                totalAllocPoint: parseInt(farm.masterChef.totalAllocPoint),
-            },
-            rewarder:
-                farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS
-                    ? {
-                          ...farm.rewarder,
-                          __typename: 'GqlBeetsRewarder',
-                          tokens: [
-                              {
-                                  token: farm.rewarder.rewardToken,
-                                  tokenPrice: tokenPriceService.getPriceForToken(
-                                      tokenPrices,
-                                      farm.rewarder.rewardToken,
-                                  ),
-                                  rewardPerSecond: `${Number(
-                                      parseInt(farm.rewarder?.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18),
-                                  )}`,
-                                  symbol:
-                                      tokens.find(
-                                          (token) =>
-                                              token.address.toLowerCase() === farm.rewarder?.rewardToken.toLowerCase(),
-                                      )?.symbol || '',
-                              },
-                          ],
-                      }
-                    : null,
-        }));
+        const mapped: GqlBeetsFarm[] = farms.map((farm) => {
+            const rewardToken = tokens.find((token) => addressesMatch(token.address, farm.rewarder?.rewardToken || ''));
+
+            return {
+                ...farm,
+                __typename: 'GqlBeetsFarm',
+                allocPoint: parseInt(farm.allocPoint),
+                masterChef: {
+                    ...farm.masterChef,
+                    __typename: 'GqlBeetsMasterChef',
+                    totalAllocPoint: parseInt(farm.masterChef.totalAllocPoint),
+                },
+                rewarder:
+                    farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS
+                        ? {
+                              ...farm.rewarder,
+                              __typename: 'GqlBeetsRewarder',
+                              tokens: [
+                                  {
+                                      token: farm.rewarder.rewardToken,
+                                      tokenPrice: tokenPriceService.getPriceForToken(
+                                          tokenPrices,
+                                          farm.rewarder.rewardToken,
+                                      ),
+                                      rewardPerSecond: formatFixed(
+                                          BigNumber.from(farm.rewarder?.rewardPerSecond || '0'),
+                                          rewardToken?.decimals || 18,
+                                      ),
+                                      decimals: rewardToken?.decimals || 18,
+                                      symbol: rewardToken?.symbol || '',
+                                  },
+                              ],
+                          }
+                        : null,
+            };
+        });
 
         await cache.putObjectValue(FARMS_CACHE_KEY, mapped, oneDayInMinutes);
 
@@ -160,6 +169,55 @@ export class BeetsFarmService {
         });
 
         return { items, thirdPartyApr: `${thirdPartyApr}`, beetsApr: `${beetsApr > 0 ? beetsApr : 0}` };
+    }
+
+    public async getUserPendingFarmRewards(userAddress: string): Promise<GqlBeetsUserPendingFarmRewards> {
+        const tokenPrices = await tokenPriceService.getTokenPrices();
+        const allFarms = await this.getBeetsFarms();
+        const userFarms = await this.getBeetsFarmsForUser(userAddress);
+        const userFarmsWithBalance = userFarms.filter((userFarm) => parseFloat(userFarm.amount) > 0);
+        const userFarmIds = userFarmsWithBalance.map((userFarm) => userFarm.farmId);
+        const pendingBeetsScaled = await masterChefContractService.getSummedPendingBeetsForFarms(
+            userFarmIds,
+            userAddress,
+        );
+        const pendingBeets = formatFixed(pendingBeetsScaled, 18);
+        const farmsWithRewarder = userFarmsWithBalance
+            .map((userFarm) => allFarms.find((farm) => farm.id === userFarm.farmId && farm.rewarder))
+            .filter((farm) => !!farm) as GqlBeetsFarm[];
+        const pendingRewards = await masterChefContractService.getSummedPendingRewards(farmsWithRewarder, userAddress);
+        const rewardTokens = _.flatten(farmsWithRewarder.map((farm) => farm.rewarder?.tokens || []));
+
+        const tokens = [
+            {
+                symbol: 'BEETS',
+                address: env.BEETS_ADDRESS,
+                balance: pendingBeets,
+                balanceUSD: `${
+                    parseFloat(pendingBeets) * tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS)
+                }`,
+            },
+            ..._.map(pendingRewards, (balanceScaled, token) => {
+                const rewardToken = rewardTokens.find((tokenDefinition) =>
+                    addressesMatch(tokenDefinition.token, token),
+                );
+                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token);
+                const balance = formatFixed(balanceScaled, rewardToken?.decimals);
+
+                return {
+                    symbol: rewardToken?.symbol || '',
+                    address: getAddress(token),
+                    balance,
+                    balanceUSD: `${parseFloat(balance) * tokenPrice}`,
+                };
+            }),
+        ];
+
+        return {
+            tokens,
+            totalBalanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+            numFarms: `${userFarmsWithBalance.length}`,
+        };
     }
 }
 

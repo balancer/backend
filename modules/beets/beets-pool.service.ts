@@ -1,4 +1,4 @@
-import { GqlBeetsUserPoolData } from '../../schema';
+import { GqlBeetsUserPoolData, GqlBeetsUserPoolPoolData } from '../../schema';
 import { beetsFarmService } from './beets-farm.service';
 import { balancerService } from '../balancer/balancer.service';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
@@ -13,7 +13,7 @@ import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { getUserFBeetsInWalletBalance } from './beets';
 
 export class BeetsPoolService {
-    public async getUserPoolData(userAddress: string): Promise<GqlBeetsUserPoolData[]> {
+    public async getUserPoolData(userAddress: string): Promise<GqlBeetsUserPoolData> {
         const pools = await balancerService.getPools();
         const userFarms = await beetsFarmService.getBeetsFarmsForUser(userAddress);
         const balancerUser = await balancerSubgraphService.getUser(userAddress);
@@ -22,10 +22,11 @@ export class BeetsPoolService {
         const beetsBar = await beetsBarService.getBeetsBarNow();
         const farms = await beetsFarmService.getBeetsFarms();
 
-        const data: GqlBeetsUserPoolData[] = [];
+        const data: GqlBeetsUserPoolPoolData[] = [];
 
         for (const pool of pools) {
             let balanceScaled = BigNumber.from(0);
+            let farmBalanceScaled = BigNumber.from(0);
             const farm = farms.find((farm) => addressesMatch(farm.pair, pool.address));
             const userFarm = userFarms.find((userFarm) => addressesMatch(userFarm.pair, pool.address));
             const shares = sharesOwned.find((shares) => shares.poolId.id === pool.id);
@@ -33,6 +34,7 @@ export class BeetsPoolService {
 
             if (userFarm) {
                 balanceScaled = balanceScaled.add(userFarm.amount);
+                farmBalanceScaled = farmBalanceScaled.add(userFarm.amount);
             }
 
             if (shares && shares.balance !== '0') {
@@ -49,22 +51,29 @@ export class BeetsPoolService {
                 const underlyingBpt = totalFBeets.mul(fBeetsRatio).div(BigNumber.from(10).pow(18));
 
                 balanceScaled = balanceScaled.add(underlyingBpt);
+                farmBalanceScaled = farmBalanceScaled.add(
+                    BigNumber.from(fBeetsInFarm).mul(fBeetsRatio).div(BigNumber.from(10).pow(18)),
+                );
             }
 
             if (balanceScaled.gt(0)) {
                 const balance = formatFixed(balanceScaled.toString(), 18).toString();
                 const userShareOfPool = parseFloat(balance) / parseFloat(pool.totalShares);
+                const farmBalance = formatFixed(farmBalanceScaled.toString(), 18).toString();
+                const userFarmShareOfPool = parseFloat(farmBalance) / parseFloat(pool.totalShares);
                 const tokens = pool.tokens
                     .filter((token) => token.address !== pool.address)
                     .map((token) => {
                         const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token.address);
                         const balance = parseFloat(token.balance) * userShareOfPool;
+                        const farmBalance = parseFloat(token.balance) * userFarmShareOfPool;
 
                         return {
                             address: getAddress(token.address),
                             symbol: token.symbol,
                             balance: `${balance}`,
                             balanceUSD: `${balance * tokenPrice}`,
+                            farmBalanceUSD: `${farmBalance * tokenPrice}`,
                         };
                     });
 
@@ -73,6 +82,7 @@ export class BeetsPoolService {
                     balance,
                     balanceScaled: balanceScaled.toString(),
                     balanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+                    farmBalanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.farmBalanceUSD))}`,
                     hasUnstakedBpt,
                     tokens,
                     mainTokens: pool.mainTokens?.map((mainToken) => {
@@ -83,12 +93,14 @@ export class BeetsPoolService {
 
                         if (linearPool) {
                             const balance = parseFloat(linearPool.mainTokenTotalBalance) * userShareOfPool;
+                            const farmBalance = parseFloat(linearPool.mainTokenTotalBalance) * userFarmShareOfPool;
 
                             return {
                                 address: getAddress(mainToken),
                                 symbol: linearPool.mainToken.symbol,
                                 balance: `${balance}`,
                                 balanceUSD: `${balance * tokenPrice}`,
+                                farmBalanceUSD: `${farmBalance * tokenPrice}`,
                             };
                         }
 
@@ -96,11 +108,14 @@ export class BeetsPoolService {
 
                         if (token) {
                             const balance = parseFloat(token.balance) * userShareOfPool;
+                            const farmBalance = parseFloat(token.balance) * userFarmShareOfPool;
+
                             return {
                                 address: getAddress(mainToken),
                                 symbol: token.symbol,
                                 balance: `${balance}`,
                                 balanceUSD: `${balance * tokenPrice}`,
+                                farmBalanceUSD: `${farmBalance * tokenPrice}`,
                             };
                         }
 
@@ -110,13 +125,50 @@ export class BeetsPoolService {
                             symbol: '',
                             balance: '',
                             balanceUSD: '',
+                            farmBalanceUSD: '',
                         };
                     }),
                 });
             }
         }
 
-        return data;
+        const nonLinearPools = pools.filter((pool) => pool.poolType !== 'Linear');
+        const totalBalanceUSD = _.sumBy(data, (pool) => parseFloat(pool.balanceUSD));
+        const totalFarmBalanceUSD = _.sumBy(data, (pool) => parseFloat(pool.farmBalanceUSD));
+        const averageApr = _.sum(
+            data.map((item) => {
+                const pool = nonLinearPools.find((pool) => pool.id === item.poolId);
+
+                if (!pool) {
+                    return 0;
+                }
+
+                return parseFloat(pool.apr.total) * (parseFloat(item.balanceUSD) / totalBalanceUSD);
+            }),
+        );
+
+        const averageFarmApr = _.sum(
+            data.map((item) => {
+                const pool = nonLinearPools.find((pool) => pool.id === item.poolId);
+
+                if (!pool) {
+                    return 0;
+                }
+
+                return (
+                    (parseFloat(pool.apr.beetsApr) + parseFloat(pool.apr.thirdPartyApr)) *
+                    (parseFloat(item.farmBalanceUSD) / totalFarmBalanceUSD)
+                );
+            }),
+        );
+
+        return {
+            pools: data,
+            totalBalanceUSD: `${totalBalanceUSD}`,
+            averageApr: `${averageApr}`,
+            totalFarmBalanceUSD: `${totalFarmBalanceUSD}`,
+            averageFarmApr: `${averageFarmApr}`,
+        };
     }
 }
 
