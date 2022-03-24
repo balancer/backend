@@ -10,6 +10,9 @@ import {
     BalancerPoolFragment,
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
+    BalancerPoolShareFragment,
+    BalancerPoolSharesQuery,
+    BalancerPoolSharesQueryVariables,
     BalancerPoolSnapshotFragment,
     BalancerPoolSnapshotsQuery,
     BalancerPoolSnapshotsQueryVariables,
@@ -41,6 +44,7 @@ const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
 const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
 const PORTFOLIO_POOLS_CACHE_KEY = 'balance-subgraph_portfolio-pools';
+const USER_CACHE_KEY_PREFIX = 'balance-subgraph_user:';
 
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;
@@ -97,7 +101,7 @@ export class BalancerSubgraphService {
     }
 
     public async getUser(userAddress: string): Promise<BalancerUserFragment | null> {
-        const { users } = await this.sdk.BalancerUsers({ where: { id: userAddress.toLowerCase() } });
+        const { users } = await this.sdk.BalancerUsers({ where: { id: userAddress.toLowerCase() }, first: 1 });
 
         if (users.length === 0) {
             return null;
@@ -110,6 +114,16 @@ export class BalancerSubgraphService {
         const users = await subgraphLoadAll<BalancerUserFragment>(this.sdk.BalancerUsers, 'users', args);
 
         return users.map((user) => this.normalizeBalancerUser(user));
+    }
+
+    public async getPoolShares(args: BalancerPoolSharesQueryVariables): Promise<BalancerPoolShareFragment[]> {
+        const { poolShares } = await this.sdk.BalancerPoolShares(args);
+
+        return poolShares.map((shares) => ({
+            ...shares,
+            //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
+            balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+        }));
     }
 
     public async getLatestPrices(args: BalancerLatestPricesQueryVariables): Promise<BalancerLatestPricesQuery> {
