@@ -3126,22 +3126,10 @@ export type BalancerPoolSharesQueryVariables = Exact<{
 
 export type BalancerPoolSharesQuery = {
     __typename?: 'Query';
-    poolShares: Array<{
-        __typename?: 'PoolShare';
-        id: string;
-        balance: string;
-        userAddress: { __typename?: 'User'; id: string };
-        poolId: { __typename?: 'Pool'; id: string };
-    }>;
+    poolShares: Array<{ __typename?: 'PoolShare'; id: string; balance: string }>;
 };
 
-export type BalancerPoolShareFragment = {
-    __typename?: 'PoolShare';
-    id: string;
-    balance: string;
-    userAddress: { __typename?: 'User'; id: string };
-    poolId: { __typename?: 'Pool'; id: string };
-};
+export type BalancerPoolShareFragment = { __typename?: 'PoolShare'; id: string; balance: string };
 
 export type BalancerTokenPricesQueryVariables = Exact<{
     skip?: Maybe<Scalars['Int']>;
@@ -3741,13 +3729,7 @@ export const BalancerUserFragmentDoc = gql`
 export const BalancerPoolShareFragmentDoc = gql`
     fragment BalancerPoolShare on PoolShare {
         id
-        userAddress {
-            id
-        }
         balance
-        poolId {
-            id
-        }
     }
 `;
 export const BalancerTokenPriceFragmentDoc = gql`

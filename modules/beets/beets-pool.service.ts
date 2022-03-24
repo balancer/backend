@@ -31,7 +31,7 @@ export class BeetsPoolService {
             let farmBalanceScaled = BigNumber.from(0);
             const farm = farms.find((farm) => addressesMatch(farm.pair, pool.address));
             const userFarm = userFarms.find((userFarm) => addressesMatch(userFarm.pair, pool.address));
-            const shares = sharesOwned.find((shares) => shares.poolId.id === pool.id);
+            const shares = sharesOwned.find((shares) => shares.poolAddress === pool.address);
             const hasUnstakedBpt = farm && farm.allocPoint > 0 && userFarm && shares && parseFloat(shares.balance) > 0;
 
             if (userFarm) {
