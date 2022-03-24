@@ -14,15 +14,27 @@ import { getUserFBeetsInWalletBalance } from './beets';
 
 export class BeetsPoolService {
     public async getUserPoolData(userAddress: string): Promise<GqlBeetsUserPoolData> {
+        console.time('getPools');
         const pools = await balancerService.getPools();
+        console.timeEnd('getPools');
+        console.time('getBeetsFarmsForUser');
         const userFarms = await beetsFarmService.getBeetsFarmsForUser(userAddress);
+        console.timeEnd('getBeetsFarmsForUser');
+        console.time('getPoolShares');
         const sharesOwned = await balancerSubgraphService.getPoolShares({
             where: { userAddress: userAddress.toLowerCase() },
             first: 100,
         });
+        console.timeEnd('getPoolShares');
+        console.time('getTokenPrices');
         const tokenPrices = await tokenPriceService.getTokenPrices();
+        console.timeEnd('getTokenPrices');
+        console.time('getBeetsBarNow');
         const beetsBar = await beetsBarService.getBeetsBarNow();
+        console.timeEnd('getBeetsBarNow');
+        console.time('getBeetsFarms');
         const farms = await beetsFarmService.getBeetsFarms();
+        console.timeEnd('getBeetsFarms');
 
         const data: GqlBeetsUserPoolPoolData[] = [];
 
@@ -45,7 +57,9 @@ export class BeetsPoolService {
 
             if (pool.id === env.FBEETS_POOL_ID) {
                 const userFBeetsFarm = userFarms.find((userFarm) => addressesMatch(userFarm.pair, env.FBEETS_ADDRESS));
+                console.time('getUserFBeetsInWalletBalance');
                 const fBeetsInWallet = await getUserFBeetsInWalletBalance(userAddress);
+                console.timeEnd('getUserFBeetsInWalletBalance');
                 const fBeetsInFarm = userFBeetsFarm?.amount || '0';
                 const totalFBeets = BigNumber.from(fBeetsInWallet).add(fBeetsInFarm);
                 //stored precision is massive, we truncate it
