@@ -217,6 +217,7 @@ export class BeetsFarmService {
             tokens,
             totalBalanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
             numFarms: `${userFarmsWithBalance.length}`,
+            farmIds: userFarmsWithBalance.map((userFarm) => userFarm.farmId),
         };
     }
 }
