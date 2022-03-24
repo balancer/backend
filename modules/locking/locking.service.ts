@@ -47,6 +47,8 @@ export type LockingUser = {
     totalUnlockedAmountUsd: string;
     totalLostThroughKick: string;
     totalLostThroughKickUsd: string;
+    totalVotingPower: string;
+    lockedToVotingPowerRatio: string;
     timestamp: string;
     block: string;
 };
@@ -136,6 +138,8 @@ class LockingService {
             }
         }
 
+        const totalVotingPower = await this.getVotingPower(accountAddress);
+
         return {
             ...user,
             totalLockedAmountUsd: decimal(user.totalLockedAmount).mul(fBeetsPrice).toFixed(),
@@ -146,6 +150,8 @@ class LockingService {
             collectedKickRewardAmountUsd: decimal(user.collectedKickRewardAmount).mul(fBeetsPrice).toFixed(),
             lockingPeriods,
             claimedRewards,
+            totalVotingPower,
+            lockedToVotingPowerRatio: decimal(totalVotingPower).div(decimal(user.totalLockedAmount)).toFixed(),
         };
     }
 

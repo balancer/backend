@@ -42,6 +42,8 @@ type GqlLockingUser {
     totalUnlockedAmountUsd: BigDecimal!
     totalLostThroughKick: BigDecimal!
     totalLostThroughKickUsd: BigDecimal!
+    totalVotingPower: BigDecimal!
+    lockedToVotingPowerRatio: BigDecimal!
     timestamp: BigInt!
     block: BigInt!
 }
