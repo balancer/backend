@@ -16,8 +16,10 @@ export class BeetsPoolService {
     public async getUserPoolData(userAddress: string): Promise<GqlBeetsUserPoolData> {
         const pools = await balancerService.getPools();
         const userFarms = await beetsFarmService.getBeetsFarmsForUser(userAddress);
-        const balancerUser = await balancerSubgraphService.getUser(userAddress);
-        const sharesOwned = balancerUser?.sharesOwned || [];
+        const sharesOwned = await balancerSubgraphService.getPoolShares({
+            where: { userAddress: userAddress.toLowerCase() },
+            first: 100,
+        });
         const tokenPrices = await tokenPriceService.getTokenPrices();
         const beetsBar = await beetsBarService.getBeetsBarNow();
         const farms = await beetsFarmService.getBeetsFarms();

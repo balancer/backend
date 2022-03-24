@@ -3115,6 +3115,34 @@ export type BalancerUserFragment = {
         | undefined;
 };
 
+export type BalancerPoolSharesQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<PoolShare_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<PoolShare_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerPoolSharesQuery = {
+    __typename?: 'Query';
+    poolShares: Array<{
+        __typename?: 'PoolShare';
+        id: string;
+        balance: string;
+        userAddress: { __typename?: 'User'; id: string };
+        poolId: { __typename?: 'Pool'; id: string };
+    }>;
+};
+
+export type BalancerPoolShareFragment = {
+    __typename?: 'PoolShare';
+    id: string;
+    balance: string;
+    userAddress: { __typename?: 'User'; id: string };
+    poolId: { __typename?: 'Pool'; id: string };
+};
+
 export type BalancerTokenPricesQueryVariables = Exact<{
     skip?: Maybe<Scalars['Int']>;
     first?: Maybe<Scalars['Int']>;
@@ -3710,6 +3738,18 @@ export const BalancerUserFragmentDoc = gql`
         }
     }
 `;
+export const BalancerPoolShareFragmentDoc = gql`
+    fragment BalancerPoolShare on PoolShare {
+        id
+        userAddress {
+            id
+        }
+        balance
+        poolId {
+            id
+        }
+    }
+`;
 export const BalancerTokenPriceFragmentDoc = gql`
     fragment BalancerTokenPrice on TokenPrice {
         id
@@ -3909,6 +3949,28 @@ export const BalancerUsersDocument = gql`
         }
     }
     ${BalancerUserFragmentDoc}
+`;
+export const BalancerPoolSharesDocument = gql`
+    query BalancerPoolShares(
+        $skip: Int
+        $first: Int
+        $orderBy: PoolShare_orderBy
+        $orderDirection: OrderDirection
+        $where: PoolShare_filter
+        $block: Block_height
+    ) {
+        poolShares(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerPoolShare
+        }
+    }
+    ${BalancerPoolShareFragmentDoc}
 `;
 export const BalancerTokenPricesDocument = gql`
     query BalancerTokenPrices(
@@ -4178,6 +4240,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerUsers',
+            );
+        },
+        BalancerPoolShares(
+            variables?: BalancerPoolSharesQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerPoolSharesQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerPoolSharesQuery>(BalancerPoolSharesDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerPoolShares',
             );
         },
         BalancerTokenPrices(
