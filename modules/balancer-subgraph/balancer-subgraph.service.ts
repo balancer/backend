@@ -116,13 +116,17 @@ export class BalancerSubgraphService {
         return users.map((user) => this.normalizeBalancerUser(user));
     }
 
-    public async getPoolShares(args: BalancerPoolSharesQueryVariables): Promise<BalancerPoolShareFragment[]> {
+    public async getPoolShares(
+        args: BalancerPoolSharesQueryVariables,
+    ): Promise<{ id: string; balance: string; poolId: string; userAddress: string }[]> {
         const { poolShares } = await this.sdk.BalancerPoolShares(args);
 
         return poolShares.map((shares) => ({
             ...shares,
             //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
             balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+            poolId: shares.id.split('-')[0],
+            userAddress: shares.id.split('-')[1],
         }));
     }
 
