@@ -92,35 +92,50 @@ export class PortfolioDataService {
         const blockNumber = parseInt(block.number);
         const poolShares = [];
 
-        for (const sharesOwned of user.sharesOwned ?? []) {
-            const pool = pools.find((pool) => pool.id === sharesOwned.poolId.id);
-
-            if (!pool) {
-                continue;
+        const poolIds = [];
+        for (const farm of farmUsers) {
+            if (farm.pool) {
+                poolIds.push(farm.pool?.pair);
             }
+        }
+        for (const sharesOwned of user.sharesOwned ?? []) {
+            poolIds.push(sharesOwned.poolId.id);
+        }
 
-            const poolSnapshot: PrismaBalancerPoolSnapshotWithTokens = {
-                ...pools.find((pool) => pool.id === sharesOwned.poolId.id)!,
-                poolId: pool.id,
-                amp: pool.amp ?? null,
-                blockNumber,
-                tokens: this.getPoolTokens(pool, pools).map((token) => ({
-                    ...token,
-                    snapshotId: '',
+        for (const pool of pools) {
+            // pool.address for masterchef subgraph, pool.id for sharesOwned in balancer subgraph
+            if (poolIds.includes(pool.address) || poolIds.includes(pool.id)) {
+                const poolSnapshot: PrismaBalancerPoolSnapshotWithTokens = {
+                    ...pools.find((pool) => pool.id === pool.id)!,
                     poolId: pool.id,
+                    amp: pool.amp ?? null,
                     blockNumber,
-                    token: token,
-                })),
-            };
+                    tokens: this.getPoolTokens(pool, pools).map((token) => ({
+                        ...token,
+                        snapshotId: '',
+                        poolId: pool.id,
+                        blockNumber,
+                        token: token,
+                    })),
+                };
 
-            poolShares.push({
-                ...sharesOwned,
-                userAddress,
-                blockNumber,
-                poolId: sharesOwned.poolId.id,
-                poolSnapshotId: '',
-                poolSnapshot,
-            });
+                const myDummySharesOwned = {
+                    balance: '0', // not used
+                    id: '0x00', // not used
+                    poolId: {
+                        id: pool.id,
+                    },
+                };
+
+                poolShares.push({
+                    ...myDummySharesOwned,
+                    userAddress,
+                    blockNumber,
+                    poolId: myDummySharesOwned.poolId.id,
+                    poolSnapshotId: '',
+                    poolSnapshot,
+                });
+            }
         }
 
         return {
