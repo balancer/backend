@@ -106,7 +106,7 @@ export class PortfolioDataService {
             // pool.address for masterchef subgraph, pool.id for sharesOwned in balancer subgraph
             if (poolIds.includes(pool.address) || poolIds.includes(pool.id)) {
                 const poolSnapshot: PrismaBalancerPoolSnapshotWithTokens = {
-                    ...pools.find((pool) => pool.id === pool.id)!,
+                    ...pool,
                     poolId: pool.id,
                     amp: pool.amp ?? null,
                     blockNumber,
@@ -119,19 +119,19 @@ export class PortfolioDataService {
                     })),
                 };
 
-                const myDummySharesOwned = {
-                    balance: '0', // not used
-                    id: '0x00', // not used
+                const sharesOwned = {
+                    balance: '0', // not used. always 0
+                    id: `${pool.address}-${userAddress}`,
                     poolId: {
                         id: pool.id,
                     },
                 };
 
                 poolShares.push({
-                    ...myDummySharesOwned,
+                    ...sharesOwned,
                     userAddress,
                     blockNumber,
-                    poolId: myDummySharesOwned.poolId.id,
+                    poolId: sharesOwned.poolId.id,
                     poolSnapshotId: '',
                     poolSnapshot,
                 });
