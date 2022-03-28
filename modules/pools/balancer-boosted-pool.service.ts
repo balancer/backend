@@ -8,6 +8,7 @@ import { TokenPrices } from '../token-price/token-price-types';
 import _ from 'lodash';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
+import { addressesMatch } from '../util/addresses';
 
 export class BalancerBoostedPoolService {
     public hasNestedBpt(

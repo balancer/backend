@@ -43,6 +43,10 @@ const balancerResolvers: Resolvers = {
                 apr: { total: '0', items: [], hasRewardApr: false, swapApr: '0', beetsApr: '0', thirdPartyApr: '0' },
                 volume24h: '',
                 fees24h: '',
+                farmTotalLiquidity: '',
+                composition: {
+                    tokens: [],
+                },
             }));
         },
         latestPrice: async (parent, { id }, context) => {
