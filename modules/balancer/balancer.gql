@@ -45,6 +45,8 @@ type GqlBalancerPool {
     stablePhantomPools: [GqlBalancerPoolStablePhantomPoolData!]
     tokenRates: [String!]
     farm: GqlBeetsFarm
+    farmTotalLiquidity: BigDecimal!
+    composition: GqlBalancerPoolComposition!
     apr: GqlBalancePoolApr!
     isNewPool: Boolean
     volume24h: BigDecimal!
@@ -202,4 +204,19 @@ input GqlBalancerGetPoolActivitiesInput {
     first: Int!
     skip: Int!
     sender: String
+}
+
+type GqlBalancerPoolComposition {
+    tokens: [GqlBalancerPoolCompositionToken!]!
+}
+
+type GqlBalancerPoolCompositionToken {
+    address: String!
+    symbol: String!
+    decimals: Int!
+    weight: BigDecimal
+    balance: BigDecimal!
+    valueUSD: BigDecimal!
+
+    nestedTokens: [GqlBalancerPoolCompositionToken!]
 }
