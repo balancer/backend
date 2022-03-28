@@ -4,6 +4,8 @@ extend type Query {
     beetsGetUserDataForFarm(farmId: String!): GqlBeetsFarmUser
     beetsGetUserDataForAllFarms: [GqlBeetsFarmUser!]!
     beetsGetConfig: GqlBeetsConfig!
+    beetsGetUserPoolData: GqlBeetsUserPoolData!
+    beetsGetUserPendingRewards: GqlBeetsUserPendingRewards!
 }
 
 type GqlBeetsProtocolData {
@@ -29,7 +31,19 @@ type GqlBeetsFarm {
     lastRewardBlock: BigInt!
     timestamp: BigInt!
     masterChef: GqlBeetsMasterChef!
-    rewarder: GqlBeetsRewarder
+    rewarder: GqlBeetsRewarder #TODO: deprecate this in preference of rewardTokens array
+    rewardTokens: [GqlBeetsFarmRewardToken!]!
+    hasBeetsRewards: Boolean!
+}
+
+type GqlBeetsFarmRewardToken {
+    address: String!
+    symbol: String!
+    decimals: Int!
+    rewardPerSecond: BigDecimal!
+    rewardPerDay: BigDecimal!
+    tokenPrice: BigDecimal!
+    isBeets: Boolean
 }
 
 type GqlBeetsMasterChef {
@@ -48,6 +62,7 @@ type GqlBeetsRewarder {
 type GqlBeetsRewarderToken {
     token: Bytes!
     symbol: String!
+    decimals: Int!
     tokenPrice: Float!
     rewardPerSecond: BigInt!
 }
@@ -60,6 +75,7 @@ type GqlBeetsFarmUser {
     farmId: ID!
     rewardDebt: BigInt!
     timestamp: BigInt!
+    pair: Bytes!
 }
 
 type GqlBeetsConfig {
@@ -73,6 +89,7 @@ type GqlBeetsConfig {
     homeEducationItems: [GqlBeetsConfigNewsItem!]!
     poolFilters: [GqlBeetsConfigPoolFilterItem!]!
     blacklistedTokens: [String!]!
+    boostedPools: [String!]!
 }
 
 type GqlBeetsConfigFeaturedPool {
@@ -93,4 +110,49 @@ type GqlBeetsConfigPoolFilterItem {
     id: ID!
     title: String!
     pools: [String!]!
+}
+
+type GqlBeetsUserPoolData {
+    pools: [GqlBeetsUserPoolPoolData!]!
+    totalBalanceUSD: BigDecimal!
+    totalFarmBalanceUSD: BigDecimal!
+    averageApr: BigDecimal!
+    averageFarmApr: BigDecimal!
+}
+
+type GqlBeetsUserPoolPoolData {
+    poolId: String!
+    balance: BigDecimal!
+    balanceScaled: BigInt!
+    balanceUSD: BigDecimal!
+    farmBalanceUSD: BigDecimal!
+    tokens: [GqlBeetsUserPoolTokenData!]!
+    mainTokens: [GqlBeetsUserPoolTokenData!]
+    hasUnstakedBpt: Boolean
+}
+
+type GqlBeetsUserPoolTokenData {
+    address: String!
+    symbol: String!
+    balance: String!
+    balanceUSD: BigDecimal!
+    farmBalanceUSD: BigDecimal!
+}
+
+type GqlBeetsUserPendingRewards {
+    farm: GqlBeetsUserPendingFarmRewards!
+}
+
+type GqlBeetsUserPendingFarmRewards {
+    tokens: [GqlBeetsUserPendingRewardsToken!]!
+    totalBalanceUSD: BigDecimal!
+    numFarms: BigInt!
+    farmIds: [String!]!
+}
+
+type GqlBeetsUserPendingRewardsToken {
+    address: Bytes!
+    symbol: String!
+    balance: BigDecimal!
+    balanceUSD: BigDecimal!
 }

@@ -111,6 +111,7 @@ export class BeetsService {
             poolFilters: config?.poolFilters ?? [],
             excludedPools: config?.excludedPools ?? [],
             blacklistedTokens: config?.blacklistedTokens ?? [],
+            boostedPools: config?.boostedPools ?? [],
         };
 
         this.cache.put(CONFIG_CACHE_KEY, beetsConfig, fiveMinutesInMs);

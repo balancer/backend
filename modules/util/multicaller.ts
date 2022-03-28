@@ -31,8 +31,13 @@ export class Multicaller {
 
     async execute(from: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
         const obj = from;
-        const results = await this.executeMulticall();
-        results.forEach((result, i) => set(obj, this.paths[i], result.length > 1 ? result : result[0]));
+        // not print the full exception for now, not polluting the log too much
+        try {
+            const results = await this.executeMulticall();
+            results.forEach((result, i) => set(obj, this.paths[i], result.length > 1 ? result : result[0]));
+        } catch (err) {
+            throw `Non-stacktrace multicall error`
+        }
         this.calls = [];
         this.paths = [];
         return obj;

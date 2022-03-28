@@ -59,6 +59,31 @@ fragment BalancerUser on User {
     }
 }
 
+query BalancerPoolShares(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolShare_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolShare_filter
+    $block: Block_height
+) {
+    poolShares(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerPoolShare
+    }
+}
+
+fragment BalancerPoolShare on PoolShare {
+    id
+    balance
+}
+
 query BalancerTokenPrices(
     $skip: Int
     $first: Int

@@ -35,6 +35,7 @@ export const schema = {
     COPPER_PROXY_ADDRESS: String,
     RPC_URL: String,
     YEARN_VAULTS_ENDPOINT: String,
+    MASTERCHEF_ADDRESS: String,
 };
 
 export const env: Env = load(schema, {

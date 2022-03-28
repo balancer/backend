@@ -284,6 +284,16 @@ export class TokenPriceService {
                 nestedBptTokenPrices[nestedBptAddress] = {
                     usd: parseFloat(formattedRate) * mainTokenPrice,
                 };
+
+                if (mainTokenPrice && pool.wrappedIndex && pool.tokensList[pool.wrappedIndex]) {
+                    const wrappedToken = pool.tokensList[pool.wrappedIndex];
+                    const wrappedRate = await linearPool.getWrappedTokenRate();
+                    const formattedWrappedRate = formatFixed(wrappedRate, 18);
+
+                    nestedBptTokenPrices[wrappedToken] = {
+                        usd: parseFloat(formattedWrappedRate) * mainTokenPrice,
+                    };
+                }
             }
         }
 

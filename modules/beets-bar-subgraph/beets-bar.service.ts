@@ -15,6 +15,7 @@ import { cache } from '../cache/cache';
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
 const FBEETS_APR_CACHE_KEY = 'beets-bar:getFbeetsApr';
+const BEETS_BAR_NOW_CACHE_KEY = 'beets-bar-now';
 
 export class BeetsBarSubgraphService {
     cache: CacheClass<string, any>;
@@ -100,13 +101,27 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBarNow(): Promise<BeetsBarFragment> {
+        const cached = this.cache.get(`${BEETS_BAR_NOW_CACHE_KEY}`) as BeetsBarFragment | null;
+
+        if (cached) {
+            return cached;
+        }
+
         const { bar } = await this.sdk.GetBeetsBar({ id: env.FBEETS_ADDRESS });
 
         if (!bar) {
             return this.emptyBeetsBar;
         }
 
+        this.cache.put(`${BEETS_BAR_NOW_CACHE_KEY}`, bar, 60000);
+
         return bar;
+    }
+
+    public async getUser(userAddress: string): Promise<BeetsBarUserFragment | null> {
+        const { users } = await this.sdk.BeetsBarUsers({ where: { address: userAddress.toLowerCase() } });
+
+        return users[0] || null;
     }
 
     public async getAllUsers(args: BeetsBarUsersQueryVariables): Promise<BeetsBarUserFragment[]> {

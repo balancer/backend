@@ -174,8 +174,8 @@ export class BlocksSubgraphService {
             orderDirection: OrderDirection.Desc,
             orderBy: Block_OrderBy.Timestamp,
             where: {
-                timestamp_gt: `${timestamp - 3 * blockTime}`,
-                timestamp_lt: `${timestamp + 3 * blockTime}`,
+                timestamp_gt: `${timestamp - 4 * blockTime}`,
+                timestamp_lt: `${timestamp + 4 * blockTime}`,
             },
         };
 
