@@ -118,10 +118,11 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/10 * * * * *', async () => {
         try {
             console.log('Cache user pool shares...');
-            console.time('cache-user-pool-shares');
+            const label = `cache-user-pool-shares-${moment().format('YYYY-MM-DD-HH-mm-ss')}}`;
+            console.time(label);
             await balancerService.cacheUserPoolShares();
             console.log('Cache user pool share done');
-            console.timeEnd('cache-user-pool-shares');
+            console.timeEnd(label);
         } catch (e) {
             console.log('Error caching user pool shares', e);
         }
