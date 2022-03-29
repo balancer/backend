@@ -1,4 +1,10 @@
-import { GqlBalancePoolAprItem, GqlBeetsFarm, GqlBeetsFarmUser, GqlBeetsUserPendingFarmRewards } from '../../schema';
+import {
+    GqlBalancePoolAprItem,
+    GqlBeetsFarm,
+    GqlBeetsFarmRewardToken,
+    GqlBeetsFarmUser,
+    GqlBeetsUserPendingFarmRewards,
+} from '../../schema';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { oneDayInMinutes, secondsPerYear } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
@@ -12,10 +18,12 @@ import _ from 'lodash';
 import { getAddress } from '@ethersproject/address';
 import { addressesMatch } from '../util/addresses';
 import { BigNumber } from 'ethers';
+import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 
 const FARMS_CACHE_KEY = 'beetsFarms';
 const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const FARM_EMISSIONS_PERCENT = 0.872;
 
 export class BeetsFarmService {
     cache: CacheClass<string, any>;
@@ -38,19 +46,60 @@ export class BeetsFarmService {
         const tokenPrices = await tokenPriceService.getTokenPrices();
         const tokens = await tokenService.getTokens();
         const farms = await masterchefService.getAllFarms({});
+        const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
+        const farmBeetsPerBlock = Number(parseInt(farms[0].masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
+        const beetsPerDay = blocksPerDay * farmBeetsPerBlock;
+        const totalAllocPoint = parseInt(farms[0].masterChef.totalAllocPoint);
 
         const mapped: GqlBeetsFarm[] = farms.map((farm) => {
             const rewardToken = tokens.find((token) => addressesMatch(token.address, farm.rewarder?.rewardToken || ''));
+            const allocPoint = parseInt(farm.allocPoint);
+            const hasBeetsRewards = allocPoint > 0;
+            const rewardTokens: GqlBeetsFarmRewardToken[] = [];
+
+            if (allocPoint > 0) {
+                const rewardPerDay = beetsPerDay * (allocPoint / totalAllocPoint);
+
+                rewardTokens.push({
+                    address: env.BEETS_ADDRESS,
+                    symbol: 'BEETS',
+                    decimals: 18,
+                    isBeets: true,
+                    tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS)}`,
+                    rewardPerDay: `${rewardPerDay}`,
+                    rewardPerSecond: `${rewardPerDay / 86400}`,
+                });
+            }
+
+            if (farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS) {
+                const rewardPerSecond = formatFixed(
+                    BigNumber.from(farm.rewarder?.rewardPerSecond || '0'),
+                    rewardToken?.decimals || 18,
+                );
+
+                rewardTokens.push({
+                    address: farm.rewarder.rewardToken,
+                    decimals: rewardToken?.decimals || 18,
+                    symbol: rewardToken?.symbol || '',
+                    tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, farm.rewarder.rewardToken)}`,
+                    rewardPerSecond,
+                    rewardPerDay: `${parseFloat(rewardPerSecond) * 86400}`,
+                    isBeets: false,
+                });
+            }
 
             return {
                 ...farm,
                 __typename: 'GqlBeetsFarm',
-                allocPoint: parseInt(farm.allocPoint),
+                allocPoint,
                 masterChef: {
                     ...farm.masterChef,
                     __typename: 'GqlBeetsMasterChef',
                     totalAllocPoint: parseInt(farm.masterChef.totalAllocPoint),
                 },
+                rewardTokens,
+                hasBeetsRewards,
+                //TODO: remove this once the new setup is integrated
                 rewarder:
                     farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS
                         ? {
@@ -138,7 +187,7 @@ export class BeetsFarmService {
             return { items: [], beetsApr: '0', thirdPartyApr: '0' };
         }
 
-        const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * 0.872;
+        const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
         const farmBeetsPerYear = (farm.allocPoint / farm.masterChef.totalAllocPoint) * beetsPerYear;
         const beetsValuePerYear = beetsPrice * farmBeetsPerYear;

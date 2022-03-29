@@ -260,18 +260,24 @@ export async function getOnChainBalances(
                             (token) => token.address === address,
                         );
 
+                        let balance = poolToken?.balance || '0';
+                        const totalSupply = formatFixed(data.totalSupply, 18);
+                        let percentOfSupply = parseFloat(balance) / parseFloat(totalSupply);
+
                         return {
                             id: data.id,
                             address,
-                            balance: poolToken?.balance || '0',
+                            balance,
                             symbol: stablePhantomPool.symbol,
                             totalSupply: formatFixed(data.totalSupply, 18),
                             tokens: stablePhantomPool.tokens
                                 .filter((token) => token.address !== stablePhantomPool.address)
                                 .map((token, index) => {
+                                    const totalBalance = formatFixed(data.poolTokens.balances[index], token.decimals);
+
                                     return {
                                         ...token,
-                                        balance: formatFixed(data.poolTokens.balances[index], token.decimals),
+                                        balance: `${parseFloat(totalBalance) * percentOfSupply}`,
                                         priceRate: formatFixed(data.tokenRates[index], 18),
                                     };
                                 }),

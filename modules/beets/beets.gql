@@ -31,7 +31,19 @@ type GqlBeetsFarm {
     lastRewardBlock: BigInt!
     timestamp: BigInt!
     masterChef: GqlBeetsMasterChef!
-    rewarder: GqlBeetsRewarder
+    rewarder: GqlBeetsRewarder #TODO: deprecate this in preference of rewardTokens array
+    rewardTokens: [GqlBeetsFarmRewardToken!]!
+    hasBeetsRewards: Boolean!
+}
+
+type GqlBeetsFarmRewardToken {
+    address: String!
+    symbol: String!
+    decimals: Int!
+    rewardPerSecond: BigDecimal!
+    rewardPerDay: BigDecimal!
+    tokenPrice: BigDecimal!
+    isBeets: Boolean
 }
 
 type GqlBeetsMasterChef {

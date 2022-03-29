@@ -22,6 +22,9 @@ import {
     GqlBalancerPool,
     GqlBalancerPool24h,
     GqlBalancerPoolActivity,
+    GqlBalancerPoolComposition,
+    GqlBalancerPoolCompositionToken,
+    GqlBalancerPoolLinearPoolData,
     GqlBalancerPoolSnapshot,
 } from '../../schema';
 import _ from 'lodash';
@@ -33,6 +36,8 @@ import { beetsFarmService } from '../beets/beets-farm.service';
 import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
 import { spookySwapService } from '../boosted/spooky-swap.service';
+import { formatFixed } from '@ethersproject/bignumber';
+import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -40,6 +45,7 @@ const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
 const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
+const POOL_SHARES_CACHE_KEY_PREFIX = 'balancer:poolShares:';
 
 const BOOSTED_POOLS = [
     '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e',
@@ -156,33 +162,7 @@ export class BalancerService {
 
                 return true;
             })
-            .map((pool) => ({
-                ...pool,
-                symbol: pool.symbol || '',
-                name:
-                    pool.id === '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187'
-                        ? 'Steady Beets, Yearn Boosted'
-                        : pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e'
-                        ? 'Fantom Of The Opera, Yearn Boosted'
-                        : pool.name,
-                __typename: 'GqlBalancerPool',
-                tokens: (pool.tokens || []).map((token) => ({
-                    ...token,
-                    __typename: 'GqlBalancerPoolToken',
-                    isBpt: token.address !== pool.address && !!pools.find((pool) => pool.address === token.address),
-                    isPhantomBpt: token.address === pool.address,
-                })),
-                fees24h: '0',
-                volume24h: '0',
-                apr: {
-                    total: '0',
-                    hasRewardApr: false,
-                    items: [],
-                    swapApr: '0',
-                    beetsApr: '0',
-                    thirdPartyApr: '0',
-                },
-            }));
+            .map((pool) => this.mapSubgraphFragmentToBaseGqlPool(pool, pools));
 
         const filteredWithOnChainBalances = await getOnChainBalances(
             filtered,
@@ -246,7 +226,7 @@ export class BalancerService {
                 ...this.getThirdPartyApr(pool, tokenPrices, decoratedPools.length === 0 ? pool : decoratedPools[0]),
             ];
 
-            decoratedPools.push({
+            const decoratedPool: GqlBalancerPool = {
                 ...pool,
                 farm,
                 apr: {
@@ -261,7 +241,16 @@ export class BalancerService {
                 volume24h: `${volume24h}`,
                 fees24h: `${swapFee24h}`,
                 totalLiquidity: `${totalLiquidity}`,
-            });
+                farmTotalLiquidity: farm
+                    ? `${
+                          totalLiquidity * (parseFloat(formatFixed(farm.slpBalance, 18)) / parseFloat(pool.totalShares))
+                      }`
+                    : '0',
+            };
+
+            decoratedPool.composition = this.getPoolComposition(pool, tokenPrices);
+
+            decoratedPools.push(decoratedPool);
         }
 
         await cache.putObjectValue(POOLS_CACHE_KEY, decoratedPools);
@@ -479,6 +468,41 @@ export class BalancerService {
         });
     }
 
+    public async cacheUserPoolShares(): Promise<BalancerUserPoolShare[]> {
+        const poolShares = await balancerSubgraphService.getAllPoolShares({
+            where: { balance_gt: '0', userAddress_not: '0x0000000000000000000000000000000000000000' },
+        });
+        const poolSharesUserMap = _.groupBy(poolShares, 'userAddress');
+        const userAddresses = Object.keys(poolSharesUserMap);
+        const existingKeys = await cache.getAllKeysMatchingPattern(POOL_SHARES_CACHE_KEY_PREFIX);
+
+        for (const userAddress of userAddresses) {
+            await cache.putObjectValue(
+                `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress}`,
+                poolSharesUserMap[userAddress],
+                30,
+            );
+        }
+
+        const newKeys = userAddresses.map((userAddress) => `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress}`);
+        const emptyKeys = existingKeys.filter((key) => !newKeys.includes(key));
+
+        //if a user exits the only pool they're in, we need to remove the stale key
+        for (const emptyKey of emptyKeys) {
+            await cache.deleteKey(emptyKey);
+        }
+
+        return poolShares;
+    }
+
+    public async getUserPoolShares(userAddress: string): Promise<BalancerUserPoolShare[]> {
+        const poolShares = await cache.getObjectValue<BalancerUserPoolShare[]>(
+            `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress.toLowerCase()}`,
+        );
+
+        return poolShares || [];
+    }
+
     public async getLateQuartetBptPrice(): Promise<number> {
         const pools = await this.getPools();
         const lateQuartet = pools.find(
@@ -541,6 +565,133 @@ export class BalancerService {
         }
 
         return items;
+    }
+
+    private mapSubgraphFragmentToBaseGqlPool(
+        pool: BalancerPoolFragment,
+        pools: BalancerPoolFragment[],
+    ): GqlBalancerPool {
+        return {
+            ...pool,
+            symbol: pool.symbol || '',
+            name:
+                pool.id === '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187'
+                    ? 'Steady Beets, Yearn Boosted'
+                    : pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e'
+                    ? 'Fantom Of The Opera, Yearn Boosted'
+                    : pool.name,
+            __typename: 'GqlBalancerPool',
+            tokens: (pool.tokens || []).map((token) => ({
+                ...token,
+                __typename: 'GqlBalancerPoolToken',
+                isBpt: token.address !== pool.address && !!pools.find((pool) => pool.address === token.address),
+                isPhantomBpt: token.address === pool.address,
+            })),
+            fees24h: '0',
+            volume24h: '0',
+            apr: {
+                total: '0',
+                hasRewardApr: false,
+                items: [],
+                swapApr: '0',
+                beetsApr: '0',
+                thirdPartyApr: '0',
+            },
+            composition: {
+                tokens: [],
+            },
+            farmTotalLiquidity: '0',
+        };
+    }
+
+    private getPoolComposition(
+        pool: Omit<GqlBalancerPool, 'composition'>,
+        tokenPrices: TokenPrices,
+    ): GqlBalancerPoolComposition {
+        const mainTokens = pool.mainTokens || [];
+
+        if (mainTokens.length === 0) {
+            return {
+                tokens: pool.tokens.map((token) => {
+                    return {
+                        ...token,
+                        __typename: 'GqlBalancerPoolCompositionToken',
+                        valueUSD: `${
+                            parseFloat(token.balance) * tokenPriceService.getPriceForToken(tokenPrices, token.address)
+                        }`,
+                    };
+                }),
+            };
+        }
+
+        return {
+            tokens: pool.tokens.map((token) => {
+                let nestedTokens: GqlBalancerPoolCompositionToken[] = [];
+                const linearPool = (pool.linearPools || []).find((linearPool) => linearPool.address === token.address);
+                const stablePhantomPool = (pool.stablePhantomPools || []).find(
+                    (stablePhantom) => stablePhantom.address === token.address,
+                );
+
+                if (linearPool) {
+                    nestedTokens = this.getPoolCompositionNestedTokensForLinearPool(linearPool, tokenPrices);
+                } else if (stablePhantomPool) {
+                    for (const stablePhantomToken of stablePhantomPool.tokens) {
+                        if (stablePhantomToken.address === stablePhantomPool.address) {
+                            continue;
+                        }
+
+                        const stablePhantomLinearPool = (pool.linearPools || []).find(
+                            (linearPool) => linearPool.address === stablePhantomToken.address,
+                        );
+
+                        nestedTokens.push({
+                            ...stablePhantomToken,
+                            __typename: 'GqlBalancerPoolCompositionToken',
+                            valueUSD: `${
+                                parseFloat(stablePhantomToken.balance) *
+                                tokenPriceService.getPriceForToken(tokenPrices, stablePhantomToken.address)
+                            }`,
+                            nestedTokens: stablePhantomLinearPool
+                                ? this.getPoolCompositionNestedTokensForLinearPool(stablePhantomLinearPool, tokenPrices)
+                                : undefined,
+                        });
+                    }
+                }
+
+                return {
+                    ...token,
+                    __typename: 'GqlBalancerPoolCompositionToken',
+                    valueUSD: `${
+                        parseFloat(token.balance) * tokenPriceService.getPriceForToken(tokenPrices, token.address)
+                    }`,
+                    nestedTokens,
+                };
+            }),
+        };
+    }
+
+    private getPoolCompositionNestedTokensForLinearPool(
+        linearPool: GqlBalancerPoolLinearPoolData,
+        tokenPrices: TokenPrices,
+    ): GqlBalancerPoolCompositionToken[] {
+        return [
+            {
+                ...linearPool.mainToken,
+                __typename: 'GqlBalancerPoolCompositionToken',
+                valueUSD: `${
+                    parseFloat(linearPool.mainToken.balance) *
+                    tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address)
+                }`,
+            },
+            {
+                ...linearPool.wrappedToken,
+                __typename: 'GqlBalancerPoolCompositionToken',
+                valueUSD: `${
+                    parseFloat(linearPool.wrappedToken.balance) *
+                    tokenPriceService.getPriceForToken(tokenPrices, linearPool.wrappedToken.address)
+                }`,
+            },
+        ];
     }
 }
 

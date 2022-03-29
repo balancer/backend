@@ -80,17 +80,17 @@ export function scheduleWorkerTasks() {
             console.log('Error caching average block time', e);
         }
     });
-
     //every 5 seconds
     cron.schedule('*/5 * * * * *', async () => {
         try {
-            console.log('Cache block from 24h ago...');
-            console.time('cache-block-from-24h-ago');
-            await blocksSubgraphService.cacheBlockFrom24HoursAgo();
-            console.log('Cache block from 24h ago done');
-            console.timeEnd('cache-block-from-24h-ago');
+            console.log('Cache beets farms');
+            const label = `cache-beets-farms-${new Date().getSeconds()}`;
+            console.time(label);
+            await beetsFarmService.cacheBeetsFarms();
+            console.log('Cache beets farms done');
+            console.time(label);
         } catch (e) {
-            console.log('Error caching block from 24h ago', e);
+            console.log('Error caching beets farms', e);
         }
     });
 
@@ -98,10 +98,11 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             console.log('Cache pools...');
-            console.time('cache-pools');
+            const label = `cache-pools-${new Date().getSeconds()}`;
+            console.time(label);
             await balancerService.cachePools();
             console.log('Cache pools done');
-            console.timeEnd('cache-pools');
+            console.timeEnd(label);
 
             console.log('Cache beets farms');
             console.time('cache-beets-farms');
@@ -114,7 +115,22 @@ export function scheduleWorkerTasks() {
             await balancerSdk.sor.fetchPools();
             console.log('Cache SOR pools done');
             console.timeEnd('cache-sor-pools');
-        } catch (e) {}
+        } catch (e) {
+            console.log('Error caching pools, farms & sor pools', e);
+        }
+    });
+
+    //every 10 seconds
+    cron.schedule('*/10 * * * * *', async () => {
+        try {
+            console.log('Cache user pool shares...');
+            console.time('cache-user-pool-shares');
+            await balancerService.cacheUserPoolShares();
+            console.log('Cache user pool share done');
+            console.timeEnd('cache-user-pool-shares');
+        } catch (e) {
+            console.log('Error caching user pool shares', e);
+        }
     });
 
     //once a minute
@@ -143,10 +159,11 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             console.log('Cache beets farm users...');
-            console.time('cache-beets-farm-users');
+            const label = `cache-beets-farm-users-${new Date().getSeconds()}`;
+            console.time(label);
             await beetsFarmService.cacheBeetsFarmUsers();
             console.log('Cache beets farm users done');
-            console.timeEnd('cache-beets-farm-users');
+            console.timeEnd(label);
         } catch (e) {
             console.log('Error caching beets farm users', e);
         }
