@@ -37,6 +37,7 @@ import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
 import { spookySwapService } from '../boosted/spooky-swap.service';
 import { formatFixed } from '@ethersproject/bignumber';
+import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -44,6 +45,7 @@ const LATEST_PRICE_CACHE_KEY_PREFIX = 'pools:latestPrice:';
 const POOL_SNAPSHOTS_CACHE_KEY_PREFIX = 'pools:snapshots:';
 const TOP_TRADE_PAIRS_CACHE_KEY = 'balancer:topTradePairs';
 const POOLS_24H_CACHE_KEY = 'pool:24hdata:';
+const POOL_SHARES_CACHE_KEY_PREFIX = 'balancer:poolShares:';
 
 const BOOSTED_POOLS = [
     '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e',
@@ -464,6 +466,41 @@ export class BalancerService {
                 valueUSD: `${valueUSD}`,
             };
         });
+    }
+
+    public async cacheUserPoolShares(): Promise<BalancerUserPoolShare[]> {
+        const poolShares = await balancerSubgraphService.getAllPoolShares({
+            where: { balance_gt: '0', userAddress_not: '0x0000000000000000000000000000000000000000' },
+        });
+        const poolSharesUserMap = _.groupBy(poolShares, 'userAddress');
+        const userAddresses = Object.keys(poolSharesUserMap);
+        const existingKeys = await cache.getAllKeysMatchingPattern(POOL_SHARES_CACHE_KEY_PREFIX);
+
+        for (const userAddress of userAddresses) {
+            await cache.putObjectValue(
+                `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress}`,
+                poolSharesUserMap[userAddress],
+                30,
+            );
+        }
+
+        const newKeys = userAddresses.map((userAddress) => `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress}`);
+        const emptyKeys = existingKeys.filter((key) => !newKeys.includes(key));
+
+        //if a user exits the only pool they're in, we need to remove the stale key
+        for (const emptyKey of emptyKeys) {
+            await cache.deleteKey(emptyKey);
+        }
+
+        return poolShares;
+    }
+
+    public async getUserPoolShares(userAddress: string): Promise<BalancerUserPoolShare[]> {
+        const poolShares = await cache.getObjectValue<BalancerUserPoolShare[]>(
+            `${POOL_SHARES_CACHE_KEY_PREFIX}${userAddress.toLowerCase()}`,
+        );
+
+        return poolShares || [];
     }
 
     public async getLateQuartetBptPrice(): Promise<number> {

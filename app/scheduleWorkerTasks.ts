@@ -68,6 +68,13 @@ export function scheduleWorkerTasks() {
         } catch (e) {}
     });
 
+    //every 10 seconds
+    cron.schedule('*/10 * * * * *', async () => {
+        try {
+            await balancerService.cacheUserPoolShares();
+        } catch (e) {}
+    });
+
     //once a minute
     cron.schedule('* * * * *', async () => {
         await balancerSdk.sor.reloadGraph();
