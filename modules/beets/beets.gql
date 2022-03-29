@@ -140,14 +140,21 @@ type GqlBeetsUserPoolTokenData {
 }
 
 type GqlBeetsUserPendingRewards {
-    farm: GqlBeetsUserPendingFarmRewards!
+    farm: GqlBeetsUserPendingAllFarmRewards!
 }
 
-type GqlBeetsUserPendingFarmRewards {
+type GqlBeetsUserPendingAllFarmRewards {
     tokens: [GqlBeetsUserPendingRewardsToken!]!
+    farms: [GqlBeetsUserPendingFarmRewards!]!
     totalBalanceUSD: BigDecimal!
     numFarms: BigInt!
     farmIds: [String!]!
+}
+
+type GqlBeetsUserPendingFarmRewards {
+    farmId: String!
+    tokens: [GqlBeetsUserPendingRewardsToken!]!
+    balanceUSD: BigDecimal!
 }
 
 type GqlBeetsUserPendingRewardsToken {
