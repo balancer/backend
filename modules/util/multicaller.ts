@@ -36,7 +36,8 @@ export class Multicaller {
             const results = await this.executeMulticall();
             results.forEach((result, i) => set(obj, this.paths[i], result.length > 1 ? result : result[0]));
         } catch (err) {
-            throw `Non-stacktrace multicall error`
+            console.log('multicall error', err);
+            throw `Non-stacktrace multicall error`;
         }
         this.calls = [];
         this.paths = [];

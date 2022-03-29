@@ -4,38 +4,27 @@ import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from '../balancer/src/contracts';
 import masterChefAbi from './abi/BeethovenxMasterChef.json';
 import timeBasedRewarderAbi from './abi/TimeBasedRewarder.json';
-import { mapValues } from 'lodash';
 import { getAddress } from '@ethersproject/address';
-import { parseUnits } from 'ethers/lib/utils';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { GqlBeetsFarm } from '../../schema';
 
 export class MasterChefContractService {
-    private readonly multicaller: Multicaller;
-    private readonly rewarderMulticaller: Multicaller;
+    private readonly provider = new providers.JsonRpcProvider(env.RPC_URL);
 
-    constructor() {
-        const provider = new providers.JsonRpcProvider(env.RPC_URL);
-        this.multicaller = new Multicaller(
+    constructor() {}
+
+    public async getPendingBeetsForFarms(ids: string[], user: string): Promise<{ [id: string]: BigNumber }> {
+        const multicaller = new Multicaller(
             BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
-            provider,
+            this.provider,
             masterChefAbi,
         );
 
-        this.rewarderMulticaller = new Multicaller(
-            BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
-            provider,
-            timeBasedRewarderAbi,
-        );
-    }
-
-    public async getPendingBeetsForFarms(ids: string[], user: string): Promise<{ [id: string]: BigNumber }> {
         for (const id of ids) {
-            this.multicaller.call(`${id}`, env.MASTERCHEF_ADDRESS, 'pendingBeets', [id, getAddress(user)]);
+            multicaller.call(`${id}`, env.MASTERCHEF_ADDRESS, 'pendingBeets', [id, getAddress(user)]);
         }
 
         let result = {} as Record<any, any>;
-        result = await this.multicaller.execute(result);
+        result = await multicaller.execute(result);
 
         return result;
     }
@@ -78,19 +67,23 @@ export class MasterChefContractService {
         farms: GqlBeetsFarm[],
         userAddress: string,
     ): Promise<{ [farmId: string]: { [token: string]: BigNumber } }> {
+        const rewarderMulticaller = new Multicaller(
+            BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
+            this.provider,
+            timeBasedRewarderAbi,
+        );
+
         for (const farm of farms) {
             if (farm.rewarder) {
-                this.rewarderMulticaller.call(
-                    `${farm.id}.${farm.rewarder.rewardToken}`,
-                    farm.rewarder.id,
-                    'pendingToken',
-                    [farm.id, getAddress(userAddress)],
-                );
+                rewarderMulticaller.call(`${farm.id}.${farm.rewarder.rewardToken}`, farm.rewarder.id, 'pendingToken', [
+                    farm.id,
+                    getAddress(userAddress),
+                ]);
             }
         }
 
         let result = {} as Record<any, any>;
-        result = await this.rewarderMulticaller.execute(result);
+        result = await rewarderMulticaller.execute(result);
 
         return result;
     }
