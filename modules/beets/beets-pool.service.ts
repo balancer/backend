@@ -1,7 +1,6 @@
 import { GqlBeetsUserPoolData, GqlBeetsUserPoolPoolData } from '../../schema';
 import { beetsFarmService } from './beets-farm.service';
 import { balancerService } from '../balancer/balancer.service';
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber } from 'ethers';
 import { tokenPriceService } from '../token-price/token-price.service';
@@ -16,10 +15,7 @@ export class BeetsPoolService {
     public async getUserPoolData(userAddress: string): Promise<GqlBeetsUserPoolData> {
         const pools = await balancerService.getPools();
         const userFarms = await beetsFarmService.getBeetsFarmsForUser(userAddress);
-        const sharesOwned = await balancerSubgraphService.getPoolShares({
-            where: { userAddress: userAddress.toLowerCase() },
-            first: 100,
-        });
+        const sharesOwned = await balancerService.getUserPoolShares(userAddress);
         const tokenPrices = await tokenPriceService.getTokenPrices();
         const beetsBar = await beetsBarService.getBeetsBarNow();
         const farms = await beetsFarmService.getBeetsFarms();
