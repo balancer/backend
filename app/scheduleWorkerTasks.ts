@@ -84,7 +84,7 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             console.log('Cache beets farms');
-            const label = `cache-beets-farms-${new Date().getSeconds()}`;
+            const label = `cache-beets-farms-${moment().format('YYYY-MM-DD-HH-mm-ss')}`;
             console.time(label);
             await beetsFarmService.cacheBeetsFarms();
             console.log('Cache beets farms done');
@@ -98,17 +98,11 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             console.log('Cache pools...');
-            const label = `cache-pools-${new Date().getSeconds()}`;
+            const label = `cache-pools-${moment().format('YYYY-MM-DD-HH-mm-ss')}}`;
             console.time(label);
             await balancerService.cachePools();
             console.log('Cache pools done');
             console.timeEnd(label);
-
-            console.log('Cache beets farms');
-            console.time('cache-beets-farms');
-            await beetsFarmService.cacheBeetsFarms();
-            console.log('Cache beets farms done');
-            console.time('cache-beets-farms');
 
             console.log('Cache SOR pools...');
             console.time('cache-sor-pools');
@@ -159,7 +153,7 @@ export function scheduleWorkerTasks() {
     cron.schedule('*/5 * * * * *', async () => {
         try {
             console.log('Cache beets farm users...');
-            const label = `cache-beets-farm-users-${new Date().getSeconds()}`;
+            const label = `cache-beets-farm-users-${moment().format('YYYY-MM-DD-HH-mm-ss')}`;
             console.time(label);
             await beetsFarmService.cacheBeetsFarmUsers();
             console.log('Cache beets farm users done');
