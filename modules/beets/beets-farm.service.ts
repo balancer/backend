@@ -3,7 +3,9 @@ import {
     GqlBeetsFarm,
     GqlBeetsFarmRewardToken,
     GqlBeetsFarmUser,
+    GqlBeetsUserPendingAllFarmRewards,
     GqlBeetsUserPendingFarmRewards,
+    GqlBeetsUserPendingRewardsToken,
 } from '../../schema';
 import { masterchefService } from '../masterchef-subgraph/masterchef.service';
 import { oneDayInMinutes, secondsPerYear } from '../util/time';
@@ -220,53 +222,80 @@ export class BeetsFarmService {
         return { items, thirdPartyApr: `${thirdPartyApr}`, beetsApr: `${beetsApr > 0 ? beetsApr : 0}` };
     }
 
-    public async getUserPendingFarmRewards(userAddress: string): Promise<GqlBeetsUserPendingFarmRewards> {
+    public async getUserPendingFarmRewards(userAddress: string): Promise<GqlBeetsUserPendingAllFarmRewards> {
         const tokenPrices = await tokenPriceService.getTokenPrices();
+        const beetsPrice = tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS);
         const allFarms = await this.getBeetsFarms();
         const userFarms = await this.getBeetsFarmsForUser(userAddress);
         const userFarmsWithBalance = userFarms.filter((userFarm) => parseFloat(userFarm.amount) > 0);
         const userFarmIds = userFarmsWithBalance.map((userFarm) => userFarm.farmId);
-        const pendingBeetsScaled = await masterChefContractService.getSummedPendingBeetsForFarms(
-            userFarmIds,
-            userAddress,
-        );
-        const pendingBeets = formatFixed(pendingBeetsScaled, 18);
         const farmsWithRewarder = userFarmsWithBalance
             .map((userFarm) => allFarms.find((farm) => farm.id === userFarm.farmId && farm.rewarder))
             .filter((farm) => !!farm) as GqlBeetsFarm[];
-        const pendingRewards = await masterChefContractService.getSummedPendingRewards(farmsWithRewarder, userAddress);
         const rewardTokens = _.flatten(farmsWithRewarder.map((farm) => farm.rewarder?.tokens || []));
+        const pendingBeetsForFarms = await masterChefContractService.getPendingBeetsForFarms(userFarmIds, userAddress);
+        const pendingRewardsForFarms = await masterChefContractService.getPendingRewards(
+            farmsWithRewarder,
+            userAddress,
+        );
 
-        const tokens = [
-            {
-                symbol: 'BEETS',
-                address: env.BEETS_ADDRESS,
-                balance: pendingBeets,
-                balanceUSD: `${
-                    parseFloat(pendingBeets) * tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS)
-                }`,
-            },
-            ..._.map(pendingRewards, (balanceScaled, token) => {
-                const rewardToken = rewardTokens.find((tokenDefinition) =>
-                    addressesMatch(tokenDefinition.token, token),
-                );
-                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token);
-                const balance = formatFixed(balanceScaled, rewardToken?.decimals);
+        const farms: GqlBeetsUserPendingFarmRewards[] = [];
 
-                return {
-                    symbol: rewardToken?.symbol || '',
-                    address: getAddress(token),
+        for (const farmId of userFarmIds) {
+            let tokens: GqlBeetsUserPendingRewardsToken[] = [];
+
+            if (pendingBeetsForFarms[farmId]) {
+                const balance = formatFixed(pendingBeetsForFarms[farmId], 18);
+
+                tokens.push({
+                    address: env.BEETS_ADDRESS,
+                    symbol: 'BEETS',
                     balance,
-                    balanceUSD: `${parseFloat(balance) * tokenPrice}`,
-                };
-            }),
-        ];
+                    balanceUSD: `${parseFloat(balance) * beetsPrice}`,
+                });
+            }
+
+            if (pendingRewardsForFarms[farmId]) {
+                tokens = [
+                    ...tokens,
+                    ..._.map(pendingRewardsForFarms[farmId], (balanceScaled, token) => {
+                        const rewardToken = rewardTokens.find((tokenDefinition) =>
+                            addressesMatch(tokenDefinition.token, token),
+                        );
+                        const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token);
+                        const balance = formatFixed(balanceScaled, rewardToken?.decimals);
+
+                        return {
+                            symbol: rewardToken?.symbol || '',
+                            address: getAddress(token),
+                            balance,
+                            balanceUSD: `${parseFloat(balance) * tokenPrice}`,
+                        };
+                    }),
+                ];
+            }
+
+            farms.push({
+                farmId,
+                tokens,
+                balanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+            });
+        }
+
+        const allTokens = _.flatten(farms.map((farm) => farm.tokens));
+        const tokensGrouped = _.groupBy(allTokens, 'address');
+        const tokens = _.map(tokensGrouped, (tokens) => ({
+            ...tokens[0],
+            balance: `${_.sumBy(tokens, (token) => parseFloat(token.balance))}`,
+            balanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+        }));
 
         return {
             tokens,
-            totalBalanceUSD: `${_.sumBy(tokens, (token) => parseFloat(token.balanceUSD))}`,
+            totalBalanceUSD: `${_.sumBy(farms, (farm) => parseFloat(farm.balanceUSD))}`,
             numFarms: `${userFarmsWithBalance.length}`,
             farmIds: userFarmsWithBalance.map((userFarm) => userFarm.farmId),
+            farms,
         };
     }
 }

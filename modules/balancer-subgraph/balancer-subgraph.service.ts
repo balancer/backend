@@ -39,6 +39,7 @@ import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-
 import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
 import { cache } from '../cache/cache';
+import { BalancerUserPoolShare } from './balancer-subgraph-types';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -116,10 +117,24 @@ export class BalancerSubgraphService {
         return users.map((user) => this.normalizeBalancerUser(user));
     }
 
-    public async getPoolShares(
-        args: BalancerPoolSharesQueryVariables,
-    ): Promise<{ id: string; balance: string; poolAddress: string; userAddress: string }[]> {
+    public async getPoolShares(args: BalancerPoolSharesQueryVariables): Promise<BalancerUserPoolShare[]> {
         const { poolShares } = await this.sdk.BalancerPoolShares(args);
+
+        return poolShares.map((shares) => ({
+            ...shares,
+            //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
+            balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+            poolAddress: shares.id.split('-')[0],
+            userAddress: shares.id.split('-')[1],
+        }));
+    }
+
+    public async getAllPoolShares(args: BalancerPoolSharesQueryVariables): Promise<BalancerUserPoolShare[]> {
+        const poolShares = await subgraphLoadAll<BalancerPoolShareFragment>(
+            this.sdk.BalancerPoolShares,
+            'poolShares',
+            args,
+        );
 
         return poolShares.map((shares) => ({
             ...shares,
