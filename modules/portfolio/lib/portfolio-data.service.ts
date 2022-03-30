@@ -92,10 +92,12 @@ export class PortfolioDataService {
         const blockNumber = parseInt(block.number);
         const poolShares = [];
 
-        const poolIds = [];
+        const poolIds: string[] = [];
+        const poolAddresses: string[] = [];
+
         for (const farm of farmUsers) {
             if (farm.pool) {
-                poolIds.push(farm.pool?.pair);
+                poolAddresses.push(farm.pool.pair);
             }
         }
         for (const sharesOwned of user.sharesOwned ?? []) {
@@ -103,8 +105,7 @@ export class PortfolioDataService {
         }
 
         for (const pool of pools) {
-            // pool.address for masterchef subgraph, pool.id for sharesOwned in balancer subgraph
-            if (poolIds.includes(pool.address) || poolIds.includes(pool.id)) {
+            if (poolAddresses.includes(pool.address) || poolIds.includes(pool.id)) {
                 const poolSnapshot: PrismaBalancerPoolSnapshotWithTokens = {
                     ...pool,
                     poolId: pool.id,
