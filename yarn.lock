@@ -586,7 +586,7 @@
 
 "@balancer-labs/sdk@github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo":
   version "0.1.1"
-  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/818f36e1912f8f1c22c0cfde7b921a672e2ec18f"
+  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/cca773ef861c412fc0ec96654f4c99f2f92aaeb2"
   dependencies:
     "@balancer-labs/sor" "github:beethovenxfi/balancer-sor#daniel/generic-path-algo-build"
     axios "^0.24.0"
@@ -4484,6 +4484,11 @@ header-case@^2.0.4:
   dependencies:
     capital-case "^1.0.4"
     tslib "^2.0.3"
+
+helmet@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/helmet/-/helmet-5.0.2.tgz#3264ec6bab96c82deaf65e3403c369424cb2366c"
+  integrity sha512-QWlwUZZ8BtlvwYVTSDTBChGf8EOcQ2LkGMnQJxSzD1mUu8CCjXJZq/BXP8eWw4kikRnzlhtYo3lCk0ucmYA3Vg==
 
 hmac-drbg@^1.0.1:
   version "1.0.1"
