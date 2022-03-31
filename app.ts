@@ -1,6 +1,6 @@
 import { loadRestRoutes } from './app/loadRestRoutes';
 import { env } from './app/env';
-import createExpressApp, { json } from 'express';
+import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
 import { contextMiddleware } from './app/middleware/contextMiddleware';
 import { accountMiddleware } from './app/middleware/accountMiddleware';
@@ -14,13 +14,16 @@ import {
 import { schema } from './graphql_schema_generated';
 import { resolvers } from './app/resolvers';
 import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
-import { startWorker } from './app/worker';
 import { redis } from './modules/cache/redis';
-import { prisma } from './modules/prisma/prisma-client';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import RedisStore from 'rate-limit-redis';
 
 async function startServer() {
+    //need to open the redis connection prior to adding the rate limit middleware
+    await redis.connect();
+
     const app = createExpressApp();
     app.use(helmet.dnsPrefetchControl());
     app.use(helmet.expectCt());
@@ -36,6 +39,18 @@ async function startServer() {
     app.use(corsMiddleware);
     app.use(contextMiddleware);
     app.use(accountMiddleware);
+
+    app.use(
+        rateLimit({
+            windowMs: 10000, // 10 seconds
+            max: 200, // Limit each IP to 100 requests per second
+            standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+            legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+            store: new RedisStore({
+                sendCommand: async (...args: string[]) => redis.sendCommand(args),
+            }),
+        }),
+    );
 
     //startWorker(app);
     loadRestRoutes(app);
@@ -57,8 +72,6 @@ async function startServer() {
     });
     await server.start();
     server.applyMiddleware({ app });
-
-    await redis.connect();
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
