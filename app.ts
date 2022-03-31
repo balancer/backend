@@ -36,9 +36,6 @@ async function startServer() {
     app.use(helmet.permittedCrossDomainPolicies());
     app.use(helmet.referrerPolicy());
     app.use(helmet.xssFilter());
-    app.use(corsMiddleware);
-    app.use(contextMiddleware);
-    app.use(accountMiddleware);
 
     app.use(
         rateLimit({
@@ -51,6 +48,10 @@ async function startServer() {
             }),
         }),
     );
+
+    app.use(corsMiddleware);
+    app.use(contextMiddleware);
+    app.use(accountMiddleware);
 
     //startWorker(app);
     loadRestRoutes(app);
