@@ -17,8 +17,7 @@ import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
 import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
+import { RateLimiterRedis } from 'rate-limiter-flexible';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
@@ -37,17 +36,25 @@ async function startServer() {
     app.use(helmet.referrerPolicy());
     app.use(helmet.xssFilter());
 
-    app.use(
-        rateLimit({
-            windowMs: 10000, // 10 seconds
-            max: 200, // Limit each IP to 100 requests per second
-            standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-            legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-            store: new RedisStore({
-                sendCommand: async (...args: string[]) => redis.sendCommand(args),
-            }),
-        }),
-    );
+    const redisRateLimiter = redis.duplicate({ legacyMode: true });
+    await redisRateLimiter.connect();
+    const rateLimiter = new RateLimiterRedis({
+        storeClient: redisRateLimiter,
+        keyPrefix: 'middleware',
+        points: 200, // 200 requests
+        duration: 10, // per 10 second by IP
+    });
+
+    app.use((req, res, next) => {
+        rateLimiter
+            .consume(req.ip)
+            .then(() => {
+                next();
+            })
+            .catch(() => {
+                res.status(429).send('Too Many Requests');
+            });
+    });
 
     app.use(corsMiddleware);
     app.use(contextMiddleware);
