@@ -45,7 +45,7 @@ async function startServer() {
         duration: 10, // per 10 second by IP
     });
 
-    app.use((req, res, next) => {
+    /*app.use((req, res, next) => {
         rateLimiter
             .consume(req.ip)
             .then(() => {
@@ -54,7 +54,7 @@ async function startServer() {
             .catch(() => {
                 res.status(429).send('Too Many Requests');
             });
-    });
+    });*/
 
     app.use(corsMiddleware);
     app.use(contextMiddleware);
