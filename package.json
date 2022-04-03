@@ -41,7 +41,6 @@
         "node-cron": "^3.0.0",
         "pino-http": "^6.0.0",
         "prisma": "3.6.0",
-        "rate-limiter-flexible": "^2.3.6",
         "redis": "^4.0.1",
         "safe-compare": "^1.1.4",
         "ts-dotenv": "^0.8.1",
