@@ -17,8 +17,6 @@ import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
 import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
@@ -36,21 +34,10 @@ async function startServer() {
     app.use(helmet.permittedCrossDomainPolicies());
     app.use(helmet.referrerPolicy());
     app.use(helmet.xssFilter());
+
     app.use(corsMiddleware);
     app.use(contextMiddleware);
     app.use(accountMiddleware);
-
-    app.use(
-        rateLimit({
-            windowMs: 10000, // 10 seconds
-            max: 200, // Limit each IP to 100 requests per second
-            standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-            legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-            store: new RedisStore({
-                sendCommand: async (...args: string[]) => redis.sendCommand(args),
-            }),
-        }),
-    );
 
     //startWorker(app);
     loadRestRoutes(app);
@@ -65,7 +52,7 @@ async function startServer() {
             ApolloServerPluginLandingPageGraphQLPlayground(),
             ApolloServerPluginUsageReporting({
                 sendVariableValues: { all: true },
-                sendHeaders: { onlyNames: ['AccountAddress'] },
+                sendHeaders: { all: true },
             }),
         ],
         context: ({ req }) => req.context,

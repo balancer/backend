@@ -88,7 +88,7 @@ export function scheduleWorkerTasks() {
             console.time(label);
             await beetsFarmService.cacheBeetsFarms();
             console.log('Cache beets farms done');
-            console.time(label);
+            console.timeEnd(label);
         } catch (e) {
             console.log('Error caching beets farms', e);
         }
@@ -103,12 +103,6 @@ export function scheduleWorkerTasks() {
             await balancerService.cachePools();
             console.log('Cache pools done');
             console.timeEnd(label);
-
-            console.log('Cache SOR pools...');
-            console.time('cache-sor-pools');
-            await balancerSdk.sor.fetchPools();
-            console.log('Cache SOR pools done');
-            console.timeEnd('cache-sor-pools');
         } catch (e) {
             console.log('Error caching pools, farms & sor pools', e);
         }
@@ -150,15 +144,15 @@ export function scheduleWorkerTasks() {
         }
     });
 
-    //every 5 seconds
-    cron.schedule('*/5 * * * * *', async () => {
+    //every 10 seconds
+    cron.schedule('*/10 * * * * *', async () => {
         try {
             console.log('Cache beets farm users...');
             const label = `cache-beets-farm-users-${moment().format('YYYY-MM-DD-HH-mm-ss')}`;
-            console.time(label);
+            console.time('Cache beets farm users...');
             await beetsFarmService.cacheBeetsFarmUsers();
             console.log('Cache beets farm users done');
-            console.timeEnd(label);
+            console.timeEnd('Cache beets farm users...');
         } catch (e) {
             console.log('Error caching beets farm users', e);
         }
@@ -243,6 +237,9 @@ export function scheduleWorkerTasks() {
                 .catch((error) => console.log('Error caching initial protocol data', error)),
         )
         .catch();
+    beetsFarmService
+        .cacheBeetsFarmUsers(true)
+        .catch((error) => console.log('Error caching initial beets farm users', error));
 
     console.log('scheduled cron jobs');
 }

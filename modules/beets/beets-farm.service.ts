@@ -21,9 +21,11 @@ import { getAddress } from '@ethersproject/address';
 import { addressesMatch } from '../util/addresses';
 import { BigNumber } from 'ethers';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import moment from 'moment-timezone';
 
 const FARMS_CACHE_KEY = 'beetsFarms';
 const FARM_USERS_CACHE_KEY = 'beetsFarmUsers';
+const FARM_USERS_RELOAD_CACHE_KEY = 'beetsFarmUsers:reloading';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -165,8 +167,25 @@ export class BeetsFarmService {
         return farmUser ?? null;
     }
 
-    public async cacheBeetsFarmUsers(): Promise<GqlBeetsFarmUser[]> {
-        const farmUsers = await masterchefService.getAllFarmUsers({});
+    public async cacheBeetsFarmUsers(reload?: boolean): Promise<GqlBeetsFarmUser[]> {
+        const existing = (await cache.getObjectValue<GqlBeetsFarmUser[]>(FARM_USERS_CACHE_KEY)) || [];
+
+        if (reload) {
+            await cache.putValue(FARM_USERS_RELOAD_CACHE_KEY, 'true');
+        } else {
+            const reloading = await cache.getValue(FARM_USERS_RELOAD_CACHE_KEY);
+
+            if (reloading === 'true') {
+                console.log('reloading, skipping cacheBeetsFarmUsers');
+                return existing;
+            }
+        }
+
+        const currentUnixTime = moment.utc().unix();
+
+        const farmUsers = await masterchefService.getAllFarmUsers({
+            where: reload ? { amount_gt: '0' } : { timestamp_gte: `${currentUnixTime - 7200}` },
+        });
         const mapped: GqlBeetsFarmUser[] = farmUsers.map((farmUser) => ({
             ...farmUser,
             __typename: 'GqlBeetsFarmUser',
@@ -174,9 +193,14 @@ export class BeetsFarmService {
             pair: farmUser?.pool?.pair || '',
         }));
 
-        await cache.putObjectValue(FARM_USERS_CACHE_KEY, mapped, 30);
+        const ids = mapped.map((item) => item.id);
 
-        return mapped;
+        const filtered = reload ? [] : existing.filter((item) => !ids.includes(item.id));
+
+        await cache.putObjectValue(FARM_USERS_CACHE_KEY, [...filtered, ...mapped]);
+        await cache.putValue(FARM_USERS_RELOAD_CACHE_KEY, 'false');
+
+        return [...filtered, ...mapped];
     }
 
     public calculateFarmApr(
