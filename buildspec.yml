@@ -24,4 +24,4 @@ artifacts:
         - dist/**/*
         - Procfile
         - cron.yaml
-        - .ebextensions/**/*
+        - .platform/**/*
