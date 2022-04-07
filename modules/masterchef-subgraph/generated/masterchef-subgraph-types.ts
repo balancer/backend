@@ -911,6 +911,7 @@ export type MasterchefFarmsQuery = {
         rewarder?:
             | {
                   __typename?: 'Rewarder';
+                  id: string;
                   rewardTokens: Array<{
                       __typename?: 'RewardToken';
                       token: string;
@@ -939,6 +940,7 @@ export type FarmFragment = {
     rewarder?:
         | {
               __typename?: 'Rewarder';
+              id: string;
               rewardTokens: Array<{
                   __typename?: 'RewardToken';
                   token: string;
@@ -1011,6 +1013,7 @@ export const FarmFragmentDoc = gql`
             beetsPerBlock
         }
         rewarder {
+            id
             rewardTokens {
                 token
                 decimals

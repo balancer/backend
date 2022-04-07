@@ -93,6 +93,7 @@ fragment Farm on Pool {
         beetsPerBlock
     }
     rewarder {
+        id
         rewardTokens {
             token
             decimals

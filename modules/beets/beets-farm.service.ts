@@ -106,6 +106,21 @@ export class BeetsFarmService {
                 },
                 rewardTokens,
                 hasBeetsRewards,
+                rewarder: rewarder
+                    ? {
+                          ...rewarder,
+                          __typename: 'GqlBeetsRewarder',
+                          rewardPerSecond: '0',
+                          rewardToken: '',
+                          tokens: rewardTokens.map((token) => ({
+                              token: token.address,
+                              tokenPrice: parseFloat(token.tokenPrice),
+                              rewardPerSecond: token.rewardPerSecond,
+                              decimals: token.decimals,
+                              symbol: token.symbol,
+                          })),
+                      }
+                    : null,
             };
         });
 
