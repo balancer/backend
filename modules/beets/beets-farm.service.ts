@@ -208,11 +208,10 @@ export class BeetsFarmService {
             });
         }
 
-        (farm.rewarder?.tokens ?? []).forEach((rewardToken) => {
+        farm.rewardTokens.forEach((rewardToken) => {
             const rewardTokenPerYear =
-                Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18)) *
-                secondsPerYear;
-            const rewardTokenValuePerYear = rewardToken.tokenPrice * rewardTokenPerYear;
+                Number(parseInt(rewardToken.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18)) * secondsPerYear;
+            const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
             const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
             thirdPartyApr += rewardApr;
