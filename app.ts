@@ -17,12 +17,28 @@ import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
 import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
+import GraphQLJSON from 'graphql-type-json';
+import { balancerService } from './modules/balancer/balancer.service';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
     await redis.connect();
 
     const app = createExpressApp();
+    app.get('/balancer/pools', async (req, res) => {
+        const pools = await balancerService.getPools();
+
+        const mapped = pools.map((pool) => ({
+            ...pool,
+            __typename: 'GqlBalancerPool',
+            tokens: (pool.tokens || []).map((token) => ({
+                ...token,
+                __typename: 'GqlBalancerPoolToken',
+            })),
+        }));
+        res.send(mapped);
+    });
+
     app.use(helmet.dnsPrefetchControl());
     app.use(helmet.expectCt());
     app.use(helmet.frameguard());
@@ -43,18 +59,27 @@ async function startServer() {
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
-    const server = new ApolloServer({
-        resolvers: resolvers,
-        typeDefs: schema,
-        introspection: true,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            ApolloServerPluginLandingPageGraphQLPlayground(),
+
+    const plugins = [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginLandingPageGraphQLPlayground(),
+    ];
+    if (env.NODE_ENV === 'production') {
+        plugins.push(
             ApolloServerPluginUsageReporting({
                 sendVariableValues: { all: true },
                 sendHeaders: { all: true },
             }),
-        ],
+        );
+    }
+    const server = new ApolloServer({
+        resolvers: {
+            JSON: GraphQLJSON,
+            ...resolvers,
+        },
+        typeDefs: schema,
+        introspection: true,
+        plugins,
         context: ({ req }) => req.context,
     });
     await server.start();
