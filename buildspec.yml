@@ -1,26 +1,27 @@
 version: 0.2
 phases:
-  install:
-    commands:
-      - yarn install
-  build:
-    commands:
-      - yarn generate
-      - yarn prisma generate
-      - yarn prisma migrate deploy
-      - yarn build
-  post_build:
-    commands:
-      - echo Build completed on `date`
+    install:
+        commands:
+            - yarn install
+    build:
+        commands:
+            - yarn generate
+            - yarn prisma generate
+            - yarn prisma migrate deploy
+            - yarn build
+    post_build:
+        commands:
+            - echo Build completed on `date`
 #      - echo Pushing to graph cdn
 #      - npx graphcdn push
 cache:
-  paths:
-    - 'node_modules/**/*'
+    paths:
+        - 'node_modules/**/*'
 artifacts:
-  files:
-    - node_modules/**/*
-    - package.json
-    - dist/**/*
-    - Procfile
-    - cron.yaml
+    files:
+        - node_modules/**/*
+        - package.json
+        - dist/**/*
+        - Procfile
+        - cron.yaml
+        - .platform/**/*
