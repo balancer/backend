@@ -17,6 +17,7 @@ import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
 import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
+import GraphQLJSON from 'graphql-type-json';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
@@ -43,18 +44,27 @@ async function startServer() {
     loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
-    const server = new ApolloServer({
-        resolvers: resolvers,
-        typeDefs: schema,
-        introspection: true,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            ApolloServerPluginLandingPageGraphQLPlayground(),
+
+    const plugins = [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginLandingPageGraphQLPlayground(),
+    ];
+    if (env.NODE_ENV === 'production') {
+        plugins.push(
             ApolloServerPluginUsageReporting({
                 sendVariableValues: { all: true },
                 sendHeaders: { all: true },
             }),
-        ],
+        );
+    }
+    const server = new ApolloServer({
+        resolvers: {
+            JSON: GraphQLJSON,
+            ...resolvers,
+        },
+        typeDefs: schema,
+        introspection: true,
+        plugins,
         context: ({ req }) => req.context,
     });
     await server.start();

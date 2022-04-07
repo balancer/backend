@@ -1,5 +1,8 @@
+scalar JSON
+
 extend type Query {
     pools: [GqlBalancerPool!]!
+    poolsJSON: [JSON!]!
     pool(id: String!): GqlBalancerPool!
     poolsPastPools: [GqlBalancerPool!]!
     latestPrice(id: ID!): GqlBalancerTokenLatestPrice

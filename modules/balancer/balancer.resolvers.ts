@@ -29,6 +29,18 @@ const balancerResolvers: Resolvers = {
                 })),
             }));
         },
+        poolsJSON: async (parent, {}, context) => {
+            const pools = await balancerService.getPools();
+
+            return pools.map((pool) => ({
+                ...pool,
+                __typename: 'GqlBalancerPool',
+                tokens: (pool.tokens || []).map((token) => ({
+                    ...token,
+                    __typename: 'GqlBalancerPoolToken',
+                })),
+            }));
+        },
         poolsPastPools: async (parent, {}, context) => {
             const pools = await balancerService.getPastPools();
 
