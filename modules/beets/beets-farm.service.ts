@@ -85,7 +85,7 @@ export class BeetsFarmService {
                         rewardTokens.push({
                             address: rewardToken.token,
                             decimals: rewardToken.decimals,
-                            symbol: rewardToken?.symbol,
+                            symbol: rewardToken.symbol,
                             tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, rewardToken.token)}`,
                             rewardPerSecond,
                             rewardPerDay: `${parseFloat(rewardPerSecond) * 86400}`,
