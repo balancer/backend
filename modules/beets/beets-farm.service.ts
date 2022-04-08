@@ -225,7 +225,7 @@ export class BeetsFarmService {
             });
         }
 
-        farm.rewardTokens.forEach((rewardToken) => {
+        farm.rewardTokens.filter(rewardToken => !rewardToken.isBeets).forEach((rewardToken) => {
             const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
             const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
             const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
