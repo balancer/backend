@@ -106,23 +106,24 @@ export class BeetsFarmService {
                 },
                 rewardTokens,
                 hasBeetsRewards,
-                rewarder: rewarder
-                    ? {
-                          ...rewarder,
-                          __typename: 'GqlBeetsRewarder',
-                          rewardPerSecond: '0',
-                          rewardToken: '',
-                          tokens: rewardTokens
-                              .filter((token) => !token.isBeets)
-                              .map((token) => ({
-                                  token: token.address,
-                                  tokenPrice: parseFloat(token.tokenPrice),
-                                  rewardPerSecond: token.rewardPerSecond,
-                                  decimals: token.decimals,
-                                  symbol: token.symbol,
-                              })),
-                      }
-                    : null,
+                rewarder:
+                    rewarder && rewarder.id !== '0x0000000000000000000000000000000000000000'
+                        ? {
+                              ...rewarder,
+                              __typename: 'GqlBeetsRewarder',
+                              rewardPerSecond: '0',
+                              rewardToken: '',
+                              tokens: rewardTokens
+                                  .filter((token) => !token.isBeets)
+                                  .map((token) => ({
+                                      token: token.address,
+                                      tokenPrice: parseFloat(token.tokenPrice),
+                                      rewardPerSecond: token.rewardPerSecond,
+                                      decimals: token.decimals,
+                                      symbol: token.symbol,
+                                  })),
+                          }
+                        : null,
             };
         });
 
@@ -225,18 +226,20 @@ export class BeetsFarmService {
             });
         }
 
-        farm.rewardTokens.filter(rewardToken => !rewardToken.isBeets).forEach((rewardToken) => {
-            const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
-            const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
-            const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
+        farm.rewardTokens
+            .filter((rewardToken) => !rewardToken.isBeets)
+            .forEach((rewardToken) => {
+                const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
+                const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
+                const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
-            thirdPartyApr += rewardApr;
+                thirdPartyApr += rewardApr;
 
-            items.push({
-                title: `${rewardToken.symbol} reward APR`,
-                apr: `${rewardApr}`,
+                items.push({
+                    title: `${rewardToken.symbol} reward APR`,
+                    apr: `${rewardApr}`,
+                });
             });
-        });
 
         return { items, thirdPartyApr: `${thirdPartyApr}`, beetsApr: `${beetsApr > 0 ? beetsApr : 0}` };
     }
