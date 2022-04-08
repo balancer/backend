@@ -112,13 +112,15 @@ export class BeetsFarmService {
                           __typename: 'GqlBeetsRewarder',
                           rewardPerSecond: '0',
                           rewardToken: '',
-                          tokens: rewardTokens.map((token) => ({
-                              token: token.address,
-                              tokenPrice: parseFloat(token.tokenPrice),
-                              rewardPerSecond: token.rewardPerSecond,
-                              decimals: token.decimals,
-                              symbol: token.symbol,
-                          })),
+                          tokens: rewardTokens
+                              .filter((token) => !token.isBeets)
+                              .map((token) => ({
+                                  token: token.address,
+                                  tokenPrice: parseFloat(token.tokenPrice),
+                                  rewardPerSecond: token.rewardPerSecond,
+                                  decimals: token.decimals,
+                                  symbol: token.symbol,
+                              })),
                       }
                     : null,
             };
@@ -223,9 +225,8 @@ export class BeetsFarmService {
             });
         }
 
-        farm.rewardTokens.forEach((rewardToken) => {
-            const rewardTokenPerYear =
-                Number(parseInt(rewardToken.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18)) * secondsPerYear;
+        farm.rewardTokens.filter(rewardToken => !rewardToken.isBeets).forEach((rewardToken) => {
+            const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
             const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
             const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
