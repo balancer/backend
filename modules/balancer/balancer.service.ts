@@ -551,6 +551,15 @@ export class BalancerService {
     ): GqlBalancePoolAprItem[] {
         let items: GqlBalancePoolAprItem[] = [];
 
+        for (const token of pool.tokens) {
+            if (token.address.toLowerCase() === '0xd7028092c830b5c8fce061af2e593413ebbc1fc1') {
+                items.push({
+                    title: 'Stader sFTMx APR',
+                    apr: '0.125',
+                });
+            }
+        }
+
         if (pool.linearPools && pool.linearPools.length > 0) {
             const yearnAprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices, bbyvUsd);
 
