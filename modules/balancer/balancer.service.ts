@@ -38,6 +38,8 @@ import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.servi
 import { spookySwapService } from '../boosted/spooky-swap.service';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
+import { getAddress } from '@ethersproject/address';
+import { SFTMX_ADDRESS } from '../token-price/lib/stader-staked-ftm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -552,10 +554,13 @@ export class BalancerService {
         let items: GqlBalancePoolAprItem[] = [];
 
         for (const token of pool.tokens) {
-            if (token.address.toLowerCase() === '0xd7028092c830b5c8fce061af2e593413ebbc1fc1') {
+            if (token.address.toLowerCase() === SFTMX_ADDRESS.toLowerCase()) {
+                const sftmxPrice = tokenPrices[SFTMX_ADDRESS]?.usd || 0;
+                const percentOfPool = (parseFloat(token.balance) * sftmxPrice) / parseFloat(pool.totalLiquidity);
+
                 items.push({
                     title: 'Stader sFTMx APR',
-                    apr: '0.125',
+                    apr: `${0.125 * percentOfPool}`,
                 });
             }
         }
