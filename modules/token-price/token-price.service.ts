@@ -123,7 +123,7 @@ export class TokenPriceService {
             ...nestedBptPrices,
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
             //stader ftmx
-            SFTMX_ADDRESS: stakedFtmPrice,
+            [SFTMX_ADDRESS]: stakedFtmPrice,
         };
 
         const cached = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
