@@ -7,6 +7,8 @@ interface GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
 
     #fields that change rarely
     swapFee: BigDecimal!
@@ -30,21 +32,39 @@ type GqlBalancerPoolDynamicData {
     apr: GqlBalancePoolApr!
 }
 
-#TODO: figure out how best to model these
-type GqlBalancerPoolInvestOption {
-    poolTokenIndex: Int!
+type GqlBalancerPoolInvestConfig {
+    proportionalEnabled: Boolean!
+    singleAssetEnabled: Boolean!
+    options: [GqlBalancerPoolInvestOption!]!
+}
 
-    abc: String!
+type GqlBalancerPoolInvestOption {
+    #we include the index because it is useful for constructing contract calls
+    poolTokenIndex: Int!
+    poolTokenAddress: String!
+
+    # we use an array here for invest options where there are more than one option, but only one can be selected
+    # - FTM/wFTM or ETH/wETH
+    # - weighted boosted with nested phantom stable (bb-yv-USD) where you can only invest with DAI or USDC, not both at the same time
+    tokenOptions: [GqlBalancerPoolToken!]!
+}
+
+type GqlBalancerPoolWithdrawConfig {
+    proportionalEnabled: Boolean!
+    singleAssetEnabled: Boolean!
+    options: [GqlBalancerPoolWithdrawOption!]!
 }
 
 type GqlBalancerPoolWithdrawOption {
-    abc: String!
+    poolTokenIndex: Int!
+    poolTokenAddress: String!
+    tokenOptions: [GqlBalancerPoolToken!]!
 }
 
 enum GqlBalancerPoolNestingType {
     NO_NESTING
+    HAS_SOME_PHANTOM_BPT
     HAS_ONLY_PHANTOM_BPT
-    HAS_NON_PHANTOM_BPT
 }
 
 type GqlBalancerPoolWeighted implements GqlBalancerPoolBase {
@@ -55,6 +75,8 @@ type GqlBalancerPoolWeighted implements GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
     swapFee: BigDecimal!
     swapEnabled: Boolean!
     dynamicData: GqlBalancerPoolDynamicData!
@@ -71,6 +93,8 @@ type GqlBalancerPoolStable implements GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
     swapFee: BigDecimal!
     swapEnabled: Boolean!
     dynamicData: GqlBalancerPoolDynamicData!
@@ -87,6 +111,8 @@ type GqlBalancerPoolPhantomStable implements GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
     swapFee: BigDecimal!
     swapEnabled: Boolean!
     dynamicData: GqlBalancerPoolDynamicData!
@@ -102,6 +128,8 @@ type GqlBalancerPoolElement implements GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
     swapFee: BigDecimal!
     swapEnabled: Boolean!
     dynamicData: GqlBalancerPoolDynamicData!
@@ -121,6 +149,8 @@ type GqlBalancerPoolLinear implements GqlBalancerPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
+    investConfig: GqlBalancerPoolInvestConfig!
+    withdrawConfig: GqlBalancerPoolWithdrawConfig!
     swapFee: BigDecimal!
     swapEnabled: Boolean!
     dynamicData: GqlBalancerPoolDynamicData!
@@ -171,6 +201,7 @@ type GqlBalancerPoolTokenLinear implements GqlBalancerPoolTokenBase {
     #the proportional balances of the underlying tokens, computed as the fraction balance / totalShares
     mainTokenBalance: BigDecimal!
     wrappedTokenBalance: BigDecimal!
+    totalMainTokenBalance: BigDecimal! # mainTokenBalance + wrappedTokenBalance * priceRate
 }
 
 type GqlBalancerPoolTokenPhantomStable implements GqlBalancerPoolTokenBase {
