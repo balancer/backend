@@ -1,0 +1,231 @@
+interface GqlBalancerPoolBase {
+    #fields that never change after creation
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+
+    #fields that change rarely
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+
+    dynamicData: GqlBalancerPoolDynamicData!
+}
+
+type GqlBalancerPoolDynamicData {
+    poolId: ID!
+
+    #fields that change often
+    totalShares: BigDecimal!
+    #data that has USD values
+    composition: GqlBalancerPoolComposition! #token balances change often
+    totalLiquidity: BigDecimal!
+    volume24h: BigDecimal!
+    fees24h: BigDecimal!
+    totalSwapFee: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    apr: GqlBalancePoolApr!
+}
+
+#TODO: figure out how best to model these
+type GqlBalancerPoolInvestOption {
+    poolTokenIndex: Int!
+
+    abc: String!
+}
+
+type GqlBalancerPoolWithdrawOption {
+    abc: String!
+}
+
+enum GqlBalancerPoolNestingType {
+    NO_NESTING
+    HAS_ONLY_PHANTOM_BPT
+    HAS_NON_PHANTOM_BPT
+}
+
+type GqlBalancerPoolWeighted implements GqlBalancerPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+    dynamicData: GqlBalancerPoolDynamicData!
+
+    tokens: [GqlBalancerPoolTokenUnion!]!
+    nestingType: GqlBalancerPoolNestingType!
+}
+
+type GqlBalancerPoolStable implements GqlBalancerPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+    dynamicData: GqlBalancerPoolDynamicData!
+
+    tokens: [GqlBalancerPoolToken!]!
+    amp: BigInt!
+}
+
+type GqlBalancerPoolPhantomStable implements GqlBalancerPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+    dynamicData: GqlBalancerPoolDynamicData!
+    tokens: [GqlBalancerPoolTokenUnion!]!
+    nestingType: GqlBalancerPoolNestingType!
+}
+
+type GqlBalancerPoolElement implements GqlBalancerPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+    dynamicData: GqlBalancerPoolDynamicData!
+    tokens: [GqlBalancerPoolToken!]!
+
+    #element specific fields
+    unitSeconds: BigInt!
+    principalToken: Bytes!
+    baseToken: Bytes!
+}
+
+type GqlBalancerPoolLinear implements GqlBalancerPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    swapFee: BigDecimal!
+    swapEnabled: Boolean!
+    dynamicData: GqlBalancerPoolDynamicData!
+    tokens: [GqlBalancerPoolToken!]!
+
+    #linear specific fields
+    mainIndex: Int!
+    wrappedIndex: Int!
+    upperTarget: BigInt!
+    lowerTarget: BigInt!
+}
+
+union GqlBalancerPoolTokenUnion = GqlBalancerPoolToken | GqlBalancerPoolTokenPhantomStable | GqlBalancerPoolTokenLinear
+
+interface GqlBalancerPoolTokenBase {
+    id: ID!
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    name: String!
+    symbol: String!
+    priceRate: BigDecimal!
+    weight: BigDecimal
+}
+
+type GqlBalancerPoolToken implements GqlBalancerPoolTokenBase {
+    id: ID!
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    name: String!
+    symbol: String!
+    priceRate: BigDecimal!
+    weight: BigDecimal
+}
+
+type GqlBalancerPoolTokenLinear implements GqlBalancerPoolTokenBase {
+    id: ID!
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    name: String!
+    symbol: String!
+    priceRate: BigDecimal!
+    weight: BigDecimal
+
+    pool: GqlBalancerPoolLinear!
+    #the proportional balances of the underlying tokens, computed as the fraction balance / totalShares
+    mainTokenBalance: BigDecimal!
+    wrappedTokenBalance: BigDecimal!
+}
+
+type GqlBalancerPoolTokenPhantomStable implements GqlBalancerPoolTokenBase {
+    id: ID!
+    address: String!
+    balance: BigDecimal!
+    decimals: Int!
+    name: String!
+    symbol: String!
+    priceRate: BigDecimal!
+    weight: BigDecimal
+
+    pool: GqlBalancerPoolPhantomStable!
+}
+
+type GqlBalancerPoolLinearPoolData {
+    id: ID!
+    address: String!
+    symbol: String!
+    priceRate: String!
+    mainToken: GqlBalancerPoolLinearPoolMainToken!
+    wrappedToken: GqlBalancerPoolLinearPoolWrappedToken!
+    unwrappedTokenAddress: String!
+    totalSupply: String!
+    balance: String!
+    poolToken: String!
+    mainTokenTotalBalance: String!
+}
+
+type GqlBalancerPoolStablePhantomPoolData {
+    id: ID!
+    address: String!
+    symbol: String!
+    tokens: [GqlBalancerPoolToken!]!
+    totalSupply: String!
+    balance: String!
+}
+
+type GqlBalancerPoolLinearPoolMainToken {
+    address: String!
+    index: Int!
+    balance: String!
+    totalSupply: String!
+    name: String!
+    symbol: String!
+    decimals: Int!
+}
+
+type GqlBalancerPoolLinearPoolWrappedToken {
+    address: String!
+    index: Int!
+    balance: String!
+    totalSupply: String!
+    priceRate: String!
+    name: String!
+    symbol: String!
+    decimals: Int!
+}
