@@ -19,6 +19,15 @@ model PrismaPool {
     linearDynamicData   PrismaPoolLinearDynamicData[]
 }
 
+enum PrismaPoolType {
+    WEIGHTED
+    STABLE
+    META_STABLE
+    PHANTOM_STABLE
+    ELEMENT
+    LINEAR
+}
+
 model PrismaPoolLinearData {
     id                  String              @id
     poolId              String
@@ -102,13 +111,4 @@ model PrismaPoolTokenDynamicData {
     balance             String
     weight              String?
     priceRate           String
-}
-
-enum PrismaPoolType {
-    WEIGHTED
-    STABLE
-    META_STABLE
-    PHANTOM_STABLE
-    ELEMENT
-    LINEAR
 }
