@@ -168,10 +168,12 @@ interface GqlPoolTokenBase {
 type GqlPoolToken implements GqlPoolTokenBase {
     id: ID!
     address: String!
-    balance: BigDecimal!
     decimals: Int!
     name: String!
     symbol: String!
+
+    #dynamic data
+    balance: BigDecimal!
     priceRate: BigDecimal!
     weight: BigDecimal
 }
