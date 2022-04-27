@@ -28,7 +28,7 @@ type GqlPoolDynamicData {
     fees24h: BigDecimal!
     totalSwapFee: BigDecimal!
     totalSwapVolume: BigDecimal!
-    apr: GqlBalancePoolApr!
+    apr: GqlPoolApr!
 }
 
 type GqlPoolInvestConfig {
@@ -265,4 +265,24 @@ type GqlPoolCompositionToken {
     valueUSD: BigDecimal!
 
     nestedTokens: [GqlPoolCompositionToken!]
+}
+
+type GqlPoolApr {
+    total: BigDecimal!
+    swapApr: BigDecimal!
+    beetsApr: BigDecimal!
+    thirdPartyApr: BigDecimal!
+    items: [GqlBalancePoolAprItem!]!
+    hasRewardApr: Boolean!
+}
+
+type GqlPoolAprItem {
+    title: String!
+    apr: BigDecimal!
+    subItems: [GqlBalancePoolAprSubItem!]
+}
+
+type GqlPoolAprSubItem {
+    title: String!
+    apr: BigDecimal!
 }
