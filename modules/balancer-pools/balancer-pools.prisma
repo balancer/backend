@@ -12,7 +12,7 @@ model PrismaPool {
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
 
-    tokens              PrismaBalancerPoolToken[]
+    tokens              PrismaPoolToken[]
 
     dynamicData         PrismaPoolDynamicData[]
     stableDynamicData   PrismaPoolStableDynamicData[]
