@@ -115,7 +115,7 @@ export class TokenPriceService {
         });
 
         nativeAssetPrice = nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS];
-        const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(nativeAssetPrice.usd);
+        const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(1);
 
         const tokenPrices = {
             ...coingeckoTokenPrices,
@@ -124,6 +124,8 @@ export class TokenPriceService {
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
             //stader ftmx
             [SFTMX_ADDRESS]: stakedFtmPrice,
+            [env.WRAPPED_NATIVE_ASSET_ADDRESS]: 1,
+            [env.NATIVE_ASSET_ADDRESS]: 1,
         };
 
         const cached = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
