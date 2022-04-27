@@ -15,7 +15,81 @@ input Block_height {
 
 scalar Bytes
 
+type HarvestAction {
+    amount: BigInt!
+    block: BigInt!
+    id: ID!
+    timestamp: BigInt!
+    token: Bytes!
+    user: User
+}
+
+input HarvestAction_filter {
+    amount: BigInt
+    amount_gt: BigInt
+    amount_gte: BigInt
+    amount_in: [BigInt!]
+    amount_lt: BigInt
+    amount_lte: BigInt
+    amount_not: BigInt
+    amount_not_in: [BigInt!]
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    token: Bytes
+    token_contains: Bytes
+    token_in: [Bytes!]
+    token_not: Bytes
+    token_not_contains: Bytes
+    token_not_in: [Bytes!]
+    user: String
+    user_contains: String
+    user_ends_with: String
+    user_gt: String
+    user_gte: String
+    user_in: [String!]
+    user_lt: String
+    user_lte: String
+    user_not: String
+    user_not_contains: String
+    user_not_ends_with: String
+    user_not_in: [String!]
+    user_not_starts_with: String
+    user_starts_with: String
+}
+
+enum HarvestAction_orderBy {
+    amount
+    block
+    id
+    timestamp
+    token
+    user
+}
+
 type MasterChef {
+    beets: Bytes!
     beetsPerBlock: BigInt!
     block: BigInt!
     id: ID!
@@ -32,6 +106,7 @@ type MasterChef {
 }
 
 input MasterChef_filter {
+    beets: Bytes
     beetsPerBlock: BigInt
     beetsPerBlock_gt: BigInt
     beetsPerBlock_gte: BigInt
@@ -40,6 +115,11 @@ input MasterChef_filter {
     beetsPerBlock_lte: BigInt
     beetsPerBlock_not: BigInt
     beetsPerBlock_not_in: [BigInt!]
+    beets_contains: Bytes
+    beets_in: [Bytes!]
+    beets_not: Bytes
+    beets_not_contains: Bytes
+    beets_not_in: [Bytes!]
     block: BigInt
     block_gt: BigInt
     block_gte: BigInt
@@ -83,6 +163,7 @@ input MasterChef_filter {
 }
 
 enum MasterChef_orderBy {
+    beets
     beetsPerBlock
     block
     id
@@ -239,6 +320,24 @@ type Query {
     Access to subgraph metadata
     """
     _meta(block: Block_height): _Meta_
+    harvestAction(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): HarvestAction
+    harvestActions(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: HarvestAction_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: HarvestAction_filter
+    ): [HarvestAction!]!
     masterChef(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -275,6 +374,24 @@ type Query {
         skip: Int = 0
         where: Pool_filter
     ): [Pool!]!
+    rewardToken(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): RewardToken
+    rewardTokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: RewardToken_filter
+    ): [RewardToken!]!
     rewarder(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -313,11 +430,115 @@ type Query {
     ): [User!]!
 }
 
+type RewardToken {
+    block: BigInt!
+    decimals: Int!
+    id: ID!
+    rewardPerSecond: BigInt!
+    rewarder: Rewarder
+    symbol: String!
+    timestamp: BigInt!
+    token: Bytes!
+}
+
+input RewardToken_filter {
+    block: BigInt
+    block_gt: BigInt
+    block_gte: BigInt
+    block_in: [BigInt!]
+    block_lt: BigInt
+    block_lte: BigInt
+    block_not: BigInt
+    block_not_in: [BigInt!]
+    decimals: Int
+    decimals_gt: Int
+    decimals_gte: Int
+    decimals_in: [Int!]
+    decimals_lt: Int
+    decimals_lte: Int
+    decimals_not: Int
+    decimals_not_in: [Int!]
+    id: ID
+    id_gt: ID
+    id_gte: ID
+    id_in: [ID!]
+    id_lt: ID
+    id_lte: ID
+    id_not: ID
+    id_not_in: [ID!]
+    rewardPerSecond: BigInt
+    rewardPerSecond_gt: BigInt
+    rewardPerSecond_gte: BigInt
+    rewardPerSecond_in: [BigInt!]
+    rewardPerSecond_lt: BigInt
+    rewardPerSecond_lte: BigInt
+    rewardPerSecond_not: BigInt
+    rewardPerSecond_not_in: [BigInt!]
+    rewarder: String
+    rewarder_contains: String
+    rewarder_ends_with: String
+    rewarder_gt: String
+    rewarder_gte: String
+    rewarder_in: [String!]
+    rewarder_lt: String
+    rewarder_lte: String
+    rewarder_not: String
+    rewarder_not_contains: String
+    rewarder_not_ends_with: String
+    rewarder_not_in: [String!]
+    rewarder_not_starts_with: String
+    rewarder_starts_with: String
+    symbol: String
+    symbol_contains: String
+    symbol_ends_with: String
+    symbol_gt: String
+    symbol_gte: String
+    symbol_in: [String!]
+    symbol_lt: String
+    symbol_lte: String
+    symbol_not: String
+    symbol_not_contains: String
+    symbol_not_ends_with: String
+    symbol_not_in: [String!]
+    symbol_not_starts_with: String
+    symbol_starts_with: String
+    timestamp: BigInt
+    timestamp_gt: BigInt
+    timestamp_gte: BigInt
+    timestamp_in: [BigInt!]
+    timestamp_lt: BigInt
+    timestamp_lte: BigInt
+    timestamp_not: BigInt
+    timestamp_not_in: [BigInt!]
+    token: Bytes
+    token_contains: Bytes
+    token_in: [Bytes!]
+    token_not: Bytes
+    token_not_contains: Bytes
+    token_not_in: [Bytes!]
+}
+
+enum RewardToken_orderBy {
+    block
+    decimals
+    id
+    rewardPerSecond
+    rewarder
+    symbol
+    timestamp
+    token
+}
+
 type Rewarder {
     block: BigInt!
     id: ID!
-    rewardPerSecond: BigInt!
-    rewardToken: Bytes!
+    rewardTokens(
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: RewardToken_filter
+    ): [RewardToken!]!
     timestamp: BigInt!
 }
 
@@ -338,20 +559,6 @@ input Rewarder_filter {
     id_lte: ID
     id_not: ID
     id_not_in: [ID!]
-    rewardPerSecond: BigInt
-    rewardPerSecond_gt: BigInt
-    rewardPerSecond_gte: BigInt
-    rewardPerSecond_in: [BigInt!]
-    rewardPerSecond_lt: BigInt
-    rewardPerSecond_lte: BigInt
-    rewardPerSecond_not: BigInt
-    rewardPerSecond_not_in: [BigInt!]
-    rewardToken: Bytes
-    rewardToken_contains: Bytes
-    rewardToken_in: [Bytes!]
-    rewardToken_not: Bytes
-    rewardToken_not_contains: Bytes
-    rewardToken_not_in: [Bytes!]
     timestamp: BigInt
     timestamp_gt: BigInt
     timestamp_gte: BigInt
@@ -365,8 +572,7 @@ input Rewarder_filter {
 enum Rewarder_orderBy {
     block
     id
-    rewardPerSecond
-    rewardToken
+    rewardTokens
     timestamp
 }
 
@@ -375,6 +581,24 @@ type Subscription {
     Access to subgraph metadata
     """
     _meta(block: Block_height): _Meta_
+    harvestAction(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): HarvestAction
+    harvestActions(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: HarvestAction_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: HarvestAction_filter
+    ): [HarvestAction!]!
     masterChef(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -411,6 +635,24 @@ type Subscription {
         skip: Int = 0
         where: Pool_filter
     ): [Pool!]!
+    rewardToken(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        id: ID!
+    ): RewardToken
+    rewardTokens(
+        """
+        The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
+        """
+        block: Block_height
+        first: Int = 100
+        orderBy: RewardToken_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: RewardToken_filter
+    ): [RewardToken!]!
     rewarder(
         """
         The block at which the query should be executed. Can either be an `{ number: Int }` containing the block number or a `{ hash: Bytes }` value containing a block hash. Defaults to the latest block when omitted.
@@ -454,6 +696,13 @@ type User {
     amount: BigInt!
     beetsHarvested: BigInt!
     block: BigInt!
+    harvests(
+        first: Int = 100
+        orderBy: HarvestAction_orderBy
+        orderDirection: OrderDirection
+        skip: Int = 0
+        where: HarvestAction_filter
+    ): [HarvestAction!]!
     id: ID!
     pool: Pool
     rewardDebt: BigInt!
@@ -536,6 +785,7 @@ enum User_orderBy {
     amount
     beetsHarvested
     block
+    harvests
     id
     pool
     rewardDebt

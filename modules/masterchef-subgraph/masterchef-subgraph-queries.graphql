@@ -48,6 +48,7 @@ query Masterchefs(
         block: $block
     ) {
         id
+        beets
         beetsPerBlock
         totalAllocPoint
         poolCount
@@ -93,8 +94,12 @@ fragment Farm on Pool {
     }
     rewarder {
         id
-        rewardToken
-        rewardPerSecond
+        rewardTokens {
+            token
+            decimals
+            symbol
+            rewardPerSecond
+        }
     }
 }
 

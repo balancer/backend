@@ -16,6 +16,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
+import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -113,11 +114,16 @@ export class TokenPriceService {
             ...balancerTokenPrices,
         });
 
+        nativeAssetPrice = nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS];
+        const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(nativeAssetPrice.usd);
+
         const tokenPrices = {
             ...coingeckoTokenPrices,
             ...balancerTokenPrices,
             ...nestedBptPrices,
-            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS],
+            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
+            //stader ftmx
+            [SFTMX_ADDRESS]: stakedFtmPrice,
         };
 
         const cached = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);

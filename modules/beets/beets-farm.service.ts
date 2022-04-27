@@ -3,6 +3,7 @@ import {
     GqlBeetsFarm,
     GqlBeetsFarmRewardToken,
     GqlBeetsFarmUser,
+    GqlBeetsRewarder,
     GqlBeetsUserPendingAllFarmRewards,
     GqlBeetsUserPendingFarmRewards,
     GqlBeetsUserPendingRewardsToken,
@@ -48,7 +49,6 @@ export class BeetsFarmService {
 
     public async cacheBeetsFarms(): Promise<GqlBeetsFarm[]> {
         const tokenPrices = await tokenPriceService.getTokenPrices();
-        const tokens = await tokenService.getTokens();
         const farms = await masterchefService.getAllFarms({});
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const farmBeetsPerBlock = Number(parseInt(farms[0].masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
@@ -56,8 +56,8 @@ export class BeetsFarmService {
         const totalAllocPoint = parseInt(farms[0].masterChef.totalAllocPoint);
 
         const mapped: GqlBeetsFarm[] = farms.map((farm) => {
-            const rewardToken = tokens.find((token) => addressesMatch(token.address, farm.rewarder?.rewardToken || ''));
-            const allocPoint = parseInt(farm.allocPoint);
+            const { allocPoint: farmAllocationPoints, rewarder, masterChef, ...remainingFarmData } = farm;
+            const allocPoint = parseInt(farmAllocationPoints);
             const hasBeetsRewards = allocPoint > 0;
             const rewardTokens: GqlBeetsFarmRewardToken[] = [];
 
@@ -75,55 +75,53 @@ export class BeetsFarmService {
                 });
             }
 
-            if (farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS) {
-                const rewardPerSecond = formatFixed(
-                    BigNumber.from(farm.rewarder?.rewardPerSecond || '0'),
-                    rewardToken?.decimals || 18,
-                );
-
-                rewardTokens.push({
-                    address: farm.rewarder.rewardToken,
-                    decimals: rewardToken?.decimals || 18,
-                    symbol: rewardToken?.symbol || '',
-                    tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, farm.rewarder.rewardToken)}`,
-                    rewardPerSecond,
-                    rewardPerDay: `${parseFloat(rewardPerSecond) * 86400}`,
-                    isBeets: false,
-                });
+            if (rewarder?.rewardTokens) {
+                for (let rewardToken of rewarder.rewardTokens) {
+                    if (rewardToken.token !== ZERO_ADDRESS) {
+                        const rewardPerSecond = formatFixed(
+                            BigNumber.from(rewardToken.rewardPerSecond),
+                            rewardToken.decimals,
+                        );
+                        rewardTokens.push({
+                            address: rewardToken.token,
+                            decimals: rewardToken.decimals,
+                            symbol: rewardToken.symbol,
+                            tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, rewardToken.token)}`,
+                            rewardPerSecond,
+                            rewardPerDay: `${parseFloat(rewardPerSecond) * 86400}`,
+                            isBeets: false,
+                        });
+                    }
+                }
             }
 
             return {
-                ...farm,
+                ...remainingFarmData,
                 __typename: 'GqlBeetsFarm',
                 allocPoint,
                 masterChef: {
-                    ...farm.masterChef,
+                    ...masterChef,
                     __typename: 'GqlBeetsMasterChef',
-                    totalAllocPoint: parseInt(farm.masterChef.totalAllocPoint),
+                    totalAllocPoint: parseInt(masterChef.totalAllocPoint),
                 },
                 rewardTokens,
                 hasBeetsRewards,
-                //TODO: remove this once the new setup is integrated
                 rewarder:
-                    farm.rewarder && farm.rewarder.rewardToken !== ZERO_ADDRESS
+                    rewarder && rewarder.id !== '0x0000000000000000000000000000000000000000'
                         ? {
-                              ...farm.rewarder,
+                              ...rewarder,
                               __typename: 'GqlBeetsRewarder',
-                              tokens: [
-                                  {
-                                      token: farm.rewarder.rewardToken,
-                                      tokenPrice: tokenPriceService.getPriceForToken(
-                                          tokenPrices,
-                                          farm.rewarder.rewardToken,
-                                      ),
-                                      rewardPerSecond: formatFixed(
-                                          BigNumber.from(farm.rewarder?.rewardPerSecond || '0'),
-                                          rewardToken?.decimals || 18,
-                                      ),
-                                      decimals: rewardToken?.decimals || 18,
-                                      symbol: rewardToken?.symbol || '',
-                                  },
-                              ],
+                              rewardPerSecond: '0',
+                              rewardToken: '',
+                              tokens: rewardTokens
+                                  .filter((token) => !token.isBeets)
+                                  .map((token) => ({
+                                      token: token.address,
+                                      tokenPrice: parseFloat(token.tokenPrice),
+                                      rewardPerSecond: token.rewardPerSecond,
+                                      decimals: token.decimals,
+                                      symbol: token.symbol,
+                                  })),
                           }
                         : null,
             };
@@ -228,20 +226,20 @@ export class BeetsFarmService {
             });
         }
 
-        (farm.rewarder?.tokens ?? []).forEach((rewardToken) => {
-            const rewardTokenPerYear =
-                Number(parseInt(farm.rewarder?.rewardPerSecond || '0') / (farm.id === '66' ? 1e6 : 1e18)) *
-                secondsPerYear;
-            const rewardTokenValuePerYear = rewardToken.tokenPrice * rewardTokenPerYear;
-            const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
+        farm.rewardTokens
+            .filter((rewardToken) => !rewardToken.isBeets)
+            .forEach((rewardToken) => {
+                const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
+                const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
+                const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
-            thirdPartyApr += rewardApr;
+                thirdPartyApr += rewardApr;
 
-            items.push({
-                title: `${rewardToken.symbol} reward APR`,
-                apr: `${rewardApr}`,
+                items.push({
+                    title: `${rewardToken.symbol} reward APR`,
+                    apr: `${rewardApr}`,
+                });
             });
-        });
 
         return { items, thirdPartyApr: `${thirdPartyApr}`, beetsApr: `${beetsApr > 0 ? beetsApr : 0}` };
     }
