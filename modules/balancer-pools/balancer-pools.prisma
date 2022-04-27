@@ -13,6 +13,7 @@ model PrismaPool {
     elementData         PrismaPoolElementData?
 
     tokens              PrismaBalancerPoolToken[]
+
     dynamicData         PrismaPoolDynamicData[]
     stableDynamicData   PrismaPoolStableDynamicData[]
     linearDynamicData   PrismaPoolLinearDynamicData[]
@@ -78,7 +79,7 @@ model PrismaPoolLinearDynamicData {
 model PrismaPoolToken {
     id                  String              @id
     poolId              String
-    pool                PrismaPool @relation(fields:[poolId], references: [id])
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
 
     address             String
     symbol              String
@@ -86,22 +87,21 @@ model PrismaPoolToken {
     decimals            Int
 
     nestedPoolId        String?
-    nestedPool          PrismaPool? @relation(fields:[poolId], references: [id])
+    nestedPool          PrismaPool?         @relation(fields:[poolId], references: [id])
+
+    dynamicData         PrismaPoolTokenDynamicData[]
 }
 
 model PrismaPoolTokenDynamicData {
     id                  String              @id
-    poolId              String
-    pool                PrismaPool @relation(fields:[poolId], references: [id])
+    poolTokenId         String
+    poolToken           PrismaPoolToken     @relation(fields:[poolId], references: [poolTokenId])
+    blockNumber         Int
+    block               PrismaBlock         @relation(fields:[blockNumber], references: [number])
 
-    swapFee             String
-    swapEnabled         Boolean
-    totalShares         String
-    totalLiquidity      String
-    volume24h           String
-    fees24h             String
-    totalSwapFee        String
-    totalSwapVolume     String
+    balance             String
+    weight              String?
+    priceRate           String
 }
 
 enum PrismaPoolType {
