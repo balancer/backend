@@ -62,7 +62,10 @@ async function startServer() {
 
     const plugins = [
         ApolloServerPluginDrainHttpServer({ httpServer }),
-        ApolloServerPluginLandingPageGraphQLPlayground(),
+        ApolloServerPluginLandingPageGraphQLPlayground({
+            endpoint: '/playground',
+            settings: { 'schema.polling.interval': 20000 },
+        }),
     ];
     if (env.NODE_ENV === 'production') {
         plugins.push(
@@ -78,7 +81,7 @@ async function startServer() {
             ...resolvers,
         },
         typeDefs: schema,
-        introspection: true,
+        introspection: env.NODE_ENV !== 'production',
         plugins,
         context: ({ req }) => req.context,
     });
