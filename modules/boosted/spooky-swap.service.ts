@@ -3,11 +3,11 @@ import { GqlBalancePoolAprItem, GqlBalancerPool } from '../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { getContractAt } from '../ethers/ethers';
 import BooTokenAbi from './abi/BooTokenAbi.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
+import { getContractAt } from '../util/ethers';
 
 const SPOOKY_SWAP_CACHE_KEY = 'spooky-swap';
 

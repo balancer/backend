@@ -6,7 +6,7 @@ import { fiveMinutesInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import { sanityClient } from '../sanity/sanity';
+import { sanityClient } from '../util/sanity';
 import { cache } from '../cache/cache';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { tokenPriceService } from '../token-price/token-price.service';

@@ -2,7 +2,7 @@ import { blocksSubgraphService } from '../../blocks-subgraph/blocks-subgraph.ser
 import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgraph.service';
 import { masterchefService } from '../../masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../../beets-bar-subgraph/beets-bar.service';
-import { prisma } from '../../prisma/prisma-client';
+import { prisma } from '../../util/prisma-client';
 import _, { parseInt } from 'lodash';
 import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-types';
 import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';

@@ -18,7 +18,7 @@ import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { PortfolioDataService } from './lib/portfolio-data.service';
-import { prisma } from '../prisma/prisma-client';
+import { prisma } from '../util/prisma-client';
 import {
     PrismaBalancerPool,
     PrismaBalancerPoolShareSnapshot,

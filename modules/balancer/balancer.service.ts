@@ -8,7 +8,7 @@ import {
     Pool_OrderBy,
     TradePairSnapshot_OrderBy,
 } from '../balancer-subgraph/generated/balancer-subgraph-types';
-import { sanityClient } from '../sanity/sanity';
+import { sanityClient } from '../util/sanity';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';

@@ -10,13 +10,13 @@ import { Cache, CacheClass } from 'memory-cache';
 import { getAddress } from 'ethers/lib/utils';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
-import { getContractAt } from '../ethers/ethers';
 import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
+import { getContractAt } from '../util/ethers';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
