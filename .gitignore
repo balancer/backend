@@ -20,3 +20,4 @@ app.json
 !.elasticbeanstalk/*.global.yml
 Users/
 dist
+.env*
