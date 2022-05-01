@@ -14,9 +14,11 @@ model PrismaPool {
 
     tokens              PrismaPoolToken[]
 
-    dynamicData         PrismaPoolDynamicData[]
-    stableDynamicData   PrismaPoolStableDynamicData[]
-    linearDynamicData   PrismaPoolLinearDynamicData[]
+    dynamicData         PrismaPoolDynamicData?
+    stableDynamicData   PrismaPoolStableDynamicData?
+    linearDynamicData   PrismaPoolLinearDynamicData?
+
+    tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 }
 
 enum PrismaPoolType {
@@ -52,7 +54,7 @@ model PrismaPoolDynamicData {
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     blockNumber         Int
-    block               PrismaBlock         @relation(fields:[blockNumber], references: [number])
+    updatedAt           DateTime            @updatedAt
 
     swapFee             String
     swapEnabled         Boolean
@@ -69,7 +71,7 @@ model PrismaPoolStableDynamicData {
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     blockNumber         Int
-    block               PrismaBlock         @relation(fields:[blockNumber], references: [number])
+    updatedAt           DateTime            @updatedAt
 
     amp                 String
 }
@@ -79,7 +81,7 @@ model PrismaPoolLinearDynamicData {
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     blockNumber         Int
-    block               PrismaBlock         @relation(fields:[blockNumber], references: [number])
+    updatedAt           DateTime            @updatedAt
 
     lowerTarget         String
     upperTarget         String
@@ -96,9 +98,9 @@ model PrismaPoolToken {
     decimals            Int
 
     nestedPoolId        String?
-    nestedPool          PrismaPool?         @relation(name: "NestedPool", fields:[nestedPoolId], references: [id])
+    nestedPool          PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId], references: [id])
 
-    dynamicData         PrismaPoolTokenDynamicData[]
+    dynamicData         PrismaPoolTokenDynamicData?
 }
 
 model PrismaPoolTokenDynamicData {
@@ -106,7 +108,7 @@ model PrismaPoolTokenDynamicData {
     poolTokenId         String
     poolToken           PrismaPoolToken     @relation(fields:[poolTokenId], references: [id])
     blockNumber         Int
-    block               PrismaBlock         @relation(fields:[blockNumber], references: [number])
+    updatedAt           DateTime            @updatedAt
 
     balance             String
     weight              String?
