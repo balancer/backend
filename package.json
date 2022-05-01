@@ -34,7 +34,7 @@
         "express-promise-router": "^4.1.0",
         "graphql": "^16.0.1",
         "graphql-request": "^3.6.1",
-        "graphql-type-json": "^0.3.1",
+        "graphql-type-json": "^0.3.2",
         "helmet": "^5.0.2",
         "lodash": "^4.17.15",
         "memory-cache": "^0.2.0",

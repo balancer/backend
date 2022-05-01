@@ -1,13 +1,22 @@
-import { blocksSubgraphService } from '../../blocks-subgraph/blocks-subgraph.service';
-import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgraph.service';
-import { masterchefService } from '../../masterchef-subgraph/masterchef.service';
-import { beetsBarService } from '../../beets-bar-subgraph/beets-bar.service';
+import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
+import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { prisma } from '../../util/prisma-client';
 import _, { parseInt } from 'lodash';
-import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-types';
-import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
-import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
-import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
+import { BlockFragment } from '../../subgraphs/blocks-subgraph/generated/blocks-subgraph-types';
+import {
+    BalancerPoolFragment,
+    BalancerUserFragment,
+} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import {
+    FarmFragment,
+    FarmUserFragment,
+} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+import {
+    BeetsBarFragment,
+    BeetsBarUserFragment,
+} from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
 import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';

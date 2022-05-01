@@ -33,12 +33,12 @@ import {
     BalancerUsersQueryVariables,
     getSdk,
 } from './generated/balancer-subgraph-types';
-import { env } from '../../app/env';
+import { env } from '../../../app/env';
 import _ from 'lodash';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
-import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../util/time';
-import { cache } from '../cache/cache';
+import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../util/time';
+import { cache } from '../../cache/cache';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';

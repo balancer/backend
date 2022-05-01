@@ -1,4 +1,4 @@
-import { BalancerJoinExitFragment, InvestType } from '../balancer-subgraph/generated/balancer-subgraph-types';
+import { BalancerJoinExitFragment, InvestType } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { BigNumber } from 'ethers';
 import { fromFp } from '../util/numbers';
 import _ from 'lodash';

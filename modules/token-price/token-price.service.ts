@@ -8,12 +8,12 @@ import { cache } from '../cache/cache';
 import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
 import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
-import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
 import { getContractAt } from '../util/ethers';

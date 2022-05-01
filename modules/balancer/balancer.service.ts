@@ -1,4 +1,4 @@
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     BalancerLatestPriceFragment,
     BalancerPoolFragment,
@@ -7,9 +7,9 @@ import {
     OrderDirection,
     Pool_OrderBy,
     TradePairSnapshot_OrderBy,
-} from '../balancer-subgraph/generated/balancer-subgraph-types';
+} from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { sanityClient } from '../util/sanity';
-import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
@@ -37,7 +37,7 @@ import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
 import { spookySwapService } from '../boosted/spooky-swap.service';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
+import { BalancerUserPoolShare } from '../subgraphs/balancer-subgraph/balancer-subgraph-types';
 import { getAddress } from '@ethersproject/address';
 import { SFTMX_ADDRESS } from '../token-price/lib/stader-staked-ftm.service';
 

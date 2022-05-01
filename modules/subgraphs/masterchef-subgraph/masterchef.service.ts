@@ -12,9 +12,9 @@ import {
     MasterchefUsersQueryVariables,
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
-import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
-import { twentyFourHoursInMs } from '../util/time';
+import { env } from '../../../app/env';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
+import { twentyFourHoursInMs } from '../../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';

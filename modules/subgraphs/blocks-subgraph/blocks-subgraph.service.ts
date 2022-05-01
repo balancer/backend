@@ -7,7 +7,7 @@ import {
     getSdk,
     OrderDirection,
 } from './generated/blocks-subgraph-types';
-import { env } from '../../app/env';
+import { env } from '../../../app/env';
 import {
     fiveMinutesInSeconds,
     getDailyTimestampsForDays,
@@ -15,9 +15,9 @@ import {
     oneDayInMinutes,
     secondsPerDay,
     secondsPerYear,
-} from '../util/time';
-import { subgraphLoadAll } from '../util/subgraph-util';
-import { cache } from '../cache/cache';
+} from '../../util/time';
+import { subgraphLoadAll } from '../../util/subgraph-util';
+import { cache } from '../../cache/cache';
 import moment from 'moment-timezone';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';

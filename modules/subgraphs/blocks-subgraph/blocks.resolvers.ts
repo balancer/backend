@@ -1,4 +1,4 @@
-import { Resolvers } from '../../schema';
+import { Resolvers } from '../../../schema';
 import { blocksSubgraphService } from './blocks-subgraph.service';
 
 const balancerResolvers: Resolvers = {

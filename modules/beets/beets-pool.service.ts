@@ -8,7 +8,7 @@ import { getAddress } from '@ethersproject/address';
 import { addressesMatch } from '../util/addresses';
 import _ from 'lodash';
 import { env } from '../../app/env';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { getUserFBeetsInWalletBalance } from './beets';
 
 export class BeetsPoolService {

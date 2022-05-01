@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
-import { env } from '../../app/env';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../util/subgraph-util';
+import { env } from '../../../app/env';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
 import {
     BeetsBarFragment,
     BeetsBarUserFragment,
@@ -9,8 +9,8 @@ import {
 } from './generated/beets-bar-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
-import { cache } from '../cache/cache';
+import { oneDayInMinutes, twentyFourHoursInMs } from '../../util/time';
+import { cache } from '../../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
