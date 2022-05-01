@@ -147,7 +147,7 @@ fragment BalancerPool on Pool {
     owner
     amp
 
-    tokens(first: 1000) {
+    tokens {
         ...BalancerPoolToken
     }
 }
