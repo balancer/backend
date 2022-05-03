@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "PrismaPoolType" AS ENUM ('WEIGHTED', 'STABLE', 'META_STABLE', 'PHANTOM_STABLE', 'ELEMENT', 'LINEAR');
+CREATE TYPE "PrismaPoolType" AS ENUM ('WEIGHTED', 'STABLE', 'META_STABLE', 'PHANTOM_STABLE', 'ELEMENT', 'LINEAR', 'UNKNOWN', 'LIQUIDITY_BOOTSTRAPPING', 'INVESTMENT');
 
 -- CreateTable
 CREATE TABLE "PrismaPool" (
@@ -85,6 +85,7 @@ CREATE TABLE "PrismaPoolToken" (
     "symbol" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "decimals" INTEGER NOT NULL,
+    "index" INTEGER NOT NULL,
     "nestedPoolId" TEXT,
 
     CONSTRAINT "PrismaPoolToken_pkey" PRIMARY KEY ("id")
@@ -97,6 +98,7 @@ CREATE TABLE "PrismaPoolTokenDynamicData" (
     "blockNumber" INTEGER NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "balance" TEXT NOT NULL,
+    "balanceUSD" TEXT NOT NULL,
     "weight" TEXT,
     "priceRate" TEXT NOT NULL,
 

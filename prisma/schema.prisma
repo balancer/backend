@@ -44,6 +44,9 @@ enum PrismaPoolType {
     PHANTOM_STABLE
     ELEMENT
     LINEAR
+    UNKNOWN
+    LIQUIDITY_BOOTSTRAPPING
+    INVESTMENT
 }
 
 model PrismaPoolLinearData {
@@ -112,6 +115,7 @@ model PrismaPoolToken {
     symbol              String
     name                String
     decimals            Int
+    index               Int
 
     nestedPoolId        String?
     nestedPool          PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId], references: [id])
@@ -127,6 +131,7 @@ model PrismaPoolTokenDynamicData {
     updatedAt           DateTime            @updatedAt
 
     balance             String
+    balanceUSD          String
     weight              String?
     priceRate           String
 }
