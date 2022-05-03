@@ -95,6 +95,16 @@ export class BlocksSubgraphService {
         return this.sdk.Blocks(args);
     }
 
+    public async getLatestBlock(): Promise<number> {
+        const { blocks } = await this.getBlocks({
+            first: 1,
+            orderBy: Block_OrderBy.Number,
+            orderDirection: OrderDirection.Desc,
+        });
+
+        return blocks.length > 0 ? parseInt(blocks[0].number) : 0;
+    }
+
     public async getAllBlocks(args: BlocksQueryVariables): Promise<BlockFragment[]> {
         return subgraphLoadAll<BlockFragment>(this.sdk.Blocks, 'blocks', args);
     }
