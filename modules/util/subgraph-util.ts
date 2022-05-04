@@ -22,6 +22,12 @@ export async function subgraphLoadAll<T>(
         all = [...all, ...response[resultKey]];
         skip += limit;
         hasMore = response[resultKey].length === limit;
+
+        //TODO: rip this out asap
+        if (skip > 5000) {
+            console.log('BAILING EARLY FROM A subgraphLoadAll', resultKey, args);
+            break;
+        }
     }
 
     return all;
