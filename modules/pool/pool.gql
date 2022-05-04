@@ -1,7 +1,10 @@
 extend type Mutation {
     poolSyncAllPoolsFromSubgraph: [String!]!
     poolLoadOnChainDataForAllPools: String!
+    poolLoadOnChainDataForPoolsWithActiveUpdates: String!
     poolUpdateLiquidityValuesForAllPools: String!
+    poolUpdateVolumeAndFeeValuesForAllPools: String!
+    poolSyncSwapsForLast24Hours: String!
 }
 
 interface GqlPoolBase {

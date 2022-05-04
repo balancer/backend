@@ -1,6 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
 import {
     Balancer,
+    BalancerAmpUpdateFragment,
+    BalancerAmpUpdatesQueryVariables,
+    BalancerGradualWeightUpdateFragment,
+    BalancerGradualWeightUpdatesQuery,
+    BalancerGradualWeightUpdatesQueryVariables,
     BalancerJoinExitFragment,
     BalancerJoinExitsQuery,
     BalancerJoinExitsQueryVariables,
@@ -91,6 +96,20 @@ export class BalancerSubgraphService {
 
     public async getAllSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapFragment[]> {
         return subgraphLoadAll<BalancerSwapFragment>(this.sdk.BalancerSwaps, 'swaps', args);
+    }
+
+    public async getAllGradualWeightUpdates(
+        args: BalancerGradualWeightUpdatesQueryVariables,
+    ): Promise<BalancerGradualWeightUpdateFragment[]> {
+        return subgraphLoadAll<BalancerGradualWeightUpdateFragment>(
+            this.sdk.BalancerGradualWeightUpdates,
+            'gradualWeightUpdates',
+            args,
+        );
+    }
+
+    public async getAllAmpUpdates(args: BalancerAmpUpdatesQueryVariables): Promise<BalancerAmpUpdateFragment[]> {
+        return subgraphLoadAll<BalancerAmpUpdateFragment>(this.sdk.BalancerAmpUpdates, 'ampUpdates', args);
     }
 
     public async getPool(args: BalancerPoolQueryVariables): Promise<BalancerPoolQuery> {
@@ -225,6 +244,12 @@ export class BalancerSubgraphService {
 
     public async clearPoolsAtBlock(block: number) {
         await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
+    }
+
+    public async getPoolsWithActiveUpdates(timestamp: number): Promise<string[]> {
+        const { ampUpdates, gradualWeightUpdates } = await this.sdk.BalancerGetPoolsWithActiveUpdates({ timestamp });
+
+        return [...ampUpdates, ...gradualWeightUpdates].map((item) => item.poolId.id);
     }
 
     private get sdk() {

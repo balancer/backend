@@ -15,6 +15,7 @@ import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../util/prisma-client';
 import { isStablePool } from './pool-utils';
 import _ from 'lodash';
+import { TokenPriceService } from '../../token-price/token-price.service';
 
 interface MulticallExecuteResult {
     amp?: string[];
@@ -65,10 +66,16 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
 ];
 
 export class PoolOnChainDataService {
-    constructor(private readonly multiAddress: string, private readonly vaultAddress: string) {}
+    constructor(
+        private readonly multiAddress: string,
+        private readonly vaultAddress: string,
+        private readonly tokenPriceService: TokenPriceService,
+    ) {}
 
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
+
+        const tokenPrices = await this.tokenPriceService.getTokenPrices();
 
         const pools = await prisma.prismaPool.findMany({
             where: { id: { in: poolIds } },
@@ -151,7 +158,6 @@ export class PoolOnChainDataService {
         }
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
-        const operations: any[] = [];
 
         for (let index = 0; index < poolsOnChainDataArray.length; index++) {
             const [poolId, onchainData] = poolsOnChainDataArray[index];
@@ -172,13 +178,11 @@ export class PoolOnChainDataService {
 
                     //only update if amp has changed
                     if (!pool.stableDynamicData || pool.stableDynamicData.amp !== amp) {
-                        operations.push(
-                            prisma.prismaPoolStableDynamicData.upsert({
-                                where: { id: pool.id },
-                                create: { id: pool.id, poolId: pool.id, amp, blockNumber },
-                                update: { amp, blockNumber },
-                            }),
-                        );
+                        await prisma.prismaPoolStableDynamicData.upsert({
+                            where: { id: pool.id },
+                            create: { id: pool.id, poolId: pool.id, amp, blockNumber },
+                            update: { amp, blockNumber },
+                        });
                     }
                 }
 
@@ -195,13 +199,11 @@ export class PoolOnChainDataService {
                             pool.linearDynamicData.lowerTarget !== lowerTarget ||
                             pool.linearDynamicData.upperTarget !== upperTarget
                         ) {
-                            operations.push(
-                                prisma.prismaPoolLinearDynamicData.upsert({
-                                    where: { id: pool.id },
-                                    create: { id: pool.id, poolId: pool.id, upperTarget, lowerTarget, blockNumber },
-                                    update: { upperTarget, lowerTarget, blockNumber },
-                                }),
-                            );
+                            await prisma.prismaPoolLinearDynamicData.upsert({
+                                where: { id: pool.id },
+                                create: { id: pool.id, poolId: pool.id, upperTarget, lowerTarget, blockNumber },
+                                update: { upperTarget, lowerTarget, blockNumber },
+                            });
                         }
                     }
 
@@ -217,12 +219,10 @@ export class PoolOnChainDataService {
                     if (pool.tokens[wrappedIndex]) {
                         const priceRate = formatFixed(onchainData.wrappedTokenRate, 18);
 
-                        operations.push(
-                            prisma.prismaPoolTokenDynamicData.update({
-                                where: { id: pool.tokens[wrappedIndex].id },
-                                data: { priceRate, blockNumber },
-                            }),
-                        );
+                        await prisma.prismaPoolTokenDynamicData.update({
+                            where: { id: pool.tokens[wrappedIndex].id },
+                            data: { priceRate, blockNumber },
+                        });
                     }
 
                     const phantomIdx = pool.tokens.findIndex((token) => token.address === pool.address);
@@ -230,12 +230,10 @@ export class PoolOnChainDataService {
                     if (phantomIdx !== -1 && onchainData.rate) {
                         const priceRate = formatFixed(onchainData.rate, 18);
 
-                        operations.push(
-                            prisma.prismaPoolTokenDynamicData.update({
-                                where: { id: pool.tokens[phantomIdx].id },
-                                data: { priceRate, blockNumber },
-                            }),
-                        );
+                        await prisma.prismaPoolTokenDynamicData.update({
+                            where: { id: pool.tokens[phantomIdx].id },
+                            data: { priceRate, blockNumber },
+                        });
                     }
                 }
 
@@ -252,17 +250,15 @@ export class PoolOnChainDataService {
                         pool.dynamicData.totalShares !== totalShares ||
                         pool.dynamicData.swapEnabled !== swapEnabled)
                 ) {
-                    operations.push(
-                        prisma.prismaPoolDynamicData.update({
-                            where: { id: pool.id },
-                            data: {
-                                swapFee,
-                                totalShares,
-                                swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
-                                blockNumber,
-                            },
-                        }),
-                    );
+                    await prisma.prismaPoolDynamicData.update({
+                        where: { id: pool.id },
+                        data: {
+                            swapFee,
+                            totalShares,
+                            swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
+                            blockNumber,
+                        },
+                    });
                 }
 
                 for (let i = 0; i < poolTokens.tokens.length; i++) {
@@ -283,30 +279,32 @@ export class PoolOnChainDataService {
                         poolToken.dynamicData.priceRate !== priceRate ||
                         poolToken.dynamicData.weight !== weight
                     ) {
-                        operations.push(
-                            prisma.prismaPoolTokenDynamicData.upsert({
-                                where: { id: poolToken.id },
-                                create: {
-                                    id: poolToken.id,
-                                    poolTokenId: poolToken.id,
-                                    blockNumber,
-                                    priceRate,
-                                    weight,
-                                    balance,
-                                    balanceUSD: '0',
-                                },
-                                update: { blockNumber, priceRate, weight, balance },
-                            }),
-                        );
+                        await prisma.prismaPoolTokenDynamicData.upsert({
+                            where: { id: poolToken.id },
+                            create: {
+                                id: poolToken.id,
+                                poolTokenId: poolToken.id,
+                                blockNumber,
+                                priceRate,
+                                weight,
+                                balance,
+                                balanceUSD:
+                                    this.tokenPriceService.getPriceForToken(tokenPrices, poolToken.address) *
+                                    parseFloat(balance),
+                            },
+                            update: {
+                                blockNumber,
+                                priceRate,
+                                weight,
+                                balance,
+                                balanceUSD:
+                                    this.tokenPriceService.getPriceForToken(tokenPrices, poolToken.address) *
+                                    parseFloat(balance),
+                            },
+                        });
                     }
                 }
             } catch {}
-        }
-
-        const chunks = _.chunk(operations, 100);
-
-        for (const chunk of chunks) {
-            await prisma.$transaction(chunk);
         }
     }
 }

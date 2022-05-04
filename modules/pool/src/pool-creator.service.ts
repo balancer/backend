@@ -111,11 +111,9 @@ export class PoolCreatorService {
                         swapFee: pool.swapFee,
                         swapEnabled: pool.swapEnabled,
                         totalShares: pool.totalShares,
-                        totalLiquidity: pool.totalLiquidity,
-                        volume24h: '0',
-                        fees24h: '0',
-                        totalSwapFee: pool.totalSwapFee,
-                        totalSwapVolume: pool.totalSwapVolume,
+                        totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
+                        volume24h: 0,
+                        fees24h: 0,
                     },
                 },
             },
@@ -129,14 +127,15 @@ export class PoolCreatorService {
                 priceRate: token.priceRate || '1.0',
                 weight: token.weight,
                 balance: token.balance,
-                balanceUSD: '0.0',
+                balanceUSD: 0,
             })),
         });
     }
 
     private async loadSortedSubgraphPools(): Promise<BalancerPoolFragment[]> {
         const subgraphPools = await balancerSubgraphService.getAllPools({});
-        const sortedSubgraphPools = sortBy(subgraphPools, (pool) => {
+
+        return sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
 
             if (poolType === 'LINEAR') {
@@ -159,8 +158,6 @@ export class PoolCreatorService {
 
             return 3;
         });
-
-        return sortedSubgraphPools;
     }
 
     private mapSubgraphPoolTypeToPoolType(poolType: string): PrismaPoolType {

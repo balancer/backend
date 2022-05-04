@@ -419,3 +419,78 @@ fragment BalancerSwap on Swap {
     tx
     valueUSD
 }
+
+query BalancerAmpUpdates(
+    $skip: Int
+    $first: Int
+    $orderBy: AmpUpdate_orderBy
+    $orderDirection: OrderDirection
+    $where: AmpUpdate_filter
+    $block: Block_height
+) {
+    ampUpdates(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerAmpUpdate
+    }
+}
+
+fragment BalancerAmpUpdate on AmpUpdate {
+    id
+    poolId {
+        id
+    }
+    startAmp
+    endAmp
+    startTimestamp
+    endTimestamp
+}
+
+query BalancerGradualWeightUpdates(
+    $skip: Int
+    $first: Int
+    $orderBy: GradualWeightUpdate_orderBy
+    $orderDirection: OrderDirection
+    $where: GradualWeightUpdate_filter
+    $block: Block_height
+) {
+    gradualWeightUpdates(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerGradualWeightUpdate
+    }
+}
+
+fragment BalancerGradualWeightUpdate on GradualWeightUpdate {
+    id
+    startTimestamp
+    endWeights
+    startWeights
+    endWeights
+    poolId {
+        id
+    }
+}
+
+query BalancerGetPoolsWithActiveUpdates($timestamp: Int!) {
+    ampUpdates(where: { endTimestamp_gte: $timestamp }) {
+        poolId {
+            id
+        }
+    }
+    gradualWeightUpdates(where: { endTimestamp_gte: $timestamp }) {
+        poolId {
+            id
+        }
+    }
+}

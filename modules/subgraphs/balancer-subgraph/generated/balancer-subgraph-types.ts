@@ -3714,6 +3714,78 @@ export type BalancerSwapFragment = {
     userAddress: { __typename?: 'User'; id: string };
 };
 
+export type BalancerAmpUpdatesQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<AmpUpdate_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<AmpUpdate_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerAmpUpdatesQuery = {
+    __typename?: 'Query';
+    ampUpdates: Array<{
+        __typename?: 'AmpUpdate';
+        id: string;
+        startAmp: string;
+        endAmp: string;
+        startTimestamp: number;
+        endTimestamp: number;
+        poolId: { __typename?: 'Pool'; id: string };
+    }>;
+};
+
+export type BalancerAmpUpdateFragment = {
+    __typename?: 'AmpUpdate';
+    id: string;
+    startAmp: string;
+    endAmp: string;
+    startTimestamp: number;
+    endTimestamp: number;
+    poolId: { __typename?: 'Pool'; id: string };
+};
+
+export type BalancerGradualWeightUpdatesQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<GradualWeightUpdate_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<GradualWeightUpdate_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type BalancerGradualWeightUpdatesQuery = {
+    __typename?: 'Query';
+    gradualWeightUpdates: Array<{
+        __typename?: 'GradualWeightUpdate';
+        id: string;
+        startTimestamp: number;
+        endWeights: Array<string>;
+        startWeights: Array<string>;
+        poolId: { __typename?: 'Pool'; id: string };
+    }>;
+};
+
+export type BalancerGradualWeightUpdateFragment = {
+    __typename?: 'GradualWeightUpdate';
+    id: string;
+    startTimestamp: number;
+    endWeights: Array<string>;
+    startWeights: Array<string>;
+    poolId: { __typename?: 'Pool'; id: string };
+};
+
+export type BalancerGetPoolsWithActiveUpdatesQueryVariables = Exact<{
+    timestamp: Scalars['Int'];
+}>;
+
+export type BalancerGetPoolsWithActiveUpdatesQuery = {
+    __typename?: 'Query';
+    ampUpdates: Array<{ __typename?: 'AmpUpdate'; poolId: { __typename?: 'Pool'; id: string } }>;
+    gradualWeightUpdates: Array<{ __typename?: 'GradualWeightUpdate'; poolId: { __typename?: 'Pool'; id: string } }>;
+};
+
 export const BalancerUserFragmentDoc = gql`
     fragment BalancerUser on User {
         id
@@ -3789,7 +3861,7 @@ export const BalancerPoolFragmentDoc = gql`
         baseToken
         owner
         amp
-        tokens(first: 1000) {
+        tokens {
             ...BalancerPoolToken
         }
     }
@@ -3875,6 +3947,30 @@ export const BalancerSwapFragmentDoc = gql`
         timestamp
         tx
         valueUSD
+    }
+`;
+export const BalancerAmpUpdateFragmentDoc = gql`
+    fragment BalancerAmpUpdate on AmpUpdate {
+        id
+        poolId {
+            id
+        }
+        startAmp
+        endAmp
+        startTimestamp
+        endTimestamp
+    }
+`;
+export const BalancerGradualWeightUpdateFragmentDoc = gql`
+    fragment BalancerGradualWeightUpdate on GradualWeightUpdate {
+        id
+        startTimestamp
+        endWeights
+        startWeights
+        endWeights
+        poolId {
+            id
+        }
     }
 `;
 export const BalancerProtocolDataDocument = gql`
@@ -4175,6 +4271,64 @@ export const BalancerSwapsDocument = gql`
     }
     ${BalancerSwapFragmentDoc}
 `;
+export const BalancerAmpUpdatesDocument = gql`
+    query BalancerAmpUpdates(
+        $skip: Int
+        $first: Int
+        $orderBy: AmpUpdate_orderBy
+        $orderDirection: OrderDirection
+        $where: AmpUpdate_filter
+        $block: Block_height
+    ) {
+        ampUpdates(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerAmpUpdate
+        }
+    }
+    ${BalancerAmpUpdateFragmentDoc}
+`;
+export const BalancerGradualWeightUpdatesDocument = gql`
+    query BalancerGradualWeightUpdates(
+        $skip: Int
+        $first: Int
+        $orderBy: GradualWeightUpdate_orderBy
+        $orderDirection: OrderDirection
+        $where: GradualWeightUpdate_filter
+        $block: Block_height
+    ) {
+        gradualWeightUpdates(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...BalancerGradualWeightUpdate
+        }
+    }
+    ${BalancerGradualWeightUpdateFragmentDoc}
+`;
+export const BalancerGetPoolsWithActiveUpdatesDocument = gql`
+    query BalancerGetPoolsWithActiveUpdates($timestamp: Int!) {
+        ampUpdates(where: { endTimestamp_gte: $timestamp }) {
+            poolId {
+                id
+            }
+        }
+        gradualWeightUpdates(where: { endTimestamp_gte: $timestamp }) {
+            poolId {
+                id
+            }
+        }
+    }
+`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -4392,6 +4546,46 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerSwaps',
+            );
+        },
+        BalancerAmpUpdates(
+            variables?: BalancerAmpUpdatesQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerAmpUpdatesQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerAmpUpdatesQuery>(BalancerAmpUpdatesDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerAmpUpdates',
+            );
+        },
+        BalancerGradualWeightUpdates(
+            variables?: BalancerGradualWeightUpdatesQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerGradualWeightUpdatesQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerGradualWeightUpdatesQuery>(BalancerGradualWeightUpdatesDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'BalancerGradualWeightUpdates',
+            );
+        },
+        BalancerGetPoolsWithActiveUpdates(
+            variables: BalancerGetPoolsWithActiveUpdatesQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<BalancerGetPoolsWithActiveUpdatesQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<BalancerGetPoolsWithActiveUpdatesQuery>(
+                        BalancerGetPoolsWithActiveUpdatesDocument,
+                        variables,
+                        { ...requestHeaders, ...wrappedRequestHeaders },
+                    ),
+                'BalancerGetPoolsWithActiveUpdates',
             );
         },
     };

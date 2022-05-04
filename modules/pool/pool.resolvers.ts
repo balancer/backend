@@ -23,6 +23,27 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolUpdateVolumeAndFeeValuesForAllPools: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.updateVolumeAndFeeValuesForAllPools();
+
+            return 'success';
+        },
+        poolSyncSwapsForLast24Hours: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncSwapsForLast24Hours();
+
+            return 'success';
+        },
+        poolLoadOnChainDataForPoolsWithActiveUpdates: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.loadOnChainDataForPoolsWithActiveUpdates();
+
+            return 'success';
+        },
     },
 };
 

@@ -1,10 +1,19 @@
-import { tokenPriceService } from '../../token-price/token-price.service';
+import { TokenPriceService } from '../../token-price/token-price.service';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
+import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import moment from 'moment-timezone';
+import { OrderDirection, Swap_OrderBy } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export class PoolUsdDataService {
+    constructor(
+        private readonly tokenPriceService: TokenPriceService,
+        private readonly balancerSubgraphService: BalancerSubgraphService,
+    ) {}
+
     public async updateLiquidityValuesForAllPools() {
-        const tokenPrices = await tokenPriceService.getTokenPrices();
+        const tokenPrices = await this.tokenPriceService.getTokenPrices();
         const pools = await prisma.prismaPool.findMany({
             include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
             where: { dynamicData: { totalShares: { gt: '0.00000000001' } } },
@@ -16,8 +25,10 @@ export class PoolUsdDataService {
             const balanceUSDs = pool.tokens.map((token) => ({
                 id: token.id,
                 balanceUSD:
-                    parseFloat(token.dynamicData?.balance || '0') *
-                    tokenPriceService.getPriceForToken(tokenPrices, token.address),
+                    token.address === pool.address
+                        ? 0
+                        : parseFloat(token.dynamicData?.balance || '0') *
+                          this.tokenPriceService.getPriceForToken(tokenPrices, token.address),
             }));
             const totalLiquidity = _.sumBy(balanceUSDs, (item) => item.balanceUSD);
 
@@ -25,7 +36,7 @@ export class PoolUsdDataService {
                 updates.push(
                     prisma.prismaPoolTokenDynamicData.update({
                         where: { id: item.id },
-                        data: { balanceUSD: `${item.balanceUSD}` },
+                        data: { balanceUSD: item.balanceUSD },
                     }),
                 );
             }
@@ -33,7 +44,7 @@ export class PoolUsdDataService {
             updates.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id: pool.id },
-                    data: { totalLiquidity: `${totalLiquidity}` },
+                    data: { totalLiquidity },
                 }),
             );
 
@@ -44,5 +55,101 @@ export class PoolUsdDataService {
         }
 
         await prisma.$transaction(updates);
+    }
+
+    public async syncSwapsForLast24Hours() {
+        const tokenPrices = await this.tokenPriceService.getTokenPrices();
+        const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
+        const yesterday = moment().subtract(1, 'day').unix();
+        //ensure we only sync the last 24 hours worth of swaps
+        const timestamp = lastSwap && lastSwap.timestamp > yesterday ? lastSwap.timestamp : yesterday;
+        let hasMore = true;
+        let skip = 0;
+        const pageSize = 1000;
+
+        while (hasMore) {
+            const { swaps } = await this.balancerSubgraphService.getSwaps({
+                first: pageSize,
+                skip,
+                where: { timestamp_gt: timestamp },
+                orderBy: Swap_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+            });
+            console.log('num swaps', swaps.length);
+
+            if (swaps.length === 0) {
+                break;
+            }
+
+            await prisma.prismaPoolSwap.createMany({
+                data: swaps.map((swap) => {
+                    let valueUSD = parseFloat(swap.valueUSD);
+
+                    if (valueUSD === 0) {
+                        const tokenInPrice = this.tokenPriceService.getPriceForToken(tokenPrices, swap.tokenIn);
+                        const tokenOutPrice = this.tokenPriceService.getPriceForToken(tokenPrices, swap.tokenOut);
+
+                        if (tokenInPrice > 0) {
+                            valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);
+                        } else {
+                            valueUSD = tokenOutPrice * parseFloat(swap.tokenAmountOut);
+                        }
+                    }
+
+                    return {
+                        id: swap.id,
+                        timestamp: swap.timestamp,
+                        poolId: swap.poolId.id,
+                        userAddress: swap.userAddress.id,
+                        tokenIn: swap.tokenIn,
+                        tokenInSym: swap.tokenInSym,
+                        tokenOut: swap.tokenOut,
+                        tokenOutSym: swap.tokenOutSym,
+                        tokenAmountIn: swap.tokenAmountIn,
+                        tokenAmountOut: swap.tokenAmountOut,
+                        tx: swap.tx,
+                        valueUSD,
+                    };
+                }),
+            });
+
+            skip += pageSize;
+
+            if (swaps.length < pageSize) {
+                hasMore = false;
+            }
+        }
+
+        await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
+    }
+
+    public async updateVolumeAndFeeValuesForAllPools() {
+        const yesterday = moment().subtract(1, 'day').unix();
+        const pools = await prisma.prismaPool.findMany({
+            include: {
+                swaps: { where: { timestamp: { gte: yesterday } } },
+                dynamicData: true,
+            },
+        });
+        const operations: any[] = [];
+
+        for (const pool of pools) {
+            const volume24h = _.sumBy(pool.swaps, (swap) => swap.valueUSD);
+            const fees24h = parseFloat(pool.dynamicData?.swapFee || '0') * volume24h;
+
+            if (
+                pool.dynamicData &&
+                (pool.dynamicData.volume24h !== volume24h || pool.dynamicData.fees24h !== fees24h)
+            ) {
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id: pool.id },
+                        data: { volume24h, fees24h },
+                    }),
+                );
+            }
+        }
+
+        await prismaBulkExecuteOperations(operations);
     }
 }

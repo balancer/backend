@@ -18,6 +18,7 @@ model PrismaPool {
     stableDynamicData   PrismaPoolStableDynamicData?
     linearDynamicData   PrismaPoolLinearDynamicData?
 
+    swaps               PrismaPoolSwap[]
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 }
 
@@ -62,11 +63,9 @@ model PrismaPoolDynamicData {
     swapFee             String
     swapEnabled         Boolean
     totalShares         String
-    totalLiquidity      String
-    volume24h           String
-    fees24h             String
-    totalSwapFee        String
-    totalSwapVolume     String
+    totalLiquidity      Float
+    volume24h           Float
+    fees24h             Float
 }
 
 model PrismaPoolStableDynamicData {
@@ -115,7 +114,23 @@ model PrismaPoolTokenDynamicData {
     updatedAt           DateTime            @updatedAt
 
     balance             String
-    balanceUSD          String
+    balanceUSD          Float
     weight              String?
     priceRate           String
+}
+
+model PrismaPoolSwap {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    userAddress         String
+    tokenIn             String
+    tokenInSym          String
+    tokenOut            String
+    tokenOutSym         String
+    tokenAmountIn       String
+    tokenAmountOut      String
+    timestamp           Int
+    tx                  String
+    valueUSD            Float
 }
