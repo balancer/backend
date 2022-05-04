@@ -140,6 +140,7 @@ export class TokenPriceService {
         const { tokenAddresses } = await this.getTokenAddresses(pools);
         const missingTokens: string[] = [];
         const tokenPrices: TokenHistoricalPrices = {};
+        const cached = await this.getHistoricalTokenPrices();
 
         for (const token of tokenAddresses) {
             try {
@@ -152,6 +153,9 @@ export class TokenPriceService {
             await sleep(150);
         }
 
+        //pre-emptively cache whatever we got from coingecko
+        await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, { ...cached, ...tokenPrices });
+
         for (const token of [...missingTokens]) {
             tokenPrices[token] = await balancerPriceService.getHistoricalTokenPrices({
                 address: token,
@@ -159,7 +163,6 @@ export class TokenPriceService {
                 coingeckoHistoricalPrices: tokenPrices,
             });
         }
-
         await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;

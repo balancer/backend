@@ -48,16 +48,22 @@ export class BalancerPriceService {
         const minTimestamp = _.min(_.flatten(ranges));
         const maxTimestamp = _.max(_.flatten(ranges));
 
-        const allTokenPrices = await balancerSubgraphService.getAllTokenPrices({
+        /*const allTokenPrices = await balancerSubgraphService.getAllTokenPrices({
             where: { asset: address, timestamp_gte: minTimestamp, timestamp_lte: maxTimestamp },
             orderBy: TokenPrice_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
-        });
+        });*/
 
         for (const range of ranges) {
-            const tokenPrices = allTokenPrices.filter(
+            const tokenPrices = await balancerSubgraphService.getAllTokenPrices({
+                where: { asset: address, timestamp_gte: range[0], timestamp_lte: range[1] },
+                orderBy: TokenPrice_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+            });
+
+            /*const tokenPrices = allTokenPrices.filter(
                 (item) => item.timestamp >= range[0] && item.timestamp < range[1],
-            );
+            );*/
 
             if (tokenPrices.length === 0) {
                 continue;
