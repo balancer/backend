@@ -52,7 +52,7 @@ export class BlocksSubgraphService {
 
         let blocks: BlockFragment[] = [];
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 6; i++) {
             const result = await this.sdk.Blocks({
                 first: 1000,
                 skip: i * 1000,
