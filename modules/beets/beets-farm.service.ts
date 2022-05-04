@@ -182,7 +182,9 @@ export class BeetsFarmService {
         const currentUnixTime = moment.utc().unix();
 
         const farmUsers = await masterchefService.getAllFarmUsers({
-            where: reload ? { amount_gt: '0' } : { timestamp_gte: `${currentUnixTime - 7200}` },
+            where: reload
+                ? { timestamp_gte: `${currentUnixTime - 14400}` }
+                : { timestamp_gte: `${currentUnixTime - 7200}` },
         });
         const mapped: GqlBeetsFarmUser[] = farmUsers.map((farmUser) => ({
             ...farmUser,
@@ -193,7 +195,8 @@ export class BeetsFarmService {
 
         const ids = mapped.map((item) => item.id);
 
-        const filtered = reload ? [] : existing.filter((item) => !ids.includes(item.id));
+        //const filtered = reload ? [] : existing.filter((item) => !ids.includes(item.id));
+        const filtered = existing.filter((item) => !ids.includes(item.id));
 
         await cache.putObjectValue(FARM_USERS_CACHE_KEY, [...filtered, ...mapped]);
         await cache.putValue(FARM_USERS_RELOAD_CACHE_KEY, 'false');
