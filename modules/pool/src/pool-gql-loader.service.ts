@@ -87,15 +87,15 @@ export class PoolGqlLoaderService {
                           notIn: where.poolTypeNotIn || undefined,
                       },
                       tokens: {
-                          every: {
+                          some: {
                               id: {
-                                  in: where.tokensIn || undefined,
-                                  notIn: where.tokensNotIn || undefined,
+                                  in: where.tokensIn?.map((token) => token.toLowerCase()) || undefined,
+                                  notIn: where.tokensNotIn?.map((token) => token.toLowerCase()) || undefined,
                               },
                           },
                       },
                       categories: {
-                          every: {
+                          some: {
                               category: {
                                   in: where.categoryIn || undefined,
                                   notIn: ['BLACK_LISTED', ...(where.categoryNotIn || [])],
