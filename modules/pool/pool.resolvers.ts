@@ -31,10 +31,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolUpdateVolumeAndFeeValuesForAllPools: async (parent, {}, context) => {
+        poolUpdateVolumeFeeAndSwapAprValuesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.updateVolumeAndFeeValuesForAllPools();
+            await poolService.updateVolumeFeeAndSwapAprValuesForAllPools();
 
             return 'success';
         },

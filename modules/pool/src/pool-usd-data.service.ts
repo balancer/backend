@@ -130,7 +130,7 @@ export class PoolUsdDataService {
         await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async updateVolumeAndFeeValuesForAllPools() {
+    public async updateVolumeFeeAndSwapAprValuesForAllPools() {
         const yesterday = moment().subtract(1, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
             include: {
@@ -152,6 +152,22 @@ export class PoolUsdDataService {
                     prisma.prismaPoolDynamicData.update({
                         where: { id: pool.id },
                         data: { volume24h, fees24h },
+                    }),
+                );
+
+                const apr = (fees24h * 365) / pool.dynamicData.totalLiquidity;
+
+                operations.push(
+                    prisma.prismaPoolAprItem.upsert({
+                        where: { id: `${pool.id}-swap-apr` },
+                        create: {
+                            id: `${pool.id}-swap-apr`,
+                            poolId: pool.id,
+                            title: 'Swap fees APR',
+                            apr,
+                            isSwapApr: true,
+                        },
+                        update: { apr },
                     }),
                 );
             }

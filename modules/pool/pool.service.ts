@@ -70,10 +70,10 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidityValuesForAllPools();
     }
 
-    public async updateVolumeAndFeeValuesForAllPools(): Promise<void> {
-        console.time('updateVolumeAndFeeValuesForAllPools');
-        await this.poolUsdDataService.updateVolumeAndFeeValuesForAllPools();
-        console.timeEnd('updateVolumeAndFeeValuesForAllPools');
+    public async updateVolumeFeeAndSwapAprValuesForAllPools(): Promise<void> {
+        console.time('updateVolumeFeeAndSwapAprValuesForAllPools');
+        await this.poolUsdDataService.updateVolumeFeeAndSwapAprValuesForAllPools();
+        console.timeEnd('updateVolumeFeeAndSwapAprValuesForAllPools');
     }
 
     public async syncSwapsForLast24Hours(): Promise<void> {
