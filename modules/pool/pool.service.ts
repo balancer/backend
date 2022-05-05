@@ -11,6 +11,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import { GqlPoolTokenUnion, GqlPoolUnion } from '../../schema';
+import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
 
 export class PoolService {
     constructor(
@@ -18,6 +19,7 @@ export class PoolService {
         private readonly poolLoaderService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
+        private readonly poolGqlLoaderService: PoolGqlLoaderService,
     ) {}
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -36,6 +38,10 @@ export class PoolService {
         for (const chunk of chunks) {
             await this.poolOnChainDataService.updateOnChainData(chunk, this.provider, blockNumber);
         }
+    }
+
+    public async updateOnChainDataForPools(poolIds: string[], blockNumber: number) {
+        await this.poolOnChainDataService.updateOnChainData(poolIds, this.provider, blockNumber);
     }
 
     public async loadOnChainDataForPoolsWithActiveUpdates() {
@@ -67,88 +73,7 @@ export class PoolService {
     }
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
-        const pool = await prisma.prismaPool.findUnique({
-            where: { id },
-            include: {
-                linearData: true,
-                elementData: true,
-                dynamicData: true,
-                stableDynamicData: true,
-                linearDynamicData: true,
-                tokens: {
-                    include: {
-                        dynamicData: true,
-                        nestedPool: {
-                            include: {
-                                linearData: true,
-                                dynamicData: true,
-                                stableDynamicData: true,
-                                linearDynamicData: true,
-                                tokens: {
-                                    include: {
-                                        dynamicData: true,
-                                        nestedPool: {
-                                            include: {
-                                                linearData: true,
-                                                dynamicData: true,
-                                                linearDynamicData: true,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
-        if (!pool || !pool.dynamicData) {
-            throw new Error('Pool with id does not exist');
-        }
-
-        const { name, symbol, address, owner, factory, createdAt } = pool;
-        const { swapEnabled, swapFee, fees24h, totalShares, totalLiquidity, volume24h } = pool.dynamicData;
-
-        return {
-            __typename: 'GqlPoolWeighted',
-            id,
-            name,
-            symbol,
-            address,
-            owner,
-            factory,
-            createdAt: Math.floor(createdAt.getTime() / 1000),
-            dynamicData: {
-                poolId: pool.id,
-                swapEnabled,
-                swapFee,
-                totalShares,
-                totalLiquidity: `${totalLiquidity}`,
-                fees24h: `${fees24h}`,
-                volume24h: `${volume24h}`,
-                apr: {
-                    total: '',
-                    swapApr: '',
-                    nativeRewardApr: '',
-                    thirdPartyApr: '',
-                    items: [],
-                    hasRewardApr: true,
-                },
-            },
-            investConfig: {
-                options: [],
-                proportionalEnabled: true,
-                singleAssetEnabled: true,
-            },
-            withdrawConfig: {
-                options: [],
-                proportionalEnabled: true,
-                singleAssetEnabled: true,
-            },
-            nestingType: 'NO_NESTING',
-            tokens: [],
-        };
+        return this.poolGqlLoaderService.getPool(id);
     }
 }
 
@@ -161,4 +86,5 @@ export const poolService = new PoolService(
         tokenPriceService,
     ),
     new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
+    new PoolGqlLoaderService(tokenPriceService),
 );

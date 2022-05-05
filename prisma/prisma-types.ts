@@ -12,13 +12,18 @@ const poolTokenWithDynamicData = Prisma.validator<Prisma.PrismaPoolTokenArgs>()(
 
 export type PrismaPoolTokenWithDynamicData = Prisma.PrismaPoolTokenGetPayload<typeof poolTokenWithDynamicData>;
 
-const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
+export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         linearData: true,
         elementData: true,
         dynamicData: true,
         stableDynamicData: true,
         linearDynamicData: true,
+        aprItems: {
+            include: {
+                subItems: true,
+            },
+        },
         tokens: {
             include: {
                 dynamicData: true,

@@ -35,6 +35,7 @@ model PrismaPool {
     linearDynamicData   PrismaPoolLinearDynamicData?
 
     swaps               PrismaPoolSwap[]
+    aprItems            PrismaPoolAprItem[]
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 }
 
@@ -150,6 +151,23 @@ model PrismaPoolSwap {
     tx                  String
     valueUSD            Float
 }
+
+model PrismaPoolAprItem {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    title               String
+    apr                 Float
+    isSwapApr           Boolean?
+    isNativeRewardApr   Boolean?
+    isThirdPartyApr     Boolean?
+
+    parentItemId        String?
+    parentItem          PrismaPoolAprItem?  @relation(name: "AprItemParentChild", fields:[parentItemId], references: [id])
+
+    subItems            PrismaPoolAprItem[] @relation(name: "AprItemParentChild")
+}
+
 
 
 model PrismaBlock {

@@ -3,6 +3,11 @@ import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../util/resolver-util';
 
 const balancerResolvers: Resolvers = {
+    Query: {
+        poolGetPool: async (parent, { id }, context) => {
+            return poolService.getGqlPool(id);
+        },
+    },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
             isAdminRoute(context);

@@ -1,3 +1,7 @@
+extend type Query {
+    poolGetPool(id: String!): GqlPoolUnion!
+}
+
 extend type Mutation {
     poolSyncAllPoolsFromSubgraph: [String!]!
     poolLoadOnChainDataForAllPools: String!
@@ -88,6 +92,22 @@ type GqlPoolWeighted implements GqlPoolBase {
     nestingType: GqlPoolNestingType!
 }
 
+type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createdAt: Int!
+    investConfig: GqlPoolInvestConfig!
+    withdrawConfig: GqlPoolWithdrawConfig!
+    dynamicData: GqlPoolDynamicData!
+
+    tokens: [GqlPoolTokenUnion!]!
+    nestingType: GqlPoolNestingType!
+}
+
 type GqlPoolStable implements GqlPoolBase {
     id: ID!
     name: String!
@@ -117,6 +137,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
+    amp: BigInt!
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -187,7 +208,13 @@ type GqlPoolPhantomStableNested {
     nestingType: GqlPoolNestingType!
 }
 
-union GqlPoolUnion = GqlPoolWeighted | GqlPoolStable | GqlPoolLinear | GqlPoolPhantomStable | GqlPoolElement
+union GqlPoolUnion =
+      GqlPoolWeighted
+    | GqlPoolStable
+    | GqlPoolLinear
+    | GqlPoolPhantomStable
+    | GqlPoolElement
+    | GqlPoolLiquidityBootstrapping
 union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolPhantomStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenPhantomStable | GqlPoolTokenLinear

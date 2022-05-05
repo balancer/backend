@@ -3,6 +3,7 @@ import {
     PrismaNestedPoolWithSingleLayerNesting,
     PrismaPoolTokenWithDynamicData,
     PrismaPoolTokenWithExpandedNesting,
+    prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
 } from '../../../prisma/prisma-types';
 import {
@@ -20,16 +21,38 @@ import {
 } from '../../../schema';
 import { TokenPriceService } from '../../token-price/token-price.service';
 import { isSameAddress } from '@balancer-labs/sdk';
-import { env } from '../../../app/env';
+import _ from 'lodash';
+import { prisma } from '../../util/prisma-client';
+import { networkConfig } from '../../config/network-config';
 
 export class PoolGqlLoaderService {
     constructor(private readonly tokenPriceService: TokenPriceService) {}
 
-    public mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
-        const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
+    public async getPool(id: string) {
+        const pool = await prisma.prismaPool.findUnique({
+            where: { id },
+            include: prismaPoolWithExpandedNesting.include,
+        });
 
-        return {
-            __typename: 'GqlPoolWeighted',
+        if (!pool) {
+            throw new Error('Pool with id does not exist');
+        }
+
+        if (pool.type === 'UNKNOWN') {
+            throw new Error('Pool exists, but has an unknown type');
+        }
+
+        return this.mapPoolToGqlPool(pool);
+    }
+
+    private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
+        const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
+        const aprItems = pool.aprItems || [];
+        const swapAprItems = aprItems.filter((item) => item.isSwapApr);
+        const nativeRewardAprItems = aprItems.filter((item) => item.isNativeRewardApr);
+        const thirdPartyRewardAprItems = aprItems.filter((item) => item.isThirdPartyApr);
+
+        const mappedData = {
             ...pool,
             createdAt: Math.floor(pool.createdAt.getTime() / 1000),
             dynamicData: {
@@ -38,13 +61,19 @@ export class PoolGqlLoaderService {
                 fees24h: `${fees24h}`,
                 volume24h: `${volume24h}`,
                 apr: {
-                    total: '',
-                    swapApr: '',
-                    nativeRewardApr: '',
-                    thirdPartyApr: '',
-                    //TODO: this should be stored in the DB so various sources can update at whatever interval makes sense
-                    items: [],
-                    hasRewardApr: true,
+                    total: `${_.sumBy(aprItems, 'apr')}`,
+                    swapApr: `${_.sumBy(swapAprItems, 'apr')}`,
+                    nativeRewardApr: `${_.sumBy(nativeRewardAprItems, 'apr')}`,
+                    thirdPartyApr: `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`,
+                    items: aprItems.map((item) => ({
+                        ...item,
+                        apr: `${item.apr}`,
+                        subItems: item.subItems.map((subItem) => ({
+                            ...subItem,
+                            apr: `${subItem.apr}`,
+                        })),
+                    })),
+                    hasRewardApr: nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0,
                 },
             },
             investConfig: this.getPoolInvestConfig(pool),
@@ -52,13 +81,61 @@ export class PoolGqlLoaderService {
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
         };
+
+        //TODO: may need to build out the types here still
+        switch (pool.type) {
+            case 'STABLE':
+            case 'META_STABLE':
+                return {
+                    __typename: 'GqlPoolStable',
+                    ...mappedData,
+                    amp: pool.stableDynamicData?.amp || '0',
+                    tokens: mappedData.tokens as GqlPoolToken[],
+                };
+            case 'PHANTOM_STABLE':
+                return {
+                    __typename: 'GqlPoolPhantomStable',
+                    ...mappedData,
+                    amp: pool.stableDynamicData?.amp || '0',
+                };
+            case 'LINEAR':
+                return {
+                    __typename: 'GqlPoolLinear',
+                    ...mappedData,
+                    tokens: mappedData.tokens as GqlPoolToken[],
+                    mainIndex: pool.linearData?.mainIndex || 0,
+                    wrappedIndex: pool.linearData?.wrappedIndex || 0,
+                    lowerTarget: pool.linearDynamicData?.lowerTarget || '0',
+                    upperTarget: pool.linearDynamicData?.upperTarget || '0',
+                };
+            case 'ELEMENT':
+                return {
+                    __typename: 'GqlPoolElement',
+                    ...mappedData,
+                    tokens: mappedData.tokens as GqlPoolToken[],
+                    baseToken: pool.elementData?.baseToken || '',
+                    unitSeconds: pool.elementData?.unitSeconds || '',
+                    principalToken: pool.elementData?.principalToken || '',
+                };
+            case 'LIQUIDITY_BOOTSTRAPPING':
+                return {
+                    __typename: 'GqlPoolLiquidityBootstrapping',
+                    ...mappedData,
+                };
+        }
+
+        return {
+            __typename: 'GqlPoolWeighted',
+            ...mappedData,
+        };
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
+        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
         const supportsNativeAssetDeposit = pool.type !== 'PHANTOM_STABLE';
         let options: GqlPoolInvestOption[] = [];
 
-        for (const poolToken of pool.tokens) {
+        for (const poolToken of poolTokens) {
             options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, supportsNativeAssetDeposit)];
         }
 
@@ -71,9 +148,10 @@ export class PoolGqlLoaderService {
     }
 
     private getPoolWithdrawConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolWithdrawConfig {
+        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
         let options: GqlPoolWithdrawOption[] = [];
 
-        for (const poolToken of pool.tokens) {
+        for (const poolToken of poolTokens) {
             options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, false)];
         }
 
@@ -95,7 +173,7 @@ export class PoolGqlLoaderService {
 
         if (nestedPool && nestedPool.type === 'LINEAR' && nestedPool.linearData) {
             const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
-            const isWrappedNativeAsset = isSameAddress(mainToken.address, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkConfig.wrappedNativeAssetAddress);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -104,10 +182,14 @@ export class PoolGqlLoaderService {
                     //TODO: will be good to add support for depositing the wrapped token for the linear pool
                     isWrappedNativeAsset && supportsNativeAsset
                         ? [
-                              this.mapPoolTokenToGql(poolToken),
-                              this.mapPoolTokenToGql({ ...poolToken, address: env.NATIVE_ASSET_ADDRESS }),
+                              this.mapPoolTokenToGql(mainToken),
+                              this.mapPoolTokenToGql({
+                                  ...mainToken,
+                                  address: networkConfig.nativeAssetAddress,
+                                  symbol: networkConfig.nativeAssetSymbol,
+                              }),
                           ]
-                        : [this.mapPoolTokenToGql(poolToken)],
+                        : [this.mapPoolTokenToGql(mainToken)],
             });
         } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
@@ -151,7 +233,7 @@ export class PoolGqlLoaderService {
                 });
             }
         } else {
-            const isWrappedNativeAsset = isSameAddress(poolToken.address, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+            const isWrappedNativeAsset = isSameAddress(poolToken.address, networkConfig.wrappedNativeAssetAddress);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -160,7 +242,11 @@ export class PoolGqlLoaderService {
                     isWrappedNativeAsset && supportsNativeAsset
                         ? [
                               this.mapPoolTokenToGql(poolToken),
-                              this.mapPoolTokenToGql({ ...poolToken, address: env.NATIVE_ASSET_ADDRESS }),
+                              this.mapPoolTokenToGql({
+                                  ...poolToken,
+                                  address: networkConfig.nativeAssetAddress,
+                                  symbol: networkConfig.nativeAssetSymbol,
+                              }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],
             });
@@ -266,6 +352,11 @@ export class PoolGqlLoaderService {
 
         const percentOfSupplyInPool =
             parseFloat(poolToken.dynamicData.balance) / parseFloat(nestedPool.dynamicData.totalShares);
+
+        console.log('percentOfSupplyInPool', poolToken.symbol, percentOfSupplyInPool);
+        console.log('poolToken.dynamicData.balance', poolToken.dynamicData.balance);
+        console.log('nestedPool.dynamicData.totalShares', nestedPool.dynamicData.totalShares);
+
         const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
         const wrappedToken = nestedPool.tokens[nestedPool.linearData.wrappedIndex];
 
