@@ -12,6 +12,7 @@ import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import moment from 'moment-timezone';
 import { GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
+import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
 
 export class PoolService {
     constructor(
@@ -20,7 +21,16 @@ export class PoolService {
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
+        private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
     ) {}
+
+    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id);
+    }
+
+    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        return this.poolGqlLoaderService.getPools(args);
+    }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
@@ -72,12 +82,8 @@ export class PoolService {
         console.timeEnd('syncSwapsForLast24Hours');
     }
 
-    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id);
-    }
-
-    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
-        return this.poolGqlLoaderService.getPools(args);
+    public async syncSanityPoolData() {
+        await this.poolSanityDataLoaderService.syncPoolSanityData();
     }
 }
 
@@ -91,4 +97,5 @@ export const poolService = new PoolService(
     ),
     new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
     new PoolGqlLoaderService(tokenPriceService),
+    new PoolSanityDataLoaderService(),
 );
