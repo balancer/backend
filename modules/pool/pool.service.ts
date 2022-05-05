@@ -13,6 +13,9 @@ import moment from 'moment-timezone';
 import { GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
 import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
+import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
+import { SwapFeeAprService } from './apr-data-sources/swap-fee-apr.service';
+import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr.service';
 
 export class PoolService {
     constructor(
@@ -22,6 +25,7 @@ export class PoolService {
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
         private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
+        private readonly poolAprUpdaterService: PoolAprUpdaterService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -70,10 +74,10 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidityValuesForAllPools();
     }
 
-    public async updateVolumeFeeAndSwapAprValuesForAllPools(): Promise<void> {
-        console.time('updateVolumeFeeAndSwapAprValuesForAllPools');
-        await this.poolUsdDataService.updateVolumeFeeAndSwapAprValuesForAllPools();
-        console.timeEnd('updateVolumeFeeAndSwapAprValuesForAllPools');
+    public async updateVolumeAndFeeValuesForAllPools(): Promise<void> {
+        console.time('updateVolumeAndFeeValuesForAllPools');
+        await this.poolUsdDataService.updateVolumeAndFeeValuesForAllPools();
+        console.timeEnd('updateVolumeAndFeeValuesForAllPools');
     }
 
     public async syncSwapsForLast24Hours(): Promise<void> {
@@ -84,6 +88,10 @@ export class PoolService {
 
     public async syncSanityPoolData() {
         await this.poolSanityDataLoaderService.syncPoolSanityData();
+    }
+
+    public async updatePoolAprs() {
+        await this.poolAprUpdaterService.updatePoolAprs();
     }
 }
 
@@ -98,4 +106,5 @@ export const poolService = new PoolService(
     new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
     new PoolGqlLoaderService(tokenPriceService),
     new PoolSanityDataLoaderService(),
+    new PoolAprUpdaterService([new SwapFeeAprService(), new MasterchefFarmAprService()]),
 );
