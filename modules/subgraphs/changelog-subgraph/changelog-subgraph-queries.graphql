@@ -1,0 +1,31 @@
+query GetChangeEvents($minBlockNumber: Int!) {
+    entityChangeEvents(block: { number_gte: $minBlockNumber }) {
+        __typename
+        action
+        block
+        ... on PoolChangeEvent {
+            poolId
+        }
+        ... on FarmChangeEvent {
+            farmId
+        }
+    }
+}
+
+query GetPoolChangeEvents($minBlockNumber: Int!) {
+    poolChangeEvents(block: { number_gte: $minBlockNumber }) {
+        __typename
+        action
+        poolId
+        block
+    }
+}
+
+query GetFarmChangeEvents($minBlockNumber: Int!) {
+    farmChangeEvents(block: { number_gte: $minBlockNumber }) {
+        __typename
+        action
+        farmId
+        block
+    }
+}
