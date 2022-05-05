@@ -1,12 +1,12 @@
 extend type Query {
-    poolGetPool(id: String!): GqlPoolUnion!
+    poolGetPool(id: String!): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int
         orderBy: GqlPoolOrderBy
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
-    ): [GqlPoolUnion!]!
+    ): [GqlPoolBase!]!
 }
 
 extend type Mutation {
