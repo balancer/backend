@@ -46,6 +46,8 @@ export type BarUsersArgs = {
 };
 
 export type Bar_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
     address?: InputMaybe<Scalars['Bytes']>;
     address_contains?: InputMaybe<Scalars['Bytes']>;
     address_in?: InputMaybe<Array<Scalars['Bytes']>>;
@@ -94,7 +96,9 @@ export type Bar_Filter = {
     id_not_in?: InputMaybe<Array<Scalars['ID']>>;
     name?: InputMaybe<Scalars['String']>;
     name_contains?: InputMaybe<Scalars['String']>;
+    name_contains_nocase?: InputMaybe<Scalars['String']>;
     name_ends_with?: InputMaybe<Scalars['String']>;
+    name_ends_with_nocase?: InputMaybe<Scalars['String']>;
     name_gt?: InputMaybe<Scalars['String']>;
     name_gte?: InputMaybe<Scalars['String']>;
     name_in?: InputMaybe<Array<Scalars['String']>>;
@@ -102,10 +106,14 @@ export type Bar_Filter = {
     name_lte?: InputMaybe<Scalars['String']>;
     name_not?: InputMaybe<Scalars['String']>;
     name_not_contains?: InputMaybe<Scalars['String']>;
+    name_not_contains_nocase?: InputMaybe<Scalars['String']>;
     name_not_ends_with?: InputMaybe<Scalars['String']>;
+    name_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     name_not_in?: InputMaybe<Array<Scalars['String']>>;
     name_not_starts_with?: InputMaybe<Scalars['String']>;
+    name_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     name_starts_with?: InputMaybe<Scalars['String']>;
+    name_starts_with_nocase?: InputMaybe<Scalars['String']>;
     ratio?: InputMaybe<Scalars['BigDecimal']>;
     ratio_gt?: InputMaybe<Scalars['BigDecimal']>;
     ratio_gte?: InputMaybe<Scalars['BigDecimal']>;
@@ -124,7 +132,9 @@ export type Bar_Filter = {
     sharedVestingTokenRevenue_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     symbol?: InputMaybe<Scalars['String']>;
     symbol_contains?: InputMaybe<Scalars['String']>;
+    symbol_contains_nocase?: InputMaybe<Scalars['String']>;
     symbol_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_ends_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_gt?: InputMaybe<Scalars['String']>;
     symbol_gte?: InputMaybe<Scalars['String']>;
     symbol_in?: InputMaybe<Array<Scalars['String']>>;
@@ -132,10 +142,14 @@ export type Bar_Filter = {
     symbol_lte?: InputMaybe<Scalars['String']>;
     symbol_not?: InputMaybe<Scalars['String']>;
     symbol_not_contains?: InputMaybe<Scalars['String']>;
+    symbol_not_contains_nocase?: InputMaybe<Scalars['String']>;
     symbol_not_ends_with?: InputMaybe<Scalars['String']>;
+    symbol_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_not_in?: InputMaybe<Array<Scalars['String']>>;
     symbol_not_starts_with?: InputMaybe<Scalars['String']>;
+    symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_starts_with?: InputMaybe<Scalars['String']>;
+    symbol_starts_with_nocase?: InputMaybe<Scalars['String']>;
     timestamp?: InputMaybe<Scalars['BigInt']>;
     timestamp_gt?: InputMaybe<Scalars['BigInt']>;
     timestamp_gte?: InputMaybe<Scalars['BigInt']>;
@@ -186,11 +200,17 @@ export enum Bar_OrderBy {
     VestingTokenStaked = 'vestingTokenStaked',
 }
 
+export type BlockChangedFilter = {
+    number_gte: Scalars['Int'];
+};
+
 export type Block_Height = {
     hash?: InputMaybe<Scalars['Bytes']>;
     number?: InputMaybe<Scalars['Int']>;
+    number_gte?: InputMaybe<Scalars['Int']>;
 };
 
+/** Defines the order direction, either ascending or descending */
 export enum OrderDirection {
     Asc = 'asc',
     Desc = 'desc',
@@ -213,6 +233,7 @@ export type Query_MetaArgs = {
 export type QueryBarArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryBarsArgs = {
@@ -221,12 +242,14 @@ export type QueryBarsArgs = {
     orderBy?: InputMaybe<Bar_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Bar_Filter>;
 };
 
 export type QueryUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type QueryUsersArgs = {
@@ -235,6 +258,7 @@ export type QueryUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -255,6 +279,7 @@ export type Subscription_MetaArgs = {
 export type SubscriptionBarArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionBarsArgs = {
@@ -263,12 +288,14 @@ export type SubscriptionBarsArgs = {
     orderBy?: InputMaybe<Bar_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Bar_Filter>;
 };
 
 export type SubscriptionUserArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
 };
 
 export type SubscriptionUsersArgs = {
@@ -277,6 +304,7 @@ export type SubscriptionUsersArgs = {
     orderBy?: InputMaybe<User_OrderBy>;
     orderDirection?: InputMaybe<OrderDirection>;
     skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<User_Filter>;
 };
 
@@ -294,6 +322,8 @@ export type User = {
 };
 
 export type User_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
     address?: InputMaybe<Scalars['Bytes']>;
     address_contains?: InputMaybe<Scalars['Bytes']>;
     address_in?: InputMaybe<Array<Scalars['Bytes']>>;
@@ -302,7 +332,9 @@ export type User_Filter = {
     address_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     bar?: InputMaybe<Scalars['String']>;
     bar_contains?: InputMaybe<Scalars['String']>;
+    bar_contains_nocase?: InputMaybe<Scalars['String']>;
     bar_ends_with?: InputMaybe<Scalars['String']>;
+    bar_ends_with_nocase?: InputMaybe<Scalars['String']>;
     bar_gt?: InputMaybe<Scalars['String']>;
     bar_gte?: InputMaybe<Scalars['String']>;
     bar_in?: InputMaybe<Array<Scalars['String']>>;
@@ -310,10 +342,14 @@ export type User_Filter = {
     bar_lte?: InputMaybe<Scalars['String']>;
     bar_not?: InputMaybe<Scalars['String']>;
     bar_not_contains?: InputMaybe<Scalars['String']>;
+    bar_not_contains_nocase?: InputMaybe<Scalars['String']>;
     bar_not_ends_with?: InputMaybe<Scalars['String']>;
+    bar_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
     bar_not_in?: InputMaybe<Array<Scalars['String']>>;
     bar_not_starts_with?: InputMaybe<Scalars['String']>;
+    bar_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     bar_starts_with?: InputMaybe<Scalars['String']>;
+    bar_starts_with_nocase?: InputMaybe<Scalars['String']>;
     block?: InputMaybe<Scalars['BigInt']>;
     block_gt?: InputMaybe<Scalars['BigInt']>;
     block_gte?: InputMaybe<Scalars['BigInt']>;
