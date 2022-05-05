@@ -10,6 +10,7 @@ import { PoolUsdDataService } from './src/pool-usd-data.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
+import { GqlPoolTokenUnion, GqlPoolUnion } from '../../schema';
 
 export class PoolService {
     constructor(
@@ -63,6 +64,91 @@ export class PoolService {
         console.time('syncSwapsForLast24Hours');
         await this.poolUsdDataService.syncSwapsForLast24Hours();
         console.timeEnd('syncSwapsForLast24Hours');
+    }
+
+    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
+        const pool = await prisma.prismaPool.findUnique({
+            where: { id },
+            include: {
+                linearData: true,
+                elementData: true,
+                dynamicData: true,
+                stableDynamicData: true,
+                linearDynamicData: true,
+                tokens: {
+                    include: {
+                        dynamicData: true,
+                        nestedPool: {
+                            include: {
+                                linearData: true,
+                                dynamicData: true,
+                                stableDynamicData: true,
+                                linearDynamicData: true,
+                                tokens: {
+                                    include: {
+                                        dynamicData: true,
+                                        nestedPool: {
+                                            include: {
+                                                linearData: true,
+                                                dynamicData: true,
+                                                linearDynamicData: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!pool || !pool.dynamicData) {
+            throw new Error('Pool with id does not exist');
+        }
+
+        const { name, symbol, address, owner, factory, createdAt } = pool;
+        const { swapEnabled, swapFee, fees24h, totalShares, totalLiquidity, volume24h } = pool.dynamicData;
+
+        return {
+            __typename: 'GqlPoolWeighted',
+            id,
+            name,
+            symbol,
+            address,
+            owner,
+            factory,
+            createdAt: Math.floor(createdAt.getTime() / 1000),
+            dynamicData: {
+                poolId: pool.id,
+                swapEnabled,
+                swapFee,
+                totalShares,
+                totalLiquidity: `${totalLiquidity}`,
+                fees24h: `${fees24h}`,
+                volume24h: `${volume24h}`,
+                apr: {
+                    total: '',
+                    swapApr: '',
+                    nativeRewardApr: '',
+                    thirdPartyApr: '',
+                    items: [],
+                    hasRewardApr: true,
+                },
+            },
+            investConfig: {
+                options: [],
+                proportionalEnabled: true,
+                singleAssetEnabled: true,
+            },
+            withdrawConfig: {
+                options: [],
+                proportionalEnabled: true,
+                singleAssetEnabled: true,
+            },
+            nestingType: 'NO_NESTING',
+            tokens: [],
+        };
     }
 }
 

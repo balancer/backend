@@ -62,16 +62,17 @@ export class PoolUsdDataService {
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
         const yesterday = moment().subtract(1, 'day').unix();
         //ensure we only sync the last 24 hours worth of swaps
-        const timestamp = lastSwap && lastSwap.timestamp > yesterday ? lastSwap.timestamp : yesterday;
+        let timestamp = lastSwap && lastSwap.timestamp > yesterday ? lastSwap.timestamp : yesterday;
         let hasMore = true;
         let skip = 0;
         const pageSize = 1000;
+        const MAX_SKIP = 5000;
 
         while (hasMore) {
             const { swaps } = await this.balancerSubgraphService.getSwaps({
                 first: pageSize,
                 skip,
-                where: { timestamp_gt: timestamp },
+                where: { timestamp_gte: timestamp },
                 orderBy: Swap_OrderBy.Timestamp,
                 orderDirection: OrderDirection.Asc,
             });
@@ -82,6 +83,7 @@ export class PoolUsdDataService {
             }
 
             await prisma.prismaPoolSwap.createMany({
+                skipDuplicates: true,
                 data: swaps.map((swap) => {
                     let valueUSD = parseFloat(swap.valueUSD);
 
@@ -113,10 +115,15 @@ export class PoolUsdDataService {
                 }),
             });
 
-            skip += pageSize;
-
             if (swaps.length < pageSize) {
                 hasMore = false;
+            }
+
+            skip += pageSize;
+
+            if (skip > MAX_SKIP) {
+                timestamp = swaps[swaps.length - 1].timestamp;
+                skip = 0;
             }
         }
 

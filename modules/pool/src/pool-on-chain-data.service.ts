@@ -13,7 +13,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../util/prisma-client';
-import { isStablePool } from './pool-utils';
+import { poolIsStablePool } from './pool-utils';
 import _ from 'lodash';
 import { TokenPriceService } from '../../token-price/token-price.service';
 
@@ -119,7 +119,7 @@ export class PoolOnChainDataService {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.weights`, pool.address, 'getNormalizedWeights');
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
-            } else if (isStablePool(pool.type)) {
+            } else if (poolIsStablePool(pool.type)) {
                 // MetaStable & StablePhantom is the same as Stable for multicall purposes
                 multiPool.call(`${pool.id}.amp`, pool.address, 'getAmplificationParameter');
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
@@ -165,7 +165,7 @@ export class PoolOnChainDataService {
             const { poolTokens } = onchainData;
 
             try {
-                if (isStablePool(pool.type)) {
+                if (poolIsStablePool(pool.type)) {
                     if (!onchainData.amp) {
                         console.log('onchain data', onchainData);
                         console.error(`Stable Pool Missing Amp: ${poolId}`);

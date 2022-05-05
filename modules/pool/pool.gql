@@ -31,12 +31,9 @@ type GqlPoolDynamicData {
     #fields that change often
     totalShares: BigDecimal!
     #data that has USD values
-    composition: GqlPoolComposition! #token balances change often
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
-    totalSwapFee: BigDecimal!
-    totalSwapVolume: BigDecimal!
     apr: GqlPoolApr!
 }
 
@@ -161,7 +158,40 @@ type GqlPoolLinear implements GqlPoolBase {
     lowerTarget: BigInt!
 }
 
+type GqlPoolLinearNested {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createdAt: Int!
+    tokens: [GqlPoolToken!]!
+
+    #linear specific fields
+    mainIndex: Int!
+    wrappedIndex: Int!
+    upperTarget: BigInt!
+    lowerTarget: BigInt!
+}
+
+type GqlPoolPhantomStableNested {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    owner: Bytes!
+    factory: Bytes
+    createdAt: Int!
+    tokens: [GqlPoolTokenPhantomStableNestedUnion!]!
+    nestingType: GqlPoolNestingType!
+}
+
+union GqlPoolUnion = GqlPoolWeighted | GqlPoolStable | GqlPoolLinear | GqlPoolPhantomStable | GqlPoolElement
+union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolPhantomStableNested
+
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenPhantomStable | GqlPoolTokenLinear
+union GqlPoolTokenPhantomStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
 
 interface GqlPoolTokenBase {
     id: ID!
@@ -197,7 +227,7 @@ type GqlPoolTokenLinear implements GqlPoolTokenBase {
     priceRate: BigDecimal!
     weight: BigDecimal
 
-    pool: GqlPoolLinear!
+    pool: GqlPoolLinearNested!
     #the proportional balances of the underlying tokens, computed as the fraction balance / totalShares
     mainTokenBalance: BigDecimal!
     wrappedTokenBalance: BigDecimal!
@@ -214,7 +244,7 @@ type GqlPoolTokenPhantomStable implements GqlPoolTokenBase {
     priceRate: BigDecimal!
     weight: BigDecimal
 
-    pool: GqlPoolPhantomStable!
+    pool: GqlPoolPhantomStableNested!
 }
 
 type GqlPoolLinearPoolData {
@@ -261,25 +291,10 @@ type GqlPoolLinearPoolWrappedToken {
     decimals: Int!
 }
 
-type GqlPoolComposition {
-    tokens: [GqlPoolCompositionToken!]!
-}
-
-type GqlPoolCompositionToken {
-    address: String!
-    symbol: String!
-    decimals: Int!
-    weight: BigDecimal
-    balance: BigDecimal!
-    valueUSD: BigDecimal!
-
-    nestedTokens: [GqlPoolCompositionToken!]
-}
-
 type GqlPoolApr {
     total: BigDecimal!
     swapApr: BigDecimal!
-    beetsApr: BigDecimal!
+    nativeRewardApr: BigDecimal!
     thirdPartyApr: BigDecimal!
     items: [GqlBalancePoolAprItem!]!
     hasRewardApr: Boolean!
