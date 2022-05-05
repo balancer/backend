@@ -146,6 +146,10 @@ export class PoolOnChainDataService {
                     multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getTokenRate', [token]);
                 });
             }
+
+            if (pool.type === 'LINEAR') {
+                multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
+            }
         });
 
         let poolsOnChainData = {} as Record<string, MulticallExecuteResult>;
