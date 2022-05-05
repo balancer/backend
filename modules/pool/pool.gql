@@ -1,5 +1,11 @@
 extend type Query {
     poolGetPool(id: String!): GqlPoolUnion!
+    poolGetPools(
+        first: Int
+        skip: Int
+        orderBy: GqlPoolOrderBy
+        orderDirection: GqlPoolOrderDirection
+    ): [GqlPoolUnion!]!
 }
 
 extend type Mutation {
@@ -189,6 +195,9 @@ type GqlPoolLinearNested {
     createdAt: Int!
     tokens: [GqlPoolToken!]!
 
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
+
     #linear specific fields
     mainIndex: Int!
     wrappedIndex: Int!
@@ -206,6 +215,9 @@ type GqlPoolPhantomStableNested {
     createdAt: Int!
     tokens: [GqlPoolTokenPhantomStableNestedUnion!]!
     nestingType: GqlPoolNestingType!
+
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
 }
 
 union GqlPoolUnion =
@@ -336,4 +348,25 @@ type GqlPoolAprItem {
 type GqlPoolAprSubItem {
     title: String!
     apr: BigDecimal!
+}
+
+enum GqlPoolOrderBy {
+    totalLiquidity
+    totalShares
+    volume24h
+    fees24h
+}
+
+enum GqlPoolOrderDirection {
+    asc
+    desc
+}
+
+input GqlPoolFilter {
+    groupType: GqlPoolFilterGroupType
+}
+
+enum GqlPoolFilterGroupType {
+    INCENTIVIZED
+    COMMUNITY
 }

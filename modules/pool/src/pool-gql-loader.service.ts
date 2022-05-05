@@ -18,17 +18,19 @@ import {
     GqlPoolUnion,
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
+    QueryPoolGetPoolsArgs,
 } from '../../../schema';
 import { TokenPriceService } from '../../token-price/token-price.service';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../util/prisma-client';
 import { networkConfig } from '../../config/network-config';
+import { Prisma } from '@prisma/client';
 
 export class PoolGqlLoaderService {
     constructor(private readonly tokenPriceService: TokenPriceService) {}
 
-    public async getPool(id: string) {
+    public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
             where: { id },
             include: prismaPoolWithExpandedNesting.include,
@@ -43,6 +45,35 @@ export class PoolGqlLoaderService {
         }
 
         return this.mapPoolToGqlPool(pool);
+    }
+
+    public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
+        const orderDirection = args.orderDirection || undefined;
+
+        switch (args.orderBy) {
+            case 'totalLiquidity':
+                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
+                break;
+            case 'totalShares':
+                orderBy = { dynamicData: { totalShares: orderDirection } };
+                break;
+            case 'volume24h':
+                orderBy = { dynamicData: { volume24h: orderDirection } };
+                break;
+            case 'fees24h':
+                orderBy = { dynamicData: { fees24h: orderDirection } };
+                break;
+        }
+
+        const pools = await prisma.prismaPool.findMany({
+            take: args.first || undefined,
+            skip: args.skip || undefined,
+            orderBy,
+            include: prismaPoolWithExpandedNesting.include,
+        });
+
+        return pools.map((pool) => this.mapPoolToGqlPool(pool));
     }
 
     private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
@@ -293,6 +324,8 @@ export class PoolGqlLoaderService {
             ...pool.linearDynamicData!,
             createdAt: Math.floor(pool.createdAt.getTime() / 1000),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGql(token)),
+            totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
+            totalShares: pool.dynamicData?.totalShares || '0',
         };
     }
 
@@ -318,6 +351,8 @@ export class PoolGqlLoaderService {
 
                 return this.mapPoolTokenToGql(token);
             }),
+            totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
+            totalShares: pool.dynamicData?.totalShares || '0',
         };
     }
 
