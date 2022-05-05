@@ -10,3 +10,14 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+model PrismaLastBlockSynced {
+    category            PrismaLastBlockSyncedCategory @id
+    blockNumber         Int
+}
+
+enum PrismaLastBlockSyncedCategory {
+    POOLS
+    FARMS
+}

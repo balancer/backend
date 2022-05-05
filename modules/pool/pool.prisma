@@ -20,6 +20,7 @@ model PrismaPool {
 
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
+    categories          PrismaPoolCategory[]
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 }
 
@@ -150,4 +151,18 @@ model PrismaPoolAprItem {
     parentItem          PrismaPoolAprItem?  @relation(name: "AprItemParentChild", fields:[parentItemId], references: [id])
 
     subItems            PrismaPoolAprItem[] @relation(name: "AprItemParentChild")
+}
+
+model PrismaPoolCategory {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    category            PrismaPoolCategoryType
+}
+
+enum PrismaPoolCategoryType {
+    INCENTIVIZED
+    BLACK_LISTED
+    FEATURED
+    HOME_FEATURED
 }

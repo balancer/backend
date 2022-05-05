@@ -5,6 +5,7 @@ extend type Query {
         skip: Int
         orderBy: GqlPoolOrderBy
         orderDirection: GqlPoolOrderDirection
+        where: GqlPoolFilter
     ): [GqlPoolUnion!]!
 }
 
@@ -363,10 +364,11 @@ enum GqlPoolOrderDirection {
 }
 
 input GqlPoolFilter {
-    groupType: GqlPoolFilterGroupType
+    category: GqlPoolFilterCategory
+    hasTokens: [String!]!
 }
 
-enum GqlPoolFilterGroupType {
-    INCENTIVIZED
-    COMMUNITY
+enum GqlPoolFilterCategory {
+    incentivized
+    community
 }
