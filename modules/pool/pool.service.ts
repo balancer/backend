@@ -16,6 +16,8 @@ import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.servi
 import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
 import { SwapFeeAprService } from './apr-data-sources/swap-fee-apr.service';
 import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr.service';
+import { SpookySwapAprService } from './apr-data-sources/spooky-swap-apr.service';
+import { YearnVaultAprService } from './apr-data-sources/yearn-vault-apr.service';
 
 export class PoolService {
     constructor(
@@ -106,5 +108,11 @@ export const poolService = new PoolService(
     new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
     new PoolGqlLoaderService(tokenPriceService),
     new PoolSanityDataLoaderService(),
-    new PoolAprUpdaterService([new SwapFeeAprService(), new MasterchefFarmAprService()]),
+    //TODO: this will depend on the chain
+    new PoolAprUpdaterService([
+        new SwapFeeAprService(),
+        new MasterchefFarmAprService(),
+        new SpookySwapAprService(tokenPriceService),
+        new YearnVaultAprService(tokenPriceService),
+    ]),
 );

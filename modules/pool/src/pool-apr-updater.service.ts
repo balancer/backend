@@ -6,7 +6,10 @@ export class PoolAprUpdaterService {
     constructor(private readonly aprServices: PoolAprService[]) {}
 
     public async updatePoolAprs() {
-        const pools = await prisma.prismaPool.findMany(prismaPoolWithExpandedNesting);
+        const pools = await prisma.prismaPool.findMany({
+            ...prismaPoolWithExpandedNesting,
+            where: { type: { not: 'LINEAR' } },
+        });
 
         for (const aprService of this.aprServices) {
             await aprService.updateAprForPools(pools);
