@@ -24,19 +24,21 @@ class PoolSyncService {
                 }
                 poolIds.add(poolChangeEvent.poolId);
             }
-            console.log(`Syncing ${poolIds.size} pools`);
-            await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
+            if (poolIds.size !== 0) {
+                console.log(`Syncing ${poolIds.size} pools`);
+                await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
 
-            await prisma.prismaLastBlockSynced.upsert({
-                where: { category: PrismaLastBlockSyncedCategory.POOLS },
-                update: {
-                    blockNumber: latestBlock,
-                },
-                create: {
-                    category: PrismaLastBlockSyncedCategory.POOLS,
-                    blockNumber: latestBlock,
-                },
-            });
+                await prisma.prismaLastBlockSynced.upsert({
+                    where: { category: PrismaLastBlockSyncedCategory.POOLS },
+                    update: {
+                        blockNumber: latestBlock,
+                    },
+                    create: {
+                        category: PrismaLastBlockSyncedCategory.POOLS,
+                        blockNumber: latestBlock,
+                    },
+                });
+            }
 
             const delay = minIntervalMs - (Date.now() - startTime);
 
