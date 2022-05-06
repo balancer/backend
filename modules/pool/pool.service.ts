@@ -12,6 +12,10 @@ import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import moment from 'moment-timezone';
 import { GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
+import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
+import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
+import { SwapFeeAprService } from './apr-data-sources/swap-fee-apr.service';
+import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr.service';
 
 export class PoolService {
     constructor(
@@ -20,7 +24,17 @@ export class PoolService {
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
+        private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
+        private readonly poolAprUpdaterService: PoolAprUpdaterService,
     ) {}
+
+    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id);
+    }
+
+    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        return this.poolGqlLoaderService.getPools(args);
+    }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
@@ -72,12 +86,12 @@ export class PoolService {
         console.timeEnd('syncSwapsForLast24Hours');
     }
 
-    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id);
+    public async syncSanityPoolData() {
+        await this.poolSanityDataLoaderService.syncPoolSanityData();
     }
 
-    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
-        return this.poolGqlLoaderService.getPools(args);
+    public async updatePoolAprs() {
+        await this.poolAprUpdaterService.updatePoolAprs();
     }
 }
 
@@ -91,4 +105,6 @@ export const poolService = new PoolService(
     ),
     new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
     new PoolGqlLoaderService(tokenPriceService),
+    new PoolSanityDataLoaderService(),
+    new PoolAprUpdaterService([new SwapFeeAprService(), new MasterchefFarmAprService()]),
 );

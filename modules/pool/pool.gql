@@ -16,6 +16,8 @@ extend type Mutation {
     poolUpdateLiquidityValuesForAllPools: String!
     poolUpdateVolumeAndFeeValuesForAllPools: String!
     poolSyncSwapsForLast24Hours: String!
+    poolSyncSanityPoolData: String!
+    poolUpdateAprs: String!
 }
 
 interface GqlPoolBase {
@@ -364,11 +366,26 @@ enum GqlPoolOrderDirection {
 }
 
 input GqlPoolFilter {
-    category: GqlPoolFilterCategory
-    hasTokens: [String!]!
+    categoryIn: [GqlPoolFilterCategory!]
+    categoryNotIn: [GqlPoolFilterCategory!]
+    tokensIn: [String!]
+    tokensNotIn: [String!]
+    poolTypeIn: [GqlPoolFilterType!]
+    poolTypeNotIn: [GqlPoolFilterType!]
 }
 
 enum GqlPoolFilterCategory {
-    incentivized
-    community
+    INCENTIVIZED
+}
+
+enum GqlPoolFilterType {
+    WEIGHTED
+    STABLE
+    META_STABLE
+    PHANTOM_STABLE
+    ELEMENT
+    LINEAR
+    UNKNOWN
+    LIQUIDITY_BOOTSTRAPPING
+    INVESTMENT
 }

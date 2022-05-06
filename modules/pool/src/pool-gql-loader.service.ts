@@ -66,11 +66,44 @@ export class PoolGqlLoaderService {
                 break;
         }
 
+        const where = args.where;
+
+        console.log({
+            category: {
+                in: where?.categoryIn || undefined,
+                notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
+            },
+        });
+
         const pools = await prisma.prismaPool.findMany({
             take: args.first || undefined,
             skip: args.skip || undefined,
             orderBy,
             include: prismaPoolWithExpandedNesting.include,
+            where: where
+                ? {
+                      type: {
+                          in: where.poolTypeIn || undefined,
+                          notIn: where.poolTypeNotIn || undefined,
+                      },
+                      tokens: {
+                          some: {
+                              id: {
+                                  in: where.tokensIn?.map((token) => token.toLowerCase()) || undefined,
+                                  notIn: where.tokensNotIn?.map((token) => token.toLowerCase()) || undefined,
+                              },
+                          },
+                      },
+                      categories: {
+                          some: {
+                              category: {
+                                  in: where.categoryIn || undefined,
+                                  notIn: ['BLACK_LISTED', ...(where.categoryNotIn || [])],
+                              },
+                          },
+                      },
+                  }
+                : undefined,
         });
 
         return pools.map((pool) => this.mapPoolToGqlPool(pool));
@@ -387,10 +420,6 @@ export class PoolGqlLoaderService {
 
         const percentOfSupplyInPool =
             parseFloat(poolToken.dynamicData.balance) / parseFloat(nestedPool.dynamicData.totalShares);
-
-        console.log('percentOfSupplyInPool', poolToken.symbol, percentOfSupplyInPool);
-        console.log('poolToken.dynamicData.balance', poolToken.dynamicData.balance);
-        console.log('nestedPool.dynamicData.totalShares', nestedPool.dynamicData.totalShares);
 
         const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
         const wrappedToken = nestedPool.tokens[nestedPool.linearData.wrappedIndex];

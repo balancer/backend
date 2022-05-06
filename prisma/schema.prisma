@@ -189,8 +189,6 @@ model PrismaPoolCategory {
 enum PrismaPoolCategoryType {
     INCENTIVIZED
     BLACK_LISTED
-    FEATURED
-    HOME_FEATURED
 }
 
 
