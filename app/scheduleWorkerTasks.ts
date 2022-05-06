@@ -246,5 +246,5 @@ export function scheduleWorkerTasks() {
 
     console.log('scheduled cron jobs');
     console.log('start pool sync');
-    runWithMinimumInterval(env.POOL_SYNC_INTERVAL_MS, poolSyncService.syncChangedPools);
+    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), poolSyncService.syncChangedPools);
 }
