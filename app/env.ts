@@ -32,6 +32,7 @@ export const schema = {
     RPC_URL: String,
     YEARN_VAULTS_ENDPOINT: String,
     MASTERCHEF_ADDRESS: String,
+    POOL_SYNC_INTERVAL_MS: String,
 };
 
 export const env: Env = load(schema, {

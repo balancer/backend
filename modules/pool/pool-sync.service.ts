@@ -4,8 +4,7 @@ import { changelogSubgraphService } from '../subgraphs/changelog-subgraph/change
 import { poolService } from './pool.service';
 
 class PoolSyncService {
-    public async syncChangedPools(minIntervalMs: number = 5000) {
-        const startTime = Date.now();
+    public async syncChangedPools() {
         try {
             let lastSync = await prisma.prismaLastBlockSynced.findUnique({
                 where: { category: PrismaLastBlockSyncedCategory.POOLS },
@@ -41,11 +40,6 @@ class PoolSyncService {
         } catch (error) {
             console.error('Error syncing changed pools', error);
         }
-        const delay = minIntervalMs - (Date.now() - startTime);
-
-        setTimeout(async () => {
-            await this.syncChangedPools(minIntervalMs);
-        }, Math.max(0, delay));
     }
 }
 
