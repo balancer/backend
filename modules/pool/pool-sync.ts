@@ -4,7 +4,9 @@ import { changelogSubgraphService } from '../subgraphs/changelog-subgraph/change
 import { poolService } from './pool.service';
 
 class PoolSync {
-    public async syncChangedPools() {
+    public async syncChangedPools(minInterval: number = 500) {
+        const startTime = Date.now();
+
         let lastSync = await prisma.prismaLastBlockSynced.findUnique({
             where: { category: PrismaLastBlockSyncedCategory.POOLS },
         });
@@ -29,5 +31,8 @@ class PoolSync {
                 blockNumber: latestBlock,
             },
         });
+
+        // we wanna run it max once every 500ms
+        setTimeout(this.syncChangedPools, Math.max(0, minInterval - (Date.now() - startTime)));
     }
 }
