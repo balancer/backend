@@ -398,7 +398,7 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type GetChangeEventsQueryVariables = Exact<{
-    minBlockNumber: Scalars['Int'];
+    minBlockNumber: Scalars['BigInt'];
 }>;
 
 export type GetChangeEventsQuery = {
@@ -410,7 +410,7 @@ export type GetChangeEventsQuery = {
 };
 
 export type GetPoolChangeEventsQueryVariables = Exact<{
-    minBlockNumber: Scalars['Int'];
+    minBlockNumber: Scalars['BigInt'];
 }>;
 
 export type GetPoolChangeEventsQuery = {
@@ -419,7 +419,7 @@ export type GetPoolChangeEventsQuery = {
 };
 
 export type GetFarmChangeEventsQueryVariables = Exact<{
-    minBlockNumber: Scalars['Int'];
+    minBlockNumber: Scalars['BigInt'];
 }>;
 
 export type GetFarmChangeEventsQuery = {
@@ -428,8 +428,8 @@ export type GetFarmChangeEventsQuery = {
 };
 
 export const GetChangeEventsDocument = gql`
-    query GetChangeEvents($minBlockNumber: Int!) {
-        entityChangeEvents(block: { number_gte: $minBlockNumber }) {
+    query GetChangeEvents($minBlockNumber: BigInt!) {
+        entityChangeEvents(where: { block_gte: $minBlockNumber }) {
             __typename
             action
             block
@@ -443,8 +443,8 @@ export const GetChangeEventsDocument = gql`
     }
 `;
 export const GetPoolChangeEventsDocument = gql`
-    query GetPoolChangeEvents($minBlockNumber: Int!) {
-        poolChangeEvents(block: { number_gte: $minBlockNumber }) {
+    query GetPoolChangeEvents($minBlockNumber: BigInt!) {
+        poolChangeEvents(where: { block_gte: $minBlockNumber }) {
             __typename
             action
             poolId
@@ -453,8 +453,8 @@ export const GetPoolChangeEventsDocument = gql`
     }
 `;
 export const GetFarmChangeEventsDocument = gql`
-    query GetFarmChangeEvents($minBlockNumber: Int!) {
-        farmChangeEvents(block: { number_gte: $minBlockNumber }) {
+    query GetFarmChangeEvents($minBlockNumber: BigInt!) {
+        farmChangeEvents(where: { block_gte: $minBlockNumber }) {
             __typename
             action
             farmId

@@ -3,8 +3,8 @@ import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { changelogSubgraphService } from '../subgraphs/changelog-subgraph/changelog-subgraph.service';
 import { poolService } from './pool.service';
 
-class PoolSync {
-    public async syncChangedPools(minInterval: number = 500) {
+class PoolSyncService {
+    public async syncChangedPools(minIntervalMs: number = 5000) {
         try {
             const startTime = Date.now();
 
@@ -27,17 +27,26 @@ class PoolSync {
             console.log(`Syncing ${poolIds.size} pools`);
             await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
 
-            await prisma.prismaLastBlockSynced.update({
+            await prisma.prismaLastBlockSynced.upsert({
                 where: { category: PrismaLastBlockSyncedCategory.POOLS },
-                data: {
+                update: {
+                    blockNumber: latestBlock,
+                },
+                create: {
+                    category: PrismaLastBlockSyncedCategory.POOLS,
                     blockNumber: latestBlock,
                 },
             });
 
-            // we wanna run it max once every 500ms
-            setTimeout(this.syncChangedPools, Math.max(0, minInterval - (Date.now() - startTime)));
+            const delay = minIntervalMs - (Date.now() - startTime);
+
+            setTimeout(async () => {
+                await this.syncChangedPools(minIntervalMs);
+            }, Math.max(0, delay));
         } catch (error) {
             console.error('Error syncing changed pools', error);
         }
     }
 }
+
+export const poolSyncService = new PoolSyncService();

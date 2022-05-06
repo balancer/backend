@@ -1,5 +1,5 @@
-query GetChangeEvents($minBlockNumber: Int!) {
-    entityChangeEvents(block: { number_gte: $minBlockNumber }) {
+query GetChangeEvents($minBlockNumber: BigInt!) {
+    entityChangeEvents(where: { block_gte: $minBlockNumber }) {
         __typename
         action
         block
@@ -12,8 +12,8 @@ query GetChangeEvents($minBlockNumber: Int!) {
     }
 }
 
-query GetPoolChangeEvents($minBlockNumber: Int!) {
-    poolChangeEvents(block: { number_gte: $minBlockNumber }) {
+query GetPoolChangeEvents($minBlockNumber: BigInt!) {
+    poolChangeEvents(where: { block_gte: $minBlockNumber }) {
         __typename
         action
         poolId
@@ -21,8 +21,8 @@ query GetPoolChangeEvents($minBlockNumber: Int!) {
     }
 }
 
-query GetFarmChangeEvents($minBlockNumber: Int!) {
-    farmChangeEvents(block: { number_gte: $minBlockNumber }) {
+query GetFarmChangeEvents($minBlockNumber: BigInt!) {
+    farmChangeEvents(where: { block_gte: $minBlockNumber }) {
         __typename
         action
         farmId
