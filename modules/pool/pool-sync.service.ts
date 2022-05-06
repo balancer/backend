@@ -15,7 +15,7 @@ class PoolSyncService {
 
             const poolChangeEvents = await changelogSubgraphService.getPoolChangeEvents(lastSyncBlock + 1);
 
-            let latestBlock = lastSyncBlock + 1;
+            let latestBlock = lastSyncBlock;
             const poolIds = new Set<string>();
             for (let poolChangeEvent of poolChangeEvents) {
                 const block = parseInt(poolChangeEvent.block);
