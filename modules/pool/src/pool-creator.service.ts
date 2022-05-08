@@ -8,7 +8,7 @@ import { sortBy } from 'lodash';
 export class PoolCreatorService {
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany();
-        const subgraphPools = await balancerSubgraphService.getAllPools({});
+        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 
         const poolIds: string[] = [];
@@ -33,9 +33,12 @@ export class PoolCreatorService {
             select: { createTime: true },
         });
 
-        const subgraphPools = await balancerSubgraphService.getAllPools({
-            where: { createTime_gte: latest?.createTime || 0 },
-        });
+        const subgraphPools = await balancerSubgraphService.getAllPools(
+            {
+                where: { createTime_gte: latest?.createTime || 0 },
+            },
+            false,
+        );
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 
         const poolIds: string[] = [];

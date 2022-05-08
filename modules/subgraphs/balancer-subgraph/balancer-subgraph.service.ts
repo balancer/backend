@@ -178,11 +178,14 @@ export class BalancerSubgraphService {
         return subgraphLoadAll<BalancerTokenPriceFragment>(this.sdk.BalancerTokenPrices, 'tokenPrices', args);
     }
 
-    public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
+    public async getAllPools(
+        args: BalancerPoolsQueryVariables,
+        applyTotalSharesFilter = true,
+    ): Promise<BalancerPoolFragment[]> {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', {
             ...args,
             where: {
-                totalShares_gt: '0.00000000001',
+                totalShares_gt: applyTotalSharesFilter ? '0.00000000001' : undefined,
                 ...args.where,
             },
         });
