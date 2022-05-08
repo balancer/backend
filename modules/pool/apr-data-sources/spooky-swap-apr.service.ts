@@ -31,13 +31,6 @@ export class SpookySwapAprService implements PoolAprService {
                     const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
                     const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
 
-                    if (pool.id === '0x302b8b64795b064cadc32f74993a6372498608070001000000000000000003e0') {
-                        console.log('poolTokens', JSON.stringify(nestedPool.tokens, null, 4));
-                        console.log('wrappedToken', wrappedToken);
-                        console.log('percentOfSupplyInPool', percentOfSupplyInPool);
-                        console.log('poolWrappedLiquidity', poolWrappedLiquidity);
-                    }
-
                     const apr =
                         pool.dynamicData && pool.dynamicData.totalLiquidity > 0
                             ? xBooApr * (poolWrappedLiquidity / pool.dynamicData.totalLiquidity)
