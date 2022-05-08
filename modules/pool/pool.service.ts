@@ -44,6 +44,12 @@ export class PoolService {
         return this.poolLoaderService.syncAllPoolsFromSubgraph(blockNumber);
     }
 
+    public async syncNewPoolsFromSubgraph(): Promise<string[]> {
+        const blockNumber = await this.provider.getBlockNumber();
+
+        return this.poolLoaderService.syncNewPoolsFromSubgraph(blockNumber);
+    }
+
     public async loadOnChainDataForAllPools(): Promise<void> {
         const result = await prisma.prismaPool.findMany({ select: { id: true } });
         const poolIds = result.map((item) => item.id);

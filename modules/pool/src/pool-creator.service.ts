@@ -8,15 +8,16 @@ import { sortBy } from 'lodash';
 export class PoolCreatorService {
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany();
-        const subgraphPools = await this.loadSortedSubgraphPools();
+        const subgraphPools = await balancerSubgraphService.getAllPools({});
+        const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 
         const poolIds: string[] = [];
 
-        for (const subgraphPool of subgraphPools) {
+        for (const subgraphPool of sortedSubgraphPools) {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
             if (!existsInDb) {
-                await this.createPoolRecord(subgraphPool, subgraphPools, blockNumber);
+                await this.createPoolRecord(subgraphPool, sortedSubgraphPools, blockNumber);
 
                 poolIds.push(subgraphPool.id);
             }
@@ -25,7 +26,34 @@ export class PoolCreatorService {
         return poolIds;
     }
 
-    public async createPoolRecord(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[], blockNumber: number) {
+    public async syncNewPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
+        const existingPools = await prisma.prismaPool.findMany();
+        const latest = await prisma.prismaPool.findFirst({
+            orderBy: { createTime: 'desc' },
+            select: { createTime: true },
+        });
+
+        const subgraphPools = await balancerSubgraphService.getAllPools({
+            where: { createTime_gte: latest?.createTime || 0 },
+        });
+        const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
+
+        const poolIds: string[] = [];
+
+        for (const subgraphPool of sortedSubgraphPools) {
+            const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
+
+            if (!existsInDb) {
+                await this.createPoolRecord(subgraphPool, sortedSubgraphPools, blockNumber);
+
+                poolIds.push(subgraphPool.id);
+            }
+        }
+
+        return poolIds;
+    }
+
+    private async createPoolRecord(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[], blockNumber: number) {
         const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
         const poolTokens = pool.tokens || [];
 
@@ -133,9 +161,7 @@ export class PoolCreatorService {
         });
     }
 
-    private async loadSortedSubgraphPools(): Promise<BalancerPoolFragment[]> {
-        const subgraphPools = await balancerSubgraphService.getAllPools({});
-
+    private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
         return sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
 
