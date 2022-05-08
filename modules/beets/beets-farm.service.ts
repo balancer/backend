@@ -8,7 +8,7 @@ import {
     GqlBeetsUserPendingFarmRewards,
     GqlBeetsUserPendingRewardsToken,
 } from '../../schema';
-import { masterchefService } from '../masterchef-subgraph/masterchef.service';
+import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { oneDayInMinutes, secondsPerYear } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { getAddress } from '@ethersproject/address';
 import { addressesMatch } from '../util/addresses';
 import { BigNumber } from 'ethers';
-import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
 
 const FARMS_CACHE_KEY = 'beetsFarms';

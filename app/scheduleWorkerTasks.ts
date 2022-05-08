@@ -1,16 +1,19 @@
 import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
-import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgraph.service';
-import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-subgraph.service';
+import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { balancerSubgraphService } from '../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { balancerService } from '../modules/balancer/balancer.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { beetsBarService } from '../modules/beets-bar-subgraph/beets-bar.service';
+import { beetsBarService } from '../modules/subgraphs/beets-bar-subgraph/beets-bar.service';
 import { portfolioService } from '../modules/portfolio/portfolio.service';
 import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
+import { poolSyncService } from '../modules/pool/pool-sync.service';
+import { env } from './env';
+import { runWithMinimumInterval } from '../modules/util/scheduling';
 
 function scheduleJob(
     cronExpression: string,
@@ -157,4 +160,7 @@ export function scheduleWorkerTasks() {
         .catch((error) => console.log('Error caching initial beets farm users', error));
 
     console.log('scheduled cron jobs');
+
+    console.log('start pool sync');
+    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), poolSyncService.syncChangedPools);
 }

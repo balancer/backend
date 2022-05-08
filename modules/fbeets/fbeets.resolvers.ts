@@ -1,5 +1,5 @@
 import { Resolvers } from '../../schema';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
+import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
 
 const resolvers: Resolvers = {
     Query: {

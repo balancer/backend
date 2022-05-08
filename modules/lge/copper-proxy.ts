@@ -1,6 +1,6 @@
-import { getContractAt } from '../ethers/ethers';
 import CopperProxyAbi from './abi/CopperProxy.json';
 import { env } from '../../app/env';
+import { getContractAt } from '../util/ethers';
 
 const copperProxy = getContractAt(env.COPPER_PROXY_ADDRESS, CopperProxyAbi);
 

@@ -1,7 +1,7 @@
 import { cache } from '../cache/cache';
 import { env } from '../../app/env';
 import { TokenDefinition } from './token-types';
-import { sanityClient } from '../sanity/sanity';
+import { sanityClient } from '../util/sanity';
 import { thirtyDaysInMinutes } from '../util/time';
 
 const TOKEN_DEFINITIONS_CACHE_KEY = 'token-definitions';

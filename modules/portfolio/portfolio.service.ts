@@ -1,4 +1,4 @@
-import { BalancerJoinExitFragment, InvestType } from '../balancer-subgraph/generated/balancer-subgraph-types';
+import { BalancerJoinExitFragment, InvestType } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { BigNumber } from 'ethers';
 import { fromFp } from '../util/numbers';
 import _ from 'lodash';
@@ -18,7 +18,7 @@ import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { PortfolioDataService } from './lib/portfolio-data.service';
-import { prisma } from '../prisma/prisma-client';
+import { prisma } from '../util/prisma-client';
 import {
     PrismaBalancerPool,
     PrismaBalancerPoolShareSnapshot,

@@ -1,0 +1,166 @@
+model PrismaPool {
+    id                  String              @id
+    createdAt           DateTime            @default(now())
+
+    address             String              @unique
+    symbol              String
+    name                String
+    type                PrismaPoolType
+    owner               String
+    factory             String?
+
+    linearData          PrismaPoolLinearData?
+    elementData         PrismaPoolElementData?
+
+    tokens              PrismaPoolToken[]
+
+    dynamicData         PrismaPoolDynamicData?
+    stableDynamicData   PrismaPoolStableDynamicData?
+    linearDynamicData   PrismaPoolLinearDynamicData?
+
+    swaps               PrismaPoolSwap[]
+    aprItems            PrismaPoolAprItem[]
+    categories          PrismaPoolCategory[]
+    tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
+}
+
+enum PrismaPoolType {
+    WEIGHTED
+    STABLE
+    META_STABLE
+    PHANTOM_STABLE
+    ELEMENT
+    LINEAR
+    UNKNOWN
+    LIQUIDITY_BOOTSTRAPPING
+    INVESTMENT
+}
+
+model PrismaPoolLinearData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    mainIndex           Int
+    wrappedIndex        Int
+}
+
+model PrismaPoolElementData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    unitSeconds         String
+    principalToken      String
+    baseToken           String
+}
+
+model PrismaPoolDynamicData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    blockNumber         Int
+    updatedAt           DateTime            @updatedAt
+
+    swapFee             String
+    swapEnabled         Boolean
+    totalShares         String
+    totalLiquidity      Float
+    volume24h           Float
+    fees24h             Float
+}
+
+model PrismaPoolStableDynamicData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    blockNumber         Int
+    updatedAt           DateTime            @updatedAt
+
+    amp                 String
+}
+
+model PrismaPoolLinearDynamicData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    blockNumber         Int
+    updatedAt           DateTime            @updatedAt
+
+    lowerTarget         String
+    upperTarget         String
+}
+
+model PrismaPoolToken {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    address             String
+    symbol              String
+    name                String
+    decimals            Int
+    index               Int
+
+    nestedPoolId        String?
+    nestedPool          PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId], references: [id])
+
+    dynamicData         PrismaPoolTokenDynamicData?
+}
+
+model PrismaPoolTokenDynamicData {
+    id                  String              @id
+    poolTokenId         String
+    poolToken           PrismaPoolToken     @relation(fields:[poolTokenId], references: [id])
+    blockNumber         Int
+    updatedAt           DateTime            @updatedAt
+
+    balance             String
+    balanceUSD          Float
+    weight              String?
+    priceRate           String
+}
+
+model PrismaPoolSwap {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    userAddress         String
+    tokenIn             String
+    tokenInSym          String
+    tokenOut            String
+    tokenOutSym         String
+    tokenAmountIn       String
+    tokenAmountOut      String
+    timestamp           Int
+    tx                  String
+    valueUSD            Float
+}
+
+model PrismaPoolAprItem {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    title               String
+    apr                 Float
+    isSwapApr           Boolean?
+    isNativeRewardApr   Boolean?
+    isThirdPartyApr     Boolean?
+
+    parentItemId        String?
+    parentItem          PrismaPoolAprItem?  @relation(name: "AprItemParentChild", fields:[parentItemId], references: [id])
+
+    subItems            PrismaPoolAprItem[] @relation(name: "AprItemParentChild")
+}
+
+model PrismaPoolCategory {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    category            PrismaPoolCategoryType
+}
+
+enum PrismaPoolCategoryType {
+    INCENTIVIZED
+    BLACK_LISTED
+}

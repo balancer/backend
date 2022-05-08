@@ -3,9 +3,9 @@ hooks:
   afterAllFileWrite:
     - prettier --write
 generates:
-  modules/balancer-subgraph/generated/balancer-subgraph-types.ts:
+  modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types.ts:
     schema: ${BALANCER_SUBGRAPH}
-    documents: 'modules/balancer-subgraph/balancer-subgraph-queries.graphql'
+    documents: 'modules/subgraphs/balancer-subgraph/balancer-subgraph-queries.graphql'
     plugins:
       - typescript
       - typescript-operations
@@ -15,13 +15,13 @@ generates:
         BigInt: string
         Bytes: string
         BigDecimal: string
-  modules/balancer-subgraph/generated/balancer-subgraph-schema.graphql:
+  modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-schema.graphql:
     schema: ${BALANCER_SUBGRAPH}
     plugins:
       - schema-ast
-  modules/masterchef-subgraph/generated/masterchef-subgraph-types.ts:
+  modules/subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types.ts:
     schema: ${MASTERCHEF_SUBGRAPH}
-    documents: 'modules/masterchef-subgraph/masterchef-subgraph-queries.graphql'
+    documents: 'modules/subgraphs/masterchef-subgraph/masterchef-subgraph-queries.graphql'
     plugins:
       - typescript
       - typescript-operations
@@ -31,13 +31,13 @@ generates:
         BigInt: string
         Bytes: string
         BigDecimal: string
-  modules/masterchef-subgraph/generated/masterchef-subgraph-schema.graphql:
+  modules/subgraphs/masterchef-subgraph/generated/masterchef-subgraph-schema.graphql:
     schema: ${MASTERCHEF_SUBGRAPH}
     plugins:
       - schema-ast
-  modules/blocks-subgraph/generated/blocks-subgraph-types.ts:
+  modules/subgraphs/blocks-subgraph/generated/blocks-subgraph-types.ts:
     schema: ${BLOCKS_SUBGRAPH}
-    documents: 'modules/blocks-subgraph/block-subgraph-queries.graphql'
+    documents: 'modules/subgraphs/blocks-subgraph/block-subgraph-queries.graphql'
     plugins:
       - typescript
       - typescript-operations
@@ -47,13 +47,13 @@ generates:
         BigInt: string
         Bytes: string
         BigDecimal: string
-  modules/blocks-subgraph/generated/blocks-subgraph-schema.graphql:
+  modules/subgraphs/blocks-subgraph/generated/blocks-subgraph-schema.graphql:
     schema: ${BLOCKS_SUBGRAPH}
     plugins:
       - schema-ast
-  modules/beets-bar-subgraph/generated/beets-bar-subgraph-types.ts:
+  modules/subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types.ts:
     schema: ${BEETS_BAR_SUBGRAPH}
-    documents: 'modules/beets-bar-subgraph/beets-bar-subgraph-queries.graphql'
+    documents: 'modules/subgraphs/beets-bar-subgraph/beets-bar-subgraph-queries.graphql'
     plugins:
       - typescript
       - typescript-operations
@@ -63,8 +63,24 @@ generates:
         BigInt: string
         Bytes: string
         BigDecimal: string
-  modules/beets-bar-subgraph/generated/beets-bar-subgraph-schema.graphql:
+  modules/subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-schema.graphql:
     schema: ${BEETS_BAR_SUBGRAPH}
+    plugins:
+      - schema-ast
+  modules/subgraphs/changelog-subgraph/generated/changelog-subgraph-types.ts:
+    schema: ${CHANGELOG_SUBGRAPH}
+    documents: 'modules/subgraphs/changelog-subgraph/changelog-subgraph-queries.graphql'
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request
+    config:
+      scalars:
+        BigInt: string
+        Bytes: string
+        BigDecimal: string
+  modules/subgraphs/changelog-subgraph/generated/changelog-subgraph-schema.graphql:
+    schema: ${CHANGELOG_SUBGRAPH}
     plugins:
       - schema-ast
   graphql_schema_generated.ts:

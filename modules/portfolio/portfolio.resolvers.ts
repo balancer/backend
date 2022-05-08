@@ -1,10 +1,10 @@
 import { Resolvers } from '../../schema';
 import { portfolioService } from './portfolio.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
-import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { masterchefService } from '../masterchef-subgraph/masterchef.service';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
-import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
 import { cache } from '../cache/cache';
 
