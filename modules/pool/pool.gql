@@ -28,7 +28,7 @@ interface GqlPoolBase {
     address: Bytes!
     owner: Bytes
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
 
@@ -92,7 +92,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -108,7 +108,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -124,7 +124,7 @@ type GqlPoolStable implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -140,7 +140,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -156,7 +156,7 @@ type GqlPoolElement implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -175,7 +175,7 @@ type GqlPoolLinear implements GqlPoolBase {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
@@ -195,7 +195,7 @@ type GqlPoolLinearNested {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     tokens: [GqlPoolToken!]!
 
     totalShares: BigDecimal!
@@ -215,7 +215,7 @@ type GqlPoolPhantomStableNested {
     address: Bytes!
     owner: Bytes!
     factory: Bytes
-    createdAt: Int!
+    createTime: Int!
     tokens: [GqlPoolTokenPhantomStableNestedUnion!]!
     nestingType: GqlPoolNestingType!
 

@@ -118,7 +118,6 @@ export class PoolGqlLoaderService {
 
         const mappedData = {
             ...pool,
-            createdAt: Math.floor(pool.createdAt.getTime() / 1000),
             dynamicData: {
                 ...pool.dynamicData!,
                 totalLiquidity: `${totalLiquidity}`,
@@ -355,7 +354,6 @@ export class PoolGqlLoaderService {
             ...pool,
             ...pool.linearData!,
             ...pool.linearDynamicData!,
-            createdAt: Math.floor(pool.createdAt.getTime() / 1000),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGql(token)),
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
@@ -369,7 +367,6 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolPhantomStableNested',
             ...pool,
             nestingType: this.getPoolNestingType(pool),
-            createdAt: Math.floor(pool.createdAt.getTime() / 1000),
             tokens: pool.tokens.map((token) => {
                 const nestedPool = token.nestedPool;
 
