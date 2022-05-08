@@ -32,6 +32,7 @@ export class PoolCreatorService {
         await prisma.prismaPool.create({
             data: {
                 id: pool.id,
+                createTime: pool.createTime,
                 address: pool.address,
                 symbol: pool.symbol || '',
                 name: pool.name || '',

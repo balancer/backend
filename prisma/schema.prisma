@@ -26,7 +26,7 @@ enum PrismaLastBlockSyncedCategory {
 
 model PrismaPool {
     id                  String              @id
-    createdAt           DateTime            @default(now())
+    createTime          Int
 
     address             String              @unique
     symbol              String
