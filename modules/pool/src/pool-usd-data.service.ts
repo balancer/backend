@@ -12,6 +12,10 @@ export class PoolUsdDataService {
         private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
 
+    /**
+     * Liquidity is dependent on token prices, so the values here are constantly in flux.
+     * When updating, the easiest is to update all pools at once.
+     */
     public async updateLiquidityValuesForAllPools() {
         const tokenPrices = await this.tokenPriceService.getTokenPrices();
         const pools = await prisma.prismaPool.findMany({
@@ -57,7 +61,11 @@ export class PoolUsdDataService {
         await prisma.$transaction(updates);
     }
 
-    public async syncSwapsForLast24Hours() {
+    /**
+     * Syncs all swaps for the last 24 hours. We fetch the timestamp of the last stored swap to avoid
+     * duplicate effort. Return an array of poolIds with swaps added.
+     */
+    public async syncSwapsForLast24Hours(): Promise<string[]> {
         const tokenPrices = await this.tokenPriceService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
         const yesterday = moment().subtract(1, 'day').unix();
@@ -67,6 +75,7 @@ export class PoolUsdDataService {
         let skip = 0;
         const pageSize = 1000;
         const MAX_SKIP = 5000;
+        const poolIds = new Set<string>();
 
         while (hasMore) {
             const { swaps } = await this.balancerSubgraphService.getSwaps({
@@ -76,7 +85,8 @@ export class PoolUsdDataService {
                 orderBy: Swap_OrderBy.Timestamp,
                 orderDirection: OrderDirection.Asc,
             });
-            console.log('num swaps', swaps.length);
+
+            console.log(`loading ${swaps.length} new swaps into the db...`);
 
             if (swaps.length === 0) {
                 break;
@@ -97,6 +107,8 @@ export class PoolUsdDataService {
                             valueUSD = tokenOutPrice * parseFloat(swap.tokenAmountOut);
                         }
                     }
+
+                    poolIds.add(swap.poolId.id);
 
                     return {
                         id: swap.id,
@@ -128,11 +140,18 @@ export class PoolUsdDataService {
         }
 
         await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
+
+        return Array.from(poolIds);
     }
 
-    public async updateVolumeAndFeeValuesForAllPools() {
+    /**
+     *
+     * @param poolIds the ids to update, if not provided, will update for all pools
+     */
+    public async updateVolumeAndFeeValuesForPools(poolIds?: string[]) {
         const yesterday = moment().subtract(1, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
+            where: poolIds ? { id: { in: poolIds } } : undefined,
             include: {
                 swaps: { where: { timestamp: { gte: yesterday } } },
                 dynamicData: true,

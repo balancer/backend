@@ -39,7 +39,7 @@ const balancerResolvers: Resolvers = {
         poolUpdateVolumeAndFeeValuesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.updateVolumeAndFeeValuesForAllPools();
+            await poolService.updateVolumeAndFeeValuesForPools();
 
             return 'success';
         },

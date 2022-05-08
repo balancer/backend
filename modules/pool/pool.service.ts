@@ -82,16 +82,18 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidityValuesForAllPools();
     }
 
-    public async updateVolumeAndFeeValuesForAllPools(): Promise<void> {
-        console.time('updateVolumeAndFeeValuesForAllPools');
-        await this.poolUsdDataService.updateVolumeAndFeeValuesForAllPools();
-        console.timeEnd('updateVolumeAndFeeValuesForAllPools');
+    public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
+        console.time('updateVolumeAndFeeValuesForPools');
+        await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
+        console.timeEnd('updateVolumeAndFeeValuesForPools');
     }
 
-    public async syncSwapsForLast24Hours(): Promise<void> {
+    public async syncSwapsForLast24Hours(): Promise<string[]> {
         console.time('syncSwapsForLast24Hours');
-        await this.poolUsdDataService.syncSwapsForLast24Hours();
+        const poolIds = await this.poolUsdDataService.syncSwapsForLast24Hours();
         console.timeEnd('syncSwapsForLast24Hours');
+
+        return poolIds;
     }
 
     public async syncSanityPoolData() {

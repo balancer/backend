@@ -68,13 +68,6 @@ export class PoolGqlLoaderService {
 
         const where = args.where;
 
-        console.log({
-            category: {
-                in: where?.categoryIn || undefined,
-                notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
-            },
-        });
-
         const pools = await prisma.prismaPool.findMany({
             take: args.first || undefined,
             skip: args.skip || undefined,
@@ -93,6 +86,10 @@ export class PoolGqlLoaderService {
                                   notIn: where.tokensNotIn?.map((token) => token.toLowerCase()) || undefined,
                               },
                           },
+                      },
+                      id: {
+                          in: where.idIn || undefined,
+                          notIn: where.idNotIn || undefined,
                       },
                       categories: {
                           some: {

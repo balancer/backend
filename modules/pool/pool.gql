@@ -373,6 +373,8 @@ input GqlPoolFilter {
     tokensNotIn: [String!]
     poolTypeIn: [GqlPoolFilterType!]
     poolTypeNotIn: [GqlPoolFilterType!]
+    idIn: [String!]
+    idNotIn: [String!]
 }
 
 enum GqlPoolFilterCategory {

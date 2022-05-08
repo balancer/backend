@@ -15,7 +15,7 @@ class PoolSyncService {
 
             let latestBlock = lastSyncBlock;
             const poolIds = new Set<string>();
-            for (let poolChangeEvent of poolChangeEvents) {
+            for (const poolChangeEvent of poolChangeEvents) {
                 const block = parseInt(poolChangeEvent.block);
                 if (block > latestBlock) {
                     latestBlock = block;
@@ -25,6 +25,9 @@ class PoolSyncService {
             if (poolIds.size !== 0) {
                 console.log(`Syncing ${poolIds.size} pools`);
                 await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
+
+                const poolsWithNewSwaps = await poolService.syncSwapsForLast24Hours();
+                await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
 
                 await prisma.prismaLastBlockSynced.upsert({
                     where: { category: PrismaLastBlockSyncedCategory.POOLS },

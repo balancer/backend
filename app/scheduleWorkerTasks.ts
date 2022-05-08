@@ -14,6 +14,7 @@ import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import { poolSyncService } from '../modules/pool/pool-sync.service';
 import { env } from './env';
 import { runWithMinimumInterval } from '../modules/util/scheduling';
+import { poolService } from '../modules/pool/pool.service';
 
 function scheduleJob(
     cronExpression: string,
@@ -51,13 +52,35 @@ function scheduleJob(
 
 export function scheduleWorkerTasks() {
     //every 20 seconds
-    scheduleJob('*/20 * * * * *', 'cache-token-prices', async () => {
+    scheduleJob('*/20 * * * * *', 'cacheTokenPrices', async () => {
         await tokenPriceService.cacheTokenPrices();
     });
 
+    //every 30 seconds
+    scheduleJob('*/30 * * * * *', 'cacheBeetsPrice', async () => {
+        await tokenPriceService.cacheBeetsPrice();
+    });
+
+    //every 30 seconds
+    scheduleJob('*/30 * * * * *', 'poolUpdateLiquidityValuesForAllPools', async () => {
+        await poolService.updateLiquidityValuesForAllPools();
+        await poolService.updatePoolAprs();
+    });
+
+    //every 30 seconds
+    scheduleJob('*/30 * * * * *', 'loadOnChainDataForPoolsWithActiveUpdates', async () => {
+        await poolService.loadOnChainDataForPoolsWithActiveUpdates();
+    });
+
+    //every 3 minutes
+    scheduleJob('*/3 * * * *', 'poolSyncSanityPoolData', async () => {
+        await poolService.syncSanityPoolData();
+    });
+
+    /*
     //every five minutes
     scheduleJob(
-        '*/5 * * * *',
+        '*!/5 * * * *',
         'cache-historical-token-price',
         async () => {
             await tokenPriceService.cacheHistoricalTokenPrices();
@@ -65,33 +88,33 @@ export function scheduleWorkerTasks() {
         true,
     );
 
-    scheduleJob('*/5 * * * *', 'cache-historical-nested-bpt-prices', async () => {
+    scheduleJob('*!/5 * * * *', 'cache-historical-nested-bpt-prices', async () => {
         await tokenPriceService.cacheHistoricalNestedBptPrices();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-average-block-time', async () => {
+    scheduleJob('*!/5 * * * *', 'cache-average-block-time', async () => {
         await blocksSubgraphService.cacheAverageBlockTime();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-fbeets-apr', async () => {
+    scheduleJob('*!/5 * * * *', 'cache-fbeets-apr', async () => {
         await beetsBarService.cacheFbeetsApr();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-tokens', async () => {
+    scheduleJob('*!/5 * * * *', 'cache-tokens', async () => {
         await tokenService.cacheTokens();
     });
 
     //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', async () => {
+    scheduleJob('*!/5 * * * * *', 'cache-balancer-pools', async () => {
         await balancerService.cachePools();
     });
 
     //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-beets-farms', async () => {
+    scheduleJob('*!/5 * * * * *', 'cache-beets-farms', async () => {
         await beetsFarmService.cacheBeetsFarms();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-beets-farms', async () => {
+    scheduleJob('*!/30 * * * * *', 'cache-beets-farms', async () => {
         await beetsFarmService.cacheBeetsFarms();
     });
 
@@ -101,28 +124,28 @@ export function scheduleWorkerTasks() {
     });
 
     //every 10 seconds
-    scheduleJob('*/10 * * * * *', 'cache-user-pool-shares', async () => {
+    scheduleJob('*!/10 * * * * *', 'cache-user-pool-shares', async () => {
         await balancerService.cacheUserPoolShares();
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'cache-beets-price', async () => {
+    scheduleJob('*!/30 * * * * *', 'cache-beets-price', async () => {
         await tokenPriceService.cacheBeetsPrice();
     });
 
-    scheduleJob('*/10 * * * * *', 'cache-beets-farm-users', async () => {
+    scheduleJob('*!/10 * * * * *', 'cache-beets-farm-users', async () => {
         await beetsFarmService.cacheBeetsFarmUsers();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-past-pools', async () => {
+    scheduleJob('*!/30 * * * * *', 'cache-past-pools', async () => {
         await balancerService.cachePastPools();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-protocol-data', async () => {
+    scheduleJob('*!/30 * * * * *', 'cache-protocol-data', async () => {
         await beetsService.cacheProtocolData();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-portfolio-pools-data', async () => {
+    scheduleJob('*!/30 * * * * *', 'cache-portfolio-pools-data', async () => {
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
     });
@@ -158,9 +181,12 @@ export function scheduleWorkerTasks() {
     beetsFarmService
         .cacheBeetsFarmUsers(true)
         .catch((error) => console.log('Error caching initial beets farm users', error));
-
+*/
     console.log('scheduled cron jobs');
 
     console.log('start pool sync');
-    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), poolSyncService.syncChangedPools);
+
+    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), poolSyncService.syncChangedPools).catch((error) =>
+        console.log('Error starting syncChangedPools...', error),
+    );
 }
