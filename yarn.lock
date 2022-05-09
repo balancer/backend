@@ -586,7 +586,7 @@
 
 "@balancer-labs/sdk@github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo":
   version "0.1.1"
-  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/cca773ef861c412fc0ec96654f4c99f2f92aaeb2"
+  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/46f259022fad79c2b273d196f8f325a0dafce45a"
   dependencies:
     "@balancer-labs/sor" "github:beethovenxfi/balancer-sor#daniel/generic-path-algo-build"
     axios "^0.24.0"
@@ -596,7 +596,7 @@
 
 "@balancer-labs/sor@github:beethovenxfi/balancer-sor#daniel/generic-path-algo-build":
   version "3.0.0-beta.0"
-  resolved "https://codeload.github.com/beethovenxfi/balancer-sor/tar.gz/c273840ca31c6b14a00ffad97d348174c7ae8003"
+  resolved "https://codeload.github.com/beethovenxfi/balancer-sor/tar.gz/4db9c23a6f17669ba6afb2af1a09ad830091d232"
   dependencies:
     isomorphic-fetch "^2.2.1"
 
@@ -4392,7 +4392,7 @@ graphql-tag@^2.11.0:
   dependencies:
     tslib "^2.1.0"
 
-graphql-type-json@^0.3.1:
+graphql-type-json@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/graphql-type-json/-/graphql-type-json-0.3.2.tgz#f53a851dbfe07bd1c8157d24150064baab41e115"
   integrity sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==
