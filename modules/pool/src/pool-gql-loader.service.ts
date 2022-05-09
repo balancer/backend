@@ -26,6 +26,7 @@ import _ from 'lodash';
 import { prisma } from '../../util/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
+import { env } from '../../../app/env';
 
 export class PoolGqlLoaderService {
     constructor(private readonly tokenPriceService: TokenPriceService) {}
@@ -140,6 +141,7 @@ export class PoolGqlLoaderService {
             withdrawConfig: this.getPoolWithdrawConfig(pool),
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
+            allTokens: pool.allTokens.map((token) => ({ ...token.token, chainId: parseInt(env.CHAIN_ID) })),
         };
 
         //TODO: may need to build out the types here still
@@ -245,8 +247,11 @@ export class PoolGqlLoaderService {
                               this.mapPoolTokenToGql(mainToken),
                               this.mapPoolTokenToGql({
                                   ...mainToken,
-                                  address: networkConfig.ethAddress,
-                                  symbol: networkConfig.ethSymbol,
+                                  token: {
+                                      ...poolToken.token,
+                                      symbol: networkConfig.ethSymbol,
+                                      address: networkConfig.ethAddress,
+                                  },
                               }),
                           ]
                         : [this.mapPoolTokenToGql(mainToken)],
@@ -304,8 +309,11 @@ export class PoolGqlLoaderService {
                               this.mapPoolTokenToGql(poolToken),
                               this.mapPoolTokenToGql({
                                   ...poolToken,
-                                  address: networkConfig.ethAddress,
-                                  symbol: networkConfig.ethSymbol,
+                                  token: {
+                                      ...poolToken.token,
+                                      symbol: networkConfig.ethSymbol,
+                                      address: networkConfig.ethAddress,
+                                  },
                               }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],
@@ -338,7 +346,8 @@ export class PoolGqlLoaderService {
 
     private mapPoolTokenToGql(poolToken: PrismaPoolTokenWithDynamicData): GqlPoolToken {
         return {
-            ...poolToken,
+            id: poolToken.id,
+            ...poolToken.token,
             __typename: 'GqlPoolToken',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
             balance: poolToken.dynamicData?.balance || '0',

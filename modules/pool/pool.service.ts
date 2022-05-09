@@ -23,7 +23,7 @@ import { PoolSyncService } from './src/pool-sync.service';
 export class PoolService {
     constructor(
         private readonly provider: Provider,
-        private readonly poolLoaderService: PoolCreatorService,
+        private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
@@ -43,13 +43,21 @@ export class PoolService {
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
 
-        return this.poolLoaderService.syncAllPoolsFromSubgraph(blockNumber);
+        return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
+    }
+
+    public async syncPoolAllTokensRelationship(): Promise<void> {
+        const pools = await prisma.prismaPool.findMany({ select: { id: true } });
+
+        for (const pool of pools) {
+            await this.poolCreatorService.createAllTokensRelationshipForPool(pool.id);
+        }
     }
 
     public async syncNewPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
 
-        const poolIds = await this.poolLoaderService.syncNewPoolsFromSubgraph(blockNumber);
+        const poolIds = await this.poolCreatorService.syncNewPoolsFromSubgraph(blockNumber);
 
         if (poolIds.length > 0) {
             await this.updateOnChainDataForPools(poolIds, blockNumber);

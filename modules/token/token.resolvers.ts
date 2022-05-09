@@ -42,7 +42,6 @@ const resolvers: Resolvers = {
         tokenSyncTokenDefinitions: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenService.syncTokensFromPoolTokens();
             await tokenService.syncSanityData();
 
             return 'success';

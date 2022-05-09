@@ -19,45 +19,6 @@ interface SanityToken {
 }
 
 export class TokenDataLoaderService {
-    public async syncTokensFromPoolTokens() {
-        const pools = await this.loadPoolData();
-        const poolTokens = await prisma.prismaPoolToken.findMany({ distinct: ['address'] });
-        const tokens = await prisma.prismaToken.findMany({});
-        const tokensToCreate = poolTokens.filter((poolToken) => {
-            const token = tokens.find((token) => token.address === poolToken.address);
-            const pool = pools.find((pool) => pool.address === token?.address);
-
-            return !token && !pool;
-        });
-        const poolBptsToCreate = pools.filter((pool) => {
-            const token = tokens.find((token) => token.address === pool.address);
-
-            return !token;
-        });
-
-        if (tokensToCreate.length > 0 || poolBptsToCreate.length > 0) {
-            await prisma.prismaToken.createMany({
-                skipDuplicates: true,
-                data: [
-                    ...tokensToCreate.map((token) => ({
-                        address: token.address,
-                        symbol: token.symbol,
-                        name: token.name,
-                        decimals: token.decimals,
-                    })),
-                    ...poolBptsToCreate.map((pool) => ({
-                        address: pool.address,
-                        symbol: pool.symbol,
-                        name: pool.name,
-                        decimals: 18,
-                    })),
-                ],
-            });
-
-            await this.syncTokenTypes();
-        }
-    }
-
     public async syncSanityTokenData(): Promise<void> {
         const sanityTokens = await sanityClient.fetch<SanityToken[]>(`
             *[_type=="${SANITY_TOKEN_TYPE_MAP[env.CHAIN_ID]}"] {

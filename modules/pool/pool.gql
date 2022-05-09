@@ -19,6 +19,7 @@ extend type Mutation {
     poolSyncSwapsForLast24Hours: String!
     poolSyncSanityPoolData: String!
     poolUpdateAprs: String!
+    poolSyncPoolAllTokensRelationship: String!
 }
 
 interface GqlPoolBase {
@@ -32,6 +33,8 @@ interface GqlPoolBase {
     createTime: Int!
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
+
+    allTokens: [GqlToken!]!
 
     dynamicData: GqlPoolDynamicData!
 }
@@ -97,6 +100,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -113,6 +117,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -129,6 +134,7 @@ type GqlPoolStable implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -145,6 +151,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
@@ -161,6 +168,7 @@ type GqlPoolElement implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
     tokens: [GqlPoolToken!]!
 
     #element specific fields
@@ -180,6 +188,7 @@ type GqlPoolLinear implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlToken!]!
     tokens: [GqlPoolToken!]!
 
     #linear specific fields

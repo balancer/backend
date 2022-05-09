@@ -80,7 +80,7 @@ export class PoolOnChainDataService {
         const pools = await prisma.prismaPool.findMany({
             where: { id: { in: poolIds } },
             include: {
-                tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } },
+                tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true, token: true } },
                 stableDynamicData: true,
                 dynamicData: true,
                 linearDynamicData: true,
@@ -273,7 +273,7 @@ export class PoolOnChainDataService {
                         throw `Pool Missing Expected Token: ${poolId} ${tokenAddress}`;
                     }
 
-                    const balance = formatFixed(poolTokens.balances[i], poolToken.decimals);
+                    const balance = formatFixed(poolTokens.balances[i], poolToken.token.decimals);
                     const weight = onchainData.weights ? formatFixed(onchainData.weights[i], 18) : null;
                     const priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
 

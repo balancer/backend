@@ -2,8 +2,9 @@ import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balan
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../util/prisma-client';
 import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
-import { PrismaPoolType, PrismaPool } from '@prisma/client';
-import { sortBy } from 'lodash';
+import { PrismaPoolType } from '@prisma/client';
+import _ from 'lodash';
+import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 
 export class PoolCreatorService {
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
@@ -59,6 +60,24 @@ export class PoolCreatorService {
         const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
         const poolTokens = pool.tokens || [];
 
+        await prisma.prismaToken.createMany({
+            skipDuplicates: true,
+            data: [
+                ...poolTokens.map((token) => ({
+                    address: token.address,
+                    symbol: token.symbol,
+                    name: token.name,
+                    decimals: token.decimals,
+                })),
+                {
+                    address: pool.address,
+                    symbol: pool.symbol || '',
+                    name: pool.name || '',
+                    decimals: 18,
+                },
+            ],
+        });
+
         await prisma.prismaPool.create({
             data: {
                 id: pool.id,
@@ -83,10 +102,7 @@ export class PoolCreatorService {
 
                             return {
                                 id: token.id,
-                                decimals: token.decimals,
                                 address: token.address,
-                                name: token.name,
-                                symbol: token.symbol,
                                 nestedPoolId: nestedPool?.id,
                                 index,
                             };
@@ -161,10 +177,39 @@ export class PoolCreatorService {
                 balanceUSD: 0,
             })),
         });
+
+        await this.createAllTokensRelationshipForPool(pool.id);
+    }
+
+    public async createAllTokensRelationshipForPool(poolId: string): Promise<void> {
+        const pool = await prisma.prismaPool.findUnique({
+            ...prismaPoolWithExpandedNesting,
+            where: { id: poolId },
+        });
+
+        if (!pool) {
+            return;
+        }
+
+        const allTokens = _.flattenDeep(
+            pool.tokens.map((token) => [
+                token,
+                ...(token.nestedPool?.tokens || []),
+                ...(token.nestedPool?.tokens.map((token) => token.nestedPool?.tokens || []) || []),
+            ]),
+        );
+
+        await prisma.prismaPoolExpandedTokens.createMany({
+            skipDuplicates: true,
+            data: allTokens.map((token) => ({
+                poolId,
+                tokenAddress: token.address,
+            })),
+        });
     }
 
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
-        return sortBy(subgraphPools, (pool) => {
+        return _.sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
 
             if (poolType === 'LINEAR') {

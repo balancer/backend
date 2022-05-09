@@ -7,7 +7,7 @@ const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
 export type PrismaPoolWithTokens = Prisma.PrismaPoolGetPayload<typeof poolWithTokens>;
 
 const poolTokenWithDynamicData = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
-    include: { dynamicData: true },
+    include: { dynamicData: true, token: true },
 });
 
 export type PrismaPoolTokenWithDynamicData = Prisma.PrismaPoolTokenGetPayload<typeof poolTokenWithDynamicData>;
@@ -20,6 +20,11 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
         stableDynamicData: true,
         linearDynamicData: true,
         categories: true,
+        allTokens: {
+            include: {
+                token: true,
+            },
+        },
         aprItems: {
             include: {
                 subItems: true,
@@ -28,6 +33,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
         tokens: {
             include: {
                 dynamicData: true,
+                token: true,
                 nestedPool: {
                     include: {
                         linearData: true,
@@ -36,6 +42,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                         linearDynamicData: true,
                         tokens: {
                             include: {
+                                token: true,
                                 dynamicData: true,
                                 nestedPool: {
                                     include: {
@@ -44,6 +51,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                                         linearDynamicData: true,
                                         tokens: {
                                             include: {
+                                                token: true,
                                                 dynamicData: true,
                                             },
                                         },
@@ -68,6 +76,7 @@ const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>
         linearDynamicData: true,
         tokens: {
             include: {
+                token: true,
                 dynamicData: true,
                 nestedPool: {
                     include: {
@@ -76,6 +85,7 @@ const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>
                         linearDynamicData: true,
                         tokens: {
                             include: {
+                                token: true,
                                 dynamicData: true,
                             },
                         },
@@ -97,6 +107,7 @@ const nestedPoolWithNoNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
         linearDynamicData: true,
         tokens: {
             include: {
+                token: true,
                 dynamicData: true,
             },
         },
@@ -107,6 +118,7 @@ export type PrismaNestedPoolWithNoNesting = Prisma.PrismaPoolGetPayload<typeof n
 
 const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
     include: {
+        token: true,
         dynamicData: true,
         nestedPool: {
             include: {
@@ -116,6 +128,7 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                 linearDynamicData: true,
                 tokens: {
                     include: {
+                        token: true,
                         dynamicData: true,
                         nestedPool: {
                             include: {
@@ -124,6 +137,7 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                                 linearDynamicData: true,
                                 tokens: {
                                     include: {
+                                        token: true,
                                         dynamicData: true,
                                     },
                                 },

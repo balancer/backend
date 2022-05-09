@@ -22,6 +22,8 @@ model PrismaPool {
     aprItems            PrismaPoolAprItem[]
     categories          PrismaPoolCategory[]
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
+
+    allTokens           PrismaPoolExpandedTokens[]
 }
 
 enum PrismaPoolType {
@@ -97,9 +99,7 @@ model PrismaPoolToken {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
 
     address             String
-    symbol              String
-    name                String
-    decimals            Int
+    token               PrismaToken          @relation(fields:[address], references: [address])
     index               Int
 
     nestedPoolId        String?
@@ -163,4 +163,13 @@ model PrismaPoolCategory {
 enum PrismaPoolCategoryType {
     INCENTIVIZED
     BLACK_LISTED
+}
+
+model PrismaPoolExpandedTokens {
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    @@id([tokenAddress, poolId])
 }

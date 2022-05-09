@@ -85,7 +85,7 @@ export function scheduleWorkerTasks() {
 
     //every 5 minutes
     scheduleJob('*/5 * * * *', 'syncTokensFromPoolTokens', async () => {
-        await tokenService.syncTokensFromPoolTokens();
+        await tokenService.syncSanityData();
     });
 
     /*

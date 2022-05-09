@@ -16,10 +16,6 @@ export class TokenService {
         private readonly tokenPriceService: TokenPriceService,
     ) {}
 
-    public async syncTokensFromPoolTokens() {
-        await this.tokenDataLoaderService.syncTokensFromPoolTokens();
-    }
-
     public async syncSanityData() {
         await this.tokenDataLoaderService.syncSanityTokenData();
     }
