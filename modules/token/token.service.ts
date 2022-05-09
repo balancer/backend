@@ -25,7 +25,7 @@ export class TokenService {
     }
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {
-        const tokens = await prisma.prismaToken.findMany({});
+        const tokens = await prisma.prismaToken.findMany({ where: { types: { some: { type: 'WHITE_LISTED' } } } });
 
         return tokens.map((token) => ({
             ...token,

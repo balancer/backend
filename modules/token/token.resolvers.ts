@@ -7,6 +7,9 @@ import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
     Query: {
+        tokenGetTokens: async (parent, {}, context) => {
+            return tokenService.getTokenDefinitions();
+        },
         tokenGetCurrentPrices: async (parent, {}, context) => {
             const prices = await tokenService.getCurrentTokenPrices();
 
