@@ -29,7 +29,7 @@ import { Prisma } from '@prisma/client';
 import { env } from '../../../app/env';
 
 export class PoolGqlLoaderService {
-    constructor(private readonly tokenPriceService: TokenPriceService) {}
+    constructor() {}
 
     public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({

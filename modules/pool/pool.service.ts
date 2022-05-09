@@ -19,6 +19,7 @@ import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr
 import { SpookySwapAprService } from './apr-data-sources/spooky-swap-apr.service';
 import { YearnVaultAprService } from './apr-data-sources/yearn-vault-apr.service';
 import { PoolSyncService } from './src/pool-sync.service';
+import { tokenService } from '../token/token.service';
 
 export class PoolService {
     constructor(
@@ -133,17 +134,17 @@ export const poolService = new PoolService(
     new PoolOnChainDataService(
         BALANCER_NETWORK_CONFIG[env.CHAIN_ID].multicall,
         BALANCER_NETWORK_CONFIG[env.CHAIN_ID].vault,
-        tokenPriceService,
+        tokenService,
     ),
-    new PoolUsdDataService(tokenPriceService, balancerSubgraphService),
-    new PoolGqlLoaderService(tokenPriceService),
+    new PoolUsdDataService(tokenService, balancerSubgraphService),
+    new PoolGqlLoaderService(),
     new PoolSanityDataLoaderService(),
     //TODO: this will depend on the chain
     new PoolAprUpdaterService([
         new SwapFeeAprService(),
         new MasterchefFarmAprService(),
-        new SpookySwapAprService(tokenPriceService),
-        new YearnVaultAprService(tokenPriceService),
+        new SpookySwapAprService(tokenService),
+        new YearnVaultAprService(tokenService),
     ]),
     new PoolSyncService(),
 );

@@ -22,6 +22,14 @@ export class TokenPriceService {
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
 
+    public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
+        const tokenPrice = tokenPrices.find(
+            (tokenPrice) => tokenPrice.tokenAddress.toLowerCase() === tokenAddress.toLowerCase(),
+        );
+
+        return tokenPrice?.price || 0;
+    }
+
     public async updateTokenPrices(): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             include: {

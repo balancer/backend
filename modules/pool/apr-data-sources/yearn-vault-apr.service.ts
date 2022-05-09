@@ -8,13 +8,14 @@ import { YearnVault } from '../../boosted/yearn-types';
 import { env } from '../../../app/env';
 import { PrismaPoolAprItem } from '@prisma/client';
 import { prisma } from '../../util/prisma-client';
+import { TokenService } from '../../token/token.service';
 
 export class YearnVaultAprService implements PoolAprService {
-    constructor(private readonly tokenPriceService: TokenPriceService) {}
+    constructor(private readonly tokenService: TokenService) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const { data } = await axios.get<YearnVault[]>(env.YEARN_VAULTS_ENDPOINT);
-        const tokenPrices = await this.tokenPriceService.getTokenPrices();
+        const tokenPrices = await this.tokenService.getTokenPrices();
 
         for (const pool of pools) {
             const itemId = `${pool.id}-yearn-vault`;
@@ -39,7 +40,7 @@ export class YearnVaultAprService implements PoolAprService {
                     continue;
                 }
 
-                const tokenPrice = this.tokenPriceService.getPriceForToken(tokenPrices, mainToken.address);
+                const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, mainToken.address);
                 const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
                 const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
                 const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;

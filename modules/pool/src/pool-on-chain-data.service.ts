@@ -16,6 +16,7 @@ import { prisma } from '../../util/prisma-client';
 import { poolIsStablePool } from './pool-utils';
 import _ from 'lodash';
 import { TokenPriceService } from '../../token-price/token-price.service';
+import { TokenService } from '../../token/token.service';
 
 interface MulticallExecuteResult {
     amp?: string[];
@@ -69,13 +70,13 @@ export class PoolOnChainDataService {
     constructor(
         private readonly multiAddress: string,
         private readonly vaultAddress: string,
-        private readonly tokenPriceService: TokenPriceService,
+        private readonly tokenService: TokenService,
     ) {}
 
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
 
-        const tokenPrices = await this.tokenPriceService.getTokenPrices();
+        const tokenPrices = await this.tokenService.getTokenPrices();
 
         const pools = await prisma.prismaPool.findMany({
             where: { id: { in: poolIds } },
@@ -293,7 +294,7 @@ export class PoolOnChainDataService {
                                 weight,
                                 balance,
                                 balanceUSD:
-                                    this.tokenPriceService.getPriceForToken(tokenPrices, poolToken.address) *
+                                    this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
                                     parseFloat(balance),
                             },
                             update: {
@@ -302,7 +303,7 @@ export class PoolOnChainDataService {
                                 weight,
                                 balance,
                                 balanceUSD:
-                                    this.tokenPriceService.getPriceForToken(tokenPrices, poolToken.address) *
+                                    this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
                                     parseFloat(balance),
                             },
                         });

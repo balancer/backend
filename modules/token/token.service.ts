@@ -33,8 +33,12 @@ export class TokenService {
         return this.tokenPriceService.updateTokenPrices();
     }
 
-    public async getCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
+    public async getTokenPrices(): Promise<PrismaTokenPrice[]> {
         return this.tokenPriceService.getCurrentTokenPrices();
+    }
+
+    public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
+        return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
 }
 

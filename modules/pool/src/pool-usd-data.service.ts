@@ -1,14 +1,14 @@
-import { TokenPriceService } from '../../token-price/token-price.service';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import { OrderDirection, Swap_OrderBy } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { TokenService } from '../../token/token.service';
 
 export class PoolUsdDataService {
     constructor(
-        private readonly tokenPriceService: TokenPriceService,
+        private readonly tokenService: TokenService,
         private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
 
@@ -17,22 +17,24 @@ export class PoolUsdDataService {
      * When updating, the easiest is to update all pools at once.
      */
     public async updateLiquidityValuesForAllPools() {
-        const tokenPrices = await this.tokenPriceService.getTokenPrices();
+        const tokenPrices = await this.tokenService.getTokenPrices();
         const pools = await prisma.prismaPool.findMany({
             include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
-            where: { dynamicData: { totalShares: { gt: '0.00000000001' } } },
+            //where: { dynamicData: { totalShares: { gt: '0.00000000001' } } },
         });
+
+        const filtered = pools.filter((pool) => parseFloat(pool.dynamicData?.totalShares || '0') > 0.00000000001);
 
         let updates: any[] = [];
 
-        for (const pool of pools) {
+        for (const pool of filtered) {
             const balanceUSDs = pool.tokens.map((token) => ({
                 id: token.id,
                 balanceUSD:
                     token.address === pool.address
                         ? 0
                         : parseFloat(token.dynamicData?.balance || '0') *
-                          this.tokenPriceService.getPriceForToken(tokenPrices, token.address),
+                          this.tokenService.getPriceForToken(tokenPrices, token.address),
             }));
             const totalLiquidity = _.sumBy(balanceUSDs, (item) => item.balanceUSD);
 
@@ -66,7 +68,7 @@ export class PoolUsdDataService {
      * duplicate effort. Return an array of poolIds with swaps added.
      */
     public async syncSwapsForLast24Hours(): Promise<string[]> {
-        const tokenPrices = await this.tokenPriceService.getTokenPrices();
+        const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
         const yesterday = moment().subtract(1, 'day').unix();
         //ensure we only sync the last 24 hours worth of swaps
@@ -98,8 +100,8 @@ export class PoolUsdDataService {
                     let valueUSD = parseFloat(swap.valueUSD);
 
                     if (valueUSD === 0) {
-                        const tokenInPrice = this.tokenPriceService.getPriceForToken(tokenPrices, swap.tokenIn);
-                        const tokenOutPrice = this.tokenPriceService.getPriceForToken(tokenPrices, swap.tokenOut);
+                        const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn);
+                        const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut);
 
                         if (tokenInPrice > 0) {
                             valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);
