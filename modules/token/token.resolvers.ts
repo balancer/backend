@@ -1,12 +1,13 @@
 import { GqlTokenPrice, Resolvers } from '../../schema';
-import { tokenPriceService } from './token-price.service';
+import { tokenPriceService } from '../token-price/token-price.service';
 import _ from 'lodash';
 import { isAdminRoute } from '../util/resolver-util';
 import { isAddress } from 'ethers/lib/utils';
+import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
     Query: {
-        tokenPriceGetCurrentPrices: async (parent, {}, context) => {
+        tokenGetCurrentPrices: async (parent, {}, context) => {
             const tokenPrices = await tokenPriceService.getTokenPrices();
             const keys = Object.keys(tokenPrices);
             const prices: GqlTokenPrice[] = [];
@@ -23,7 +24,7 @@ const resolvers: Resolvers = {
 
             return prices;
         },
-        tokenPriceGetHistoricalPrices: async (parent, { addresses }, context) => {
+        tokenGetHistoricalPrices: async (parent, { addresses }, context) => {
             const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();
             const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
 
@@ -37,12 +38,20 @@ const resolvers: Resolvers = {
         },
     },
     Mutation: {
-        reloadTokenPrices: async (parent, {}, context) => {
+        tokenReloadTokenPrices: async (parent, {}, context) => {
             isAdminRoute(context);
 
             await tokenPriceService.cacheTokenPrices();
 
             return true;
+        },
+        tokenSyncTokenDefinitions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await tokenService.syncTokensFromPoolTokens();
+            await tokenService.syncSanityData();
+
+            return 'success';
         },
     },
 };

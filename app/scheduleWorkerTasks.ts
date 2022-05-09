@@ -11,7 +11,6 @@ import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
-import { poolSyncService } from '../modules/pool/pool-sync.service';
 import { env } from './env';
 import { runWithMinimumInterval } from '../modules/util/scheduling';
 import { poolService } from '../modules/pool/pool.service';
@@ -52,8 +51,10 @@ function scheduleJob(
 
 export function scheduleWorkerTasks() {
     //every 20 seconds
-    scheduleJob('*/20 * * * * *', 'cacheTokenPrices', async () => {
-        await tokenPriceService.cacheTokenPrices();
+    scheduleJob('*/20 * * * * *', 'loadTokenPrices', async () => {
+        //await tokenPriceService.cacheTokenPrices();
+
+        await tokenService.loadTokenPrices();
     });
 
     //every 30 seconds
@@ -72,9 +73,19 @@ export function scheduleWorkerTasks() {
         await poolService.loadOnChainDataForPoolsWithActiveUpdates();
     });
 
+    //every 30 seconds
+    scheduleJob('*/30 * * * * *', 'syncNewPoolsFromSubgraph', async () => {
+        await poolService.syncNewPoolsFromSubgraph();
+    });
+
     //every 3 minutes
     scheduleJob('*/3 * * * *', 'poolSyncSanityPoolData', async () => {
         await poolService.syncSanityPoolData();
+    });
+
+    //every 5 minutes
+    scheduleJob('*/5 * * * *', 'syncTokensFromPoolTokens', async () => {
+        await tokenService.syncTokensFromPoolTokens();
     });
 
     /*
@@ -101,7 +112,7 @@ export function scheduleWorkerTasks() {
     });
 
     scheduleJob('*!/5 * * * *', 'cache-tokens', async () => {
-        await tokenService.cacheTokens();
+        await tokenService.cacheTokenDefinitions();
     });
 
     //every 5 seconds
@@ -186,7 +197,7 @@ export function scheduleWorkerTasks() {
 
     console.log('start pool sync');
 
-    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), poolSyncService.syncChangedPools).catch((error) =>
-        console.log('Error starting syncChangedPools...', error),
-    );
+    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), async () => {
+        await poolService.syncChangedPools();
+    }).catch((error) => console.log('Error starting syncChangedPools...', error));
 }

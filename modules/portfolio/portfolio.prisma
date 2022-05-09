@@ -12,24 +12,6 @@ model PrismaBlock {
     beetsBarUsers       PrismaBeetsBarUserSnapshot[]
 }
 
-model PrismaToken {
-    address             String              @id
-    symbol              String
-    name                String
-
-    prices              PrismaTokenPrice[]
-    poolTokenSnapshots  PrismaBalancerPoolTokenSnapshot[]
-}
-
-model PrismaTokenPrice {
-    tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
-    timestamp           Int
-    price               String
-
-    @@unique([tokenAddress, timestamp])
-}
-
 model PrismaUser {
     address             String              @id
     farms               PrismaFarmUser[]

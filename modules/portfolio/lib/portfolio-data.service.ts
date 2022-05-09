@@ -125,7 +125,13 @@ export class PortfolioDataService {
                         snapshotId: '',
                         poolId: pool.id,
                         blockNumber,
-                        token: token,
+                        token: {
+                            ...token,
+                            decimals: token.decimals,
+                            logoURI: null,
+                            coingeckoContractAddress: null,
+                            coingeckoPlatformId: null,
+                        },
                     })),
                 };
 
@@ -300,6 +306,7 @@ export class PortfolioDataService {
                     address: token.address,
                     name: token.name,
                     symbol: token.symbol,
+                    decimals: token.decimals,
                 },
             });
         }

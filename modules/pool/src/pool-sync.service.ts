@@ -1,9 +1,9 @@
-import { prisma } from '../util/prisma-client';
+import { prisma } from '../../util/prisma-client';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { changelogSubgraphService } from '../subgraphs/changelog-subgraph/changelog-subgraph.service';
-import { poolService } from './pool.service';
+import { changelogSubgraphService } from '../../subgraphs/changelog-subgraph/changelog-subgraph.service';
+import { poolService } from '../pool.service';
 
-class PoolSyncService {
+export class PoolSyncService {
     public async syncChangedPools() {
         try {
             let lastSync = await prisma.prismaLastBlockSynced.findUnique({
@@ -45,5 +45,3 @@ class PoolSyncService {
         }
     }
 }
-
-export const poolSyncService = new PoolSyncService();

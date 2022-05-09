@@ -2,7 +2,13 @@ import axios from 'axios';
 import { twentyFourHoursInSecs } from '../../util/time';
 import _ from 'lodash';
 import { env } from '../../../app/env';
-import { HistoricalPrice, HistoricalPriceResponse, Price, PriceResponse, TokenPrices } from '../token-price-types';
+import {
+    HistoricalPrice,
+    HistoricalPriceResponse,
+    Price,
+    CoingeckoPriceResponse,
+    TokenPrices,
+} from '../token-price-types';
 import moment from 'moment-timezone';
 import { tokenService } from '../../token/token.service';
 import { TokenDefinition } from '../../token/token-types';
@@ -33,7 +39,7 @@ export class CoingeckoService {
 
     public async getNativeAssetPrice(): Promise<Price> {
         try {
-            const response = await this.get<PriceResponse>(
+            const response = await this.get<CoingeckoPriceResponse>(
                 `/simple/price?ids=${this.nativeAssetId}&vs_currencies=${this.fiatParam}`,
             );
             return response[this.nativeAssetId];
@@ -50,11 +56,11 @@ export class CoingeckoService {
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
 
-            const tokenDefinitions = await tokenService.getTokens();
+            const tokenDefinitions = await tokenService.getTokenDefinitions();
             const mapped = addresses.map((address) => this.getMappedTokenDetails(address, tokenDefinitions));
             const groupedByPlatform = _.groupBy(mapped, 'platform');
 
-            const requests: Promise<PriceResponse>[] = [];
+            const requests: Promise<CoingeckoPriceResponse>[] = [];
 
             _.forEach(groupedByPlatform, (tokens, platform) => {
                 const mappedAddresses = tokens.map((token) => token.address);
@@ -67,7 +73,7 @@ export class CoingeckoService {
                         addressesPerRequest * (page + 1),
                     );
                     const endpoint = `/simple/token_price/${platform}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
-                    const request = this.get<PriceResponse>(endpoint);
+                    const request = this.get<CoingeckoPriceResponse>(endpoint);
                     requests.push(request);
                 });
             });
@@ -91,7 +97,7 @@ export class CoingeckoService {
         const now = Math.floor(Date.now() / 1000);
         const end = now;
         const start = end - days * twentyFourHoursInSecs;
-        const tokenDefinitions = await tokenService.getTokens();
+        const tokenDefinitions = await tokenService.getTokenDefinitions();
         const mapped = this.getMappedTokenDetails(address, tokenDefinitions);
 
         const endpoint = `/coins/${mapped.platform}/contract/${mapped.address}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;

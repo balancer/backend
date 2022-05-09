@@ -1,10 +1,11 @@
 extend type Query {
-    tokenPriceGetCurrentPrices: [GqlTokenPrice!]!
-    tokenPriceGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
+    tokenGetCurrentPrices: [GqlTokenPrice!]!
+    tokenGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
 }
 
 extend type Mutation {
-    reloadTokenPrices: Boolean
+    tokenReloadTokenPrices: Boolean
+    tokenSyncTokenDefinitions: String!
 }
 
 type GqlTokenPrice {

@@ -18,6 +18,7 @@ import { SwapFeeAprService } from './apr-data-sources/swap-fee-apr.service';
 import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr.service';
 import { SpookySwapAprService } from './apr-data-sources/spooky-swap-apr.service';
 import { YearnVaultAprService } from './apr-data-sources/yearn-vault-apr.service';
+import { PoolSyncService } from './src/pool-sync.service';
 
 export class PoolService {
     constructor(
@@ -28,6 +29,7 @@ export class PoolService {
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
         private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
+        private readonly poolSyncService: PoolSyncService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -47,7 +49,15 @@ export class PoolService {
     public async syncNewPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
 
-        return this.poolLoaderService.syncNewPoolsFromSubgraph(blockNumber);
+        const poolIds = await this.poolLoaderService.syncNewPoolsFromSubgraph(blockNumber);
+
+        if (poolIds.length > 0) {
+            await this.updateOnChainDataForPools(poolIds, blockNumber);
+            await this.syncSwapsForLast24Hours();
+            await this.updateVolumeAndFeeValuesForPools(poolIds);
+        }
+
+        return poolIds;
     }
 
     public async loadOnChainDataForAllPools(): Promise<void> {
@@ -103,6 +113,10 @@ export class PoolService {
     public async updatePoolAprs() {
         await this.poolAprUpdaterService.updatePoolAprs();
     }
+
+    public async syncChangedPools() {
+        await this.poolSyncService.syncChangedPools();
+    }
 }
 
 export const poolService = new PoolService(
@@ -123,4 +137,5 @@ export const poolService = new PoolService(
         new SpookySwapAprService(tokenPriceService),
         new YearnVaultAprService(tokenPriceService),
     ]),
+    new PoolSyncService(),
 );

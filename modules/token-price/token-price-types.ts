@@ -1,5 +1,5 @@
 export type Price = { usd: number };
-export type PriceResponse = { [id: string]: Price };
+export type CoingeckoPriceResponse = { [id: string]: Price };
 export type TokenPrices = { [address: string]: Price };
 
 export interface HistoricalPriceResponse {

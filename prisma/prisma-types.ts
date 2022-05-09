@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaToken, PrismaTokenTypeOption } from '@prisma/client';
 
 const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: { tokens: true },
@@ -139,3 +139,5 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
 export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayload<
     typeof prismaPoolTokenWithExpandedNesting
 >;
+
+export type PrismaTokenWithTypes = PrismaToken & { types: PrismaTokenTypeOption[] };

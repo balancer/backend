@@ -1,45 +1,52 @@
-import { cache } from '../cache/cache';
 import { env } from '../../app/env';
 import { TokenDefinition } from './token-types';
-import { sanityClient } from '../util/sanity';
-import { thirtyDaysInMinutes } from '../util/time';
-
-const TOKEN_DEFINITIONS_CACHE_KEY = 'token-definitions';
-
-const SANITY_TOKEN_TYPE: { [key: string]: string } = {
-    '250': 'fantomToken',
-    '4': 'rinkebyToken',
-};
+import { prisma } from '../util/prisma-client';
+import { TokenDataLoaderService } from './src/token-data-loader.service';
+import { TokenPriceService } from './src/token-price.service';
+import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
+import { networkConfig } from '../config/network-config';
+import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
+import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
+import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 
 export class TokenService {
-    public async getTokens(): Promise<TokenDefinition[]> {
-        const cached = await cache.getObjectValue<TokenDefinition[]>(TOKEN_DEFINITIONS_CACHE_KEY);
+    constructor(
+        private readonly tokenDataLoaderService: TokenDataLoaderService,
+        private readonly tokenPriceService: TokenPriceService,
+    ) {}
 
-        if (cached) {
-            return cached;
-        }
-
-        return this.cacheTokens();
+    public async syncTokensFromPoolTokens() {
+        await this.tokenDataLoaderService.syncTokensFromPoolTokens();
     }
 
-    public async cacheTokens(): Promise<TokenDefinition[]> {
-        const tokens = await sanityClient.fetch<TokenDefinition[]>(`
-            *[_type=="${SANITY_TOKEN_TYPE[env.CHAIN_ID]}"] {
-                name,
-                address,
-                symbol,
-                decimals,
-                "chainId": ${env.CHAIN_ID},
-                logoURI,
-                coingeckoPlatformId,
-                coingeckoContractAddress
-            }
-        `);
+    public async syncSanityData() {
+        await this.tokenDataLoaderService.syncSanityTokenData();
+    }
 
-        await cache.putObjectValue(TOKEN_DEFINITIONS_CACHE_KEY, tokens, thirtyDaysInMinutes);
+    public async getTokenDefinitions(): Promise<TokenDefinition[]> {
+        const tokens = await prisma.prismaToken.findMany({});
 
-        return tokens;
+        return tokens.map((token) => ({
+            ...token,
+            chainId: parseInt(env.CHAIN_ID),
+        }));
+    }
+
+    public async loadTokenPrices(): Promise<void> {
+        return this.tokenPriceService.loadTokenPrices();
     }
 }
 
-export const tokenService = new TokenService();
+export const tokenService = new TokenService(
+    new TokenDataLoaderService(),
+    new TokenPriceService([
+        new CoingeckoPriceHandlerService(
+            networkConfig.coingecko.nativeAssetId,
+            networkConfig.coingecko.platformId,
+            networkConfig.wethAddress,
+        ),
+        new BptPriceHandlerService(),
+        new LinearWrappedTokenPriceHandlerService(),
+        new SwapsPriceHandlerService(),
+    ]),
+);

@@ -40,8 +40,7 @@ export class PoolCreatorService {
             false,
         );
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
-
-        const poolIds: string[] = [];
+        const poolIds = new Set<string>();
 
         for (const subgraphPool of sortedSubgraphPools) {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
@@ -49,11 +48,11 @@ export class PoolCreatorService {
             if (!existsInDb) {
                 await this.createPoolRecord(subgraphPool, sortedSubgraphPools, blockNumber);
 
-                poolIds.push(subgraphPool.id);
+                poolIds.add(subgraphPool.id);
             }
         }
 
-        return poolIds;
+        return Array.from(poolIds);
     }
 
     private async createPoolRecord(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[], blockNumber: number) {

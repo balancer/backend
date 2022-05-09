@@ -233,7 +233,7 @@ export class PoolGqlLoaderService {
 
         if (nestedPool && nestedPool.type === 'LINEAR' && nestedPool.linearData) {
             const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
-            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkConfig.wrappedNativeAssetAddress);
+            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkConfig.wethAddress);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -245,8 +245,8 @@ export class PoolGqlLoaderService {
                               this.mapPoolTokenToGql(mainToken),
                               this.mapPoolTokenToGql({
                                   ...mainToken,
-                                  address: networkConfig.nativeAssetAddress,
-                                  symbol: networkConfig.nativeAssetSymbol,
+                                  address: networkConfig.ethAddress,
+                                  symbol: networkConfig.ethSymbol,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(mainToken)],
@@ -293,7 +293,7 @@ export class PoolGqlLoaderService {
                 });
             }
         } else {
-            const isWrappedNativeAsset = isSameAddress(poolToken.address, networkConfig.wrappedNativeAssetAddress);
+            const isWrappedNativeAsset = isSameAddress(poolToken.address, networkConfig.wethAddress);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -304,8 +304,8 @@ export class PoolGqlLoaderService {
                               this.mapPoolTokenToGql(poolToken),
                               this.mapPoolTokenToGql({
                                   ...poolToken,
-                                  address: networkConfig.nativeAssetAddress,
-                                  symbol: networkConfig.nativeAssetSymbol,
+                                  address: networkConfig.ethAddress,
+                                  symbol: networkConfig.ethSymbol,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],

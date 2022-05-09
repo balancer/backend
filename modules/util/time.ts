@@ -125,3 +125,20 @@ export function getDailyTimestampsWithBuffer(numDays: number): number[] {
 
     return timestamps;
 }
+
+export function timestampRoundedUpToNearestHour(): number {
+    const m = moment();
+    const roundUp = m.second() || m.millisecond() || m.minute() ? m.add(1, 'hour').startOf('hour') : m.startOf('hour');
+
+    return roundUp.unix();
+}
+
+export function timestampRoundedUpToNearestFifteen(): number {
+    const minutes = Math.floor(moment().minute() / 15) * 15 + 15;
+
+    return moment()
+        .add(minutes === 60 ? 1 : 0, 'hours')
+        .minutes(minutes === 60 ? 0 : minutes)
+        .seconds(0)
+        .unix();
+}
