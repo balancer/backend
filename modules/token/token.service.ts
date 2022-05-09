@@ -8,6 +8,7 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
+import { PrismaTokenPrice } from '@prisma/client';
 
 export class TokenService {
     constructor(
@@ -33,7 +34,11 @@ export class TokenService {
     }
 
     public async loadTokenPrices(): Promise<void> {
-        return this.tokenPriceService.loadTokenPrices();
+        return this.tokenPriceService.updateTokenPrices();
+    }
+
+    public async getCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getCurrentTokenPrices();
     }
 }
 

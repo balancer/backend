@@ -2,11 +2,27 @@ import { TokenPriceHandler } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { GqlTokenPrice } from '../../../schema';
+import { PrismaTokenPrice } from '@prisma/client';
+
+export interface TokenPrice {
+    address: string;
+    price: number;
+}
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
 
-    public async loadTokenPrices(): Promise<void> {
+    public async getCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
+        const tokenPrices = await prisma.prismaTokenPrice.findMany({
+            orderBy: { timestamp: 'desc' },
+            distinct: ['tokenAddress'],
+        });
+
+        return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
+    }
+
+    public async updateTokenPrices(): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             include: {
                 types: true,

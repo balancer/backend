@@ -8,21 +8,12 @@ import { tokenService } from './token.service';
 const resolvers: Resolvers = {
     Query: {
         tokenGetCurrentPrices: async (parent, {}, context) => {
-            const tokenPrices = await tokenPriceService.getTokenPrices();
-            const keys = Object.keys(tokenPrices);
-            const prices: GqlTokenPrice[] = [];
+            const prices = await tokenService.getCurrentTokenPrices();
 
-            for (const address of keys) {
-                if (
-                    isAddress(address) &&
-                    tokenPrices[address].usd !== null &&
-                    typeof tokenPrices[address].usd !== 'undefined'
-                ) {
-                    prices.push({ address, price: tokenPrices[address].usd });
-                }
-            }
-
-            return prices;
+            return prices.map((price) => ({
+                address: price.tokenAddress,
+                price: price.price,
+            }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses }, context) => {
             const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();
