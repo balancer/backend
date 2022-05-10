@@ -1,8 +1,18 @@
 import { balancerSdk } from './src/balancer-sdk';
 import { SwapTypes } from '@balancer-labs/sor';
-import { GqlBalancerPool, GqlSorGetSwapsInput, GqlSorGetSwapsResponse } from '../../schema';
+import { GqlBalancerPool, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
 import _ from 'lodash';
 import { parseFixed } from '@ethersproject/bignumber';
+
+interface GetSwapsInput {
+    tokenIn: string;
+    tokenOut: string;
+    swapType: GqlSorSwapType;
+    swapAmount: string;
+    swapOptions: GqlSorSwapOptionsInput;
+    boostedPools: string[];
+    pools: GqlBalancerPool[];
+}
 
 export class BalancerSorService {
     public async getSwaps({
@@ -13,7 +23,7 @@ export class BalancerSorService {
         swapAmount,
         boostedPools,
         pools,
-    }: GqlSorGetSwapsInput & { boostedPools: string[]; pools: GqlBalancerPool[] }): Promise<GqlSorGetSwapsResponse> {
+    }: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, pools);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
