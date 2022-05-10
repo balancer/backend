@@ -348,9 +348,6 @@ export class BalancerService {
             const previousPool = previousPools.find((previousPool) => previousPool.id === poolId);
 
             if (!pool || !previousPool) {
-                console.log(`Breaking from block loop at ${block.timestamp} when i=${i}.`)
-                console.log(`Pool: ${pool}`)
-                console.log(`PreviousPool: ${previousPool}`)
                 break;
             }
 
@@ -378,8 +375,6 @@ export class BalancerService {
                 swapFees24h < 0 ||
                 swapVolume24h < 0
             ) {
-                console.log(`Skipping ${block.timestamp} for pool ${pool.address}.`)
-                console.log(`swapFees: ${Math.abs(swapFees24h)}, swapVolume24h: ${Math.abs(500_000_000)}, swapFees24h: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`)
                 continue;
             }
             snapshots.push({
