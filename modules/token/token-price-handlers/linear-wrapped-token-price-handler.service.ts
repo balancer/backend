@@ -27,7 +27,9 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         });
 
         for (const token of tokens) {
-            const pool = pools.find((pool) => token.address === pool.address);
+            const pool = pools.find(
+                (pool) => pool.linearData && token.address === pool.tokens[pool.linearData.wrappedIndex].address,
+            );
 
             if (pool && pool.linearData) {
                 const mainToken = pool.tokens[pool.linearData.mainIndex];

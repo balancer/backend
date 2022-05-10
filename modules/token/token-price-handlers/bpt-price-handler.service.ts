@@ -9,7 +9,7 @@ export class BptPriceHandlerService implements TokenPriceHandler {
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         return tokens
-            .filter((token) => !token.types.includes('BPT') || !token.types.includes('PHANTOM_BPT'))
+            .filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'))
             .map((token) => token.address);
     }
 
