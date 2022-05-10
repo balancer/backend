@@ -50,7 +50,12 @@ export class BalancerBoostedPoolService {
 
         const volume = _.sum(
             swaps.map((swap) => {
-                return tokenPriceService.getPriceForToken(tokenPrices, swap.tokenOut) * parseFloat(swap.tokenAmountOut);
+                const price = tokenPriceService.getPriceForToken(tokenPrices, swap.tokenOut);
+                const volume = price * parseFloat(swap.tokenAmountOut);
+                if (boostedPool.id === '0xa10285f445bcb521f1d623300dc4998b02f11c8f00000000000000000000043b') {
+                    console.log(`Price for ${swap.tokenOut} is ${price}. SwapAmount is ${swap.tokenAmountOut}}`);
+                }
+                return volume;
             }),
         );
 
