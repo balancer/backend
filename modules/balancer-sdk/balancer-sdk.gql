@@ -1,13 +1,11 @@
 extend type Query {
-    sorGetSwaps(input: GqlSorGetSwapsInput!): GqlSorGetSwapsResponse!
-}
-
-input GqlSorGetSwapsInput {
-    tokenIn: String!
-    tokenOut: String!
-    swapType: GqlSorSwapType!
-    swapAmount: BigDecimal! #expected in human readable form
-    swapOptions: GqlSorSwapOptionsInput!
+    sorGetSwaps(
+        tokenIn: String!
+        tokenOut: String!
+        swapType: GqlSorSwapType!
+        swapAmount: BigDecimal! #expected in human readable form
+        swapOptions: GqlSorSwapOptionsInput!
+    ): GqlSorGetSwapsResponse!
 }
 
 enum GqlSorSwapType {

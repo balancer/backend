@@ -5,11 +5,11 @@ import { balancerService } from '../balancer/balancer.service';
 
 const balancerSdkResolvers: Resolvers = {
     Query: {
-        sorGetSwaps: async (parent, { input }, context) => {
+        sorGetSwaps: async (parent, args, context) => {
             const config = await beetsService.getConfig();
             const pools = await balancerService.getPools();
 
-            return balancerSorService.getSwaps({ ...input, boostedPools: config.boostedPools, pools });
+            return balancerSorService.getSwaps({ ...args, boostedPools: config.boostedPools, pools });
         },
     },
 };
