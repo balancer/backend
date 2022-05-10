@@ -141,7 +141,14 @@ export class PoolGqlLoaderService {
             withdrawConfig: this.getPoolWithdrawConfig(pool),
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
-            allTokens: pool.allTokens.map((token) => ({ ...token.token, chainId: parseInt(env.CHAIN_ID) })),
+            allTokens: pool.allTokens.map((token) => {
+                const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
+
+                return {
+                    ...token.token,
+                    isNested: !poolToken,
+                };
+            }),
         };
 
         //TODO: may need to build out the types here still

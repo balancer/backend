@@ -38,7 +38,6 @@ import { BalancerBoostedPoolService } from './src/balancer-boosted-pool.service'
 import { spookySwapService } from '../boosted/spooky-swap.service';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerUserPoolShare } from '../subgraphs/balancer-subgraph/balancer-subgraph-types';
-import { getAddress } from '@ethersproject/address';
 import { SFTMX_ADDRESS } from '../token-price/lib/stader-staked-ftm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
