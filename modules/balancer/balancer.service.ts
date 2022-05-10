@@ -381,7 +381,7 @@ export class BalancerService {
                 swapFees24h < 0 ||
                 swapVolume24h < 0
             ) {
-                if (pool.id === '0xa10285f445bcb521f1d623300dc4998b02f11c8f00000000000000000000043b') {
+                if (pool.id === '0xdfc65c1f15ad3507754ef0fd4ba67060c108db7e000000000000000000000406') {
                     console.log(
                         `Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
                     );
