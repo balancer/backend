@@ -147,6 +147,7 @@ export class PoolGqlLoaderService {
                 return {
                     ...token.token,
                     isNested: !poolToken,
+                    isPhantomBpt: token.tokenAddress === pool.address,
                 };
             }),
         };

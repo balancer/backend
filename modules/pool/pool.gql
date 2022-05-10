@@ -408,4 +408,5 @@ type GqlPoolTokenExpanded {
     symbol: String!
     decimals: Int!
     isNested: Boolean!
+    isPhantomBpt: Boolean!
 }
