@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "PrismaPoolDynamicData" ADD COLUMN     "apr" DOUBLE PRECISION NOT NULL DEFAULT 0;

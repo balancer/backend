@@ -88,6 +88,15 @@ export function scheduleWorkerTasks() {
         await tokenService.syncSanityData();
     });
 
+    scheduleJob(
+        '*/5 * * * *',
+        'cacheAverageBlockTime',
+        async () => {
+            await blocksSubgraphService.cacheAverageBlockTime();
+        },
+        true,
+    );
+
     /*
     //every five minutes
     scheduleJob(
@@ -103,9 +112,6 @@ export function scheduleWorkerTasks() {
         await tokenPriceService.cacheHistoricalNestedBptPrices();
     });
 
-    scheduleJob('*!/5 * * * *', 'cache-average-block-time', async () => {
-        await blocksSubgraphService.cacheAverageBlockTime();
-    });
 
     scheduleJob('*!/5 * * * *', 'cache-fbeets-apr', async () => {
         await beetsBarService.cacheFbeetsApr();

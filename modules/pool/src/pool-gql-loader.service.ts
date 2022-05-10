@@ -49,6 +49,15 @@ export class PoolGqlLoaderService {
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        const pools = await prisma.prismaPool.findMany({
+            ...this.mapQueryArgsToPoolQuery(args),
+            include: prismaPoolWithExpandedNesting.include,
+        });
+
+        return pools.map((pool) => this.mapPoolToGqlPool(pool));
+    }
+
+    private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
         const orderDirection = args.orderDirection || undefined;
 
@@ -65,46 +74,91 @@ export class PoolGqlLoaderService {
             case 'fees24h':
                 orderBy = { dynamicData: { fees24h: orderDirection } };
                 break;
+            case 'apr':
+                orderBy = { dynamicData: { apr: orderDirection } };
+                break;
         }
 
-        const where = args.where;
-
-        const pools = await prisma.prismaPool.findMany({
+        const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
             skip: args.skip || undefined,
             orderBy,
-            include: prismaPoolWithExpandedNesting.include,
-            where: where
-                ? {
-                      type: {
-                          in: where.poolTypeIn || undefined,
-                          notIn: where.poolTypeNotIn || undefined,
-                      },
-                      tokens: {
-                          some: {
-                              id: {
-                                  in: where.tokensIn?.map((token) => token.toLowerCase()) || undefined,
-                                  notIn: where.tokensNotIn?.map((token) => token.toLowerCase()) || undefined,
-                              },
-                          },
-                      },
-                      id: {
-                          in: where.idIn || undefined,
-                          notIn: where.idNotIn || undefined,
-                      },
-                      categories: {
-                          some: {
-                              category: {
-                                  in: where.categoryIn || undefined,
-                                  notIn: ['BLACK_LISTED', ...(where.categoryNotIn || [])],
-                              },
-                          },
-                      },
-                  }
-                : undefined,
-        });
+        };
 
-        return pools.map((pool) => this.mapPoolToGqlPool(pool));
+        if (!args.where && !args.textSearch) {
+            return baseQuery;
+        }
+
+        const where = args.where;
+        const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
+        const filterArgs: Prisma.PrismaPoolWhereInput = {
+            type: {
+                in: where?.poolTypeIn || undefined,
+                notIn: where?.poolTypeNotIn || undefined,
+            },
+            allTokens: {
+                some: {
+                    token: {
+                        address: {
+                            in: where?.tokensIn || undefined,
+                            notIn: where?.tokensNotIn || undefined,
+                            mode: 'insensitive',
+                        },
+                    },
+                },
+            },
+            id: {
+                in: where?.idIn || undefined,
+                notIn: where?.idNotIn || undefined,
+                mode: 'insensitive',
+            },
+            categories: {
+                some: {
+                    category: {
+                        in: where?.categoryIn || undefined,
+                        notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
+                    },
+                },
+            },
+        };
+
+        if (!textSearch) {
+            return {
+                ...baseQuery,
+                where: filterArgs,
+            };
+        }
+
+        return {
+            ...baseQuery,
+            where: {
+                OR: [
+                    { name: textSearch, ...filterArgs },
+                    { symbol: textSearch, ...filterArgs },
+                    {
+                        ...filterArgs,
+                        allTokens: {
+                            some: {
+                                OR: [
+                                    {
+                                        token: {
+                                            name: textSearch,
+                                            address: filterArgs.allTokens?.some?.token?.address,
+                                        },
+                                    },
+                                    {
+                                        token: {
+                                            symbol: textSearch,
+                                            address: filterArgs.allTokens?.some?.token?.address,
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+        };
     }
 
     private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {

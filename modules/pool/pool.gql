@@ -6,6 +6,7 @@ extend type Query {
         orderBy: GqlPoolOrderBy
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
+        textSearch: String
     ): [GqlPoolBase!]!
 }
 
@@ -368,6 +369,7 @@ enum GqlPoolOrderBy {
     totalShares
     volume24h
     fees24h
+    apr
 }
 
 enum GqlPoolOrderDirection {
