@@ -348,12 +348,12 @@ export class BalancerService {
             const previousPool = previousPools.find((previousPool) => previousPool.id === poolId);
 
             if (!pool || !previousPool) {
-                if (pool){
-                    console.log(`Breaking from block loop at ${block.timestamp} when i=${i} for pool ${pool.id} because previousPool is None.`)
-                }
-                if (previousPool){
-                    console.log(`Breaking from block loop at ${block.timestamp} when i=${i} for pool ${previousPool.id} because pool is None.`)
-                }
+                // if (pool){
+                //     console.log(`Breaking from block loop at ${block.timestamp} when i=${i} for pool ${pool.id} because previousPool is None.`)
+                // }
+                // if (previousPool){
+                //     console.log(`Breaking from block loop at ${block.timestamp} when i=${i} for pool ${previousPool.id} because pool is None.`)
+                // }
                 break;
             }
 
@@ -381,7 +381,7 @@ export class BalancerService {
                 swapFees24h < 0 ||
                 swapVolume24h < 0
             ) {
-                console.log(`Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`)
+                // console.log(`Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`)
                 continue;
             }
             snapshots.push({
