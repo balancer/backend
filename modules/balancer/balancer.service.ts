@@ -382,7 +382,6 @@ export class BalancerService {
                 console.log(`swapFees: ${Math.abs(swapFees24h)}, swapVolume24h: ${Math.abs(500_000_000)}, swapFees24h: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`)
                 continue;
             }
-            console.log(`Pushing snapshot for pool ${poolId} at ${block.timestamp}.`)
             snapshots.push({
                 id: `${poolId}-${block.timestamp}`,
                 poolId,
