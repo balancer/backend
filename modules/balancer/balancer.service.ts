@@ -382,7 +382,7 @@ export class BalancerService {
                 swapVolume24h < 0
             ) {
                 console.log(
-                    `Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
+                    `Skipping snapshot at ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
                 );
                 continue;
             }
