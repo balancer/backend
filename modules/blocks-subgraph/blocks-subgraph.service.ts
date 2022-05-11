@@ -52,7 +52,7 @@ export class BlocksSubgraphService {
 
         let blocks: BlockFragment[] = [];
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 6; i++) {
             const result = await this.sdk.Blocks({
                 first: 1000,
                 skip: i * 1000,
@@ -148,12 +148,12 @@ export class BlocksSubgraphService {
                 timestamp_gte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .subtract(3 * blockTime, 'seconds')
+                    .subtract(5 * blockTime, 'seconds')
                     .unix()}`,
                 timestamp_lte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .add(3 * blockTime, 'seconds')
+                    .add(5 * blockTime, 'seconds')
                     .unix()}`,
             },
         };

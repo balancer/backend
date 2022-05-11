@@ -160,7 +160,13 @@ export class BalancerSubgraphService {
     }
 
     public async getAllPools(args: BalancerPoolsQueryVariables): Promise<BalancerPoolFragment[]> {
-        return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', args);
+        return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', {
+            ...args,
+            where: {
+                totalShares_gt: '0.00000000001',
+                ...args.where,
+            },
+        });
     }
 
     public async getPoolJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitsQuery> {

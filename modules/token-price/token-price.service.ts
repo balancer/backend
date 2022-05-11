@@ -90,10 +90,14 @@ export class TokenPriceService {
         let nativeAssetPrice: Price | null = null;
 
         try {
+            nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
             //rate limiting happens quite often, we try to handle it gracefully below
             coingeckoTokenPrices = await coingeckoService.getTokenPrices(tokenAddresses);
-            nativeAssetPrice = await coingeckoService.getNativeAssetPrice();
         } catch {}
+
+        if (!nativeAssetPrice) {
+            throw new Error('no native asset price');
+        }
 
         const missingTokens = tokenAddresses.filter((token) => {
             const tokenPrice =
@@ -114,7 +118,6 @@ export class TokenPriceService {
             ...balancerTokenPrices,
         });
 
-        nativeAssetPrice = nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS];
         const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(nativeAssetPrice.usd);
 
         const tokenPrices = {
@@ -140,6 +143,7 @@ export class TokenPriceService {
         const { tokenAddresses } = await this.getTokenAddresses(pools);
         const missingTokens: string[] = [];
         const tokenPrices: TokenHistoricalPrices = {};
+        const cached = await this.getHistoricalTokenPrices();
 
         for (const token of tokenAddresses) {
             try {
@@ -152,6 +156,9 @@ export class TokenPriceService {
             await sleep(150);
         }
 
+        //pre-emptively cache whatever we got from coingecko
+        await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, { ...cached, ...tokenPrices });
+
         for (const token of [...missingTokens]) {
             tokenPrices[token] = await balancerPriceService.getHistoricalTokenPrices({
                 address: token,
@@ -159,7 +166,6 @@ export class TokenPriceService {
                 coingeckoHistoricalPrices: tokenPrices,
             });
         }
-
         await cache.putObjectValue(TOKEN_HISTORICAL_PRICES_CACHE_KEY, tokenPrices);
 
         return tokenPrices;
@@ -173,6 +179,7 @@ export class TokenPriceService {
         );
 
         if (!historicalTokenPrices) {
+            console.log('No historical token prices present, returning from cachingHistoricalNestedBptPrices.');
             return;
         }
 
@@ -196,6 +203,11 @@ export class TokenPriceService {
                         timestamp: timestamp * 1000,
                         price: nestedBptPrices[nestedBpt].usd,
                     });
+                    console.log(
+                        `Caching historicalBptPrice of ${nestedBptPrices[nestedBpt].usd} for ${nestedBpt} at ${block.timestamp}`,
+                    );
+                } else {
+                    console.log(`Did not get a bpt price for ${nestedBpt}.`);
                 }
             }
         }
@@ -286,7 +298,6 @@ export class TokenPriceService {
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);
                 const mainTokenPrice = this.getPriceForToken(tokenPrices, pool.tokensList[pool.mainIndex || 0]);
-
                 nestedBptTokenPrices[nestedBptAddress] = {
                     usd: parseFloat(formattedRate) * mainTokenPrice,
                 };
