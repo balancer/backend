@@ -292,10 +292,6 @@ export class TokenPriceService {
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);
                 const mainTokenPrice = this.getPriceForToken(tokenPrices, pool.tokensList[pool.mainIndex || 0]);
-
-                if (nestedBptAddress === '0xC3BF643799237588b7a6B407B3fc028Dd4e037d2'.toLowerCase()) {
-                    console.log(`bb-yv-ftm price is ${parseFloat(formattedRate) * mainTokenPrice}`);
-                }
                 nestedBptTokenPrices[nestedBptAddress] = {
                     usd: parseFloat(formattedRate) * mainTokenPrice,
                 };
