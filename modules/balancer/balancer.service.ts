@@ -381,11 +381,11 @@ export class BalancerService {
                 swapFees24h < 0 ||
                 swapVolume24h < 0
             ) {
-                // if (pool.id === '0xdfc65c1f15ad3507754ef0fd4ba67060c108db7e000000000000000000000406') {
-                //     console.log(
-                //         `Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
-                //     );
-                // }
+                if (pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e') {
+                    console.log(
+                        `Skipping ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
+                    );
+                }
                 continue;
             }
             snapshots.push({
