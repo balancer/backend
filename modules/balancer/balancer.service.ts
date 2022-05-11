@@ -373,6 +373,24 @@ export class BalancerService {
 
                 swapVolume24h = data.volume;
                 swapFees24h = data.swapFees;
+                if (
+                    Math.abs(swapFees24h) > 500_000_000 ||
+                    swapVolume24h > Math.abs(500_000_000) ||
+                    swapFees24h < 0 ||
+                    swapVolume24h < 0
+                ) {
+                    console.log(
+                        `Skipping snapshot at ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
+                    );
+                    const tokens = pool.tokens || [];
+                    for (const token of tokens) {
+                        if (token.address === pool.address) {
+                            continue;
+                        }
+                        const price = tokenPriceService.getPriceForToken(tokenPrices, token.address);
+                        console.log(`Price of ${token.name} (${token.address}) is ${price}`);
+                    }
+                }
             }
 
             if (
@@ -381,11 +399,9 @@ export class BalancerService {
                 swapFees24h < 0 ||
                 swapVolume24h < 0
             ) {
-                console.log(
-                    `Skipping snapshot at ${block.timestamp} for pool ${pool.id}. swapFees: ${swapFees24h}, swapVolume24h: ${swapVolume24h}`,
-                );
                 continue;
             }
+
             snapshots.push({
                 id: `${poolId}-${block.timestamp}`,
                 poolId,
