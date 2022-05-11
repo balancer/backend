@@ -13,6 +13,20 @@ export interface TokenPrice {
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
 
+    public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
+        const tokenPrices = await prisma.prismaTokenPrice.findMany({
+            orderBy: { timestamp: 'desc' },
+            distinct: ['tokenAddress'],
+            where: {
+                token: {
+                    types: { some: { type: 'WHITE_LISTED' } },
+                },
+            },
+        });
+
+        return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
+    }
+
     public async getCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             orderBy: { timestamp: 'desc' },

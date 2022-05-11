@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
             return tokenService.getTokenDefinitions();
         },
         tokenGetCurrentPrices: async (parent, {}, context) => {
-            const prices = await tokenService.getTokenPrices();
+            const prices = await tokenService.getWhiteListedTokenPrices();
 
             return prices.map((price) => ({
                 address: price.tokenAddress,

@@ -37,6 +37,10 @@ export class TokenService {
         return this.tokenPriceService.getCurrentTokenPrices();
     }
 
+    public async getWhiteListedTokenPrices(): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getWhiteListedCurrentTokenPrices();
+    }
+
     public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
