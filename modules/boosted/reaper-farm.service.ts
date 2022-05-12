@@ -1,9 +1,10 @@
-import { GqlBalancePoolAprItem, GqlBalancerPool } from '../../schema';
+import { GqlBalancePoolAprItem, GqlBalancePoolAprSubItem, GqlBalancerPool } from '../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import { getContractAt } from '../ethers/ethers';
 import ReaperFarmBoostedAbi from './abi/ReaperFarmBoostedAbi.json';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
+import _ from 'lodash';
 
 const REAPER_FARM_CACHE_KEY = 'spooky-swap';
 
@@ -34,6 +35,8 @@ export class ReaperFarmService {
     }
 
     public getAprItemForBoostedPool(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem | null {
+        const subItems: GqlBalancePoolAprSubItem[] = [];
+
         for (const linearPool of pool.linearPools || []) {
             if (
                 linearPool.address !== pool.address &&
@@ -52,9 +55,17 @@ export class ReaperFarmService {
                 const poolWrappedLiquidity = poolTusdLiquidity * percentWrapped;
                 const apr = reaperFarmData.rfScTusdApr * (poolWrappedLiquidity / parseFloat(pool.totalLiquidity));
 
-                return {
-                    title: 'rf-scTUSD boosted APR',
+                subItems.push({
+                    title: 'rf-scTUSD APR',
                     apr: apr.toString(),
+                });
+            }
+
+            if (subItems.length > 0) {
+                return {
+                    title: 'Reaper boosted APR',
+                    apr: `${_.sumBy(subItems, (item) => parseFloat(item.apr))}`,
+                    subItems,
                 };
             }
         }
