@@ -179,6 +179,7 @@ export class TokenPriceService {
         );
 
         if (!historicalTokenPrices) {
+            // console.log('No historical token prices present, returning from cachingHistoricalNestedBptPrices.');
             return;
         }
 
@@ -202,7 +203,13 @@ export class TokenPriceService {
                         timestamp: timestamp * 1000,
                         price: nestedBptPrices[nestedBpt].usd,
                     });
+                    // console.log(
+                    //     `Caching historicalBptPrice of ${nestedBptPrices[nestedBpt].usd} for ${nestedBpt} at ${block.timestamp}`,
+                    // );
                 }
+                // else {
+                //    console.log(`Did not get a bpt price for ${nestedBpt}.`);
+                // }
             }
         }
 
@@ -292,7 +299,6 @@ export class TokenPriceService {
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);
                 const mainTokenPrice = this.getPriceForToken(tokenPrices, pool.tokensList[pool.mainIndex || 0]);
-
                 nestedBptTokenPrices[nestedBptAddress] = {
                     usd: parseFloat(formattedRate) * mainTokenPrice,
                 };
