@@ -6,7 +6,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import _ from 'lodash';
 
-const REAPER_FARM_CACHE_KEY = 'spooky-swap';
+const REAPER_FARM_CACHE_KEY = 'reaper-farm';
 
 interface ReaperFarmData {
     rfScTusdApr: number;
