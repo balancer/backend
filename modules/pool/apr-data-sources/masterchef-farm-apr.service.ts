@@ -2,14 +2,15 @@ import { PoolAprService } from '../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { prisma } from '../../util/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 import { beetsFarmService } from '../../beets/beets-farm.service';
-import { env } from '../../../app/env';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenPriceService } from '../../token-price/token-price.service';
-import { GqlBalancePoolAprItem, GqlBeetsFarm } from '../../../schema';
+import { GqlBeetsFarm } from '../../../schema';
 import { secondsPerYear } from '../../util/time';
-import { PrismaPoolAprItem } from '@prisma/client';
+import { PrismaPoolAprItem, PrismaTokenPrice } from '@prisma/client';
+import { networkConfig } from '../../config/network-config';
+import { tokenService } from '../../token/token.service';
+import { TokenPrices } from '../../token-price/token-price-types';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -18,13 +19,13 @@ export class MasterchefFarmAprService implements PoolAprService {
         const farms = await beetsFarmService.getBeetsFarms();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
-        const { beetsPrice } = await tokenPriceService.getBeetsPrice();
+        const tokenPrices = await tokenService.getTokenPrices();
         const operations: any[] = [];
 
         for (const pool of pools) {
             const farm = farms.find((farm) => {
-                if (pool.id === env.FBEETS_POOL_ID) {
-                    return farm.id === env.FBEETS_FARM_ID;
+                if (pool.id === networkConfig.fbeets.poolId) {
+                    return farm.id === networkConfig.fbeets.farmId;
                 }
 
                 return farm.pair.toLowerCase() === pool.address.toLowerCase();
@@ -39,7 +40,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const farmTvl = totalShares > 0 ? (farmBptBalance / totalShares) * totalLiquidity : 0;
 
-            const items = this.calculateFarmApr(pool.id, farm, farmTvl, blocksPerYear, beetsPrice);
+            const items = this.calculateFarmApr(pool.id, farm, farmTvl, blocksPerYear, tokenPrices);
 
             items.forEach((item) => {
                 operations.push(
@@ -55,17 +56,18 @@ export class MasterchefFarmAprService implements PoolAprService {
         await prismaBulkExecuteOperations(operations);
     }
 
-    public calculateFarmApr(
+    private calculateFarmApr(
         poolId: string,
         farm: GqlBeetsFarm,
         farmTvl: number,
         blocksPerYear: number,
-        beetsPrice: number,
+        tokenPrices: PrismaTokenPrice[],
     ): PrismaPoolAprItem[] {
         if (farmTvl <= 0) {
             return [];
         }
 
+        const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkConfig.beets.address);
         const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
         const farmBeetsPerYear = (farm.allocPoint / farm.masterChef.totalAllocPoint) * beetsPerYear;
@@ -90,8 +92,9 @@ export class MasterchefFarmAprService implements PoolAprService {
         farm.rewardTokens
             .filter((rewardToken) => !rewardToken.isBeets)
             .forEach((rewardToken) => {
+                const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.address);
                 const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
-                const rewardTokenValuePerYear = parseFloat(rewardToken.tokenPrice) * rewardTokenPerYear;
+                const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
                 thirdPartyApr += rewardApr;

@@ -12,7 +12,6 @@ import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.s
 import { oneDayInMinutes, secondsPerYear } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
-import { tokenPriceService } from '../token-price/token-price.service';
 import { tokenService } from '../token/token.service';
 import { masterChefContractService } from '../masterchef/master-chef-contract.service';
 import { env } from '../../app/env';
@@ -48,7 +47,7 @@ export class BeetsFarmService {
     }
 
     public async cacheBeetsFarms(): Promise<GqlBeetsFarm[]> {
-        const tokenPrices = await tokenPriceService.getTokenPrices();
+        const tokenPrices = await tokenService.getTokenPrices();
         const farms = await masterchefService.getAllFarms({});
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const farmBeetsPerBlock = Number(parseInt(farms[0].masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
@@ -69,7 +68,7 @@ export class BeetsFarmService {
                     symbol: 'BEETS',
                     decimals: 18,
                     isBeets: true,
-                    tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS)}`,
+                    tokenPrice: `${tokenService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS)}`,
                     rewardPerDay: `${rewardPerDay}`,
                     rewardPerSecond: `${rewardPerDay / 86400}`,
                 });
@@ -86,7 +85,7 @@ export class BeetsFarmService {
                             address: rewardToken.token,
                             decimals: rewardToken.decimals,
                             symbol: rewardToken.symbol,
-                            tokenPrice: `${tokenPriceService.getPriceForToken(tokenPrices, rewardToken.token)}`,
+                            tokenPrice: `${tokenService.getPriceForToken(tokenPrices, rewardToken.token)}`,
                             rewardPerSecond,
                             rewardPerDay: `${parseFloat(rewardPerSecond) * 86400}`,
                             isBeets: false,
@@ -248,8 +247,8 @@ export class BeetsFarmService {
     }
 
     public async getUserPendingFarmRewards(userAddress: string): Promise<GqlBeetsUserPendingAllFarmRewards> {
-        const tokenPrices = await tokenPriceService.getTokenPrices();
-        const beetsPrice = tokenPriceService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS);
+        const tokenPrices = await tokenService.getTokenPrices();
+        const beetsPrice = tokenService.getPriceForToken(tokenPrices, env.BEETS_ADDRESS);
         const allFarms = await this.getBeetsFarms();
         const userFarms = await this.getBeetsFarmsForUser(userAddress);
         const userFarmsWithBalance = userFarms.filter((userFarm) => parseFloat(userFarm.amount) > 0);
@@ -287,7 +286,7 @@ export class BeetsFarmService {
                         const rewardToken = rewardTokens.find((tokenDefinition) =>
                             addressesMatch(tokenDefinition.token, token),
                         );
-                        const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, token);
+                        const tokenPrice = tokenService.getPriceForToken(tokenPrices, token);
                         const balance = formatFixed(balanceScaled, rewardToken?.decimals);
 
                         return {

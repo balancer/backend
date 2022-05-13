@@ -22,6 +22,14 @@ export interface NetworkConfig {
         projectId: string;
         dataset: string;
     };
+    beets: {
+        address: string;
+    };
+    fbeets: {
+        address: string;
+        farmId: string;
+        poolId: string;
+    };
 }
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
@@ -38,6 +46,14 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         sanity: {
             projectId: '1g2ag2hb',
             dataset: 'production',
+        },
+        beets: {
+            address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
+        },
+        fbeets: {
+            address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
+            farmId: '22',
+            poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
         },
     },
 };
