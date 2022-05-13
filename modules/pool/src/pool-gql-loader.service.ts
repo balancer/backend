@@ -86,7 +86,14 @@ export class PoolGqlLoaderService {
         };
 
         if (!args.where && !args.textSearch) {
-            return baseQuery;
+            return {
+                ...baseQuery,
+                where: {
+                    categories: {
+                        none: { category: 'BLACK_LISTED' },
+                    },
+                },
+            };
         }
 
         const where = args.where;
@@ -113,12 +120,20 @@ export class PoolGqlLoaderService {
                 mode: 'insensitive',
             },
             categories: {
-                some: {
+                every: {
                     category: {
-                        in: where?.categoryIn || undefined,
-                        notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
+                        not: 'BLACK_LISTED',
                     },
                 },
+                ...(where?.categoryIn
+                    ? {
+                          some: {
+                              category: {
+                                  in: where.categoryIn,
+                              },
+                          },
+                      }
+                    : {}),
             },
         };
 
