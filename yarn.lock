@@ -586,7 +586,7 @@
 
 "@balancer-labs/sdk@github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo":
   version "0.1.1"
-  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/cca773ef861c412fc0ec96654f4c99f2f92aaeb2"
+  resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/111db25484314ab21e61b486a30f72230ec288bb"
   dependencies:
     "@balancer-labs/sor" "github:beethovenxfi/balancer-sor#daniel/generic-path-algo-build"
     axios "^0.24.0"

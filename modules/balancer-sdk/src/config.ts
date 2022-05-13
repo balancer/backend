@@ -19,6 +19,8 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                 linearFactories: {
                     '0x1f73ae6ed391a2b1e84ff988a1bb5394b78a4a71': 'yearn',
                     '0xba306e3cf84751d8ef5e812c18caa6c567c783e8': 'boo',
+                    '0x80434cf3661313d1a0632f567c1ba389ee2f7665': 'reaper',
+                    '0x681b59c9cbbb6ab43ee3360ac6c34e1dd2f147e9': 'tarot',
                 },
             },
             urls: {
