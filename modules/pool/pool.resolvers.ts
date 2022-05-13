@@ -78,6 +78,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolReloadAllPoolAprs: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.realodAllPoolAprs();
+
+            return 'success';
+        },
     },
 };
 

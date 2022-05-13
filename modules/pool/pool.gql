@@ -21,6 +21,7 @@ extend type Mutation {
     poolSyncSanityPoolData: String!
     poolUpdateAprs: String!
     poolSyncPoolAllTokensRelationship: String!
+    poolReloadAllPoolAprs: String!
 }
 
 interface GqlPoolBase {

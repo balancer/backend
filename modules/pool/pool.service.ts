@@ -128,6 +128,10 @@ export class PoolService {
     public async syncChangedPools() {
         await this.poolSyncService.syncChangedPools();
     }
+
+    public async realodAllPoolAprs() {
+        this.poolAprUpdaterService.realodAllPoolAprs();
+    }
 }
 
 export const poolService = new PoolService(

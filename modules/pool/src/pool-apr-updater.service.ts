@@ -33,4 +33,9 @@ export class PoolAprUpdaterService {
 
         await prismaBulkExecuteOperations(operations);
     }
+
+    public async realodAllPoolAprs() {
+        await prisma.prismaPoolAprItem.deleteMany({});
+        await this.updatePoolAprs();
+    }
 }
