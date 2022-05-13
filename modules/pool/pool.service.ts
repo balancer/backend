@@ -130,7 +130,7 @@ export class PoolService {
     }
 
     public async realodAllPoolAprs() {
-        this.poolAprUpdaterService.realodAllPoolAprs();
+        await this.poolAprUpdaterService.realodAllPoolAprs();
     }
 }
 
