@@ -20,6 +20,8 @@ import { SpookySwapAprService } from './apr-data-sources/spooky-swap-apr.service
 import { YearnVaultAprService } from './apr-data-sources/yearn-vault-apr.service';
 import { PoolSyncService } from './src/pool-sync.service';
 import { tokenService } from '../token/token.service';
+import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
+import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
 
 export class PoolService {
     constructor(
@@ -141,10 +143,13 @@ export const poolService = new PoolService(
     new PoolSanityDataLoaderService(),
     //TODO: this will depend on the chain
     new PoolAprUpdaterService([
-        new SwapFeeAprService(),
-        new MasterchefFarmAprService(),
+        //order matters for the boosted pool aprs: linear, phantom stable, then boosted
         new SpookySwapAprService(tokenService),
         new YearnVaultAprService(tokenService),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
+        new SwapFeeAprService(),
+        new MasterchefFarmAprService(),
     ]),
     new PoolSyncService(),
 );

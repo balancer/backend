@@ -162,7 +162,9 @@ export class PoolUsdDataService {
         const operations: any[] = [];
 
         for (const pool of pools) {
-            const volume24h = _.sumBy(pool.swaps, (swap) => swap.valueUSD);
+            const volume24h = _.sumBy(pool.swaps, (swap) =>
+                swap.tokenIn === pool.address || swap.tokenOut === pool.address ? 0 : swap.valueUSD,
+            );
             const fees24h = parseFloat(pool.dynamicData?.swapFee || '0') * volume24h;
 
             if (

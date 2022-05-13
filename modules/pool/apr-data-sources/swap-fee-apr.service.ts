@@ -22,7 +22,7 @@ export class SwapFeeAprService implements PoolAprService {
                             poolId: pool.id,
                             title: 'Swap fees APR',
                             apr,
-                            isSwapApr: true,
+                            type: 'SWAP_FEE',
                         },
                         update: { apr },
                     }),

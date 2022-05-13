@@ -25,11 +25,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                 token: true,
             },
         },
-        aprItems: {
-            include: {
-                subItems: true,
-            },
-        },
+        aprItems: true,
         tokens: {
             include: {
                 dynamicData: true,

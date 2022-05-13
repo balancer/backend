@@ -170,14 +170,21 @@ model PrismaPoolAprItem {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     title               String
     apr                 Float
-    isSwapApr           Boolean?
-    isNativeRewardApr   Boolean?
-    isThirdPartyApr     Boolean?
 
-    parentItemId        String?
-    parentItem          PrismaPoolAprItem?  @relation(name: "AprItemParentChild", fields:[parentItemId], references: [id])
+    type                PrismaPoolAprType?
+    group               PrismaPoolAprItemGroup?
+}
 
-    subItems            PrismaPoolAprItem[] @relation(name: "AprItemParentChild")
+enum PrismaPoolAprType {
+    SWAP_FEE
+    NATIVE_REWARD
+    THIRD_PARTY_REWARD
+    LINEAR_BOOSTED
+    PHANTOM_STABLE_BOOSTED
+}
+
+enum PrismaPoolAprItemGroup {
+    YEARN
 }
 
 model PrismaPoolCategory {
@@ -200,6 +207,7 @@ model PrismaPoolExpandedTokens {
 
     @@id([tokenAddress, poolId])
 }
+
 
 
 model PrismaBlock {

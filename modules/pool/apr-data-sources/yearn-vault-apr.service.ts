@@ -19,64 +19,40 @@ export class YearnVaultAprService implements PoolAprService {
 
         for (const pool of pools) {
             const itemId = `${pool.id}-yearn-vault`;
-            const subItems: PrismaPoolAprItem[] = [];
 
-            for (const poolToken of pool.tokens) {
-                if (!poolToken.nestedPool || !poolToken.nestedPool.linearData) {
-                    continue;
-                }
+            if (!pool.linearData || !pool.dynamicData) {
+                continue;
+            }
 
-                const nestedPool = poolToken.nestedPool;
-                const linearData = poolToken.nestedPool.linearData;
-                const wrappedToken = nestedPool.tokens[linearData.wrappedIndex];
-                const mainToken = nestedPool.tokens[linearData.mainIndex];
-                const percentOfSupplyInPool =
-                    parseFloat(poolToken.dynamicData?.balance || '0') /
-                    parseFloat(nestedPool.dynamicData?.totalShares || '1');
+            const linearData = pool.linearData;
+            const wrappedToken = pool.tokens[linearData.wrappedIndex];
+            const mainToken = pool.tokens[linearData.mainIndex];
 
-                const vault = data.find((vault) => vault.address.toLowerCase() === wrappedToken.address.toLowerCase());
+            const vault = data.find((vault) => vault.address.toLowerCase() === wrappedToken.address.toLowerCase());
 
-                if (!vault) {
-                    continue;
-                }
+            if (!vault) {
+                continue;
+            }
 
-                const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, mainToken.address);
-                const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
-                const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
-                const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
+            const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, mainToken.address);
+            const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
+            const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
+            const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
+            const totalLiquidity = pool.dynamicData.totalLiquidity;
+            const apr = totalLiquidity > 0 ? vault.apy.net_apy * (poolWrappedLiquidity / totalLiquidity) : 0;
 
-                subItems.push({
-                    id: `${pool.id}-yearn-vault-${vault.symbol}`,
+            await prisma.prismaPoolAprItem.upsert({
+                where: { id: itemId },
+                create: {
+                    id: itemId,
                     poolId: pool.id,
                     title: `${vault.symbol} APR`,
-                    apr:
-                        pool.dynamicData && pool.dynamicData.totalLiquidity > 0
-                            ? vault.apy.net_apy * (poolWrappedLiquidity / pool.dynamicData.totalLiquidity)
-                            : 0,
-                    isSwapApr: false,
-                    isThirdPartyApr: true,
-                    isNativeRewardApr: false,
-                    parentItemId: `${pool.id}-yearn-vault`,
-                });
-            }
-
-            if (subItems.length > 0) {
-                const apr = _.sumBy(subItems, 'apr');
-
-                await prisma.prismaPoolAprItem.upsert({
-                    where: { id: itemId },
-                    create: { id: itemId, poolId: pool.id, title: 'Yearn boosted APR', apr },
-                    update: { apr },
-                });
-
-                for (const subItem of subItems) {
-                    await prisma.prismaPoolAprItem.upsert({
-                        where: { id: subItem.id },
-                        create: subItem,
-                        update: subItem,
-                    });
-                }
-            }
+                    apr,
+                    group: 'YEARN',
+                    type: 'LINEAR_BOOSTED',
+                },
+                update: { apr, group: 'YEARN', type: 'LINEAR_BOOSTED' },
+            });
         }
     }
 }

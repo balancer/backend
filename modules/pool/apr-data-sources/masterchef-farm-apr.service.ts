@@ -4,13 +4,11 @@ import { prisma } from '../../util/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { beetsFarmService } from '../../beets/beets-farm.service';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { tokenPriceService } from '../../token-price/token-price.service';
 import { GqlBeetsFarm } from '../../../schema';
 import { secondsPerYear } from '../../util/time';
 import { PrismaPoolAprItem, PrismaTokenPrice } from '@prisma/client';
 import { networkConfig } from '../../config/network-config';
 import { tokenService } from '../../token/token.service';
-import { TokenPrices } from '../../token-price/token-price-types';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -82,10 +80,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                 poolId,
                 title: 'BEETS reward APR',
                 apr: beetsApr,
-                isSwapApr: false,
-                isNativeRewardApr: true,
-                isThirdPartyApr: false,
-                parentItemId: null,
+                type: 'NATIVE_REWARD',
+                group: null,
             });
         }
 
@@ -104,10 +100,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                     poolId,
                     title: `${rewardToken.symbol} reward APR`,
                     apr: rewardApr,
-                    isSwapApr: false,
-                    isNativeRewardApr: false,
-                    isThirdPartyApr: true,
-                    parentItemId: null,
+                    type: 'THIRD_PARTY_REWARD',
+                    group: null,
                 });
             });
 

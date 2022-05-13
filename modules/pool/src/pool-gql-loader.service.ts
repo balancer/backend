@@ -164,9 +164,15 @@ export class PoolGqlLoaderService {
     private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
         const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
         const aprItems = pool.aprItems || [];
-        const swapAprItems = aprItems.filter((item) => item.isSwapApr);
-        const nativeRewardAprItems = aprItems.filter((item) => item.isNativeRewardApr);
-        const thirdPartyRewardAprItems = aprItems.filter((item) => item.isThirdPartyApr);
+        const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
+        const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
+        const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
+        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
+
+        const grouped = _.groupBy(
+            aprItems.filter((item) => item.group),
+            (item) => item.group,
+        );
 
         const mappedData = {
             ...pool,
@@ -180,14 +186,30 @@ export class PoolGqlLoaderService {
                     swapApr: `${_.sumBy(swapAprItems, 'apr')}`,
                     nativeRewardApr: `${_.sumBy(nativeRewardAprItems, 'apr')}`,
                     thirdPartyApr: `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`,
-                    items: aprItems.map((item) => ({
-                        ...item,
-                        apr: `${item.apr}`,
-                        subItems: item.subItems.map((subItem) => ({
-                            ...subItem,
-                            apr: `${subItem.apr}`,
+                    items: [
+                        ...aprItemsWithNoGroup.map((item) => ({
+                            ...item,
+                            apr: `${item.apr}`,
+                            subItems: [],
                         })),
-                    })),
+                        ..._.map(grouped, (items, group) => {
+                            const subItems = items.map((item) => ({ ...item, apr: `${item.apr}` }));
+                            const apr = _.sumBy(items, 'apr');
+                            let title = '';
+
+                            switch (group) {
+                                case 'YEARN':
+                                    title = 'Yearn boosted APR';
+                                    break;
+                            }
+
+                            return {
+                                title,
+                                apr: `${apr}`,
+                                subItems,
+                            };
+                        }),
+                    ],
                     hasRewardApr: nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0,
                 },
             },
