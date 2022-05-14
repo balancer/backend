@@ -8,12 +8,14 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaTokenPrice } from '@prisma/client';
+import { PrismaTokenPrice, PrismaTokenDynamicData } from '@prisma/client';
+import { CoingeckoDataService } from './src/coingecko-data.service';
 
 export class TokenService {
     constructor(
         private readonly tokenDataLoaderService: TokenDataLoaderService,
         private readonly tokenPriceService: TokenPriceService,
+        private readonly coingeckoDataService: CoingeckoDataService,
     ) {}
 
     public async syncSanityData() {
@@ -52,6 +54,20 @@ export class TokenService {
     public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
+
+    public async syncTokenDynamicData(): Promise<void> {
+        await this.coingeckoDataService.syncTokenDynamicDataFromCoingecko();
+    }
+
+    public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {
+        return prisma.prismaTokenDynamicData.findUnique({ where: { tokenAddress: tokenAddress.toLowerCase() } });
+    }
+
+    public async getTokensDynamicData(tokenAddresses: string[]): Promise<PrismaTokenDynamicData[]> {
+        return prisma.prismaTokenDynamicData.findMany({
+            where: { tokenAddress: { in: tokenAddresses.map((address) => address.toLowerCase()) } },
+        });
+    }
 }
 
 export const tokenService = new TokenService(
@@ -66,4 +82,5 @@ export const tokenService = new TokenService(
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ]),
+    new CoingeckoDataService(),
 );

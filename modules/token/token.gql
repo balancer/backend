@@ -2,12 +2,14 @@ extend type Query {
     tokenGetTokens: [GqlToken!]!
     tokenGetCurrentPrices: [GqlTokenPrice!]!
     tokenGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
-    tokenGetTokensDynamicData(addresses: [String!]!): String!
+    tokenGetTokensDynamicData(addresses: [String!]!): [GqlTokenDynamicData!]!
+    tokenGetTokenDynamicData(address: String!): GqlTokenDynamicData
 }
 
 extend type Mutation {
     tokenReloadTokenPrices: Boolean
     tokenSyncTokenDefinitions: String!
+    tokenSyncTokenDynamicData: String!
 }
 
 type GqlTokenPrice {
@@ -37,19 +39,20 @@ type GqlToken {
 }
 
 type GqlTokenDynamicData {
-    address: String!
+    id: String!
+    tokenAddress: String!
     price: Float!
     ath: Float!
     atl: Float!
-    marketCap: String!
-    fdv: String!
+    marketCap: String
+    fdv: String
     high24h: Float!
     low24h: Float!
     priceChange24h: Float!
 
     priceChangePercent24h: Float!
-    priceChangePercent7d: Float!
-    priceChangePercent14d: Float!
-    priceChangePercent30d: Float!
+    priceChangePercent7d: Float
+    priceChangePercent14d: Float
+    priceChangePercent30d: Float
     updatedAt: String!
 }

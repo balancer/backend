@@ -30,6 +30,28 @@ const resolvers: Resolvers = {
                 })),
             }));
         },
+        tokenGetTokenDynamicData: async (parent, { address }, context) => {
+            const data = await tokenService.getTokenDynamicData(address);
+
+            return data
+                ? {
+                      ...data,
+                      fdv: data.fdv ? `${data.fdv}` : null,
+                      marketCap: data.marketCap ? `${data.marketCap}` : null,
+                      updatedAt: data.updatedAt.toUTCString(),
+                  }
+                : null;
+        },
+        tokenGetTokensDynamicData: async (parent, { addresses }, context) => {
+            const items = await tokenService.getTokensDynamicData(addresses);
+
+            return items.map((item) => ({
+                ...item,
+                fdv: item.fdv ? `${item.fdv}` : null,
+                marketCap: item.marketCap ? `${item.marketCap}` : null,
+                updatedAt: item.updatedAt.toUTCString(),
+            }));
+        },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {
@@ -43,6 +65,13 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
 
             await tokenService.syncSanityData();
+
+            return 'success';
+        },
+        tokenSyncTokenDynamicData: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await tokenService.syncTokenDynamicData();
 
             return 'success';
         },
