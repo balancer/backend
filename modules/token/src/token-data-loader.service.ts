@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
     '250': 'fantomToken',
     '4': 'rinkebyToken',
+    '10': 'optimismToken',
 };
 
 interface SanityToken {
@@ -14,8 +15,10 @@ interface SanityToken {
     symbol: string;
     decimals: number;
     logoURI: string;
+    priority: number;
     coingeckoPlatformId?: string;
     coingeckoContractAddress?: string;
+    coingeckoTokenId?: string;
 }
 
 export class TokenDataLoaderService {
@@ -27,8 +30,10 @@ export class TokenDataLoaderService {
                 symbol,
                 decimals,
                 logoURI,
+                'priority': coalesce(priority, 0),
                 coingeckoPlatformId,
-                coingeckoContractAddress
+                coingeckoContractAddress,
+                coingeckoTokenId
             }
         `);
 
@@ -44,16 +49,20 @@ export class TokenDataLoaderService {
                     symbol: sanityToken.symbol,
                     decimals: sanityToken.decimals,
                     logoURI: sanityToken.logoURI,
+                    priority: sanityToken.priority,
                     coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
                     coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
+                    coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
                 },
                 update: {
                     name: sanityToken.name,
                     symbol: sanityToken.symbol,
                     //use set to ensure we overwrite the underlying value if it is removed in sanity
                     logoURI: { set: sanityToken.logoURI || null },
+                    priority: sanityToken.priority,
                     coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
                     coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
+                    coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
                 },
             });
         }

@@ -5,8 +5,10 @@ model PrismaToken {
     decimals            Int
 
     logoURI             String?
+    priority            Int                 @default(0)
     coingeckoPlatformId String?
     coingeckoContractAddress String?
+    coingeckoTokenId    String?
 
     prices              PrismaTokenPrice[]
     types               PrismaTokenType[]

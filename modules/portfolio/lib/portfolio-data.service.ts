@@ -131,6 +131,8 @@ export class PortfolioDataService {
                             logoURI: null,
                             coingeckoContractAddress: null,
                             coingeckoPlatformId: null,
+                            coingeckoTokenId: null,
+                            priority: 0,
                         },
                     })),
                 };

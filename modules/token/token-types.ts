@@ -25,6 +25,9 @@ export interface TokenDefinition {
     decimals: number;
     chainId: number;
     logoURI?: string | null;
+    priority: number;
     coingeckoPlatformId?: string | null;
     coingeckoContractAddress?: string | null;
+    coingeckoTokenId?: string | null;
+    tradable: boolean;
 }

@@ -21,11 +21,19 @@ export class TokenService {
     }
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {
-        const tokens = await prisma.prismaToken.findMany({ where: { types: { some: { type: 'WHITE_LISTED' } } } });
+        const tokens = await prisma.prismaToken.findMany({
+            where: { types: { some: { type: 'WHITE_LISTED' } } },
+            include: { types: true },
+            orderBy: { priority: 'desc' },
+        });
 
         return tokens.map((token) => ({
             ...token,
             chainId: parseInt(env.CHAIN_ID),
+            //TODO: some linear wrapped tokens are tradable. ie: xBOO
+            tradable: !token.types.find(
+                (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'LINEAR_WRAPPED_TOKEN',
+            ),
         }));
     }
 
