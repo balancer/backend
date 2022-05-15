@@ -9,57 +9,74 @@ import _ from 'lodash';
 const REAPER_FARM_CACHE_KEY = 'reaper-farm';
 
 interface ReaperFarmData {
-    rfScTusdApr: number;
+    address: string;
+    apr: number;
 }
 
-const TUSD_TOKEN_ADDRESS = '0x9879aBDea01a879644185341F7aF7d8343556B7a';
-const RF_TUSD_STRATEGY_ADDRESS = '0x175D6eF56e2F5335D5d8f37C5c580CA438f83e9f';
-const rfTusdStrategyContract = getContractAt(RF_TUSD_STRATEGY_ADDRESS, ReaperFarmBoostedAbi);
-
 export class ReaperFarmService {
-    private cache: CacheClass<string, ReaperFarmData>;
+    private cache: CacheClass<string, ReaperFarmData[]>;
+    private boostedPools = [
+        {
+            address: '0x9879aBDea01a879644185341F7aF7d8343556B7a', // TUSD
+            strategy: '0x175D6eF56e2F5335D5d8f37C5c580CA438f83e9f', // TUSD strategy
+        },
+    ];
 
     constructor() {
-        this.cache = new Cache<string, ReaperFarmData>();
+        this.cache = new Cache<string, ReaperFarmData[]>();
     }
 
     public async cacheReaperFarmData(): Promise<void> {
-        const rfScTusdApr = await rfTusdStrategyContract.averageAPRAcrossLastNHarvests(2);
-        this.cache.put(REAPER_FARM_CACHE_KEY, { rfScTusdApr: parseFloat(rfScTusdApr.toString()) / 10000 }, 120000);
+        let data: ReaperFarmData[] = [];
+
+        for (const pool of this.boostedPools) {
+            const strategyContract = getContractAt(pool.strategy, ReaperFarmBoostedAbi);
+            const apr = await strategyContract.averageAPRAcrossLastNHarvests(2);
+
+            data.push({
+                address: pool.address,
+                apr: parseFloat(apr.toString()) / 10000,
+            });
+        }
+
+        this.cache.put(REAPER_FARM_CACHE_KEY, data, 120000);
     }
 
-    public getReaperFarmData(): ReaperFarmData {
+    public getReaperFarmData(): ReaperFarmData[] {
         const cached = this.cache.get(REAPER_FARM_CACHE_KEY);
 
-        return cached || { rfScTusdApr: 0 };
+        return cached || [];
     }
 
     public getAprItemForBoostedPool(pool: GqlBalancerPool, tokenPrices: TokenPrices): GqlBalancePoolAprItem | null {
         const subItems: GqlBalancePoolAprSubItem[] = [];
+        const boostedPools = this.getReaperFarmData();
 
         for (const linearPool of pool.linearPools || []) {
-            if (
-                linearPool.address !== pool.address &&
-                linearPool.mainToken.address.toLowerCase() === TUSD_TOKEN_ADDRESS.toLowerCase()
-            ) {
-                const poolToken = pool.tokens.find((token) => token.address === linearPool.address);
-                const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
-                const reaperFarmData = this.getReaperFarmData();
-                const mainTokens = parseFloat(linearPool.mainToken.balance);
-                const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
-                const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
-                const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
-                const tusdLiquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
-                const poolTusdLiquidity =
-                    (parseFloat(poolToken?.balance || '0') / parseFloat(linearPool.totalSupply)) * tusdLiquidity;
-                const poolWrappedLiquidity = poolTusdLiquidity * percentWrapped;
-                const apr = reaperFarmData.rfScTusdApr * (poolWrappedLiquidity / parseFloat(pool.totalLiquidity));
+            const boostedPool = boostedPools.find(
+                (boostedPool) => boostedPool.address.toLowerCase() === linearPool.mainToken.address.toLowerCase(),
+            );
 
-                subItems.push({
-                    title: 'rf-scTUSD APR',
-                    apr: apr.toString(),
-                });
+            if (!boostedPool || linearPool.address === pool.address) {
+                continue;
             }
+
+            const poolToken = pool.tokens.find((token) => token.address === linearPool.address);
+            const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, linearPool.mainToken.address);
+            const mainTokens = parseFloat(linearPool.mainToken.balance);
+            const wrappedTokens = parseFloat(linearPool.wrappedToken.balance);
+            const priceRate = parseFloat(linearPool.wrappedToken.priceRate);
+            const percentWrapped = (wrappedTokens * priceRate) / (mainTokens + wrappedTokens * priceRate);
+            const liquidity = mainTokens * tokenPrice + wrappedTokens * priceRate * tokenPrice;
+            const poolLiquidity =
+                (parseFloat(poolToken?.balance || '0') / parseFloat(linearPool.totalSupply)) * liquidity;
+            const poolWrappedLiquidity = poolLiquidity * percentWrapped;
+            const apr = boostedPool.apr * (poolWrappedLiquidity / parseFloat(pool.totalLiquidity));
+
+            subItems.push({
+                title: `${linearPool.wrappedToken.symbol} APR`,
+                apr: apr.toString(),
+            });
 
             if (subItems.length > 0) {
                 return {
