@@ -36,7 +36,7 @@ export class TarotService {
         for (const pool of this.boostedPools) {
             const apr = await tarotAPRContract.callStatic.getAPREstimate(pool.vault);
 
-            // 28842190275744000 -> 0.028842190275744
+            // to convert for example 28842190275744000 -> 0.028842190275744
             const aprToBN = new BigNumber(apr.toString());
             const aprToFloat = parseFloat(aprToBN.shiftedBy(-18).toString());
 
