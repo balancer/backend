@@ -26,7 +26,6 @@
         "apollo-server-core": "^3.5.0",
         "apollo-server-express": "^3.5.0",
         "axios": "^0.24.0",
-        "bignumber.js": "^9.0.2",
         "decimal.js": "^10.3.1",
         "dotenv": "^10.0.0",
         "ethers": "^5.5.1",
