@@ -70,12 +70,11 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
             addresses: {
                 contracts: {
                     vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-                    // TODO is this the correct multicall?
-                    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+                    multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
                     batchRelayer: '0x00',
                 },
                 tokens: {
-                    wrappedNativeAsset: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+                    wrappedNativeAsset: '0x4200000000000000000000000000000000000006',
                 },
                 linearFactories: {},
             },
