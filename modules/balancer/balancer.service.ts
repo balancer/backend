@@ -33,9 +33,7 @@ import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
-import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
-import { getAddress } from '@ethersproject/address';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
