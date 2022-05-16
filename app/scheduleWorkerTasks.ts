@@ -11,6 +11,7 @@ import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
+import { env } from './env';
 
 function scheduleJob(
     cronExpression: string,
@@ -62,18 +63,17 @@ export function scheduleWorkerTasks() {
         true,
     );
 
+    //every five minutes
     scheduleJob('*/5 * * * *', 'cache-historical-nested-bpt-prices', async () => {
         await tokenPriceService.cacheHistoricalNestedBptPrices();
     });
 
+    //every five minutes
     scheduleJob('*/5 * * * *', 'cache-average-block-time', async () => {
         await blocksSubgraphService.cacheAverageBlockTime();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-fbeets-apr', async () => {
-        await beetsBarService.cacheFbeetsApr();
-    });
-
+    //every five minutes
     scheduleJob('*/5 * * * *', 'cache-tokens', async () => {
         await tokenService.cacheTokens();
     });
@@ -81,15 +81,6 @@ export function scheduleWorkerTasks() {
     //every 5 seconds
     scheduleJob('*/5 * * * * *', 'cache-balancer-pools', async () => {
         await balancerService.cachePools();
-    });
-
-    //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-beets-farms', async () => {
-        await beetsFarmService.cacheBeetsFarms();
-    });
-
-    scheduleJob('*/30 * * * * *', 'cache-beets-farms', async () => {
-        await beetsFarmService.cacheBeetsFarms();
     });
 
     //once a minute
@@ -103,58 +94,77 @@ export function scheduleWorkerTasks() {
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'cache-beets-price', async () => {
-        await tokenPriceService.cacheBeetsPrice();
-    });
-
-    scheduleJob('*/10 * * * * *', 'cache-beets-farm-users', async () => {
-        await beetsFarmService.cacheBeetsFarmUsers();
-    });
-
     scheduleJob('*/30 * * * * *', 'cache-past-pools', async () => {
         await balancerService.cachePastPools();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-protocol-data', async () => {
-        await beetsService.cacheProtocolData();
-    });
+    //do not run these crons on OP
+    if (env.CHAIN_ID !== '10') {
+        //every five minutes
+        scheduleJob('*/5 * * * *', 'cache-fbeets-apr', async () => {
+            await beetsBarService.cacheFbeetsApr();
+        });
 
-    scheduleJob('*/30 * * * * *', 'cache-portfolio-pools-data', async () => {
-        const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
-    });
+        //every 5 seconds
+        scheduleJob('*/5 * * * * *', 'cache-beets-farms', async () => {
+            await beetsFarmService.cacheBeetsFarms();
+        });
 
-    scheduleJob('5 0 * * *', 'cache-daily-data', async () => {
-        console.log('Starting new cron to cache daily data.');
-        const timestamp = moment.tz('GMT').startOf('day').unix();
+        //every 30 seconds
+        scheduleJob('*/30 * * * * *', 'cache-beets-price', async () => {
+            await tokenPriceService.cacheBeetsPrice();
+        });
 
-        //retry loop in case of timeouts from the subgraph
-        for (let i = 0; i < 10; i++) {
-            try {
-                await portfolioService.cacheRawDataForTimestamp(timestamp);
-                console.log('Finished cron to cache daily data.');
-                break;
-            } catch (e) {
-                console.log(
-                    `Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`,
-                    e,
-                );
-                await sleep(5000);
+        //every 10 seconds
+        scheduleJob('*/10 * * * * *', 'cache-beets-farm-users', async () => {
+            await beetsFarmService.cacheBeetsFarmUsers();
+        });
+
+        //every 30 seconds
+        //TODO uses beets price
+        scheduleJob('*/30 * * * * *', 'cache-protocol-data', async () => {
+            await beetsService.cacheProtocolData();
+        });
+
+        //every 30 seconds
+        scheduleJob('*/30 * * * * *', 'cache-portfolio-pools-data', async () => {
+            const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
+            await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
+        });
+
+        scheduleJob('5 0 * * *', 'cache-daily-data', async () => {
+            console.log('Starting new cron to cache daily data.');
+            const timestamp = moment.tz('GMT').startOf('day').unix();
+
+            //retry loop in case of timeouts from the subgraph
+            for (let i = 0; i < 10; i++) {
+                try {
+                    await portfolioService.cacheRawDataForTimestamp(timestamp);
+                    console.log('Finished cron to cache daily data.');
+                    break;
+                } catch (e) {
+                    console.log(
+                        `Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`,
+                        e,
+                    );
+                    await sleep(5000);
+                }
             }
-        }
-    });
+        });
 
-    tokenPriceService
-        .cacheBeetsPrice()
-        .then(() =>
-            beetsService
-                .cacheProtocolData()
-                .catch((error) => console.log('Error caching initial protocol data', error)),
-        )
-        .catch();
-    beetsFarmService
-        .cacheBeetsFarmUsers(true)
-        .catch((error) => console.log('Error caching initial beets farm users', error));
+        tokenPriceService
+            .cacheBeetsPrice()
+            .then(() =>
+                beetsService
+                    .cacheProtocolData()
+                    .catch((error) => console.log('Error caching initial protocol data', error)),
+            )
+            .catch();
+
+        beetsFarmService
+            .cacheBeetsFarmUsers(true)
+            .catch((error) => console.log('Error caching initial beets farm users', error));
+    }
 
     console.log('scheduled cron jobs');
 }
