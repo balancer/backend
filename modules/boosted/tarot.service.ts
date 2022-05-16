@@ -24,6 +24,14 @@ export class TarotService {
             address: '0xfB98B335551a418cD0737375a2ea0ded62Ea213b', // MAI
             vault: '0x80D7413331AfB37B30BC0eF6AE9d11A40bcf014B', // tMAI
         },
+        {
+            address: '0x6CAa3e5FebA1f83ec1d80EA2EAca37C3421C33A8', // tinSPIRIT
+            vault: '0x80Fe671E580CD1D95B2Dcd8EA09233DF06C81C7b', // xtinSPIRIT
+        },
+        {
+            address: '0xC5e2B037D30a390e62180970B3aa4E91868764cD', // TAROT
+            vault: '0x74D1D2A851e339B8cB953716445Be7E8aBdf92F4', // xTAROT
+        },
     ];
 
     constructor() {
