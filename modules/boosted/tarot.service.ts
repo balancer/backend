@@ -5,7 +5,7 @@ import TarotBoostedAbi from './abi/TarotBoostedAbi.json';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import _ from 'lodash';
-import { BigNumber } from 'bignumber.js';
+import { formatFixed } from '@ethersproject/bignumber';
 
 const TAROT_CACHE_KEY = 'tarot';
 
@@ -36,13 +36,9 @@ export class TarotService {
         for (const pool of this.boostedPools) {
             const apr = await tarotAPRContract.callStatic.getAPREstimate(pool.vault);
 
-            // to convert for example 28842190275744000 -> 0.028842190275744
-            const aprToBN = new BigNumber(apr.toString());
-            const aprToFloat = parseFloat(aprToBN.shiftedBy(-18).toString());
-
             data.push({
                 address: pool.address,
-                apr: aprToFloat,
+                apr: parseFloat(formatFixed(apr, 18)),
             });
         }
 
