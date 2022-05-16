@@ -32,14 +32,10 @@ import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
-import { beetsFarmService } from '../beets/beets-farm.service';
-import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
-import { spookySwapService } from '../boosted/spooky-swap.service';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
 import { getAddress } from '@ethersproject/address';
-import { SFTMX_ADDRESS } from '../token-price/lib/stader-staked-ftm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -175,29 +171,16 @@ export class BalancerService {
         );
 
         const pastPools = await this.getPastPools();
-        const farms = await beetsFarmService.getBeetsFarms();
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
-        const { beetsPrice } = await tokenPriceService.getBeetsPrice();
         const tokenPrices = await tokenPriceService.getTokenPrices();
-        await yearnVaultService.cacheYearnVaults();
-        await spookySwapService.cacheSpookySwapData();
 
         const decoratedPools: GqlBalancerPool[] = [];
 
         for (const pool of filteredWithOnChainBalances) {
-            const farm = farms.find((farm) => {
-                if (pool.id === env.FBEETS_POOL_ID) {
-                    return farm.id === env.FBEETS_FARM_ID;
-                }
-
-                return farm.pair.toLowerCase() === pool.address.toLowerCase();
-            });
             const pastPool = pastPools.find((pastPool) => pastPool.id === pool.id);
             const totalLiquidity = this.calculatePoolLiquidity(pool, tokenPrices);
-            const farmTvl =
-                (Number(parseInt(farm?.slpBalance || '0') / 1e18) / parseFloat(pool.totalShares)) * totalLiquidity;
             let swapFee24h = parseFloat(pool.totalSwapFee) - parseFloat(pastPool?.totalSwapFee || '0');
             let volume24h = parseFloat(pool.totalSwapVolume) - parseFloat(pastPool?.totalSwapVolume || '0');
 
@@ -216,39 +199,20 @@ export class BalancerService {
 
             pool.totalLiquidity = `${totalLiquidity}`;
             const swapApr = totalLiquidity > 0 ? (swapFee24h / totalLiquidity) * 365 : 0;
-            const {
-                thirdPartyApr,
-                beetsApr,
-                items: farmAprItems,
-            } = farm
-                ? beetsFarmService.calculateFarmApr(farm, farmTvl, blocksPerYear, beetsPrice)
-                : { items: [], thirdPartyApr: '0', beetsApr: '0' };
-            const items: GqlBalancePoolAprItem[] = [
-                { title: 'Swap fees APR', apr: `${swapApr}` },
-                ...farmAprItems,
-                ...this.getThirdPartyApr(pool, tokenPrices, decoratedPools.length === 0 ? pool : decoratedPools[0]),
-            ];
+            const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }];
 
             const decoratedPool: GqlBalancerPool = {
                 ...pool,
-                farm,
                 apr: {
                     total: `${_.sumBy(items, (item) => parseFloat(item.apr))}`,
                     hasRewardApr: items.length > 1,
                     items,
                     swapApr: `${swapApr}`,
-                    beetsApr,
-                    thirdPartyApr,
                 },
                 isNewPool: moment().diff(moment.unix(pool.createTime), 'weeks') === 0,
                 volume24h: `${volume24h}`,
                 fees24h: `${swapFee24h}`,
                 totalLiquidity: `${totalLiquidity}`,
-                farmTotalLiquidity: farm
-                    ? `${
-                          totalLiquidity * (parseFloat(formatFixed(farm.slpBalance, 18)) / parseFloat(pool.totalShares))
-                      }`
-                    : '0',
             };
 
             decoratedPool.composition = this.getPoolComposition(pool, tokenPrices);
@@ -546,42 +510,6 @@ export class BalancerService {
         });
     }
 
-    private getThirdPartyApr(
-        pool: GqlBalancerPool,
-        tokenPrices: TokenPrices,
-        bbyvUsd: GqlBalancerPool,
-    ): GqlBalancePoolAprItem[] {
-        let items: GqlBalancePoolAprItem[] = [];
-
-        for (const token of pool.tokens) {
-            if (token.address.toLowerCase() === SFTMX_ADDRESS.toLowerCase()) {
-                const sftmxPrice = tokenPrices[SFTMX_ADDRESS]?.usd || 0;
-                const percentOfPool = (parseFloat(token.balance) * sftmxPrice) / parseFloat(pool.totalLiquidity);
-
-                items.push({
-                    title: 'Stader sFTMx APR',
-                    apr: `${0.125 * percentOfPool}`,
-                });
-            }
-        }
-
-        if (pool.linearPools && pool.linearPools.length > 0) {
-            const yearnAprItem = yearnVaultService.getAprItemForBoostedPool(pool, tokenPrices, bbyvUsd);
-
-            if (yearnAprItem) {
-                items.push(yearnAprItem);
-            }
-
-            const spookyAprItem = spookySwapService.getAprItemForBoostedPool(pool, tokenPrices);
-
-            if (spookyAprItem) {
-                items.push(spookyAprItem);
-            }
-        }
-
-        return items;
-    }
-
     private mapSubgraphFragmentToBaseGqlPool(
         pool: BalancerPoolFragment,
         pools: BalancerPoolFragment[],
@@ -589,12 +517,7 @@ export class BalancerService {
         return {
             ...pool,
             symbol: pool.symbol || '',
-            name:
-                pool.id === '0x5ddb92a5340fd0ead3987d3661afcd6104c3b757000000000000000000000187'
-                    ? 'Steady Beets, Yearn Boosted'
-                    : pool.id === '0x64b301e21d640f9bef90458b0987d81fb4cf1b9e00020000000000000000022e'
-                    ? 'Fantom Of The Opera, Yearn Boosted'
-                    : pool.name,
+            name: pool.name,
             __typename: 'GqlBalancerPool',
             tokens: (pool.tokens || []).map((token) => ({
                 ...token,
@@ -609,8 +532,6 @@ export class BalancerService {
                 hasRewardApr: false,
                 items: [],
                 swapApr: '0',
-                beetsApr: '0',
-                thirdPartyApr: '0',
             },
             composition: {
                 tokens: [],
