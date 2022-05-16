@@ -64,4 +64,56 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
             },
         },
     },
+    '10': {
+        network: {
+            chainId: 10 as Network,
+            addresses: {
+                contracts: {
+                    vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+                    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+                    batchRelayer: '0x00',
+                },
+                tokens: {
+                    wrappedNativeAsset: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+                },
+                linearFactories: {},
+            },
+            urls: {
+                subgraph: 'https://backend-optimism.beets-ftm-node.com/graphql',
+            },
+            pools: {},
+            fBeets: {
+                address: '0xfcef8a994209d6916EB2C86cDD2AFD60Aa6F54b1',
+                farmId: 22,
+                poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            },
+        },
+        rpcUrl: 'https://mainnet.optimism.io/',
+        sor: {
+            tokenPriceService: {
+                getNativeAssetPriceInToken: async (tokenAddress: string) => {
+                    try {
+                        const tokenPrices = await tokenPriceService.getTokenPrices();
+                        tokenPriceService.getPriceForToken(tokenPrices, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+                        const nativeAssetPrice = tokenPriceService.getPriceForToken(
+                            tokenPrices,
+                            env.WRAPPED_NATIVE_ASSET_ADDRESS,
+                        );
+                        const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, tokenAddress) || 1;
+
+                        return `${nativeAssetPrice / tokenPrice}`;
+                    } catch {
+                        return '0';
+                    }
+                },
+            },
+            poolDataService: {
+                getPools: async () => {
+                    const pools = (await balancerService.getPools()) as SubgraphPoolBase[];
+
+                    return pools;
+                },
+            },
+        },
+    },
 };
