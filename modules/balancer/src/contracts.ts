@@ -11,4 +11,9 @@ export const BALANCER_NETWORK_CONFIG: Record<string, BalancerNetworkConfig> = {
         weth: '0x80dD2B80FbcFB06505A301d732322e987380EcD6',
         multicall: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
     },
+    '10': {
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+        multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    },
 };
