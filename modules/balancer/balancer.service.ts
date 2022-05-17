@@ -184,7 +184,7 @@ export class BalancerService {
         const tokenPrices = await tokenPriceService.getTokenPrices();
         await yearnVaultService.cacheYearnVaults();
         await spookySwapService.cacheSpookySwapData();
-        await tarotService.cacheTarotData();
+        await tarotService.cacheTarotData(filteredWithOnChainBalances);
 
         const decoratedPools: GqlBalancerPool[] = [];
 

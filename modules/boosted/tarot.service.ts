@@ -10,7 +10,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 const TAROT_CACHE_KEY = 'tarot';
 
 interface TarotData {
-    address: string;
+    mainToken: string;
     apr: number;
 }
 
@@ -19,35 +19,25 @@ const tarotAPRContract = getContractAt(TAROT_APR_CONTRACT_ADDRESS, TarotBoostedA
 
 export class TarotService {
     private cache: CacheClass<string, TarotData[]>;
-    private boostedPools = [
-        {
-            address: '0xfB98B335551a418cD0737375a2ea0ded62Ea213b', // MAI
-            vault: '0x80D7413331AfB37B30BC0eF6AE9d11A40bcf014B', // tMAI
-        },
-        {
-            address: '0x6CAa3e5FebA1f83ec1d80EA2EAca37C3421C33A8', // tinSPIRIT
-            vault: '0x80Fe671E580CD1D95B2Dcd8EA09233DF06C81C7b', // xtinSPIRIT
-        },
-        {
-            address: '0xC5e2B037D30a390e62180970B3aa4E91868764cD', // TAROT
-            vault: '0x74D1D2A851e339B8cB953716445Be7E8aBdf92F4', // xTAROT
-        },
-    ];
 
     constructor() {
         this.cache = new Cache<string, TarotData[]>();
     }
 
-    public async cacheTarotData(): Promise<void> {
+    public async cacheTarotData(pools: GqlBalancerPool[]): Promise<void> {
         let data: TarotData[] = [];
 
-        for (const pool of this.boostedPools) {
-            const apr = await tarotAPRContract.callStatic.getAPREstimate(pool.vault);
+        for (const pool of pools) {
+            if (pool && pool.factory === '0x681b59c9cbbb6ab43ee3360ac6c34e1dd2f147e9' && pool.wrappedIndex) {
+                const apr = await tarotAPRContract.callStatic.getAPREstimate(
+                    pool.tokens[pool.wrappedIndex || 0].address,
+                );
 
-            data.push({
-                address: pool.address,
-                apr: parseFloat(formatFixed(apr, 18)),
-            });
+                data.push({
+                    mainToken: pool.tokens[pool.mainIndex || 0].address,
+                    apr: parseFloat(formatFixed(apr, 18)),
+                });
+            }
         }
 
         this.cache.put(TAROT_CACHE_KEY, data, 120000);
@@ -65,7 +55,7 @@ export class TarotService {
 
         for (const linearPool of pool.linearPools || []) {
             const boostedPool = boostedPools.find(
-                (boostedPool) => boostedPool.address.toLowerCase() === linearPool.mainToken.address.toLowerCase(),
+                (boostedPool) => boostedPool.mainToken.toLowerCase() === linearPool.mainToken.address.toLowerCase(),
             );
 
             if (!boostedPool || linearPool.address === pool.address) {
