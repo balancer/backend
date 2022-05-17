@@ -288,6 +288,8 @@ export class TokenPriceService {
             const pool = pools.find((pool) => pool.address === nestedBptAddress);
 
             if (pool?.poolType === 'Linear') {
+                console.log(pool.id);
+                console.log(pool.name);
                 const linearPool = getContractAt(pool.address, LinearPoolAbi);
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);
