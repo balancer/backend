@@ -9,20 +9,16 @@ import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
 import { getContractAt } from '../ethers/ethers';
 import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import moment from 'moment-timezone';
-import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
 const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
-const BEETS_PRICE_CACHE_KEY = 'token-prices:beets-price';
-const FBEETS_PRICE_CACHE_KEY = 'token-prices:fbeets-price';
 
 export class TokenPriceService {
     cache: CacheClass<string, any>;
@@ -118,15 +114,11 @@ export class TokenPriceService {
             ...balancerTokenPrices,
         });
 
-        const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(nativeAssetPrice.usd);
-
         const tokenPrices = {
             ...coingeckoTokenPrices,
             ...balancerTokenPrices,
             ...nestedBptPrices,
             [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
-            //stader ftmx
-            [SFTMX_ADDRESS]: stakedFtmPrice,
         };
 
         const cached = await cache.getObjectValue<TokenPrices>(TOKEN_PRICES_CACHE_KEY);
@@ -218,51 +210,6 @@ export class TokenPriceService {
         );
     }
 
-    public async getBeetsPrice(): Promise<{
-        beetsPrice: number;
-        fbeetsPrice: number;
-    }> {
-        const beetsPrice = await cache.getValue(BEETS_PRICE_CACHE_KEY);
-        const fbeetsPrice = await cache.getValue(FBEETS_PRICE_CACHE_KEY);
-
-        if (!beetsPrice || !fbeetsPrice) {
-            throw new Error('did not find price for beets');
-        }
-
-        return {
-            beetsPrice: parseFloat(beetsPrice),
-            fbeetsPrice: parseFloat(fbeetsPrice),
-        };
-    }
-
-    public async cacheBeetsPrice() {
-        const { pool: beetsUsdcPool } = await balancerSubgraphService.getPool({
-            id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
-        });
-
-        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
-        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
-
-        const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
-            id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-        });
-
-        if (!beets || !usdc || !beetsFtmPool) {
-            throw new Error('did not find price for beets');
-        }
-
-        const bptPrice = parseFloat(beetsFtmPool.totalLiquidity) / parseFloat(beetsFtmPool.totalShares);
-        const beetsBar = await beetsBarService.getBeetsBarNow();
-        const fbeetsPrice = bptPrice * parseFloat(beetsBar.ratio);
-
-        const beetsPrice =
-            ((parseFloat(beets.weight || '0') / parseFloat(usdc.weight || '1')) * parseFloat(usdc.balance)) /
-            parseFloat(beets.balance);
-
-        await cache.putValue(BEETS_PRICE_CACHE_KEY, `${beetsPrice}`, 30);
-        await cache.putValue(FBEETS_PRICE_CACHE_KEY, `${fbeetsPrice}`, 30);
-    }
-
     public async getTokenAddresses(
         pools: BalancerPoolFragment[],
     ): Promise<{ tokenAddresses: string[]; nestedBptAddresses: string[] }> {
@@ -288,8 +235,6 @@ export class TokenPriceService {
             const pool = pools.find((pool) => pool.address === nestedBptAddress);
 
             if (pool?.poolType === 'Linear') {
-                console.log(pool.id);
-                console.log(pool.name);
                 const linearPool = getContractAt(pool.address, LinearPoolAbi);
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);

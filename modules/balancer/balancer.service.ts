@@ -534,7 +534,6 @@ export class BalancerService {
             composition: {
                 tokens: [],
             },
-            farmTotalLiquidity: '0',
         };
     }
 

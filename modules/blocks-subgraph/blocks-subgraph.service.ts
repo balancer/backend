@@ -24,9 +24,11 @@ const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
 const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 
+//TODO config
 const BLOCK_TIME_MAP: { [chainId: string]: number } = {
     '250': 1,
     '4': 15,
+    '10': 0.5,
 };
 
 export class BlocksSubgraphService {
@@ -148,12 +150,12 @@ export class BlocksSubgraphService {
                 timestamp_gte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .subtract(5 * blockTime, 'seconds')
+                    .subtract(10 * blockTime, 'seconds')
                     .unix()}`,
                 timestamp_lte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .add(5 * blockTime, 'seconds')
+                    .add(10 * blockTime, 'seconds')
                     .unix()}`,
             },
         };

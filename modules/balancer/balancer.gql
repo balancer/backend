@@ -47,8 +47,6 @@ type GqlBalancerPool {
     linearPools: [GqlBalancerPoolLinearPoolData!]
     stablePhantomPools: [GqlBalancerPoolStablePhantomPoolData!]
     tokenRates: [String!]
-    farm: GqlBeetsFarm
-    farmTotalLiquidity: BigDecimal!
     composition: GqlBalancerPoolComposition!
     apr: GqlBalancePoolApr!
     isNewPool: Boolean

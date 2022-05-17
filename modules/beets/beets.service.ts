@@ -1,15 +1,12 @@
 import { balancerSubgraphService } from '../balancer-subgraph/balancer-subgraph.service';
 import { env } from '../../app/env';
 import { GqlBeetsConfig, GqlBeetsProtocolData } from '../../schema';
-import { getCirculatingSupply } from './beets';
 import { fiveMinutesInMs } from '../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 import { balancerService } from '../balancer/balancer.service';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { sanityClient } from '../sanity/sanity';
 import { cache } from '../cache/cache';
-import { beetsBarService } from '../beets-bar-subgraph/beets-bar.service';
-import { tokenPriceService } from '../token-price/token-price.service';
 import _ from 'lodash';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beetsProtocolData';
@@ -43,8 +40,6 @@ export class BeetsService {
     public async cacheProtocolData(): Promise<GqlBeetsProtocolData> {
         const { totalSwapFee, totalSwapVolume, poolCount } = await balancerSubgraphService.getProtocolData({});
 
-        const { beetsPrice, fbeetsPrice } = await tokenPriceService.getBeetsPrice();
-        const circulatingSupply = parseFloat(await getCirculatingSupply());
         const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
         const pools = await balancerService.getPools();
@@ -57,10 +52,6 @@ export class BeetsService {
             totalLiquidity: `${totalLiquidity}`,
             totalSwapFee,
             totalSwapVolume,
-            beetsPrice: `${beetsPrice}`,
-            fbeetsPrice: `${fbeetsPrice}`,
-            marketCap: `${beetsPrice * circulatingSupply}`,
-            circulatingSupply: `${circulatingSupply}`,
             poolCount: `${poolCount}`,
             swapVolume24h: `${parseFloat(totalSwapVolume) - parseFloat(prev.totalSwapVolume)}`,
             swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,

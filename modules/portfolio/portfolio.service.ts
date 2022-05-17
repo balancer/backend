@@ -8,7 +8,6 @@ import {
     PrismaBalancerPoolSnapshotWithTokens,
     PrismaBalancerPoolTokenSnapshotWithToken,
     PrismaBlockExtended,
-    PrismaFarmUserSnapshotWithFarm,
     UserPoolData,
     UserPortfolioData,
     UserTokenData,
@@ -19,12 +18,7 @@ import { balancerTokenMappings } from '../token-price/lib/balancer-token-mapping
 import { env } from '../../app/env';
 import { PortfolioDataService } from './lib/portfolio-data.service';
 import { prisma } from '../prisma/prisma-client';
-import {
-    PrismaBalancerPool,
-    PrismaBalancerPoolShareSnapshot,
-    PrismaBeetsBarSnapshot,
-    PrismaBeetsBarUserSnapshot,
-} from '@prisma/client';
+import { PrismaBalancerPool, PrismaBalancerPoolShareSnapshot } from '@prisma/client';
 import { cache } from '../cache/cache';
 import { getAddress } from 'ethers/lib/utils';
 
@@ -187,20 +181,14 @@ class PortfolioService {
                     pool,
                     snapshot,
                     block.poolShares.filter((share) => share.poolId === pool.id),
-                    block.farmUsers,
                     tokenPrices,
-                    block.beetsBar,
-                    block.beetsBarUsers[0] ?? null,
                 );
 
             const previous = this.generatePoolIntermediates(
                 pool,
                 previousSnapshot,
                 previousBlock.poolShares.filter((share) => share.poolId === pool.id),
-                previousBlock.farmUsers,
                 previousTokenPrices,
-                previousBlock.beetsBar,
-                previousBlock.beetsBarUsers[0] ?? null,
             );
 
             const swapFees = parseFloat(snapshot.totalSwapFee) - parseFloat(previousSnapshot.totalSwapFee);
@@ -326,18 +314,10 @@ class PortfolioService {
         pool: PrismaBalancerPool,
         snapshot: PrismaBalancerPoolSnapshotWithTokens,
         poolShares: PrismaBalancerPoolShareSnapshot[],
-        userFarms: PrismaFarmUserSnapshotWithFarm[],
         tokenPrices: TokenPrices,
-        beetsBar: PrismaBeetsBarSnapshot | null,
-        beetsBarUser: PrismaBeetsBarUserSnapshot | null,
     ) {
-        const beetsBarSharesForPool = this.getUserBeetsBarSharesForPool(pool, userFarms, beetsBar, beetsBarUser);
         const poolShare = poolShares.find((shares) => shares.poolId === pool.id);
-        const userFarm = userFarms.find((userFarm) => userFarm.farm.pair === pool.address);
-        const userNumShares =
-            parseFloat(poolShare?.balance || '0') +
-            fromFp(BigNumber.from(userFarm?.amount || 0)).toNumber() +
-            beetsBarSharesForPool;
+        const userNumShares = parseFloat(poolShare?.balance || '0');
         const poolTotalShares = parseFloat(snapshot.totalShares);
         const poolTotalValue = this.getPoolValue(snapshot, tokenPrices);
         const userPercentShare = userNumShares / poolTotalShares;
@@ -359,23 +339,6 @@ class PortfolioService {
             poolTotalValue,
             poolTotalShares,
         };
-    }
-
-    private getUserBeetsBarSharesForPool(
-        pool: PrismaBalancerPool,
-        userFarms: PrismaFarmUserSnapshotWithFarm[],
-        beetsBar: PrismaBeetsBarSnapshot | null,
-        beetsBarUser: PrismaBeetsBarUserSnapshot | null,
-    ): number {
-        if (pool.id !== env.FBEETS_POOL_ID || !beetsBar) {
-            return 0;
-        }
-
-        const userFbeetsFarm = userFarms.find((userFarm) => userFarm.farm.pair === env.FBEETS_ADDRESS);
-        const userStakedFbeets = fromFp(userFbeetsFarm?.amount || '0').toNumber();
-        const userFbeets = parseFloat(beetsBarUser?.fBeets || '0');
-
-        return (userStakedFbeets + userFbeets) * parseFloat(beetsBar.ratio);
     }
 
     private getPoolValue(pool: PrismaBalancerPoolSnapshotWithTokens, tokenPrices: TokenPrices): number {

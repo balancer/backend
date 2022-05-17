@@ -1,13 +1,9 @@
 import { blocksSubgraphService } from '../../blocks-subgraph/blocks-subgraph.service';
 import { balancerSubgraphService } from '../../balancer-subgraph/balancer-subgraph.service';
-import { masterchefService } from '../../masterchef-subgraph/masterchef.service';
-import { beetsBarService } from '../../beets-bar-subgraph/beets-bar.service';
 import { prisma } from '../../prisma/prisma-client';
 import _, { parseInt } from 'lodash';
 import { BlockFragment } from '../../blocks-subgraph/generated/blocks-subgraph-types';
 import { BalancerPoolFragment, BalancerUserFragment } from '../../balancer-subgraph/generated/balancer-subgraph-types';
-import { FarmFragment, FarmUserFragment } from '../../masterchef-subgraph/generated/masterchef-subgraph-types';
-import { BeetsBarFragment, BeetsBarUserFragment } from '../../beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
 import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';
@@ -43,13 +39,6 @@ export class PortfolioDataService {
         const pools = this.injectTokenPriceRates(subgraphPools, cachedPools);
         const previousPools = this.injectTokenPriceRates(subgraphPreviousPools, cachedPools);
 
-        const { farmUsers, previousFarmUsers } = await masterchefService.getPortfolioData({
-            address: userAddress,
-            previousBlockNumber: parseInt(previousBlock.number),
-        });
-        const { beetsBarUser, previousBeetsBarUser, beetsBar, previousBeetsBar } =
-            await beetsBarService.getPortfolioData(userAddress, parseInt(previousBlock.number));
-
         const response = {
             pools: pools.map((pool) => ({
                 ...pool,
@@ -62,18 +51,12 @@ export class PortfolioDataService {
                 { number: '0', timestamp: '0', id: '' }, //not important
                 user,
                 pools,
-                farmUsers,
-                beetsBar,
-                beetsBarUser,
             ),
             previousBlock: this.mapSubgraphDataToExtendedBlock(
                 userAddress,
                 previousBlock,
                 previousUser ?? user,
                 previousPools,
-                previousFarmUsers,
-                previousBeetsBar,
-                previousBeetsBarUser,
             ),
         };
 
@@ -85,9 +68,6 @@ export class PortfolioDataService {
         block: BlockFragment,
         user: BalancerUserFragment,
         pools: BalancerPoolFragment[],
-        farmUsers: FarmUserFragment[],
-        beetsBar: BeetsBarFragment,
-        beetsBarUser: BeetsBarUserFragment | null,
     ): PrismaBlockExtended {
         const blockNumber = parseInt(block.number);
         const poolShares = [];
@@ -95,11 +75,6 @@ export class PortfolioDataService {
         const poolIds: string[] = [];
         const poolAddresses: string[] = [];
 
-        for (const farm of farmUsers) {
-            if (farm.pool) {
-                poolAddresses.push(farm.pool.pair);
-            }
-        }
         for (const sharesOwned of user.sharesOwned ?? []) {
             poolIds.push(sharesOwned.poolId.id);
         }
@@ -144,20 +119,6 @@ export class PortfolioDataService {
             number: blockNumber,
             timestamp: parseInt(block.timestamp),
             poolShares,
-            farmUsers: farmUsers.map((farmUser) => ({
-                ...farmUser,
-                blockNumber,
-                farmUserId: '',
-                farmId: '',
-                userAddress,
-                farm: {
-                    id: '',
-                    poolId: pools.find((pool) => pool.address === farmUser.pool?.pair)?.id ?? null,
-                    pair: farmUser.pool?.pair || '',
-                },
-            })),
-            beetsBar: { ...beetsBar, blockNumber },
-            beetsBarUsers: beetsBarUser ? [{ ...beetsBarUser, blockNumber }] : [],
         };
     }
 
@@ -167,11 +128,7 @@ export class PortfolioDataService {
             const block = await blocksSubgraphService.getBlockForTimestamp(timestamp);
             const blockNumber = parseInt(block.number);
             const users = await balancerSubgraphService.getAllUsers({ block: { number: blockNumber } });
-            const farms = await masterchefService.getAllFarms({ block: { number: blockNumber } });
-            const farmUsers = await masterchefService.getAllFarmUsers({ block: { number: blockNumber } });
             const pools = await balancerSubgraphService.getAllPoolsAtBlock(blockNumber);
-            const beetsBar = await beetsBarService.getBeetsBar(blockNumber);
-            const beetsBarUsers = await beetsBarService.getAllUsers({ block: { number: blockNumber } });
             console.log(`portfolio cache <${timestamp}>: done fetching data`);
 
             console.log(`portfolio cache <${timestamp}>: deleting snapshots`);
@@ -180,17 +137,11 @@ export class PortfolioDataService {
             await this.saveBlock(block, timestamp);
             console.log(`portfolio cache <${timestamp}>: saving new pools`);
             await this.saveAnyNewPools(pools);
-            console.log(`portfolio cache <${timestamp}>: saving new users`);
-            await this.saveAnyNewUsers(users, farmUsers, beetsBarUsers);
             console.log(`portfolio cache <${timestamp}>: saving new tokens`);
             await this.saveAnyNewTokens(pools);
 
             console.log(`portfolio cache <${timestamp}>: saving pool  snapshots`);
             await this.savePoolSnapshots(blockNumber, pools, users);
-            console.log(`portfolio cache <${timestamp}>: saving farms`);
-            await this.saveFarms(blockNumber, farms, farmUsers);
-            console.log(`portfolio cache <${timestamp}>: saving beets bar`);
-            await this.saveBeetsBar(blockNumber, beetsBar, beetsBarUsers);
 
             console.log(`portfolio cache <${timestamp}>: saving latest block`);
             await this.refreshLatestBlockCachedTimestamp();
@@ -263,23 +214,6 @@ export class PortfolioDataService {
         });
     }
 
-    private async saveAnyNewUsers(
-        users: BalancerUserFragment[],
-        farmUsers: FarmUserFragment[],
-        beetsBarUsers: BeetsBarUserFragment[],
-    ) {
-        const userAddresses = _.uniq([
-            ...users.map((user) => user.id),
-            ...farmUsers.map((farmUser) => farmUser.address),
-            ...beetsBarUsers.map((beetsBarUser) => beetsBarUser.address),
-        ]);
-
-        await prisma.prismaUser.createMany({
-            data: userAddresses.map((address) => ({ address })),
-            skipDuplicates: true,
-        });
-    }
-
     private async saveAnyNewTokens(pools: BalancerPoolFragment[]) {
         const tokens = _.uniq(_.flatten(pools.map((pool) => this.getPoolTokens(pool, pools))));
 
@@ -342,66 +276,6 @@ export class PortfolioDataService {
                 },
             });
         }
-    }
-
-    private async saveFarms(blockNumber: number, farms: FarmFragment[], farmUsers: FarmUserFragment[]) {
-        await prisma.prismaFarm.createMany({
-            data: farms.map((farm) => ({
-                id: farm.id,
-                pair: farm.pair,
-            })),
-            skipDuplicates: true,
-        });
-
-        await prisma.prismaFarmUser.createMany({
-            data: farmUsers
-                .filter((farmUser) => farmUser.pool)
-                .map((farmUser) => ({
-                    id: farmUser.id,
-                    userAddress: farmUser.address,
-                    farmId: farmUser.pool!.id,
-                })),
-            skipDuplicates: true,
-        });
-
-        await prisma.prismaFarmUserSnapshot.createMany({
-            data: farmUsers
-                .filter((farmUser) => farmUser.pool)
-                .map((farmUser) => ({
-                    userAddress: farmUser.address,
-                    blockNumber,
-                    farmUserId: farmUser.id,
-                    farmId: farmUser.pool!.id,
-                    amount: farmUser.amount,
-                    rewardDebt: farmUser.rewardDebt,
-                    beetsHarvested: farmUser.beetsHarvested,
-                })),
-        });
-    }
-
-    private async saveBeetsBar(blockNumber: number, beetsBar: BeetsBarFragment, beetsBarUsers: BeetsBarUserFragment[]) {
-        await prisma.prismaBeetsBarSnapshot.create({
-            data: {
-                blockNumber,
-                fBeetsBurned: beetsBar.fBeetsBurned,
-                fBeetsMinted: beetsBar.fBeetsMinted,
-                ratio: beetsBar.ratio,
-                totalSupply: beetsBar.totalSupply,
-                vestingTokenStaked: beetsBar.vestingTokenStaked,
-                sharedVestingTokenRevenue: beetsBar.sharedVestingTokenRevenue,
-            },
-        });
-
-        await prisma.prismaBeetsBarUserSnapshot.createMany({
-            data: beetsBarUsers.map((beetsBarUser) => ({
-                address: beetsBarUser.address,
-                fBeets: beetsBarUser.fBeets,
-                vestingTokenHarvested: beetsBarUser.vestingTokenHarvested,
-                vestingTokenIn: beetsBarUser.vestingTokenIn,
-                vestingTokenOut: beetsBarUser.vestingTokenOut,
-                blockNumber,
-            })),
-        });
     }
 
     private getPoolTokens(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[]) {

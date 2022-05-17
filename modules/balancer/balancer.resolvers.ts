@@ -55,7 +55,6 @@ const balancerResolvers: Resolvers = {
                 apr: { total: '0', items: [], hasRewardApr: false, swapApr: '0' },
                 volume24h: '',
                 fees24h: '',
-                farmTotalLiquidity: '',
                 composition: {
                     tokens: [],
                 },
