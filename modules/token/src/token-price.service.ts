@@ -2,14 +2,8 @@ import { TokenPriceHandler } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestFifteen } from '../../util/time';
-import { GqlTokenPrice } from '../../../schema';
 import { PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
-
-export interface TokenPrice {
-    address: string;
-    price: number;
-}
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}

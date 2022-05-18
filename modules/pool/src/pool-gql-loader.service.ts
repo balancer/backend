@@ -349,7 +349,9 @@ export class PoolGqlLoaderService {
                                       ...poolToken.token,
                                       symbol: networkConfig.ethSymbol,
                                       address: networkConfig.ethAddress,
+                                      name: networkConfig.ethName,
                                   },
+                                  id: `${pool.id}-${networkConfig.ethAddress}`,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(mainToken)],
@@ -411,7 +413,9 @@ export class PoolGqlLoaderService {
                                       ...poolToken.token,
                                       symbol: networkConfig.ethSymbol,
                                       address: networkConfig.ethAddress,
+                                      name: networkConfig.ethName,
                                   },
+                                  id: `${pool.id}-${networkConfig.ethAddress}`,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],
