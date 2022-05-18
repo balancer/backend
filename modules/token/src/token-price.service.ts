@@ -20,6 +20,15 @@ export class TokenPriceService {
             },
         });
 
+        const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === networkConfig.weth.address);
+
+        if (wethPrice) {
+            tokenPrices.push({
+                ...wethPrice,
+                tokenAddress: networkConfig.eth.address,
+            });
+        }
+
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
 
