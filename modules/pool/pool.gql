@@ -417,6 +417,7 @@ enum GqlPoolFilterType {
 }
 
 type GqlPoolTokenExpanded {
+    id: ID!
     address: String!
     name: String!
     symbol: String!

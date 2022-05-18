@@ -236,6 +236,7 @@ export class PoolGqlLoaderService {
 
                 return {
                     ...token.token,
+                    id: `${pool.id}-${token.tokenAddress}`,
                     isNested: !poolToken,
                     isPhantomBpt: token.tokenAddress === pool.address,
                 };
