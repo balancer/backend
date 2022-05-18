@@ -30,6 +30,7 @@ interface GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes
     factory: Bytes
     createTime: Int!
@@ -96,6 +97,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -113,6 +115,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -130,6 +133,7 @@ type GqlPoolStable implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -147,6 +151,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -164,6 +169,7 @@ type GqlPoolElement implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -184,6 +190,7 @@ type GqlPoolLinear implements GqlPoolBase {
     name: String!
     symbol: String!
     address: Bytes!
+    decimals: Int!
     owner: Bytes!
     factory: Bytes
     createTime: Int!
@@ -254,6 +261,7 @@ interface GqlPoolTokenBase {
     decimals: Int!
     name: String!
     symbol: String!
+    index: Int!
     priceRate: BigDecimal!
     weight: BigDecimal
 }
@@ -264,6 +272,7 @@ type GqlPoolToken implements GqlPoolTokenBase {
     decimals: Int!
     name: String!
     symbol: String!
+    index: Int!
 
     #dynamic data
     balance: BigDecimal!
@@ -278,6 +287,7 @@ type GqlPoolTokenLinear implements GqlPoolTokenBase {
     decimals: Int!
     name: String!
     symbol: String!
+    index: Int!
     priceRate: BigDecimal!
     weight: BigDecimal
 
@@ -295,6 +305,7 @@ type GqlPoolTokenPhantomStable implements GqlPoolTokenBase {
     decimals: Int!
     name: String!
     symbol: String!
+    index: Int!
     priceRate: BigDecimal!
     weight: BigDecimal
 

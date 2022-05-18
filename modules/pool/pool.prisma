@@ -6,6 +6,7 @@ model PrismaPool {
     symbol              String
     name                String
     type                PrismaPoolType
+    decimals            Int                 @default(18)
     owner               String
     factory             String?
 

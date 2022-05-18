@@ -85,6 +85,7 @@ export class PoolCreatorService {
                 address: pool.address,
                 symbol: pool.symbol || '',
                 name: pool.name || '',
+                decimals: 18,
                 type: poolType,
                 owner: pool.owner || ZERO_ADDRESS,
                 factory: pool.factory,

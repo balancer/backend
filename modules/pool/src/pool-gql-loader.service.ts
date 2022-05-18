@@ -20,13 +20,11 @@ import {
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
 } from '../../../schema';
-import { TokenPriceService } from '../../token-price/token-price.service';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../util/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
-import { env } from '../../../app/env';
 
 export class PoolGqlLoaderService {
     constructor() {}
@@ -191,6 +189,7 @@ export class PoolGqlLoaderService {
 
         const mappedData = {
             ...pool,
+            decimals: 18,
             dynamicData: {
                 ...pool.dynamicData!,
                 totalLiquidity: `${totalLiquidity}`,
@@ -450,6 +449,8 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolToken',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
             balance: poolToken.dynamicData?.balance || '0',
+            index: poolToken.index,
+            weight: poolToken.dynamicData?.weight,
         };
     }
 
