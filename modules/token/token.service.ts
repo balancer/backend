@@ -76,7 +76,7 @@ export const tokenService = new TokenService(
         new CoingeckoPriceHandlerService(
             networkConfig.coingecko.nativeAssetId,
             networkConfig.coingecko.platformId,
-            networkConfig.wethAddress,
+            networkConfig.weth.address,
         ),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),

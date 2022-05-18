@@ -1,11 +1,16 @@
 import { env } from '../../app/env';
 
 export interface NetworkConfig {
-    ethAddress: string;
-    ethSymbol: string;
-    ethName: string;
-    wethAddress: string;
-    wethAddressFormatted: string;
+    eth: {
+        address: string;
+        addressFormatted: string;
+        symbol: string;
+        name: string;
+    };
+    weth: {
+        address: string;
+        addressFormatted: string;
+    };
     rpcUrl: string;
     coingecko: {
         nativeAssetId: string;
@@ -35,11 +40,16 @@ export interface NetworkConfig {
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': {
-        ethAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        ethSymbol: 'FTM',
-        ethName: 'Fantom',
-        wethAddress: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
-        wethAddressFormatted: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+        eth: {
+            address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+            addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            symbol: 'FTM',
+            name: 'Fantom',
+        },
+        weth: {
+            address: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
+            addressFormatted: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+        },
         coingecko: {
             nativeAssetId: 'fantom',
             platformId: 'fantom',

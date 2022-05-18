@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { timestampRoundedUpToNearestFifteen } from '../../util/time';
 import { PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
+import { networkConfig } from '../../config/network-config';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
@@ -27,6 +28,15 @@ export class TokenPriceService {
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
         });
+
+        const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === networkConfig.weth.address);
+
+        if (wethPrice) {
+            tokenPrices.push({
+                ...wethPrice,
+                tokenAddress: networkConfig.eth.address,
+            });
+        }
 
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
