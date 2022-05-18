@@ -425,17 +425,25 @@ export class PoolGqlLoaderService {
         const { nestedPool } = token;
 
         if (nestedPool && nestedPool.type === 'LINEAR') {
+            const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
+            const percentOfSupplyNested =
+                totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
+
             return {
                 ...this.mapPoolTokenToGql(token),
                 __typename: 'GqlPoolTokenLinear',
                 ...this.getLinearPoolTokenData(token, nestedPool),
-                pool: this.mapNestedPoolToGqlPoolLinearNested(nestedPool),
+                pool: this.mapNestedPoolToGqlPoolLinearNested(nestedPool, percentOfSupplyNested),
             };
         } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
+            const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
+            const percentOfSupplyNested =
+                totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
+
             return {
                 ...this.mapPoolTokenToGql(token),
                 __typename: 'GqlPoolTokenPhantomStable',
-                pool: this.mapNestedPoolToGqlPoolPhantomStableNested(nestedPool),
+                pool: this.mapNestedPoolToGqlPoolPhantomStableNested(nestedPool, percentOfSupplyNested),
             };
         }
 
@@ -454,20 +462,36 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private mapNestedPoolToGqlPoolLinearNested(pool: PrismaNestedPoolWithNoNesting): GqlPoolLinearNested {
+    private mapNestedPoolToGqlPoolLinearNested(
+        pool: PrismaNestedPoolWithNoNesting,
+        percentOfSupplyNested: number,
+    ): GqlPoolLinearNested {
+        const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
+
         return {
             __typename: 'GqlPoolLinearNested',
             ...pool,
             ...pool.linearData!,
             ...pool.linearDynamicData!,
-            tokens: pool.tokens.map((token) => this.mapPoolTokenToGql(token)),
-            totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
+            tokens: pool.tokens.map((token) =>
+                this.mapPoolTokenToGql({
+                    ...token,
+                    dynamicData: token.dynamicData
+                        ? {
+                              ...token.dynamicData,
+                              balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
+                          }
+                        : null,
+                }),
+            ),
+            totalLiquidity: `${totalLiquidity}`,
             totalShares: pool.dynamicData?.totalShares || '0',
         };
     }
 
     private mapNestedPoolToGqlPoolPhantomStableNested(
         pool: PrismaNestedPoolWithSingleLayerNesting,
+        percentOfSupplyNested: number,
     ): GqlPoolPhantomStableNested {
         return {
             __typename: 'GqlPoolPhantomStableNested',
@@ -477,11 +501,26 @@ export class PoolGqlLoaderService {
                 const nestedPool = token.nestedPool;
 
                 if (nestedPool && nestedPool.type === 'LINEAR') {
+                    const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
+                    const percentOfLinearSupplyNested =
+                        totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
+
                     return {
-                        ...this.mapPoolTokenToGql(token),
+                        ...this.mapPoolTokenToGql({
+                            ...token,
+                            dynamicData: token.dynamicData
+                                ? {
+                                      ...token.dynamicData,
+                                      balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
+                                  }
+                                : null,
+                        }),
                         __typename: 'GqlPoolTokenLinear',
                         ...this.getLinearPoolTokenData(token, nestedPool),
-                        pool: this.mapNestedPoolToGqlPoolLinearNested(nestedPool),
+                        pool: this.mapNestedPoolToGqlPoolLinearNested(
+                            nestedPool,
+                            percentOfSupplyNested * percentOfLinearSupplyNested,
+                        ),
                     };
                 }
 
