@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { timestampRoundedUpToNearestFifteen } from '../../util/time';
 import { GqlTokenPrice } from '../../../schema';
 import { PrismaTokenPrice } from '@prisma/client';
+import moment from 'moment-timezone';
 
 export interface TokenPrice {
     address: string;
@@ -78,6 +79,10 @@ export class TokenPriceService {
         }
 
         await this.updateCandleStickData();
+
+        //we only keep token prices for the last 24 hours
+        const yesterday = moment().subtract(1, 'day').unix();
+        await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
     private async updateCandleStickData() {
