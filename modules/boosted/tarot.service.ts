@@ -6,6 +6,7 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import _ from 'lodash';
 import { formatFixed } from '@ethersproject/bignumber';
+import { balancerSdk } from '../balancer-sdk/src/balancer-sdk';
 
 const TAROT_CACHE_KEY = 'tarot';
 
@@ -16,6 +17,7 @@ interface TarotData {
 
 const TAROT_APR_CONTRACT_ADDRESS = '0xc32B9a98F2419544070E9580166C5A18Af8ADf9f';
 const tarotAPRContract = getContractAt(TAROT_APR_CONTRACT_ADDRESS, TarotBoostedAbi);
+const TAROT_FACTORY_ADDRESS = balancerSdk.networkConfig.addresses.linearFactories;
 
 export class TarotService {
     private cache: CacheClass<string, TarotData[]>;
@@ -26,9 +28,14 @@ export class TarotService {
 
     public async cacheTarotData(pools: GqlBalancerPool[]): Promise<void> {
         let data: TarotData[] = [];
+        const tarotFactoryAddress = TAROT_FACTORY_ADDRESS
+            ? Object.keys(TAROT_FACTORY_ADDRESS).filter(function (key) {
+                  return TAROT_FACTORY_ADDRESS[key] === 'tarot';
+              })[0]
+            : '';
 
         for (const pool of pools) {
-            if (pool && pool.factory === '0x681b59c9cbbb6ab43ee3360ac6c34e1dd2f147e9' && pool.wrappedIndex) {
+            if (pool && pool.factory === tarotFactoryAddress && pool.wrappedIndex) {
                 const apr = await tarotAPRContract.callStatic.getAPREstimate(
                     pool.tokens[pool.wrappedIndex || 0].address,
                 );
