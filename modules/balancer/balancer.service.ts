@@ -40,6 +40,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
 import { getAddress } from '@ethersproject/address';
 import { SFTMX_ADDRESS } from '../token-price/lib/stader-staked-ftm.service';
+import { reaperFarmService } from '../boosted/reaper-farm.service';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -183,6 +184,7 @@ export class BalancerService {
         const tokenPrices = await tokenPriceService.getTokenPrices();
         await yearnVaultService.cacheYearnVaults();
         await spookySwapService.cacheSpookySwapData();
+        await reaperFarmService.cacheReaperFarmData();
 
         const decoratedPools: GqlBalancerPool[] = [];
 
@@ -600,6 +602,12 @@ export class BalancerService {
 
             if (spookyAprItem) {
                 items.push(spookyAprItem);
+            }
+
+            const reaperAprItem = reaperFarmService.getAprItemForBoostedPool(pool, tokenPrices);
+
+            if (reaperAprItem) {
+                items.push(reaperAprItem);
             }
         }
 
