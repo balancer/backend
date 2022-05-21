@@ -95,9 +95,9 @@ export class TokenPriceService {
             coingeckoTokenPrices = await coingeckoService.getTokenPrices(tokenAddresses);
         } catch {}
 
-        /*if (!nativeAssetPrice) {
+        if (!nativeAssetPrice) {
             throw new Error('no native asset price');
-        }*/
+        }
 
         const missingTokens = tokenAddresses.filter((token) => {
             const tokenPrice =
@@ -118,7 +118,6 @@ export class TokenPriceService {
             ...balancerTokenPrices,
         });
 
-        nativeAssetPrice = nativeAssetPrice || balancerTokenPrices[env.WRAPPED_NATIVE_ASSET_ADDRESS];
         const stakedFtmPrice = await staderStakedFtmService.getStakedFtmPrice(nativeAssetPrice.usd);
 
         const tokenPrices = {
