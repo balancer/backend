@@ -88,10 +88,6 @@ export function scheduleWorkerTasks() {
         await beetsFarmService.cacheBeetsFarms();
     });
 
-    scheduleJob('*/30 * * * * *', 'cache-beets-farms', async () => {
-        await beetsFarmService.cacheBeetsFarms();
-    });
-
     //once a minute
     scheduleJob('* * * * *', 'sor-reload-graph', async () => {
         await balancerSdk.sor.reloadGraph();
