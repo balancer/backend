@@ -7,7 +7,7 @@
 node_modules/
 *-debug.log
 *-error.log
-*.graphql
+**/generated/*
 
 schema.ts
 graphql_schema_generated.ts

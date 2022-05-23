@@ -47,6 +47,8 @@ type GqlBalancerPool {
     linearPools: [GqlBalancerPoolLinearPoolData!]
     stablePhantomPools: [GqlBalancerPoolStablePhantomPoolData!]
     tokenRates: [String!]
+    farm: GqlBeetsFarm
+    farmTotalLiquidity: BigDecimal!
     composition: GqlBalancerPoolComposition!
     apr: GqlBalancePoolApr!
     isNewPool: Boolean
@@ -167,6 +169,8 @@ type GqlBalancerPool24h {
 type GqlBalancePoolApr {
     total: BigDecimal!
     swapApr: BigDecimal!
+    beetsApr: BigDecimal!
+    thirdPartyApr: BigDecimal!
     items: [GqlBalancePoolAprItem!]!
     hasRewardApr: Boolean!
 }

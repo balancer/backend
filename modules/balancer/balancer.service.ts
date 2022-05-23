@@ -206,6 +206,8 @@ export class BalancerService {
                     hasRewardApr: items.length > 1,
                     items,
                     swapApr: `${swapApr}`,
+                    beetsApr: '0',
+                    thirdPartyApr: '0'
                 },
                 isNewPool: moment().diff(moment.unix(pool.createTime), 'weeks') === 0,
                 volume24h: `${volume24h}`,
@@ -530,10 +532,13 @@ export class BalancerService {
                 hasRewardApr: false,
                 items: [],
                 swapApr: '0',
+                beetsApr: '0',
+                thirdPartyApr: '0',
             },
             composition: {
                 tokens: [],
             },
+            farmTotalLiquidity: '0'
         };
     }
 

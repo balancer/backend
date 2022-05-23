@@ -52,9 +52,10 @@ const balancerResolvers: Resolvers = {
                     ...token,
                     __typename: 'GqlBalancerPoolToken',
                 })),
-                apr: { total: '0', items: [], hasRewardApr: false, swapApr: '0' },
+                apr: { total: '0', items: [], hasRewardApr: false, swapApr: '0', beetsApr: '0', thirdPartyApr: '0' },
                 volume24h: '',
                 fees24h: '',
+                farmTotalLiquidity: '',
                 composition: {
                     tokens: [],
                 },
