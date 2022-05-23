@@ -9,6 +9,7 @@ const TOKEN_DEFINITIONS_CACHE_KEY = 'token-definitions';
 const SANITY_TOKEN_TYPE: { [key: string]: string } = {
     '250': 'fantomToken',
     '4': 'rinkebyToken',
+    '10': 'optimismToken',
 };
 
 export class TokenService {
