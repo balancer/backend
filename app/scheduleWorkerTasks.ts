@@ -97,6 +97,16 @@ export function scheduleWorkerTasks() {
         true,
     );
 
+    //once a minute
+    scheduleJob('* * * * *', 'sor-reload-graph', async () => {
+        await balancerSdk.sor.reloadGraph();
+    });
+
+    //every 5 seconds
+    scheduleJob('*!/5 * * * * *', 'cache-balancer-pools', async () => {
+        await balancerService.cachePools();
+    });
+
     /*
     //every five minutes
     scheduleJob(
@@ -122,22 +132,12 @@ export function scheduleWorkerTasks() {
     });
 
     //every 5 seconds
-    scheduleJob('*!/5 * * * * *', 'cache-balancer-pools', async () => {
-        await balancerService.cachePools();
-    });
-
-    //every 5 seconds
     scheduleJob('*!/5 * * * * *', 'cache-beets-farms', async () => {
         await beetsFarmService.cacheBeetsFarms();
     });
 
     scheduleJob('*!/30 * * * * *', 'cache-beets-farms', async () => {
         await beetsFarmService.cacheBeetsFarms();
-    });
-
-    //once a minute
-    scheduleJob('* * * * *', 'sor-reload-graph', async () => {
-        await balancerSdk.sor.reloadGraph();
     });
 
     //every 10 seconds
