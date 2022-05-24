@@ -8,7 +8,7 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import { PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 
@@ -50,8 +50,8 @@ export class TokenService {
         return this.tokenPriceService.updateTokenPrices();
     }
 
-    public async getTokenPrices(): Promise<PrismaTokenPrice[]> {
-        const cached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as PrismaTokenPrice[] | null;
+    public async getTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+        /*const cached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as PrismaTokenCurrentPrice[] | null;
 
         if (cached) {
             return cached;
@@ -60,23 +60,27 @@ export class TokenService {
         const tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
         this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
 
-        return tokenPrices;
+        return tokenPrices;*/
+
+        return this.tokenPriceService.getCurrentTokenPrices();
     }
 
-    public async getWhiteListedTokenPrices(): Promise<PrismaTokenPrice[]> {
-        const cached = this.cache.get(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY) as PrismaTokenPrice[] | null;
+    public async getWhiteListedTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+        /*const cached = this.cache.get(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY) as PrismaTokenCurrentPrice[] | null;
 
         if (cached) {
             return cached;
         }
 
-        const tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
+        const tokenPrices = await this.tokenPriceService.getWhiteListedCurrentTokenPrices();
         this.cache.put(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
 
-        return tokenPrices;
+        return tokenPrices;*/
+
+        return this.tokenPriceService.getWhiteListedCurrentTokenPrices();
     }
 
-    public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
+    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
 

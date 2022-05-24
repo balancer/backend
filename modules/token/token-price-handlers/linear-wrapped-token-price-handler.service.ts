@@ -57,6 +57,19 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
                         }),
                     );
 
+                    operations.push(
+                        prisma.prismaTokenCurrentPrice.upsert({
+                            where: { id: token.address },
+                            update: { price: price },
+                            create: {
+                                id: token.address,
+                                tokenAddress: token.address,
+                                timestamp,
+                                price,
+                            },
+                        }),
+                    );
+
                     tokensUpdated.push(token.address);
                 }
             }

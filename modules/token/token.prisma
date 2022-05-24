@@ -11,12 +11,24 @@ model PrismaToken {
     coingeckoTokenId    String?
 
     dynamicData         PrismaTokenDynamicData?
+    currentPrice        PrismaTokenCurrentPrice?
     prices              PrismaTokenPrice[]
     types               PrismaTokenType[]
 
     poolTokenSnapshots  PrismaBalancerPoolTokenSnapshot[]
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
+}
+
+
+model PrismaTokenCurrentPrice {
+    id                  String               @id
+    tokenAddress        String
+    token               PrismaToken          @relation(fields:[tokenAddress], references: [address])
+    updatedAt           DateTime             @updatedAt
+    timestamp           Int
+    price               Float
+    coingecko           Boolean?
 }
 
 model PrismaTokenPrice {

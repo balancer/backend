@@ -6,7 +6,7 @@ import { beetsFarmService } from '../../beets/beets-farm.service';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { GqlBeetsFarm } from '../../../schema';
 import { secondsPerYear } from '../../util/time';
-import { PrismaPoolAprItem, PrismaTokenPrice } from '@prisma/client';
+import { PrismaPoolAprItem, PrismaTokenCurrentPrice } from '@prisma/client';
 import { networkConfig } from '../../config/network-config';
 import { tokenService } from '../../token/token.service';
 
@@ -59,7 +59,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         farm: GqlBeetsFarm,
         farmTvl: number,
         blocksPerYear: number,
-        tokenPrices: PrismaTokenPrice[],
+        tokenPrices: PrismaTokenCurrentPrice[],
     ): PrismaPoolAprItem[] {
         if (farmTvl <= 0) {
             return [];

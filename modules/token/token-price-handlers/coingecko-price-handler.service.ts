@@ -100,6 +100,21 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                                     low: price,
                                     open: price,
                                     close: price,
+                                    coingecko: true,
+                                },
+                            }),
+                        );
+
+                        operations.push(
+                            prisma.prismaTokenCurrentPrice.upsert({
+                                where: { id: item.address },
+                                update: { price: price },
+                                create: {
+                                    id: item.address,
+                                    tokenAddress: item.address,
+                                    timestamp,
+                                    price,
+                                    coingecko: true,
                                 },
                             }),
                         );

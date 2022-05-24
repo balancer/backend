@@ -2,15 +2,15 @@ import { TokenPriceHandler } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestFifteen } from '../../util/time';
-import { PrismaTokenPrice } from '@prisma/client';
+import { PrismaTokenCurrentPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
 
-    public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
-        const tokenPrices = await prisma.prismaTokenPrice.findMany({
+    public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+        const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
             where: {
@@ -32,8 +32,8 @@ export class TokenPriceService {
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
 
-    public async getCurrentTokenPrices(): Promise<PrismaTokenPrice[]> {
-        const tokenPrices = await prisma.prismaTokenPrice.findMany({
+    public async getCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+        const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
         });
@@ -50,7 +50,7 @@ export class TokenPriceService {
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
 
-    public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {
+    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string): number {
         const tokenPrice = tokenPrices.find(
             (tokenPrice) => tokenPrice.tokenAddress.toLowerCase() === tokenAddress.toLowerCase(),
         );
