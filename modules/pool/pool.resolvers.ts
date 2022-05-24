@@ -10,6 +10,9 @@ const balancerResolvers: Resolvers = {
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
         },
+        poolGetPoolsCount: async (parent, args, context) => {
+            return poolService.getPoolsCount(args);
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {

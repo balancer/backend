@@ -8,6 +8,14 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): [GqlPoolBase!]!
+    poolGetPoolsCount(
+        first: Int
+        skip: Int
+        orderBy: GqlPoolOrderBy
+        orderDirection: GqlPoolOrderDirection
+        where: GqlPoolFilter
+        textSearch: String
+    ): Int!
 }
 
 extend type Mutation {

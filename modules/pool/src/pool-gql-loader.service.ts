@@ -55,6 +55,10 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapPoolToGqlPool(pool));
     }
 
+    public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
+        return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+    }
+
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
         const orderDirection = args.orderDirection || undefined;

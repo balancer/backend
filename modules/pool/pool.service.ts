@@ -43,6 +43,10 @@ export class PoolService {
         return this.poolGqlLoaderService.getPools(args);
     }
 
+    public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
+        return this.poolGqlLoaderService.getPoolsCount(args);
+    }
+
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
         const blockNumber = await this.provider.getBlockNumber();
 
