@@ -151,3 +151,23 @@ export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayloa
 >;
 
 export type PrismaTokenWithTypes = PrismaToken & { types: PrismaTokenTypeOption[] };
+
+export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
+    include: {
+        dynamicData: true,
+        categories: true,
+        allTokens: {
+            include: {
+                token: true,
+            },
+        },
+        aprItems: true,
+        tokens: {
+            include: {
+                token: true,
+            },
+        },
+    },
+});
+
+export type PrismaPoolMinimal = Prisma.PrismaPoolGetPayload<typeof prismaPoolMinimal>;

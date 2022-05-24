@@ -7,7 +7,7 @@ extend type Query {
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
         textSearch: String
-    ): [GqlPoolBase!]!
+    ): [GqlPoolMinimal!]!
     poolGetPoolsCount(
         first: Int
         skip: Int
@@ -31,6 +31,19 @@ extend type Mutation {
     poolSyncPoolAllTokensRelationship: String!
     poolReloadAllPoolAprs: String!
     poolSyncTotalShares: String!
+}
+
+type GqlPoolMinimal {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    owner: Bytes
+    factory: Bytes
+    createTime: Int!
+    allTokens: [GqlPoolTokenExpanded!]!
+    dynamicData: GqlPoolDynamicData!
 }
 
 interface GqlPoolBase {

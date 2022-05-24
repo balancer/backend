@@ -8,15 +8,22 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaTokenPrice, PrismaTokenDynamicData } from '@prisma/client';
+import { PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
+import { Cache, CacheClass } from 'memory-cache';
+
+const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
+const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
 
 export class TokenService {
+    cache: CacheClass<string, any>;
     constructor(
         private readonly tokenDataLoaderService: TokenDataLoaderService,
         private readonly tokenPriceService: TokenPriceService,
         private readonly coingeckoDataService: CoingeckoDataService,
-    ) {}
+    ) {
+        this.cache = new Cache<string, any>();
+    }
 
     public async syncSanityData() {
         await this.tokenDataLoaderService.syncSanityTokenData();
@@ -44,11 +51,29 @@ export class TokenService {
     }
 
     public async getTokenPrices(): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getCurrentTokenPrices();
+        const cached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as PrismaTokenPrice[] | null;
+
+        if (cached) {
+            return cached;
+        }
+
+        const tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
+        this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
+
+        return tokenPrices;
     }
 
     public async getWhiteListedTokenPrices(): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getWhiteListedCurrentTokenPrices();
+        const cached = this.cache.get(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY) as PrismaTokenPrice[] | null;
+
+        if (cached) {
+            return cached;
+        }
+
+        const tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
+        this.cache.put(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
+
+        return tokenPrices;
     }
 
     public getPriceForToken(tokenPrices: PrismaTokenPrice[], tokenAddress: string): number {

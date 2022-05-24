@@ -10,7 +10,7 @@ import { PoolUsdDataService } from './src/pool-usd-data.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
-import { GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
+import { GqlPoolMinimal, GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
 import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
 import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
@@ -39,7 +39,7 @@ export class PoolService {
         return this.poolGqlLoaderService.getPool(id);
     }
 
-    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
     }
 

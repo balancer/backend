@@ -1,19 +1,24 @@
 import {
     PrismaNestedPoolWithNoNesting,
     PrismaNestedPoolWithSingleLayerNesting,
+    prismaPoolMinimal,
+    PrismaPoolMinimal,
     PrismaPoolTokenWithDynamicData,
     PrismaPoolTokenWithExpandedNesting,
     prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
 } from '../../../prisma/prisma-types';
 import {
+    GqlPoolDynamicData,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
     GqlPoolLinear,
     GqlPoolLinearNested,
+    GqlPoolMinimal,
     GqlPoolNestingType,
     GqlPoolPhantomStableNested,
     GqlPoolToken,
+    GqlPoolTokenExpanded,
     GqlPoolTokenUnion,
     GqlPoolUnion,
     GqlPoolWithdrawConfig,
@@ -46,13 +51,20 @@ export class PoolGqlLoaderService {
         return this.mapPoolToGqlPool(pool);
     }
 
-    public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+    public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
-            include: prismaPoolWithExpandedNesting.include,
+            include: prismaPoolMinimal.include,
         });
 
-        return pools.map((pool) => this.mapPoolToGqlPool(pool));
+        return pools.map((pool) => {
+            return {
+                ...pool,
+                decimals: 18,
+                dynamicData: this.getPoolDynamicData(pool),
+                allTokens: this.mapAllTokens(pool),
+            };
+        });
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -189,72 +201,15 @@ export class PoolGqlLoaderService {
     }
 
     private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
-        const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
-        const aprItems = pool.aprItems || [];
-        const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
-        const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
-        const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
-
-        const grouped = _.groupBy(
-            aprItems.filter((item) => item.group),
-            (item) => item.group,
-        );
-
         const mappedData = {
             ...pool,
             decimals: 18,
-            dynamicData: {
-                ...pool.dynamicData!,
-                totalLiquidity: `${totalLiquidity}`,
-                fees24h: `${fees24h}`,
-                volume24h: `${volume24h}`,
-                apr: {
-                    total: `${_.sumBy(aprItems, 'apr')}`,
-                    swapApr: `${_.sumBy(swapAprItems, 'apr')}`,
-                    nativeRewardApr: `${_.sumBy(nativeRewardAprItems, 'apr')}`,
-                    thirdPartyApr: `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`,
-                    items: [
-                        ...aprItemsWithNoGroup.map((item) => ({
-                            ...item,
-                            apr: `${item.apr}`,
-                            subItems: [],
-                        })),
-                        ..._.map(grouped, (items, group) => {
-                            const subItems = items.map((item) => ({ ...item, apr: `${item.apr}` }));
-                            const apr = _.sumBy(items, 'apr');
-                            let title = '';
-
-                            switch (group) {
-                                case 'YEARN':
-                                    title = 'Yearn boosted APR';
-                                    break;
-                            }
-
-                            return {
-                                title,
-                                apr: `${apr}`,
-                                subItems,
-                            };
-                        }),
-                    ],
-                    hasRewardApr: nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0,
-                },
-            },
+            dynamicData: this.getPoolDynamicData(pool),
             investConfig: this.getPoolInvestConfig(pool),
             withdrawConfig: this.getPoolWithdrawConfig(pool),
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
-            allTokens: pool.allTokens.map((token) => {
-                const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
-
-                return {
-                    ...token.token,
-                    id: `${pool.id}-${token.tokenAddress}`,
-                    isNested: !poolToken,
-                    isPhantomBpt: token.tokenAddress === pool.address,
-                };
-            }),
+            allTokens: this.mapAllTokens(pool),
         };
 
         //TODO: may need to build out the types here still
@@ -302,6 +257,71 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolWeighted',
             ...mappedData,
+        };
+    }
+
+    private mapAllTokens(pool: PrismaPoolMinimal): GqlPoolTokenExpanded[] {
+        return pool.allTokens.map((token) => {
+            const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
+
+            return {
+                ...token.token,
+                id: `${pool.id}-${token.tokenAddress}`,
+                isNested: !poolToken,
+                isPhantomBpt: token.tokenAddress === pool.address,
+            };
+        });
+    }
+
+    private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
+        const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
+        const aprItems = pool.aprItems || [];
+        const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
+        const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
+        const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
+        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
+
+        const grouped = _.groupBy(
+            aprItems.filter((item) => item.group),
+            (item) => item.group,
+        );
+
+        return {
+            ...pool.dynamicData!,
+            totalLiquidity: `${totalLiquidity}`,
+            fees24h: `${fees24h}`,
+            volume24h: `${volume24h}`,
+            apr: {
+                total: `${_.sumBy(aprItems, 'apr')}`,
+                swapApr: `${_.sumBy(swapAprItems, 'apr')}`,
+                nativeRewardApr: `${_.sumBy(nativeRewardAprItems, 'apr')}`,
+                thirdPartyApr: `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`,
+                items: [
+                    ...aprItemsWithNoGroup.map((item) => ({
+                        ...item,
+                        apr: `${item.apr}`,
+                        subItems: [],
+                    })),
+                    ..._.map(grouped, (items, group) => {
+                        const subItems = items.map((item) => ({ ...item, apr: `${item.apr}` }));
+                        const apr = _.sumBy(items, 'apr');
+                        let title = '';
+
+                        switch (group) {
+                            case 'YEARN':
+                                title = 'Yearn boosted APR';
+                                break;
+                        }
+
+                        return {
+                            title,
+                            apr: `${apr}`,
+                            subItems,
+                        };
+                    }),
+                ],
+                hasRewardApr: nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0,
+            },
         };
     }
 
