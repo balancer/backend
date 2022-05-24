@@ -14,7 +14,7 @@ import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
-const SEVEN_MINUTES_IN_MS = 420000;
+const TEN_MINUTES_IN_MS = 600000;
 const TWENTY_MINUTES_IN_MS = 1200000;
 
 const asyncCallWithTimeout = async (fn: () => Promise<any>, timeLimit: number) => {
@@ -75,26 +75,26 @@ export function scheduleWorkerTasks() {
     scheduleJob(
         '*/5 * * * *',
         'cache-historical-token-price',
-        SEVEN_MINUTES_IN_MS,
+        TEN_MINUTES_IN_MS,
         async () => {
             await tokenPriceService.cacheHistoricalTokenPrices();
         },
         true,
     );
 
-    scheduleJob('*/5 * * * *', 'cache-historical-nested-bpt-prices', SEVEN_MINUTES_IN_MS, async () => {
+    scheduleJob('*/5 * * * *', 'cache-historical-nested-bpt-prices', TEN_MINUTES_IN_MS, async () => {
         await tokenPriceService.cacheHistoricalNestedBptPrices();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-average-block-time', SEVEN_MINUTES_IN_MS, async () => {
+    scheduleJob('*/5 * * * *', 'cache-average-block-time', TEN_MINUTES_IN_MS, async () => {
         await blocksSubgraphService.cacheAverageBlockTime();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-fbeets-apr', SEVEN_MINUTES_IN_MS, async () => {
+    scheduleJob('*/5 * * * *', 'cache-fbeets-apr', TEN_MINUTES_IN_MS, async () => {
         await beetsBarService.cacheFbeetsApr();
     });
 
-    scheduleJob('*/5 * * * *', 'cache-tokens', SEVEN_MINUTES_IN_MS, async () => {
+    scheduleJob('*/5 * * * *', 'cache-tokens', TEN_MINUTES_IN_MS, async () => {
         await tokenService.cacheTokens();
     });
 
