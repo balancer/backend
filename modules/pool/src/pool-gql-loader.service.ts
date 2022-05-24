@@ -124,7 +124,7 @@ export class PoolGqlLoaderService {
             categories: {
                 every: {
                     category: {
-                        not: 'BLACK_LISTED',
+                        notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
                     },
                 },
                 ...(where?.categoryIn
