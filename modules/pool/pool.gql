@@ -30,6 +30,7 @@ extend type Mutation {
     poolUpdateAprs: String!
     poolSyncPoolAllTokensRelationship: String!
     poolReloadAllPoolAprs: String!
+    poolSyncTotalShares: String!
 }
 
 interface GqlPoolBase {

@@ -1,6 +1,7 @@
 import { poolService } from './pool.service';
 import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../util/resolver-util';
+import { prisma } from '../util/prisma-client';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -85,6 +86,20 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.realodAllPoolAprs();
+
+            return 'success';
+        },
+        poolSyncTotalShares: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            const items = await prisma.prismaPoolDynamicData.findMany({});
+
+            for (const item of items) {
+                await prisma.prismaPoolDynamicData.update({
+                    where: { id: item.id },
+                    data: { totalSharesNum: parseFloat(item.totalShares) },
+                });
+            }
 
             return 'success';
         },
