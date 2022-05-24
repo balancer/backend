@@ -12,6 +12,21 @@ import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 
+const TWO_MINUTES_IN_MS = 120000;
+
+const asyncCallWithTimeout = async (asyncPromise: Promise<void>, timeLimit: number) => {
+    let timeoutHandle: NodeJS.Timeout;
+
+    const timeoutPromise = new Promise((_resolve, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error('Call timed out!')), timeLimit);
+    });
+
+    return Promise.race([asyncPromise, timeoutPromise]).then((result) => {
+        clearTimeout(timeoutHandle);
+        return result;
+    });
+};
+
 function scheduleJob(
     cronExpression: string,
     taskName: string,
@@ -35,11 +50,12 @@ function scheduleJob(
             running = true;
             console.log(`Start ${taskName}...`);
             console.time(taskName);
-            await func();
+            await asyncCallWithTimeout(func(), TWO_MINUTES_IN_MS);
             console.log(`${taskName} done`);
             console.timeEnd(taskName);
         } catch (e) {
             console.log(`Error ${taskName}`, e);
+            console.timeEnd(taskName);
         }
 
         running = false;
