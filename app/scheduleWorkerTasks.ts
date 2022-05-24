@@ -14,14 +14,14 @@ import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 
 const TWO_MINUTES_IN_MS = 120000;
 
-const asyncCallWithTimeout = async (asyncPromise: Promise<void>, timeLimit: number) => {
+const asyncCallWithTimeout = async (fn: () => Promise<any>, timeLimit: number) => {
     let timeoutHandle: NodeJS.Timeout;
 
     const timeoutPromise = new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => reject(new Error('Call timed out!')), timeLimit);
     });
 
-    return Promise.race([asyncPromise, timeoutPromise]).then((result) => {
+    return Promise.race([fn(), timeoutPromise]).then((result) => {
         clearTimeout(timeoutHandle);
         return result;
     });
@@ -50,15 +50,14 @@ function scheduleJob(
             running = true;
             console.log(`Start ${taskName}...`);
             console.time(taskName);
-            await asyncCallWithTimeout(func(), TWO_MINUTES_IN_MS);
+            await asyncCallWithTimeout(func, TWO_MINUTES_IN_MS);
             console.log(`${taskName} done`);
-            console.timeEnd(taskName);
         } catch (e) {
             console.log(`Error ${taskName}`, e);
+        } finally {
             console.timeEnd(taskName);
+            running = false;
         }
-
-        running = false;
     });
 }
 
