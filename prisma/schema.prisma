@@ -94,6 +94,7 @@ model PrismaPoolDynamicData {
     swapFee             String
     swapEnabled         Boolean
     totalShares         String
+    totalSharesNum      Float               @default(0)
     totalLiquidity      Float
     volume24h           Float
     fees24h             Float

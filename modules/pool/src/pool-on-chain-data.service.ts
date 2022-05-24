@@ -260,6 +260,7 @@ export class PoolOnChainDataService {
                         data: {
                             swapFee,
                             totalShares,
+                            totalSharesNum: parseFloat(totalShares),
                             swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
                             blockNumber,
                         },

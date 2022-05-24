@@ -159,6 +159,7 @@ export class PoolCreatorService {
                         swapFee: pool.swapFee,
                         swapEnabled: pool.swapEnabled,
                         totalShares: pool.totalShares,
+                        totalSharesNum: parseFloat(pool.totalShares),
                         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
                         volume24h: 0,
                         fees24h: 0,
