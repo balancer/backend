@@ -107,6 +107,11 @@ export function scheduleWorkerTasks() {
         await balancerService.cachePools();
     });
 
+    //every 5 minutes
+    scheduleJob('*/5 * * * *', 'syncTokenDynamicData', async () => {
+        await tokenService.syncTokenDynamicData();
+    });
+
     /*
     //every five minutes
     scheduleJob(
