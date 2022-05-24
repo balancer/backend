@@ -16,6 +16,7 @@ const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
 const TEN_MINUTES_IN_MS = 600000;
 const TWENTY_MINUTES_IN_MS = 1200000;
+const ONE_HOUR_IN_MS = 3600000;
 
 const asyncCallWithTimeout = async (fn: () => Promise<any>, timeLimit: number) => {
     let timeoutHandle: NodeJS.Timeout;
@@ -75,7 +76,7 @@ export function scheduleWorkerTasks() {
     scheduleJob(
         '*/5 * * * *',
         'cache-historical-token-price',
-        TEN_MINUTES_IN_MS,
+        ONE_HOUR_IN_MS,
         async () => {
             await tokenPriceService.cacheHistoricalTokenPrices();
         },
