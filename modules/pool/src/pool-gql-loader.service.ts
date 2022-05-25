@@ -545,17 +545,19 @@ export class PoolGqlLoaderService {
             ...pool,
             ...pool.linearData!,
             ...pool.linearDynamicData!,
-            tokens: pool.tokens.map((token) =>
-                this.mapPoolTokenToGql({
-                    ...token,
-                    dynamicData: token.dynamicData
-                        ? {
-                              ...token.dynamicData,
-                              balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
-                          }
-                        : null,
-                }),
-            ),
+            tokens: pool.tokens
+                .filter((token) => token.address !== pool.address)
+                .map((token) =>
+                    this.mapPoolTokenToGql({
+                        ...token,
+                        dynamicData: token.dynamicData
+                            ? {
+                                  ...token.dynamicData,
+                                  balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
+                              }
+                            : null,
+                    }),
+                ),
             totalLiquidity: `${totalLiquidity}`,
             totalShares: pool.dynamicData?.totalShares || '0',
         };
@@ -569,35 +571,37 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolPhantomStableNested',
             ...pool,
             nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => {
-                const nestedPool = token.nestedPool;
+            tokens: pool.tokens
+                .filter((token) => token.address !== pool.address)
+                .map((token) => {
+                    const nestedPool = token.nestedPool;
 
-                if (nestedPool && nestedPool.type === 'LINEAR') {
-                    const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-                    const percentOfLinearSupplyNested =
-                        totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
+                    if (nestedPool && nestedPool.type === 'LINEAR') {
+                        const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
+                        const percentOfLinearSupplyNested =
+                            totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
 
-                    return {
-                        ...this.mapPoolTokenToGql({
-                            ...token,
-                            dynamicData: token.dynamicData
-                                ? {
-                                      ...token.dynamicData,
-                                      balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
-                                  }
-                                : null,
-                        }),
-                        __typename: 'GqlPoolTokenLinear',
-                        ...this.getLinearPoolTokenData(token, nestedPool),
-                        pool: this.mapNestedPoolToGqlPoolLinearNested(
-                            nestedPool,
-                            percentOfSupplyNested * percentOfLinearSupplyNested,
-                        ),
-                    };
-                }
+                        return {
+                            ...this.mapPoolTokenToGql({
+                                ...token,
+                                dynamicData: token.dynamicData
+                                    ? {
+                                          ...token.dynamicData,
+                                          balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
+                                      }
+                                    : null,
+                            }),
+                            __typename: 'GqlPoolTokenLinear',
+                            ...this.getLinearPoolTokenData(token, nestedPool),
+                            pool: this.mapNestedPoolToGqlPoolLinearNested(
+                                nestedPool,
+                                percentOfSupplyNested * percentOfLinearSupplyNested,
+                            ),
+                        };
+                    }
 
-                return this.mapPoolTokenToGql(token);
-            }),
+                    return this.mapPoolTokenToGql(token);
+                }),
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
         };
