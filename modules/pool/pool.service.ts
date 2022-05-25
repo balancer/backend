@@ -22,6 +22,7 @@ import { PoolSyncService } from './src/pool-sync.service';
 import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
+import { PrismaPoolFilter } from '@prisma/client';
 
 export class PoolService {
     constructor(
@@ -45,6 +46,10 @@ export class PoolService {
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return this.poolGqlLoaderService.getPoolsCount(args);
+    }
+
+    public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
+        return prisma.prismaPoolFilter.findMany({});
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {

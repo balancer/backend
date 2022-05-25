@@ -16,7 +16,7 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): Int!
-    poolGetPoolCategories: [GqlPoolCategory!]!
+    poolGetPoolFilters: [GqlPoolFilterDefinition!]!
 }
 
 extend type Mutation {
@@ -451,8 +451,7 @@ type GqlPoolTokenExpanded {
     isPhantomBpt: Boolean!
 }
 
-type GqlPoolCategory {
+type GqlPoolFilterDefinition {
     id: ID!
     title: String!
-    poolIds: [String!]!
 }
