@@ -15,9 +15,28 @@ import { env } from './env';
 import { runWithMinimumInterval } from '../modules/util/scheduling';
 import { poolService } from '../modules/pool/pool.service';
 
+const ONE_MINUTE_IN_MS = 60000;
+const TWO_MINUTES_IN_MS = 120000;
+const FIVE_MINUTES_IN_MS = 300000;
+const TEN_MINUTES_IN_MS = 600000;
+
+const asyncCallWithTimeout = async (fn: () => Promise<any>, timeLimit: number) => {
+    let timeoutHandle: NodeJS.Timeout;
+
+    const timeoutPromise = new Promise((_resolve, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error('Call timed out!')), timeLimit);
+    });
+
+    return Promise.race([fn(), timeoutPromise]).then((result) => {
+        clearTimeout(timeoutHandle);
+        return result;
+    });
+};
+
 function scheduleJob(
     cronExpression: string,
     taskName: string,
+    timeout: number,
     func: () => Promise<void>,
     runOnStartup: boolean = false,
 ) {
@@ -38,59 +57,60 @@ function scheduleJob(
             running = true;
             console.log(`Start ${taskName}...`);
             console.time(taskName);
-            await func();
+            await asyncCallWithTimeout(func, timeout);
             console.log(`${taskName} done`);
-            console.timeEnd(taskName);
         } catch (e) {
             console.log(`Error ${taskName}`, e);
+        } finally {
+            console.timeEnd(taskName);
+            running = false;
         }
-
-        running = false;
     });
 }
 
 export function scheduleWorkerTasks() {
     //every 20 seconds
-    scheduleJob('*/20 * * * * *', 'loadTokenPrices', async () => {
+    scheduleJob('*/20 * * * * *', 'loadTokenPrices', ONE_MINUTE_IN_MS, async () => {
         //await tokenPriceService.cacheTokenPrices();
 
         await tokenService.loadTokenPrices();
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'cacheBeetsPrice', async () => {
+    scheduleJob('*/30 * * * * *', 'cacheBeetsPrice', TWO_MINUTES_IN_MS, async () => {
         await tokenPriceService.cacheBeetsPrice();
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'poolUpdateLiquidityValuesForAllPools', async () => {
+    scheduleJob('*/30 * * * * *', 'poolUpdateLiquidityValuesForAllPools', TWO_MINUTES_IN_MS, async () => {
         await poolService.updateLiquidityValuesForAllPools();
         await poolService.updatePoolAprs();
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'loadOnChainDataForPoolsWithActiveUpdates', async () => {
+    scheduleJob('*/30 * * * * *', 'loadOnChainDataForPoolsWithActiveUpdates', TWO_MINUTES_IN_MS, async () => {
         await poolService.loadOnChainDataForPoolsWithActiveUpdates();
     });
 
     //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'syncNewPoolsFromSubgraph', async () => {
+    scheduleJob('*/30 * * * * *', 'syncNewPoolsFromSubgraph', TWO_MINUTES_IN_MS, async () => {
         await poolService.syncNewPoolsFromSubgraph();
     });
 
     //every 3 minutes
-    scheduleJob('*/3 * * * *', 'poolSyncSanityPoolData', async () => {
+    scheduleJob('*/3 * * * *', 'poolSyncSanityPoolData', FIVE_MINUTES_IN_MS, async () => {
         await poolService.syncSanityPoolData();
     });
 
     //every 5 minutes
-    scheduleJob('*/5 * * * *', 'syncTokensFromPoolTokens', async () => {
+    scheduleJob('*/5 * * * *', 'syncTokensFromPoolTokens', TEN_MINUTES_IN_MS, async () => {
         await tokenService.syncSanityData();
     });
 
     scheduleJob(
         '*/5 * * * *',
         'cacheAverageBlockTime',
+        TEN_MINUTES_IN_MS,
         async () => {
             await blocksSubgraphService.cacheAverageBlockTime();
         },
@@ -98,17 +118,17 @@ export function scheduleWorkerTasks() {
     );
 
     //once a minute
-    scheduleJob('* * * * *', 'sor-reload-graph', async () => {
+    scheduleJob('* * * * *', 'sor-reload-graph', TWO_MINUTES_IN_MS, async () => {
         await balancerSdk.sor.reloadGraph();
     });
 
     //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', async () => {
+    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', ONE_MINUTE_IN_MS, async () => {
         await balancerService.cachePools();
     });
 
     //every 5 minutes
-    scheduleJob('*/5 * * * *', 'syncTokenDynamicData', async () => {
+    scheduleJob('*/5 * * * *', 'syncTokenDynamicData', TEN_MINUTES_IN_MS, async () => {
         await tokenService.syncTokenDynamicData();
     });
 
