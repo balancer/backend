@@ -17,6 +17,7 @@ extend type Query {
         textSearch: String
     ): Int!
     poolGetPoolFilters: [GqlPoolFilterDefinition!]!
+    poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
 }
 
 extend type Mutation {
@@ -454,4 +455,23 @@ type GqlPoolTokenExpanded {
 type GqlPoolFilterDefinition {
     id: ID!
     title: String!
+}
+
+type GqlPoolSwap {
+    id: ID!
+    poolId: String!
+    userAddress: String!
+    tokenIn: String!
+    tokenOut: String!
+    tokenAmountIn: String!
+    tokenAmountOut: String!
+    timestamp: Int!
+    tx: String!
+    valueUSD: Float!
+}
+
+input GqlPoolSwapFilter {
+    tokenInIn: [String!]
+    tokenOutIn: [String!]
+    poolIdIn: [String!]
 }

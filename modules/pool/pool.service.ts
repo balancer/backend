@@ -10,7 +10,13 @@ import { PoolUsdDataService } from './src/pool-usd-data.service';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
-import { GqlPoolMinimal, GqlPoolTokenUnion, GqlPoolUnion, QueryPoolGetPoolsArgs } from '../../schema';
+import {
+    GqlPoolMinimal,
+    GqlPoolTokenUnion,
+    GqlPoolUnion,
+    QueryPoolGetPoolsArgs,
+    QueryPoolGetSwapsArgs,
+} from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
 import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
 import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
@@ -22,7 +28,8 @@ import { PoolSyncService } from './src/pool-sync.service';
 import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
-import { PrismaPoolFilter } from '@prisma/client';
+import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
+import { PoolSwapService } from './src/pool-swap.service';
 
 export class PoolService {
     constructor(
@@ -34,6 +41,7 @@ export class PoolService {
         private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSyncService: PoolSyncService,
+        private readonly poolSwapService: PoolSwapService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -50,6 +58,10 @@ export class PoolService {
 
     public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
         return prisma.prismaPoolFilter.findMany({});
+    }
+
+    public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
+        return this.poolSwapService.getSwaps(args);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -120,7 +132,7 @@ export class PoolService {
 
     public async syncSwapsForLast24Hours(): Promise<string[]> {
         console.time('syncSwapsForLast24Hours');
-        const poolIds = await this.poolUsdDataService.syncSwapsForLast24Hours();
+        const poolIds = await this.poolSwapService.syncSwapsForLast24Hours();
         console.timeEnd('syncSwapsForLast24Hours');
 
         return poolIds;
@@ -151,7 +163,7 @@ export const poolService = new PoolService(
         BALANCER_NETWORK_CONFIG[env.CHAIN_ID].vault,
         tokenService,
     ),
-    new PoolUsdDataService(tokenService, balancerSubgraphService),
+    new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolSanityDataLoaderService(),
     //TODO: this will depend on the chain
@@ -165,4 +177,5 @@ export const poolService = new PoolService(
         new MasterchefFarmAprService(),
     ]),
     new PoolSyncService(),
+    new PoolSwapService(tokenService, balancerSubgraphService),
 );
