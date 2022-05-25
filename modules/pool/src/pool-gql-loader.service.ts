@@ -128,11 +128,22 @@ export class PoolGqlLoaderService {
                 notIn: where?.poolTypeNotIn || undefined,
             },
             allTokens: {
+                ...(where?.tokensNotIn
+                    ? {
+                          every: {
+                              token: {
+                                  address: {
+                                      notIn: where?.tokensNotIn || undefined,
+                                      mode: 'insensitive',
+                                  },
+                              },
+                          },
+                      }
+                    : {}),
                 some: {
                     token: {
                         address: {
                             in: where?.tokensIn || undefined,
-                            notIn: where?.tokensNotIn || undefined,
                             mode: 'insensitive',
                         },
                     },
@@ -154,6 +165,26 @@ export class PoolGqlLoaderService {
                           some: {
                               category: {
                                   in: where.categoryIn,
+                              },
+                          },
+                      }
+                    : {}),
+            },
+            filters: {
+                ...(where?.filterNotIn
+                    ? {
+                          every: {
+                              filterId: {
+                                  notIn: where.filterNotIn,
+                              },
+                          },
+                      }
+                    : {}),
+                ...(where?.filterIn
+                    ? {
+                          some: {
+                              filterId: {
+                                  in: where.filterIn,
                               },
                           },
                       }

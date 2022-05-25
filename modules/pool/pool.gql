@@ -16,6 +16,7 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): Int!
+    poolGetPoolCategories: [GqlPoolCategory!]!
 }
 
 extend type Mutation {
@@ -420,6 +421,8 @@ input GqlPoolFilter {
     poolTypeNotIn: [GqlPoolFilterType!]
     idIn: [String!]
     idNotIn: [String!]
+    filterIn: [String!]
+    filterNotIn: [String!]
 }
 
 enum GqlPoolFilterCategory {
@@ -446,4 +449,10 @@ type GqlPoolTokenExpanded {
     decimals: Int!
     isNested: Boolean!
     isPhantomBpt: Boolean!
+}
+
+type GqlPoolCategory {
+    id: ID!
+    title: String!
+    poolIds: [String!]!
 }

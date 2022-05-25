@@ -51,6 +51,7 @@ model PrismaPool {
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 
     allTokens           PrismaPoolExpandedTokens[]
+    filters               PrismaPoolFilterMap[]
 }
 
 enum PrismaPoolType {
@@ -208,6 +209,23 @@ model PrismaPoolExpandedTokens {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
 
     @@id([tokenAddress, poolId])
+}
+
+
+model PrismaPoolFilter {
+    id                  String              @id
+    title               String
+
+    pools               PrismaPoolFilterMap[]
+}
+
+
+model PrismaPoolFilterMap {
+    id                  String              @id
+    filterId            String
+    filter              PrismaPoolFilter    @relation(fields:[filterId], references: [id])
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
 }
 
 

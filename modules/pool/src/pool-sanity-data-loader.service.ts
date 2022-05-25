@@ -6,18 +6,25 @@ import { PrismaPoolCategoryType } from '@prisma/client';
 interface SanityPoolConfig {
     incentivizedPools: string[];
     blacklistedPools: string[];
+    poolFilters: {
+        id: string;
+        title: string;
+        pools: string[];
+    }[];
 }
 
 export class PoolSanityDataLoaderService {
     public async syncPoolSanityData() {
         const response = await sanityClient.fetch(`*[_type == "config" && chainId == ${env.CHAIN_ID}][0]{
             incentivizedPools,
-            blacklistedPools
+            blacklistedPools,
+            poolFilters
         }`);
 
         const config: SanityPoolConfig = {
             incentivizedPools: response?.incentivizedPools ?? [],
             blacklistedPools: response?.blacklistedPools ?? [],
+            poolFilters: response?.poolFilters ?? [],
         };
 
         const categories = await prisma.prismaPoolCategory.findMany({});
@@ -26,6 +33,30 @@ export class PoolSanityDataLoaderService {
 
         await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED');
         await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED');
+
+        await prisma.$transaction([
+            prisma.prismaPoolFilterMap.deleteMany({}),
+            prisma.prismaPoolFilter.deleteMany({}),
+            prisma.prismaPoolFilter.createMany({
+                data: config.poolFilters.map((item) => ({
+                    id: item.id,
+                    title: item.title,
+                })),
+                skipDuplicates: true,
+            }),
+            prisma.prismaPoolFilterMap.createMany({
+                data: config.poolFilters
+                    .map((item) => {
+                        return item.pools.map((poolId) => ({
+                            id: `${item.id}-${poolId}`,
+                            poolId,
+                            filterId: item.id,
+                        }));
+                    })
+                    .flat(),
+                skipDuplicates: true,
+            }),
+        ]);
     }
 
     private async updatePoolCategory(currentPoolIds: string[], newPoolIds: string[], category: PrismaPoolCategoryType) {
