@@ -1,5 +1,5 @@
 import { utils } from 'ethers';
-import beetsAbi from './abi/BeethovenxToken.json';
+import beetsAbi from '../beets/abi/BeethovenxToken.json';
 import { env } from '../../app/env';
 import { getContractAt } from '../util/ethers';
 

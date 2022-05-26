@@ -35,6 +35,7 @@ export interface NetworkConfig {
         address: string;
         farmId: string;
         poolId: string;
+        poolAddress: string;
     };
 }
 
@@ -66,6 +67,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
             farmId: '22',
             poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
         },
     },
 };
