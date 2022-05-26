@@ -6,4 +6,5 @@ export interface PoolAprService {
 
 export interface PoolStakingService {
     syncStakingForPools(): Promise<void>;
+    reloadStakingForAllPools(): Promise<void>;
 }

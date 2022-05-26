@@ -239,6 +239,7 @@ model PrismaPoolStaking {
 enum PrismaPoolStakingType {
     MASTER_CHEF
     GAUGE
+    FRESH_BEETS
 }
 
 

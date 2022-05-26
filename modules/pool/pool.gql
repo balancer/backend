@@ -33,6 +33,7 @@ extend type Mutation {
     poolSyncPoolAllTokensRelationship: String!
     poolReloadAllPoolAprs: String!
     poolSyncTotalShares: String!
+    poolReloadStakingForAllPools: String!
 }
 
 type GqlPoolMinimal {
@@ -500,6 +501,7 @@ type GqlPoolStakingRewarder {
 enum GqlPoolStakingType {
     MASTER_CHEF
     GAUGE
+    FRESH_BEETS
 }
 
 enum GqlPoolStakingRewarderType {

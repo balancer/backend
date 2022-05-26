@@ -74,6 +74,10 @@ export class PoolService {
         return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
     }
 
+    public async reloadStakingForAllPools(): Promise<void> {
+        return this.poolStakingService.reloadStakingForAllPools();
+    }
+
     public async syncPoolAllTokensRelationship(): Promise<void> {
         const pools = await prisma.prismaPool.findMany({ select: { id: true } });
 

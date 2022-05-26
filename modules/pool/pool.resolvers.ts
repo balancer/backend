@@ -109,6 +109,11 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolReloadStakingForAllPools: async (parent, args, context) => {
+            await poolService.reloadStakingForAllPools();
+
+            return 'success';
+        },
     },
 };
 
