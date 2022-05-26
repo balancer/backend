@@ -2,7 +2,7 @@ import { PoolAprService } from '../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { prisma } from '../../util/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { beetsFarmService } from '../../beets/beets-farm.service';
+import { beetsFarmService } from '../../beets_old/beets-farm.service';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { GqlBeetsFarm } from '../../../schema';
 import { secondsPerYear } from '../../util/time';

@@ -32,7 +32,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import { cache } from '../cache/cache';
 import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
-import { beetsFarmService } from '../beets/beets-farm.service';
+import { beetsFarmService } from '../beets_old/beets-farm.service';
 import { yearnVaultService } from '../boosted/yearn-vault.service';
 import { BalancerBoostedPoolService } from './src/balancer-boosted-pool.service';
 import { spookySwapService } from '../boosted/spooky-swap.service';

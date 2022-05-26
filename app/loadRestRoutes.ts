@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { getCirculatingSupply } from '../modules/beets/beets';
+import { getCirculatingSupply } from '../modules/beets_old/beets';
 import { balancerService } from '../modules/balancer/balancer.service';
 
 export function loadRestRoutes(app: Express) {

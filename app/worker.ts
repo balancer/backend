@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
-import { beetsService } from '../modules/beets/beets.service';
+import { beetsService } from '../modules/beets_old/beets.service';
 import { balancerService } from '../modules/balancer/balancer.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { balancerSubgraphService } from '../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { beetsFarmService } from '../modules/beets/beets-farm.service';
+import { beetsFarmService } from '../modules/beets_old/beets-farm.service';
 
 export function startWorker(app: Express) {
     /*const app = express();
