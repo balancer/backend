@@ -25,7 +25,8 @@ model PrismaPool {
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 
     allTokens           PrismaPoolExpandedTokens[]
-    filters               PrismaPoolFilterMap[]
+    filters             PrismaPoolFilterMap[]
+    staking             PrismaPoolStaking?
 }
 
 enum PrismaPoolType {
@@ -193,11 +194,23 @@ model PrismaPoolFilter {
     pools               PrismaPoolFilterMap[]
 }
 
-
 model PrismaPoolFilterMap {
     id                  String              @id
     filterId            String
     filter              PrismaPoolFilter    @relation(fields:[filterId], references: [id])
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
+}
+
+model PrismaPoolStaking {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    type                PrismaPoolStakingType
+    address             String
+}
+
+enum PrismaPoolStakingType {
+    MASTER_CHEF
+    GAUGE
 }

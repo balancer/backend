@@ -19,6 +19,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
         dynamicData: true,
         stableDynamicData: true,
         linearDynamicData: true,
+        staking: true,
         categories: true,
         allTokens: {
             include: {
@@ -167,6 +168,7 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                 token: true,
             },
         },
+        staking: true,
     },
 });
 

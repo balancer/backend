@@ -46,6 +46,7 @@ type GqlPoolMinimal {
     createTime: Int!
     allTokens: [GqlPoolTokenExpanded!]!
     dynamicData: GqlPoolDynamicData!
+    staking: GqlPoolStaking
 }
 
 interface GqlPoolBase {
@@ -64,6 +65,7 @@ interface GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
 
     dynamicData: GqlPoolDynamicData!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolDynamicData {
@@ -132,6 +134,7 @@ type GqlPoolWeighted implements GqlPoolBase {
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -150,6 +153,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -168,6 +172,7 @@ type GqlPoolStable implements GqlPoolBase {
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -186,6 +191,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -207,6 +213,7 @@ type GqlPoolElement implements GqlPoolBase {
     unitSeconds: BigInt!
     principalToken: Bytes!
     baseToken: Bytes!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -229,6 +236,7 @@ type GqlPoolLinear implements GqlPoolBase {
     wrappedIndex: Int!
     upperTarget: BigInt!
     lowerTarget: BigInt!
+    staking: GqlPoolStaking
 }
 
 type GqlPoolLinearNested {
@@ -474,4 +482,26 @@ input GqlPoolSwapFilter {
     tokenInIn: [String!]
     tokenOutIn: [String!]
     poolIdIn: [String!]
+}
+
+type GqlPoolStaking {
+    id: ID!
+    type: GqlPoolStakingType!
+    address: String!
+    rewarders: [GqlPoolStakingRewarder!]
+}
+
+type GqlPoolStakingRewarder {
+    id: ID!
+    type: GqlPoolStakingRewarderType!
+    address: String!
+}
+
+enum GqlPoolStakingType {
+    MASTER_CHEF
+    GAUGE
+}
+
+enum GqlPoolStakingRewarderType {
+    MASTER_CHEF_REWARDER
 }

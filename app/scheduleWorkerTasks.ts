@@ -132,6 +132,11 @@ export function scheduleWorkerTasks() {
         await tokenService.syncTokenDynamicData();
     });
 
+    //every 5 minutes
+    scheduleJob('*/5 * * * *', 'syncStakingForPools', ONE_MINUTE_IN_MS, async () => {
+        await poolService.syncStakingForPools();
+    });
+
     /*
     //every five minutes
     scheduleJob(

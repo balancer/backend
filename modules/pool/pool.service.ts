@@ -30,6 +30,9 @@ import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.s
 import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
 import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
 import { PoolSwapService } from './src/pool-swap.service';
+import { PoolStakingService } from './pool-types';
+import { MasterChefStakingService } from './staking/master-chef-staking.service';
+import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 
 export class PoolService {
     constructor(
@@ -42,6 +45,7 @@ export class PoolService {
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
+        private readonly poolStakingService: PoolStakingService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -142,6 +146,10 @@ export class PoolService {
         await this.poolSanityDataLoaderService.syncPoolSanityData();
     }
 
+    public async syncStakingForPools() {
+        await this.poolStakingService.syncStakingForPools();
+    }
+
     public async updatePoolAprs() {
         await this.poolAprUpdaterService.updatePoolAprs();
     }
@@ -178,4 +186,5 @@ export const poolService = new PoolService(
     ]),
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
+    new MasterChefStakingService(masterchefService),
 );
