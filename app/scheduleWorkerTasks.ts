@@ -44,6 +44,11 @@ function scheduleJob(
             console.log(`error on initial run ${taskName}`);
         });
     }
+    //make sure we have every metric
+    cronTimeMetric.publish(`${taskName}-skip`);
+    cronTimeMetric.publish(`${taskName}-timeout`);
+    cronTimeMetric.publish(`${taskName}-error`);
+    cronTimeMetric.publish(`${taskName}-duration`);
 
     let running = false;
     cron.schedule(cronExpression, async () => {
