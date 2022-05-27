@@ -18,6 +18,7 @@ extend type Query {
     ): Int!
     poolGetPoolFilters: [GqlPoolFilterDefinition!]!
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
+    poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
 }
 
 extend type Mutation {
@@ -509,4 +510,29 @@ enum GqlPoolStakingType {
     MASTER_CHEF
     GAUGE
     FRESH_BEETS
+}
+
+input GqlPoolJoinExitFilter {
+    poolIdIn: [String!]
+}
+
+type GqlPoolJoinExit {
+    id: ID!
+    type: GqlPoolJoinExitType!
+    sender: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: String!
+    tx: String!
+    amounts: [GqlPoolJoinExitAmount!]!
+}
+
+enum GqlPoolJoinExitType {
+    Join
+    Exit
+}
+
+type GqlPoolJoinExitAmount {
+    address: String!
+    amount: String!
 }

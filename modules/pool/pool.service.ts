@@ -11,9 +11,11 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import {
+    GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolTokenUnion,
     GqlPoolUnion,
+    QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
 } from '../../schema';
@@ -66,6 +68,10 @@ export class PoolService {
 
     public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
         return this.poolSwapService.getSwaps(args);
+    }
+
+    public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
+        return this.poolSwapService.getJoinExits(args);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {

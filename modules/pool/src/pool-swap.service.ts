@@ -1,9 +1,13 @@
 import { prisma } from '../../util/prisma-client';
 import moment from 'moment-timezone';
-import { OrderDirection, Swap_OrderBy } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import {
+    JoinExit_OrderBy,
+    OrderDirection,
+    Swap_OrderBy,
+} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { TokenService } from '../../token/token.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { QueryPoolGetSwapsArgs } from '../../../schema';
+import { GqlPoolJoinExit, QueryPoolGetJoinExitsArgs, QueryPoolGetSwapsArgs } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
 
 export class PoolSwapService {
@@ -11,6 +15,25 @@ export class PoolSwapService {
         private readonly tokenService: TokenService,
         private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
+
+    public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
+        const first = !args.first || args.first > 100 ? 10 : args.first;
+
+        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
+            where: { pool_in: args.where?.poolIdIn },
+            first,
+            skip: args.skip,
+            orderBy: JoinExit_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Desc,
+        });
+
+        return joinExits.map((joinExit) => ({
+            ...joinExit,
+            __typename: 'GqlPoolJoinExit',
+            poolId: joinExit.pool.id,
+            amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
+        }));
+    }
 
     public async getSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
         const take = !args.first || args.first > 100 ? 10 : args.first;

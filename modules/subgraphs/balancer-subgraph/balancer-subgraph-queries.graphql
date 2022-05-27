@@ -314,9 +314,6 @@ fragment BalancerJoinExit on JoinExit {
     timestamp
     tx
     type
-    user {
-        id
-    }
     pool {
         id
         tokensList

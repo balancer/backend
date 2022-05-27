@@ -208,8 +208,14 @@ model PrismaPoolStaking {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     type                PrismaPoolStakingType
     address             String
-    rewarder            String?
     farm                PrismaPoolStakingMasterChefFarm?
+}
+
+
+enum PrismaPoolStakingType {
+    MASTER_CHEF
+    GAUGE
+    FRESH_BEETS
 }
 
 model PrismaPoolStakingMasterChefFarm {
@@ -230,9 +236,3 @@ model PrismaPoolStakingMasterChefFarmRewarder {
     rewardPerSecond     String
 }
 
-
-enum PrismaPoolStakingType {
-    MASTER_CHEF
-    GAUGE
-    FRESH_BEETS
-}
