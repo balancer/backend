@@ -19,7 +19,15 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
         dynamicData: true,
         stableDynamicData: true,
         linearDynamicData: true,
-        staking: true,
+        staking: {
+            include: {
+                farm: {
+                    include: {
+                        rewarders: true,
+                    },
+                },
+            },
+        },
         categories: true,
         allTokens: {
             include: {

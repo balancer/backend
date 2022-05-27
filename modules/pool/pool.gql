@@ -489,21 +489,24 @@ type GqlPoolStaking {
     id: ID!
     type: GqlPoolStakingType!
     address: String!
-    rewarders: [GqlPoolStakingRewarder!]
+    farm: GqlPoolStakingMasterChefFarm
 }
 
-type GqlPoolStakingRewarder {
+type GqlPoolStakingMasterChefFarm {
     id: ID!
-    type: GqlPoolStakingRewarderType!
+    beetsPerBlock: String!
+    rewarders: [GqlPoolStakingMasterChefFarmRewarder!]
+}
+
+type GqlPoolStakingMasterChefFarmRewarder {
+    id: ID!
     address: String!
+    tokenAddress: String!
+    rewardPerSecond: String!
 }
 
 enum GqlPoolStakingType {
     MASTER_CHEF
     GAUGE
     FRESH_BEETS
-}
-
-enum GqlPoolStakingRewarderType {
-    MASTER_CHEF_REWARDER
 }
