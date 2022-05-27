@@ -1,8 +1,8 @@
-import { MetricPublisher } from '../modules/util/metrics.client';
+import { MetricPublisher } from './util/metrics.client';
 
 class CronTimeMetric extends MetricPublisher {
     constructor() {
-        super('Crons', 'Backend/CronTime');
+        super('Backend/CronTime');
     }
 }
 

@@ -4,7 +4,7 @@ import {
     MetricDatum,
     PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
-import { env } from '../../app/env';
+import { env } from '../env';
 
 export interface NotificationsCloudwatchMetric {
     merticData: MetricDatum[];
@@ -12,25 +12,23 @@ export interface NotificationsCloudwatchMetric {
 }
 
 export abstract class MetricPublisher {
-    protected metricName: string;
     protected namespace: string;
     protected environment: string;
     protected configuration?: CloudWatchClientConfig;
     private client: CloudWatchClient;
 
-    constructor(metricName: string, namespace: string, configuration?: CloudWatchClientConfig) {
-        this.metricName = metricName;
+    constructor(namespace: string, configuration?: CloudWatchClientConfig) {
         this.namespace = namespace;
         this.environment = env.NODE_ENV;
         this.client = new CloudWatchClient(this.getOrDefaultConfig());
     }
 
-    public async publish(count?: number): Promise<void> {
+    public async publish(metricName: string, count?: number): Promise<void> {
         try {
             const command = new PutMetricDataCommand({
                 MetricData: [
                     {
-                        MetricName: this.metricName,
+                        MetricName: metricName,
                         Dimensions: [
                             {
                                 Name: 'Environment',

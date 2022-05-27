@@ -11,6 +11,7 @@ import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
+import cronTimeMetric from './cron.metric';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -48,19 +49,29 @@ function scheduleJob(
     cron.schedule(cronExpression, async () => {
         if (running) {
             console.log(`${taskName} already running, skipping call...`);
+            cronTimeMetric.publish(`${taskName}-skip`);
             return;
         }
 
+        let elapsed = 0;
         try {
             running = true;
             console.log(`Start ${taskName}...`);
             console.time(taskName);
+            const start = new Date().getTime();
             await asyncCallWithTimeout(func, timeout);
+            elapsed = new Date().getTime() - start;
             console.log(`${taskName} done`);
         } catch (e) {
+            if (e instanceof Error && e.message === 'Call timed out!') {
+                cronTimeMetric.publish(`${taskName}-timeout`);
+            } else {
+                cronTimeMetric.publish(`${taskName}-error`);
+            }
             console.log(`Error ${taskName}`, e);
         } finally {
             console.timeEnd(taskName);
+            cronTimeMetric.publish(`${taskName}-duration`, elapsed);
             running = false;
         }
     });
