@@ -11,7 +11,7 @@ env:
 phases:
     install:
         runtime-versions:
-            nodejs: latest
+            nodejs: 14.x
         commands:
             - yarn install
     build:
