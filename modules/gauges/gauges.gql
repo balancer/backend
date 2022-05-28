@@ -1,0 +1,32 @@
+extend type Query {
+    gauges: [GqlGauge]
+    gaugesUserShares: [GqlGaugeUserShare!]!
+}
+
+type GqlGauge {
+    id: ID!
+    address: Bytes!
+    totalSupply: BigDecimal!
+    poolId: Bytes
+    tokens: [GqlGaugeRewardToken!]!
+    shares: [GqlGaugeShare!]!
+}
+
+type GqlGaugeRewardToken {
+    id: ID!
+    address: Bytes!
+    name: String!
+    symbol: String!
+    decimals: Int!
+}
+
+type GqlGaugeShare {
+    userAddress: Bytes!
+    amount: BigDecimal!
+}
+
+type GqlGaugeUserShare {
+    gaugeAddress: Bytes!
+    poolId: Bytes!
+    amount: BigDecimal!
+}

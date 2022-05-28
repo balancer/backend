@@ -35,6 +35,22 @@ generates:
         schema: ${BLOCKS_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/gauge-subgraph/generated/gauge-subgraph-types.ts:
+        schema: ${GAUGE_SUBGRAPH}
+        documents: 'modules/gauge-subgraph/gauge-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/gauge-subgraph/generated/gauge-subgraph-schema.graphql:
+        schema: ${GAUGE_SUBGRAPH}
+        plugins:
+            - schema-ast
     graphql_schema_generated.ts:
         schema: ./modules/**/*.gql
         plugins:

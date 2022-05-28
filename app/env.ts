@@ -31,6 +31,7 @@ export const schema = {
     RPC_URL: String,
     YEARN_VAULTS_ENDPOINT: String,
     MASTERCHEF_ADDRESS: String,
+    GAUGE_SUBGRAPH: String
 };
 
 export const env: Env = load(schema, {

@@ -1,0 +1,52 @@
+query LiquidityGauges(
+    $first: Int = 100
+    $orderBy: LiquidityGauge_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: LiquidityGauge_filter
+) {
+    liquidityGauges(skip: $skip, first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
+        id
+        poolId
+        totalSupply
+        tokens {
+            id
+            name
+            address
+            decimals
+            symbol
+        }
+        shares {
+            user {
+                id
+            }
+            balance
+        }
+    }
+}
+
+query UserGauges($userAddress: ID!) {
+    user(id: $userAddress) {
+        id
+        gaugeShares {
+            balance
+            gauge {
+                id
+                poolId
+            }
+        }
+    }
+}
+
+query Streamers {
+    streamers {
+        id
+        rewardTokens {
+            address
+        }
+        gauge {
+            id
+            poolId
+        }
+    }
+}
