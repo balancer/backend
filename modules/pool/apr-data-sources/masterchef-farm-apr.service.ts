@@ -2,19 +2,20 @@ import { PoolAprService } from '../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { prisma } from '../../util/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { beetsFarmService } from '../../beets_old/beets-farm.service';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { GqlBeetsFarm } from '../../../schema';
 import { secondsPerYear } from '../../util/time';
 import { PrismaPoolAprItem, PrismaTokenCurrentPrice } from '@prisma/client';
 import { networkConfig } from '../../config/network-config';
 import { tokenService } from '../../token/token.service';
+import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
+import { FarmFragment } from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
 export class MasterchefFarmAprService implements PoolAprService {
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const farms = await beetsFarmService.getBeetsFarms();
+        const farms = await masterchefService.getAllFarms({});
+
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
         const blocksPerYear = blocksPerDay * 365;
         const tokenPrices = await tokenService.getTokenPrices();
@@ -56,7 +57,7 @@ export class MasterchefFarmAprService implements PoolAprService {
 
     private calculateFarmApr(
         poolId: string,
-        farm: GqlBeetsFarm,
+        farm: FarmFragment,
         farmTvl: number,
         blocksPerYear: number,
         tokenPrices: PrismaTokenCurrentPrice[],
@@ -68,7 +69,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkConfig.beets.address);
         const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
-        const farmBeetsPerYear = (farm.allocPoint / farm.masterChef.totalAllocPoint) * beetsPerYear;
+        const farmBeetsPerYear = (parseInt(farm.allocPoint) / parseInt(farm.masterChef.totalAllocPoint)) * beetsPerYear;
         const beetsValuePerYear = beetsPrice * farmBeetsPerYear;
         const items: PrismaPoolAprItem[] = [];
         const beetsApr = beetsValuePerYear / farmTvl;
@@ -85,10 +86,10 @@ export class MasterchefFarmAprService implements PoolAprService {
             });
         }
 
-        farm.rewardTokens
-            .filter((rewardToken) => !rewardToken.isBeets)
+        (farm.rewarder?.rewardTokens || [])
+            .filter((rewardToken) => rewardToken.token !== networkConfig.beets.address)
             .forEach((rewardToken) => {
-                const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.address);
+                const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
                 const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;

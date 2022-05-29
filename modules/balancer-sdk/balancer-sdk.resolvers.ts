@@ -1,7 +1,7 @@
 import { Resolvers } from '../../schema';
-import { beetsService } from '../beets_old/beets.service';
 import { balancerSorService } from './balancer-sor.service';
 import { balancerService } from '../balancer/balancer.service';
+import { beetsService } from '../beets/beets.service';
 
 const balancerSdkResolvers: Resolvers = {
     Query: {

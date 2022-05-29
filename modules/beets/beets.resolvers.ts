@@ -6,6 +6,12 @@ const balancerResolvers: Resolvers = {
         beetsGetFbeetsRatio: async (parent, {}, context) => {
             return beetsService.getFbeetsRatio();
         },
+        beetsGetProtocolData: async (parent, {}, context) => {
+            return beetsService.getProtocolData();
+        },
+        beetsGetConfig: async (parent, {}, context) => {
+            return beetsService.getConfig();
+        },
     },
 };
 

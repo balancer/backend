@@ -1,24 +1,9 @@
 extend type Query {
-    beetsGetProtocolData: GqlBeetsProtocolData!
     beetsGetBeetsFarms: [GqlBeetsFarm!]!
     beetsGetUserDataForFarm(farmId: String!): GqlBeetsFarmUser
     beetsGetUserDataForAllFarms: [GqlBeetsFarmUser!]!
-    beetsGetConfig: GqlBeetsConfig!
     beetsGetUserPoolData: GqlBeetsUserPoolData!
     beetsGetUserPendingRewards: GqlBeetsUserPendingRewards!
-}
-
-type GqlBeetsProtocolData {
-    totalLiquidity: BigDecimal!
-    totalSwapVolume: BigDecimal!
-    totalSwapFee: BigDecimal!
-    poolCount: BigInt!
-    beetsPrice: BigDecimal!
-    fbeetsPrice: BigDecimal!
-    circulatingSupply: BigDecimal!
-    marketCap: BigDecimal!
-    swapFee24h: BigDecimal!
-    swapVolume24h: BigDecimal!
 }
 
 type GqlBeetsFarm {
@@ -76,40 +61,6 @@ type GqlBeetsFarmUser {
     rewardDebt: BigInt!
     timestamp: BigInt!
     pair: Bytes!
-}
-
-type GqlBeetsConfig {
-    incentivizedPools: [String!]!
-    pausedPools: [String!]!
-    blacklistedPools: [String!]!
-    excludedPools: [String!]!
-    featuredPools: [String!]!
-    homeFeaturedPools: [GqlBeetsConfigFeaturedPool!]!
-    homeNewsItems: [GqlBeetsConfigNewsItem!]!
-    homeEducationItems: [GqlBeetsConfigNewsItem!]!
-    poolFilters: [GqlBeetsConfigPoolFilterItem!]!
-    blacklistedTokens: [String!]!
-    boostedPools: [String!]!
-}
-
-type GqlBeetsConfigFeaturedPool {
-    poolId: String!
-    image: String!
-    description: String
-}
-
-type GqlBeetsConfigNewsItem {
-    title: String!
-    image: String!
-    publishDate: String!
-    url: String!
-    description: String!
-}
-
-type GqlBeetsConfigPoolFilterItem {
-    id: ID!
-    title: String!
-    pools: [String!]!
 }
 
 type GqlBeetsUserPoolData {

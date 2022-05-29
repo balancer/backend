@@ -1,10 +1,9 @@
 import { utils } from 'ethers';
-import beetsAbi from '../beets/abi/BeethovenxToken.json';
-import { env } from '../../app/env';
-import { getContractAt } from '../util/ethers';
+import beetsAbi from '../abi/BeethovenxToken.json';
+import { env } from '../../../app/env';
+import { getContractAt } from '../../util/ethers';
 
 const beetsContract = getContractAt(env.BEETS_ADDRESS, beetsAbi);
-const fBeetsContract = getContractAt(env.FBEETS_ADDRESS, beetsAbi);
 
 const NON_CIRCULATING_ADDRESSES = [
     '0xa2503804ec837d1e4699932d58a3bdb767dea505', //team linear vesting
@@ -16,7 +15,7 @@ const NON_CIRCULATING_ADDRESSES = [
     '0x766ddc12447973d86092e403f85c35578dd0433d', //advisor linear vesting
 ];
 
-export async function getCirculatingSupply() {
+export async function beetsGetCirculatingSupply() {
     let totalSupply = await beetsContract.totalSupply();
 
     for (const address of NON_CIRCULATING_ADDRESSES) {
@@ -25,10 +24,4 @@ export async function getCirculatingSupply() {
     }
 
     return utils.formatUnits(totalSupply);
-}
-
-export async function getUserFBeetsInWalletBalance(userAddress: string): Promise<string> {
-    const balance = await fBeetsContract.balanceOf(userAddress);
-
-    return balance.toString();
 }

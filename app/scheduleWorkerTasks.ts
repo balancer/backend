@@ -3,17 +3,16 @@ import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { balancerSubgraphService } from '../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { balancerService } from '../modules/balancer/balancer.service';
-import { beetsService } from '../modules/beets_old/beets.service';
 import { beetsBarService } from '../modules/subgraphs/beets-bar-subgraph/beets-bar.service';
 import { portfolioService } from '../modules/portfolio/portfolio.service';
 import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
-import { beetsFarmService } from '../modules/beets_old/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import { env } from './env';
 import { runWithMinimumInterval } from '../modules/util/scheduling';
 import { poolService } from '../modules/pool/pool.service';
+import { beetsService } from '../modules/beets/beets.service';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -137,6 +136,10 @@ export function scheduleWorkerTasks() {
         await poolService.syncStakingForPools();
     });
 
+    scheduleJob('*/30 * * * * *', 'cache-protocol-data', TWO_MINUTES_IN_MS, async () => {
+        await beetsService.cacheProtocolData();
+    });
+
     /*
     //every five minutes
     scheduleJob(
@@ -186,10 +189,6 @@ export function scheduleWorkerTasks() {
 
     scheduleJob('*!/30 * * * * *', 'cache-past-pools', async () => {
         await balancerService.cachePastPools();
-    });
-
-    scheduleJob('*!/30 * * * * *', 'cache-protocol-data', async () => {
-        await beetsService.cacheProtocolData();
     });
 
     scheduleJob('*!/30 * * * * *', 'cache-portfolio-pools-data', async () => {
