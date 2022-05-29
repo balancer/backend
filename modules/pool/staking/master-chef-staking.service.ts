@@ -42,7 +42,7 @@ export class MasterChefStakingService implements PoolStakingService {
                             id: farmId,
                             poolId: pool.id,
                             type: isFbeetsPool ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                            address: networkConfig.fbeets.address,
+                            address: isFbeetsPool ? networkConfig.fbeets.address : farm.masterChef.id,
                         },
                     }),
                 );
