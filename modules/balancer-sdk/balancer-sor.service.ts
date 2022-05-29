@@ -1,8 +1,9 @@
 import { balancerSdk } from './src/balancer-sdk';
 import { SwapTypes } from '@balancer-labs/sor';
-import { GqlBalancerPool, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
+import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
 import _ from 'lodash';
 import { parseFixed } from '@ethersproject/bignumber';
+import { PrismaToken } from '@prisma/client';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -11,7 +12,7 @@ interface GetSwapsInput {
     swapAmount: string;
     swapOptions: GqlSorSwapOptionsInput;
     boostedPools: string[];
-    pools: GqlBalancerPool[];
+    tokens: PrismaToken[];
 }
 
 export class BalancerSorService {
@@ -22,9 +23,9 @@ export class BalancerSorService {
         swapOptions,
         swapAmount,
         boostedPools,
-        pools,
+        tokens,
     }: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
-        const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, pools);
+        const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
         const swapInfo = await balancerSdk.sor.getSwaps(
@@ -52,14 +53,13 @@ export class BalancerSorService {
         };
     }
 
-    private getTokenDecimals(tokenAddress: string, pools: GqlBalancerPool[]): number {
+    private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
         if (tokenAddress === '0x0000000000000000000000000000000000000000') {
             return 18;
         }
 
         tokenAddress = tokenAddress.toLowerCase();
-        const allTokens = _.flatten(pools.map((pool) => pool.tokens || []));
-        const match = allTokens.find((token) => token.address === tokenAddress);
+        const match = tokens.find((token) => token.address === tokenAddress);
 
         if (!match) {
             throw new Error('Unknown token: ' + tokenAddress);

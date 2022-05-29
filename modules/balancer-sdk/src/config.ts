@@ -1,7 +1,8 @@
 import { BalancerSdkConfig, Network, SubgraphPoolBase } from '@balancer-labs/sdk';
 import { env } from '../../../app/env';
 import { tokenPriceService } from '../../token-price/token-price.service';
-import { balancerService } from '../../balancer/balancer.service';
+import { prisma } from '../../util/prisma-client';
+import { PrismaPoolType } from '@prisma/client';
 
 export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
     '250': {
@@ -57,11 +58,69 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
             },
             poolDataService: {
                 getPools: async () => {
-                    const pools = (await balancerService.getPools()) as SubgraphPoolBase[];
+                    const pools = await prisma.prismaPool.findMany({
+                        where: {
+                            dynamicData: {
+                                totalSharesNum: {
+                                    gt: 0.000000000001,
+                                },
+                            },
+                        },
+                        include: {
+                            dynamicData: true,
+                            stableDynamicData: true,
+                            linearDynamicData: true,
+                            linearData: true,
+                            tokens: {
+                                include: { dynamicData: true, token: true },
+                                orderBy: { index: 'asc' },
+                            },
+                        },
+                    });
 
-                    return pools;
+                    const mappedPools: SubgraphPoolBase[] = pools.map((pool) => ({
+                        ...pool,
+                        ...pool.dynamicData!,
+                        ...pool.stableDynamicData,
+                        ...pool.linearData,
+                        ...pool.linearDynamicData,
+                        totalLiquidity: `${pool.dynamicData!.totalLiquidity}`,
+                        factory: pool.factory || undefined,
+                        poolType: mapPoolTypeToSubgraphPoolType(pool.type),
+                        tokensList: pool.tokens.map((token) => token.address),
+                        totalWeight: '1', //TODO: properly calculate this
+                        tokens: pool.tokens.map((token) => ({
+                            ...token.token!,
+                            ...token.dynamicData!,
+                        })),
+                    }));
+
+                    return mappedPools;
                 },
             },
         },
     },
 };
+
+function mapPoolTypeToSubgraphPoolType(poolType: PrismaPoolType): string {
+    switch (poolType) {
+        case 'WEIGHTED':
+            return 'Weighted';
+        case 'LIQUIDITY_BOOTSTRAPPING':
+            return 'LiquidityBootstrapping';
+        case 'STABLE':
+            return 'Stable';
+        case 'META_STABLE':
+            return 'MetaStable';
+        case 'PHANTOM_STABLE':
+            return 'StablePhantom';
+        case 'LINEAR':
+            return 'Linear';
+        case 'ELEMENT':
+            return 'Element';
+        case 'INVESTMENT':
+            return 'Investment';
+    }
+
+    return 'UNKNOWN';
+}

@@ -21,8 +21,7 @@ import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfoli
 import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';
 import { oneDayInMinutes } from '../../util/time';
-import { balancerService } from '../../balancer/balancer.service';
-import { GqlBalancerPool } from '../../../schema';
+//import { balancerService } from '../../balancer/balancer.service';
 
 const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';
 const HISTORY_CACHE_KEY_PREFIX = 'portfolio:data:history:';
@@ -45,7 +44,8 @@ export class PortfolioDataService {
             return null;
         }
 
-        const cachedPools = await balancerService.getPools();
+        //const cachedPools = await balancerService.getPools();
+        const cachedPools: any[] = []; //TODO: fix
         const { pools: subgraphPools, previousPools: subgraphPreviousPools } =
             await balancerSubgraphService.getPortfolioPoolsData(parseInt(previousBlock.number));
 
@@ -448,7 +448,7 @@ export class PortfolioDataService {
             });
     }
 
-    private injectTokenPriceRates(pools: BalancerPoolFragment[], poolsWithOnchainData: GqlBalancerPool[]) {
+    private injectTokenPriceRates(pools: BalancerPoolFragment[], poolsWithOnchainData: any[]) {
         const onChainTokens = _.keyBy(_.flatten(poolsWithOnchainData.map((pool) => pool.tokens)), 'address');
 
         return pools.map((pool) => {

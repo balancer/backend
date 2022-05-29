@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import { beetsGetCirculatingSupply } from '../modules/beets/src/beets';
-import { balancerService } from '../modules/balancer/balancer.service';
+import { tokenService } from '../modules/token/token.service';
 
 export function loadRestRoutes(app: Express) {
     app.use('/health', (req, res) => res.sendStatus(200));
@@ -11,8 +11,10 @@ export function loadRestRoutes(app: Express) {
     });
 
     app.use('/late-quartet', async (req, res) => {
+        const tokenPrices = await tokenService.getTokenPrices();
+
         res.send({
-            bptPrice: await balancerService.getLateQuartetBptPrice(),
+            bptPrice: tokenService.getPriceForToken(tokenPrices, '0xf3a602d30dcb723a74a0198313a7551feaca7dac'),
         });
     });
 }

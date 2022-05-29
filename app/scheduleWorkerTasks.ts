@@ -1,12 +1,6 @@
 import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { balancerSubgraphService } from '../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { balancerService } from '../modules/balancer/balancer.service';
-import { beetsBarService } from '../modules/subgraphs/beets-bar-subgraph/beets-bar.service';
-import { portfolioService } from '../modules/portfolio/portfolio.service';
-import moment from 'moment-timezone';
-import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import { env } from './env';
@@ -119,11 +113,6 @@ export function scheduleWorkerTasks() {
     //once a minute
     scheduleJob('* * * * *', 'sor-reload-graph', TWO_MINUTES_IN_MS, async () => {
         await balancerSdk.sor.reloadGraph();
-    });
-
-    //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', ONE_MINUTE_IN_MS, async () => {
-        await balancerService.cachePools();
     });
 
     //every 5 minutes

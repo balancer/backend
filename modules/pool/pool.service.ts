@@ -1,19 +1,16 @@
 import { PoolCreatorService } from './src/pool-creator.service';
 import { PoolOnChainDataService } from './src/pool-on-chain-data.service';
 import { env } from '../../app/env';
-import { BALANCER_NETWORK_CONFIG } from '../balancer/src/contracts';
 import { prisma } from '../util/prisma-client';
 import { providers } from 'ethers';
 import { Provider } from '@ethersproject/providers';
 import _ from 'lodash';
 import { PoolUsdDataService } from './src/pool-usd-data.service';
-import { tokenPriceService } from '../token-price/token-price.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import {
     GqlPoolJoinExit,
     GqlPoolMinimal,
-    GqlPoolTokenUnion,
     GqlPoolUnion,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
@@ -35,6 +32,7 @@ import { PoolSwapService } from './src/pool-swap.service';
 import { PoolStakingService } from './pool-types';
 import { MasterChefStakingService } from './staking/master-chef-staking.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { networkConfig } from '../config/network-config';
 
 export class PoolService {
     constructor(
@@ -176,11 +174,7 @@ export class PoolService {
 export const poolService = new PoolService(
     new providers.JsonRpcProvider(env.RPC_URL),
     new PoolCreatorService(),
-    new PoolOnChainDataService(
-        BALANCER_NETWORK_CONFIG[env.CHAIN_ID].multicall,
-        BALANCER_NETWORK_CONFIG[env.CHAIN_ID].vault,
-        tokenService,
-    ),
+    new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
     new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolSanityDataLoaderService(),

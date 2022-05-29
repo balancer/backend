@@ -3,7 +3,7 @@ import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 
 export function scheduleMainTasks() {
     //every 5 seconds
-    cron.schedule('*/5 * * * * *', async () => {
+    cron.schedule('*/15 * * * * *', async () => {
         try {
             await balancerSdk.sor.fetchPools();
         } catch (e) {}

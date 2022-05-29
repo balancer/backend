@@ -10,7 +10,6 @@ import { Cache, CacheClass } from 'memory-cache';
 import { getAddress } from 'ethers/lib/utils';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
-import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
@@ -288,7 +287,7 @@ export class TokenPriceService {
             const pool = pools.find((pool) => pool.address === nestedBptAddress);
 
             if (pool?.poolType === 'Linear') {
-                const linearPool = getContractAt(pool.address, LinearPoolAbi);
+                const linearPool = getContractAt(pool.address, []);
                 const rate = await linearPool.getRate();
                 const formattedRate = formatFixed(rate, 18);
                 const mainTokenPrice = this.getPriceForToken(tokenPrices, pool.tokensList[pool.mainIndex || 0]);

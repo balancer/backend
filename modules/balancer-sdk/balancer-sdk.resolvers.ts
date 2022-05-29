@@ -1,15 +1,15 @@
 import { Resolvers } from '../../schema';
 import { balancerSorService } from './balancer-sor.service';
-import { balancerService } from '../balancer/balancer.service';
 import { beetsService } from '../beets/beets.service';
+import { tokenService } from '../token/token.service';
 
 const balancerSdkResolvers: Resolvers = {
     Query: {
         sorGetSwaps: async (parent, args, context) => {
             const config = await beetsService.getConfig();
-            const pools = await balancerService.getPools();
+            const tokens = await tokenService.getTokens();
 
-            return balancerSorService.getSwaps({ ...args, boostedPools: config.boostedPools, pools });
+            return balancerSorService.getSwaps({ ...args, boostedPools: config.boostedPools, tokens });
         },
     },
 };

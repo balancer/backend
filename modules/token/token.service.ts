@@ -8,12 +8,14 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@prisma/client';
+import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
+import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
+const ALL_TOKENS_CACHE_KEY = 'tokens:all';
 
 export class TokenService {
     cache: CacheClass<string, any>;
@@ -27,6 +29,20 @@ export class TokenService {
 
     public async syncSanityData() {
         await this.tokenDataLoaderService.syncSanityTokenData();
+    }
+
+    public async getTokens(): Promise<PrismaToken[]> {
+        const cached = memCacheGetValue<PrismaToken[]>(ALL_TOKENS_CACHE_KEY);
+
+        if (cached) {
+            return cached;
+        }
+
+        const tokens = await prisma.prismaToken.findMany({});
+
+        memCacheSetValue(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60);
+
+        return tokens;
     }
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {

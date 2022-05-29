@@ -536,3 +536,14 @@ type GqlPoolJoinExitAmount {
     address: String!
     amount: String!
 }
+
+type GqlBalancePoolAprItem {
+    title: String!
+    apr: BigDecimal!
+    subItems: [GqlBalancePoolAprSubItem!]
+}
+
+type GqlBalancePoolAprSubItem {
+    title: String!
+    apr: BigDecimal!
+}
