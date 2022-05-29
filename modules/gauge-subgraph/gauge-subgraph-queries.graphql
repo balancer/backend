@@ -43,10 +43,13 @@ query Streamers {
         id
         rewardTokens {
             address
+            decimals
+            symbol
         }
         gauge {
             id
             poolId
+            totalSupply
         }
     }
 }

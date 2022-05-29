@@ -14,7 +14,7 @@ import { getOnChainBalances } from './src/onchainData';
 import { providers } from 'ethers';
 import { env } from '../../app/env';
 import { BALANCER_NETWORK_CONFIG } from './src/contracts';
-import { oneDayInMinutes, twentyFourHoursInMs } from '../util/time';
+import { oneDayInMinutes, secondsPerYear, twentyFourHoursInMs } from '../util/time';
 import moment from 'moment-timezone';
 import {
     GqlBalancePoolAprItem,
@@ -34,6 +34,10 @@ import { tokenPriceService } from '../token-price/token-price.service';
 import { TokenPrices } from '../token-price/token-price-types';
 import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.service';
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
+import { gaugesService } from '../gauges/gauges.service';
+import { Multicaller } from '../util/multicaller';
+import ChildChainStreamerAbi from './abi/ChildChainStreamer.json';
+import { decimal } from '../util/numbers';
 
 const POOLS_CACHE_KEY = 'pools:all';
 const PAST_POOLS_CACHE_KEY = 'pools:24h';
@@ -170,9 +174,9 @@ export class BalancerService {
 
         const pastPools = await this.getPastPools();
         const previousBlock = await blocksSubgraphService.getBlockFrom24HoursAgo();
-        const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
-        const blocksPerYear = blocksPerDay * 365;
         const tokenPrices = await tokenPriceService.getTokenPrices();
+
+        const gaugeStreamers = await gaugesService.getStreamers();
 
         const decoratedPools: GqlBalancerPool[] = [];
 
@@ -199,6 +203,36 @@ export class BalancerService {
             const swapApr = totalLiquidity > 0 ? (swapFee24h / totalLiquidity) * 365 : 0;
             const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }];
 
+            const gaugeStreamer = gaugeStreamers.find((streamer) => streamer.poolId === pool.id);
+            if (gaugeStreamer && parseFloat(gaugeStreamer.gaugeTvl) > 0) {
+                const multiCaller = new Multicaller(
+                    BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
+                    provider,
+                    ChildChainStreamerAbi,
+                );
+
+                for (let rewardToken of gaugeStreamer.rewardTokens) {
+                    multiCaller.call(rewardToken.address, gaugeStreamer.address, 'reward_data', [rewardToken.address]);
+                }
+                const rewardDataResult = (await multiCaller.execute()) as Record<string, { rate: string }>;
+                for (let rewardToken of gaugeStreamer.rewardTokens) {
+                    const rewardRate = decimal(rewardDataResult[rewardToken.address].rate)
+                        .div(decimal(1).pow(rewardToken.decimals))
+                        .toNumber();
+                    // todo: set price to 0 if not found, only for testing now!
+                    const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
+                    const rewardTokenPerYear = rewardRate * secondsPerYear;
+                    const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
+                    const gaugeTvl = parseFloat(gaugeStreamer.gaugeTvl);
+                    const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
+
+                    items.push({
+                        title: `${rewardToken.symbol} reward APR`,
+                        apr: `${rewardApr}`,
+                    });
+                }
+            }
+
             const decoratedPool: GqlBalancerPool = {
                 ...pool,
                 apr: {
@@ -207,7 +241,7 @@ export class BalancerService {
                     items,
                     swapApr: `${swapApr}`,
                     beetsApr: '0',
-                    thirdPartyApr: '0'
+                    thirdPartyApr: '0',
                 },
                 isNewPool: moment().diff(moment.unix(pool.createTime), 'weeks') === 0,
                 volume24h: `${volume24h}`,
@@ -538,7 +572,7 @@ export class BalancerService {
             composition: {
                 tokens: [],
             },
-            farmTotalLiquidity: '0'
+            farmTotalLiquidity: '0',
         };
     }
 

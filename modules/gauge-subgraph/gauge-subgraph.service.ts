@@ -17,6 +17,10 @@ class GaugeSubgraphService {
         const userGaugesQuery = await this.sdk.UserGauges({ userAddress });
         return userGaugesQuery.user;
     }
+    public async getStreamers() {
+        const streamersQuery = await this.sdk.Streamers();
+        return streamersQuery.streamers;
+    }
 
     public get sdk() {
         return getSdk(this.client);
