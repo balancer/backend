@@ -217,7 +217,7 @@ export class BalancerService {
                 const rewardDataResult = (await multiCaller.execute()) as Record<string, { rate: string }>;
                 for (let rewardToken of gaugeStreamer.rewardTokens) {
                     const rewardRate = decimal(rewardDataResult[rewardToken.address].rate)
-                        .div(decimal(1).pow(rewardToken.decimals))
+                        .div(decimal(10).pow(rewardToken.decimals))
                         .toNumber();
                     // todo: set price to 0 if not found, only for testing now!
                     const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
