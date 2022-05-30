@@ -18,26 +18,12 @@ import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
-import { balancerService } from './modules/balancer/balancer.service';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
     await redis.connect();
 
     const app = createExpressApp();
-    app.get('/balancer/pools', async (req, res) => {
-        const pools = await balancerService.getPools();
-
-        const mapped = pools.map((pool) => ({
-            ...pool,
-            __typename: 'GqlBalancerPool',
-            tokens: (pool.tokens || []).map((token) => ({
-                ...token,
-                __typename: 'GqlBalancerPoolToken',
-            })),
-        }));
-        res.send(mapped);
-    });
 
     app.use(helmet.dnsPrefetchControl());
     app.use(helmet.expectCt());
@@ -90,14 +76,23 @@ async function startServer() {
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 
-    if (process.env.WORKER === 'true') {
+    if (process.env.NODE_ENV === 'local') {
         try {
             scheduleWorkerTasks();
+            scheduleMainTasks();
         } catch (e) {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
     } else {
-        scheduleMainTasks();
+        if (process.env.WORKER === 'true') {
+            try {
+                scheduleWorkerTasks();
+            } catch (e) {
+                console.log(`Fatal error happened during cron scheduling.`, e);
+            }
+        } else {
+            scheduleMainTasks();
+        }
     }
 }
 
