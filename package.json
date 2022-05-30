@@ -14,6 +14,7 @@
         "generate": "graphql-codegen --config codegen.yml -r dotenv/config"
     },
     "dependencies": {
+        "@aws-sdk/client-cloudwatch": "^3.95.0",
         "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo",
         "@ethersproject/address": "^5.6.0",
         "@ethersproject/bignumber": "^5.6.0",
