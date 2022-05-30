@@ -4,6 +4,8 @@ import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
 import { contextMiddleware } from './app/middleware/contextMiddleware';
 import { accountMiddleware } from './app/middleware/accountMiddleware';
+import { sentryMiddleware } from './app/middleware/sentryMiddleware';
+import SentryPlugin from './app/middleware/sentry-plugin';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import {
@@ -54,6 +56,7 @@ async function startServer() {
     app.use(corsMiddleware);
     app.use(contextMiddleware);
     app.use(accountMiddleware);
+    app.use(sentryMiddleware);
 
     //startWorker(app);
     loadRestRoutes(app);
@@ -65,6 +68,7 @@ async function startServer() {
         ApolloServerPluginLandingPageGraphQLPlayground({
             settings: { 'schema.polling.interval': 20000 },
         }),
+        SentryPlugin,
     ];
     if (env.NODE_ENV === 'production') {
         plugins.push(
@@ -97,7 +101,7 @@ async function startServer() {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
     } else {
-        scheduleMainTasks();
+        // scheduleMainTasks();
     }
 }
 
