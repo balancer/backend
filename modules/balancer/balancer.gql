@@ -54,6 +54,14 @@ type GqlBalancerPool {
     isNewPool: Boolean
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    gauge: GqlBalancerPoolGauge
+}
+
+type GqlBalancerPoolGauge {
+    id: ID!
+    address: Bytes!
+    totalSupply: BigDecimal!
+    totalLiquidity: BigDecimal!
 }
 
 type GqlBalancerPoolToken {

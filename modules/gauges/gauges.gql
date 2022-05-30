@@ -1,5 +1,6 @@
 extend type Query {
     gauges: [GqlGauge]
+    gauge(poolId: ID): GqlGauge
     gaugesAllUserShares: [GqlGaugeUserShare!]!
     gaugesUserShares(poolId: ID!): GqlGaugeUserShare
 }
@@ -14,7 +15,6 @@ type GqlGauge {
 }
 
 type GqlGaugeRewardToken {
-    id: ID!
     address: Bytes!
     name: String!
     symbol: String!

@@ -42,6 +42,7 @@ query Streamers {
     streamers {
         id
         rewardTokens {
+            name
             address
             decimals
             symbol

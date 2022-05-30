@@ -205,6 +205,8 @@ export class BalancerService {
 
             const gaugeStreamer = gaugeStreamers.find((streamer) => streamer.poolId === pool.id);
             if (gaugeStreamer && parseFloat(gaugeStreamer.totalSupply) > 0) {
+                const gaugeTvl =
+                    (parseFloat(gaugeStreamer.totalSupply) / parseFloat(pool.totalShares)) * totalLiquidity;
                 for (let rewardToken of gaugeStreamer.rewardTokens) {
                     if (rewardToken.rewardsPerSecond === 0) {
                         continue;
@@ -213,8 +215,6 @@ export class BalancerService {
                     const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
                     const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
                     const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
-                    const gaugeTvl =
-                        (parseFloat(gaugeStreamer.totalSupply) / parseFloat(pool.totalShares)) * totalLiquidity;
                     const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
                     items.push({
@@ -222,6 +222,12 @@ export class BalancerService {
                         apr: `${rewardApr}`,
                     });
                 }
+                pool.gauge = {
+                    id: gaugeStreamer.gaugeAddress,
+                    address: gaugeStreamer.gaugeAddress,
+                    totalSupply: gaugeStreamer.totalSupply,
+                    totalLiquidity: `${gaugeTvl}`,
+                };
             }
 
             const decoratedPool: GqlBalancerPool = {

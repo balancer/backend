@@ -7,7 +7,7 @@ import { providers } from 'ethers';
 import { decimal } from '../util/numbers';
 import moment from 'moment-timezone';
 
-type GaugeRewardToken = { address: string; decimals: number; symbol: string; rewardsPerSecond: number };
+type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string; rewardsPerSecond: number };
 
 export type GaugeStreamer = {
     address: string;
