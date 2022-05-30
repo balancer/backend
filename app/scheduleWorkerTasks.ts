@@ -12,12 +12,29 @@ import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import cronTimeMetric from './cron.metric';
+import * as Sentry from '@sentry/node';
+import { env } from './env';
+
+import '@sentry/tracing';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
 const TEN_MINUTES_IN_MS = 600000;
 const TWENTY_MINUTES_IN_MS = 1200000;
 const ONE_HOUR_IN_MS = 3600000;
+
+Sentry.init({
+    dsn: `https://${env.SENTRY_KEY}@o1267521.ingest.sentry.io/6454017`,
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+    integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+    ],
+});
 
 const asyncCallWithTimeout = async (fn: () => Promise<any>, timeLimit: number) => {
     let timeoutHandle: NodeJS.Timeout;
@@ -55,10 +72,21 @@ function scheduleJob(
         if (running) {
             console.log(`${taskName} already running, skipping call...`);
             cronTimeMetric.publish(`${taskName}-skip`);
+            Sentry.captureException(new Error(`${taskName} already running, skipping call...`));
             return;
         }
 
         let elapsed = 0;
+
+        const transaction = Sentry.startTransaction({
+            op: 'cron',
+            name: taskName,
+        });
+
+        Sentry.configureScope((scope) => {
+            scope.setSpan(transaction);
+        });
+
         try {
             running = true;
             console.log(`Start ${taskName}...`);
@@ -74,10 +102,12 @@ function scheduleJob(
                 cronTimeMetric.publish(`${taskName}-error`);
             }
             console.log(`Error ${taskName}`, e);
+            Sentry.captureException(e);
         } finally {
             console.timeEnd(taskName);
             cronTimeMetric.publish(`${taskName}-duration`, elapsed);
             running = false;
+            transaction.finish();
         }
     });
 }
