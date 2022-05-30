@@ -7,9 +7,14 @@ const gaugesResolvers: Resolvers = {
         gauges: async () => {
             return gaugesService.getAllGauges();
         },
-        gaugesUserShares: async (parent, _, context) => {
+        gaugesAllUserShares: async (parent, _, context) => {
             const address = getRequiredAccountAddress(context);
-            return gaugesService.getUserShares(address);
+            return gaugesService.getAllUserShares(address);
+        },
+        gaugesUserShares: async (parent, { poolId }, context) => {
+            const address = getRequiredAccountAddress(context);
+            const userSharesForPool = await gaugesService.getUserSharesForPool(address, poolId);
+            return userSharesForPool ?? null;
         },
     },
 };

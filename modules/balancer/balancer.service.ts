@@ -36,7 +36,7 @@ import { BalancerBoostedPoolService } from '../pools/balancer-boosted-pool.servi
 import { BalancerUserPoolShare } from '../balancer-subgraph/balancer-subgraph-types';
 import { gaugesService } from '../gauges/gauges.service';
 import { Multicaller } from '../util/multicaller';
-import ChildChainStreamerAbi from './abi/ChildChainStreamer.json';
+import ChildChainStreamerAbi from '../gauges/abi/ChildChainStreamer.json';
 import { decimal } from '../util/numbers';
 
 const POOLS_CACHE_KEY = 'pools:all';
@@ -204,26 +204,17 @@ export class BalancerService {
             const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }];
 
             const gaugeStreamer = gaugeStreamers.find((streamer) => streamer.poolId === pool.id);
-            if (gaugeStreamer && parseFloat(gaugeStreamer.gaugeTvl) > 0) {
-                const multiCaller = new Multicaller(
-                    BALANCER_NETWORK_CONFIG[`${env.CHAIN_ID}`].multicall,
-                    provider,
-                    ChildChainStreamerAbi,
-                );
-
+            if (gaugeStreamer && parseFloat(gaugeStreamer.totalSupply) > 0) {
                 for (let rewardToken of gaugeStreamer.rewardTokens) {
-                    multiCaller.call(rewardToken.address, gaugeStreamer.address, 'reward_data', [rewardToken.address]);
-                }
-                const rewardDataResult = (await multiCaller.execute()) as Record<string, { rate: string }>;
-                for (let rewardToken of gaugeStreamer.rewardTokens) {
-                    const rewardRate = decimal(rewardDataResult[rewardToken.address].rate)
-                        .div(decimal(10).pow(rewardToken.decimals))
-                        .toNumber();
+                    if (rewardToken.rewardsPerSecond === 0) {
+                        continue;
+                    }
                     // todo: set price to 0 if not found, only for testing now!
                     const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
-                    const rewardTokenPerYear = rewardRate * secondsPerYear;
+                    const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
                     const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
-                    const gaugeTvl = parseFloat(gaugeStreamer.gaugeTvl);
+                    const gaugeTvl =
+                        (parseFloat(gaugeStreamer.totalSupply) / parseFloat(pool.totalShares)) * totalLiquidity;
                     const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
                     items.push({
