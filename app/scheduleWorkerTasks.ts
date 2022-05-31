@@ -67,6 +67,11 @@ function scheduleJob(
             name: taskName,
         });
 
+        //@ts-ignore
+        sentry.configureScope((scope) => {
+            scope.setSpan(transaction);
+        });
+
         try {
             running = true;
             console.log(`Start ${taskName}...`);
