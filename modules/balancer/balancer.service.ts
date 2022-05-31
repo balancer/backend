@@ -227,6 +227,7 @@ export class BalancerService {
                     address: gaugeStreamer.gaugeAddress,
                     totalSupply: gaugeStreamer.totalSupply,
                     totalLiquidity: `${gaugeTvl}`,
+                    rewardTokens: gaugeStreamer.rewardTokens,
                 };
             }
 

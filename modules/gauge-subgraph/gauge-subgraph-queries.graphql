@@ -33,6 +33,12 @@ query UserGauges($userAddress: ID!) {
             gauge {
                 id
                 poolId
+                tokens {
+                    name
+                    address
+                    decimals
+                    symbol
+                }
             }
         }
     }

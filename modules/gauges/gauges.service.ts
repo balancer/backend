@@ -7,14 +7,22 @@ import { providers } from 'ethers';
 import { decimal } from '../util/numbers';
 import moment from 'moment-timezone';
 
-type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string; rewardsPerSecond: number };
+type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string };
+type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
 
 export type GaugeStreamer = {
     address: string;
     gaugeAddress: string;
     totalSupply: string;
     poolId: string;
-    rewardTokens: GaugeRewardToken[];
+    rewardTokens: GaugeRewardTokenWithEmissions[];
+};
+
+export type GaugeUserShare = {
+    gaugeAddress: string;
+    poolId: string;
+    amount: string;
+    tokens: GaugeRewardToken[];
 };
 
 class GaugesService {
@@ -38,13 +46,14 @@ class GaugesService {
         }));
     }
 
-    public async getAllUserShares(userAddress: string) {
+    public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
         const userGauges = await gaugeSubgraphService.getUserGauges(userAddress);
         return (
             userGauges?.gaugeShares?.map((share) => ({
                 gaugeAddress: share.gauge.id,
                 poolId: share.gauge.poolId,
                 amount: share.balance,
+                tokens: share.gauge.tokens ?? [],
             })) ?? []
         );
     }
@@ -75,7 +84,7 @@ class GaugesService {
 
         const gaugeStreamers: GaugeStreamer[] = [];
         for (let streamer of streamers) {
-            const rewardTokens: GaugeRewardToken[] = [];
+            const rewardTokens: GaugeRewardTokenWithEmissions[] = [];
             streamer.rewardTokens?.forEach((rewardToken) => {
                 const rewardData = rewardDataResult[streamer.id + rewardToken.address];
                 const isActive = moment.unix(parseInt(rewardData.period_finish)).isAfter(moment());
