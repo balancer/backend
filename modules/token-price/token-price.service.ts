@@ -15,8 +15,8 @@ import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import moment from 'moment-timezone';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
+import { sentry } from '../../app';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -83,9 +83,23 @@ export class TokenPriceService {
     }
 
     public async cacheTokenPrices(): Promise<void> {
+        const transaction = sentry.getCurrentHub().getScope()?.getTransaction();
+
+        let span = transaction?.startChild({
+            op: 'getAllPools',
+            description: 'cachingTokenPrices/getAllPools',
+        });
         const pools = await balancerSubgraphService.getAllPools({});
+        span?.finish();
+
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
+
+        span = transaction?.startChild({
+            op: 'getTokenPrices',
+            description: 'cachingTokenPrices/getTokenPrices',
+        });
         const { tokenAddresses, nestedBptAddresses } = await this.getTokenAddresses(pools);
+
         let coingeckoTokenPrices: TokenPrices = {};
         let nativeAssetPrice: Price | null = null;
 
@@ -94,6 +108,7 @@ export class TokenPriceService {
             //rate limiting happens quite often, we try to handle it gracefully below
             coingeckoTokenPrices = await coingeckoService.getTokenPrices(tokenAddresses);
         } catch {}
+        span?.finish();
 
         /*if (!nativeAssetPrice) {
             throw new Error('no native asset price');
