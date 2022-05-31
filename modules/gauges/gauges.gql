@@ -1,6 +1,5 @@
 extend type Query {
     gauges: [GqlGauge]
-    gauge(poolId: ID): GqlGauge
     gaugesAllUserShares: [GqlGaugeUserShare!]!
     gaugesUserShares(poolId: ID!): GqlGaugeUserShare
 }
