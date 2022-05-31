@@ -12,7 +12,7 @@ import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import cronTimeMetric from './cron.metric';
-import { sentry } from '../app';
+import { sentry } from '../modules/sentry/sentry-client';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;

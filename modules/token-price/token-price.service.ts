@@ -16,7 +16,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
-import { sentry } from '../../app';
+import { sentry } from '../sentry/sentry-client';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';

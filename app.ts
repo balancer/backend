@@ -21,24 +21,6 @@ import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import { balancerService } from './modules/balancer/balancer.service';
-import * as Sentry from '@sentry/node';
-
-import '@sentry/tracing';
-
-Sentry.init({
-    dsn: `https://${env.SENTRY_KEY}@o1267521.ingest.sentry.io/6454017`,
-
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-    integrations: [
-        // enable HTTP calls tracing
-        new Sentry.Integrations.Http({ tracing: true }),
-    ],
-});
-
-export const sentry = Sentry;
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
