@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { balancerService } from '../balancer/balancer.service';
 
 type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string };
-type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
+type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: string; rewardsPerDay: string };
 
 export type GaugeStreamer = {
     address: string;
@@ -32,20 +32,24 @@ class GaugesService {
 
     public async getAllGauges() {
         const gauges = await gaugeSubgraphService.getAllGauges();
-        // console.log(gauges);
 
-        return gauges.map(({ id, poolId, totalSupply, shares, tokens }) => ({
-            id,
-            address: id,
-            poolId,
-            totalSupply,
-            shares:
-                shares?.map((share) => ({
-                    userAddress: share.user.id,
-                    amount: share.balance,
-                })) ?? [],
-            tokens: tokens?.map(({ __typename, ...rest }) => rest) ?? [],
-        }));
+        const streamers = await this.getStreamers();
+
+        return gauges.map(({ id, poolId, totalSupply, shares }) => {
+            const streamer = streamers.find((streamer) => streamer.gaugeAddress === id);
+            return {
+                id,
+                address: id,
+                poolId,
+                totalSupply,
+                shares:
+                    shares?.map((share) => ({
+                        userAddress: share.user.id,
+                        amount: share.balance,
+                    })) ?? [],
+                tokens: streamer?.rewardTokens ?? [],
+            };
+        });
     }
 
     public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
@@ -99,11 +103,13 @@ class GaugesService {
             streamer.rewardTokens?.forEach((rewardToken) => {
                 const rewardData = rewardDataResult[streamer.id + rewardToken.address];
                 const isActive = moment.unix(parseInt(rewardData.period_finish)).isAfter(moment());
+                const rewardsPerSecond = isActive
+                    ? decimal(rewardData.rate).div(decimal(10).pow(rewardToken.decimals)).toNumber()
+                    : 0;
                 rewardTokens.push({
                     ...rewardToken,
-                    rewardsPerSecond: isActive
-                        ? decimal(rewardData.rate).div(decimal(10).pow(rewardToken.decimals)).toNumber()
-                        : 0,
+                    rewardsPerSecond: `${rewardsPerSecond}`,
+                    rewardsPerDay: `${rewardsPerSecond * 86400}`,
                 });
                 gaugeStreamers.push({
                     address: streamer.id,

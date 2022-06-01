@@ -9,13 +9,6 @@ query LiquidityGauges(
         id
         poolId
         totalSupply
-        tokens {
-            id
-            name
-            address
-            decimals
-            symbol
-        }
         shares {
             user {
                 id

@@ -62,7 +62,7 @@ type GqlBalancerPoolGauge {
     address: Bytes!
     totalSupply: BigDecimal!
     totalLiquidity: BigDecimal!
-    rewardTokens: [GqlGaugeRewardToken!]!
+    rewardTokens: [GqlGaugeRewardTokenWithEmissions!]!
 }
 
 type GqlBalancerPoolToken {

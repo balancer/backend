@@ -9,8 +9,17 @@ type GqlGauge {
     address: Bytes!
     totalSupply: BigDecimal!
     poolId: Bytes
-    tokens: [GqlGaugeRewardToken!]!
+    tokens: [GqlGaugeRewardTokenWithEmissions!]!
     shares: [GqlGaugeShare!]!
+}
+
+type GqlGaugeRewardTokenWithEmissions {
+    address: Bytes!
+    name: String!
+    symbol: String!
+    decimals: Int!
+    rewardsPerSecond: BigDecimal!
+    rewardsPerDay: BigDecimal!
 }
 
 type GqlGaugeRewardToken {

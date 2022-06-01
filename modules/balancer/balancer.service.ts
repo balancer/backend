@@ -208,12 +208,13 @@ export class BalancerService {
                 const gaugeTvl =
                     (parseFloat(gaugeStreamer.totalSupply) / parseFloat(pool.totalShares)) * totalLiquidity;
                 for (let rewardToken of gaugeStreamer.rewardTokens) {
-                    if (rewardToken.rewardsPerSecond === 0) {
+                    const rewardsPerSecond = parseFloat(rewardToken.rewardsPerSecond);
+                    if (rewardsPerSecond === 0) {
                         continue;
                     }
                     // todo: set price to 0 if not found, only for testing now!
                     const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
-                    const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
+                    const rewardTokenPerYear = rewardsPerSecond * secondsPerYear;
                     const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                     const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
