@@ -29,5 +29,6 @@ type GqlGaugeUserShare {
     gaugeAddress: Bytes!
     poolId: Bytes!
     amount: BigDecimal!
+    amountUSD: BigDecimal!
     tokens: [GqlGaugeRewardToken!]!
 }

@@ -6,6 +6,7 @@ import ChildChainStreamerAbi from './abi/ChildChainStreamer.json';
 import { providers } from 'ethers';
 import { decimal } from '../util/numbers';
 import moment from 'moment-timezone';
+import { balancerService } from '../balancer/balancer.service';
 
 type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string };
 type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
@@ -22,6 +23,7 @@ export type GaugeUserShare = {
     gaugeAddress: string;
     poolId: string;
     amount: string;
+    amountUSD: string;
     tokens: GaugeRewardToken[];
 };
 
@@ -47,14 +49,23 @@ class GaugesService {
     }
 
     public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
+        const pools = await balancerService.getPools();
         const userGauges = await gaugeSubgraphService.getUserGauges(userAddress);
         return (
-            userGauges?.gaugeShares?.map((share) => ({
-                gaugeAddress: share.gauge.id,
-                poolId: share.gauge.poolId,
-                amount: share.balance,
-                tokens: share.gauge.tokens ?? [],
-            })) ?? []
+            userGauges?.gaugeShares?.map((share) => {
+                const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+                const amountUSD =
+                    pool != null
+                        ? (parseFloat(share.balance) / parseFloat(pool.totalShares)) * parseFloat(pool.totalLiquidity)
+                        : 0;
+                return {
+                    gaugeAddress: share.gauge.id,
+                    poolId: share.gauge.poolId,
+                    amount: share.balance,
+                    amountUSD: `${amountUSD}`,
+                    tokens: share.gauge.tokens ?? [],
+                };
+            }) ?? []
         );
     }
     public async getUserSharesForPool(userAddress: string, poolId: string) {
