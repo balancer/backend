@@ -111,13 +111,13 @@ class GaugesService {
                     rewardsPerSecond: `${rewardsPerSecond}`,
                     rewardsPerDay: `${rewardsPerSecond * 86400}`,
                 });
-                gaugeStreamers.push({
-                    address: streamer.id,
-                    gaugeAddress: streamer.gauge.id,
-                    totalSupply: streamer.gauge.totalSupply,
-                    poolId: streamer.gauge.poolId,
-                    rewardTokens,
-                });
+            });
+            gaugeStreamers.push({
+                address: streamer.id,
+                gaugeAddress: streamer.gauge.id,
+                totalSupply: streamer.gauge.totalSupply,
+                poolId: streamer.gauge.poolId,
+                rewardTokens,
             });
         }
         return gaugeStreamers;
