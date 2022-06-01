@@ -1,10 +1,7 @@
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { env } from '../../app/env';
-// import { prisma } from '../prisma/prisma-client';
-import { PrismaClient } from '@prisma/client';
-
-export const prisma = new PrismaClient();
+import { prisma } from '../prisma/prisma-client';
 
 Sentry.init({
     dsn: `https://${env.SENTRY_KEY}@o1267521.ingest.sentry.io/6454017`,
