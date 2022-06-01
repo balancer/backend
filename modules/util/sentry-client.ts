@@ -6,6 +6,7 @@ import { prisma } from './prisma-client';
 Sentry.init({
     dsn: env.SENTRY_DSN,
     tracesSampleRate: 1.0,
+    debug: true,
     integrations: [
         new Sentry.Integrations.Http({ tracing: true }),
         // @ts-ignore
