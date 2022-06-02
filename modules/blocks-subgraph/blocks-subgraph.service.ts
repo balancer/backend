@@ -28,7 +28,7 @@ const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 const BLOCK_TIME_MAP: { [chainId: string]: number } = {
     '250': 1,
     '4': 15,
-    '10': 0.5,
+    '10': 1,
 };
 
 export class BlocksSubgraphService {
