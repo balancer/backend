@@ -212,8 +212,7 @@ export class BalancerService {
                     if (rewardsPerSecond === 0) {
                         continue;
                     }
-                    // todo: set price to 0 if not found, only for testing now!
-                    const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0001;
+                    const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0;
                     const rewardTokenPerYear = rewardsPerSecond * secondsPerYear;
                     const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                     const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
