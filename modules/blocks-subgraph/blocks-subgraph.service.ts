@@ -19,6 +19,7 @@ import {
 import { subgraphLoadAll } from '../util/subgraph-util';
 import { cache } from '../cache/cache';
 import moment from 'moment-timezone';
+import { multiply } from 'lodash';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
@@ -28,7 +29,7 @@ const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 const BLOCK_TIME_MAP: { [chainId: string]: number } = {
     '250': 1,
     '4': 15,
-    '10': 0.5,
+    '10': 1,
 };
 
 export class BlocksSubgraphService {
@@ -140,7 +141,7 @@ export class BlocksSubgraphService {
         return this.cacheBlockFrom24HoursAgo();
     }
 
-    public async cacheBlockFrom24HoursAgo(): Promise<BlockFragment> {
+    public async cacheBlockFrom24HoursAgo(marginMultiplier = 10): Promise<BlockFragment> {
         const blockTime = BLOCK_TIME_MAP[env.CHAIN_ID] ?? 1;
 
         const args: BlocksQueryVariables = {
@@ -150,12 +151,12 @@ export class BlocksSubgraphService {
                 timestamp_gte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .subtract(10 * blockTime, 'seconds')
+                    .subtract(marginMultiplier * blockTime, 'seconds')
                     .unix()}`,
                 timestamp_lte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .add(10 * blockTime, 'seconds')
+                    .add(marginMultiplier * blockTime, 'seconds')
                     .unix()}`,
             },
         };
@@ -164,9 +165,13 @@ export class BlocksSubgraphService {
 
         if (allBlocks.length > 0) {
             await cache.putObjectValue(BLOCK_24H_AGO, allBlocks[0], 0.25);
+            return allBlocks[0];
+        } else {
+            if (marginMultiplier >= 100) {
+                throw new Error('Unable to find a block within 24 hours of the current time');
+            }
+            return this.cacheBlockFrom24HoursAgo(marginMultiplier * 2);
         }
-
-        return allBlocks[0];
     }
 
     public async getBlockForTimestamp(timestamp: number): Promise<BlockFragment> {
