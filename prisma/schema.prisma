@@ -166,6 +166,24 @@ model PrismaPoolSwap {
     timestamp           Int
     tx                  String
     valueUSD            Float
+
+    batchSwapId         String?
+    batchSwap           PrismaPoolBatchSwap? @relation(fields:[batchSwapId], references: [id])
+    batchSwapIdx        Int?
+}
+
+model PrismaPoolBatchSwap {
+    id                  String              @id
+    userAddress         String
+    tokenIn             String
+    tokenOut            String
+    tokenAmountIn       String
+    tokenAmountOut      String
+    timestamp           Int
+    tx                  String
+    valueUSD            Float
+
+    swaps               PrismaPoolSwap[]
 }
 
 model PrismaPoolAprItem {
@@ -234,8 +252,14 @@ model PrismaPoolStaking {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     type                PrismaPoolStakingType
     address             String
-    rewarder            String?
     farm                PrismaPoolStakingMasterChefFarm?
+}
+
+
+enum PrismaPoolStakingType {
+    MASTER_CHEF
+    GAUGE
+    FRESH_BEETS
 }
 
 model PrismaPoolStakingMasterChefFarm {
@@ -257,11 +281,6 @@ model PrismaPoolStakingMasterChefFarmRewarder {
 }
 
 
-enum PrismaPoolStakingType {
-    MASTER_CHEF
-    GAUGE
-    FRESH_BEETS
-}
 
 
 model PrismaBlock {

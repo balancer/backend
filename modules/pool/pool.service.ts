@@ -12,6 +12,7 @@ import {
     GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolUnion,
+    QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
@@ -27,12 +28,13 @@ import { PoolSyncService } from './src/pool-sync.service';
 import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
-import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
+import { PrismaPoolFilter, PrismaPoolSwap, PrismaPoolBatchSwap } from '@prisma/client';
 import { PoolSwapService } from './src/pool-swap.service';
 import { PoolStakingService } from './pool-types';
 import { MasterChefStakingService } from './staking/master-chef-staking.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { networkConfig } from '../config/network-config';
+import { PrismaPoolBatchSwapWithSwaps } from '../../prisma/prisma-types';
 
 export class PoolService {
     constructor(
@@ -66,6 +68,10 @@ export class PoolService {
 
     public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
         return this.poolSwapService.getSwaps(args);
+    }
+
+    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
+        return this.poolSwapService.getBatchSwaps(args);
     }
 
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {

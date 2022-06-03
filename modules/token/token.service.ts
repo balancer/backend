@@ -11,7 +11,7 @@ import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-han
 import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
+import { memCacheGetValue, memCacheGetValueAndCacheIfNeeded, memCacheSetValue } from '../util/mem-cache';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
@@ -32,17 +32,7 @@ export class TokenService {
     }
 
     public async getTokens(): Promise<PrismaToken[]> {
-        const cached = memCacheGetValue<PrismaToken[]>(ALL_TOKENS_CACHE_KEY);
-
-        if (cached) {
-            return cached;
-        }
-
-        const tokens = await prisma.prismaToken.findMany({});
-
-        memCacheSetValue(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60);
-
-        return tokens;
+        return memCacheGetValueAndCacheIfNeeded(ALL_TOKENS_CACHE_KEY, () => prisma.prismaToken.findMany({}), 5 * 60);
     }
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {
@@ -67,18 +57,11 @@ export class TokenService {
     }
 
     public async getTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
-        /*const cached = this.cache.get(TOKEN_PRICES_CACHE_KEY) as PrismaTokenCurrentPrice[] | null;
-
-        if (cached) {
-            return cached;
-        }
-
-        const tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
-        this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
-
-        return tokenPrices;*/
-
-        return this.tokenPriceService.getCurrentTokenPrices();
+        return memCacheGetValueAndCacheIfNeeded(
+            TOKEN_PRICES_CACHE_KEY,
+            () => this.tokenPriceService.getCurrentTokenPrices(),
+            10,
+        );
     }
 
     public async getWhiteListedTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {

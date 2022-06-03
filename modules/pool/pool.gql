@@ -18,6 +18,7 @@ extend type Query {
     ): Int!
     poolGetPoolFilters: [GqlPoolFilterDefinition!]!
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
+    poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
 }
 
@@ -478,6 +479,38 @@ type GqlPoolSwap {
     timestamp: Int!
     tx: String!
     valueUSD: Float!
+}
+
+type GqlPoolBatchSwap {
+    id: ID!
+    userAddress: String!
+    tokenIn: String!
+    tokenOut: String!
+    tokenAmountIn: String!
+    tokenAmountOut: String!
+    timestamp: Int!
+    tx: String!
+    valueUSD: Float!
+    swaps: [GqlPoolBatchSwapSwap!]!
+}
+
+type GqlPoolBatchSwapSwap {
+    id: ID!
+    poolId: String!
+    poolTokens: [String!]!
+    userAddress: String!
+    tokenIn: String!
+    tokenOut: String!
+    tokenAmountIn: String!
+    tokenAmountOut: String!
+    timestamp: Int!
+    tx: String!
+    valueUSD: Float!
+}
+
+type GqlPoolBatchSwapPool {
+    id: ID!
+    tokens: [String!]!
 }
 
 input GqlPoolSwapFilter {

@@ -7,8 +7,16 @@ import {
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { TokenService } from '../../token/token.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { GqlPoolJoinExit, QueryPoolGetJoinExitsArgs, QueryPoolGetSwapsArgs } from '../../../schema';
+import {
+    GqlPoolJoinExit,
+    QueryPoolGetBatchSwapsArgs,
+    QueryPoolGetJoinExitsArgs,
+    QueryPoolGetSwapsArgs,
+} from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
+import _ from 'lodash';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
 
 export class PoolSwapService {
     constructor(
@@ -56,6 +64,40 @@ export class PoolSwapService {
         });
     }
 
+    public async getBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
+        const take = !args.first || args.first > 100 ? 10 : args.first;
+
+        return prisma.prismaPoolBatchSwap.findMany({
+            take,
+            skip: args.skip || undefined,
+            where: {
+                swaps: args.where?.poolIdIn
+                    ? {
+                          some: {
+                              poolId: {
+                                  in: args.where.poolIdIn,
+                              },
+                          },
+                      }
+                    : undefined,
+                tokenIn: {
+                    in: args.where?.tokenInIn || undefined,
+                },
+                tokenOut: {
+                    in: args.where?.tokenOutIn || undefined,
+                },
+            },
+            orderBy: { timestamp: 'desc' },
+            include: {
+                swaps: {
+                    include: {
+                        pool: { include: { tokens: true } },
+                    },
+                },
+            },
+        });
+    }
+
     /**
      * Syncs all swaps for the last 24 hours. We fetch the timestamp of the last stored swap to avoid
      * duplicate effort. Return an array of poolIds with swaps added.
@@ -71,6 +113,7 @@ export class PoolSwapService {
         const pageSize = 1000;
         const MAX_SKIP = 5000;
         const poolIds = new Set<string>();
+        const txs = new Set<string>();
 
         while (hasMore) {
             const { swaps } = await this.balancerSubgraphService.getSwaps({
@@ -104,6 +147,7 @@ export class PoolSwapService {
                     }
 
                     poolIds.add(swap.poolId.id);
+                    txs.add(swap.tx);
 
                     return {
                         id: swap.id,
@@ -122,6 +166,9 @@ export class PoolSwapService {
                 }),
             });
 
+            await this.createBatchSwaps(Array.from(txs));
+            txs.clear();
+
             if (swaps.length < pageSize) {
                 hasMore = false;
             }
@@ -135,7 +182,76 @@ export class PoolSwapService {
         }
 
         await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
+        await prisma.prismaPoolBatchSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
 
         return Array.from(poolIds);
+    }
+
+    private async createBatchSwaps(txs: string[]) {
+        const tokenPrices = await this.tokenService.getTokenPrices();
+        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs } } });
+        const groupedByTxAndUser = _.groupBy(swaps, (swap) => `${swap.tx}${swap.userAddress}`);
+        let operations: any[] = [
+            prisma.prismaPoolSwap.updateMany({
+                where: { tx: { in: txs } },
+                data: { batchSwapId: null, batchSwapIdx: null },
+            }),
+            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs } } }),
+        ];
+
+        for (const group of Object.values(groupedByTxAndUser)) {
+            const inMap = _.keyBy(group, this.getSwapInKey);
+            const outMap = _.keyBy(group, this.getSwapOutKey);
+            //start swaps are the tokenIn-tokenAmountIn that doesn't have an out
+            const startSwaps = group.filter((swap) => !outMap[this.getSwapInKey(swap)]);
+
+            for (const startSwap of startSwaps) {
+                const batchSwaps: PrismaPoolSwap[] = [startSwap];
+                let current = startSwap;
+
+                while (inMap[this.getSwapOutKey(current)]) {
+                    current = inMap[this.getSwapOutKey(current)];
+                    batchSwaps.push(current);
+                }
+
+                if (batchSwaps.length > 0) {
+                    const startSwap = batchSwaps[0];
+                    const endSwap = batchSwaps[batchSwaps.length - 1];
+
+                    operations = [
+                        ...operations,
+                        prisma.prismaPoolBatchSwap.create({
+                            data: {
+                                id: startSwap.id,
+                                timestamp: startSwap.timestamp,
+                                userAddress: startSwap.userAddress,
+                                tokenIn: startSwap.tokenIn,
+                                tokenAmountIn: startSwap.tokenAmountIn,
+                                tokenOut: endSwap.tokenOut,
+                                tokenAmountOut: endSwap.tokenAmountOut,
+                                tx: startSwap.tx,
+                                valueUSD: endSwap.valueUSD,
+                            },
+                        }),
+                        ...batchSwaps.map((swap, index) =>
+                            prisma.prismaPoolSwap.update({
+                                where: { id: swap.id },
+                                data: { batchSwapId: startSwap.id, batchSwapIdx: index },
+                            }),
+                        ),
+                    ];
+                }
+            }
+        }
+
+        await prismaBulkExecuteOperations(operations);
+    }
+
+    private getSwapOutKey(swap: PrismaPoolSwap): string {
+        return `${swap.tokenOut}${swap.tokenAmountOut}`;
+    }
+
+    private getSwapInKey(swap: PrismaPoolSwap): string {
+        return `${swap.tokenIn}${swap.tokenAmountIn}`;
     }
 }
