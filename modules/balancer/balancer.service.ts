@@ -204,7 +204,7 @@ export class BalancerService {
             const items: GqlBalancePoolAprItem[] = [{ title: 'Swap fees APR', apr: `${swapApr}` }];
 
             const gaugeStreamer = gaugeStreamers.find((streamer) => streamer.poolId === pool.id);
-            if (gaugeStreamer && parseFloat(gaugeStreamer.totalSupply) > 0) {
+            if (gaugeStreamer) {
                 const gaugeTvl =
                     (parseFloat(gaugeStreamer.totalSupply) / parseFloat(pool.totalShares)) * totalLiquidity;
                 for (let rewardToken of gaugeStreamer.rewardTokens) {
