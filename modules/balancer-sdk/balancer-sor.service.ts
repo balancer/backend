@@ -45,6 +45,7 @@ export class BalancerSorService {
 
         return {
             ...swapInfo,
+            swapType,
             returnAmount: formatFixed(swapInfo.returnAmount, this.getTokenDecimals(tokenOut, tokens)),
             returnAmountScaled: swapInfo.returnAmount.toString(),
             returnAmountConsideringFees: swapInfo.returnAmountConsideringFees.toString(),
