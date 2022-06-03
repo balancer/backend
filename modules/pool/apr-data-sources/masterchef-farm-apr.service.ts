@@ -9,6 +9,7 @@ import { networkConfig } from '../../config/network-config';
 import { tokenService } from '../../token/token.service';
 import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 import { FarmFragment } from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+import { formatFixed } from '@ethersproject/bignumber';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -90,7 +91,8 @@ export class MasterchefFarmAprService implements PoolAprService {
             .filter((rewardToken) => rewardToken.token !== networkConfig.beets.address)
             .forEach((rewardToken) => {
                 const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
-                const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
+                const rewardTokenPerYear =
+                    parseFloat(formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals)) * secondsPerYear;
                 const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
