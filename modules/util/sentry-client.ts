@@ -8,7 +8,7 @@ const client = prisma;
 Sentry.init({
     dsn: env.SENTRY_DSN,
     tracesSampleRate: 1.0,
-    debug: true,
+    environment: env.NODE_ENV,
     integrations: [new Sentry.Integrations.Http({ tracing: true }), new Tracing.Integrations.Prisma({ client })],
 });
 
