@@ -213,10 +213,13 @@ export class BalancerService {
                         continue;
                     }
                     const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0;
+                    console.log(rewardToken.address);
+                    console.log(tokenPrice);
                     const rewardTokenPerYear = rewardsPerSecond * secondsPerYear;
                     const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                     const rewardApr = rewardTokenValuePerYear / gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
+                    console.log(rewardApr);
                     items.push({
                         title: `${rewardToken.symbol} reward APR`,
                         apr: `${rewardApr}`,
