@@ -12,6 +12,7 @@ import {
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetSwapsArgs,
+    QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
@@ -96,6 +97,27 @@ export class PoolSwapService {
                 },
             },
         });
+    }
+
+    public async getUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs) {
+        const yesterday = moment().subtract(1, 'day').unix();
+        const take = !args.first || args.first > 100 ? 10 : args.first;
+
+        const result = await prisma.prismaPoolSwap.groupBy({
+            take,
+            skip: args.skip || undefined,
+            by: ['userAddress'],
+            _sum: { valueUSD: true },
+            orderBy: { _sum: { valueUSD: 'desc' } },
+            where: {
+                poolId: { in: args.where?.poolIdIn || undefined },
+                tokenIn: { in: args.where?.tokenInIn || undefined },
+                tokenOut: { in: args.where?.tokenOutIn || undefined },
+                timestamp: { gte: yesterday },
+            },
+        });
+
+        return result.map((item) => ({ userAddress: item.userAddress, swapVolumeUSD: `${item._sum.valueUSD || 0}` }));
     }
 
     /**

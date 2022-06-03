@@ -12,10 +12,12 @@ import {
     GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolUnion,
+    GqlPoolUserSwapVolume,
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
+    QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
 import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
 import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
@@ -76,6 +78,10 @@ export class PoolService {
 
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         return this.poolSwapService.getJoinExits(args);
+    }
+
+    public async getPoolUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs): Promise<GqlPoolUserSwapVolume[]> {
+        return this.poolSwapService.getUserSwapVolume(args);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {

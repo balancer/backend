@@ -36,6 +36,9 @@ const balancerResolvers: Resolvers = {
         poolGetJoinExits: async (parent, args, context) => {
             return poolService.getPoolJoinExits(args);
         },
+        poolGetUserSwapVolume: async (parent, args, context) => {
+            return poolService.getPoolUserSwapVolume(args);
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
