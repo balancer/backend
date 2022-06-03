@@ -212,7 +212,14 @@ export class BalancerService {
                     if (rewardsPerSecond === 0) {
                         continue;
                     }
-                    const tokenPrice = tokenPrices[rewardToken.address]?.usd ?? 0.0;
+                    const tokenPrice = tokenPrices[rewardToken.address.toLowerCase()]?.usd ?? 0.0;
+                    for (const token in tokenPrices) {
+                        if (Object.prototype.hasOwnProperty.call(tokenPrices, token)) {
+                            const price = tokenPrices[token];
+                            console.log(token);
+                            console.log(price);
+                        }
+                    }
                     console.log(rewardToken.address);
                     console.log(tokenPrice);
                     const rewardTokenPerYear = rewardsPerSecond * secondsPerYear;
