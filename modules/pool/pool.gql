@@ -488,6 +488,8 @@ type GqlPoolBatchSwap {
     tokenOut: String!
     tokenAmountIn: String!
     tokenAmountOut: String!
+    tokenInPrice: Float!
+    tokenOutPrice: Float!
     timestamp: Int!
     tx: String!
     valueUSD: Float!

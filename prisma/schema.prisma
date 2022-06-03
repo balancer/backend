@@ -182,6 +182,8 @@ model PrismaPoolBatchSwap {
     timestamp           Int
     tx                  String
     valueUSD            Float
+    tokenInPrice        Float               @default(0)
+    tokenOutPrice       Float               @default(0)
 
     swaps               PrismaPoolSwap[]
 }

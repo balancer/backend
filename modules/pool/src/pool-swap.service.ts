@@ -5,7 +5,7 @@ import {
     OrderDirection,
     Swap_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { TokenService } from '../../token/token.service';
+import { tokenService, TokenService } from '../../token/token.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     GqlPoolJoinExit,
@@ -231,6 +231,8 @@ export class PoolSwapService {
                                 tokenAmountOut: endSwap.tokenAmountOut,
                                 tx: startSwap.tx,
                                 valueUSD: endSwap.valueUSD,
+                                tokenInPrice: tokenService.getPriceForToken(tokenPrices, startSwap.tokenIn),
+                                tokenOutPrice: tokenService.getPriceForToken(tokenPrices, endSwap.tokenOut),
                             },
                         }),
                         ...batchSwaps.map((swap, index) =>
