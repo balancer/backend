@@ -27,6 +27,7 @@ type GqlSorGetSwapsResponse {
     swapAmount: BigDecimal!
     swapAmountForSwaps: BigDecimal
     returnAmount: BigDecimal!
+    returnAmountScaled: BigDecimal!
     returnAmountFromSwaps: BigDecimal
     returnAmountConsideringFees: BigDecimal!
     marketSp: String!
