@@ -25,9 +25,10 @@ type GqlSorGetSwapsResponse {
     tokenAddresses: [String!]!
     swapType: GqlSorSwapType!
     swaps: [GqlSorSwap!]!
-    swapAmount: BigDecimal!
+    swapAmount: AmountHumanReadable!
+    swapAmountScaled: BigDecimal!
     swapAmountForSwaps: BigDecimal
-    returnAmount: BigDecimal!
+    returnAmount: AmountHumanReadable!
     returnAmountScaled: BigDecimal!
     returnAmountFromSwaps: BigDecimal
     returnAmountConsideringFees: BigDecimal!

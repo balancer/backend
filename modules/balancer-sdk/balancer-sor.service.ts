@@ -50,7 +50,8 @@ export class BalancerSorService {
             returnAmountScaled: swapInfo.returnAmount.toString(),
             returnAmountConsideringFees: swapInfo.returnAmountConsideringFees.toString(),
             returnAmountFromSwaps: swapInfo.returnAmountFromSwaps?.toString(),
-            swapAmount: swapInfo.swapAmount.toString(),
+            swapAmount: formatFixed(swapInfo.swapAmount, this.getTokenDecimals(tokenIn, tokens)),
+            swapAmountScaled: swapInfo.swapAmount.toString(),
             swapAmountForSwaps: swapInfo.swapAmountForSwaps?.toString(),
         };
     }

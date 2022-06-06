@@ -118,3 +118,4 @@ generates:
         Bytes: string
         BigDecimal: string
         BigInt: string
+        AmountHumanReadable: string
