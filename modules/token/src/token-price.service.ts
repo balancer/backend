@@ -5,7 +5,7 @@ import { timestampRoundedUpToNearestHour } from '../../util/time';
 import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
-import { GqlTokenPriceChartDataItem } from '../../../schema';
+import { GqlTokenGetChartDataRange, GqlTokenPriceChartDataItem, QueryTokenGetChartDataArgs } from '../../../schema';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
@@ -99,13 +99,19 @@ export class TokenPriceService {
         //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async getChartData(tokenIn: string, tokenOut: string): Promise<GqlTokenPriceChartDataItem[]> {
-        const thirtyDaysAgo = moment().subtract(30, 'days').unix();
+    public async getChartData({
+        tokenIn,
+        tokenOut,
+        range,
+    }: QueryTokenGetChartDataArgs): Promise<GqlTokenPriceChartDataItem[]> {
+        const startTimestamp = moment()
+            .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
+            .unix();
 
         const data = await prisma.prismaTokenPrice.findMany({
             where: {
                 tokenAddress: { in: [tokenIn, tokenOut] },
-                timestamp: { gt: thirtyDaysAgo },
+                timestamp: { gt: startTimestamp },
             },
             orderBy: { timestamp: 'desc' },
         });

@@ -12,7 +12,7 @@ import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@p
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { memCacheGetValue, memCacheGetValueAndCacheIfNeeded, memCacheSetValue } from '../util/mem-cache';
-import { GqlTokenPriceChartDataItem } from '../../schema';
+import { GqlTokenPriceChartDataItem, QueryTokenGetChartDataArgs } from '../../schema';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
@@ -98,8 +98,8 @@ export class TokenService {
         });
     }
 
-    public async getChartData(tokenIn: string, tokenOut: string): Promise<GqlTokenPriceChartDataItem[]> {
-        return this.tokenPriceService.getChartData(tokenIn, tokenOut);
+    public async getChartData(args: QueryTokenGetChartDataArgs): Promise<GqlTokenPriceChartDataItem[]> {
+        return this.tokenPriceService.getChartData(args);
     }
 
     public async initChartData(tokenAddress: string) {

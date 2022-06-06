@@ -52,8 +52,8 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
-        tokenGetChartData: async (parent, { tokenIn, tokenOut }, context) => {
-            return tokenService.getChartData(tokenIn, tokenOut);
+        tokenGetChartData: async (parent, args, context) => {
+            return tokenService.getChartData(args);
         },
     },
     Mutation: {
