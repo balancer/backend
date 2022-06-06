@@ -52,6 +52,9 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
+        tokenGetChartData: async (parent, { tokenIn, tokenOut }, context) => {
+            return tokenService.getChartData(tokenIn, tokenOut);
+        },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {
@@ -72,6 +75,13 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
 
             await tokenService.syncTokenDynamicData();
+
+            return 'success';
+        },
+        tokenInitChartData: async (parent, { tokenAddress }, context) => {
+            isAdminRoute(context);
+
+            await tokenService.initChartData(tokenAddress);
 
             return 'success';
         },

@@ -2,6 +2,9 @@ import axios from 'axios';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { sleep } from '../../util/promise';
+import moment from 'moment-timezone';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 const FIAT_PARAM = 'usd';
@@ -65,6 +68,62 @@ export class CoingeckoDataService {
         }
     }
 
+    public async initChartData(tokenAddress: string) {
+        const latestTimestamp = timestampRoundedUpToNearestHour();
+        tokenAddress = tokenAddress.toLowerCase();
+
+        const operations: any[] = [];
+        const token = await prisma.prismaToken.findUnique({ where: { address: tokenAddress } });
+
+        if (!token || !token.coingeckoTokenId) {
+            throw new Error('Missing token or token is missing coingecko token id');
+        }
+
+        const twentyFourHourData = await this.getCoinCandlestickData(token.coingeckoTokenId, 1);
+        const hourlyData = twentyFourHourData.filter(
+            (item) => moment.unix(item[0] / 1000).minute() === 0 && item[0] / 1000 <= latestTimestamp,
+        );
+
+        operations.push(prisma.prismaTokenPrice.deleteMany({ where: { tokenAddress } }));
+
+        operations.push(
+            prisma.prismaTokenPrice.createMany({
+                data: hourlyData.map((item) => ({
+                    tokenAddress,
+                    timestamp: item[0] / 1000,
+                    open: item[1],
+                    high: item[2],
+                    low: item[3],
+                    close: item[4],
+                    price: item[4],
+                    coingecko: true,
+                })),
+            }),
+        );
+
+        const monthData = await this.getCoinCandlestickData(token.coingeckoTokenId, 30);
+
+        operations.push(
+            prisma.prismaTokenPrice.createMany({
+                data: monthData
+                    .filter((item) => item[0] / 1000 <= latestTimestamp)
+                    .map((item) => ({
+                        tokenAddress,
+                        timestamp: item[0] / 1000,
+                        open: item[1],
+                        high: item[2],
+                        low: item[3],
+                        close: item[4],
+                        price: item[4],
+                        coingecko: true,
+                    })),
+                skipDuplicates: true,
+            }),
+        );
+
+        await prismaBulkExecuteOperations(operations);
+    }
+
     private async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
         const endpoint = `/coins/markets?vs_currency=${FIAT_PARAM}&ids=${tokenIds}&per_page=${ADDRESSES_PER_REQUEST}&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
 
@@ -75,6 +134,15 @@ export class CoingeckoDataService {
         const endpoint = `/coins/${tokenId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=false&sparkline=true`;
 
         return this.get<CoingeckoTokenData[]>(endpoint);
+    }
+
+    private async getCoinCandlestickData(
+        tokenId: string,
+        days: 1 | 30,
+    ): Promise<[number, number, number, number, number][]> {
+        const endpoint = `/coins/${tokenId}/ohlc?vs_currency=usd&days=${days}`;
+
+        return this.get(endpoint);
     }
 
     private async get<T>(endpoint: string): Promise<T> {

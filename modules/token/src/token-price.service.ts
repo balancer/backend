@@ -2,9 +2,10 @@ import { TokenPriceHandler } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../util/time';
-import { PrismaTokenCurrentPrice } from '@prisma/client';
+import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
+import { GqlTokenPriceChartDataItem } from '../../../schema';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
@@ -96,6 +97,39 @@ export class TokenPriceService {
         //we only keep token prices for the last 24 hours
         //const yesterday = moment().subtract(1, 'day').unix();
         //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
+    }
+
+    public async getChartData(tokenIn: string, tokenOut: string): Promise<GqlTokenPriceChartDataItem[]> {
+        const thirtyDaysAgo = moment().subtract(30, 'days').unix();
+
+        const data = await prisma.prismaTokenPrice.findMany({
+            where: {
+                tokenAddress: { in: [tokenIn, tokenOut] },
+                timestamp: { gt: thirtyDaysAgo },
+            },
+            orderBy: { timestamp: 'desc' },
+        });
+
+        const tokenInData = data.filter((item) => item.tokenAddress === tokenIn);
+        const tokenOutData = data.filter((item) => item.tokenAddress === tokenOut);
+        const items: GqlTokenPriceChartDataItem[] = [];
+
+        for (const tokenInItem of tokenInData) {
+            const tokenOutItem = tokenOutData.find((tokenOutItem) => tokenOutItem.timestamp == tokenInItem.timestamp);
+
+            if (tokenOutItem) {
+                items.push({
+                    id: `${tokenIn}-${tokenOut}-${tokenInItem.timestamp}`,
+                    timestamp: tokenOutItem.timestamp,
+                    open: `${tokenOutItem.open / tokenInItem.open}`,
+                    high: `${tokenOutItem.high / tokenInItem.high}`,
+                    low: `${tokenOutItem.low / tokenInItem.low}`,
+                    close: `${tokenOutItem.close / tokenInItem.close}`,
+                });
+            }
+        }
+
+        return items;
     }
 
     private async updateCandleStickData() {
