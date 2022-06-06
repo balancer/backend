@@ -43,19 +43,20 @@ export class BalancerSorService {
             },
         );
 
+        const returnAmount = formatFixed(
+            swapInfo.returnAmount,
+            this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenOut : tokenIn, tokens),
+        );
+
         return {
             ...swapInfo,
             swapType,
-            swapAmount: formatFixed(
-                swapInfo.swapAmount,
-                this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens),
-            ),
+            tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : returnAmount,
+            tokenOutAmount: swapType === 'EXACT_IN' ? returnAmount : swapAmount,
+            swapAmount,
             swapAmountScaled: swapInfo.swapAmount.toString(),
             swapAmountForSwaps: swapInfo.swapAmountForSwaps?.toString(),
-            returnAmount: formatFixed(
-                swapInfo.returnAmount,
-                this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenOut : tokenIn, tokens),
-            ),
+            returnAmount,
             returnAmountScaled: swapInfo.returnAmount.toString(),
             returnAmountConsideringFees: swapInfo.returnAmountConsideringFees.toString(),
             returnAmountFromSwaps: swapInfo.returnAmountFromSwaps?.toString(),
