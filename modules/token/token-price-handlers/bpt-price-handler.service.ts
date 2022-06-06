@@ -1,6 +1,6 @@
 import { TokenPriceHandler } from '../token-types';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
-import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 import { prisma } from '../../util/prisma-client';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
@@ -14,7 +14,7 @@ export class BptPriceHandlerService implements TokenPriceHandler {
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        const timestamp = timestampRoundedUpToNearestFifteen();
+        const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
             where: { dynamicData: { totalLiquidity: { gt: 10 } } },
             include: { dynamicData: true },

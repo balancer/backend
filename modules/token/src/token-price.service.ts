@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
-import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 import { PrismaTokenCurrentPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
@@ -99,7 +99,7 @@ export class TokenPriceService {
     }
 
     private async updateCandleStickData() {
-        const timestamp = timestampRoundedUpToNearestFifteen();
+        const timestamp = timestampRoundedUpToNearestHour();
         const tokenPrices = await prisma.prismaTokenPrice.findMany({ where: { timestamp } });
         let operations: any[] = [];
 

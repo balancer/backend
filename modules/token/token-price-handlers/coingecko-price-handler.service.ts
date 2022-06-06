@@ -4,7 +4,7 @@ import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 import _ from 'lodash';
 import { sleep } from '../../util/promise';
 import { prisma } from '../../util/prisma-client';
-import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 const FIAT_PARAM = 'usd';
@@ -36,7 +36,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        const timestamp = timestampRoundedUpToNearestFifteen();
+        const timestamp = timestampRoundedUpToNearestHour();
         const nativeAsset = tokens.find((token) => token.address === this.weth);
         const tokensUpdated: string[] = [];
 

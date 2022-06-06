@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../token-types';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 import { prisma } from '../../util/prisma-client';
-import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 import moment from 'moment-timezone';
 
 export class SwapsPriceHandlerService implements TokenPriceHandler {
@@ -22,7 +22,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         let operations: any[] = [];
         const tokensUpdated: string[] = [];
-        const timestamp = timestampRoundedUpToNearestFifteen();
+        const timestamp = timestampRoundedUpToNearestHour();
         const tokenAddresses = tokens.map((token) => token.address);
         const swaps = await prisma.prismaPoolSwap.findMany({
             where: {

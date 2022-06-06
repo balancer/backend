@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../token-types';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 import { prisma } from '../../util/prisma-client';
-import { timestampRoundedUpToNearestFifteen } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../util/time';
 
 export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -14,7 +14,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         let operations: any[] = [];
         const tokensUpdated: string[] = [];
-        const timestamp = timestampRoundedUpToNearestFifteen();
+        const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
             where: { type: 'LINEAR' },
             include: { linearData: true, tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } } },
