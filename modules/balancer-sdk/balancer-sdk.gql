@@ -61,4 +61,5 @@ type GqlSorSwapRouteHop {
     tokenOut: String!
     tokenOutAmount: BigDecimal!
     poolId: String!
+    pool: GqlPoolMinimal!
 }

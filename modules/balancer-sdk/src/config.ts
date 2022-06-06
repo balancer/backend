@@ -65,6 +65,9 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                                     gt: 0.000000000001,
                                 },
                             },
+                            categories: {
+                                none: { category: 'BLACK_LISTED' },
+                            },
                         },
                         include: {
                             dynamicData: true,

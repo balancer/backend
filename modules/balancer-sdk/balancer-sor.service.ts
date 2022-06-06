@@ -4,6 +4,7 @@ import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '
 import _ from 'lodash';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
+import { poolService } from '../pool/pool.service';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -48,6 +49,10 @@ export class BalancerSorService {
             this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenOut : tokenIn, tokens),
         );
 
+        const pools = await poolService.getGqlPools({
+            where: { idIn: swapInfo.routes.map((route) => route.hops.map((hop) => hop.poolId)).flat() },
+        });
+
         return {
             ...swapInfo,
             swapType,
@@ -60,6 +65,13 @@ export class BalancerSorService {
             returnAmountScaled: swapInfo.returnAmount.toString(),
             returnAmountConsideringFees: swapInfo.returnAmountConsideringFees.toString(),
             returnAmountFromSwaps: swapInfo.returnAmountFromSwaps?.toString(),
+            routes: swapInfo.routes.map((route) => ({
+                ...route,
+                hops: route.hops.map((hop) => ({
+                    ...hop,
+                    pool: pools.find((pool) => pool.id === hop.poolId)!,
+                })),
+            })),
         };
     }
 
