@@ -10,6 +10,7 @@ model PrismaToken {
     coingeckoContractAddress String?
     coingeckoTokenId    String?
 
+    data                PrismaTokenData?
     dynamicData         PrismaTokenDynamicData?
     currentPrice        PrismaTokenCurrentPrice?
     prices              PrismaTokenPrice[]
@@ -65,6 +66,20 @@ model PrismaTokenDynamicData {
     priceChangePercent7d Float?
     priceChangePercent14d Float?
     priceChangePercent30d Float?
+}
+
+
+model PrismaTokenData {
+    id                  String              @id
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    updatedAt           DateTime            @updatedAt
+
+    description         String?
+    websiteUrl          String?
+    discordUrl          String?
+    telegramUrl         String?
+    twitterUsername     String?
 }
 
 model PrismaTokenType {

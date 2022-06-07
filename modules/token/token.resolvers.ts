@@ -81,6 +81,9 @@ const resolvers: Resolvers = {
                 close: `${item.close}`,
             }));
         },
+        tokenGetData: async (parent, { address }, context) => {
+            return tokenService.getTokenData(address);
+        },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {
@@ -110,6 +113,18 @@ const resolvers: Resolvers = {
             await tokenService.initChartData(tokenAddress);
 
             return 'success';
+        },
+        tokenSyncTokenData: async (parent, { address }, context) => {
+            isAdminRoute(context);
+
+            await tokenService.syncTokenData(address);
+
+            return 'success';
+        },
+        tokenSyncAllTokenData: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            return tokenService.syncAllTokenData();
         },
     },
 };

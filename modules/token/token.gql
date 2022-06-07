@@ -11,12 +11,15 @@ extend type Query {
     ): [GqlTokenPriceChartDataItem!]!
     tokenGetPriceChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenPriceChartDataItem!]!
     tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
+    tokenGetData(address: String!): GqlTokenData
 }
 
 extend type Mutation {
     tokenReloadTokenPrices: Boolean
     tokenSyncTokenDefinitions: String!
     tokenSyncTokenDynamicData: String!
+    tokenSyncTokenData(address: String!): String!
+    tokenSyncAllTokenData: [String!]!
     tokenInitChartData(tokenAddress: String!): String!
 }
 
@@ -83,4 +86,14 @@ type GqlTokenPriceChartDataItem {
     id: ID!
     timestamp: Int!
     price: AmountHumanReadable!
+}
+
+type GqlTokenData {
+    id: ID!
+    tokenAddress: String!
+    description: String
+    websiteUrl: String
+    discordUrl: String
+    telegramUrl: String
+    twitterUsername: String
 }

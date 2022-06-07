@@ -68,6 +68,54 @@ export class CoingeckoDataService {
         }
     }
 
+    public async syncAllTokenData() {
+        const messages: string[] = [];
+        const tokensWithIds = await prisma.prismaToken.findMany({
+            where: { coingeckoTokenId: { not: null } },
+        });
+
+        for (const token of tokensWithIds) {
+            try {
+                await this.syncTokenData(token.address);
+            } catch {
+                console.log('failed to sync', token.symbol, token.coingeckoTokenId);
+                messages.push(`failed to sync ${token.symbol} ${token.coingeckoTokenId}`);
+            }
+
+            await sleep(500);
+        }
+
+        return messages;
+    }
+
+    public async syncTokenData(address: string) {
+        const token = await prisma.prismaToken.findUnique({ where: { address } });
+
+        if (!token || !token.coingeckoTokenId) {
+            throw new Error('Token with address does not exist or token does not have a coingeckoTokenId');
+        }
+
+        const data = await this.getCoinDataForTokenId(token.coingeckoTokenId);
+
+        const tokenData = {
+            description: data.description.en || null,
+            websiteUrl: data.links.homepage[0] || null,
+            discordUrl: data.links.chat_url.find((url) => url.indexOf('discord') !== -1),
+            telegramUrl: data.links.chat_url.find((url) => url.indexOf('t.me') !== -1),
+            twitterUsername: data.links.twitter_screen_name || null,
+        };
+
+        await prisma.prismaTokenData.upsert({
+            where: { id: token.coingeckoTokenId },
+            create: {
+                id: token.coingeckoTokenId,
+                tokenAddress: address,
+                ...tokenData,
+            },
+            update: tokenData,
+        });
+    }
+
     public async initChartData(tokenAddress: string) {
         const latestTimestamp = timestampRoundedUpToNearestHour();
         tokenAddress = tokenAddress.toLowerCase();
@@ -143,10 +191,10 @@ export class CoingeckoDataService {
         return this.get<CoingeckoTokenMarketData[]>(endpoint);
     }
 
-    private async getCoinDataForTokenId(tokenId: string) {
+    private async getCoinDataForTokenId(tokenId: string): Promise<CoingeckoTokenData> {
         const endpoint = `/coins/${tokenId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=false&sparkline=true`;
 
-        return this.get<CoingeckoTokenData[]>(endpoint);
+        return this.get<CoingeckoTokenData>(endpoint);
     }
 
     private async getCoinCandlestickData(

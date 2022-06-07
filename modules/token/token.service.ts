@@ -8,7 +8,13 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import {
+    PrismaToken,
+    PrismaTokenCurrentPrice,
+    PrismaTokenDynamicData,
+    PrismaTokenPrice,
+    PrismaTokenData,
+} from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { memCacheGetValueAndCacheIfNeeded } from '../util/mem-cache';
@@ -119,6 +125,18 @@ export class TokenService {
 
     public async initChartData(tokenAddress: string) {
         await this.coingeckoDataService.initChartData(tokenAddress);
+    }
+
+    public async syncAllTokenData(): Promise<string[]> {
+        return this.coingeckoDataService.syncAllTokenData();
+    }
+
+    public async syncTokenData(tokenAddress: string) {
+        await this.coingeckoDataService.syncTokenData(tokenAddress);
+    }
+
+    public async getTokenData(tokenAddress: string): Promise<PrismaTokenData | null> {
+        return prisma.prismaTokenData.findUnique({ where: { tokenAddress } });
     }
 }
 
