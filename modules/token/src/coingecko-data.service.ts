@@ -79,29 +79,27 @@ export class CoingeckoDataService {
             throw new Error('Missing token or token is missing coingecko token id');
         }
 
+        const monthData = await this.getCoinCandlestickData(token.coingeckoTokenId, 30);
         const twentyFourHourData = await this.getCoinCandlestickData(token.coingeckoTokenId, 1);
-        const hourlyData = twentyFourHourData.filter(
-            (item) => moment.unix(item[0] / 1000).minute() === 0 && item[0] / 1000 <= latestTimestamp,
-        );
+
+        //merge 30 min data into hourly data
+        const hourlyData = Object.values(
+            _.groupBy(twentyFourHourData, (item) => timestampRoundedUpToNearestHour(moment.unix(item[0] / 1000))),
+        ).map((hourData) => {
+            if (hourData.length === 1) {
+                const item = hourData[0];
+                item[0] = timestampRoundedUpToNearestHour(moment.unix(item[0] / 1000)) * 1000;
+
+                return item;
+            }
+
+            const thirty = hourData[0];
+            const hour = hourData[1];
+
+            return [hour[0], thirty[1], Math.max(thirty[2], hour[2]), Math.min(thirty[3], hour[3]), hour[4]];
+        });
 
         operations.push(prisma.prismaTokenPrice.deleteMany({ where: { tokenAddress } }));
-
-        operations.push(
-            prisma.prismaTokenPrice.createMany({
-                data: hourlyData.map((item) => ({
-                    tokenAddress,
-                    timestamp: item[0] / 1000,
-                    open: item[1],
-                    high: item[2],
-                    low: item[3],
-                    close: item[4],
-                    price: item[4],
-                    coingecko: true,
-                })),
-            }),
-        );
-
-        const monthData = await this.getCoinCandlestickData(token.coingeckoTokenId, 30);
 
         operations.push(
             prisma.prismaTokenPrice.createMany({
@@ -117,6 +115,21 @@ export class CoingeckoDataService {
                         price: item[4],
                         coingecko: true,
                     })),
+            }),
+        );
+
+        operations.push(
+            prisma.prismaTokenPrice.createMany({
+                data: hourlyData.map((item) => ({
+                    tokenAddress,
+                    timestamp: Math.floor(item[0] / 1000),
+                    open: item[1],
+                    high: item[2],
+                    low: item[3],
+                    close: item[4],
+                    price: item[4],
+                    coingecko: true,
+                })),
                 skipDuplicates: true,
             }),
         );
@@ -235,3 +248,40 @@ export interface CoingeckoTokenData {
     };
     last_updated: Date;
 }
+
+/*
+1654581600000
+1654583400000
+1654585200000
+1654587000000
+      3600000
+
+[
+    1654581600000,
+    0.343544,
+    0.34609,
+    0.343544,
+    0.34609
+  ],
+  [
+    1654583400000,
+    0.345831,
+    0.345831,
+    0.345452,
+    0.345452
+  ],
+  [
+    1654585200000,
+    0.345486,
+    0.345486,
+    0.344707,
+    0.345018
+  ],
+  [
+    1654587000000,
+    0.345032,
+    0.345032,
+    0.345032,
+    0.345032
+  ]
+ */

@@ -1,8 +1,7 @@
-import { GqlTokenPrice, Resolvers } from '../../schema';
+import { Resolvers } from '../../schema';
 import { tokenPriceService } from '../token-price/token-price.service';
 import _ from 'lodash';
 import { isAdminRoute } from '../util/resolver-util';
-import { isAddress } from 'ethers/lib/utils';
 import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
@@ -52,8 +51,35 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
-        tokenGetChartData: async (parent, args, context) => {
-            return tokenService.getChartData(args);
+        tokenGetPriceChartData: async (parent, { address, range }, context) => {
+            const data = await tokenService.getDataForRange(address, range);
+
+            return data.map((item) => ({
+                id: `${address}-${item.timestamp}`,
+                timestamp: item.timestamp,
+                price: `${item.price}`,
+            }));
+        },
+        tokenGetRelativePriceChartData: async (parent, { tokenIn, tokenOut, range }, context) => {
+            const data = await tokenService.getRelativeDataForRange(tokenIn, tokenOut, range);
+
+            return data.map((item) => ({
+                id: `${tokenIn}-${tokenOut}-${item.timestamp}`,
+                timestamp: item.timestamp,
+                price: `${item.price}`,
+            }));
+        },
+        tokenGetCandlestickChartData: async (parent, { address, range }, context) => {
+            const data = await tokenService.getDataForRange(address, range);
+
+            return data.map((item) => ({
+                id: `${address}-${item.timestamp}`,
+                timestamp: item.timestamp,
+                open: `${item.open}`,
+                high: `${item.high}`,
+                low: `${item.low}`,
+                close: `${item.close}`,
+            }));
         },
     },
     Mutation: {

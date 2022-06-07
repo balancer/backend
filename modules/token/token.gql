@@ -4,11 +4,13 @@ extend type Query {
     tokenGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
     tokenGetTokensDynamicData(addresses: [String!]!): [GqlTokenDynamicData!]!
     tokenGetTokenDynamicData(address: String!): GqlTokenDynamicData
-    tokenGetChartData(
+    tokenGetRelativePriceChartData(
         tokenIn: String!
         tokenOut: String!
-        range: GqlTokenGetChartDataRange!
+        range: GqlTokenChartDataRange!
     ): [GqlTokenPriceChartDataItem!]!
+    tokenGetPriceChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenPriceChartDataItem!]!
+    tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
 }
 
 extend type Mutation {
@@ -63,16 +65,22 @@ type GqlTokenDynamicData {
     updatedAt: String!
 }
 
-enum GqlTokenGetChartDataRange {
+enum GqlTokenChartDataRange {
     SEVEN_DAY
     THIRTY_DAY
 }
 
-type GqlTokenPriceChartDataItem {
+type GqlTokenCandlestickChartDataItem {
     id: ID!
     timestamp: Int!
     open: AmountHumanReadable!
     high: AmountHumanReadable!
     low: AmountHumanReadable!
     close: AmountHumanReadable!
+}
+
+type GqlTokenPriceChartDataItem {
+    id: ID!
+    timestamp: Int!
+    price: AmountHumanReadable!
 }

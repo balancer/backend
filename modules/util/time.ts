@@ -126,8 +126,7 @@ export function getDailyTimestampsWithBuffer(numDays: number): number[] {
     return timestamps;
 }
 
-export function timestampRoundedUpToNearestHour(): number {
-    const m = moment();
+export function timestampRoundedUpToNearestHour(m: moment.Moment = moment()): number {
     const roundUp = m.second() || m.millisecond() || m.minute() ? m.add(1, 'hour').startOf('hour') : m.startOf('hour');
 
     return roundUp.unix();

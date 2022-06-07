@@ -1,11 +1,17 @@
-import { TokenPriceHandler } from '../token-types';
+import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../util/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../util/time';
 import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
-import { GqlTokenGetChartDataRange, GqlTokenPriceChartDataItem, QueryTokenGetChartDataArgs } from '../../../schema';
+import {
+    GqlTokenChartDataRange,
+    GqlTokenPriceChartDataItem,
+    QueryTokenGetCandlestickChartDataArgs,
+    QueryTokenGetPriceChartDataArgs,
+    QueryTokenGetRelativePriceChartDataArgs,
+} from '../../../schema';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
@@ -99,26 +105,33 @@ export class TokenPriceService {
         //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async getChartData({
-        tokenIn,
-        tokenOut,
-        range,
-    }: QueryTokenGetChartDataArgs): Promise<GqlTokenPriceChartDataItem[]> {
-        const startTimestamp = moment()
-            .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
-            .unix();
+    public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {
+        const startTimestamp = this.getStartTimestampFromRange(range);
+
+        return prisma.prismaTokenPrice.findMany({
+            where: { tokenAddress, timestamp: { gt: startTimestamp } },
+            orderBy: { timestamp: 'asc' },
+        });
+    }
+
+    public async getRelativeDataForRange(
+        tokenIn: string,
+        tokenOut: string,
+        range: GqlTokenChartDataRange,
+    ): Promise<TokenPriceItem[]> {
+        const startTimestamp = this.getStartTimestampFromRange(range);
 
         const data = await prisma.prismaTokenPrice.findMany({
             where: {
                 tokenAddress: { in: [tokenIn, tokenOut] },
                 timestamp: { gt: startTimestamp },
             },
-            orderBy: { timestamp: 'desc' },
+            orderBy: { timestamp: 'asc' },
         });
 
         const tokenInData = data.filter((item) => item.tokenAddress === tokenIn);
         const tokenOutData = data.filter((item) => item.tokenAddress === tokenOut);
-        const items: GqlTokenPriceChartDataItem[] = [];
+        const items: TokenPriceItem[] = [];
 
         for (const tokenInItem of tokenInData) {
             const tokenOutItem = tokenOutData.find((tokenOutItem) => tokenOutItem.timestamp == tokenInItem.timestamp);
@@ -126,16 +139,19 @@ export class TokenPriceService {
             if (tokenOutItem) {
                 items.push({
                     id: `${tokenIn}-${tokenOut}-${tokenInItem.timestamp}`,
-                    timestamp: tokenOutItem.timestamp,
-                    open: `${tokenOutItem.open / tokenInItem.open}`,
-                    high: `${tokenOutItem.high / tokenInItem.high}`,
-                    low: `${tokenOutItem.low / tokenInItem.low}`,
-                    close: `${tokenOutItem.close / tokenInItem.close}`,
+                    timestamp: tokenInItem.timestamp,
+                    price: tokenOutItem.close / tokenInItem.close,
                 });
             }
         }
 
         return items;
+    }
+
+    private getStartTimestampFromRange(range: GqlTokenChartDataRange) {
+        return moment()
+            .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
+            .unix();
     }
 
     private async updateCandleStickData() {

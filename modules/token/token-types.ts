@@ -31,3 +31,9 @@ export interface TokenDefinition {
     coingeckoTokenId?: string | null;
     tradable: boolean;
 }
+
+export interface TokenPriceItem {
+    id: string;
+    timestamp: number;
+    price: number;
+}

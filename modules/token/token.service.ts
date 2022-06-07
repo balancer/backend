@@ -1,5 +1,5 @@
 import { env } from '../../app/env';
-import { TokenDefinition } from './token-types';
+import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../util/prisma-client';
 import { TokenDataLoaderService } from './src/token-data-loader.service';
 import { TokenPriceService } from './src/token-price.service';
@@ -8,11 +8,18 @@ import { networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData } from '@prisma/client';
+import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { memCacheGetValue, memCacheGetValueAndCacheIfNeeded, memCacheSetValue } from '../util/mem-cache';
-import { GqlTokenPriceChartDataItem, QueryTokenGetChartDataArgs } from '../../schema';
+import { memCacheGetValueAndCacheIfNeeded } from '../util/mem-cache';
+import {
+    GqlTokenCandlestickChartDataItem,
+    GqlTokenChartDataRange,
+    GqlTokenPriceChartDataItem,
+    QueryTokenGetCandlestickChartDataArgs,
+    QueryTokenGetPriceChartDataArgs,
+    QueryTokenGetRelativePriceChartDataArgs,
+} from '../../schema';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
@@ -98,8 +105,16 @@ export class TokenService {
         });
     }
 
-    public async getChartData(args: QueryTokenGetChartDataArgs): Promise<GqlTokenPriceChartDataItem[]> {
-        return this.tokenPriceService.getChartData(args);
+    public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getDataForRange(tokenAddress, range);
+    }
+
+    public async getRelativeDataForRange(
+        tokenIn: string,
+        tokenOut: string,
+        range: GqlTokenChartDataRange,
+    ): Promise<TokenPriceItem[]> {
+        return this.tokenPriceService.getRelativeDataForRange(tokenIn, tokenOut, range);
     }
 
     public async initChartData(tokenAddress: string) {
