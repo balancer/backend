@@ -127,14 +127,6 @@ export class TokenService {
         await this.coingeckoDataService.initChartData(tokenAddress);
     }
 
-    public async syncAllTokenData(): Promise<string[]> {
-        return this.coingeckoDataService.syncAllTokenData();
-    }
-
-    public async syncTokenData(tokenAddress: string) {
-        await this.coingeckoDataService.syncTokenData(tokenAddress);
-    }
-
     public async getTokenData(tokenAddress: string): Promise<PrismaTokenData | null> {
         return prisma.prismaTokenData.findUnique({ where: { tokenAddress } });
     }

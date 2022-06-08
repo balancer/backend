@@ -18,8 +18,6 @@ extend type Mutation {
     tokenReloadTokenPrices: Boolean
     tokenSyncTokenDefinitions: String!
     tokenSyncTokenDynamicData: String!
-    tokenSyncTokenData(address: String!): String!
-    tokenSyncAllTokenData: [String!]!
     tokenInitChartData(tokenAddress: String!): String!
 }
 

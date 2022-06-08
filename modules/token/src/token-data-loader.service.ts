@@ -19,6 +19,11 @@ interface SanityToken {
     coingeckoPlatformId?: string;
     coingeckoContractAddress?: string;
     coingeckoTokenId?: string;
+    description?: string;
+    websiteUrl?: string;
+    twitterUsername?: string;
+    discordUrl?: string;
+    telegramUrl?: string;
 }
 
 export class TokenDataLoaderService {
@@ -33,7 +38,12 @@ export class TokenDataLoaderService {
                 'priority': coalesce(priority, 0),
                 coingeckoPlatformId,
                 coingeckoContractAddress,
-                coingeckoTokenId
+                coingeckoTokenId,
+                description,
+                websiteUrl,
+                twitterUsername,
+                discordUrl,
+                telegramUrl
             }
         `);
 
@@ -65,6 +75,22 @@ export class TokenDataLoaderService {
                     coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
                 },
             });
+
+            if (sanityToken.coingeckoTokenId) {
+                const tokenData = {
+                    description: sanityToken.description || null,
+                    websiteUrl: sanityToken.websiteUrl || null,
+                    discordUrl: sanityToken.discordUrl || null,
+                    telegramUrl: sanityToken.telegramUrl || null,
+                    twitterUsername: sanityToken.twitterUsername || null,
+                };
+
+                await prisma.prismaTokenData.upsert({
+                    where: { id: sanityToken.coingeckoTokenId },
+                    create: { id: sanityToken.coingeckoTokenId, tokenAddress, ...tokenData },
+                    update: tokenData,
+                });
+            }
         }
 
         //TODO: need to be able to remove whitelist
