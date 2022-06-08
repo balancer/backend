@@ -81,7 +81,7 @@ const resolvers: Resolvers = {
                 close: `${item.close}`,
             }));
         },
-        tokenGetData: async (parent, { address }, context) => {
+        tokenGetTokenData: async (parent, { address }, context) => {
             return tokenService.getTokenData(address);
         },
     },

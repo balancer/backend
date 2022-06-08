@@ -128,8 +128,8 @@ export function scheduleWorkerTasks() {
         await balancerSdk.sor.reloadGraph();
     });
 
-    //every 5 minutes
-    scheduleJob('*/5 * * * *', 'syncTokenDynamicData', TEN_MINUTES_IN_MS, async () => {
+    //every minute
+    scheduleJob('*/1 * * * *', 'syncTokenDynamicData', TEN_MINUTES_IN_MS, async () => {
         await tokenService.syncTokenDynamicData();
     });
 

@@ -11,7 +11,7 @@ extend type Query {
     ): [GqlTokenPriceChartDataItem!]!
     tokenGetPriceChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenPriceChartDataItem!]!
     tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
-    tokenGetData(address: String!): GqlTokenData
+    tokenGetTokenData(address: String!): GqlTokenData
 }
 
 extend type Mutation {
