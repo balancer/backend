@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
 import { poolService } from '../pool/pool.service';
+import { oldBnum } from '../util/old-big-number';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -53,11 +54,18 @@ export class BalancerSorService {
             where: { idIn: swapInfo.routes.map((route) => route.hops.map((hop) => hop.poolId)).flat() },
         });
 
+        const tokenInAmount = swapType === 'EXACT_IN' ? swapAmount : returnAmount;
+        const tokenOutAmount = swapType === 'EXACT_IN' ? returnAmount : swapAmount;
+
+        const effectivePrice = oldBnum(tokenInAmount).div(tokenOutAmount);
+        const effectivePriceReversed = oldBnum(tokenOutAmount).div(tokenInAmount);
+        const priceImpact = effectivePrice.div(swapInfo.marketSp).minus(1);
+
         return {
             ...swapInfo,
             swapType,
-            tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : returnAmount,
-            tokenOutAmount: swapType === 'EXACT_IN' ? returnAmount : swapAmount,
+            tokenInAmount,
+            tokenOutAmount,
             swapAmount,
             swapAmountScaled: swapInfo.swapAmount.toString(),
             swapAmountForSwaps: swapInfo.swapAmountForSwaps?.toString(),
@@ -72,6 +80,9 @@ export class BalancerSorService {
                     pool: pools.find((pool) => pool.id === hop.poolId)!,
                 })),
             })),
+            effectivePrice: effectivePrice.toString(),
+            effectivePriceReversed: effectivePriceReversed.toString(),
+            priceImpact: priceImpact.toString(),
         };
     }
 

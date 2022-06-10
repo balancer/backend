@@ -36,6 +36,9 @@ type GqlSorGetSwapsResponse {
     returnAmountConsideringFees: BigDecimal!
     marketSp: String!
     routes: [GqlSorSwapRoute!]!
+    effectivePrice: AmountHumanReadable!
+    effectivePriceReversed: AmountHumanReadable!
+    priceImpact: AmountHumanReadable!
 }
 
 type GqlSorSwap {
