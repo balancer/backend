@@ -56,7 +56,7 @@ function scheduleJob(
         if (running) {
             console.log(`${taskName} already running, skipping call...`);
             cronTimeMetric.publish(`${taskName}-skip`);
-            sentry.captureException(new Error(`${taskName} already running, skipping call...`));
+            // sentry.captureException(new Error(`${taskName} already running, skipping call...`));
             return;
         }
 
@@ -87,7 +87,7 @@ function scheduleJob(
                 cronTimeMetric.publish(`${taskName}-error`);
             }
             console.log(`Error ${taskName}`, e);
-            sentry.captureException(e);
+            // sentry.captureException(e);
         } finally {
             console.timeEnd(taskName);
             cronTimeMetric.publish(`${taskName}-duration`, elapsed);
