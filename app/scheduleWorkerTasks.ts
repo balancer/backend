@@ -62,15 +62,15 @@ function scheduleJob(
 
         let elapsed = 0;
 
-        const transaction = sentry.startTransaction({
-            op: 'cron',
-            name: taskName,
-        });
+        // const transaction = sentry.startTransaction({
+        //     op: 'cron',
+        //     name: taskName,
+        // });
 
-        //@ts-ignore
-        sentry.configureScope((scope) => {
-            scope.setSpan(transaction);
-        });
+        // //@ts-ignore
+        // sentry.configureScope((scope) => {
+        //     scope.setSpan(transaction);
+        // });
 
         try {
             running = true;
@@ -92,7 +92,7 @@ function scheduleJob(
             console.timeEnd(taskName);
             cronTimeMetric.publish(`${taskName}-duration`, elapsed);
             running = false;
-            transaction.finish();
+            // transaction.finish();
         }
     });
 }
