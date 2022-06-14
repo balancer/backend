@@ -59,6 +59,7 @@ function scheduleJob(
         }
 
         let elapsed = 0;
+
         try {
             running = true;
             console.log(`Start ${taskName}...`);

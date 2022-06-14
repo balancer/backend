@@ -97,7 +97,7 @@ async function startServer() {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
     } else {
-        scheduleMainTasks();
+        // scheduleMainTasks();
     }
 }
 

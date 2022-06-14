@@ -15,7 +15,6 @@ import LinearPoolAbi from '../balancer/abi/LinearPool.json';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
-import moment from 'moment-timezone';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
@@ -84,8 +83,10 @@ export class TokenPriceService {
 
     public async cacheTokenPrices(): Promise<void> {
         const pools = await balancerSubgraphService.getAllPools({});
+
         //TODO: if we get to a point where we support more than 1000 tokens, we need to paginate this better
         const { tokenAddresses, nestedBptAddresses } = await this.getTokenAddresses(pools);
+
         let coingeckoTokenPrices: TokenPrices = {};
         let nativeAssetPrice: Price | null = null;
 
