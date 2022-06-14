@@ -34,7 +34,6 @@ export const schema = {
     AWS_REGION: String,
     AWS_ACCESSKEY: String,
     AWS_SECRETKEY: String,
-    SENTRY_KEY: String,
 };
 
 export const env: Env = load(schema, {
