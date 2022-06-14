@@ -12,7 +12,6 @@ import { tokenService } from '../modules/token/token.service';
 import { beetsFarmService } from '../modules/beets/beets-farm.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
 import cronTimeMetric from './cron.metric';
-import { sentry } from '../modules/sentry/sentry-client';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -56,21 +55,10 @@ function scheduleJob(
         if (running) {
             console.log(`${taskName} already running, skipping call...`);
             cronTimeMetric.publish(`${taskName}-skip`);
-            // sentry.captureException(new Error(`${taskName} already running, skipping call...`));
             return;
         }
 
         let elapsed = 0;
-
-        // const transaction = sentry.startTransaction({
-        //     op: 'cron',
-        //     name: taskName,
-        // });
-
-        // //@ts-ignore
-        // sentry.configureScope((scope) => {
-        //     scope.setSpan(transaction);
-        // });
 
         try {
             running = true;
@@ -87,12 +75,10 @@ function scheduleJob(
                 cronTimeMetric.publish(`${taskName}-error`);
             }
             console.log(`Error ${taskName}`, e);
-            // sentry.captureException(e);
         } finally {
             console.timeEnd(taskName);
             cronTimeMetric.publish(`${taskName}-duration`, elapsed);
             running = false;
-            // transaction.finish();
         }
     });
 }
