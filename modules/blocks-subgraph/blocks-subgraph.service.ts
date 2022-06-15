@@ -6,6 +6,7 @@ import {
     BlocksQueryVariables,
     getSdk,
     OrderDirection,
+    Block,
 } from './generated/blocks-subgraph-types';
 import { env } from '../../app/env';
 import {
@@ -177,6 +178,18 @@ export class BlocksSubgraphService {
                 timestamp_gt: `${timestamp - 4 * blockTime}`,
                 timestamp_lt: `${timestamp + 4 * blockTime}`,
             },
+        };
+
+        const allBlocks = await this.getAllBlocks(args);
+
+        return allBlocks[0];
+    }
+
+    public async getLatestBlock(): Promise<BlockFragment> {
+        const args: BlocksQueryVariables = {
+            first: 1,
+            orderDirection: OrderDirection.Desc,
+            orderBy: Block_OrderBy.Timestamp,
         };
 
         const allBlocks = await this.getAllBlocks(args);
