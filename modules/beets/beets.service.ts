@@ -42,6 +42,7 @@ export class BeetsService {
 
         const block = await blocksSubgraphService.getBlockFrom24HoursAgo();
         const prev = await balancerSubgraphService.getProtocolData({ block: { number: parseInt(block.number) } });
+        const latestBlock = await blocksSubgraphService.getLatestBlock();
         const pools = await balancerService.getPools();
         const { excludedPools } = await this.getConfig();
         const totalLiquidity = _.sumBy(pools, (pool) =>
@@ -59,6 +60,7 @@ export class BeetsService {
             poolCount: `${poolCount}`,
             swapVolume24h: `${parseFloat(totalSwapVolume) - parseFloat(prev.totalSwapVolume)}`,
             swapFee24h: `${parseFloat(totalSwapFee) - parseFloat(prev.totalSwapFee)}`,
+            block: latestBlock.number,
         };
 
         await cache.putObjectValue(PROTOCOL_DATA_CACHE_KEY, protocolData, 30);

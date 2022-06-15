@@ -191,6 +191,18 @@ export class BlocksSubgraphService {
         return allBlocks[0];
     }
 
+    public async getLatestBlock(): Promise<BlockFragment> {
+        const args: BlocksQueryVariables = {
+            first: 1,
+            orderDirection: OrderDirection.Desc,
+            orderBy: Block_OrderBy.Timestamp,
+        };
+
+        const allBlocks = await this.getAllBlocks(args);
+
+        return allBlocks[0];
+    }
+
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
         const today = moment.tz('GMT').format('YYYY-MM-DD');
         const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');
