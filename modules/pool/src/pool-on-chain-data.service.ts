@@ -224,6 +224,8 @@ export class PoolOnChainDataService {
                     if (pool.tokens[wrappedIndex]) {
                         const priceRate = formatFixed(onchainData.wrappedTokenRate, 18);
 
+                        console.log(`${pool.symbol} wrappedToken rate`, priceRate);
+
                         await prisma.prismaPoolTokenDynamicData.update({
                             where: { id: pool.tokens[wrappedIndex].id },
                             data: { priceRate, blockNumber },
