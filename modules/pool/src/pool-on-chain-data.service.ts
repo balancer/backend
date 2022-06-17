@@ -226,10 +226,20 @@ export class PoolOnChainDataService {
 
                         console.log(`${pool.symbol} wrappedToken rate`, priceRate);
 
-                        await prisma.prismaPoolTokenDynamicData.update({
+                        const result = await prisma.prismaPoolTokenDynamicData.update({
                             where: { id: pool.tokens[wrappedIndex].id },
                             data: { priceRate, blockNumber },
                         });
+
+                        if (pool.id === '0x71959b131426fdb7af01de8d7d4149ccaf09f8cc0000000000000000000002e7') {
+                            console.log('boo linear result', result);
+                            console.log(
+                                'boo linear fetch',
+                                await prisma.prismaPoolTokenDynamicData.findUnique({
+                                    where: { id: pool.tokens[wrappedIndex].id },
+                                }),
+                            );
+                        }
                     }
 
                     const phantomIdx = pool.tokens.findIndex((token) => token.address === pool.address);
