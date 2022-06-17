@@ -322,7 +322,9 @@ export class PoolOnChainDataService {
                         });
                     }
                 }
-            } catch {}
+            } catch (e) {
+                console.log('error syncing on chain data', e);
+            }
         }
     }
 }
