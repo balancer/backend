@@ -17,6 +17,7 @@ import { poolIsStablePool } from './pool-utils';
 import _ from 'lodash';
 import { TokenPriceService } from '../../token-price/token-price.service';
 import { TokenService } from '../../token/token.service';
+import { One, WeiPerEther } from '@ethersproject/constants';
 
 interface MulticallExecuteResult {
     amp?: string[];
@@ -28,8 +29,8 @@ interface MulticallExecuteResult {
         tokens: string[];
         balances: string[];
     };
-    wrappedTokenRate?: string;
-    rate?: string;
+    wrappedTokenRate?: BigNumber;
+    rate?: BigNumber;
     swapEnabled?: boolean;
     tokenRates?: BigNumber[];
     linearPools?: Record<
@@ -220,37 +221,19 @@ export class PoolOnChainDataService {
 
                     //TODO: need to make sure its safe to index the tokens like this.
 
+                    onchainData.tokenRates = [];
+                    //main rate is always 1
+                    onchainData.tokenRates[pool.linearData?.mainIndex || 0] = WeiPerEther;
+
                     // Update priceRate of wrappedToken
                     if (pool.tokens[wrappedIndex]) {
-                        const priceRate = formatFixed(onchainData.wrappedTokenRate, 18);
-
-                        console.log(`${pool.symbol} wrappedToken rate`, priceRate);
-
-                        const result = await prisma.prismaPoolTokenDynamicData.update({
-                            where: { id: pool.tokens[wrappedIndex].id },
-                            data: { priceRate, blockNumber },
-                        });
-
-                        if (pool.id === '0x71959b131426fdb7af01de8d7d4149ccaf09f8cc0000000000000000000002e7') {
-                            console.log('boo linear result', result);
-                            console.log(
-                                'boo linear fetch',
-                                await prisma.prismaPoolTokenDynamicData.findUnique({
-                                    where: { id: pool.tokens[wrappedIndex].id },
-                                }),
-                            );
-                        }
+                        onchainData.tokenRates[wrappedIndex] = onchainData.wrappedTokenRate;
                     }
 
                     const phantomIdx = pool.tokens.findIndex((token) => token.address === pool.address);
 
                     if (phantomIdx !== -1 && onchainData.rate) {
-                        const priceRate = formatFixed(onchainData.rate, 18);
-
-                        await prisma.prismaPoolTokenDynamicData.update({
-                            where: { id: pool.tokens[phantomIdx].id },
-                            data: { priceRate, blockNumber },
-                        });
+                        onchainData.tokenRates[phantomIdx] = onchainData.rate;
                     }
                 }
 
@@ -307,8 +290,10 @@ export class PoolOnChainDataService {
                                 weight,
                                 balance,
                                 balanceUSD:
-                                    this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                    parseFloat(balance),
+                                    poolToken.address === pool.address
+                                        ? 0
+                                        : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
+                                          parseFloat(balance),
                             },
                             update: {
                                 blockNumber,
@@ -316,8 +301,10 @@ export class PoolOnChainDataService {
                                 weight,
                                 balance,
                                 balanceUSD:
-                                    this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                    parseFloat(balance),
+                                    poolToken.address === pool.address
+                                        ? 0
+                                        : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
+                                          parseFloat(balance),
                             },
                         });
                     }
