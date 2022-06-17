@@ -11,7 +11,7 @@ export class SpookySwapAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const { data } = await axios.get<string>('https://api.spookyswap.finance/api/xboo', {});
+        const { data } = await axios.get<string>('https://api.spooky.fi/api/xboo', {});
         const xBooApr = parseFloat(data) / 100;
         let operations: any[] = [];
 
