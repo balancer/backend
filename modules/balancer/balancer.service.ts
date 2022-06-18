@@ -183,10 +183,15 @@ export class BalancerService {
         const blocksPerYear = blocksPerDay * 365;
         const { beetsPrice } = await tokenPriceService.getBeetsPrice();
         const tokenPrices = await tokenPriceService.getTokenPrices();
-        await yearnVaultService.cacheYearnVaults();
-        await spookySwapService.cacheSpookySwapData();
-        await tarotService.cacheTarotData(filteredWithOnChainBalances);
-        await reaperFarmService.cacheReaperFarmData();
+
+        try {
+            await yearnVaultService.cacheYearnVaults();
+            //await spookySwapService.cacheSpookySwapData();
+            await tarotService.cacheTarotData(filteredWithOnChainBalances);
+            await reaperFarmService.cacheReaperFarmData();
+        } catch (e) {
+            console.log('e', e);
+        }
 
         const decoratedPools: GqlBalancerPool[] = [];
 
