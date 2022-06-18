@@ -117,7 +117,7 @@ export function scheduleWorkerTasks() {
     });
 
     //every 5 seconds
-    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', ONE_MINUTE_IN_MS, async () => {
+    scheduleJob('*/5 * * * * *', 'cache-balancer-pools', TWO_MINUTES_IN_MS, async () => {
         await balancerService.cachePools();
     });
 
