@@ -186,7 +186,7 @@ export class BalancerService {
 
         try {
             await yearnVaultService.cacheYearnVaults();
-            //await spookySwapService.cacheSpookySwapData();
+            await spookySwapService.cacheSpookySwapData();
             await tarotService.cacheTarotData(filteredWithOnChainBalances);
             await reaperFarmService.cacheReaperFarmData();
         } catch (e) {
