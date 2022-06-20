@@ -1,8 +1,6 @@
 import { PoolCreatorService } from './src/pool-creator.service';
 import { PoolOnChainDataService } from './src/pool-on-chain-data.service';
-import { env } from '../../app/env';
 import { prisma } from '../util/prisma-client';
-import { providers } from 'ethers';
 import { Provider } from '@ethersproject/providers';
 import _ from 'lodash';
 import { PoolUsdDataService } from './src/pool-usd-data.service';
@@ -30,13 +28,15 @@ import { PoolSyncService } from './src/pool-sync.service';
 import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
-import { PrismaPoolFilter, PrismaPoolSwap, PrismaPoolBatchSwap } from '@prisma/client';
+import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
 import { PoolSwapService } from './src/pool-swap.service';
 import { PoolStakingService } from './pool-types';
 import { MasterChefStakingService } from './staking/master-chef-staking.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { networkConfig } from '../config/network-config';
 import { PrismaPoolBatchSwapWithSwaps } from '../../prisma/prisma-types';
+import { userService } from '../user/user.service';
+import { jsonRpcProvider } from '../util/ethers';
 
 export class PoolService {
     constructor(
@@ -184,8 +184,8 @@ export class PoolService {
 }
 
 export const poolService = new PoolService(
-    new providers.JsonRpcProvider(env.RPC_URL),
-    new PoolCreatorService(),
+    jsonRpcProvider,
+    new PoolCreatorService(userService),
     new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
     new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),

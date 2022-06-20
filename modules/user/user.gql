@@ -1,0 +1,6 @@
+extend type Mutation {
+    userInitWalletBalancesForAllPools: String!
+    userInitWalletBalancesForPool(poolId: String!): String!
+    userSyncWalletBalancesForAllPools: String!
+    userInitWalletBalancesForMissingPools: String!
+}

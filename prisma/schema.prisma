@@ -53,6 +53,9 @@ model PrismaPool {
     allTokens           PrismaPoolExpandedTokens[]
     filters             PrismaPoolFilterMap[]
     staking             PrismaPoolStaking?
+
+    userWalletBalances  PrismaUserWalletBalance[]
+    userStakedBalances  PrismaUserStakedBalance[]
 }
 
 enum PrismaPoolType {
@@ -255,6 +258,8 @@ model PrismaPoolStaking {
     type                PrismaPoolStakingType
     address             String
     farm                PrismaPoolStakingMasterChefFarm?
+
+    userStakedBalances  PrismaUserStakedBalance[]
 }
 
 
@@ -296,14 +301,6 @@ model PrismaBlock {
     farmUsers           PrismaFarmUserSnapshot[]
     beetsBar            PrismaBeetsBarSnapshot?
     beetsBarUsers       PrismaBeetsBarUserSnapshot[]
-}
-
-model PrismaUser {
-    address             String              @id
-    farms               PrismaFarmUser[]
-    sharesOwnedSnapshots PrismaBalancerPoolShareSnapshot[]
-    farmSnapshots       PrismaFarmUserSnapshot[]
-    beetsBarSnapshots   PrismaBeetsBarUserSnapshot[]
 }
 
 model PrismaBalancerPool {
@@ -533,4 +530,49 @@ enum PrismaTokenTypeOption {
     BPT
     PHANTOM_BPT
     LINEAR_WRAPPED_TOKEN
+}
+
+model PrismaUser {
+    address             String              @id
+
+    walletBalances  PrismaUserWalletBalance[]
+    stakedBalances  PrismaUserStakedBalance[]
+
+    //TODO: old models, remove these or refactor
+    farms               PrismaFarmUser[]
+    sharesOwnedSnapshots PrismaBalancerPoolShareSnapshot[]
+    farmSnapshots       PrismaFarmUserSnapshot[]
+    beetsBarSnapshots   PrismaBeetsBarUserSnapshot[]
+}
+
+model PrismaUserWalletBalance {
+    id                  String              @id
+    balance             String
+    updatedAt           DateTime            @updatedAt
+
+    userAddress         String
+    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+}
+
+model PrismaUserStakedBalance {
+    id                  String              @id
+    balance             String
+    updatedAt           DateTime            @updatedAt
+
+    userAddress         String
+    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    stakingId           String
+    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+}
+
+model PrismaUserPoolSyncStatus {
+    id                  String              @id
+    blockNumber         Int
 }

@@ -1,7 +1,6 @@
 import { balancerSdk } from './src/balancer-sdk';
 import { SwapTypes } from '@balancer-labs/sor';
 import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
-import _ from 'lodash';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
 import { poolService } from '../pool/pool.service';

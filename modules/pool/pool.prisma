@@ -27,6 +27,9 @@ model PrismaPool {
     allTokens           PrismaPoolExpandedTokens[]
     filters             PrismaPoolFilterMap[]
     staking             PrismaPoolStaking?
+
+    userWalletBalances  PrismaUserWalletBalance[]
+    userStakedBalances  PrismaUserStakedBalance[]
 }
 
 enum PrismaPoolType {
@@ -229,6 +232,8 @@ model PrismaPoolStaking {
     type                PrismaPoolStakingType
     address             String
     farm                PrismaPoolStakingMasterChefFarm?
+
+    userStakedBalances  PrismaUserStakedBalance[]
 }
 
 

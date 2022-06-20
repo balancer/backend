@@ -61,6 +61,16 @@ export class BalancerSubgraphService {
         this.client = new GraphQLClient(env.BALANCER_SUBGRAPH);
     }
 
+    public async getMetadata() {
+        const { meta } = await this.sdk.BalancerGetMeta();
+
+        if (!meta) {
+            throw new Error('Missing meta data');
+        }
+
+        return meta;
+    }
+
     public async getProtocolData(args: BalancerProtocolDataQueryVariables): Promise<Balancer> {
         const { balancers } = await this.sdk.BalancerProtocolData(args);
 

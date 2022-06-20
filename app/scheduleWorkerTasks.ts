@@ -8,6 +8,10 @@ import { runWithMinimumInterval } from '../modules/util/scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
 import { sentry } from '../modules/util/sentry-client';
+import { jsonRpcProvider } from '../modules/util/ethers';
+import { userService } from '../modules/user/user.service';
+import { EventType } from '@ethersproject/abstract-provider/src.ts/index';
+import _ from 'lodash';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -72,6 +76,45 @@ function scheduleJob(
             transaction.finish();
         }
     });
+}
+
+function addRpcListener(taskName: string, eventType: EventType, timeout: number, listener: () => Promise<void>) {
+    let running = false;
+
+    jsonRpcProvider.on(
+        eventType,
+        _.debounce(async () => {
+            if (running) {
+                console.log(`${taskName} already running, skipping call...`);
+                sentry.captureException(new Error(`${taskName} already running, skipping call...`));
+                return;
+            }
+
+            const transaction = sentry.startTransaction({
+                op: 'cron',
+                name: taskName,
+            });
+
+            sentry.configureScope((scope) => {
+                scope.setSpan(transaction);
+            });
+
+            try {
+                running = true;
+                console.log(`Start ${taskName}...`);
+                console.time(taskName);
+                await asyncCallWithTimeout(listener, timeout);
+                console.log(`${taskName} done`);
+            } catch (e) {
+                console.log(`Error ${taskName}`, e);
+                sentry.captureException(e);
+            } finally {
+                console.timeEnd(taskName);
+                running = false;
+                transaction.finish();
+            }
+        }),
+    );
 }
 
 export function scheduleWorkerTasks() {
@@ -237,4 +280,8 @@ export function scheduleWorkerTasks() {
     runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), async () => {
         await poolService.syncChangedPools();
     }).catch((error) => console.log('Error starting syncChangedPools...', error));
+
+    addRpcListener('syncWalletBalancesForAllPools', 'block', ONE_MINUTE_IN_MS, async () => {
+        await userService.syncWalletBalancesForAllPools();
+    });
 }

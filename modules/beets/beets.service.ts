@@ -2,7 +2,7 @@ import { FbeetsService } from './src/fbeets.service';
 import { getContractAt } from '../util/ethers';
 import { networkConfig } from '../config/network-config';
 import FreshBeetsAbi from './abi/FreshBeets.json';
-import ERC20 from './abi/ERC20.json';
+import ERC20 from '../abi/ERC20.json';
 import { GqlBeetsConfig, GqlBeetsProtocolData } from '../../schema';
 import {
     BalancerSubgraphService,

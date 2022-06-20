@@ -12,14 +12,6 @@ model PrismaBlock {
     beetsBarUsers       PrismaBeetsBarUserSnapshot[]
 }
 
-model PrismaUser {
-    address             String              @id
-    farms               PrismaFarmUser[]
-    sharesOwnedSnapshots PrismaBalancerPoolShareSnapshot[]
-    farmSnapshots       PrismaFarmUserSnapshot[]
-    beetsBarSnapshots   PrismaBeetsBarUserSnapshot[]
-}
-
 model PrismaBalancerPool {
     id                  String              @id
     address             String              @unique

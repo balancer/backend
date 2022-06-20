@@ -5,8 +5,11 @@ import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants'
 import { PrismaPoolType } from '@prisma/client';
 import _ from 'lodash';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
+import { UserService } from '../../user/user.service';
 
 export class PoolCreatorService {
+    constructor(private readonly userService: UserService) {}
+
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany();
         const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
@@ -181,6 +184,7 @@ export class PoolCreatorService {
         });
 
         await this.createAllTokensRelationshipForPool(pool.id);
+        await this.userService.initWalletBalancesForPool(pool.id);
     }
 
     public async createAllTokensRelationshipForPool(poolId: string): Promise<void> {

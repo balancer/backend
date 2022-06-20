@@ -491,3 +491,13 @@ query BalancerGetPoolsWithActiveUpdates($timestamp: Int!) {
         }
     }
 }
+
+query BalancerGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

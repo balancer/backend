@@ -2,6 +2,16 @@ import { set } from 'lodash';
 import { Fragment, JsonFragment, Interface, Result } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
+import _ from 'lodash';
+import ERC20Abi from '../abi/ERC20.json';
+import { Zero } from '@ethersproject/constants';
+import { BigNumber } from 'ethers';
+
+interface UserBalance {
+    erc20Address: string;
+    userAddress: string;
+    balance: BigNumber;
+}
 
 export class Multicaller {
     private multiAddress: string;
@@ -62,5 +72,43 @@ export class Multicaller {
         );
 
         return res.map((result: any, i: number) => this.interface.decodeFunctionResult(this.calls[i][1], result));
+    }
+
+    public static async fetchBalances({
+        multicallAddress,
+        provider,
+        balancesToFetch,
+    }: {
+        multicallAddress: string;
+        provider: Provider;
+        balancesToFetch: { erc20Address: string; userAddress: string }[];
+    }): Promise<UserBalance[]> {
+        const chunks = _.chunk(balancesToFetch, 100);
+        let data: UserBalance[] = [];
+
+        for (const chunk of chunks) {
+            const multicall = new Multicaller(multicallAddress, provider, ERC20Abi);
+
+            for (const { erc20Address, userAddress } of chunk) {
+                multicall.call(`${erc20Address}.${userAddress}`, erc20Address, 'balanceOf', [userAddress]);
+            }
+
+            const response = (await multicall.execute()) as {
+                [erc20Address: string]: { [userAddress: string]: BigNumber };
+            };
+
+            data = [
+                ...data,
+                ..._.map(response, (item, erc20Address) =>
+                    _.map(item, (balance, userAddress) => ({
+                        erc20Address,
+                        userAddress,
+                        balance,
+                    })),
+                ).flat(),
+            ];
+        }
+
+        return data;
     }
 }
