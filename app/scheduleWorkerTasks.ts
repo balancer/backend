@@ -49,6 +49,7 @@ function scheduleJob(
     cronTimeMetric.publish(`${taskName}-timeout`);
     cronTimeMetric.publish(`${taskName}-error`);
     cronTimeMetric.publish(`${taskName}-duration`);
+    cronTimeMetric.publish(`${taskName}-done`);
 
     let running = false;
     cron.schedule(cronExpression, async () => {
@@ -68,6 +69,7 @@ function scheduleJob(
             await asyncCallWithTimeout(func, timeout);
             elapsed = new Date().getTime() - start;
             console.log(`${taskName} done`);
+            cronTimeMetric.publish(`${taskName}-done`);
         } catch (e) {
             if (e instanceof Error && e.message === 'Call timed out!') {
                 cronTimeMetric.publish(`${taskName}-timeout`);
