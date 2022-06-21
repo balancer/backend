@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "PrismaUserBalanceType" AS ENUM ('WALLET', 'STAKED');
+
 -- CreateTable
 CREATE TABLE "PrismaUserWalletBalance" (
     "id" TEXT NOT NULL,
@@ -22,11 +25,11 @@ CREATE TABLE "PrismaUserStakedBalance" (
 );
 
 -- CreateTable
-CREATE TABLE "PrismaUserPoolSyncStatus" (
-    "id" TEXT NOT NULL,
+CREATE TABLE "PrismaUserBalanceSyncStatus" (
+    "type" "PrismaUserBalanceType" NOT NULL,
     "blockNumber" INTEGER NOT NULL,
 
-    CONSTRAINT "PrismaUserPoolSyncStatus_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PrismaUserBalanceSyncStatus_pkey" PRIMARY KEY ("type")
 );
 
 -- AddForeignKey

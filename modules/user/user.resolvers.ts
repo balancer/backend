@@ -18,17 +18,24 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userInitWalletBalancesForMissingPools: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await userService.initWalletBalancesForAllPools();
-
-            return 'success';
-        },
         userInitWalletBalancesForPool: async (parent, { poolId }, context) => {
             isAdminRoute(context);
 
             await userService.initWalletBalancesForPool(poolId);
+
+            return 'success';
+        },
+        userInitStakedBalances: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await userService.initStakedBalances();
+
+            return 'success';
+        },
+        userSyncStakedBalances: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await userService.syncStakedBalances();
 
             return 'success';
         },

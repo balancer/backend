@@ -7,16 +7,17 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber } from 'ethers';
 import { Zero } from '@ethersproject/constants';
 import { UserWalletBalanceService } from './src/user-wallet-balance.service';
+import { UserMasterchefFarmBalanceService } from './src/user-masterchef-farm-balance.service';
+import { UserStakedBalanceService } from './user-types';
 
 export class UserService {
-    constructor(private readonly walletBalanceService: UserWalletBalanceService) {}
+    constructor(
+        private readonly walletBalanceService: UserWalletBalanceService,
+        private readonly stakedBalanceService: UserStakedBalanceService,
+    ) {}
 
     public async initWalletBalancesForAllPools() {
-        await this.walletBalanceService.initBalancesForAllPools();
-    }
-
-    public async initWalletBalancesForMissingPools() {
-        await this.walletBalanceService.initBalancesForMissingPools();
+        await this.walletBalanceService.initBalancesForPools();
     }
 
     public async initWalletBalancesForPool(poolId: string) {
@@ -26,6 +27,14 @@ export class UserService {
     public async syncWalletBalancesForAllPools() {
         await this.walletBalanceService.syncBalancesForAllPools();
     }
+
+    public async initStakedBalances() {
+        await this.stakedBalanceService.initStakedBalances();
+    }
+
+    public async syncStakedBalances() {
+        await this.stakedBalanceService.syncStakedBalances();
+    }
 }
 
-export const userService = new UserService(new UserWalletBalanceService());
+export const userService = new UserService(new UserWalletBalanceService(), new UserMasterchefFarmBalanceService());

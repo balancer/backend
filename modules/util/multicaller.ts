@@ -74,6 +74,10 @@ export class Multicaller {
         return res.map((result: any, i: number) => this.interface.decodeFunctionResult(this.calls[i][1], result));
     }
 
+    public get numCalls() {
+        return this.calls.length;
+    }
+
     public static async fetchBalances({
         multicallAddress,
         provider,

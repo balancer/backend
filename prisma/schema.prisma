@@ -548,6 +548,7 @@ model PrismaUser {
 model PrismaUserWalletBalance {
     id                  String              @id
     balance             String
+    balanceNum          Float
     updatedAt           DateTime            @updatedAt
 
     userAddress         String
@@ -560,6 +561,7 @@ model PrismaUserWalletBalance {
 model PrismaUserStakedBalance {
     id                  String              @id
     balance             String
+    balanceNum          Float
     updatedAt           DateTime            @updatedAt
 
     userAddress         String
@@ -572,7 +574,12 @@ model PrismaUserStakedBalance {
     staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
 }
 
-model PrismaUserPoolSyncStatus {
-    id                  String              @id
+model PrismaUserBalanceSyncStatus {
+    type                PrismaUserBalanceType @id
     blockNumber         Int
+}
+
+enum PrismaUserBalanceType {
+    WALLET
+    STAKED
 }

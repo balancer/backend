@@ -111,3 +111,13 @@ query MasterchefPortfolioData($address: Bytes!, $previousBlockNumber: Int!) {
         ...FarmUser
     }
 }
+
+query MasterchefGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

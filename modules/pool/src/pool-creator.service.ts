@@ -11,7 +11,7 @@ export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
 
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
-        const existingPools = await prisma.prismaPool.findMany();
+        const existingPools = await prisma.prismaPool.findMany({});
         const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 

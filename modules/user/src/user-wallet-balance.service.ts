@@ -9,58 +9,79 @@ import { networkConfig } from '../../config/network-config';
 import { formatFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
 
 export class UserWalletBalanceService {
-    constructor() {}
-
-    public async initBalancesForAllPools() {
+    public async initBalancesForPools() {
+        console.log('initBalancesForPools: loading balances, pools, block...');
+        const { block } = await balancerSubgraphService.getMetadata();
+        const balances = await prisma.prismaUserWalletBalance.findMany({});
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
-            where: {
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
-                    },
-                },
-            },
+            where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } } },
         });
+        const poolIdsToInit = pools
+            .filter((pool) => balances.filter((balance) => balance.poolId === pool.id).length === 0)
+            .map((pool) => pool.id);
+        const chunks = _.chunk(poolIdsToInit, 100);
+        let shares: BalancerUserPoolShare[] = [];
 
-        for (const pool of pools) {
-            await this.initBalancesForPool(pool.id);
+        console.log('initBalancesForPools: loading pool shares...');
+        for (const chunk of chunks) {
+            shares = [
+                ...shares,
+                ...(await balancerSubgraphService.getAllPoolShares({
+                    where: {
+                        poolId_in: chunk,
+                        userAddress_not_in: [AddressZero, networkConfig.balancer.vault.toLowerCase()],
+                        balance_not: '0',
+                    },
+                })),
+            ];
         }
-    }
+        console.log('initBalancesForPools: finished loading pool shares...');
 
-    public async initBalancesForMissingPools() {
-        const pools = await prisma.prismaPool.findMany({
-            select: { id: true, address: true },
-            where: {
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
-                    },
-                },
-            },
-        });
-
-        const syncStatuses = await prisma.prismaUserPoolSyncStatus.findMany({});
+        let operations: any[] = [];
 
         for (const pool of pools) {
-            const status = syncStatuses.find((status) => status.id === pool.id);
+            const poolShares = shares.filter((share) => share.poolAddress.toLowerCase() === pool.address);
 
-            if (!status) {
-                await this.initBalancesForPool(pool.id);
+            if (poolShares.length > 0) {
+                operations = [
+                    ...operations,
+                    ...poolShares.map((share) => this.getPrismaUpsertForPoolShare(pool.id, share)),
+                ];
             }
         }
+
+        console.log('initBalancesForPools: performing db operations...');
+        await prismaBulkExecuteOperations([
+            prisma.prismaUser.createMany({
+                data: _.uniq(shares.map((share) => share.userAddress)).map((address) => ({ address })),
+                skipDuplicates: true,
+            }),
+            ...operations,
+            prisma.prismaUserBalanceSyncStatus.upsert({
+                where: { type: 'WALLET' },
+                create: { type: 'WALLET', blockNumber: block.number },
+                update: { blockNumber: block.number },
+            }),
+        ]);
+        console.log('initBalancesForPools: finished performing db operations...');
     }
 
     public async syncBalancesForAllPools() {
         const erc20Interface = new ethers.utils.Interface(ERC20Abi);
         const latestBlock = await jsonRpcProvider.getBlockNumber();
-        const oldestSyncStatus = await prisma.prismaUserPoolSyncStatus.findFirst({ orderBy: { blockNumber: 'asc' } });
+        const syncStatus = await prisma.prismaUserBalanceSyncStatus.findUnique({ where: { type: 'WALLET' } });
         const response = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
         const poolAddresses = response.map((item) => item.address);
-        const poolIds = response.map((item) => item.id);
-        const fromBlock = oldestSyncStatus ? oldestSyncStatus.blockNumber + 1 : latestBlock;
+
+        if (!syncStatus) {
+            throw new Error('UserWalletBalanceService: syncBalances called before initBalances');
+        }
+
+        const fromBlock = syncStatus.blockNumber + 1;
         const toBlock = latestBlock - fromBlock > 1000 ? fromBlock + 1000 : latestBlock;
 
         //fetch all transfer events for the block range
@@ -117,87 +138,50 @@ export class UserWalletBalanceService {
                             userAddress,
                             poolId,
                             balance: formatFixed(balance, 18),
+                            balanceNum: parseFloat(formatFixed(balance, 18)),
                         },
-                        update: { balance: formatFixed(balance, 18) },
+                        update: { balance: formatFixed(balance, 18), balanceNum: parseFloat(formatFixed(balance, 18)) },
                     });
                 }),
-            //update block numbers
-            prisma.prismaUserPoolSyncStatus.updateMany({
-                where: { id: { in: poolIds } },
-                data: { blockNumber: toBlock },
+            prisma.prismaUserBalanceSyncStatus.upsert({
+                where: { type: 'WALLET' },
+                create: { type: 'WALLET', blockNumber: toBlock },
+                update: { blockNumber: toBlock },
             }),
         ]);
     }
 
     public async initBalancesForPool(poolId: string) {
         const { block } = await balancerSubgraphService.getMetadata();
-        const pool = await prisma.prismaPool.findUnique({ where: { id: poolId } });
-
-        if (!pool) {
-            throw new Error(`pool with id not found ${poolId}`);
-        }
-
         const shares = await balancerSubgraphService.getAllPoolShares({
-            where: {
-                poolId,
-                userAddress_not: AddressZero,
-                balance_not: '0',
-            },
+            where: { poolId, userAddress_not: AddressZero, balance_not: '0' },
         });
-
-        const providerLatestBlock = await jsonRpcProvider.getBlockNumber();
-
-        const contract = getContractAt(pool.address, ERC20Abi);
-        const transferEventFilter = contract.filters.Transfer();
-        //fetch all events that have happened beyond the currently synced subgraph block
-        const events = await contract.queryFilter(transferEventFilter, block.number + 1);
-        const addresses: string[] = _.uniq(events.map((event) => [event.args?.from, event.args?.to]).flat());
-
-        const balances = await Multicaller.fetchBalances({
-            multicallAddress: networkConfig.multicall,
-            provider: jsonRpcProvider,
-            balancesToFetch: addresses.map((userAddress) => ({ userAddress, erc20Address: pool.address })),
-        });
-
-        _.forEach(balances, ({ balance, userAddress }) => {
-            const share = shares.find((share) => share.userAddress === userAddress);
-
-            if (share) {
-                share.balance = formatFixed(balance, 18);
-            } else if (balance.gt(Zero)) {
-                shares.push({
-                    id: `${pool.id}-${userAddress}`,
-                    balance: formatFixed(balance, 18),
-                    userAddress,
-                    poolAddress: pool.address,
-                });
-            }
-        });
-
-        const operations = shares.map((share) =>
-            prisma.prismaUserWalletBalance.upsert({
-                where: { id: `${pool.id}-${share.userAddress}` },
-                create: {
-                    id: `${pool.id}-${share.userAddress}`,
-                    userAddress: share.userAddress,
-                    poolId: pool.id,
-                    balance: share.balance,
-                },
-                update: { balance: share.balance },
-            }),
-        );
 
         await prismaBulkExecuteOperations([
             prisma.prismaUser.createMany({
                 data: shares.map((share) => ({ address: share.userAddress })),
                 skipDuplicates: true,
             }),
-            ...operations,
-            prisma.prismaUserPoolSyncStatus.upsert({
-                where: { id: poolId },
-                create: { id: poolId, blockNumber: block.number },
-                update: { blockNumber: providerLatestBlock },
+            ...shares.map((share) => this.getPrismaUpsertForPoolShare(poolId, share)),
+            prisma.prismaUserBalanceSyncStatus.upsert({
+                where: { type: 'WALLET' },
+                create: { type: 'WALLET', blockNumber: block.number },
+                update: { blockNumber: block.number },
             }),
         ]);
+    }
+
+    private getPrismaUpsertForPoolShare(poolId: string, share: BalancerUserPoolShare) {
+        return prisma.prismaUserWalletBalance.upsert({
+            where: { id: `${poolId}-${share.userAddress}` },
+            create: {
+                id: `${poolId}-${share.userAddress}`,
+                userAddress: share.userAddress,
+                poolId,
+                balance: share.balance,
+                balanceNum: parseFloat(share.balance),
+            },
+            update: { balance: share.balance, balanceNum: parseFloat(share.balance) },
+        });
     }
 }

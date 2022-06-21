@@ -28,6 +28,16 @@ export class MasterchefSubgraphService {
         this.client = new GraphQLClient(env.MASTERCHEF_SUBGRAPH);
     }
 
+    public async getMetadata() {
+        const { meta } = await this.sdk.MasterchefGetMeta();
+
+        if (!meta) {
+            throw new Error('Missing meta data');
+        }
+
+        return meta;
+    }
+
     public async getMasterChef(args: QueryMasterChefsArgs): Promise<MasterChef> {
         const response = await this.sdk.Masterchefs(args);
 
