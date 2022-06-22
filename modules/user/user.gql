@@ -1,3 +1,8 @@
+extend type Query {
+    userGetPoolBalances: [GqlUserPoolBalance!]!
+    userGetFbeetsBalance: GqlUserFbeetsBalance!
+}
+
 extend type Mutation {
     userInitWalletBalancesForAllPools: String!
     userInitWalletBalancesForPool(poolId: String!): String!
@@ -5,4 +10,20 @@ extend type Mutation {
 
     userInitStakedBalances: String!
     userSyncStakedBalances: String!
+}
+
+type GqlUserPoolBalance {
+    id: String!
+    poolId: String!
+    tokenAddress: String!
+    totalBalance: AmountHumanReadable!
+    walletBalance: AmountHumanReadable!
+    stakedBalance: AmountHumanReadable!
+}
+
+type GqlUserFbeetsBalance {
+    id: String!
+    totalBalance: AmountHumanReadable!
+    walletBalance: AmountHumanReadable!
+    stakedBalance: AmountHumanReadable!
 }

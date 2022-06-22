@@ -105,8 +105,8 @@ export class Multicaller {
                 ...data,
                 ..._.map(response, (item, erc20Address) =>
                     _.map(item, (balance, userAddress) => ({
-                        erc20Address,
-                        userAddress,
+                        erc20Address: erc20Address.toLowerCase(),
+                        userAddress: userAddress.toLowerCase(),
                         balance,
                     })),
                 ).flat(),

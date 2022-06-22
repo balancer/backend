@@ -1,8 +1,30 @@
 import { Resolvers } from '../../schema';
 import { userService } from './user.service';
-import { isAdminRoute } from '../util/resolver-util';
+import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
 
 const resolvers: Resolvers = {
+    Query: {
+        userGetPoolBalances: async (parent, {}, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            const balances = await userService.getUserPoolBalances(accountAddress);
+
+            return balances.map((balance) => ({
+                ...balance,
+                id: balance.poolId,
+            }));
+        },
+        userGetFbeetsBalance: async (parent, {}, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            const balance = await userService.getUserFbeetsBalance(accountAddress);
+
+            return {
+                id: balance.tokenAddress,
+                ...balance,
+            };
+        },
+    },
     Mutation: {
         userSyncWalletBalancesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);

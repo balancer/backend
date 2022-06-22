@@ -12,7 +12,7 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { UserStakedBalanceService } from '../user-types';
 import { AmountHumanReadable } from '../../global/global-types';
 
-export class UserMasterchefFarmBalanceService implements UserStakedBalanceService {
+export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     public async syncStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({ where: { type: 'STAKED' } });
 
@@ -50,13 +50,13 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
                 const farm = farms.find((farm) => farm.id === update.farmId);
 
                 return prisma.prismaUserStakedBalance.upsert({
-                    where: { id: `${update.farmId}-${pool?.address}` },
+                    where: { id: `${update.farmId}-${update.userAddress}` },
                     update: {
                         balance: update.amount,
                         balanceNum: parseFloat(update.amount),
                     },
                     create: {
-                        id: `${update.farmId}-${pool?.address}`,
+                        id: `${update.farmId}-${update.userAddress}`,
                         balance: update.amount,
                         balanceNum: parseFloat(update.amount),
                         userAddress: update.userAddress,

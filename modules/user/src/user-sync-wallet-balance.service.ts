@@ -13,7 +13,7 @@ import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balance
 import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 
-export class UserWalletBalanceService {
+export class UserSyncWalletBalanceService {
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
         const { block } = await balancerSubgraphService.getMetadata();
@@ -91,7 +91,7 @@ export class UserWalletBalanceService {
         }
 
         const fromBlock = syncStatus.blockNumber + 1;
-        const toBlock = latestBlock - fromBlock > 1000 ? fromBlock + 1000 : latestBlock;
+        const toBlock = latestBlock - fromBlock > 500 ? fromBlock + 500 : latestBlock;
 
         //fetch all transfer events for the block range
         const events = await jsonRpcProvider.getLogs({
@@ -138,9 +138,7 @@ export class UserWalletBalanceService {
             ...balances
                 .filter(({ userAddress }) => userAddress !== AddressZero)
                 .map(({ userAddress, erc20Address, balance }) => {
-                    const poolId = response.find((item) => {
-                        return item.address === erc20Address.toLowerCase();
-                    })?.id;
+                    const poolId = response.find((item) => item.address === erc20Address)?.id;
 
                     return prisma.prismaUserWalletBalance.upsert({
                         where: { id: `${poolId}-${userAddress}` },
@@ -148,7 +146,7 @@ export class UserWalletBalanceService {
                             id: `${poolId}-${userAddress}`,
                             userAddress,
                             poolId,
-                            tokenAddress: erc20Address.toLowerCase(),
+                            tokenAddress: erc20Address,
                             balance: formatFixed(balance, 18),
                             balanceNum: parseFloat(formatFixed(balance, 18)),
                         },
