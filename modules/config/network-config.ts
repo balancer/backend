@@ -41,6 +41,10 @@ export interface NetworkConfig {
         vault: string;
     };
     multicall: string;
+    masterchef: {
+        address: string;
+        excludedFarmIds: string[];
+    };
 }
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
@@ -77,6 +81,12 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
         },
         multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
+        masterchef: {
+            address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
+            excludedFarmIds: [
+                '34', //OHM bonding farm
+            ],
+        },
     },
 };
 

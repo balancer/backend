@@ -113,7 +113,7 @@ function addRpcListener(taskName: string, eventType: EventType, timeout: number,
                 running = false;
                 transaction.finish();
             }
-        }),
+        }, 250),
     );
 }
 

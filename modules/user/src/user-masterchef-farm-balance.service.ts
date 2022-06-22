@@ -21,17 +21,22 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
         }
 
         const pools = await prisma.prismaPool.findMany({ include: { staking: true } });
-        const masterChef = await masterchefService.getMasterChef({});
         const latestBlock = await jsonRpcProvider.getBlockNumber();
-
-        console.log('latest blck from provider', latestBlock);
-        console.log('status', status);
+        const farms = await masterchefService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
-        const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(masterChef.id, startBlock);
+        const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
+            networkConfig.masterchef.address,
+            startBlock,
+        );
         const userAddresses = _.uniq(amountUpdates.map((update) => update.userAddress));
 
         if (amountUpdates.length === 0) {
+            await prisma.prismaUserBalanceSyncStatus.update({
+                where: { type: 'STAKED' },
+                data: { blockNumber: latestBlock },
+            });
+
             return;
         }
 
@@ -41,12 +46,8 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
                 skipDuplicates: true,
             }),
             ...amountUpdates.map((update) => {
-                const isFbeetsFarm = update.farmId === networkConfig.fbeets.farmId;
-                const pool = pools.find((pool) =>
-                    isFbeetsFarm
-                        ? pool.address === networkConfig.fbeets.poolAddress
-                        : pool.staking?.id === update.farmId,
-                );
+                const pool = pools.find((pool) => pool.staking?.id === update.farmId);
+                const farm = farms.find((farm) => farm.id === update.farmId);
 
                 return prisma.prismaUserStakedBalance.upsert({
                     where: { id: `${update.farmId}-${pool?.address}` },
@@ -59,7 +60,8 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
                         balance: update.amount,
                         balanceNum: parseFloat(update.amount),
                         userAddress: update.userAddress,
-                        poolId: pool!.id,
+                        poolId: pool?.id,
+                        tokenAddress: farm!.pair,
                         stakingId: update.farmId,
                     },
                 });
@@ -69,12 +71,6 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
                 data: { blockNumber: latestBlock },
             }),
         ]);
-
-        console.log('!!!!!!!!!!!!set latest block', latestBlock);
-        await prisma.prismaUserBalanceSyncStatus.update({
-            where: { type: 'STAKED' },
-            data: { blockNumber: latestBlock },
-        });
     }
 
     public async initStakedBalances(): Promise<void> {
@@ -86,7 +82,6 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
         const pools = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
         console.log('initStakedBalances: finished loading pools...');
         const userAddresses = _.uniq(farmUsers.map((farmUser) => farmUser.address));
-        const poolAddresses = pools.map((pool) => pool.address);
 
         console.log('initStakedBalances: performing db operations...');
         await prismaBulkExecuteOperations([
@@ -97,23 +92,17 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
             prisma.prismaUserStakedBalance.deleteMany({}),
             prisma.prismaUserStakedBalance.createMany({
                 data: farmUsers
-                    .filter(
-                        (farmUser) =>
-                            farmUser.pool?.pair === networkConfig.fbeets.address ||
-                            poolAddresses.includes(farmUser.pool?.pair || ''),
-                    )
+                    .filter((farmUser) => !networkConfig.masterchef.excludedFarmIds.includes(farmUser.pool!.id))
                     .map((farmUser) => {
-                        const isFbeetsFarm = farmUser.pool?.id === networkConfig.fbeets.farmId;
-                        const pool = isFbeetsFarm
-                            ? { id: networkConfig.fbeets.poolId, address: networkConfig.fbeets.poolAddress }
-                            : pools.find((pool) => pool.address === farmUser.pool?.pair);
+                        const pool = pools.find((pool) => pool.address === farmUser.pool?.pair);
 
                         return {
                             id: farmUser.id,
                             balance: formatFixed(farmUser.amount, 18),
                             balanceNum: parseFloat(formatFixed(farmUser.amount, 18)),
                             userAddress: farmUser.address,
-                            poolId: pool!.id,
+                            poolId: pool?.id,
+                            tokenAddress: farmUser.pool!.pair,
                             stakingId: farmUser.pool!.id,
                         };
                     }),
@@ -133,23 +122,17 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
         startBlock: number,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
         const contract = getContractAt(masterChefAddress, MasterChefAbi);
-
-        console.log('start block', startBlock);
-
-        //fetch all events that have happened beyond the currently synced subgraph block
-        const depositEvents = await contract.queryFilter(contract.filters.Deposit(), startBlock);
-        const withdrawEvents = await contract.queryFilter(contract.filters.Withdraw(), startBlock);
-        const emergencyWithdrawEvents = await contract.queryFilter(contract.filters.EmergencyWithdraw(), startBlock);
-        const events = [...depositEvents, ...withdrawEvents, ...emergencyWithdrawEvents];
-
-        console.log('!@#!@# num events', events.length);
+        const events = await contract.queryFilter({ address: masterChefAddress }, startBlock);
+        const filteredEvents = events.filter((event) =>
+            ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),
+        );
 
         const multicall = new Multicaller(networkConfig.multicall, jsonRpcProvider, MasterChefAbi);
         let response: {
             [farmId: string]: { [userAddress: string]: [BigNumber, BigNumber] };
         } = {};
 
-        for (const event of events) {
+        for (const event of filteredEvents) {
             multicall.call(`${event.args?.pid}.${event.args?.user}`, masterChefAddress, 'userInfo', [
                 event.args?.pid,
                 event.args?.user,
@@ -168,13 +151,19 @@ export class UserMasterchefFarmBalanceService implements UserStakedBalanceServic
             }
         }
 
+        if (multicall.numCalls > 0) {
+            response = _.merge(response, await multicall.execute());
+        }
+
         return _.map(response, (farmData, farmId) => {
             return _.map(farmData, ([amount], userAddress) => ({
                 farmId,
                 userAddress: userAddress.toLowerCase(),
                 amount: formatFixed(amount, 18),
             }));
-        }).flat();
+        })
+            .flat()
+            .filter((item) => !networkConfig.masterchef.excludedFarmIds.includes(item.farmId));
     }
 
     private async loadAllSubgraphUsers(): Promise<FarmUserFragment[]> {

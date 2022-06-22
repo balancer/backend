@@ -82,3 +82,13 @@ query BeetsBarData($barId: ID!, $previousBlockNumber: Int!) {
         ...BeetsBar
     }
 }
+
+query BeetsBarGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

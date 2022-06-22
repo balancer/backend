@@ -10,11 +10,14 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
+import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
+import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 
 export class UserWalletBalanceService {
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
         const { block } = await balancerSubgraphService.getMetadata();
+        const { block: beetsBarBlock } = await beetsBarService.getMetadata();
         const balances = await prisma.prismaUserWalletBalance.findMany({});
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
@@ -41,6 +44,8 @@ export class UserWalletBalanceService {
         }
         console.log('initBalancesForPools: finished loading pool shares...');
 
+        const fbeetsHolders = await beetsBarService.getAllUsers({ where: { fBeets_not: '0' } });
+
         let operations: any[] = [];
 
         for (const pool of pools) {
@@ -57,14 +62,18 @@ export class UserWalletBalanceService {
         console.log('initBalancesForPools: performing db operations...');
         await prismaBulkExecuteOperations([
             prisma.prismaUser.createMany({
-                data: _.uniq(shares.map((share) => share.userAddress)).map((address) => ({ address })),
+                data: _.uniq([
+                    ...shares.map((share) => share.userAddress),
+                    ...fbeetsHolders.map((user) => user.address),
+                ]).map((address) => ({ address })),
                 skipDuplicates: true,
             }),
             ...operations,
+            ...fbeetsHolders.map((user) => this.getPrismaUpsertForFbeetsUser(user)),
             prisma.prismaUserBalanceSyncStatus.upsert({
                 where: { type: 'WALLET' },
-                create: { type: 'WALLET', blockNumber: block.number },
-                update: { blockNumber: block.number },
+                create: { type: 'WALLET', blockNumber: Math.min(block.number, beetsBarBlock.number) },
+                update: { blockNumber: Math.min(block.number, beetsBarBlock.number) },
             }),
         ]);
         console.log('initBalancesForPools: finished performing db operations...');
@@ -94,7 +103,10 @@ export class UserWalletBalanceService {
 
         const balancesToFetch = _.uniq(
             events
-                .filter((event) => poolAddresses.includes(event.address.toLowerCase()))
+                .filter((event) =>
+                    //we also need to track fbeets balance
+                    [...poolAddresses, networkConfig.fbeets.address].includes(event.address.toLowerCase()),
+                )
                 .map((event) => {
                     const parsed = erc20Interface.parseLog(event);
 
@@ -126,10 +138,9 @@ export class UserWalletBalanceService {
             ...balances
                 .filter(({ userAddress }) => userAddress !== AddressZero)
                 .map(({ userAddress, erc20Address, balance }) => {
-                    const poolId =
-                        response.find((item) => {
-                            return item.address === erc20Address.toLowerCase();
-                        })?.id || '';
+                    const poolId = response.find((item) => {
+                        return item.address === erc20Address.toLowerCase();
+                    })?.id;
 
                     return prisma.prismaUserWalletBalance.upsert({
                         where: { id: `${poolId}-${userAddress}` },
@@ -137,6 +148,7 @@ export class UserWalletBalanceService {
                             id: `${poolId}-${userAddress}`,
                             userAddress,
                             poolId,
+                            tokenAddress: erc20Address.toLowerCase(),
                             balance: formatFixed(balance, 18),
                             balanceNum: parseFloat(formatFixed(balance, 18)),
                         },
@@ -178,10 +190,25 @@ export class UserWalletBalanceService {
                 id: `${poolId}-${share.userAddress}`,
                 userAddress: share.userAddress,
                 poolId,
+                tokenAddress: share.poolAddress.toLowerCase(),
                 balance: share.balance,
                 balanceNum: parseFloat(share.balance),
             },
             update: { balance: share.balance, balanceNum: parseFloat(share.balance) },
+        });
+    }
+
+    private getPrismaUpsertForFbeetsUser(user: BeetsBarUserFragment) {
+        return prisma.prismaUserWalletBalance.upsert({
+            where: { id: `fbeets-${user.address}` },
+            create: {
+                id: `fbeets-${user.address}`,
+                userAddress: user.address,
+                tokenAddress: networkConfig.fbeets.address,
+                balance: user.fBeets,
+                balanceNum: parseFloat(user.fBeets),
+            },
+            update: { balance: user.fBeets, balanceNum: parseFloat(user.fBeets) },
         });
     }
 }

@@ -19,6 +19,9 @@ model PrismaToken {
     poolTokenSnapshots  PrismaBalancerPoolTokenSnapshot[]
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
+
+    walletBalances  PrismaUserWalletBalance[]
+    stakedBalances  PrismaUserStakedBalance[]
 }
 
 

@@ -26,6 +26,16 @@ export class BeetsBarSubgraphService {
         this.client = new GraphQLClient(env.BEETS_BAR_SUBGRAPH);
     }
 
+    public async getMetadata() {
+        const { meta } = await this.sdk.BeetsBarGetMeta();
+
+        if (!meta) {
+            throw new Error('Missing meta data');
+        }
+
+        return meta;
+    }
+
     public async getFbeetsApr(): Promise<number> {
         const cached = await cache.getValue(FBEETS_APR_CACHE_KEY);
 

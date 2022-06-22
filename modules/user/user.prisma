@@ -20,8 +20,11 @@ model PrismaUserWalletBalance {
     userAddress         String
     user                PrismaUser          @relation(fields:[userAddress], references: [address])
 
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    poolId              String?
+    pool                PrismaPool?          @relation(fields:[poolId], references: [id])
+
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
 }
 
 model PrismaUserStakedBalance {
@@ -33,8 +36,11 @@ model PrismaUserStakedBalance {
     userAddress         String
     user                PrismaUser          @relation(fields:[userAddress], references: [address])
 
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    poolId              String?
+    pool                PrismaPool?          @relation(fields:[poolId], references: [id])
+
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
 
     stakingId           String
     staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
