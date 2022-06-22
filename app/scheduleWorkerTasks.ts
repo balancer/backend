@@ -10,7 +10,6 @@ import { beetsService } from '../modules/beets/beets.service';
 import { sentry } from '../modules/util/sentry-client';
 import { jsonRpcProvider } from '../modules/util/ethers';
 import { userService } from '../modules/user/user.service';
-import { EventType } from '@ethersproject/abstract-provider/src.ts/index';
 import _ from 'lodash';
 
 const ONE_MINUTE_IN_MS = 60000;
@@ -78,7 +77,7 @@ function scheduleJob(
     });
 }
 
-function addRpcListener(taskName: string, eventType: EventType, timeout: number, listener: () => Promise<void>) {
+function addRpcListener(taskName: string, eventType: string, timeout: number, listener: () => Promise<void>) {
     let running = false;
 
     jsonRpcProvider.on(
