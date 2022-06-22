@@ -7,12 +7,7 @@ const resolvers: Resolvers = {
         userGetPoolBalances: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
-            const balances = await userService.getUserPoolBalances(accountAddress);
-
-            return balances.map((balance) => ({
-                ...balance,
-                id: balance.poolId,
-            }));
+            return userService.getUserPoolBalances(accountAddress);
         },
         userGetFbeetsBalance: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
