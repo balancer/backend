@@ -15,6 +15,7 @@ extend type Mutation {
 type GqlUserPoolBalance {
     poolId: String!
     tokenAddress: String!
+    tokenPrice: Float!
     totalBalance: AmountHumanReadable!
     walletBalance: AmountHumanReadable!
     stakedBalance: AmountHumanReadable!
