@@ -10,8 +10,8 @@ export class UserBalanceService {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
-                walletBalances: { where: { poolId: { not: null } } },
-                stakedBalances: { where: { poolId: { not: null } } },
+                walletBalances: { where: { poolId: { not: null }, balanceNum: { gt: 0 } } },
+                stakedBalances: { where: { poolId: { not: null }, balanceNum: { gt: 0 } } },
             },
         });
 
