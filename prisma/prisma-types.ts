@@ -174,6 +174,7 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
         tokens: {
             include: {
                 token: true,
+                dynamicData: true,
             },
         },
         staking: true,

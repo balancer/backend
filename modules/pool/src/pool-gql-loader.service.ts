@@ -300,6 +300,7 @@ export class PoolGqlLoaderService {
             return {
                 ...token.token,
                 id: `${pool.id}-${token.tokenAddress}`,
+                weight: poolToken?.dynamicData?.weight,
                 isNested: !poolToken,
                 isPhantomBpt: token.tokenAddress === pool.address,
             };
