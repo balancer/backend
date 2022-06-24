@@ -1,5 +1,9 @@
 import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
-import { FarmUserFragment } from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+import {
+    FarmUserFragment,
+    OrderDirection,
+    User_OrderBy,
+} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import _ from 'lodash';
 import { prisma } from '../../util/prisma-client';
 import { getContractAt, jsonRpcProvider } from '../../util/ethers';
@@ -84,6 +88,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const userAddresses = _.uniq(farmUsers.map((farmUser) => farmUser.address));
 
         console.log('initStakedBalances: performing db operations...');
+
         await prismaBulkExecuteOperations([
             prisma.prismaUser.createMany({
                 data: userAddresses.map((userAddress) => ({ address: userAddress })),
@@ -179,6 +184,8 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                 where: { timestamp_gte: timestamp, amount_not: '0' },
                 first: pageSize,
                 skip,
+                orderBy: User_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
             });
 
             users = [...users, ...farmUsers];

@@ -85,6 +85,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
             excludedFarmIds: [
                 '34', //OHM bonding farm
+                '28', //OHM bonding farm
+                '9', //old fidellio dueto (non fbeets)
             ],
         },
     },
