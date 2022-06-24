@@ -11,22 +11,23 @@ export class MasterChefStakingService implements PoolStakingService {
 
     public async syncStakingForPools(): Promise<void> {
         const farms = await this.masterChefSubgraphService.getAllFarms({});
+        const filteredFarms = farms.filter((farm) => !networkConfig.masterchef.excludedFarmIds.includes(farm.id));
         const pools = await prisma.prismaPool.findMany({
-            include: {
-                staking: { include: { farm: { include: { rewarders: true } } } },
-            },
+            include: { staking: { include: { farm: { include: { rewarders: true } } } } },
         });
         const operations: any[] = [];
 
-        for (const farm of farms) {
-            const pool = pools.find((pool) => pool.address === farm.pair);
+        for (const farm of filteredFarms) {
+            const isFbeetsFarm = farm.id === networkConfig.fbeets.farmId;
+            const pool = pools.find((pool) =>
+                isFbeetsFarm ? pool.id === networkConfig.fbeets.poolId : pool.address === farm.pair,
+            );
 
             if (!pool) {
                 continue;
             }
 
-            const isFbeetsPool = pool.id === networkConfig.fbeets.poolId;
-            const farmId = isFbeetsPool ? networkConfig.fbeets.farmId : farm.id;
+            const farmId = farm.id;
             const beetsPerBlock = formatFixed(
                 oldBnum(farm.masterChef.beetsPerBlock)
                     .times(farm.allocPoint)
@@ -39,10 +40,10 @@ export class MasterChefStakingService implements PoolStakingService {
                 operations.push(
                     prisma.prismaPoolStaking.create({
                         data: {
-                            id: farmId,
+                            id: farm.id,
                             poolId: pool.id,
-                            type: isFbeetsPool ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                            address: isFbeetsPool ? networkConfig.fbeets.address : farm.masterChef.id,
+                            type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
+                            address: isFbeetsFarm ? networkConfig.fbeets.address : farm.masterChef.id,
                         },
                     }),
                 );
