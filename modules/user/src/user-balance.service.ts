@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 import { networkConfig } from '../../config/network-config';
+import { PrismaPoolStaking } from '@prisma/client';
 
 export class UserBalanceService {
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
@@ -11,7 +12,9 @@ export class UserBalanceService {
             where: { address: address.toLowerCase() },
             include: {
                 walletBalances: { where: { poolId: { not: null }, balanceNum: { gt: 0 } } },
-                stakedBalances: { where: { poolId: { not: null }, balanceNum: { gt: 0 } } },
+                stakedBalances: {
+                    where: { poolId: { not: null }, balanceNum: { gt: 0 } },
+                },
             },
         });
 
@@ -60,5 +63,35 @@ export class UserBalanceService {
             stakedBalance: stakedBalance?.balance || '0',
             walletBalance: walletBalance?.balance || '0',
         };
+    }
+
+    public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
+        const user = await prisma.prismaUser.findUnique({
+            where: { address: address.toLowerCase() },
+            include: {
+                stakedBalances: {
+                    where: { balanceNum: { gt: 0 } },
+                    include: {
+                        pool: {
+                            include: {
+                                staking: {
+                                    include: {
+                                        farm: {
+                                            include: {
+                                                rewarders: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        return (user?.stakedBalances || [])
+            .filter((stakedBalance) => stakedBalance.pool?.staking)
+            .map((stakedBalance) => stakedBalance.pool?.staking) as PrismaPoolStaking[];
     }
 }

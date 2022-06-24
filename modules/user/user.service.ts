@@ -2,8 +2,8 @@ import { UserSyncWalletBalanceService } from './src/user-sync-wallet-balance.ser
 import { UserSyncMasterchefFarmBalanceService } from './src/user-sync-masterchef-farm-balance.service';
 import { UserPoolBalance, UserStakedBalanceService } from './user-types';
 import { prisma } from '../util/prisma-client';
-import _ from 'lodash';
 import { UserBalanceService } from './src/user-balance.service';
+import { PrismaPoolStaking } from '@prisma/client';
 
 export class UserService {
     constructor(
@@ -18,6 +18,10 @@ export class UserService {
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
         return this.userBalanceService.getUserFbeetsBalance(address);
+    }
+
+    public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
+        return this.userBalanceService.getUserStaking(address);
     }
 
     public async initWalletBalancesForAllPools() {

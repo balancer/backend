@@ -25,6 +25,11 @@ const resolvers: Resolvers = {
                 ...balance,
             };
         },
+        userGetStaking: async (parent, {}, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            return userService.getUserStaking(accountAddress);
+        },
     },
     Mutation: {
         userSyncWalletBalancesForAllPools: async (parent, {}, context) => {

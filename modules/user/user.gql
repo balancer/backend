@@ -1,6 +1,7 @@
 extend type Query {
     userGetPoolBalances: [GqlUserPoolBalance!]!
     userGetFbeetsBalance: GqlUserFbeetsBalance!
+    userGetStaking: [GqlPoolStaking!]!
 }
 
 extend type Mutation {

@@ -37,6 +37,7 @@ extend type Mutation {
     poolReloadAllPoolAprs: String!
     poolSyncTotalShares: String!
     poolReloadStakingForAllPools: String!
+    poolSyncStakingForPools: String!
 }
 
 type GqlPoolMinimal {
