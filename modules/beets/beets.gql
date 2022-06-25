@@ -4,6 +4,10 @@ extend type Query {
     beetsGetConfig: GqlBeetsConfig!
 }
 
+extend type Mutation {
+    beetsSyncFbeetsRatio: String!
+}
+
 type GqlBeetsProtocolData {
     totalLiquidity: BigDecimal!
     totalSwapVolume: BigDecimal!

@@ -24,6 +24,12 @@ enum PrismaLastBlockSyncedCategory {
     FARMS
 }
 
+
+model PrismaFbeets {
+    id                  String              @id
+    ratio               String
+}
+
 model PrismaPool {
     id                  String              @id
     createTime          Int

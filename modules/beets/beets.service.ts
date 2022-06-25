@@ -128,6 +128,10 @@ export class BeetsService {
 
         return beetsConfig;
     }
+
+    public async syncFbeetsRatio(): Promise<void> {
+        return this.fBeetsService.syncRatio();
+    }
 }
 
 export const beetsService = new BeetsService(

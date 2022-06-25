@@ -1,5 +1,6 @@
 import { Resolvers } from '../../schema';
 import { beetsService } from './beets.service';
+import { isAdminRoute } from '../util/resolver-util';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -11,6 +12,15 @@ const balancerResolvers: Resolvers = {
         },
         beetsGetConfig: async (parent, {}, context) => {
             return beetsService.getConfig();
+        },
+    },
+    Mutation: {
+        beetsSyncFbeetsRatio: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await beetsService.syncFbeetsRatio();
+
+            return 'success';
         },
     },
 };

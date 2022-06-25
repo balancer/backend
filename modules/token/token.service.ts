@@ -26,6 +26,7 @@ import {
     QueryTokenGetPriceChartDataArgs,
     QueryTokenGetRelativePriceChartDataArgs,
 } from '../../schema';
+import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
@@ -135,6 +136,7 @@ export class TokenService {
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
+        new FbeetsPriceHandlerService(),
         new CoingeckoPriceHandlerService(
             networkConfig.coingecko.nativeAssetId,
             networkConfig.coingecko.platformId,

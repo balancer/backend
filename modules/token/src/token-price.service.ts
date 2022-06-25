@@ -5,13 +5,7 @@ import { timestampRoundedUpToNearestHour } from '../../util/time';
 import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
-import {
-    GqlTokenChartDataRange,
-    GqlTokenPriceChartDataItem,
-    QueryTokenGetCandlestickChartDataArgs,
-    QueryTokenGetPriceChartDataArgs,
-    QueryTokenGetRelativePriceChartDataArgs,
-} from '../../../schema';
+import { GqlTokenChartDataRange } from '../../../schema';
 
 export class TokenPriceService {
     constructor(private readonly handlers: TokenPriceHandler[]) {}
