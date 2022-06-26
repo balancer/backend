@@ -155,6 +155,10 @@ export function scheduleWorkerTasks() {
         await tokenService.syncSanityData();
     });
 
+    scheduleJob('*/5 * * * *', 'syncFbeetsRatio', ONE_MINUTE_IN_MS, async () => {
+        await beetsService.syncFbeetsRatio();
+    });
+
     scheduleJob(
         '*/5 * * * *',
         'cacheAverageBlockTime',
