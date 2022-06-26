@@ -11,7 +11,11 @@ export class PoolAprUpdaterService {
         const pools = await prisma.prismaPool.findMany(prismaPoolWithExpandedNesting);
 
         for (const aprService of this.aprServices) {
-            await aprService.updateAprForPools(pools);
+            try {
+                await aprService.updateAprForPools(pools);
+            } catch (e) {
+                console.log(`Error during APR update of aprService ${aprService}:`, e);
+            }
         }
 
         const aprItems = await prisma.prismaPoolAprItem.findMany({
