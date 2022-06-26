@@ -51,14 +51,14 @@ function scheduleJob(
             return;
         }
 
-        const transaction = sentry.startTransaction({
-            op: 'cron',
-            name: taskName,
-        });
+        // const transaction = sentry.startTransaction({
+        //     op: 'cron',
+        //     name: taskName,
+        // });
 
-        sentry.configureScope((scope) => {
-            scope.setSpan(transaction);
-        });
+        // sentry.configureScope((scope) => {
+        //     scope.setSpan(transaction);
+        // });
 
         try {
             running = true;
@@ -72,7 +72,7 @@ function scheduleJob(
         } finally {
             console.timeEnd(taskName);
             running = false;
-            transaction.finish();
+            // transaction.finish();
         }
     });
 }
@@ -89,14 +89,14 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
                 return;
             }
 
-            const transaction = sentry.startTransaction({
-                op: 'cron',
-                name: taskName,
-            });
+            // const transaction = sentry.startTransaction({
+            //     op: 'cron',
+            //     name: taskName,
+            // });
 
-            sentry.configureScope((scope) => {
-                scope.setSpan(transaction);
-            });
+            // sentry.configureScope((scope) => {
+            //     scope.setSpan(transaction);
+            // });
 
             try {
                 running = true;
@@ -110,7 +110,7 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
             } finally {
                 console.timeEnd(taskName);
                 running = false;
-                transaction.finish();
+                // transaction.finish();
             }
         }, 250),
     );
