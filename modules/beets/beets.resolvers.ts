@@ -22,6 +22,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        beetsSyncProtocolData: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await beetsService.cacheProtocolData();
+
+            return 'success';
+        },
     },
 };
 

@@ -49,7 +49,7 @@ export class BeetsService {
 
         const oneDayAgo = moment().subtract(24, 'hours').unix();
         const pools = await prisma.prismaPool.findMany({
-            where: { categories: { none: { category: { in: ['BLACK_LISTED'] } } } },
+            where: { categories: { none: { category: 'BLACK_LISTED' } } },
             include: { dynamicData: true },
         });
         const swaps = await prisma.prismaPoolSwap.findMany({ where: { timestamp: { gte: oneDayAgo } } });

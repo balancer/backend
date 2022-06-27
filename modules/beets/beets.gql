@@ -6,6 +6,7 @@ extend type Query {
 
 extend type Mutation {
     beetsSyncFbeetsRatio: String!
+    beetsSyncProtocolData: String!
 }
 
 type GqlBeetsProtocolData {
