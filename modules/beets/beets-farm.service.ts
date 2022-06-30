@@ -183,7 +183,7 @@ export class BeetsFarmService {
 
         const farmUsers = await masterchefService.getAllFarmUsers({
             where: reload
-                ? { timestamp_gte: `${currentUnixTime - 14400}` }
+                ? { timestamp_gte: `${currentUnixTime - 86400}` }
                 : { timestamp_gte: `${currentUnixTime - 7200}` },
         });
         const mapped: GqlBeetsFarmUser[] = farmUsers.map((farmUser) => ({
