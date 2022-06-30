@@ -1,6 +1,7 @@
 export interface ConfigHomeScreen {
     chainId: number;
     featuredPoolGroups: HomeScreenFeaturedPoolGroup[];
+    newsItems: HomeScreenNewsItem[];
 }
 
 interface HomeScreenFeaturedPoolGroup {
@@ -25,4 +26,13 @@ interface HomeScreenFeaturedPoolGroupItemExternalLink {
     buttonText: string;
     buttonUrl: string;
     image: string;
+}
+
+interface HomeScreenNewsItem {
+    id: string;
+    timestamp: string;
+    source: 'twitter' | 'medium' | 'discord';
+    url: string;
+    text: string;
+    image?: string;
 }

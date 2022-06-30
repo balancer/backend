@@ -23,6 +23,10 @@ export class ConfigService {
                         ...,
                         "image": image.asset->url + "?w=600"
                     }
+                },
+                "newsItems": newsItems[]{
+                    ...,
+                    "image": image.asset->url + "?w=800"
                 }
             }
         `);
