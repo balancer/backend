@@ -21,6 +21,7 @@ extend type Query {
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetUserSwapVolume(first: Int, skip: Int, where: GqlUserSwapVolumeFilter): [GqlPoolUserSwapVolume!]!
+    poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
 }
 
 extend type Mutation {
@@ -595,4 +596,20 @@ input GqlUserSwapVolumeFilter {
 type GqlPoolUserSwapVolume {
     userAddress: String!
     swapVolumeUSD: BigDecimal!
+}
+
+type GqlPoolFeaturedPoolGroup {
+    id: ID!
+    title: String!
+    icon: String!
+    items: [GqlPoolFeaturedPoolGroupItem!]!
+}
+
+union GqlPoolFeaturedPoolGroupItem = GqlPoolMinimal | GqlFeaturePoolGroupItemExternalLink
+
+type GqlFeaturePoolGroupItemExternalLink {
+    id: ID!
+    image: String!
+    buttonText: String!
+    buttonUrl: String!
 }

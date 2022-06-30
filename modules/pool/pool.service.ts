@@ -7,6 +7,7 @@ import { PoolUsdDataService } from './src/pool-usd-data.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import {
+    GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolUnion,
@@ -37,10 +38,15 @@ import { networkConfig } from '../config/network-config';
 import { PrismaPoolBatchSwapWithSwaps } from '../../prisma/prisma-types';
 import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../util/ethers';
+import { configService, ConfigService } from '../config/config.service';
+import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
+
+const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
 export class PoolService {
     constructor(
         private readonly provider: Provider,
+        private readonly configService: ConfigService,
         private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
@@ -82,6 +88,20 @@ export class PoolService {
 
     public async getPoolUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs): Promise<GqlPoolUserSwapVolume[]> {
         return this.poolSwapService.getUserSwapVolume(args);
+    }
+
+    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
+        const cached = await memCacheGetValue<GqlPoolFeaturedPoolGroup[]>(FEATURED_POOL_GROUPS_CACHE_KEY);
+
+        if (cached) {
+            return cached;
+        }
+
+        const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
+
+        memCacheSetValue(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5);
+
+        return featuredPoolGroups;
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -185,10 +205,11 @@ export class PoolService {
 
 export const poolService = new PoolService(
     jsonRpcProvider,
+    configService,
     new PoolCreatorService(userService),
     new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
     new PoolUsdDataService(tokenService),
-    new PoolGqlLoaderService(),
+    new PoolGqlLoaderService(configService),
     new PoolSanityDataLoaderService(),
     //TODO: this will depend on the chain
     new PoolAprUpdaterService([

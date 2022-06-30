@@ -10,6 +10,7 @@ import {
 } from '../../../prisma/prisma-types';
 import {
     GqlPoolDynamicData,
+    GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
     GqlPoolLinear,
@@ -30,9 +31,10 @@ import _ from 'lodash';
 import { prisma } from '../../util/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
+import { ConfigService } from '../../config/config.service';
 
 export class PoolGqlLoaderService {
-    constructor() {}
+    constructor(private readonly configService: ConfigService) {}
 
     public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
@@ -69,6 +71,43 @@ export class PoolGqlLoaderService {
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+    }
+
+    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
+        const { featuredPoolGroups } = await this.configService.getHomeScreenConfig();
+        const poolIds = featuredPoolGroups
+            .map((group) =>
+                group.items
+                    .filter((item) => item._type === 'homeScreenFeaturedPoolGroupPoolId')
+                    .map((item) => (item._type === 'homeScreenFeaturedPoolGroupPoolId' ? item.poolId : '')),
+            )
+            .flat();
+
+        const pools = await this.getPools({ where: { idIn: poolIds } });
+
+        return featuredPoolGroups.map((group) => {
+            return {
+                ...group,
+                items: group.items
+                    //filter out any invalid pool ids
+                    .filter((item) => {
+                        if (item._type === 'homeScreenFeaturedPoolGroupPoolId') {
+                            return !!pools.find((pool) => pool.id === item.poolId);
+                        }
+
+                        return true;
+                    })
+                    .map((item) => {
+                        if (item._type === 'homeScreenFeaturedPoolGroupPoolId') {
+                            const pool = pools.find((pool) => pool.id === item.poolId);
+
+                            return { __typename: 'GqlPoolMinimal', ...pool! };
+                        } else {
+                            return { __typename: 'GqlFeaturePoolGroupItemExternalLink', ...item };
+                        }
+                    }),
+            };
+        });
     }
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
