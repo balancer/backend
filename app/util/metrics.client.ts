@@ -32,7 +32,7 @@ export abstract class MetricPublisher {
                         Dimensions: [
                             {
                                 Name: 'Environment',
-                                Value: this.environment,
+                                Value: this.environment + '-op',
                             },
                         ],
                         Unit: 'None',
