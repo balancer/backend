@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
 import { balancerSdk } from '../modules/balancer-sdk/src/balancer-sdk';
-import { cronTimeMetric } from './cron.metric';
+import cronTimeMetric from './cron.metric';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
