@@ -31,7 +31,10 @@ export const schema = {
     RPC_URL: String,
     YEARN_VAULTS_ENDPOINT: String,
     MASTERCHEF_ADDRESS: String,
-    GAUGE_SUBGRAPH: String
+    GAUGE_SUBGRAPH: String,
+    AWS_REGION: String,
+    AWS_ACCESSKEY: String,
+    AWS_SECRETKEY: String,
 };
 
 export const env: Env = load(schema, {
