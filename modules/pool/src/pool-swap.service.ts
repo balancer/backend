@@ -44,6 +44,28 @@ export class PoolSwapService {
         }));
     }
 
+    public async getUserJoinExitsForPool(
+        userAddress: string,
+        poolId: string,
+        first = 10,
+        skip = 0,
+    ): Promise<GqlPoolJoinExit[]> {
+        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
+            where: { pool: poolId, user: userAddress },
+            first,
+            skip: skip,
+            orderBy: JoinExit_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Desc,
+        });
+
+        return joinExits.map((joinExit) => ({
+            ...joinExit,
+            __typename: 'GqlPoolJoinExit',
+            poolId: joinExit.pool.id,
+            amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
+        }));
+    }
+
     public async getSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
         const take = !args.first || args.first > 100 ? 10 : args.first;
 

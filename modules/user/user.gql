@@ -2,6 +2,7 @@ extend type Query {
     userGetPoolBalances: [GqlUserPoolBalance!]!
     userGetFbeetsBalance: GqlUserFbeetsBalance!
     userGetStaking: [GqlPoolStaking!]!
+    userGetPoolInvestments(poolId: String!): [GqlPoolJoinExit!]!
 }
 
 extend type Mutation {
