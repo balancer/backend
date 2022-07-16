@@ -7,7 +7,6 @@ import { env } from './env';
 import { runWithMinimumInterval } from '../modules/util/scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { sentry } from '../modules/util/sentry-client';
 import { jsonRpcProvider } from '../modules/util/ethers';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
@@ -47,18 +46,8 @@ function scheduleJob(
     cron.schedule(cronExpression, async () => {
         if (running) {
             console.log(`${taskName} already running, skipping call...`);
-            sentry.captureException(new Error(`${taskName} already running, skipping call...`));
             return;
         }
-
-        // const transaction = sentry.startTransaction({
-        //     op: 'cron',
-        //     name: taskName,
-        // });
-
-        // sentry.configureScope((scope) => {
-        //     scope.setSpan(transaction);
-        // });
 
         try {
             running = true;
@@ -68,11 +57,9 @@ function scheduleJob(
             console.log(`${taskName} done`);
         } catch (e) {
             console.log(`Error ${taskName}`, e);
-            sentry.captureException(e);
         } finally {
             console.timeEnd(taskName);
             running = false;
-            // transaction.finish();
         }
     });
 }
@@ -85,18 +72,8 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
         _.debounce(async () => {
             if (running) {
                 console.log(`${taskName} already running, skipping call...`);
-                sentry.captureException(new Error(`${taskName} already running, skipping call...`));
                 return;
             }
-
-            // const transaction = sentry.startTransaction({
-            //     op: 'cron',
-            //     name: taskName,
-            // });
-
-            // sentry.configureScope((scope) => {
-            //     scope.setSpan(transaction);
-            // });
 
             try {
                 running = true;
@@ -106,11 +83,9 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
                 console.log(`${taskName} done`);
             } catch (e) {
                 console.log(`Error ${taskName}`, e);
-                sentry.captureException(e);
             } finally {
                 console.timeEnd(taskName);
                 running = false;
-                // transaction.finish();
             }
         }, 250),
     );
