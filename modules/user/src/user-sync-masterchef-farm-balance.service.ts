@@ -29,16 +29,18 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const farms = await masterchefService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
+        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             networkConfig.masterchef.address,
             startBlock,
+            endBlock,
         );
         const userAddresses = _.uniq(amountUpdates.map((update) => update.userAddress));
 
         if (amountUpdates.length === 0) {
             await prisma.prismaUserBalanceSyncStatus.update({
                 where: { type: 'STAKED' },
-                data: { blockNumber: latestBlock },
+                data: { blockNumber: endBlock },
             });
 
             return;
@@ -72,7 +74,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             }),
             prisma.prismaUserBalanceSyncStatus.update({
                 where: { type: 'STAKED' },
-                data: { blockNumber: latestBlock },
+                data: { blockNumber: endBlock },
             }),
         ]);
     }
@@ -125,9 +127,10 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
     private async getAmountsForUsersWithBalanceChangesSinceStartBlock(
         masterChefAddress: string,
         startBlock: number,
+        endBlock: number,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
         const contract = getContractAt(masterChefAddress, MasterChefAbi);
-        const events = await contract.queryFilter({ address: masterChefAddress }, startBlock);
+        const events = await contract.queryFilter({ address: masterChefAddress }, startBlock, endBlock);
         const filteredEvents = events.filter((event) =>
             ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),
         );
