@@ -15,7 +15,7 @@ const resolvers: Resolvers = {
                 tokenPrice: tokenService.getPriceForToken(tokenPrices, balance.tokenAddress),
             }));
         },
-        userGetPoolInvestments: async (parent, { poolId }, context) => {
+        userGetPoolJoinExits: async (parent, { poolId }, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
             return userService.getUserPoolInvestments(accountAddress, poolId);
