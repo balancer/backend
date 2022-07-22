@@ -1,10 +1,12 @@
 import { balancerSdk } from './src/balancer-sdk';
-import { SwapTypes } from '@balancer-labs/sor';
 import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
 import { poolService } from '../pool/pool.service';
 import { oldBnum } from '../util/old-big-number';
+import axios from 'axios';
+import { SwapInfo } from '@balancer-labs/sdk';
+import { env } from '../../app/env';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -29,7 +31,19 @@ export class BalancerSorService {
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
-        const swapInfo = await balancerSdk.sor.getSwaps(
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(env.SOR_URL, {
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmountScaled,
+            swapOptions: {
+                maxPools: swapOptions.maxPools || 8,
+                forceRefresh: swapOptions.forceRefresh || false,
+            },
+        });
+        const swapInfo = data.swapInfo;
+
+        /*const swapInfo = await balancerSdk.sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType === 'EXACT_IN' ? SwapTypes.SwapExactIn : SwapTypes.SwapExactOut,
@@ -42,7 +56,7 @@ export class BalancerSorService {
                 boostedPools,
                 //TODO: support gas price and swap gas
             },
-        );
+        );*/
 
         const returnAmount = formatFixed(
             swapInfo.returnAmount,

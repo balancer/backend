@@ -33,6 +33,7 @@ export const schema = {
     YEARN_VAULTS_ENDPOINT: String,
     MASTERCHEF_ADDRESS: String,
     POOL_SYNC_INTERVAL_MS: String,
+    SOR_URL: String,
 };
 
 export const env: Env = load(schema, {
