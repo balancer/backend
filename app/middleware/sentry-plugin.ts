@@ -4,11 +4,13 @@ const plugin: ApolloServerPlugin<Express.Context> = {
     async requestDidStart({ request, context }) {
         if (request.operationName) {
             // set the transaction Name if we have named queries
+            //@ts-ignore
             context.transaction.setName(request.operationName);
         }
         return {
             async willSendResponse({ context }) {
                 // hook for transaction finished
+                //@ts-ignore
                 context.transaction.finish();
             },
             async executionDidStart() {
