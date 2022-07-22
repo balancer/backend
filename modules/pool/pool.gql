@@ -31,7 +31,7 @@ extend type Mutation {
     poolLoadOnChainDataForPoolsWithActiveUpdates: String!
     poolUpdateLiquidityValuesForAllPools: String!
     poolUpdateVolumeAndFeeValuesForAllPools: String!
-    poolSyncSwapsForLast24Hours: String!
+    poolSyncSwapsForLast48Hours: String!
     poolSyncSanityPoolData: String!
     poolUpdateAprs: String!
     poolSyncPoolAllTokensRelationship: String!
@@ -87,6 +87,9 @@ type GqlPoolDynamicData {
     volume24h: BigDecimal!
     fees24h: BigDecimal!
     apr: GqlPoolApr!
+
+    volume48h: BigDecimal!
+    fees48h: BigDecimal!
 }
 
 type GqlPoolInvestConfig {

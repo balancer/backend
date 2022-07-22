@@ -24,7 +24,6 @@ enum PrismaLastBlockSyncedCategory {
     FARMS
 }
 
-
 model PrismaFbeets {
     id                  String              @id
     ratio               String
@@ -110,6 +109,8 @@ model PrismaPoolDynamicData {
     volume24h           Float
     fees24h             Float
     apr                 Float               @default(0)
+    volume48h           Float               @default(0)
+    fees48h             Float               @default(0)
 }
 
 model PrismaPoolStableDynamicData {

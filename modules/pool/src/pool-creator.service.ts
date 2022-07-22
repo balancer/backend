@@ -166,6 +166,8 @@ export class PoolCreatorService {
                         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
                         volume24h: 0,
                         fees24h: 0,
+                        volume48h: 0,
+                        fees48h: 0,
                     },
                 },
             },

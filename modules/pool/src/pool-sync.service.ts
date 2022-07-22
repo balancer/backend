@@ -26,7 +26,7 @@ export class PoolSyncService {
                 console.log(`Syncing ${poolIds.size} pools`);
                 await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
 
-                const poolsWithNewSwaps = await poolService.syncSwapsForLast24Hours();
+                const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
                 await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
 
                 await prisma.prismaLastBlockSynced.upsert({

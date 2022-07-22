@@ -64,29 +64,39 @@ export class PoolUsdDataService {
      */
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]) {
         const yesterday = moment().subtract(1, 'day').unix();
+        const twoDaysAgo = moment().subtract(2, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
             where: poolIds ? { id: { in: poolIds } } : undefined,
             include: {
-                swaps: { where: { timestamp: { gte: yesterday } } },
+                swaps: { where: { timestamp: { gte: twoDaysAgo } } },
                 dynamicData: true,
             },
         });
         const operations: any[] = [];
 
         for (const pool of pools) {
-            const volume24h = _.sumBy(pool.swaps, (swap) =>
-                swap.tokenIn === pool.address || swap.tokenOut === pool.address ? 0 : swap.valueUSD,
+            const volume24h = _.sumBy(
+                pool.swaps.filter((swap) => swap.timestamp >= yesterday),
+                (swap) => (swap.tokenIn === pool.address || swap.tokenOut === pool.address ? 0 : swap.valueUSD),
             );
             const fees24h = parseFloat(pool.dynamicData?.swapFee || '0') * volume24h;
 
+            const volume48h = _.sumBy(pool.swaps, (swap) =>
+                swap.tokenIn === pool.address || swap.tokenOut === pool.address ? 0 : swap.valueUSD,
+            );
+            const fees48h = parseFloat(pool.dynamicData?.swapFee || '0') * volume48h;
+
             if (
                 pool.dynamicData &&
-                (pool.dynamicData.volume24h !== volume24h || pool.dynamicData.fees24h !== fees24h)
+                (pool.dynamicData.volume24h !== volume24h ||
+                    pool.dynamicData.fees24h !== fees24h ||
+                    pool.dynamicData.volume48h !== volume48h ||
+                    pool.dynamicData.fees48h !== fees48h)
             ) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
                         where: { id: pool.id },
-                        data: { volume24h, fees24h },
+                        data: { volume24h, fees24h, volume48h, fees48h },
                     }),
                 );
             }

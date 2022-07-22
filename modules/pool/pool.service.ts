@@ -129,7 +129,7 @@ export class PoolService {
 
         if (poolIds.length > 0) {
             await this.updateOnChainDataForPools(poolIds, blockNumber);
-            await this.syncSwapsForLast24Hours();
+            await this.syncSwapsForLast48Hours();
             await this.updateVolumeAndFeeValuesForPools(poolIds);
         }
 
@@ -174,10 +174,10 @@ export class PoolService {
         console.timeEnd('updateVolumeAndFeeValuesForPools');
     }
 
-    public async syncSwapsForLast24Hours(): Promise<string[]> {
-        console.time('syncSwapsForLast24Hours');
-        const poolIds = await this.poolSwapService.syncSwapsForLast24Hours();
-        console.timeEnd('syncSwapsForLast24Hours');
+    public async syncSwapsForLast48Hours(): Promise<string[]> {
+        console.time('syncSwapsForLast48Hours');
+        const poolIds = await this.poolSwapService.syncSwapsForLast48Hours();
+        console.timeEnd('syncSwapsForLast48Hours');
 
         return poolIds;
     }

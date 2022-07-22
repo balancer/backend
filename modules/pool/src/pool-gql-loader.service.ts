@@ -347,7 +347,7 @@ export class PoolGqlLoaderService {
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
-        const { fees24h, totalLiquidity, volume24h } = pool.dynamicData!;
+        const { fees24h, totalLiquidity, volume24h, fees48h, volume48h } = pool.dynamicData!;
         const aprItems = pool.aprItems || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
         const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
@@ -364,6 +364,8 @@ export class PoolGqlLoaderService {
             totalLiquidity: `${totalLiquidity}`,
             fees24h: `${fees24h}`,
             volume24h: `${volume24h}`,
+            fees48h: `${fees48h}`,
+            volume48h: `${volume48h}`,
             apr: {
                 total: `${_.sumBy(aprItems, 'apr')}`,
                 swapApr: `${_.sumBy(swapAprItems, 'apr')}`,

@@ -75,10 +75,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncSwapsForLast24Hours: async (parent, {}, context) => {
+        poolSyncSwapsForLast48Hours: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.syncSwapsForLast24Hours();
+            await poolService.syncSwapsForLast48Hours();
 
             return 'success';
         },

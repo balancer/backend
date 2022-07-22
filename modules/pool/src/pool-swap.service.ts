@@ -15,7 +15,7 @@ import {
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
-import _ from 'lodash';
+import _, { uniqBy } from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
 
@@ -143,15 +143,15 @@ export class PoolSwapService {
     }
 
     /**
-     * Syncs all swaps for the last 24 hours. We fetch the timestamp of the last stored swap to avoid
+     * Syncs all swaps for the last 48 hours. We fetch the timestamp of the last stored swap to avoid
      * duplicate effort. Return an array of poolIds with swaps added.
      */
-    public async syncSwapsForLast24Hours(): Promise<string[]> {
+    public async syncSwapsForLast48Hours(): Promise<string[]> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
-        const yesterday = moment().subtract(1, 'day').unix();
-        //ensure we only sync the last 24 hours worth of swaps
-        let timestamp = lastSwap && lastSwap.timestamp > yesterday ? lastSwap.timestamp : yesterday;
+        const twoDaysAgo = moment().subtract(2, 'day').unix();
+        //ensure we only sync the last 48 hours worth of swaps
+        let timestamp = lastSwap && lastSwap.timestamp > twoDaysAgo ? lastSwap.timestamp : twoDaysAgo;
         let hasMore = true;
         let skip = 0;
         const pageSize = 1000;
@@ -225,8 +225,8 @@ export class PoolSwapService {
             }
         }
 
-        await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
-        await prisma.prismaPoolBatchSwap.deleteMany({ where: { timestamp: { lt: yesterday } } });
+        await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: twoDaysAgo } } });
+        await prisma.prismaPoolBatchSwap.deleteMany({ where: { timestamp: { lt: twoDaysAgo } } });
 
         return Array.from(poolIds);
     }
