@@ -45,6 +45,7 @@ export interface NetworkConfig {
         address: string;
         excludedFarmIds: string[];
     };
+    avgBlockSpeed: number;
 }
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
@@ -89,6 +90,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '9', //old fidellio dueto (non fbeets)
             ],
         },
+        avgBlockSpeed: 1,
     },
 };
 

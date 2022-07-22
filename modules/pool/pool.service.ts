@@ -40,6 +40,7 @@ import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../util/ethers';
 import { configService, ConfigService } from '../config/config.service';
 import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -201,6 +202,10 @@ export class PoolService {
     public async realodAllPoolAprs() {
         await this.poolAprUpdaterService.realodAllPoolAprs();
     }
+
+    public async updateLiquidity24hAgoForAllPools() {
+        await this.poolUsdDataService.updateLiquidity24hAgoForAllPools();
+    }
 }
 
 export const poolService = new PoolService(
@@ -208,7 +213,7 @@ export const poolService = new PoolService(
     configService,
     new PoolCreatorService(userService),
     new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
-    new PoolUsdDataService(tokenService),
+    new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
     new PoolGqlLoaderService(configService),
     new PoolSanityDataLoaderService(),
     //TODO: this will depend on the chain

@@ -3,9 +3,15 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { TokenService } from '../../token/token.service';
+import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 export class PoolUsdDataService {
-    constructor(private readonly tokenService: TokenService) {}
+    constructor(
+        private readonly tokenService: TokenService,
+        private readonly blockSubgraphService: BlocksSubgraphService,
+        private readonly balancerSubgraphService: BalancerSubgraphService,
+    ) {}
 
     /**
      * Liquidity is dependent on token prices, so the values here are constantly in flux.
@@ -15,7 +21,6 @@ export class PoolUsdDataService {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const pools = await prisma.prismaPool.findMany({
             include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
-            //where: { dynamicData: { totalShares: { gt: '0.00000000001' } } },
         });
 
         const filtered = pools.filter((pool) => parseFloat(pool.dynamicData?.totalShares || '0') > 0.00000000001);
@@ -56,6 +61,42 @@ export class PoolUsdDataService {
         }
 
         await prisma.$transaction(updates);
+    }
+
+    public async updateLiquidity24hAgoForAllPools() {
+        const block24hAgo = await this.blockSubgraphService.getBlockFrom24HoursAgo();
+        const tokenPrices24hAgo = await this.tokenService.getTokenPriceFrom24hAgo();
+
+        const subgraphPools = await this.balancerSubgraphService.getAllPools(
+            { block: { number: parseInt(block24hAgo.number) } },
+            false,
+        );
+
+        let updates: any[] = [];
+
+        for (const pool of subgraphPools) {
+            const balanceUSDs = (pool.tokens || []).map((token) => ({
+                id: token.id,
+                balanceUSD:
+                    token.address === pool.address
+                        ? 0
+                        : parseFloat(token.balance || '0') *
+                          this.tokenService.getPriceForToken(tokenPrices24hAgo, token.address),
+            }));
+            const totalLiquidity = Math.max(
+                _.sumBy(balanceUSDs, (item) => item.balanceUSD),
+                0,
+            );
+
+            updates.push(
+                prisma.prismaPoolDynamicData.update({
+                    where: { id: pool.id },
+                    data: { totalLiquidity24hAgo: totalLiquidity },
+                }),
+            );
+        }
+
+        await prismaBulkExecuteOperations(updates);
     }
 
     /**

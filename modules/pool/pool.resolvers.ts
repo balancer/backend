@@ -145,6 +145,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolUpdateLiquidity24hAgoForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.updateLiquidity24hAgoForAllPools();
+
+            return 'success';
+        },
     },
 };
 

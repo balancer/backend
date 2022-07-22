@@ -195,7 +195,7 @@ export class BalancerSubgraphService {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', {
             ...args,
             where: {
-                totalShares_gt: applyTotalSharesFilter ? '0.00000000001' : undefined,
+                totalShares_not: applyTotalSharesFilter ? '0.00000000001' : undefined,
                 ...args.where,
             },
         });

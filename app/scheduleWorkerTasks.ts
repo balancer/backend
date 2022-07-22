@@ -130,6 +130,11 @@ export function scheduleWorkerTasks() {
         await tokenService.syncSanityData();
     });
 
+    //every 5 minutes
+    scheduleJob('*/5 * * * *', 'updateLiquidity24hAgoForAllPools', TEN_MINUTES_IN_MS, async () => {
+        await poolService.updateLiquidity24hAgoForAllPools();
+    });
+
     scheduleJob('*/5 * * * *', 'syncFbeetsRatio', ONE_MINUTE_IN_MS, async () => {
         await beetsService.syncFbeetsRatio();
     });
