@@ -20,8 +20,13 @@ export class UserService {
         return this.userBalanceService.getUserPoolBalances(address);
     }
 
-    public async getUserPoolInvestments(address: string, poolId: string): Promise<GqlPoolJoinExit[]> {
-        return this.poolSwapService.getUserJoinExitsForPool(address, poolId);
+    public async getUserPoolInvestments(
+        address: string,
+        poolId: string,
+        first?: number,
+        skip?: number,
+    ): Promise<GqlPoolJoinExit[]> {
+        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
