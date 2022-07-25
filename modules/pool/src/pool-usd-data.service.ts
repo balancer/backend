@@ -91,7 +91,7 @@ export class PoolUsdDataService {
             updates.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id: pool.id },
-                    data: { totalLiquidity24hAgo: totalLiquidity },
+                    data: { totalLiquidity24hAgo: totalLiquidity, totalShares24hAgo: pool.totalShares },
                 }),
             );
         }
