@@ -42,6 +42,9 @@ const balancerResolvers: Resolvers = {
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
         },
+        poolGetSnapshots: async (parent, { id, range }, context) => {
+            return poolService.getSnapshotsForPool(id, range);
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
@@ -149,6 +152,13 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.updateLiquidity24hAgoForAllPools();
+
+            return 'success';
+        },
+        poolLoadSnapshotsForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.loadSnapshotsForAllPools();
 
             return 'success';
         },

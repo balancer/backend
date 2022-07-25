@@ -10,6 +10,7 @@ import {
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
+    GqlPoolSnapshotDataRange,
     GqlPoolUnion,
     GqlPoolUserSwapVolume,
     QueryPoolGetBatchSwapsArgs,
@@ -41,6 +42,7 @@ import { jsonRpcProvider } from '../util/ethers';
 import { configService, ConfigService } from '../config/config.service';
 import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { PoolSnapshotService } from './src/pool-snapshot.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -57,6 +59,7 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolStakingService: PoolStakingService,
+        private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -103,6 +106,10 @@ export class PoolService {
         memCacheSetValue(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5);
 
         return featuredPoolGroups;
+    }
+
+    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -206,6 +213,25 @@ export class PoolService {
     public async updateLiquidity24hAgoForAllPools() {
         await this.poolUsdDataService.updateLiquidity24hAgoForAllPools();
     }
+
+    public async loadSnapshotsForAllPools() {
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true },
+            where: {
+                dynamicData: {
+                    totalSharesNum: {
+                        gt: 0.000000000001,
+                    },
+                },
+            },
+        });
+        const chunks = _.chunk(pools, 10);
+
+        for (const chunk of chunks) {
+            const poolIds = chunk.map((pool) => pool.id);
+            await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
+        }
+    }
 }
 
 export const poolService = new PoolService(
@@ -229,4 +255,5 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
     new MasterChefStakingService(masterchefService),
+    new PoolSnapshotService(balancerSubgraphService),
 );

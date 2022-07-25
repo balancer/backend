@@ -19,6 +19,7 @@ model PrismaPool {
     stableDynamicData   PrismaPoolStableDynamicData?
     linearDynamicData   PrismaPoolLinearDynamicData?
 
+    snapshots           PrismaPoolSnapshotData[]
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
     categories          PrismaPoolCategory[]
@@ -265,3 +266,21 @@ model PrismaPoolStakingMasterChefFarmRewarder {
     rewardPerSecond     String
 }
 
+
+model PrismaPoolSnapshotData {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    timestamp           Int
+
+    totalLiquidity      String
+    sharePrice          String
+    volume24h           String
+    fees24h             String
+    totalShares         String
+    totalSwapVolume     String
+    totalSwapFee        String
+    swapsCount          String
+    holdersCount        String
+    amounts             String[]
+}

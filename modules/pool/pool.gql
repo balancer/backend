@@ -22,6 +22,7 @@ extend type Query {
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetUserSwapVolume(first: Int, skip: Int, where: GqlUserSwapVolumeFilter): [GqlPoolUserSwapVolume!]!
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
+    poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
 }
 
 extend type Mutation {
@@ -40,6 +41,7 @@ extend type Mutation {
     poolReloadStakingForAllPools: String!
     poolSyncStakingForPools: String!
     poolUpdateLiquidity24hAgoForAllPools: String!
+    poolLoadSnapshotsForAllPools: String!
 }
 
 type GqlPoolMinimal {
@@ -618,4 +620,27 @@ type GqlFeaturePoolGroupItemExternalLink {
     image: String!
     buttonText: String!
     buttonUrl: String!
+}
+
+enum GqlPoolSnapshotDataRange {
+    THIRTY_DAYS
+    NINETY_DAYS
+    ONE_HUNDRED_EIGHTY_DAYS
+    ONE_YEAR
+    ALL_TIME
+}
+
+type GqlPoolSnapshot {
+    id: ID!
+    poolId: String!
+    timestamp: Int!
+    totalLiquidity: String!
+    volume24h: String!
+    fees24h: String!
+    totalShares: String!
+    totalSwapVolume: String!
+    totalSwapFee: String!
+    swapsCount: String!
+    holdersCount: String!
+    amounts: [String!]!
 }
