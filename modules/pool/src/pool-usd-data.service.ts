@@ -145,4 +145,46 @@ export class PoolUsdDataService {
 
         await prismaBulkExecuteOperations(operations);
     }
+
+    public async updateLifetimeValuesForAllPools() {
+        let updates: any[] = [];
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({});
+        const snapshotMinMaxs = await prisma.prismaPoolSnapshot.groupBy({
+            by: ['poolId'],
+            _min: { sharePrice: true, totalLiquidity: true, volume24h: true, fees24h: true },
+            _max: { sharePrice: true, totalLiquidity: true, volume24h: true, fees24h: true },
+        });
+
+        const stakedUsers = await prisma.prismaUserStakedBalance.groupBy({
+            by: ['poolId'],
+            _count: { userAddress: true },
+        });
+
+        for (const pool of subgraphPools) {
+            const snapshotMinMax = snapshotMinMaxs.find((snapshot) => snapshot.poolId === pool.id);
+            const staked = stakedUsers.find((stakedUser) => stakedUser.poolId === pool.id);
+
+            updates.push(
+                prisma.prismaPoolDynamicData.update({
+                    where: { id: pool.id },
+                    data: {
+                        lifetimeVolume: parseFloat(pool.totalSwapVolume),
+                        lifetimeSwapFees: parseFloat(pool.totalSwapFee),
+                        holdersCount: parseInt(pool.holdersCount) + (staked?._count.userAddress || 0),
+                        swapsCount: parseInt(pool.swapsCount),
+                        sharePriceAth: snapshotMinMax?._max.sharePrice || 0,
+                        sharePriceAtl: snapshotMinMax?._min.sharePrice || 0,
+                        totalLiquidityAth: snapshotMinMax?._max.totalLiquidity || 0,
+                        totalLiquidityAtl: snapshotMinMax?._min.totalLiquidity || 0,
+                        volume24hAth: snapshotMinMax?._max.volume24h || 0,
+                        volume24hAtl: snapshotMinMax?._min.volume24h || 0,
+                        fees24hAth: snapshotMinMax?._max.fees24h || 0,
+                        fees24hAtl: snapshotMinMax?._min.fees24h || 0,
+                    },
+                }),
+            );
+        }
+
+        await prismaBulkExecuteOperations(updates);
+    }
 }

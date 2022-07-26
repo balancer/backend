@@ -50,7 +50,7 @@ model PrismaPool {
     stableDynamicData   PrismaPoolStableDynamicData?
     linearDynamicData   PrismaPoolLinearDynamicData?
 
-    snapshots           PrismaPoolSnapshotData[]
+    snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
     categories          PrismaPoolCategory[]
@@ -114,6 +114,18 @@ model PrismaPoolDynamicData {
     fees48h             Float               @default(0)
     totalLiquidity24hAgo Float              @default(0)
     totalShares24hAgo   String              @default("0")
+    lifetimeVolume      Float               @default(0)
+    lifetimeSwapFees    Float               @default(0)
+    holdersCount        Int                 @default(0)
+    swapsCount          Int                 @default(0)
+    sharePriceAth       Float               @default(0)
+    sharePriceAtl       Float               @default(0)
+    totalLiquidityAth   Float               @default(0)
+    totalLiquidityAtl   Float               @default(0)
+    volume24hAth        Float               @default(0)
+    volume24hAtl        Float               @default(0)
+    fees24hAth          Float               @default(0)
+    fees24hAtl          Float               @default(0)
 }
 
 model PrismaPoolStableDynamicData {
@@ -298,21 +310,22 @@ model PrismaPoolStakingMasterChefFarmRewarder {
 }
 
 
-model PrismaPoolSnapshotData {
+model PrismaPoolSnapshot {
     id                  String              @id
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     timestamp           Int
 
-    totalLiquidity      String
-    sharePrice          String
-    volume24h           String
-    fees24h             String
+    totalLiquidity      Float
+    sharePrice          Float
+    volume24h           Float
+    fees24h             Float
     totalShares         String
-    totalSwapVolume     String
-    totalSwapFee        String
-    swapsCount          String
-    holdersCount        String
+    totalSharesNum      Float
+    totalSwapVolume     Float
+    totalSwapFee        Float
+    swapsCount          Int
+    holdersCount        Int
     amounts             String[]
 }
 
