@@ -347,8 +347,27 @@ export class PoolGqlLoaderService {
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
-        const { fees24h, totalLiquidity, volume24h, fees48h, volume48h, totalLiquidity24hAgo, totalShares24hAgo } =
-            pool.dynamicData!;
+        const {
+            fees24h,
+            totalLiquidity,
+            volume24h,
+            fees48h,
+            volume48h,
+            totalLiquidity24hAgo,
+            totalShares24hAgo,
+            lifetimeVolume,
+            lifetimeSwapFees,
+            holdersCount,
+            swapsCount,
+            sharePriceAth,
+            sharePriceAtl,
+            totalLiquidityAth,
+            totalLiquidityAtl,
+            volume24hAtl,
+            volume24hAth,
+            fees24hAtl,
+            fees24hAth,
+        } = pool.dynamicData!;
         const aprItems = pool.aprItems || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
         const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
@@ -369,6 +388,18 @@ export class PoolGqlLoaderService {
             volume24h: `${volume24h}`,
             fees48h: `${fees48h}`,
             volume48h: `${volume48h}`,
+            lifetimeVolume: `${lifetimeVolume}`,
+            lifetimeSwapFees: `${lifetimeSwapFees}`,
+            holdersCount: `${holdersCount}`,
+            swapsCount: `${swapsCount}`,
+            sharePriceAth: `${sharePriceAth}`,
+            sharePriceAtl: `${sharePriceAtl}`,
+            totalLiquidityAth: `${totalLiquidityAth}`,
+            totalLiquidityAtl: `${totalLiquidityAtl}`,
+            volume24hAtl: `${volume24hAtl}`,
+            volume24hAth: `${volume24hAth}`,
+            fees24hAtl: `${fees24hAtl}`,
+            fees24hAth: `${fees24hAth}`,
             apr: {
                 total: `${_.sumBy(aprItems, 'apr')}`,
                 swapApr: `${_.sumBy(swapAprItems, 'apr')}`,

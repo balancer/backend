@@ -236,6 +236,10 @@ export class PoolService {
     public async syncLatestSnapshotsForAllPools(daysToSync?: number) {
         await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
     }
+
+    public async updateLifetimeValuesForAllPools() {
+        await this.poolUsdDataService.updateLifetimeValuesForAllPools();
+    }
 }
 
 export const poolService = new PoolService(

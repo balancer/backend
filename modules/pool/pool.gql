@@ -43,6 +43,7 @@ extend type Mutation {
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
     poolSyncLatestSnapshotsForAllPools: String!
+    poolUpdateLifetimeValuesForAllPools: String!
 }
 
 type GqlPoolMinimal {
@@ -96,6 +97,19 @@ type GqlPoolDynamicData {
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+
+    lifetimeVolume: BigDecimal!
+    lifetimeSwapFees: BigDecimal!
+    holdersCount: BigInt!
+    swapsCount: BigInt!
+    sharePriceAth: BigDecimal!
+    sharePriceAtl: BigDecimal!
+    totalLiquidityAth: BigDecimal!
+    totalLiquidityAtl: BigDecimal!
+    volume24hAth: BigDecimal!
+    volume24hAtl: BigDecimal!
+    fees24hAth: BigDecimal!
+    fees24hAtl: BigDecimal!
 }
 
 type GqlPoolInvestConfig {

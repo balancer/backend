@@ -169,8 +169,13 @@ export function scheduleWorkerTasks() {
     });
 
     //once an hour at minute 1
-    scheduleJob('1 * * * *', 'cache-protocol-data', TWO_MINUTES_IN_MS, async () => {
+    scheduleJob('1 * * * *', 'syncLatestSnapshotsForAllPools', TEN_MINUTES_IN_MS, async () => {
         await poolService.syncLatestSnapshotsForAllPools();
+    });
+
+    //every 20 minutes
+    scheduleJob('*/20 * * * *', 'updateLifetimeValuesForAllPools', TEN_MINUTES_IN_MS, async () => {
+        await poolService.updateLifetimeValuesForAllPools();
     });
 
     /*

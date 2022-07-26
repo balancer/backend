@@ -43,7 +43,19 @@ const balancerResolvers: Resolvers = {
             return poolService.getFeaturedPoolGroups();
         },
         poolGetSnapshots: async (parent, { id, range }, context) => {
-            return poolService.getSnapshotsForPool(id, range);
+            const snapshots = await poolService.getSnapshotsForPool(id, range);
+
+            return snapshots.map((snapshot) => ({
+                ...snapshot,
+                totalLiquidity: `${snapshot.totalLiquidity}`,
+                sharePrice: `${snapshot.sharePrice}`,
+                volume24h: `${snapshot.volume24h}`,
+                fees24h: `${snapshot.fees24h}`,
+                totalSwapVolume: `${snapshot.totalSwapVolume}`,
+                totalSwapFee: `${snapshot.totalSwapFee}`,
+                swapsCount: `${snapshot.swapsCount}`,
+                holdersCount: `${snapshot.holdersCount}`,
+            }));
         },
     },
     Mutation: {
@@ -166,6 +178,13 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.syncLatestSnapshotsForAllPools();
+
+            return 'success';
+        },
+        poolUpdateLifetimeValuesForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.updateLifetimeValuesForAllPools();
 
             return 'success';
         },
