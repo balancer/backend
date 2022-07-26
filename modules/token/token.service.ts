@@ -132,6 +132,10 @@ export class TokenService {
         return prisma.prismaTokenData.findUnique({ where: { tokenAddress } });
     }
 
+    public async getTokensData(tokenAddresses: string[]): Promise<PrismaTokenData[]> {
+        return prisma.prismaTokenData.findMany({ where: { tokenAddress: { in: tokenAddresses } } });
+    }
+
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
         return memCacheGetValueAndCacheIfNeeded(
             TOKEN_PRICES_CACHE_KEY,

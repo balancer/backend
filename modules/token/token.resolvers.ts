@@ -84,6 +84,9 @@ const resolvers: Resolvers = {
         tokenGetTokenData: async (parent, { address }, context) => {
             return tokenService.getTokenData(address);
         },
+        tokenGetTokensData: async (parent, { addresses }, context) => {
+            return tokenService.getTokensData(addresses);
+        },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {
