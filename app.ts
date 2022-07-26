@@ -21,7 +21,9 @@ import GraphQLJSON from 'graphql-type-json';
 
 async function startServer() {
     //need to open the redis connection prior to adding the rate limit middleware
-    await redis.connect();
+    if (env.CHAIN_SLUG === 'fantom') {
+        await redis.connect();
+    }
 
     const app = createExpressApp();
 
