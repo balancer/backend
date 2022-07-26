@@ -215,6 +215,7 @@ export class PoolService {
     }
 
     public async loadSnapshotsForAllPools() {
+        await prisma.prismaPoolSnapshot.deleteMany({});
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
             where: {
