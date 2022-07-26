@@ -92,6 +92,49 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         avgBlockSpeed: 1,
     },
+    '10': {
+        eth: {
+            address: '0x4200000000000000000000000000000000000006',
+            addressFormatted: '0x4200000000000000000000000000000000000006',
+            symbol: 'ETH',
+            name: 'Ether',
+        },
+        weth: {
+            address: '0x4200000000000000000000000000000000000006',
+            addressFormatted: '0x4200000000000000000000000000000000000006',
+        },
+        coingecko: {
+            nativeAssetId: 'ethereum',
+            platformId: 'optimism',
+        },
+        rpcUrl: 'https://mainnet.optimism.io/',
+        sanity: {
+            projectId: '1g2ag2hb',
+            dataset: 'production',
+        },
+        beets: {
+            address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
+        },
+        fbeets: {
+            address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
+            farmId: '22',
+            poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
+        },
+        balancer: {
+            vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        },
+        multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+        masterchef: {
+            address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
+            excludedFarmIds: [
+                '34', //OHM bonding farm
+                '28', //OHM bonding farm
+                '9', //old fidellio dueto (non fbeets)
+            ],
+        },
+        avgBlockSpeed: 1,
+    },
 };
 
 export const networkConfig = AllNetworkConfigs[env.CHAIN_ID];
