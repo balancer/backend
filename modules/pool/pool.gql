@@ -102,14 +102,26 @@ type GqlPoolDynamicData {
     lifetimeSwapFees: BigDecimal!
     holdersCount: BigInt!
     swapsCount: BigInt!
+
     sharePriceAth: BigDecimal!
+    sharePriceAthTimestamp: Int!
     sharePriceAtl: BigDecimal!
+    sharePriceAtlTimestamp: Int!
+
     totalLiquidityAth: BigDecimal!
+    totalLiquidityAthTimestamp: Int!
     totalLiquidityAtl: BigDecimal!
+    totalLiquidityAtlTimestamp: Int!
+
     volume24hAth: BigDecimal!
+    volume24hAthTimestamp: Int!
     volume24hAtl: BigDecimal!
+    volume24hAtlTimestamp: Int!
+
     fees24hAth: BigDecimal!
+    fees24hAthTimestamp: Int!
     fees24hAtl: BigDecimal!
+    fees24hAtlTimestamp: Int!
 }
 
 type GqlPoolInvestConfig {
