@@ -168,6 +168,11 @@ export function scheduleWorkerTasks() {
         await beetsService.cacheProtocolData();
     });
 
+    //once an hour at minute 1
+    scheduleJob('1 * * * *', 'cache-protocol-data', TWO_MINUTES_IN_MS, async () => {
+        await poolService.syncLatestSnapshotsForAllPools();
+    });
+
     /*
     //every five minutes
     scheduleJob(

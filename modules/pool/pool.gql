@@ -42,6 +42,7 @@ extend type Mutation {
     poolSyncStakingForPools: String!
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
+    poolSyncLatestSnapshotsForAllPools: String!
 }
 
 type GqlPoolMinimal {

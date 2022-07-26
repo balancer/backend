@@ -232,6 +232,10 @@ export class PoolService {
             await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
         }
     }
+
+    public async syncLatestSnapshotsForAllPools(daysToSync?: number) {
+        await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
+    }
 }
 
 export const poolService = new PoolService(

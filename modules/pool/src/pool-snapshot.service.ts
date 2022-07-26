@@ -1,11 +1,13 @@
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { prisma } from '../../util/prisma-client';
 import {
+    BalancerPoolSnapshotFragment,
     OrderDirection,
     PoolSnapshot_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { GqlPoolSnapshotDataRange } from '../../../schema';
 import moment from 'moment-timezone';
+import _ from 'lodash';
 
 export class PoolSnapshotService {
     constructor(private readonly balancerSubgraphService: BalancerSubgraphService) {}
@@ -19,13 +21,32 @@ export class PoolSnapshotService {
         });
     }
 
+    //TODO: this could be optimized, currently we just reload all snapshots for the last two days
+    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
+        const twoDaysAgo = moment().subtract(daysToSync, 'day').unix();
+
+        const snapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
+            where: { timestamp_gte: twoDaysAgo },
+            orderBy: PoolSnapshot_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Asc,
+        });
+
+        await this.createSnapshotRecords(snapshots);
+    }
+
     public async loadAllSnapshotsForPools(poolIds: string[]) {
         //assuming the pool does not have more than 5,000 snapshots, we should be ok.
-        const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
+        const snapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { pool_in: poolIds },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
+
+        await this.createSnapshotRecords(snapshots);
+    }
+
+    private async createSnapshotRecords(allSnapshots: BalancerPoolSnapshotFragment[]) {
+        const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
 
         for (const poolId of poolIds) {
             const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === poolId);
