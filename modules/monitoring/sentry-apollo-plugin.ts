@@ -5,10 +5,13 @@ import { Context } from '../../app/Context';
 
 export const sentryPlugin: ApolloServerPlugin<Context> = {
     async requestDidStart({ request, context }) {
-        const name = request.query
-            ?.substring(request.query?.indexOf('{') + 1, request.query?.indexOf('(') || request.query?.length)
-            .replace(/\n/g, '')
-            .replace(/\s/g, '');
+        let name = request.operationName;
+        if (!name) {
+            name = request.query
+                ?.substring(request.query?.indexOf('{') + 1, request.query?.indexOf('(') || request.query?.length)
+                .replace(/\n/g, '')
+                .replace(/\s/g, '');
+        }
 
         context.transaction.setName(name || 'gql');
         return {

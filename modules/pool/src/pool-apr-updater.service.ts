@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { prisma } from '../../util/prisma-client';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
@@ -15,6 +16,7 @@ export class PoolAprUpdaterService {
                 await aprService.updateAprForPools(pools);
             } catch (e) {
                 console.log(`Error during APR update of aprService:`, e);
+                Sentry.captureException(e);
             }
         }
 

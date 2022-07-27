@@ -22,9 +22,9 @@ import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from './modules/util/prisma-client';
 import { sentryPlugin } from './modules/monitoring/sentry-apollo-plugin';
+import { startWorker } from './worker';
 
 async function startServer() {
-    //need to open the redis connection prior to adding the rate limit middleware
     if (env.CHAIN_SLUG === 'fantom') {
         await redis.connect();
     }
@@ -109,20 +109,20 @@ async function startServer() {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
     } else {
-        if (process.env.WORKER === 'true') {
-            try {
-                scheduleWorkerTasks();
-            } catch (e) {
-                console.log(`Fatal error happened during cron scheduling.`, e);
-            }
-        } else {
-            scheduleMainTasks();
-        }
+        // if (process.env.WORKER === 'true') {
+        //     try {
+        //         scheduleWorkerTasks();
+        //     } catch (e) {
+        //         console.log(`Fatal error happened during cron scheduling.`, e);
+        //     }
+        // } else {
+        scheduleMainTasks();
+        // }
     }
 }
 
-//
-startServer().finally(async () => {
-    //await prisma.$disconnect();
-    //await redis.disconnect();
-});
+if (process.env.WORKER === 'true') {
+    startWorker();
+} else {
+    startServer();
+}
