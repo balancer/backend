@@ -24,7 +24,13 @@ export function startWorker() {
     app.use(Sentry.Handlers.tracingHandler());
 
     addWorkerRoutes(app);
-    app.use(Sentry.Handlers.errorHandler());
+    app.use(
+        Sentry.Handlers.errorHandler({
+            shouldHandleError(): boolean {
+                return true;
+            },
+        }),
+    );
 
     app.listen(env.PORT, () => {
         console.log(`Worker listening on port ${env.PORT}`);
