@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import cron from 'node-cron';
 import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
@@ -37,7 +38,8 @@ function scheduleJob(
     runOnStartup: boolean = false,
 ) {
     if (runOnStartup) {
-        func().catch(() => {
+        func().catch((error) => {
+            Sentry.captureException(error, (scope) => scope.setContext(taskName, { isStartup: true }));
             console.log(`error on initial run ${taskName}`);
         });
     }
@@ -49,18 +51,24 @@ function scheduleJob(
             return;
         }
 
-        try {
+        const transaction = Sentry.startTransaction({ name: taskName });
+        Sentry.withScope((scope) => {
+            scope.setSpan(transaction);
             running = true;
             console.log(`Start ${taskName}...`);
             console.time(taskName);
-            await asyncCallWithTimeout(func, timeout);
-            console.log(`${taskName} done`);
-        } catch (e) {
-            console.log(`Error ${taskName}`, e);
-        } finally {
-            console.timeEnd(taskName);
-            running = false;
-        }
+            asyncCallWithTimeout(func, timeout)
+                .catch((error) => {
+                    console.log(`Error ${taskName}`, error);
+                    Sentry.captureException(error);
+                })
+                .finally(() => {
+                    running = false;
+                    transaction.finish();
+                    console.timeEnd(taskName);
+                    console.log(`${taskName} done`);
+                });
+        });
     });
 }
 
@@ -74,19 +82,24 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
                 console.log(`${taskName} already running, skipping call...`);
                 return;
             }
+            const transaction = Sentry.startTransaction({ name: taskName });
+            Sentry.withScope((scope) => {
+                scope.setSpan(transaction);
 
-            try {
                 running = true;
                 console.log(`Start ${taskName}...`);
                 console.time(taskName);
-                await asyncCallWithTimeout(listener, timeout);
-                console.log(`${taskName} done`);
-            } catch (e) {
-                console.log(`Error ${taskName}`, e);
-            } finally {
-                console.timeEnd(taskName);
-                running = false;
-            }
+                asyncCallWithTimeout(listener, timeout)
+                    .catch((error) => {
+                        console.log(`Error ${taskName}`, error);
+                        Sentry.captureException(error);
+                    })
+                    .finally(() => {
+                        transaction.finish();
+                        running = false;
+                        console.timeEnd(taskName);
+                    });
+            });
         }, 250),
     );
 }
@@ -270,7 +283,7 @@ export function scheduleWorkerTasks() {
 
     console.log('start pool sync');
 
-    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), async () => {
+    runWithMinimumInterval('syncChangedPools', Number(env.POOL_SYNC_INTERVAL_MS), async () => {
         await poolService.syncChangedPools();
     }).catch((error) => console.log('Error starting syncChangedPools...', error));
 
