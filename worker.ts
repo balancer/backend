@@ -27,6 +27,6 @@ export function startWorker() {
     app.use(Sentry.Handlers.errorHandler());
 
     app.listen(env.PORT, () => {
-        console.log(`Example app listening on port ${env.PORT}`);
+        console.log(`Worker listening on port ${env.PORT}`);
     });
 }
