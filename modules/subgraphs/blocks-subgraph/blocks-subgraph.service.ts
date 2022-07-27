@@ -17,10 +17,10 @@ import {
     secondsPerYear,
 } from '../../util/time';
 import { subgraphLoadAll } from '../../util/subgraph-util';
-import { cache } from '../../cache/cache';
 import moment from 'moment-timezone';
 import { memCacheGetValue, memCacheSetValue } from '../../util/mem-cache';
 import { networkConfig } from '../../config/network-config';
+import { Cache, CacheClass } from 'memory-cache';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
@@ -32,14 +32,16 @@ const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 };*/
 
 export class BlocksSubgraphService {
+    private cache: CacheClass<string, any>;
     private readonly client: GraphQLClient;
 
     constructor() {
+        this.cache = new Cache<string, any>();
         this.client = new GraphQLClient(env.BLOCKS_SUBGRAPH);
     }
 
     public async getAverageBlockTime(): Promise<number> {
-        const avgBlockTime = await cache.getValue(AVG_BLOCK_TIME_CACHE_PREFIX);
+        const avgBlockTime = await this.cache.get(AVG_BLOCK_TIME_CACHE_PREFIX);
 
         if (avgBlockTime !== null) {
             return parseFloat(avgBlockTime);
@@ -88,7 +90,7 @@ export class BlocksSubgraphService {
             timestamp = parseInt(block.timestamp);
         }
 
-        await cache.putValue(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime / blocks.length}`);
+        await this.cache.put(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime / blocks.length}`);
 
         return averageBlockTime / blocks.length;
     }
@@ -213,9 +215,7 @@ export class BlocksSubgraphService {
             },
         };
 
-        const cacheResult = await cache.getObjectValue<BlockFragment[]>(
-            `${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`,
-        );
+        const cacheResult: BlockFragment[] = await this.cache.get(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`);
 
         if (cacheResult) {
             return cacheResult;
@@ -236,7 +236,7 @@ export class BlocksSubgraphService {
             }
         }
 
-        await cache.putObjectValue(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, oneDayInMinutes);
+        await this.cache.put(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, oneDayInMinutes);
 
         return blocks;
     }
