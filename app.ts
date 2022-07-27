@@ -18,7 +18,6 @@ import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
-import './modules/monitoring/sentry';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from './modules/util/prisma-client';
