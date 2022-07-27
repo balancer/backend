@@ -8,6 +8,8 @@ import {
 import { GqlPoolSnapshotDataRange } from '../../../schema';
 import moment from 'moment-timezone';
 import _ from 'lodash';
+import { PrismaPoolSnapshot } from '@prisma/client';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export class PoolSnapshotService {
     constructor(private readonly balancerSubgraphService: BalancerSubgraphService) {}
@@ -23,67 +25,89 @@ export class PoolSnapshotService {
 
     //TODO: this could be optimized, currently we just reload all snapshots for the last two days
     public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
+        let operations: any[] = [];
         const twoDaysAgo = moment().subtract(daysToSync, 'day').unix();
 
-        const snapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
+        const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { timestamp_gte: twoDaysAgo },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
 
-        await this.createSnapshotRecords(snapshots);
+        const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
+
+        for (const poolId of poolIds) {
+            const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === poolId);
+
+            const poolOperations = snapshots.map((snapshot, index) => {
+                const prevTotalSwapVolume = index > 0 ? snapshots[index - 1].totalSwapVolume : '0';
+                const prevTotalSwapFee = index > 0 ? snapshots[index - 1].totalSwapFee : '0';
+                const data = this.getPrismaPoolSnapshotFromSubgraphData(
+                    snapshot,
+                    prevTotalSwapVolume,
+                    prevTotalSwapFee,
+                );
+
+                return prisma.prismaPoolSnapshot.upsert({
+                    where: { id: snapshot.id },
+                    create: data,
+                    update: data,
+                });
+            });
+
+            operations = [...operations, ...poolOperations];
+        }
+
+        await prismaBulkExecuteOperations(operations);
     }
 
     public async loadAllSnapshotsForPools(poolIds: string[]) {
         //assuming the pool does not have more than 5,000 snapshots, we should be ok.
-        const snapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
+        const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { pool_in: poolIds },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
-
-        await this.createSnapshotRecords(snapshots);
-    }
-
-    private async createSnapshotRecords(allSnapshots: BalancerPoolSnapshotFragment[]) {
-        const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
 
         for (const poolId of poolIds) {
             const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === poolId);
 
             await prisma.prismaPoolSnapshot.createMany({
                 data: snapshots.map((snapshot, index) => {
-                    const totalLiquidity = parseFloat(snapshot.totalLiquidity);
-                    const totalShares = parseFloat(snapshot.totalShares);
+                    const prevTotalSwapVolume = index > 0 ? snapshots[index - 1].totalSwapVolume : '0';
+                    const prevTotalSwapFee = index > 0 ? snapshots[index - 1].totalSwapFee : '0';
 
-                    return {
-                        id: snapshot.id,
-                        poolId,
-                        timestamp: snapshot.timestamp,
-                        totalLiquidity: parseFloat(snapshot.totalLiquidity),
-                        totalShares: snapshot.totalShares,
-                        totalSharesNum: parseFloat(snapshot.totalShares),
-                        totalSwapVolume: parseFloat(snapshot.totalSwapVolume),
-                        totalSwapFee: parseFloat(snapshot.totalSwapFee),
-                        swapsCount: parseInt(snapshot.swapsCount),
-                        holdersCount: parseInt(snapshot.holdersCount),
-                        amounts: snapshot.amounts,
-                        volume24h: Math.max(
-                            parseFloat(snapshot.totalSwapVolume) -
-                                parseFloat(index > 0 ? snapshots[index - 1].totalSwapVolume : '0'),
-                            0,
-                        ),
-                        fees24h: Math.max(
-                            parseFloat(snapshot.totalSwapFee) -
-                                parseFloat(index > 0 ? snapshots[index - 1].totalSwapFee : '0'),
-                            0,
-                        ),
-                        sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
-                    };
+                    return this.getPrismaPoolSnapshotFromSubgraphData(snapshot, prevTotalSwapVolume, prevTotalSwapFee);
                 }),
                 skipDuplicates: true,
             });
         }
+    }
+
+    private getPrismaPoolSnapshotFromSubgraphData(
+        snapshot: BalancerPoolSnapshotFragment,
+        prevTotalSwapVolume: string,
+        prevTotalSwapFee: string,
+    ): PrismaPoolSnapshot {
+        const totalLiquidity = parseFloat(snapshot.totalLiquidity);
+        const totalShares = parseFloat(snapshot.totalShares);
+
+        return {
+            id: snapshot.id,
+            poolId: snapshot.pool.id,
+            timestamp: snapshot.timestamp,
+            totalLiquidity: parseFloat(snapshot.totalLiquidity),
+            totalShares: snapshot.totalShares,
+            totalSharesNum: parseFloat(snapshot.totalShares),
+            totalSwapVolume: parseFloat(snapshot.totalSwapVolume),
+            totalSwapFee: parseFloat(snapshot.totalSwapFee),
+            swapsCount: parseInt(snapshot.swapsCount),
+            holdersCount: parseInt(snapshot.holdersCount),
+            amounts: snapshot.amounts,
+            volume24h: Math.max(parseFloat(snapshot.totalSwapVolume) - parseFloat(prevTotalSwapVolume), 0),
+            fees24h: Math.max(parseFloat(snapshot.totalSwapFee) - parseFloat(prevTotalSwapFee), 0),
+            sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
+        };
     }
 
     private getTimestampForRange(range: GqlPoolSnapshotDataRange): number {
