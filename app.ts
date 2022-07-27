@@ -36,7 +36,7 @@ async function startServer() {
         dsn: env.SENTRY_DSN,
         tracesSampleRate: 1,
         environment: env.NODE_ENV,
-        // enabled: env.NODE_ENV === 'production',
+        enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
