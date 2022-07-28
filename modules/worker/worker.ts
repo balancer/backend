@@ -1,9 +1,10 @@
 import createExpressApp from 'express';
 import * as Sentry from '@sentry/node';
-import { env } from './app/env';
+import { env } from '../../app/env';
 import * as Tracing from '@sentry/tracing';
-import { prisma } from './modules/util/prisma-client';
-import { addWorkerRoutes } from './app/scheduleWorkerTasks';
+import { prisma } from '../util/prisma-client';
+import { configureWorkerRoutes } from './job-handlers';
+import { scheduleManualJobs } from './manual-jobs';
 
 export function startWorker() {
     const app = createExpressApp();
@@ -23,7 +24,7 @@ export function startWorker() {
     app.use(Sentry.Handlers.requestHandler());
     app.use(Sentry.Handlers.tracingHandler());
 
-    addWorkerRoutes(app);
+    configureWorkerRoutes(app);
     app.use(
         Sentry.Handlers.errorHandler({
             shouldHandleError(): boolean {
@@ -31,6 +32,8 @@ export function startWorker() {
             },
         }),
     );
+
+    scheduleManualJobs();
 
     app.listen(env.PORT, () => {
         console.log(`Worker listening on port ${env.PORT}`);
