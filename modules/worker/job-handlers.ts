@@ -15,10 +15,22 @@ export function configureWorkerRoutes(app: Express) {
         const job = req.body as WorkerJob;
         console.log('Received manual job', job);
         Sentry.configureScope((scope) => scope.setTransactionName(`POST /${job.type} - manual`));
-        switch (job.type) {
-            case 'sync-pools':
-                await poolService.syncChangedPools();
-                break;
+        try {
+            switch (job.type) {
+                case 'sync-pools':
+                    await poolService.syncChangedPools();
+                    break;
+                case 'user-sync-wallet-balances-for-all-pools':
+                    await userService.syncWalletBalancesForAllPools();
+                    break;
+                case 'user-sync-staked-balances':
+                    await userService.syncStakedBalances();
+                    break;
+                default:
+                    throw new Error(`Unhandled job type ${job.type}`);
+            }
+        } catch (error) {
+            next(error);
         }
     });
 
