@@ -6,7 +6,7 @@ import { PrismaPoolStaking, PrismaPoolSwap } from '@prisma/client';
 import { PoolSwapService } from '../pool/src/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { GqlPoolJoinExit } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
 
 export class UserService {
     constructor(
@@ -29,12 +29,7 @@ export class UserService {
         return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
     }
 
-    public async getUserSwaps(
-        address: string,
-        poolId: string,
-        first?: number,
-        skip?: number,
-    ): Promise<PrismaPoolSwap[]> {
+    public async getUserSwaps(address: string, poolId: string, first?: number, skip?: number): Promise<GqlPoolSwap[]> {
         return this.poolSwapService.getUserSwapsForPool(address, poolId, first, skip);
     }
 

@@ -9,6 +9,7 @@ import { tokenService, TokenService } from '../../token/token.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     GqlPoolJoinExit,
+    GqlPoolSwap,
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetSwapsArgs,
@@ -92,16 +93,30 @@ export class PoolSwapService {
         poolId: string,
         first = 10,
         skip = 0,
-    ): Promise<PrismaPoolSwap[]> {
-        return prisma.prismaPoolSwap.findMany({
-            take: first,
-            skip: skip,
+    ): Promise<GqlPoolSwap[]> {
+        const result = await this.balancerSubgraphService.getSwaps({
+            first,
+            skip,
             where: {
                 poolId,
                 userAddress,
             },
-            orderBy: { timestamp: 'desc' },
+            orderBy: Swap_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Desc,
         });
+
+        return result.swaps.map((swap) => ({
+            id: swap.id,
+            userAddress,
+            poolId: swap.poolId.id,
+            tokenIn: swap.tokenIn,
+            tokenAmountIn: swap.tokenAmountIn,
+            tokenOut: swap.tokenOut,
+            tokenAmountOut: swap.tokenAmountOut,
+            valueUSD: parseFloat(swap.valueUSD),
+            timestamp: swap.timestamp,
+            tx: swap.tx,
+        }));
     }
 
     public async getBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
