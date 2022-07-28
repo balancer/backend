@@ -6,14 +6,14 @@ export type WorkerJob = {
     type: WokerJobType;
 };
 
-async function scheduleJobWithMinimumInterval(job: WokerJobType, minIntervalMs: number): Promise<void> {
-    await workerQueue.sendWithMinimumInterval(JSON.stringify({ type: job }), minIntervalMs, job);
+async function scheduleJobWithInterval(job: WokerJobType, intervalMs: number): Promise<void> {
+    await workerQueue.sendWithInterval(JSON.stringify({ type: job }), intervalMs);
 }
 
 // all jobs requiring manual scheduling will be handled here (e.g. sub minute crons)
 
 export async function scheduleManualJobs(): Promise<void> {
-    await scheduleJobWithMinimumInterval('sync-pools', 10000);
-    await scheduleJobWithMinimumInterval('user-sync-wallet-balances-for-all-pools', 5000);
-    await scheduleJobWithMinimumInterval('user-sync-staked-balances', 5000);
+    await scheduleJobWithInterval('sync-pools', 15000);
+    await scheduleJobWithInterval('user-sync-wallet-balances-for-all-pools', 5000);
+    await scheduleJobWithInterval('user-sync-staked-balances', 5000);
 }
