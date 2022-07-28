@@ -193,15 +193,7 @@ export type PrismaPoolMinimal = Prisma.PrismaPoolGetPayload<typeof prismaPoolMin
 
 export const prismaPoolBatchSwapWithSwaps = Prisma.validator<Prisma.PrismaPoolBatchSwapArgs>()({
     include: {
-        swaps: {
-            include: {
-                pool: {
-                    include: {
-                        tokens: true,
-                    },
-                },
-            },
-        },
+        swaps: true,
     },
 });
 

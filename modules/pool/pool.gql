@@ -58,6 +58,19 @@ type GqlPoolMinimal {
     allTokens: [GqlPoolTokenExpanded!]!
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
+    type: GqlPoolMinimalType!
+}
+
+enum GqlPoolMinimalType {
+    WEIGHTED
+    STABLE
+    META_STABLE
+    PHANTOM_STABLE
+    ELEMENT
+    LINEAR
+    UNKNOWN
+    LIQUIDITY_BOOTSTRAPPING
+    INVESTMENT
 }
 
 interface GqlPoolBase {
@@ -537,8 +550,7 @@ type GqlPoolBatchSwap {
 
 type GqlPoolBatchSwapSwap {
     id: ID!
-    poolId: String!
-    poolTokens: [String!]!
+    pool: GqlPoolMinimal!
     userAddress: String!
     tokenIn: String!
     tokenOut: String!
