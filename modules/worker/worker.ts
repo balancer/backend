@@ -1,4 +1,4 @@
-import createExpressApp from 'express';
+import express from 'express';
 import * as Sentry from '@sentry/node';
 import { env } from '../../app/env';
 import * as Tracing from '@sentry/tracing';
@@ -7,7 +7,7 @@ import { configureWorkerRoutes } from './job-handlers';
 import { scheduleManualJobs } from './manual-jobs';
 
 export function startWorker() {
-    const app = createExpressApp();
+    const app = express();
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
@@ -23,6 +23,7 @@ export function startWorker() {
 
     app.use(Sentry.Handlers.requestHandler());
     app.use(Sentry.Handlers.tracingHandler());
+    app.use(express.json());
 
     configureWorkerRoutes(app);
     app.use(
