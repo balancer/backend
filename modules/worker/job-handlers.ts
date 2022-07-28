@@ -41,13 +41,13 @@ export function configureWorkerRoutes(app: Express) {
         try {
             switch (job.type) {
                 case 'sync-pools':
-                    await runIfNotAlreadyRunning(job.type, poolService.syncChangedPools);
+                    await runIfNotAlreadyRunning(job.type, () => poolService.syncChangedPools());
                     break;
                 case 'user-sync-wallet-balances-for-all-pools':
-                    await runIfNotAlreadyRunning(job.type, userService.syncWalletBalancesForAllPools);
+                    await runIfNotAlreadyRunning(job.type, () => userService.syncWalletBalancesForAllPools());
                     break;
                 case 'user-sync-staked-balances':
-                    await runIfNotAlreadyRunning(job.type, userService.syncStakedBalances);
+                    await runIfNotAlreadyRunning(job.type, () => userService.syncStakedBalances());
                     break;
                 default:
                     throw new Error(`Unhandled job type ${job.type}`);
@@ -61,7 +61,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/load-token-prices', async (req, res, next) => {
         try {
             console.log('Load token prices');
-            await runIfNotAlreadyRunning('load-token-prices', tokenService.loadTokenPrices);
+            await runIfNotAlreadyRunning('load-token-prices', () => tokenService.loadTokenPrices());
             console.log('Load token prices done');
             res.sendStatus(200);
         } catch (error) {
@@ -72,7 +72,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/load-beets-price', async (req, res, next) => {
         try {
             console.log('Load beets price');
-            await runIfNotAlreadyRunning('load-beets-price', tokenPriceService.cacheBeetsPrice);
+            await runIfNotAlreadyRunning('load-beets-price', () => tokenPriceService.cacheBeetsPrice());
             console.log('Load beets price done');
             res.sendStatus(200);
         } catch (error) {
@@ -82,9 +82,8 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-liquidity-for-all-pools', async (req, res, next) => {
         try {
             console.log('Update liquidity for all pools');
-            await runIfNotAlreadyRunning(
-                'update-liquidity-for-all-pools',
-                poolService.updateLiquidityValuesForAllPools,
+            await runIfNotAlreadyRunning('update-liquidity-for-all-pools', () =>
+                poolService.updateLiquidityValuesForAllPools(),
             );
             console.log('Update liquidity for all pools done');
             res.sendStatus(200);
@@ -96,7 +95,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-pool-apr', async (req, res, next) => {
         try {
             console.log('Update pool apr');
-            await runIfNotAlreadyRunning('update-pool-apr', poolService.updatePoolAprs);
+            await runIfNotAlreadyRunning('update-pool-apr', () => poolService.updatePoolAprs());
             console.log('Update pool apr done');
             res.sendStatus(200);
         } catch (error) {
@@ -106,9 +105,8 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/load-on-chain-data-for-pools-with-active-updates', async (req, res, next) => {
         try {
             console.log('Load on chain data for pools with active updates');
-            await runIfNotAlreadyRunning(
-                'load-on-chain-data-for-pools-with-active-updates',
-                poolService.loadOnChainDataForPoolsWithActiveUpdates,
+            await runIfNotAlreadyRunning('load-on-chain-data-for-pools-with-active-updates', () =>
+                poolService.loadOnChainDataForPoolsWithActiveUpdates(),
             );
             console.log('Load on chain data for pools with active updates done');
             res.sendStatus(200);
@@ -119,7 +117,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-new-pools-from-subgraph', async (req, res, next) => {
         try {
             console.log('Sync new pools from subgraph');
-            await runIfNotAlreadyRunning('sync-new-pools-from-subgraph', poolService.syncNewPoolsFromSubgraph);
+            await runIfNotAlreadyRunning('sync-new-pools-from-subgraph', () => poolService.syncNewPoolsFromSubgraph());
             console.log('Sync new pools from subgraph done');
             res.sendStatus(200);
         } catch (error) {
@@ -129,7 +127,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-sanity-pool-data', async (req, res, next) => {
         try {
             console.log('Sync sanity pool data');
-            await runIfNotAlreadyRunning('sync-sanity-pool-data', poolService.syncSanityPoolData);
+            await runIfNotAlreadyRunning('sync-sanity-pool-data', () => poolService.syncSanityPoolData());
             console.log('Sync sanity pool data done');
             res.sendStatus(200);
         } catch (error) {
@@ -139,7 +137,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-tokens-from-pool-tokens', async (req, res, next) => {
         try {
             console.log('Sync tokens from pool tokens');
-            await runIfNotAlreadyRunning('sync-tokens-from-pool-tokens', tokenService.syncSanityData);
+            await runIfNotAlreadyRunning('sync-tokens-from-pool-tokens', () => tokenService.syncSanityData());
             console.log('Sync tokens from pool tokens done');
             res.sendStatus(200);
         } catch (error) {
@@ -149,9 +147,8 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-liquidity-24h-ago-for-all-pools', async (req, res, next) => {
         try {
             console.log('Update liquidity 24h ago for all pools');
-            await runIfNotAlreadyRunning(
-                'update-liquidity-24h-ago-for-all-pools',
-                poolService.updateLiquidity24hAgoForAllPools,
+            await runIfNotAlreadyRunning('update-liquidity-24h-ago-for-all-pools', () =>
+                poolService.updateLiquidity24hAgoForAllPools(),
             );
             console.log('Update liquidity 24h ago for all pools done');
             res.sendStatus(200);
@@ -162,7 +159,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-fbeets-ratio', async (req, res, next) => {
         try {
             console.log('Sync fbeets ratio');
-            await runIfNotAlreadyRunning('sync-fbeets-ratio', beetsService.syncFbeetsRatio);
+            await runIfNotAlreadyRunning('sync-fbeets-ratio', () => beetsService.syncFbeetsRatio());
             console.log('Sync fbeets ratio done');
             res.sendStatus(200);
         } catch (error) {
@@ -172,7 +169,9 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/cache-average-block-time', async (req, res, next) => {
         try {
             console.log('Cache average block time');
-            await runIfNotAlreadyRunning('cache-average-block-time', blocksSubgraphService.cacheAverageBlockTime);
+            await runIfNotAlreadyRunning('cache-average-block-time', () =>
+                blocksSubgraphService.cacheAverageBlockTime(),
+            );
             console.log('Cache average block time done');
             res.sendStatus(200);
         } catch (error) {
@@ -182,7 +181,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sor-reload-graph', async (req, res, next) => {
         try {
             console.log('SOR reload graph');
-            await runIfNotAlreadyRunning('sor-reload-graph', balancerSdk.sor.reloadGraph);
+            await runIfNotAlreadyRunning('sor-reload-graph', () => balancerSdk.sor.reloadGraph());
             console.log('SOR reload graph done');
             res.sendStatus(200);
         } catch (error) {
@@ -192,7 +191,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-token-dynamic-data', async (req, res, next) => {
         try {
             console.log('Sync token dynamic data');
-            await runIfNotAlreadyRunning('sync-token-dynamic-data', tokenService.syncTokenDynamicData);
+            await runIfNotAlreadyRunning('sync-token-dynamic-data', () => tokenService.syncTokenDynamicData());
             console.log('Sync token dynamic data done');
             res.sendStatus(200);
         } catch (error) {
@@ -202,7 +201,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-staking-for-pools', async (req, res, next) => {
         try {
             console.log('Sync staking for pools');
-            await runIfNotAlreadyRunning('sync-staking-for-pools', poolService.syncStakingForPools);
+            await runIfNotAlreadyRunning('sync-staking-for-pools', () => poolService.syncStakingForPools());
             console.log('Sync staking for pools done');
             res.sendStatus(200);
         } catch (error) {
@@ -212,7 +211,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/cache-protocol-data', async (req, res, next) => {
         try {
             console.log('Cache protocol data');
-            await runIfNotAlreadyRunning('cache-protocol-data', beetsService.cacheProtocolData);
+            await runIfNotAlreadyRunning('cache-protocol-data', () => beetsService.cacheProtocolData());
             console.log('Cache protocol data done');
             res.sendStatus(200);
         } catch (error) {
@@ -222,9 +221,8 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-latest-snapshots-for-all-pools', async (req, res, next) => {
         try {
             console.log('Sync latest snapshots for all pools');
-            await runIfNotAlreadyRunning(
-                'sync-latest-snapshots-for-all-pools',
-                poolService.syncLatestSnapshotsForAllPools,
+            await runIfNotAlreadyRunning('sync-latest-snapshots-for-all-pools', () =>
+                poolService.syncLatestSnapshotsForAllPools(),
             );
             console.log('Sync latest snapshots for all pools done');
             res.sendStatus(200);
@@ -235,9 +233,8 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-lifetime-values-for-all-pools', async (req, res, next) => {
         try {
             console.log('Update lifetime values for all pools');
-            await runIfNotAlreadyRunning(
-                'update-lifetime-values-for-all-pools',
-                poolService.updateLifetimeValuesForAllPools,
+            await runIfNotAlreadyRunning('update-lifetime-values-for-all-pools', () =>
+                poolService.updateLifetimeValuesForAllPools(),
             );
             console.log('Update lifetime values for all pools done');
             res.sendStatus(200);
