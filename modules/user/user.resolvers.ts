@@ -20,6 +20,10 @@ const resolvers: Resolvers = {
 
             return userService.getUserPoolInvestments(accountAddress, poolId, first, skip);
         },
+        userGetSwaps: async (parent, { first, skip, poolId }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+            return userService.getUserSwaps(accountAddress, poolId, first, skip);
+        },
         userGetFbeetsBalance: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
