@@ -143,13 +143,7 @@ export class PoolSwapService {
                 },
             },
             orderBy: { timestamp: 'desc' },
-            include: {
-                swaps: {
-                    include: {
-                        pool: { include: { tokens: true } },
-                    },
-                },
-            },
+            include: { swaps: true },
         });
     }
 

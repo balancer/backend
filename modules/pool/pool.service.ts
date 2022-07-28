@@ -7,6 +7,8 @@ import { PoolUsdDataService } from './src/pool-usd-data.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import {
+    GqlPoolBatchSwap,
+    GqlPoolBatchSwapSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
@@ -82,8 +84,18 @@ export class PoolService {
         return this.poolSwapService.getSwaps(args);
     }
 
-    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
-        return this.poolSwapService.getBatchSwaps(args);
+    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
+        const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
+        const poolIds = batchSwaps.map((batchSwap) => batchSwap.swaps.map((swap) => swap.poolId)).flat();
+        const pools = await this.getGqlPools({ where: { idIn: poolIds } });
+
+        return batchSwaps.map((batchSwap) => ({
+            ...batchSwap,
+            swaps: batchSwap.swaps.map((swap) => ({
+                ...swap,
+                pool: pools.find((pool) => pool.id === swap.poolId)!,
+            })),
+        }));
     }
 
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
