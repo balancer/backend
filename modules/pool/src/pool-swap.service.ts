@@ -87,6 +87,23 @@ export class PoolSwapService {
         });
     }
 
+    public async getUserSwapsForPool(
+        userAddress: string,
+        poolId: string,
+        first = 10,
+        skip = 0,
+    ): Promise<PrismaPoolSwap[]> {
+        return prisma.prismaPoolSwap.findMany({
+            take: first,
+            skip: skip,
+            where: {
+                poolId,
+                userAddress,
+            },
+            orderBy: { timestamp: 'desc' },
+        });
+    }
+
     public async getBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
         const take = !args.first || args.first > 100 ? 10 : args.first;
 
