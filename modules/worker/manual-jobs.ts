@@ -14,6 +14,6 @@ async function scheduleJobWithInterval(job: WokerJobType, intervalMs: number): P
 
 export async function scheduleManualJobs(): Promise<void> {
     await scheduleJobWithInterval('sync-pools', 15000);
-    await scheduleJobWithInterval('user-sync-wallet-balances-for-all-pools', 5000);
-    await scheduleJobWithInterval('user-sync-staked-balances', 5000);
+    await scheduleJobWithInterval('user-sync-wallet-balances-for-all-pools', 10000);
+    await scheduleJobWithInterval('user-sync-staked-balances', 10000);
 }
