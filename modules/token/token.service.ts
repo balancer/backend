@@ -4,32 +4,24 @@ import { prisma } from '../util/prisma-client';
 import { TokenDataLoaderService } from './src/token-data-loader.service';
 import { TokenPriceService } from './src/token-price.service';
 import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
-import { networkConfig } from '../config/network-config';
+import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import {
     PrismaToken,
     PrismaTokenCurrentPrice,
+    PrismaTokenData,
     PrismaTokenDynamicData,
     PrismaTokenPrice,
-    PrismaTokenData,
 } from '@prisma/client';
 import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { memCacheGetValueAndCacheIfNeeded } from '../util/mem-cache';
-import {
-    GqlTokenCandlestickChartDataItem,
-    GqlTokenChartDataRange,
-    GqlTokenPriceChartDataItem,
-    QueryTokenGetCandlestickChartDataArgs,
-    QueryTokenGetPriceChartDataArgs,
-    QueryTokenGetRelativePriceChartDataArgs,
-} from '../../schema';
+import { GqlTokenChartDataRange } from '../../schema';
 import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
-const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
 const ALL_TOKENS_CACHE_KEY = 'tokens:all';
 
 export class TokenService {
@@ -148,7 +140,7 @@ export class TokenService {
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
-        new FbeetsPriceHandlerService(),
+        ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
         new CoingeckoPriceHandlerService(
             networkConfig.coingecko.nativeAssetId,
             networkConfig.coingecko.platformId,

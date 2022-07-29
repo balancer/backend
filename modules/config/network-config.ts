@@ -138,3 +138,11 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
 };
 
 export const networkConfig = AllNetworkConfigs[env.CHAIN_ID];
+
+export function isFantomNetwork() {
+    return env.CHAIN_ID === '250';
+}
+
+export function isOptimismNetwork() {
+    return env.CHAIN_ID === '10';
+}

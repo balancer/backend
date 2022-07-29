@@ -1,10 +1,10 @@
-import { PoolAprService } from '../pool-types';
-import { PrismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
+import { PoolAprService } from '../../pool-types';
+import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import axios from 'axios';
-import { env } from '../../../app/env';
-import { prisma } from '../../util/prisma-client';
-import { TokenService } from '../../token/token.service';
-import { YearnVault } from './apr-types';
+import { env } from '../../../../app/env';
+import { prisma } from '../../../util/prisma-client';
+import { TokenService } from '../../../token/token.service';
+import { YearnVault } from '../apr-types';
 
 export class YearnVaultAprService implements PoolAprService {
     constructor(private readonly tokenService: TokenService) {}

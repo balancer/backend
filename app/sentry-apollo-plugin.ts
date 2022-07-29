@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import { ApolloError } from 'apollo-server-express';
-import { Context } from '../../app/Context';
+import { Context } from './Context';
 
 export const sentryPlugin: ApolloServerPlugin<Context> = {
     async requestDidStart({ request, context }) {
