@@ -1,14 +1,13 @@
 import * as Sentry from '@sentry/node';
 import cron from 'node-cron';
-import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../modules/token/token.service';
 import { balancerSdk } from '../legacy/balancer-sdk/src/balancer-sdk';
 import { env } from '../app/env';
-import { runWithMinimumInterval } from '../modules/util/scheduling';
+import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { jsonRpcProvider } from '../modules/util/ethers';
+import { jsonRpcProvider } from '../modules/on-chain/contract';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
 
@@ -108,14 +107,7 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
 export function scheduleLocalWorkerTasks() {
     //every 20 seconds
     scheduleJob('*/20 * * * * *', 'loadTokenPrices', ONE_MINUTE_IN_MS, async () => {
-        //await tokenPriceService.cacheTokenPrices();
-
         await tokenService.loadTokenPrices();
-    });
-
-    //every 30 seconds
-    scheduleJob('*/30 * * * * *', 'cacheBeetsPrice', TWO_MINUTES_IN_MS, async () => {
-        await tokenPriceService.cacheBeetsPrice();
     });
 
     //every 30 seconds

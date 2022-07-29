@@ -1,7 +1,7 @@
 import { PoolAprService } from '../../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import axios from 'axios';
-import { prisma } from '../../../../util/prisma-client';
+import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
 
 const BOO_TOKEN_ADDRESS = '0x841FAD6EAe12c286d1Fd18d1d525DFfA75C7EFFE'.toLowerCase();

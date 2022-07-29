@@ -1,10 +1,10 @@
-import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { balancerSubgraphService } from '../../../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     OrderDirection,
     TokenPrice_OrderBy,
-} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+} from '../../../modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { HistoricalPrice, TokenHistoricalPrices, TokenPrices } from '../token-price-types';
-import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../../util/time';
+import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../../../modules/util/time';
 import _ from 'lodash';
 
 export class BalancerPriceService {

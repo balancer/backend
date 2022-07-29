@@ -1,14 +1,14 @@
-import { UserSyncWalletBalanceService } from './src/user-sync-wallet-balance.service';
-import { UserSyncMasterchefFarmBalanceService } from './src/fantom/user-sync-masterchef-farm-balance.service';
+import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
+import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
 import { UserPoolBalance, UserStakedBalanceService } from './user-types';
-import { UserBalanceService } from './src/user-balance.service';
-import { PrismaPoolStaking, PrismaPoolSwap } from '@prisma/client';
-import { PoolSwapService } from '../pool/src/pool-swap.service';
+import { UserBalanceService } from './lib/user-balance.service';
+import { PrismaPoolStaking } from '@prisma/client';
+import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
 import { isFantomNetwork } from '../config/network-config';
-import { UserSyncGaugeBalanceService } from './src/optimism/user-sync-gauge-balance.service';
+import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
 
 export class UserService {
     constructor(

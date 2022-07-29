@@ -10,7 +10,6 @@ import {
 import { blocksSubgraphService } from '../blocks-subgraph/blocks-subgraph.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { oneDayInMinutes, twentyFourHoursInMs } from '../../util/time';
-import { cache } from '../../cache/cache';
 
 const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
 const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
@@ -34,35 +33,6 @@ export class BeetsBarSubgraphService {
         }
 
         return meta;
-    }
-
-    public async getFbeetsApr(): Promise<number> {
-        const cached = await cache.getValue(FBEETS_APR_CACHE_KEY);
-
-        if (cached !== null) {
-            return parseFloat(cached);
-        }
-
-        return this.cacheFbeetsApr();
-    }
-
-    public async cacheFbeetsApr(): Promise<number> {
-        const blocks = await blocksSubgraphService.getDailyBlocks(30);
-        const block = blocks[blocks.length - 1]; //take the block from 30 days ago
-
-        const { beetsBar, previousBeetsBar } = await this.sdk.BeetsBarData({
-            barId: env.FBEETS_ADDRESS,
-            previousBlockNumber: parseFloat(block.number),
-        });
-        const ratio = parseFloat(beetsBar?.ratio || '0');
-        const prevRatio = parseFloat(previousBeetsBar?.ratio || '1');
-
-        const diff = ratio - prevRatio;
-        const estimatedYield = diff * 12;
-
-        await cache.putValue(FBEETS_APR_CACHE_KEY, `${estimatedYield / prevRatio}`, oneDayInMinutes);
-
-        return estimatedYield / prevRatio;
     }
 
     public async getPortfolioData(

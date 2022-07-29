@@ -1,4 +1,4 @@
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { changelogSubgraphService } from '../../subgraphs/changelog-subgraph/changelog-subgraph.service';
 import { poolService } from '../pool.service';

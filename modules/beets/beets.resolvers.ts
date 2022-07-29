@@ -1,6 +1,6 @@
 import { Resolvers } from '../../schema';
 import { beetsService } from './beets.service';
-import { isAdminRoute } from '../util/resolver-util';
+import { isAdminRoute } from '../auth/resolver-auth';
 
 const balancerResolvers: Resolvers = {
     Query: {

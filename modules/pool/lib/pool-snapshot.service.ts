@@ -1,5 +1,5 @@
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import {
     BalancerPoolSnapshotFragment,
     OrderDirection,

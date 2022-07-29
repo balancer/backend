@@ -1,19 +1,19 @@
 import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
-import { sleep } from '../util/promise';
+import { sleep } from '../../modules/util/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
 import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
-import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';
+import { balancerSubgraphService } from '../../modules/subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { beetsBarService } from '../../modules/subgraphs/beets-bar-subgraph/beets-bar.service';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { BalancerPoolFragment } from '../../modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { blocksSubgraphService } from '../../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
-import { getContractAt } from '../util/ethers';
+import { getContractAt } from '../../modules/on-chain/contract';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';

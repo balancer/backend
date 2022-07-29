@@ -1,5 +1,5 @@
 import { UserPoolBalance } from '../user-types';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';

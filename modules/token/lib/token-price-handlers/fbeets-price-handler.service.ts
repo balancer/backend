@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../util/time';
-import { prisma } from '../../../util/prisma-client';
+import { prisma } from '../../../../prisma/prisma-client';
 import { networkConfig } from '../../../config/network-config';
 import _ from 'lodash';
 
@@ -42,17 +42,6 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
                 return (balance / totalShares) * parseFloat(fbeets.ratio) * tokenPrice;
             }),
         );
-
-        await prisma.prismaTokenCurrentPrice.upsert({
-            where: { id: fbeetsAddress },
-            update: { price: fbeetsPrice },
-            create: {
-                id: fbeetsAddress,
-                tokenAddress: fbeetsAddress,
-                timestamp,
-                price: fbeetsPrice,
-            },
-        });
 
         await prisma.prismaTokenCurrentPrice.upsert({
             where: { id: fbeetsAddress },

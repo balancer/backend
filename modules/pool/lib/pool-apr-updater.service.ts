@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
 import _ from 'lodash';

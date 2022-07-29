@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { twentyFourHoursInSecs } from '../../util/time';
+import { twentyFourHoursInSecs } from '../../../modules/util/time';
 import _ from 'lodash';
 import { env } from '../../../app/env';
 import {
@@ -10,10 +10,10 @@ import {
     TokenPrices,
 } from '../token-price-types';
 import moment from 'moment-timezone';
-import { tokenService } from '../../token/token.service';
-import { TokenDefinition } from '../../token/token-types';
+import { tokenService } from '../../../modules/token/token.service';
+import { TokenDefinition } from '../../../modules/token/token-types';
 import { getAddress, isAddress } from 'ethers/lib/utils';
-import { networkConfig } from '../../config/network-config';
+import { networkConfig } from '../../../modules/config/network-config';
 
 interface MappedToken {
     platform: string;

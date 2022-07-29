@@ -1,6 +1,6 @@
 import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
 import { PrismaPoolType } from '@prisma/client';
 import _ from 'lodash';

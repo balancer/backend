@@ -1,6 +1,6 @@
-import { sanityClient } from '../../util/sanity';
+import { sanityClient } from '../../sanity/sanity';
 import { env } from '../../../app/env';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolCategoryType } from '@prisma/client';
 
 interface SanityPoolConfig {

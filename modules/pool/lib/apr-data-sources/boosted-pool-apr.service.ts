@@ -1,6 +1,6 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
-import { prisma } from '../../../util/prisma-client';
+import { prisma } from '../../../../prisma/prisma-client';
 
 export class BoostedPoolAprService implements PoolAprService {
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {

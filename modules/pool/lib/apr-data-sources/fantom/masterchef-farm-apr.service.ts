@@ -1,6 +1,6 @@
 import { PoolAprService } from '../../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
-import { prisma } from '../../../../util/prisma-client';
+import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { blocksSubgraphService } from '../../../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { secondsPerYear } from '../../../../util/time';

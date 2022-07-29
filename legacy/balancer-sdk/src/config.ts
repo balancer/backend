@@ -1,7 +1,7 @@
 import { BalancerSdkConfig, Network, SubgraphPoolBase } from '@balancer-labs/sdk';
 import { env } from '../../../app/env';
-import { tokenPriceService } from '../../../modules/token-price/token-price.service';
-import { prisma } from '../../../modules/util/prisma-client';
+import { tokenPriceService } from '../../token-price/token-price.service';
+import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolType } from '@prisma/client';
 
 export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {

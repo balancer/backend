@@ -1,7 +1,6 @@
 import { Resolvers } from '../../schema';
-import { tokenPriceService } from '../token-price/token-price.service';
 import _ from 'lodash';
-import { isAdminRoute } from '../util/resolver-util';
+import { isAdminRoute } from '../auth/resolver-auth';
 import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
@@ -18,7 +17,7 @@ const resolvers: Resolvers = {
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses }, context) => {
-            const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();
+            const tokenPrices = await tokenService.getHistoricalTokenPrices();
             const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
 
             return _.map(filtered, (entries, address) => ({
@@ -92,7 +91,7 @@ const resolvers: Resolvers = {
         tokenReloadTokenPrices: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenPriceService.cacheTokenPrices();
+            await tokenService.loadTokenPrices();
 
             return true;
         },

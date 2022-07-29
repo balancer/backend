@@ -1,9 +1,9 @@
 import { BalancerJoinExitFragment, InvestType } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { BigNumber } from 'ethers';
-import { fromFp } from '../util/numbers';
+import { fromFp } from '../big-numbers/numbers';
 import _ from 'lodash';
-import { TokenPrices } from '../token-price/token-price-types';
-import { tokenPriceService } from '../token-price/token-price.service';
+import { TokenPrices } from '../../legacy/token-price/token-price-types';
+import { tokenPriceService } from '../../legacy/token-price/token-price.service';
 import {
     PrismaBalancerPoolSnapshotWithTokens,
     PrismaBalancerPoolTokenSnapshotWithToken,
@@ -15,10 +15,10 @@ import {
 } from './portfolio-types';
 import moment from 'moment-timezone';
 import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
-import { balancerTokenMappings } from '../token-price/lib/balancer-token-mappings';
+import { balancerTokenMappings } from '../../legacy/token-price/lib/balancer-token-mappings';
 import { env } from '../../app/env';
 import { PortfolioDataService } from './lib/portfolio-data.service';
-import { prisma } from '../util/prisma-client';
+import { prisma } from '../../prisma/prisma-client';
 import {
     PrismaBalancerPool,
     PrismaBalancerPoolShareSnapshot,

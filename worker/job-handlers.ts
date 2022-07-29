@@ -1,13 +1,12 @@
 import * as Sentry from '@sentry/node';
 import { Express } from 'express';
 import { tokenService } from '../modules/token/token.service';
-import { tokenPriceService } from '../modules/token-price/token-price.service';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { balancerSdk } from '../legacy/balancer-sdk/src/balancer-sdk';
 import { userService } from '../modules/user/user.service';
-import { WorkerJob } from './manual-jobs';
+import { WorkerJob } from './manual-jobs'
 
 const runningJobs: Set<string> = new Set();
 
@@ -67,16 +66,6 @@ export function configureWorkerRoutes(app: Express) {
         }
     });
 
-    app.post('/load-beets-price', async (req, res, next) => {
-        try {
-            console.log('Load beets price');
-            await runIfNotAlreadyRunning('load-beets-price', () => tokenPriceService.cacheBeetsPrice());
-            console.log('Load beets price done');
-            res.sendStatus(200);
-        } catch (error) {
-            next(error);
-        }
-    });
     app.post('/update-liquidity-for-all-pools', async (req, res, next) => {
         try {
             console.log('Update liquidity for all pools');

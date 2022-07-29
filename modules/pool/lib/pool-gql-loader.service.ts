@@ -28,7 +28,7 @@ import {
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
 import { ConfigService } from '../../config/config.service';

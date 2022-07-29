@@ -1,8 +1,8 @@
 import { FbeetsService } from './lib/fbeets.service';
-import { getContractAt } from '../util/ethers';
+import { getContractAt } from '../on-chain/contract';
 import { networkConfig } from '../config/network-config';
 import FreshBeetsAbi from './abi/FreshBeets.json';
-import ERC20 from '../abi/ERC20.json';
+import ERC20 from './abi/ERC20.json';
 import { GqlBeetsConfig, GqlBeetsProtocolData } from '../../schema';
 import {
     BalancerSubgraphService,
@@ -10,12 +10,12 @@ import {
 } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { beetsGetCirculatingSupply } from './lib/beets';
 import _ from 'lodash';
-import { sanityClient } from '../util/sanity';
+import { sanityClient } from '../sanity/sanity';
 import { env } from '../../app/env';
-import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
+import { memCacheGetValue, memCacheSetValue } from '../cache/mem-cache';
 import { tokenService } from '../token/token.service';
 import moment from 'moment-timezone';
-import { prisma } from '../util/prisma-client';
+import { prisma } from '../../prisma/prisma-client';
 
 const PROTOCOL_DATA_CACHE_KEY = 'beets:protocol-data';
 const CONFIG_CACHE_KEY = 'beets:global-config';

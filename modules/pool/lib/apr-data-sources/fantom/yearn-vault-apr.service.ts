@@ -2,7 +2,7 @@ import { PoolAprService } from '../../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import axios from 'axios';
 import { env } from '../../../../../app/env';
-import { prisma } from '../../../../util/prisma-client';
+import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
 import { YearnVault } from '../apr-types';
 

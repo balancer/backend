@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { sleep } from '../../util/promise';
 import moment from 'moment-timezone';

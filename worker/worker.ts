@@ -2,7 +2,7 @@ import express from 'express';
 import * as Sentry from '@sentry/node';
 import { env } from '../app/env';
 import * as Tracing from '@sentry/tracing';
-import { prisma } from '../modules/util/prisma-client';
+import { prisma } from '../prisma/prisma-client';
 import { configureWorkerRoutes } from './job-handlers';
 import { scheduleManualJobs } from './manual-jobs';
 

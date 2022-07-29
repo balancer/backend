@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from 'ethers';
-import { oldBnumFromBnum } from '../../util/old-big-number';
-import { prisma } from '../../util/prisma-client';
+import { oldBnumFromBnum } from '../../big-numbers/old-big-number';
+import { prisma } from '../../../prisma/prisma-client';
 
 export class FbeetsService {
     constructor(private readonly fBeetsContract: Contract, private readonly fBeetsPoolContract: Contract) {}

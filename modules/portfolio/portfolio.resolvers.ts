@@ -1,6 +1,6 @@
 import { Resolvers } from '../../schema';
 import { portfolioService } from './portfolio.service';
-import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
+import { getRequiredAccountAddress, isAdminRoute } from '../auth/resolver-auth';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { beetsBarService } from '../subgraphs/beets-bar-subgraph/beets-bar.service';

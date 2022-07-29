@@ -3,7 +3,7 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import _ from 'lodash';
 import { sleep } from '../../../util/promise';
-import { prisma } from '../../../util/prisma-client';
+import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../util/time';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';

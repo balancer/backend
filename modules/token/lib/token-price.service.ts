@@ -1,14 +1,21 @@
 import { TokenPriceHandler, TokenPriceItem } from '../token-types';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../util/time';
-import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
+import { PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
 import { GqlTokenChartDataRange } from '../../../schema';
-import { memCacheGetValueAndCacheIfNeeded } from '../../util/mem-cache';
+import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
+import { Cache, CacheClass } from 'memory-cache';
+
+const TOKEN_PRICES_CACHE_KEY = 'token-prices';
+const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
+const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
 
 export class TokenPriceService {
+    cache: CacheClass<string, any> = new Cache<string, any>();
+
     constructor(private readonly handlers: TokenPriceHandler[]) {}
 
     public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
@@ -83,6 +90,24 @@ export class TokenPriceService {
         );
 
         return tokenPrice?.price || 0;
+    }
+
+    public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
+        const memCached = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
+
+        if (memCached) {
+            return memCached;
+        }
+
+        const tokenPrices: TokenHistoricalPrices = await this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
+        const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY);
+
+        if (tokenPrices) {
+            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, { ...tokenPrices, ...nestedBptPrices }, 60000);
+        }
+
+        //don't try to refetch the cache, it takes way too long
+        return { ...tokenPrices, ...nestedBptPrices };
     }
 
     public async updateTokenPrices(): Promise<void> {

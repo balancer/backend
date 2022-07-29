@@ -1,4 +1,4 @@
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';

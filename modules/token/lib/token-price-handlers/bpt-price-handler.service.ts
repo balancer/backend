@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../util/time';
-import { prisma } from '../../../util/prisma-client';
+import { prisma } from '../../../../prisma/prisma-client';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
