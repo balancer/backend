@@ -74,8 +74,8 @@ export class PoolSnapshotService {
 
             await prisma.prismaPoolSnapshot.createMany({
                 data: snapshots.map((snapshot, index) => {
-                    const prevTotalSwapVolume = index > 0 ? snapshots[index - 1].totalSwapVolume : '0';
-                    const prevTotalSwapFee = index > 0 ? snapshots[index - 1].totalSwapFee : '0';
+                    const prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].totalSwapVolume;
+                    const prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].totalSwapFee;
 
                     return this.getPrismaPoolSnapshotFromSubgraphData(snapshot, prevTotalSwapVolume, prevTotalSwapFee);
                 }),
