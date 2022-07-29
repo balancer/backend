@@ -21,7 +21,7 @@ import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from './modules/util/prisma-client';
-import { sentryPlugin } from './modules/monitoring/sentry-apollo-plugin';
+import { sentryPlugin } from './app/sentry-apollo-plugin';
 import { startWorker } from './modules/worker/worker';
 
 async function startServer() {
