@@ -3,11 +3,11 @@ import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../util/prisma-client';
 import { TokenDataLoaderService } from './src/token-data-loader.service';
 import { TokenPriceService } from './src/token-price.service';
-import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
+import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
 import { isFantomNetwork, networkConfig } from '../config/network-config';
-import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
+import { BptPriceHandlerService } from './lib/token-price-handlers/bpt-price-handler.service';
+import { LinearWrappedTokenPriceHandlerService } from './lib/token-price-handlers/linear-wrapped-token-price-handler.service';
+import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price-handler.service';
 import {
     PrismaToken,
     PrismaTokenCurrentPrice,
@@ -19,7 +19,7 @@ import { CoingeckoDataService } from './src/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { memCacheGetValueAndCacheIfNeeded } from '../util/mem-cache';
 import { GqlTokenChartDataRange } from '../../schema';
-import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
+import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const ALL_TOKENS_CACHE_KEY = 'tokens:all';

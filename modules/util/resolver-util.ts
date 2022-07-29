@@ -1,4 +1,4 @@
-import { Context } from '../../app/Context';
+import { Context } from '../../app/gql/gql-context';
 import { env } from '../../app/env';
 
 export function getRequiredAccountAddress(context: Context) {

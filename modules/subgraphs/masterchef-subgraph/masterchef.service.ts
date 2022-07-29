@@ -13,7 +13,7 @@ import {
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../../app/env';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
 import { twentyFourHoursInMs } from '../../util/time';
 import { Cache, CacheClass } from 'memory-cache';
 

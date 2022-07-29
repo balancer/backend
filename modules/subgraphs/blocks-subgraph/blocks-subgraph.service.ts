@@ -16,7 +16,7 @@ import {
     secondsPerDay,
     secondsPerYear,
 } from '../../util/time';
-import { subgraphLoadAll } from '../../util/subgraph-util';
+import { subgraphLoadAll } from '../subgraph-util';
 import moment from 'moment-timezone';
 import { memCacheGetValue, memCacheSetValue } from '../../util/mem-cache';
 import { networkConfig } from '../../config/network-config';

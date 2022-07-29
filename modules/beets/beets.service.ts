@@ -1,4 +1,4 @@
-import { FbeetsService } from './src/fbeets.service';
+import { FbeetsService } from './lib/fbeets.service';
 import { getContractAt } from '../util/ethers';
 import { networkConfig } from '../config/network-config';
 import FreshBeetsAbi from './abi/FreshBeets.json';
@@ -8,7 +8,7 @@ import {
     BalancerSubgraphService,
     balancerSubgraphService,
 } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { beetsGetCirculatingSupply } from './src/beets';
+import { beetsGetCirculatingSupply } from './lib/beets';
 import _ from 'lodash';
 import { sanityClient } from '../util/sanity';
 import { env } from '../../app/env';

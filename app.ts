@@ -12,8 +12,8 @@ import {
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
 import { schema } from './graphql_schema_generated';
-import { resolvers } from './app/resolvers';
-import { scheduleWorkerTasks } from './app/scheduleWorkerTasks';
+import { resolvers } from './app/gql/resolvers';
+import { scheduleLocalWorkerTasks } from './worker/scheduleLocalWorkerTasks';
 import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
@@ -21,8 +21,8 @@ import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from './modules/util/prisma-client';
-import { sentryPlugin } from './app/sentry-apollo-plugin';
-import { startWorker } from './modules/worker/worker';
+import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
+import { startWorker } from './worker/worker';
 
 async function startServer() {
     if (env.CHAIN_SLUG === 'fantom') {
@@ -103,7 +103,7 @@ async function startServer() {
 
     if (process.env.NODE_ENV === 'local') {
         try {
-            scheduleWorkerTasks();
+            scheduleLocalWorkerTasks();
             scheduleMainTasks();
         } catch (e) {
             console.log(`Fatal error happened during cron scheduling.`, e);

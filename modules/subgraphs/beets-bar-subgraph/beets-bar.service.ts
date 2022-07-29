@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { env } from '../../../app/env';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
+import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
 import {
     BeetsBarFragment,
     BeetsBarUserFragment,

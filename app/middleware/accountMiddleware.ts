@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/node';
 import { NextFunction, Request, Response } from 'express';
-import { getHeader } from '../util/getHeader';
 import { Hub } from '@sentry/hub/types/hub';
 
 declare global {
@@ -11,6 +10,11 @@ declare global {
             transaction: ReturnType<Hub['startTransaction']>;
         }
     }
+}
+
+function getHeader(req: Request, key: string): string | undefined {
+    const value = req.headers[key.toLowerCase()];
+    return Array.isArray(value) ? value[0] : value;
 }
 
 export async function accountMiddleware(req: Request, res: Response, next: NextFunction) {
