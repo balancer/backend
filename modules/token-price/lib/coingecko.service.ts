@@ -35,6 +35,7 @@ export class CoingeckoService {
         this.platformId = env.COINGECKO_PLATFORM_ID;
         this.nativeAssetId = env.COINGECKO_NATIVE_ASSET_ID;
         this.nativeAssetAddress = env.NATIVE_ASSET_ADDRESS;
+        console.log('PLATFOOORMMMMMMMMMMMM', this.platformId);
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
@@ -72,6 +73,7 @@ export class CoingeckoService {
                         addressesPerRequest * page,
                         addressesPerRequest * (page + 1),
                     );
+                    console.log({ platform });
                     const endpoint = `/simple/token_price/${platform}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
                     const request = this.get<CoingeckoPriceResponse>(endpoint);
                     requests.push(request);
