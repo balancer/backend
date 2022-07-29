@@ -33,10 +33,7 @@ export function configureWorkerRoutes(app: Express) {
     // all manual triggered (e.g. fast running) jobs will be handled here
     app.post('/', async (req, res, next) => {
         const job = req.body as WorkerJob;
-        if (runningJobs.has(job.type)) {
-            res.status(400).send('Job already running');
-            return;
-        }
+        console.log(job.type);
         Sentry.configureScope((scope) => scope.setTransactionName(`POST /${job.type} - manual`));
         try {
             switch (job.type) {
@@ -52,6 +49,7 @@ export function configureWorkerRoutes(app: Express) {
                 default:
                     throw new Error(`Unhandled job type ${job.type}`);
             }
+            console.log(`${job.type} done`);
             res.sendStatus(200);
         } catch (error) {
             next(error);
