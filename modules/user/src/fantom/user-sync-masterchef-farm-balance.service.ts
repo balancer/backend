@@ -1,20 +1,20 @@
-import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
+import { masterchefService } from '../../../subgraphs/masterchef-subgraph/masterchef.service';
 import {
     FarmUserFragment,
     OrderDirection,
     User_OrderBy,
-} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+} from '../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import _ from 'lodash';
-import { prisma } from '../../util/prisma-client';
-import { getContractAt, jsonRpcProvider } from '../../util/ethers';
-import MasterChefAbi from '../../abi/MasterChef.json';
-import { Multicaller } from '../../util/multicaller';
-import { networkConfig } from '../../config/network-config';
+import { prisma } from '../../../util/prisma-client';
+import { getContractAt, jsonRpcProvider } from '../../../util/ethers';
+import MasterChefAbi from '../../../abi/MasterChef.json';
+import { Multicaller } from '../../../util/multicaller';
+import { networkConfig } from '../../../config/network-config';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { UserStakedBalanceService } from '../user-types';
-import { AmountHumanReadable } from '../../global/global-types';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { UserStakedBalanceService } from '../../user-types';
+import { AmountHumanReadable } from '../../../global/global-types';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     public async syncStakedBalances(): Promise<void> {
