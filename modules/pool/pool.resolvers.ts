@@ -21,17 +21,7 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolSwaps(args);
         },
         poolGetBatchSwaps: async (parent, args, context) => {
-            const batchSwaps = await poolService.getPoolBatchSwaps(args);
-
-            return batchSwaps.map((batchSwap) => ({
-                ...batchSwap,
-                swaps: batchSwap.swaps.map((swap) => ({
-                    ...swap,
-                    poolTokens: swap.pool.tokens
-                        .filter((token) => token.address !== swap.pool.address)
-                        .map((token) => token.address),
-                })),
-            }));
+            return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
             return poolService.getPoolJoinExits(args);

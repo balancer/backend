@@ -2,11 +2,11 @@ import { UserSyncWalletBalanceService } from './src/user-sync-wallet-balance.ser
 import { UserSyncMasterchefFarmBalanceService } from './src/user-sync-masterchef-farm-balance.service';
 import { UserPoolBalance, UserStakedBalanceService } from './user-types';
 import { UserBalanceService } from './src/user-balance.service';
-import { PrismaPoolStaking } from '@prisma/client';
+import { PrismaPoolStaking, PrismaPoolSwap } from '@prisma/client';
 import { PoolSwapService } from '../pool/src/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { GqlPoolJoinExit } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
 
 export class UserService {
     constructor(
@@ -27,6 +27,10 @@ export class UserService {
         skip?: number,
     ): Promise<GqlPoolJoinExit[]> {
         return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
+    }
+
+    public async getUserSwaps(address: string, poolId: string, first?: number, skip?: number): Promise<GqlPoolSwap[]> {
+        return this.poolSwapService.getUserSwapsForPool(address, poolId, first, skip);
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {

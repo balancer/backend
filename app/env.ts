@@ -34,6 +34,8 @@ export const schema = {
     MASTERCHEF_ADDRESS: String,
     POOL_SYNC_INTERVAL_MS: String,
     SOR_URL: String,
+    SENTRY_DSN: String,
+    WORKER_QUEUE_URL: String,
 };
 
 export const env: Env = load(schema, {

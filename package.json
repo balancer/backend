@@ -15,6 +15,7 @@
         "prisma-merge": "ts-node prisma/prisma-merge.ts"
     },
     "dependencies": {
+        "@aws-sdk/client-sqs": "^3.137.0",
         "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo",
         "@ethersproject/address": "^5.6.0",
         "@ethersproject/bignumber": "^5.6.0",
@@ -24,6 +25,8 @@
         "@graphql-tools/merge": "^8.2.1",
         "@prisma/client": "^3.14.0",
         "@sanity/client": "^2.23.1",
+        "@sentry/node": "^7.8.0",
+        "@sentry/tracing": "^7.8.0",
         "apollo-server-core": "^3.5.0",
         "apollo-server-express": "^3.5.0",
         "axios": "^0.24.0",

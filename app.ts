@@ -18,14 +18,36 @@ import { redis } from './modules/cache/redis';
 import { scheduleMainTasks } from './app/scheduleMainTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
+import { prisma } from './modules/util/prisma-client';
+import { sentryPlugin } from './modules/monitoring/sentry-apollo-plugin';
+import { startWorker } from './modules/worker/worker';
 
 async function startServer() {
-    //need to open the redis connection prior to adding the rate limit middleware
     if (env.CHAIN_SLUG === 'fantom') {
         await redis.connect();
     }
 
     const app = createExpressApp();
+
+    Sentry.init({
+        dsn: env.SENTRY_DSN,
+        tracesSampleRate: 1,
+        environment: env.NODE_ENV,
+        enabled: env.NODE_ENV === 'production',
+        integrations: [
+            new Tracing.Integrations.Apollo(),
+            // new Tracing.Integrations.GraphQL(),
+            new Tracing.Integrations.Prisma({ client: prisma }),
+            // new Tracing.Integrations.Express({ app }),
+            new Sentry.Integrations.Http({ tracing: true }),
+        ],
+    });
+
+    app.use(Sentry.Handlers.requestHandler());
+    // app.use(Sentry.Handlers.tracingHandler());
+    // app.use(Sentry.Handlers.errorHandler());
 
     app.use(helmet.dnsPrefetchControl());
     app.use(helmet.expectCt());
@@ -53,6 +75,7 @@ async function startServer() {
         ApolloServerPluginLandingPageGraphQLPlayground({
             settings: { 'schema.polling.interval': 20000 },
         }),
+        sentryPlugin,
     ];
     if (env.NODE_ENV === 'production') {
         plugins.push(
@@ -86,20 +109,20 @@ async function startServer() {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }
     } else {
-        if (process.env.WORKER === 'true') {
-            try {
-                scheduleWorkerTasks();
-            } catch (e) {
-                console.log(`Fatal error happened during cron scheduling.`, e);
-            }
-        } else {
-            scheduleMainTasks();
-        }
+        // if (process.env.WORKER === 'true') {
+        //     try {
+        //         scheduleWorkerTasks();
+        //     } catch (e) {
+        //         console.log(`Fatal error happened during cron scheduling.`, e);
+        //     }
+        // } else {
+        scheduleMainTasks();
+        // }
     }
 }
 
-//
-startServer().finally(async () => {
-    //await prisma.$disconnect();
-    //await redis.disconnect();
-});
+if (process.env.WORKER === 'true') {
+    startWorker();
+} else {
+    startServer();
+}
