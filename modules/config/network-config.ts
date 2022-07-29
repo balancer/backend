@@ -105,7 +105,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         coingecko: {
             nativeAssetId: 'ethereum',
-            platformId: 'optimism',
+            platformId: 'optimistic-ethereum',
         },
         rpcUrl: 'https://mainnet.optimism.io/',
         sanity: {

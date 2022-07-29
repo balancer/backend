@@ -13,6 +13,7 @@ import moment from 'moment-timezone';
 import { tokenService } from '../../token/token.service';
 import { TokenDefinition } from '../../token/token-types';
 import { getAddress, isAddress } from 'ethers/lib/utils';
+import { networkConfig } from '../../config/network-config';
 
 interface MappedToken {
     platform: string;
@@ -32,10 +33,9 @@ export class CoingeckoService {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
         this.chainId = env.CHAIN_ID;
-        this.platformId = env.COINGECKO_PLATFORM_ID;
-        this.nativeAssetId = env.COINGECKO_NATIVE_ASSET_ID;
+        this.platformId = networkConfig.coingecko.platformId;
+        this.nativeAssetId = networkConfig.coingecko.nativeAssetId;
         this.nativeAssetAddress = env.NATIVE_ASSET_ADDRESS;
-        console.log('PLATFOOORMMMMMMMMMMMM', this.platformId);
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
@@ -73,7 +73,6 @@ export class CoingeckoService {
                         addressesPerRequest * page,
                         addressesPerRequest * (page + 1),
                     );
-                    console.log({ platform });
                     const endpoint = `/simple/token_price/${platform}?contract_addresses=${addressString}&vs_currencies=${this.fiatParam}`;
                     const request = this.get<CoingeckoPriceResponse>(endpoint);
                     requests.push(request);
