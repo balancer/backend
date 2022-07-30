@@ -164,10 +164,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncLatestSnapshotsForAllPools: async (parent, args, context) => {
+        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
             isAdminRoute(context);
 
-            await poolService.syncLatestSnapshotsForAllPools();
+            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
 
             return 'success';
         },
