@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import cron from 'node-cron';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../modules/token/token.service';
-import { balancerSdk } from '../legacy/balancer-sdk/src/balancer-sdk';
 import { env } from '../app/env';
 import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
@@ -157,9 +156,9 @@ export function scheduleLocalWorkerTasks() {
     );
 
     //once a minute
-    scheduleJob('* * * * *', 'sor-reload-graph', TWO_MINUTES_IN_MS, async () => {
+    /*scheduleJob('* * * * *', 'sor-reload-graph', TWO_MINUTES_IN_MS, async () => {
         await balancerSdk.sor.reloadGraph();
-    });
+    });*/
 
     //every minute
     scheduleJob('*/1 * * * *', 'syncTokenDynamicData', TEN_MINUTES_IN_MS, async () => {

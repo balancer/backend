@@ -42,7 +42,7 @@ import { jsonRpcProvider } from '../web3/contract';
 import { configService } from '../content/content.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
-import { GaugeStakingService } from './lib/staking/optimism/gauge-staking-service';
+import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
 import { Cache } from 'memory-cache';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';

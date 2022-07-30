@@ -4,7 +4,6 @@ import { tokenService } from '../modules/token/token.service';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { balancerSdk } from '../legacy/balancer-sdk/src/balancer-sdk';
 import { userService } from '../modules/user/user.service';
 import { WorkerJob } from './manual-jobs';
 import { protocolService } from '../modules/protocol/protocol.service';
@@ -166,16 +165,7 @@ export function configureWorkerRoutes(app: Express) {
             next(error);
         }
     });
-    app.post('/sor-reload-graph', async (req, res, next) => {
-        try {
-            console.log('SOR reload graph');
-            await runIfNotAlreadyRunning('sor-reload-graph', () => balancerSdk.sor.reloadGraph());
-            console.log('SOR reload graph done');
-            res.sendStatus(200);
-        } catch (error) {
-            next(error);
-        }
-    });
+
     app.post('/sync-token-dynamic-data', async (req, res, next) => {
         try {
             console.log('Sync token dynamic data');
