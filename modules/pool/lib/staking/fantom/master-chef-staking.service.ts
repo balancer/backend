@@ -3,7 +3,7 @@ import { MasterchefSubgraphService } from '../../../../subgraphs/masterchef-subg
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { networkConfig } from '../../../../config/network-config';
-import { oldBnum } from '../../../../big-numbers/old-big-number';
+import { oldBnum } from '../../../../big-number/old-big-number';
 import { formatFixed } from '@ethersproject/bignumber';
 
 export class MasterChefStakingService implements PoolStakingService {

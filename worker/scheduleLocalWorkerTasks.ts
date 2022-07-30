@@ -7,7 +7,7 @@ import { env } from '../app/env';
 import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { jsonRpcProvider } from '../modules/on-chain/contract';
+import { jsonRpcProvider } from '../modules/web3/contract';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
 

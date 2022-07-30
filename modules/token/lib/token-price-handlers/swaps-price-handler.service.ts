@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { timestampRoundedUpToNearestHour } from '../../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import moment from 'moment-timezone';
 
 export class SwapsPriceHandlerService implements TokenPriceHandler {

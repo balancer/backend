@@ -15,7 +15,7 @@ import {
     oneDayInMinutes,
     secondsPerDay,
     secondsPerYear,
-} from '../../util/time';
+} from '../../common/time';
 import { subgraphLoadAll } from '../subgraph-util';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';

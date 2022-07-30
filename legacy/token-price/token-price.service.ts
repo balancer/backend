@@ -1,7 +1,7 @@
 import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
 import { coingeckoService } from './lib/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
-import { sleep } from '../../modules/util/promise';
+import { sleep } from '../../modules/common/promise';
 import _ from 'lodash';
 import { env } from '../../app/env';
 import { Cache, CacheClass } from 'memory-cache';
@@ -13,7 +13,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerPoolFragment } from '../../modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { blocksSubgraphService } from '../../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
-import { getContractAt } from '../../modules/on-chain/contract';
+import { getContractAt } from '../../modules/web3/contract';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';

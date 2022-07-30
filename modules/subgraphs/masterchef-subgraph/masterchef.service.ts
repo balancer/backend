@@ -14,7 +14,7 @@ import {
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../../app/env';
 import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
-import { twentyFourHoursInMs } from '../../util/time';
+import { twentyFourHoursInMs } from '../../common/time';
 import { Cache, CacheClass } from 'memory-cache';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';

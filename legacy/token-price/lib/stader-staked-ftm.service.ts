@@ -1,7 +1,7 @@
 import { Price } from '../token-price-types';
 import { formatUnits } from 'ethers/lib/utils';
 import { getAddress } from '@ethersproject/address';
-import { getContractAt } from '../../../modules/on-chain/contract';
+import { getContractAt } from '../../../modules/web3/contract';
 
 const ftmStakingRateProvider = getContractAt('0x629D4c27057915e59Dd94Bca8D48c6d80735B521', [
     {

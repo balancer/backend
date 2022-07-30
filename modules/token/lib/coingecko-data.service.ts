@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { sleep } from '../../util/promise';
+import { sleep } from '../../common/promise';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { timestampRoundedUpToNearestHour } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../common/time';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 const FIAT_PARAM = 'usd';

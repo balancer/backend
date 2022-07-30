@@ -1,5 +1,5 @@
 import { FbeetsService } from './lib/fbeets.service';
-import { getContractAt } from '../on-chain/contract';
+import { getContractAt } from '../web3/contract';
 import { networkConfig } from '../config/network-config';
 import FreshBeetsAbi from './abi/FreshBeets.json';
 import ERC20 from './abi/ERC20.json';

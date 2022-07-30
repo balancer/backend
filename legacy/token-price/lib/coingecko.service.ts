@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { twentyFourHoursInSecs } from '../../../modules/util/time';
+import { twentyFourHoursInSecs } from '../../../modules/common/time';
 import _ from 'lodash';
 import { env } from '../../../app/env';
 import {

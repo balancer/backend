@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from 'ethers';
-import { oldBnumFromBnum } from '../../big-numbers/old-big-number';
+import { oldBnumFromBnum } from '../../big-number/old-big-number';
 import { prisma } from '../../../prisma/prisma-client';
 
 export class FbeetsService {

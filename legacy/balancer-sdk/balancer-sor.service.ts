@@ -3,7 +3,7 @@ import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
 import { poolService } from '../../modules/pool/pool.service';
-import { oldBnum } from '../../modules/big-numbers/old-big-number';
+import { oldBnum } from '../../modules/big-number/old-big-number';
 import axios from 'axios';
 import { SwapInfo } from '@balancer-labs/sdk';
 import { env } from '../../app/env';

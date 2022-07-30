@@ -7,7 +7,7 @@ import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
-import { Multicaller } from '../../multicaller/multicaller';
+import { Multicaller } from '../../web3/multicaller';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';

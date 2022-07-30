@@ -1,6 +1,6 @@
 import { BalancerJoinExitFragment, InvestType } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { BigNumber } from 'ethers';
-import { fromFp } from '../big-numbers/numbers';
+import { fromFp } from '../big-number/big-number';
 import _ from 'lodash';
 import { TokenPrices } from '../../legacy/token-price/token-price-types';
 import { tokenPriceService } from '../../legacy/token-price/token-price.service';

@@ -20,7 +20,7 @@ import {
 import { PrismaBalancerPoolSnapshotWithTokens, PrismaBlockExtended, UserPortfolioData } from '../portfolio-types';
 import { PrismaBalancerPool } from '@prisma/client';
 import { cache } from '../../cache/cache';
-import { oneDayInMinutes } from '../../util/time';
+import { oneDayInMinutes } from '../../common/time';
 //import { balancerService } from '../../balancer/balancer.service';
 
 const LAST_BLOCK_CACHED_KEY = 'portfolio:data:last-block-cached';

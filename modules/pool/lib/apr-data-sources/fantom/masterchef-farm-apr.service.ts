@@ -3,7 +3,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { blocksSubgraphService } from '../../../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { secondsPerYear } from '../../../../util/time';
+import { secondsPerYear } from '../../../../common/time';
 import { PrismaPoolAprItem, PrismaTokenCurrentPrice } from '@prisma/client';
 import { networkConfig } from '../../../../config/network-config';
 import { tokenService } from '../../../../token/token.service';

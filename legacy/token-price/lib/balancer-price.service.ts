@@ -4,7 +4,7 @@ import {
     TokenPrice_OrderBy,
 } from '../../../modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { HistoricalPrice, TokenHistoricalPrices, TokenPrices } from '../token-price-types';
-import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../../../modules/util/time';
+import { fiveMinutesInSeconds, getDailyTimestampRanges, getHourlyTimestamps } from '../../../modules/common/time';
 import _ from 'lodash';
 
 export class BalancerPriceService {

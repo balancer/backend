@@ -38,7 +38,7 @@ import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staki
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { userService } from '../user/user.service';
-import { jsonRpcProvider } from '../on-chain/contract';
+import { jsonRpcProvider } from '../web3/contract';
 import { configService, ConfigService } from '../config/config.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';

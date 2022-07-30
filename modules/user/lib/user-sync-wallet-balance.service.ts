@@ -1,10 +1,10 @@
 import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { AddressZero } from '@ethersproject/constants';
-import { jsonRpcProvider } from '../../on-chain/contract';
+import { jsonRpcProvider } from '../../web3/contract';
 import ERC20Abi from '../abi/ERC20.json';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { Multicaller } from '../../multicaller/multicaller';
+import { Multicaller } from '../../web3/multicaller';
 import { networkConfig } from '../../config/network-config';
 import { formatFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';

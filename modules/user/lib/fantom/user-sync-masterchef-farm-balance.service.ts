@@ -6,15 +6,15 @@ import {
 } from '../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import _ from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
-import { getContractAt, jsonRpcProvider } from '../../../on-chain/contract';
+import { getContractAt, jsonRpcProvider } from '../../../web3/contract';
 import MasterChefAbi from '../../abi/MasterChef.json';
-import { Multicaller } from '../../../multicaller/multicaller';
+import { Multicaller } from '../../../web3/multicaller';
 import { networkConfig } from '../../../config/network-config';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { UserStakedBalanceService } from '../../user-types';
-import { AmountHumanReadable } from '../../../global-types';
+import { AmountHumanReadable } from '../../../common/global-types';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     public async syncStakedBalances(): Promise<void> {

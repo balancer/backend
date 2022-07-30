@@ -1,7 +1,7 @@
 import { utils } from 'ethers';
 import beetsAbi from '../abi/BeethovenxToken.json';
 import { env } from '../../../app/env';
-import { getContractAt } from '../../on-chain/contract';
+import { getContractAt } from '../../web3/contract';
 
 const beetsContract = getContractAt(env.BEETS_ADDRESS, beetsAbi);
 

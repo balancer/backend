@@ -1,7 +1,7 @@
 import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { timestampRoundedUpToNearestHour } from '../../util/time';
+import { timestampRoundedUpToNearestHour } from '../../common/time';
 import { PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { networkConfig } from '../../config/network-config';
