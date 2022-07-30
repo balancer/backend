@@ -10,6 +10,7 @@ import { beetsService } from '../modules/beets/beets.service';
 import { jsonRpcProvider } from '../modules/web3/contract';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
+import { protocolService } from '../modules/protocol/protocol.service';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -171,7 +172,7 @@ export function scheduleLocalWorkerTasks() {
     });
 
     scheduleJob('*/30 * * * * *', 'cache-protocol-data', TWO_MINUTES_IN_MS, async () => {
-        await beetsService.cacheProtocolData();
+        await protocolService.cacheProtocolMetrics();
     });
 
     //once an hour at minute 1

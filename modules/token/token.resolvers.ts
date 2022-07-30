@@ -1,6 +1,6 @@
 import { Resolvers } from '../../schema';
 import _ from 'lodash';
-import { isAdminRoute } from '../auth/resolver-auth';
+import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {

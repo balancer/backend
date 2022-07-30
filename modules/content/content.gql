@@ -1,17 +1,17 @@
 extend type Query {
-    configGetNewsItems: [GqlConfigNewsItem!]!
+    contentGetNewsItems: [GqlContentNewsItem!]!
 }
 
-type GqlConfigNewsItem {
+type GqlContentNewsItem {
     id: ID!
     timestamp: String!
     url: String!
     text: String!
-    source: GqlConfigNewsItemSource!
+    source: GqlContentNewsItemSource!
     image: String
 }
 
-enum GqlConfigNewsItemSource {
+enum GqlContentNewsItemSource {
     twitter
     discord
     medium

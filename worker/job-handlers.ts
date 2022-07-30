@@ -6,7 +6,8 @@ import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { balancerSdk } from '../legacy/balancer-sdk/src/balancer-sdk';
 import { userService } from '../modules/user/user.service';
-import { WorkerJob } from './manual-jobs'
+import { WorkerJob } from './manual-jobs';
+import { protocolService } from '../modules/protocol/protocol.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -198,7 +199,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/cache-protocol-data', async (req, res, next) => {
         try {
             console.log('Cache protocol data');
-            await runIfNotAlreadyRunning('cache-protocol-data', () => beetsService.cacheProtocolData());
+            await runIfNotAlreadyRunning('cache-protocol-data', () => protocolService.cacheProtocolMetrics());
             console.log('Cache protocol data done');
             res.sendStatus(200);
         } catch (error) {

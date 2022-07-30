@@ -39,7 +39,7 @@ import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.s
 import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../web3/contract';
-import { configService, ConfigService } from '../config/config.service';
+import { configService } from '../content/content.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { GaugeStakingService } from './lib/staking/optimism/gauge-staking-service';
@@ -51,7 +51,6 @@ export class PoolService {
     private cache = new Cache<string, any>();
     constructor(
         private readonly provider: Provider,
-        private readonly configService: ConfigService,
         private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
@@ -260,7 +259,6 @@ const aprServices = [];
 
 export const poolService = new PoolService(
     jsonRpcProvider,
-    configService,
     new PoolCreatorService(userService),
     new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
     new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),

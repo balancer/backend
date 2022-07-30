@@ -1,17 +1,11 @@
 import { Resolvers } from '../../schema';
 import { beetsService } from './beets.service';
-import { isAdminRoute } from '../auth/resolver-auth';
+import { isAdminRoute } from '../auth/auth-context';
 
 const balancerResolvers: Resolvers = {
     Query: {
         beetsGetFbeetsRatio: async (parent, {}, context) => {
             return beetsService.getFbeetsRatio();
-        },
-        beetsGetProtocolData: async (parent, {}, context) => {
-            return beetsService.getProtocolData();
-        },
-        beetsGetConfig: async (parent, {}, context) => {
-            return beetsService.getConfig();
         },
     },
     Mutation: {
@@ -19,13 +13,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await beetsService.syncFbeetsRatio();
-
-            return 'success';
-        },
-        beetsSyncProtocolData: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await beetsService.cacheProtocolData();
 
             return 'success';
         },

@@ -31,10 +31,10 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
-import { ConfigService } from '../../config/config.service';
+import { ContentService } from '../../content/content.service';
 
 export class PoolGqlLoaderService {
-    constructor(private readonly configService: ConfigService) {}
+    constructor(private readonly configService: ContentService) {}
 
     public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({

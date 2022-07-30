@@ -1,6 +1,6 @@
 import { poolService } from './pool.service';
 import { Resolvers } from '../../schema';
-import { isAdminRoute } from '../auth/resolver-auth';
+import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 
 const balancerResolvers: Resolvers = {
