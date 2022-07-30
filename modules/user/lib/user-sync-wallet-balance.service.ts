@@ -101,7 +101,7 @@ export class UserSyncWalletBalanceService {
             toBlock,
         });
 
-        const balancesToFetch = _.uniq(
+        const balancesToFetch = _.uniqBy(
             events
                 .filter((event) =>
                     //we also need to track fbeets balance
@@ -116,6 +116,7 @@ export class UserSyncWalletBalanceService {
                     ];
                 })
                 .flat(),
+            (entry) => entry.erc20Address + entry.userAddress,
         );
 
         if (balancesToFetch.length === 0) {
