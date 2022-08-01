@@ -42,7 +42,7 @@ extend type Mutation {
     poolSyncStakingForPools: String!
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
-    poolSyncLatestSnapshotsForAllPools: String!
+    poolSyncLatestSnapshotsForAllPools(daysToSync: Int): String!
     poolUpdateLifetimeValuesForAllPools: String!
 }
 

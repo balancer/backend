@@ -1,6 +1,6 @@
 import { Resolvers } from '../../schema';
 import { userService } from './user.service';
-import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
+import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { tokenService } from '../token/token.service';
 
 const resolvers: Resolvers = {

@@ -1,7 +1,7 @@
 import { poolService } from './pool.service';
 import { Resolvers } from '../../schema';
-import { isAdminRoute } from '../util/resolver-util';
-import { prisma } from '../util/prisma-client';
+import { isAdminRoute } from '../auth/auth-context';
+import { prisma } from '../../prisma/prisma-client';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -164,10 +164,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncLatestSnapshotsForAllPools: async (parent, args, context) => {
+        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
             isAdminRoute(context);
 
-            await poolService.syncLatestSnapshotsForAllPools();
+            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
 
             return 'success';
         },

@@ -1,6 +1,12 @@
 import { env } from '../../app/env';
 
 export interface NetworkConfig {
+    chain: {
+        slug: string;
+        id: number;
+        nativeAssetAddress: string;
+        wrappedNativeAssetAddress: string;
+    };
     eth: {
         address: string;
         addressFormatted: string;
@@ -16,14 +22,14 @@ export interface NetworkConfig {
         nativeAssetId: string;
         platformId: string;
     };
-    /*subgraphs: {
+    subgraphs: {
+        startDate: string;
         balancer: string;
         blocks: string;
         masterchef: string;
         beetsBar: string;
         changelog: string;
-        locking: string;
-    };*/
+    };
     sanity: {
         projectId: string;
         dataset: string;
@@ -45,11 +51,34 @@ export interface NetworkConfig {
         address: string;
         excludedFarmIds: string[];
     };
+    copper: {
+        proxyAddress: string;
+    };
+    yearn: {
+        vaultsEndpoint: string;
+    };
     avgBlockSpeed: number;
+    sor: {
+        url: string;
+    };
 }
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': {
+        chain: {
+            slug: 'fantom',
+            id: 250,
+            nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            wrappedNativeAssetAddress: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
+        },
+        subgraphs: {
+            startDate: '2021-10-08',
+            balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+            beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
+            blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
+            changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
+            masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
+        },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
             addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -91,8 +120,31 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             ],
         },
         avgBlockSpeed: 1,
+        sor: {
+            url: 'https://22nltjhtfsyhecuudusuv2m5i40zeafa.lambda-url.eu-central-1.on.aws/',
+        },
+        yearn: {
+            vaultsEndpoint: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
+        },
+        copper: {
+            proxyAddress: '0xbC8a71C75ffbd2807c021F4F81a8832392dEF93c',
+        },
     },
     '10': {
+        chain: {
+            slug: 'optimism',
+            id: 10,
+            nativeAssetAddress: '0x4200000000000000000000000000000000000006',
+            wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
+        },
+        subgraphs: {
+            startDate: '2022-01-01',
+            balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-optimism',
+            beetsBar: 'https://',
+            blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
+            changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
+            masterchef: 'https://',
+        },
         eth: {
             address: '0x4200000000000000000000000000000000000006',
             addressFormatted: '0x4200000000000000000000000000000000000006',
@@ -113,27 +165,32 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             dataset: 'production',
         },
         beets: {
-            address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
+            address: '0x0000000000000000000000000000000000000000',
         },
         fbeets: {
-            address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
-            farmId: '22',
-            poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-            poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
+            address: '0x0000000000000000000000000000000000000000',
+            farmId: '-1',
+            poolId: '0x0000000000000000000000000000000000000000',
+            poolAddress: '0x0000000000000000000000000000000000000000',
         },
         balancer: {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         },
         multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
         masterchef: {
-            address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
-            excludedFarmIds: [
-                '34', //OHM bonding farm
-                '28', //OHM bonding farm
-                '9', //old fidellio dueto (non fbeets)
-            ],
+            address: '0x0000000000000000000000000000000000000000',
+            excludedFarmIds: [],
         },
         avgBlockSpeed: 1,
+        sor: {
+            url: 'https://#/',
+        },
+        yearn: {
+            vaultsEndpoint: 'https://#/',
+        },
+        copper: {
+            proxyAddress: '0x0000000000000000000000000000000000000000',
+        },
     },
 };
 

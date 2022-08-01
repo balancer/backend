@@ -1,12 +1,13 @@
-import { balancerSdk } from './src/balancer-sdk';
 import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
 import { poolService } from '../pool/pool.service';
-import { oldBnum } from '../util/old-big-number';
+import { oldBnum } from '../big-number/old-big-number';
 import axios from 'axios';
 import { SwapInfo } from '@balancer-labs/sdk';
-import { env } from '../../app/env';
+import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../web3/addresses';
+import { networkConfig } from '../config/network-config';
+import { BigNumber } from 'ethers';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -25,13 +26,15 @@ export class BalancerSorService {
         swapType,
         swapOptions,
         swapAmount,
-        boostedPools,
         tokens,
     }: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
+        tokenIn = replaceEthWithZeroAddress(tokenIn);
+        tokenOut = replaceEthWithZeroAddress(tokenOut);
+
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
-        const { data } = await axios.post<{ swapInfo: SwapInfo }>(env.SOR_URL, {
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(networkConfig.sor.url, {
             swapType,
             tokenIn,
             tokenOut,
@@ -76,16 +79,22 @@ export class BalancerSorService {
 
         return {
             ...swapInfo,
+            tokenIn: replaceZeroAddressWithEth(swapInfo.tokenIn),
+            tokenOut: replaceZeroAddressWithEth(swapInfo.tokenOut),
             swapType,
             tokenInAmount,
             tokenOutAmount,
             swapAmount,
-            swapAmountScaled: swapInfo.swapAmount.toString(),
-            swapAmountForSwaps: swapInfo.swapAmountForSwaps?.toString(),
+            swapAmountScaled: BigNumber.from(swapInfo.swapAmount).toString(),
+            swapAmountForSwaps: swapInfo.swapAmountForSwaps
+                ? BigNumber.from(swapInfo.swapAmountForSwaps).toString()
+                : undefined,
             returnAmount,
-            returnAmountScaled: swapInfo.returnAmount.toString(),
-            returnAmountConsideringFees: swapInfo.returnAmountConsideringFees.toString(),
-            returnAmountFromSwaps: swapInfo.returnAmountFromSwaps?.toString(),
+            returnAmountScaled: BigNumber.from(swapInfo.returnAmount).toString(),
+            returnAmountConsideringFees: BigNumber.from(swapInfo.returnAmountConsideringFees).toString(),
+            returnAmountFromSwaps: swapInfo.returnAmountFromSwaps
+                ? BigNumber.from(swapInfo.returnAmountFromSwaps).toString()
+                : undefined,
             routes: swapInfo.routes.map((route) => ({
                 ...route,
                 hops: route.hops.map((hop) => ({

@@ -1,4 +1,4 @@
-import { AmountHumanReadable } from '../global/global-types';
+import { AmountHumanReadable } from '../common/global-types';
 
 export interface UserStakedBalanceService {
     syncStakedBalances(): Promise<void>;

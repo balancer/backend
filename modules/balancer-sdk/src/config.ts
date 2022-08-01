@@ -1,8 +1,8 @@
 import { BalancerSdkConfig, Network, SubgraphPoolBase } from '@balancer-labs/sdk';
-import { env } from '../../../app/env';
-import { tokenPriceService } from '../../token-price/token-price.service';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolType } from '@prisma/client';
+import { tokenPriceService } from '../../../legacy/token-price/token-price.service';
+import { networkConfig } from '../../config/network-config';
 
 export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
     '250': {
@@ -43,10 +43,10 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                 getNativeAssetPriceInToken: async (tokenAddress: string) => {
                     try {
                         const tokenPrices = await tokenPriceService.getTokenPrices();
-                        tokenPriceService.getPriceForToken(tokenPrices, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+                        tokenPriceService.getPriceForToken(tokenPrices, networkConfig.chain.wrappedNativeAssetAddress);
                         const nativeAssetPrice = tokenPriceService.getPriceForToken(
                             tokenPrices,
-                            env.WRAPPED_NATIVE_ASSET_ADDRESS,
+                            networkConfig.chain.wrappedNativeAssetAddress,
                         );
                         const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, tokenAddress) || 1;
 
@@ -133,10 +133,10 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                 getNativeAssetPriceInToken: async (tokenAddress: string) => {
                     try {
                         const tokenPrices = await tokenPriceService.getTokenPrices();
-                        tokenPriceService.getPriceForToken(tokenPrices, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+                        tokenPriceService.getPriceForToken(tokenPrices, networkConfig.chain.wrappedNativeAssetAddress);
                         const nativeAssetPrice = tokenPriceService.getPriceForToken(
                             tokenPrices,
-                            env.WRAPPED_NATIVE_ASSET_ADDRESS,
+                            networkConfig.chain.wrappedNativeAssetAddress,
                         );
                         const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, tokenAddress) || 1;
 

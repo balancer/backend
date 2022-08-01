@@ -1,0 +1,18 @@
+extend type Query {
+    protocolMetrics: GqlProtocolMetrics!
+}
+
+extend type Mutation {
+    protocolCacheMetrics: String!
+}
+
+type GqlProtocolMetrics {
+    totalLiquidity: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalSwapFee: BigDecimal!
+    poolCount: BigInt!
+    swapFee24h: BigDecimal!
+    swapVolume24h: BigDecimal!
+}
+
+

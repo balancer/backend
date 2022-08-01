@@ -3,7 +3,7 @@ import { env } from '../../app/env';
 import { SignatureLike } from '@ethersproject/bytes';
 import { createLgeTypes } from './data-verification';
 import { TypedDataField } from '@ethersproject/abstract-signer';
-import { sanityClient } from '../util/sanity';
+import { sanityClient } from '../sanity/sanity';
 import { GqlLgeCreateInput } from '../../schema';
 import { getLbpPoolOwner } from './copper-proxy';
 import { getAddress } from 'ethers/lib/utils';
