@@ -29,7 +29,6 @@ export interface NetworkConfig {
         masterchef: string;
         beetsBar: string;
         changelog: string;
-        locking: string;
     };
     sanity: {
         projectId: string;
@@ -74,12 +73,11 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         subgraphs: {
             startDate: '2021-10-08',
-            balancer: 'balancer-subgraph',
-            beetsBar: 'beets-bar-subgraph',
-            blocks: 'blocks-subgraph',
-            changelog: 'changelog-subgraph',
-            locking: 'locking-subgraph',
-            masterchef: 'masterchef-subgraph',
+            balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+            beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
+            blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
+            changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
+            masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -145,7 +143,6 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             beetsBar: 'https://',
             blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
-            locking: 'https://',
             masterchef: 'https://',
         },
         eth: {
