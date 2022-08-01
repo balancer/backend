@@ -53,6 +53,18 @@ export class MasterchefFarmAprService implements PoolAprService {
             });
         }
 
+        const poolsWithNoAllocPoints = farms
+            .filter((farm) => parseFloat(farm.allocPoint) === 0)
+            .map((farm) => farm.pair);
+
+        //TODO: this could be optimized, doesn't need to be run everytime
+        await prisma.prismaPoolAprItem.deleteMany({
+            where: {
+                type: 'NATIVE_REWARD',
+                pool: { address: { in: poolsWithNoAllocPoints } },
+            },
+        });
+
         await prismaBulkExecuteOperations(operations);
     }
 
