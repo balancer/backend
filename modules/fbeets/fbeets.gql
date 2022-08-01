@@ -1,7 +1,0 @@
-extend type Query {
-    fbeetsGetApr: FbeetsApr!
-}
-
-type FbeetsApr {
-    apr: Float!
-}

@@ -7,7 +7,6 @@ import {
     getSdk,
     OrderDirection,
 } from './generated/blocks-subgraph-types';
-import { env } from '../../../app/env';
 import {
     fiveMinutesInSeconds,
     getDailyTimestampsForDays,
@@ -15,10 +14,9 @@ import {
     oneDayInMinutes,
     secondsPerDay,
     secondsPerYear,
-} from '../../util/time';
-import { subgraphLoadAll } from '../../util/subgraph-util';
+} from '../../common/time';
+import { subgraphLoadAll } from '../subgraph-util';
 import moment from 'moment-timezone';
-import { memCacheGetValue, memCacheSetValue } from '../../util/mem-cache';
 import { networkConfig } from '../../config/network-config';
 import { Cache, CacheClass } from 'memory-cache';
 
@@ -37,7 +35,7 @@ export class BlocksSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.BLOCKS_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.blocks);
     }
 
     public async getAverageBlockTime(): Promise<number> {
@@ -143,7 +141,7 @@ export class BlocksSubgraphService {
     }*/
 
     public async getBlockFrom24HoursAgo(): Promise<BlockFragment> {
-        const cached = memCacheGetValue<BlockFragment>(BLOCK_24H_AGO);
+        const cached = this.cache.get(BLOCK_24H_AGO);
 
         if (cached) {
             return cached;
@@ -175,7 +173,7 @@ export class BlocksSubgraphService {
         const allBlocks = await this.getAllBlocks(args);
 
         if (allBlocks.length > 0) {
-            memCacheSetValue(BLOCK_24H_AGO, allBlocks[0], 15);
+            this.cache.put(BLOCK_24H_AGO, allBlocks[0], 15 * 1000);
         }
 
         return allBlocks[0];
@@ -200,7 +198,7 @@ export class BlocksSubgraphService {
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
         const today = moment.tz('GMT').format('YYYY-MM-DD');
-        const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');
+        const maxDays = moment.tz('GMT').diff(moment.tz(networkConfig.subgraphs.startDate, 'GMT'), 'days');
         numDays = maxDays < numDays ? maxDays : numDays;
 
         const timestampsWithBuffer = getDailyTimestampsWithBuffer(numDays);
