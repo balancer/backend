@@ -23,25 +23,39 @@ export class PoolSnapshotService {
         });
     }
 
-    //TODO: this could be optimized, currently we just reload all snapshots for the last two days
-    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
+    //TODO: this could be optimized
+    public async syncLatestSnapshotsForAllPools(daysToSync = 1) {
         let operations: any[] = [];
-        const twoDaysAgo = moment().subtract(daysToSync, 'day').unix();
+        const oneDayAgoStartOfDay = moment().utc().startOf('day').subtract(daysToSync, 'days').unix();
 
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
-            where: { timestamp_gte: twoDaysAgo },
+            where: { timestamp_gte: oneDayAgoStartOfDay },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
+        });
+
+        const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
+            where: {
+                timestamp: moment()
+                    .utc()
+                    .startOf('day')
+                    .subtract(daysToSync + 1, 'days')
+                    .unix(),
+            },
         });
 
         const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
 
         for (const poolId of poolIds) {
             const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === poolId);
+            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === poolId);
+            const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
+            const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
 
             const poolOperations = snapshots.map((snapshot, index) => {
-                const prevTotalSwapVolume = index > 0 ? snapshots[index - 1].totalSwapVolume : '0';
-                const prevTotalSwapFee = index > 0 ? snapshots[index - 1].totalSwapFee : '0';
+                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].totalSwapVolume;
+                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].totalSwapFee;
+
                 const data = this.getPrismaPoolSnapshotFromSubgraphData(
                     snapshot,
                     prevTotalSwapVolume,
@@ -74,8 +88,8 @@ export class PoolSnapshotService {
 
             await prisma.prismaPoolSnapshot.createMany({
                 data: snapshots.map((snapshot, index) => {
-                    const prevTotalSwapVolume = index > 0 ? snapshots[index - 1].totalSwapVolume : '0';
-                    const prevTotalSwapFee = index > 0 ? snapshots[index - 1].totalSwapFee : '0';
+                    let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].totalSwapVolume;
+                    let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].totalSwapFee;
 
                     return this.getPrismaPoolSnapshotFromSubgraphData(snapshot, prevTotalSwapVolume, prevTotalSwapFee);
                 }),

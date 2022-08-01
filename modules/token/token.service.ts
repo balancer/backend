@@ -54,6 +54,17 @@ export class TokenService {
             orderBy: { priority: 'desc' },
         });
 
+        const weth = tokens.find((token) => token.address === networkConfig.weth.address);
+
+        if (weth) {
+            tokens.push({
+                ...weth,
+                name: networkConfig.eth.name,
+                address: networkConfig.eth.address,
+                symbol: networkConfig.eth.symbol,
+            });
+        }
+
         return tokens.map((token) => ({
             ...token,
             chainId: parseInt(env.CHAIN_ID),
