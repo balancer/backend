@@ -3,7 +3,6 @@ import { coingeckoService } from './lib/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
 import { sleep } from '../../modules/common/promise';
 import _ from 'lodash';
-import { env } from '../../app/env';
 import { Cache, CacheClass } from 'memory-cache';
 
 import { getAddress } from 'ethers/lib/utils';
@@ -14,6 +13,7 @@ import { BalancerPoolFragment } from '../../modules/subgraphs/balancer-subgraph/
 import { blocksSubgraphService } from '../../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { SFTMX_ADDRESS, staderStakedFtmService } from './lib/stader-staked-ftm.service';
 import { getContractAt } from '../../modules/web3/contract';
+import { networkConfig } from '../../modules/config/network-config';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -104,7 +104,7 @@ export class TokenPriceService {
         });
 
         const balancerTokenPrices = await balancerPriceService.getTokenPrices(
-            [...missingTokens, env.WRAPPED_NATIVE_ASSET_ADDRESS],
+            [...missingTokens, networkConfig.chain.wrappedNativeAssetAddress],
             coingeckoTokenPrices,
         );
 
@@ -119,7 +119,7 @@ export class TokenPriceService {
             ...coingeckoTokenPrices,
             ...balancerTokenPrices,
             ...nestedBptPrices,
-            [env.NATIVE_ASSET_ADDRESS]: nativeAssetPrice,
+            [networkConfig.chain.nativeAssetAddress]: nativeAssetPrice,
             //stader ftmx
             [SFTMX_ADDRESS]: stakedFtmPrice,
         };
@@ -233,8 +233,8 @@ export class TokenPriceService {
             id: '0x03c6b3f09d2504606936b1a4decefad204687890000200000000000000000015',
         });
 
-        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === env.BEETS_ADDRESS.toLowerCase());
-        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== env.BEETS_ADDRESS.toLowerCase());
+        const beets = (beetsUsdcPool?.tokens ?? []).find((token) => token.address === networkConfig.beets.address);
+        const usdc = (beetsUsdcPool?.tokens ?? []).find((token) => token.address !== networkConfig.beets.address);
 
         const { pool: beetsFtmPool } = await balancerSubgraphService.getPool({
             id: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',

@@ -1,16 +1,16 @@
 import { PoolAprService } from '../../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import axios from 'axios';
-import { env } from '../../../../../app/env';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
 import { YearnVault } from '../apr-types';
+import { networkConfig } from '../../../../config/network-config';
 
 export class YearnVaultAprService implements PoolAprService {
     constructor(private readonly tokenService: TokenService) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const { data } = await axios.get<YearnVault[]>(env.YEARN_VAULTS_ENDPOINT);
+        const { data } = await axios.get<YearnVault[]>(networkConfig.yearn.vaultsEndpoint);
         const tokenPrices = await this.tokenService.getTokenPrices();
 
         for (const pool of pools) {

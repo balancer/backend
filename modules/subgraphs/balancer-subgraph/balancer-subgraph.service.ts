@@ -45,6 +45,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../common/time';
 import { cache } from '../../cache/cache';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
+import { networkConfig } from '../../config/network-config';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -58,7 +59,7 @@ export class BalancerSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.BALANCER_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.balancer);
     }
 
     public async getMetadata() {

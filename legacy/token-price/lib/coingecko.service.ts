@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { twentyFourHoursInSecs } from '../../../modules/common/time';
 import _ from 'lodash';
-import { env } from '../../../app/env';
 import {
+    CoingeckoPriceResponse,
     HistoricalPrice,
     HistoricalPriceResponse,
     Price,
-    CoingeckoPriceResponse,
     TokenPrices,
 } from '../token-price-types';
 import moment from 'moment-timezone';
@@ -24,7 +23,6 @@ interface MappedToken {
 export class CoingeckoService {
     private readonly baseUrl: string;
     private readonly fiatParam: string;
-    private readonly chainId: string;
     private readonly platformId: string;
     private readonly nativeAssetId: string;
     private readonly nativeAssetAddress: string;
@@ -32,10 +30,9 @@ export class CoingeckoService {
     constructor() {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
-        this.chainId = env.CHAIN_ID;
         this.platformId = networkConfig.coingecko.platformId;
         this.nativeAssetId = networkConfig.coingecko.nativeAssetId;
-        this.nativeAssetAddress = env.NATIVE_ASSET_ADDRESS;
+        this.nativeAssetAddress = networkConfig.chain.nativeAssetAddress;
     }
 
     public async getNativeAssetPrice(): Promise<Price> {

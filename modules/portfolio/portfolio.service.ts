@@ -16,7 +16,6 @@ import {
 import moment from 'moment-timezone';
 import { GqlUserPortfolioData, GqlUserTokenData } from '../../schema';
 import { balancerTokenMappings } from '../../legacy/token-price/lib/balancer-token-mappings';
-import { env } from '../../app/env';
 import { PortfolioDataService } from './lib/portfolio-data.service';
 import { prisma } from '../../prisma/prisma-client';
 import {
@@ -27,6 +26,7 @@ import {
 } from '@prisma/client';
 import { cache } from '../cache/cache';
 import { getAddress } from 'ethers/lib/utils';
+import { networkConfig } from '../config/network-config';
 
 const PORTFOLIO_USER_DATA_CACHE_KEY_PREFIX = 'portfolio:user-data:';
 
@@ -367,11 +367,11 @@ class PortfolioService {
         beetsBar: PrismaBeetsBarSnapshot | null,
         beetsBarUser: PrismaBeetsBarUserSnapshot | null,
     ): number {
-        if (pool.id !== env.FBEETS_POOL_ID || !beetsBar) {
+        if (pool.id !== networkConfig.fbeets.poolId || !beetsBar) {
             return 0;
         }
 
-        const userFbeetsFarm = userFarms.find((userFarm) => userFarm.farm.pair === env.FBEETS_ADDRESS);
+        const userFbeetsFarm = userFarms.find((userFarm) => userFarm.farm.pair === networkConfig.fbeets.address);
         const userStakedFbeets = fromFp(userFbeetsFarm?.amount || '0').toNumber();
         const userFbeets = parseFloat(beetsBarUser?.fBeets || '0');
 

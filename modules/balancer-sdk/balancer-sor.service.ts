@@ -1,4 +1,3 @@
-import { balancerSdk } from './src/balancer-sdk';
 import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
@@ -6,7 +5,7 @@ import { poolService } from '../pool/pool.service';
 import { oldBnum } from '../big-number/old-big-number';
 import axios from 'axios';
 import { SwapInfo } from '@balancer-labs/sdk';
-import { env } from '../../app/env';
+import { networkConfig } from '../config/network-config';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -31,7 +30,7 @@ export class BalancerSorService {
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
-        const { data } = await axios.post<{ swapInfo: SwapInfo }>(env.SOR_URL, {
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(networkConfig.sor.url, {
             swapType,
             tokenIn,
             tokenOut,

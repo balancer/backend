@@ -16,6 +16,7 @@ import { env } from '../../../app/env';
 import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
 import { twentyFourHoursInMs } from '../../common/time';
 import { Cache, CacheClass } from 'memory-cache';
+import { networkConfig } from '../../config/network-config';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
 
@@ -25,7 +26,7 @@ export class MasterchefSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.MASTERCHEF_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.masterchef);
     }
 
     public async getMetadata() {

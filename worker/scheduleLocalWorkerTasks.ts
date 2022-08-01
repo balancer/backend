@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import cron from 'node-cron';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../modules/token/token.service';
-import { env } from '../app/env';
 import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
@@ -276,7 +275,7 @@ export function scheduleLocalWorkerTasks() {
 
     console.log('start pool sync');
 
-    runWithMinimumInterval(Number(env.POOL_SYNC_INTERVAL_MS), async () => {
+    runWithMinimumInterval(5000, async () => {
         await poolService.syncChangedPools();
     }).catch((error) => console.log('Error starting syncChangedPools...', error));
 

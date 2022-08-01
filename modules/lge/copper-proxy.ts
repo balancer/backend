@@ -1,8 +1,8 @@
 import CopperProxyAbi from './abi/CopperProxy.json';
-import { env } from '../../app/env';
 import { getContractAt } from '../web3/contract';
+import { networkConfig } from '../config/network-config';
 
-const copperProxy = getContractAt(env.COPPER_PROXY_ADDRESS, CopperProxyAbi);
+const copperProxy = getContractAt(networkConfig.copper.proxyAddress, CopperProxyAbi);
 
 export async function getLbpPoolOwner(poolAddress: string): Promise<string> {
     const poolData = await copperProxy.getPoolData(poolAddress);

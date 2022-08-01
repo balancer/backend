@@ -7,7 +7,6 @@ import {
     getSdk,
     OrderDirection,
 } from './generated/blocks-subgraph-types';
-import { env } from '../../../app/env';
 import {
     fiveMinutesInSeconds,
     getDailyTimestampsForDays,
@@ -36,7 +35,7 @@ export class BlocksSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.BLOCKS_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.blocks);
     }
 
     public async getAverageBlockTime(): Promise<number> {
@@ -199,7 +198,7 @@ export class BlocksSubgraphService {
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
         const today = moment.tz('GMT').format('YYYY-MM-DD');
-        const maxDays = moment.tz('GMT').diff(moment.tz(env.SUBGRAPH_START_DATE, 'GMT'), 'days');
+        const maxDays = moment.tz('GMT').diff(moment.tz(networkConfig.subgraphs.startDate, 'GMT'), 'days');
         numDays = maxDays < numDays ? maxDays : numDays;
 
         const timestampsWithBuffer = getDailyTimestampsWithBuffer(numDays);

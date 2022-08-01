@@ -1,6 +1,6 @@
 import { getAddress } from 'ethers/lib/utils';
 import { Contract, ethers } from 'ethers';
-import { env } from '../../app/env';
+import { networkConfig } from '../config/network-config';
 
 export function returnChecksum() {
     return function (target: any, key: string, descriptor: PropertyDescriptor) {
@@ -13,7 +13,7 @@ export function returnChecksum() {
     };
 }
 
-export const jsonRpcProvider = new ethers.providers.JsonRpcProvider(env.RPC_URL);
+export const jsonRpcProvider = new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl);
 
 export function getContractAt(address: string, abi: any): Contract {
     return new Contract(address, abi, jsonRpcProvider);
