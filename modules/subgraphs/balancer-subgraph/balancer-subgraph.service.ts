@@ -59,7 +59,7 @@ export class BalancerSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.balancer);
+        this.client = new GraphQLClient(networkConfig.subgraphs.balancer);
     }
 
     public async getMetadata() {
