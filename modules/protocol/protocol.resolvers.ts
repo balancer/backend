@@ -4,7 +4,7 @@ import { protocolService } from './protocol.service';
 const protocolResolvers: Resolvers = {
     Query: {
         protocolMetrics: async (): Promise<GqlProtocolMetrics> => {
-            return protocolService.cacheProtocolMetrics();
+            return protocolService.getMetrics();
         },
     },
     Mutation: {
