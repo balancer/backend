@@ -7,7 +7,12 @@ const balancerSdkResolvers: Resolvers = {
         sorGetSwaps: async (parent, args, context) => {
             const tokens = await tokenService.getTokens();
 
-            return balancerSorService.getSwaps({ ...args, boostedPools: [], tokens });
+            return balancerSorService.getSwaps({ ...args, tokens });
+        },
+        sorGetBatchSwapForTokensIn: async (parent, args, context) => {
+            const tokens = await tokenService.getTokens();
+
+            return balancerSorService.getBatchSwapForTokensIn({ ...args, tokens });
         },
     },
 };

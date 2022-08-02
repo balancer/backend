@@ -5,3 +5,8 @@ scalar BigInt
 scalar BigDecimal
 scalar JSON
 scalar AmountHumanReadable
+
+input GqlTokenAmountHumanReadable {
+    address: String!
+    amount: AmountHumanReadable!
+}
