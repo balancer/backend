@@ -183,7 +183,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         avgBlockSpeed: 1,
         sor: {
-            url: 'https://#/',
+            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
         },
         yearn: {
             vaultsEndpoint: 'https://#/',
