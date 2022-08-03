@@ -2,12 +2,18 @@ import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from 'ethers';
 import { oldBnumFromBnum } from '../../big-number/old-big-number';
 import { prisma } from '../../../prisma/prisma-client';
+import { isFantomNetwork, networkConfig } from '../../config/network-config';
+import { env } from '../../../app/env';
 
 export class FbeetsService {
     constructor(private readonly fBeetsContract: Contract, private readonly fBeetsPoolContract: Contract) {}
 
     public async getRatio(): Promise<string> {
         const fbeets = await prisma.prismaFbeets.findFirst({});
+
+        if (!isFantomNetwork()) {
+            return '1.0';
+        }
 
         if (!fbeets) {
             throw new Error('Fbeets data has not yet been synced');
