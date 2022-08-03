@@ -311,6 +311,7 @@ type GqlPoolLinearNested {
     wrappedIndex: Int!
     upperTarget: BigInt!
     lowerTarget: BigInt!
+    bptPriceRate: BigDecimal!
 }
 
 type GqlPoolPhantomStableNested {

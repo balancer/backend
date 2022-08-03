@@ -13,6 +13,7 @@ import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import VaultAbi from '../pool/abi/Vault.json';
 import { jsonRpcProvider } from '../web3/contract';
+import { balancerSdk } from './src/balancer-sdk';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -136,12 +137,17 @@ export class BalancerSorService {
                 tokens,
             });
 
+            console.log(tokensIn[i].address, response.swaps);
+            console.log(tokensIn[i].address, response.tokenAddresses);
+
             swaps.push(response.swaps);
             assetArray.push(response.tokenAddresses);
         }
 
         // Join swaps and assets together correctly
         const batchedSwaps = this.batchSwaps(assetArray, swaps);
+
+        console.log('batchedSwaps', batchedSwaps);
 
         let tokenOutAmountScaled = '0';
         try {

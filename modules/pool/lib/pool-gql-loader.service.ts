@@ -461,7 +461,7 @@ export class PoolGqlLoaderService {
 
         return {
             //TODO could flag these as disabled in sanity
-            proportionalEnabled: true,
+            proportionalEnabled: pool.type !== 'PHANTOM_STABLE',
             singleAssetEnabled: true,
             options,
         };
@@ -631,6 +631,7 @@ export class PoolGqlLoaderService {
         percentOfSupplyNested: number,
     ): GqlPoolLinearNested {
         const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
+        const bpt = pool.tokens.find((token) => token.address === pool.address);
 
         return {
             __typename: 'GqlPoolLinearNested',
@@ -652,6 +653,7 @@ export class PoolGqlLoaderService {
                 ),
             totalLiquidity: `${totalLiquidity}`,
             totalShares: pool.dynamicData?.totalShares || '0',
+            bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
         };
     }
 
