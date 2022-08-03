@@ -327,6 +327,8 @@ type GqlPoolPhantomStableNested {
 
     totalShares: BigDecimal!
     totalLiquidity: BigDecimal!
+    amp: BigInt!
+    swapFee: BigDecimal!
 }
 
 union GqlPoolUnion =

@@ -698,6 +698,8 @@ export class PoolGqlLoaderService {
                 }),
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
+            swapFee: pool.dynamicData?.swapFee || '0',
+            amp: pool.stableDynamicData?.amp || '0',
         };
     }
 
