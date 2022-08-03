@@ -261,6 +261,7 @@ model PrismaPoolStaking {
     type                PrismaPoolStakingType
     address             String
     farm                PrismaPoolStakingMasterChefFarm?
+    gauge               PrismaPoolStakingGauge?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -286,6 +287,22 @@ model PrismaPoolStakingMasterChefFarmRewarder {
     farm                PrismaPoolStakingMasterChefFarm  @relation(fields:[farmId], references: [id])
 
     address             String
+    tokenAddress        String
+    rewardPerSecond     String
+}
+
+model PrismaPoolStakingGauge {
+    id                  String              @id
+    stakingId           String
+    staking             PrismaPoolStaking          @relation(fields:[stakingId], references: [id])
+    gaugeAddress        String
+    rewards             PrismaPoolStakingGaugeReward[]
+}
+
+model PrismaPoolStakingGaugeReward{
+    id                  String              @id
+    gaugeId             String
+    gauge               PrismaPoolStakingGauge @relation(fields:[gaugeId], references: [id])
     tokenAddress        String
     rewardPerSecond     String
 }

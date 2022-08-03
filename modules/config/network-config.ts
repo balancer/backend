@@ -29,6 +29,7 @@ export interface NetworkConfig {
         masterchef: string;
         beetsBar: string;
         changelog: string;
+        gauge: string;
     };
     sanity: {
         projectId: string;
@@ -42,6 +43,9 @@ export interface NetworkConfig {
         farmId: string;
         poolId: string;
         poolAddress: string;
+    };
+    bal: {
+        address: string;
     };
     balancer: {
         vault: string;
@@ -78,6 +82,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
             masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
+            gauge: 'https://#/',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -106,6 +111,9 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             farmId: '22',
             poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
             poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
+        },
+        bal: {
+            address: '',
         },
         balancer: {
             vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
@@ -144,6 +152,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
             masterchef: 'https://',
+            gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
         },
         eth: {
             address: '0x4200000000000000000000000000000000000006',
@@ -165,13 +174,16 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             dataset: 'production',
         },
         beets: {
-            address: '0x0000000000000000000000000000000000000000',
+            address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
         },
         fbeets: {
             address: '0x0000000000000000000000000000000000000000',
             farmId: '-1',
             poolId: '0x0000000000000000000000000000000000000000',
             poolAddress: '0x0000000000000000000000000000000000000000',
+        },
+        bal: {
+            address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
         },
         balancer: {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',

@@ -13,6 +13,8 @@ export const toFp = (x: BigNumberish | Decimal): Decimal => decimal(x).mul(SCALI
 
 export const fromFp = (x: BigNumberish | Decimal): Decimal => decimal(x).div(SCALING_FACTOR);
 
+export const scaleDown = (x: BigNumberish | Decimal, decimals: number): Decimal => decimal(x).div(10 ** decimals);
+
 export const bn = (x: BigNumberish | Decimal): BigNumber => {
     if (BigNumber.isBigNumber(x)) return x;
     const stringified = parseScientific(x.toString());

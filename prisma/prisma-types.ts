@@ -26,6 +26,11 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                         rewarders: true,
                     },
                 },
+                gauge: {
+                    include: {
+                        rewards: true,
+                    },
+                },
             },
         },
         categories: true,
@@ -182,6 +187,11 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                 farm: {
                     include: {
                         rewarders: true,
+                    },
+                },
+                gauge: {
+                    include: {
+                        rewards: true,
                     },
                 },
             },
