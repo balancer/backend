@@ -3,7 +3,7 @@ extend type Query {
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
-        swapAmount: AmountHumanReadable! #expected in human readable form
+        swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
     ): GqlSorGetSwapsResponse!
     sorGetBatchSwapForTokensIn(
