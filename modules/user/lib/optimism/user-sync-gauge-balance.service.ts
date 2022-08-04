@@ -97,15 +97,13 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             const filteredEvents = events.filter((event) => ['Deposit', 'Withdraw', 'Transfer'].includes(event.event!));
 
             for (let event of filteredEvents) {
-                if (
-                    event.event === 'Transfer' &&
-                    event.args!._from !== ZERO_ADDRESS &&
-                    event.args!._to !== ZERO_ADDRESS
-                ) {
-                    uniqueUserAddresses.add(event.args!._from);
-                    uniqueUserAddresses.add(event.args!._to);
+                if (event.event === 'Transfer') {
+                    if (event.args!._from !== ZERO_ADDRESS && event.args!._to !== ZERO_ADDRESS) {
+                        uniqueUserAddresses.add(event.args!._from.toLowerCase());
+                        uniqueUserAddresses.add(event.args!._to.toLowerCase());
+                    }
                 } else {
-                    uniqueUserAddresses.add(event.args!._provider);
+                    uniqueUserAddresses.add(event.args!.provider.toLowerCase());
                 }
             }
 
