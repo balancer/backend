@@ -23,14 +23,11 @@ export class UserSyncWalletBalanceService {
             const { block: beetsBarBlock } = await beetsBarService.getMetadata();
             endBlock = Math.min(endBlock, beetsBarBlock.number);
         }
-        const balances = await prisma.prismaUserWalletBalance.findMany({});
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
             where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } } },
         });
-        const poolIdsToInit = pools
-            .filter((pool) => balances.filter((balance) => balance.poolId === pool.id).length === 0)
-            .map((pool) => pool.id);
+        const poolIdsToInit = pools.map((pool) => pool.id);
         const chunks = _.chunk(poolIdsToInit, 100);
         let shares: BalancerUserPoolShare[] = [];
 
