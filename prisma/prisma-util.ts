@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { prisma } from './prisma-client';
 
 export async function prismaBulkExecuteOperations(
-    operations: PrismaPromise[],
+    operations: PrismaPromise<any>[],
     transaction: boolean = false,
     chunkSize = 100,
 ) {
