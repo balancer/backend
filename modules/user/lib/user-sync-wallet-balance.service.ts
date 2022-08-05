@@ -60,22 +60,26 @@ export class UserSyncWalletBalanceService {
         }
 
         console.log('initBalancesForPools: performing db operations...');
-        await prismaBulkExecuteOperations([
-            prisma.prismaUser.createMany({
-                data: _.uniq([
-                    ...shares.map((share) => share.userAddress),
-                    ...fbeetsHolders.map((user) => user.address),
-                ]).map((address) => ({ address })),
-                skipDuplicates: true,
-            }),
-            ...operations,
-            ...fbeetsHolders.map((user) => this.getPrismaUpsertForFbeetsUser(user)),
-            prisma.prismaUserBalanceSyncStatus.upsert({
-                where: { type: 'WALLET' },
-                create: { type: 'WALLET', blockNumber: Math.min(block.number, beetsBarBlock.number) },
-                update: { blockNumber: Math.min(block.number, beetsBarBlock.number) },
-            }),
-        ]);
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaUser.createMany({
+                    data: _.uniq([
+                        ...shares.map((share) => share.userAddress),
+                        ...fbeetsHolders.map((user) => user.address),
+                    ]).map((address) => ({ address })),
+                    skipDuplicates: true,
+                }),
+                ...operations,
+                ...fbeetsHolders.map((user) => this.getPrismaUpsertForFbeetsUser(user)),
+                prisma.prismaUserBalanceSyncStatus.upsert({
+                    where: { type: 'WALLET' },
+                    create: { type: 'WALLET', blockNumber: Math.min(block.number, beetsBarBlock.number) },
+                    update: { blockNumber: Math.min(block.number, beetsBarBlock.number) },
+                }),
+            ],
+            undefined,
+            true,
+        );
         console.log('initBalancesForPools: finished performing db operations...');
     }
 
