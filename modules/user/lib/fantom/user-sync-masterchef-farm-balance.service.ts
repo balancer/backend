@@ -46,37 +46,40 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             return;
         }
 
-        await prismaBulkExecuteOperations([
-            prisma.prismaUser.createMany({
-                data: userAddresses.map((userAddress) => ({ address: userAddress })),
-                skipDuplicates: true,
-            }),
-            ...amountUpdates.map((update) => {
-                const pool = pools.find((pool) => pool.staking?.id === update.farmId);
-                const farm = farms.find((farm) => farm.id === update.farmId);
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaUser.createMany({
+                    data: userAddresses.map((userAddress) => ({ address: userAddress })),
+                    skipDuplicates: true,
+                }),
+                ...amountUpdates.map((update) => {
+                    const pool = pools.find((pool) => pool.staking?.id === update.farmId);
+                    const farm = farms.find((farm) => farm.id === update.farmId);
 
-                return prisma.prismaUserStakedBalance.upsert({
-                    where: { id: `${update.farmId}-${update.userAddress}` },
-                    update: {
-                        balance: update.amount,
-                        balanceNum: parseFloat(update.amount),
-                    },
-                    create: {
-                        id: `${update.farmId}-${update.userAddress}`,
-                        balance: update.amount,
-                        balanceNum: parseFloat(update.amount),
-                        userAddress: update.userAddress,
-                        poolId: pool?.id,
-                        tokenAddress: farm!.pair,
-                        stakingId: update.farmId,
-                    },
-                });
-            }),
-            prisma.prismaUserBalanceSyncStatus.update({
-                where: { type: 'STAKED' },
-                data: { blockNumber: endBlock },
-            }),
-        ]);
+                    return prisma.prismaUserStakedBalance.upsert({
+                        where: { id: `${update.farmId}-${update.userAddress}` },
+                        update: {
+                            balance: update.amount,
+                            balanceNum: parseFloat(update.amount),
+                        },
+                        create: {
+                            id: `${update.farmId}-${update.userAddress}`,
+                            balance: update.amount,
+                            balanceNum: parseFloat(update.amount),
+                            userAddress: update.userAddress,
+                            poolId: pool?.id,
+                            tokenAddress: farm!.pair,
+                            stakingId: update.farmId,
+                        },
+                    });
+                }),
+                prisma.prismaUserBalanceSyncStatus.update({
+                    where: { type: 'STAKED' },
+                    data: { blockNumber: endBlock },
+                }),
+            ],
+            true,
+        );
     }
 
     public async initStakedBalances(): Promise<void> {
@@ -91,35 +94,38 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
 
         console.log('initStakedBalances: performing db operations...');
 
-        await prismaBulkExecuteOperations([
-            prisma.prismaUser.createMany({
-                data: userAddresses.map((userAddress) => ({ address: userAddress })),
-                skipDuplicates: true,
-            }),
-            prisma.prismaUserStakedBalance.deleteMany({}),
-            prisma.prismaUserStakedBalance.createMany({
-                data: farmUsers
-                    .filter((farmUser) => !networkConfig.masterchef.excludedFarmIds.includes(farmUser.pool!.id))
-                    .map((farmUser) => {
-                        const pool = pools.find((pool) => pool.address === farmUser.pool?.pair);
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaUser.createMany({
+                    data: userAddresses.map((userAddress) => ({ address: userAddress })),
+                    skipDuplicates: true,
+                }),
+                prisma.prismaUserStakedBalance.deleteMany({}),
+                prisma.prismaUserStakedBalance.createMany({
+                    data: farmUsers
+                        .filter((farmUser) => !networkConfig.masterchef.excludedFarmIds.includes(farmUser.pool!.id))
+                        .map((farmUser) => {
+                            const pool = pools.find((pool) => pool.address === farmUser.pool?.pair);
 
-                        return {
-                            id: farmUser.id,
-                            balance: formatFixed(farmUser.amount, 18),
-                            balanceNum: parseFloat(formatFixed(farmUser.amount, 18)),
-                            userAddress: farmUser.address,
-                            poolId: pool?.id,
-                            tokenAddress: farmUser.pool!.pair,
-                            stakingId: farmUser.pool!.id,
-                        };
-                    }),
-            }),
-            prisma.prismaUserBalanceSyncStatus.upsert({
-                where: { type: 'STAKED' },
-                create: { type: 'STAKED', blockNumber: block.number },
-                update: { blockNumber: block.number },
-            }),
-        ]);
+                            return {
+                                id: farmUser.id,
+                                balance: formatFixed(farmUser.amount, 18),
+                                balanceNum: parseFloat(formatFixed(farmUser.amount, 18)),
+                                userAddress: farmUser.address,
+                                poolId: pool?.id,
+                                tokenAddress: farmUser.pool!.pair,
+                                stakingId: farmUser.pool!.id,
+                            };
+                        }),
+                }),
+                prisma.prismaUserBalanceSyncStatus.upsert({
+                    where: { type: 'STAKED' },
+                    create: { type: 'STAKED', blockNumber: block.number },
+                    update: { blockNumber: block.number },
+                }),
+            ],
+            true,
+        );
 
         console.log('initStakedBalances: finished...');
     }

@@ -16,7 +16,7 @@ import {
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
-import _, { uniqBy } from 'lodash';
+import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
 

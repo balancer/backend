@@ -25,33 +25,36 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         console.log('initStakedBalances: performing db operations...');
 
-        await prismaBulkExecuteOperations([
-            prisma.prismaUser.createMany({
-                data: userAddresses.map((userAddress) => ({ address: userAddress })),
-                skipDuplicates: true,
-            }),
-            prisma.prismaUserStakedBalance.deleteMany({}),
-            prisma.prismaUserStakedBalance.createMany({
-                data: gaugeShares.map((share) => {
-                    const pool = pools.find((pool) => pool.id === share.gauge.poolId);
-
-                    return {
-                        id: `${share.gauge.id}-${share.user.id}`,
-                        balance: share.balance,
-                        balanceNum: parseFloat(share.balance),
-                        userAddress: share.user.id,
-                        poolId: pool?.id,
-                        tokenAddress: share.gauge.poolAddress,
-                        stakingId: share.gauge.id,
-                    };
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaUser.createMany({
+                    data: userAddresses.map((userAddress) => ({ address: userAddress })),
+                    skipDuplicates: true,
                 }),
-            }),
-            prisma.prismaUserBalanceSyncStatus.upsert({
-                where: { type: 'STAKED' },
-                create: { type: 'STAKED', blockNumber: block.number },
-                update: { blockNumber: block.number },
-            }),
-        ]);
+                prisma.prismaUserStakedBalance.deleteMany({}),
+                prisma.prismaUserStakedBalance.createMany({
+                    data: gaugeShares.map((share) => {
+                        const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+
+                        return {
+                            id: `${share.gauge.id}-${share.user.id}`,
+                            balance: share.balance,
+                            balanceNum: parseFloat(share.balance),
+                            userAddress: share.user.id,
+                            poolId: pool?.id,
+                            tokenAddress: share.gauge.poolAddress,
+                            stakingId: share.gauge.id,
+                        };
+                    }),
+                }),
+                prisma.prismaUserBalanceSyncStatus.upsert({
+                    where: { type: 'STAKED' },
+                    create: { type: 'STAKED', blockNumber: block.number },
+                    update: { blockNumber: block.number },
+                }),
+            ],
+            true,
+        );
 
         console.log('initStakedBalances: finished...');
     }
@@ -145,36 +148,39 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             return;
         }
 
-        await prismaBulkExecuteOperations([
-            prisma.prismaUser.createMany({
-                data: _.uniq(allUserAddress).map((address) => ({ address })),
-                skipDuplicates: true,
-            }),
-            ...userGaugeBalanceUpdates.map((update) => {
-                const pool = pools.find((pool) => pool.staking?.id === update.gaugeAddress);
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaUser.createMany({
+                    data: _.uniq(allUserAddress).map((address) => ({ address })),
+                    skipDuplicates: true,
+                }),
+                ...userGaugeBalanceUpdates.map((update) => {
+                    const pool = pools.find((pool) => pool.staking?.id === update.gaugeAddress);
 
-                return prisma.prismaUserStakedBalance.upsert({
-                    where: { id: `${update.gaugeAddress}-${update.userAddress}` },
-                    update: {
-                        balance: update.amount,
-                        balanceNum: parseFloat(update.amount),
-                    },
-                    create: {
-                        id: `${update.gaugeAddress}-${update.userAddress}`,
-                        balance: update.amount,
-                        balanceNum: parseFloat(update.amount),
-                        userAddress: update.userAddress,
-                        poolId: pool?.id,
-                        tokenAddress: pool!.address,
-                        stakingId: update.gaugeAddress,
-                    },
-                });
-            }),
-            prisma.prismaUserBalanceSyncStatus.update({
-                where: { type: 'STAKED' },
-                data: { blockNumber: endBlock },
-            }),
-        ]);
+                    return prisma.prismaUserStakedBalance.upsert({
+                        where: { id: `${update.gaugeAddress}-${update.userAddress}` },
+                        update: {
+                            balance: update.amount,
+                            balanceNum: parseFloat(update.amount),
+                        },
+                        create: {
+                            id: `${update.gaugeAddress}-${update.userAddress}`,
+                            balance: update.amount,
+                            balanceNum: parseFloat(update.amount),
+                            userAddress: update.userAddress,
+                            poolId: pool?.id,
+                            tokenAddress: pool!.address,
+                            stakingId: update.gaugeAddress,
+                        },
+                    });
+                }),
+                prisma.prismaUserBalanceSyncStatus.update({
+                    where: { type: 'STAKED' },
+                    data: { blockNumber: endBlock },
+                }),
+            ],
+            true,
+        );
     }
 
     private async loadAllSubgraphUsers(): Promise<GaugeShare[]> {

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { sleep } from '../../common/promise';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';

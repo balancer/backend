@@ -68,8 +68,7 @@ export class PoolSnapshotService {
                     update: data,
                 });
             });
-
-            operations = [...operations, ...poolOperations];
+            operations.push(...poolOperations);
         }
 
         await prismaBulkExecuteOperations(operations);

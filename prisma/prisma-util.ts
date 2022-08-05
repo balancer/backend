@@ -3,9 +3,9 @@ import _ from 'lodash';
 import { prisma } from './prisma-client';
 
 export async function prismaBulkExecuteOperations(
-    operations: PrismaPromise<any>[],
-    chunkSize = 100,
+    operations: PrismaPromise[],
     transaction: boolean = false,
+    chunkSize = 100,
 ) {
     const chunks = _.chunk(operations, chunkSize);
 

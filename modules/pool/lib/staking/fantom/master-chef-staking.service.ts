@@ -79,7 +79,7 @@ export class MasterChefStakingService implements PoolStakingService {
             }
         }
 
-        await prismaBulkExecuteOperations(operations, undefined, true);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     public async reloadStakingForAllPools() {
