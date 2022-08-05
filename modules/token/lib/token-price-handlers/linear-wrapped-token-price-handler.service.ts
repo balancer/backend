@@ -74,7 +74,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
             }
         }
 
-        await prisma.$transaction(operations);
+        await Promise.all(operations);
 
         return tokensUpdated;
     }

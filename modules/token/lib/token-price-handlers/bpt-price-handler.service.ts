@@ -60,7 +60,7 @@ export class BptPriceHandlerService implements TokenPriceHandler {
             }
         }
 
-        await prisma.$transaction(operations);
+        await Promise.all(operations);
 
         return updated;
     }

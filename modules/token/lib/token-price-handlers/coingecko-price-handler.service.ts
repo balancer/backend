@@ -122,8 +122,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                     }
                 }
 
-                await prisma.$transaction(operations);
-                await sleep(200);
+                await Promise.all(operations);
             }
         }
 

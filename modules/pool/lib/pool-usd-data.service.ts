@@ -55,12 +55,12 @@ export class PoolUsdDataService {
             );
 
             if (updates.length > 100) {
-                await prisma.$transaction(updates);
+                await Promise.all(updates);
                 updates = [];
             }
         }
 
-        await prisma.$transaction(updates);
+        await Promise.all(updates);
     }
 
     public async updateLiquidity24hAgoForAllPools() {

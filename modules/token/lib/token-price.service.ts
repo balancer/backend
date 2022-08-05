@@ -216,6 +216,6 @@ export class TokenPriceService {
             );
         }
 
-        await prisma.$transaction(operations);
+        await Promise.all(operations);
     }
 }

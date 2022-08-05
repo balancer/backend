@@ -34,7 +34,7 @@ export class PoolSanityDataLoaderService {
         await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED');
         await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED');
 
-        await prisma.$transaction([
+        await Promise.all([
             prisma.prismaPoolFilterMap.deleteMany({}),
             prisma.prismaPoolFilter.deleteMany({}),
             prisma.prismaPoolFilter.createMany({

@@ -63,8 +63,7 @@ export class CoingeckoDataService {
                 );
             }
 
-            await prisma.$transaction(operations);
-            await sleep(200);
+            await Promise.all(operations);
         }
     }
 
