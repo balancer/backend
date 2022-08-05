@@ -49,7 +49,10 @@ export class UserSyncWalletBalanceService {
         }
         console.log('initBalancesForPools: finished loading pool shares...');
 
-        const fbeetsHolders = await beetsBarService.getAllUsers({ where: { fBeets_not: '0' } });
+        let fbeetsHolders: BeetsBarUserFragment[] = [];
+        if (isFantomNetwork()) {
+            fbeetsHolders = await beetsBarService.getAllUsers({ where: { fBeets_not: '0' } });
+        }
 
         let operations: any[] = [];
 
