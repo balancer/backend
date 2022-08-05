@@ -61,7 +61,7 @@ export class GaugeStakingService implements PoolStakingService {
         operations.push(prisma.prismaPoolStakingGauge.createMany({ data: gaugeStakingEntities, skipDuplicates: true }));
         operations.push(...gaugeStakingRewardOperations);
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, undefined, true);
     }
     public async reloadStakingForAllPools(): Promise<void> {
         await prisma.prismaPoolStakingGaugeReward.deleteMany({});
