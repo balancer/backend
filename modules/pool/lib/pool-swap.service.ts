@@ -316,7 +316,7 @@ export class PoolSwapService {
             }
         }
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     private getSwapOutKey(swap: PrismaPoolSwap): string {
