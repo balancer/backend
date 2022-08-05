@@ -155,8 +155,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
         },
         eth: {
-            address: '0x4200000000000000000000000000000000000006',
-            addressFormatted: '0x4200000000000000000000000000000000000006',
+            address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+            addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
             symbol: 'ETH',
             name: 'Ether',
         },
