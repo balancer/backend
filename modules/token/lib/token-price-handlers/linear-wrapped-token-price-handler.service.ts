@@ -59,10 +59,9 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
 
                     operations.push(
                         prisma.prismaTokenCurrentPrice.upsert({
-                            where: { id: token.address },
+                            where: { tokenAddress: token.address },
                             update: { price: price },
                             create: {
-                                id: token.address,
                                 tokenAddress: token.address,
                                 timestamp,
                                 price,

@@ -107,10 +107,9 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
 
                         operations.push(
                             prisma.prismaTokenCurrentPrice.upsert({
-                                where: { id: item.address },
+                                where: { tokenAddress: item.address },
                                 update: { price: price },
                                 create: {
-                                    id: item.address,
                                     tokenAddress: item.address,
                                     timestamp,
                                     price,

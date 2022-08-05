@@ -52,10 +52,10 @@ export class CoingeckoDataService {
 
                 operations.push(
                     prisma.prismaTokenDynamicData.upsert({
-                        where: { id: item.id },
+                        where: { tokenAddress: token.address },
                         update: data,
                         create: {
-                            id: item.id,
+                            coingeckoId: item.id,
                             tokenAddress: token.address,
                             ...data,
                         },

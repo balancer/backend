@@ -3,12 +3,6 @@ model PrismaUser {
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
-
-    //TODO: old models, remove these or refactor
-    farms               PrismaFarmUser[]
-    sharesOwnedSnapshots PrismaBalancerPoolShareSnapshot[]
-    farmSnapshots       PrismaFarmUserSnapshot[]
-    beetsBarSnapshots   PrismaBeetsBarUserSnapshot[]
 }
 
 model PrismaUserWalletBalance {

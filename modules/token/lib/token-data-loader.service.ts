@@ -50,6 +50,16 @@ export class TokenDataLoaderService {
         //TODO: could be more intelligent about when to upsert
         for (const sanityToken of sanityTokens) {
             const tokenAddress = sanityToken.address.toLowerCase();
+            let tokenData = {};
+            if (sanityToken.coingeckoTokenId) {
+                tokenData = {
+                    description: sanityToken.description || null,
+                    websiteUrl: sanityToken.websiteUrl || null,
+                    discordUrl: sanityToken.discordUrl || null,
+                    telegramUrl: sanityToken.telegramUrl || null,
+                    twitterUsername: sanityToken.twitterUsername || null,
+                };
+            }
 
             await prisma.prismaToken.upsert({
                 where: { address: tokenAddress },
@@ -63,6 +73,7 @@ export class TokenDataLoaderService {
                     coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
                     coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
                     coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
+                    ...tokenData,
                 },
                 update: {
                     name: sanityToken.name,
@@ -73,34 +84,19 @@ export class TokenDataLoaderService {
                     coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
                     coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
                     coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
+                    ...tokenData,
                 },
             });
-
-            if (sanityToken.coingeckoTokenId) {
-                const tokenData = {
-                    description: sanityToken.description || null,
-                    websiteUrl: sanityToken.websiteUrl || null,
-                    discordUrl: sanityToken.discordUrl || null,
-                    telegramUrl: sanityToken.telegramUrl || null,
-                    twitterUsername: sanityToken.twitterUsername || null,
-                };
-
-                await prisma.prismaTokenData.upsert({
-                    where: { id: sanityToken.coingeckoTokenId },
-                    create: { id: sanityToken.coingeckoTokenId, tokenAddress, ...tokenData },
-                    update: tokenData,
-                });
-            }
         }
 
         //TODO: need to be able to remove whitelist
         await prisma.prismaTokenType.createMany({
-            skipDuplicates: true,
             data: sanityTokens.map((token) => ({
                 id: `${token.address}-white-listed`,
                 tokenAddress: token.address.toLowerCase(),
                 type: 'WHITE_LISTED' as const,
             })),
+            skipDuplicates: true,
         });
 
         await this.syncTokenTypes();

@@ -44,8 +44,7 @@ import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgr
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
 import { Cache } from 'memory-cache';
-import { gaugeSerivce, GaugeSerivce } from './lib/staking/optimism/gauge-service';
-import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
 import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';

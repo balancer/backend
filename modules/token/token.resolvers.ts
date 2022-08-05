@@ -5,7 +5,7 @@ import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
     Query: {
-        tokenGetTokens: async (parent, {}, context) => {
+        tokenGetTokens: async () => {
             return tokenService.getTokenDefinitions();
         },
         tokenGetCurrentPrices: async (parent, {}, context) => {
@@ -34,6 +34,7 @@ const resolvers: Resolvers = {
             return data
                 ? {
                       ...data,
+                      id: data.coingeckoId,
                       fdv: data.fdv ? `${data.fdv}` : null,
                       marketCap: data.marketCap ? `${data.marketCap}` : null,
                       updatedAt: data.updatedAt.toUTCString(),
@@ -45,6 +46,7 @@ const resolvers: Resolvers = {
 
             return items.map((item) => ({
                 ...item,
+                id: item.coingeckoId,
                 fdv: item.fdv ? `${item.fdv}` : null,
                 marketCap: item.marketCap ? `${item.marketCap}` : null,
                 updatedAt: item.updatedAt.toUTCString(),
@@ -81,10 +83,19 @@ const resolvers: Resolvers = {
             }));
         },
         tokenGetTokenData: async (parent, { address }, context) => {
-            return tokenService.getTokenData(address);
+            const token = await tokenService.getToken(address);
+            if (token) {
+                return {
+                    ...token,
+                    id: token.address,
+                    tokenAddress: token.address,
+                };
+            }
+            return null;
         },
         tokenGetTokensData: async (parent, { addresses }, context) => {
-            return tokenService.getTokensData(addresses);
+            const tokens = await tokenService.getTokens(addresses);
+            return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
         },
     },
     Mutation: {
