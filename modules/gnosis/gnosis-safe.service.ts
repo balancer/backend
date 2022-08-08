@@ -1,6 +1,5 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from '@gnosis.pm/safe-core-sdk';
 import { ethers, providers } from 'ethers';
-import { cache } from '../cache/cache';
 import { getAddress } from 'ethers/lib/utils';
 import { networkConfig } from '../config/network-config';
 import { Cache } from 'memory-cache';
@@ -52,36 +51,4 @@ export class GnosisSafeService {
     }
 }
 
-export async function isAddressGnosisSafe(address: string) {
-    const key = `${CACHE_KEY_PREFIX}${address}`;
-    const cachedValue = await cache.getValue(key);
-
-    if (cachedValue) {
-        return cachedValue === 'true';
-    }
-
-    try {
-        await Safe.create({
-            ethAdapter: await getAdapter(),
-            safeAddress: getAddress(address),
-            contractNetworks,
-        });
-
-        await cache.putValue(key, 'true', TIMEOUT);
-        return true;
-    } catch {
-        await cache.putValue(key, 'false', TIMEOUT);
-        return false;
-    }
-}
-
-async function getAdapter() {
-    const provider = new providers.JsonRpcProvider(networkConfig.rpcUrl);
-    const signer = ethers.Wallet.createRandom();
-
-    return new EthersAdapter({
-        ethers,
-        signer: signer.connect(provider),
-    });
-}
 export const gnosisSafeService = new GnosisSafeService();
