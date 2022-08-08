@@ -160,12 +160,12 @@ export class BlocksSubgraphService {
                 timestamp_gte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .subtract(5 * blockTime, 'seconds')
+                    .subtract(10 * blockTime, 'seconds')
                     .unix()}`,
                 timestamp_lte: `${moment
                     .tz('GMT')
                     .subtract(1, 'day')
-                    .add(5 * blockTime, 'seconds')
+                    .add(10 * blockTime, 'seconds')
                     .unix()}`,
             },
         };
