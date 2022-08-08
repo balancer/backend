@@ -9,6 +9,7 @@ type GqlContentNewsItem {
     text: String!
     source: GqlContentNewsItemSource!
     image: String
+    discussionUrl: String
 }
 
 enum GqlContentNewsItemSource {
