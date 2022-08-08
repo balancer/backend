@@ -71,7 +71,7 @@ export class PoolSnapshotService {
             operations.push(...poolOperations);
         }
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     public async loadAllSnapshotsForPools(poolIds: string[]) {

@@ -167,7 +167,7 @@ export class UserSyncWalletBalanceService {
                 create: { type: 'WALLET', blockNumber: toBlock },
                 update: { blockNumber: toBlock },
             }),
-        ]);
+        ], true);
     }
 
     public async initBalancesForPool(poolId: string) {
