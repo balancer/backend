@@ -8,13 +8,7 @@ import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { BptPriceHandlerService } from './lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from './lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price-handler.service';
-import {
-    PrismaToken,
-    PrismaTokenCurrentPrice,
-    PrismaTokenData,
-    PrismaTokenDynamicData,
-    PrismaTokenPrice,
-} from '@prisma/client';
+import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange } from '../../schema';
@@ -38,11 +32,18 @@ export class TokenService {
         await this.tokenDataLoaderService.syncSanityTokenData();
     }
 
-    public async getTokens(): Promise<PrismaToken[]> {
+    public async getToken(address: string): Promise<PrismaToken | null> {
+        return prisma.prismaToken.findUnique({ where: { address: address.toLowerCase() } });
+    }
+
+    public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
         let tokens: PrismaToken[] | null = this.cache.get(ALL_TOKENS_CACHE_KEY);
         if (!tokens) {
             tokens = await prisma.prismaToken.findMany({});
             this.cache.put(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60 * 1000);
+        }
+        if (addresses) {
+            return tokens.filter((token) => addresses.includes(token.address));
         }
         return tokens;
     }
@@ -135,14 +136,6 @@ export class TokenService {
 
     public async initChartData(tokenAddress: string) {
         await this.coingeckoDataService.initChartData(tokenAddress);
-    }
-
-    public async getTokenData(tokenAddress: string): Promise<PrismaTokenData | null> {
-        return prisma.prismaTokenData.findUnique({ where: { tokenAddress } });
-    }
-
-    public async getTokensData(tokenAddresses: string[]): Promise<PrismaTokenData[]> {
-        return prisma.prismaTokenData.findMany({ where: { tokenAddress: { in: tokenAddresses } } });
     }
 
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {

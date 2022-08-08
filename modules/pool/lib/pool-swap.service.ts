@@ -16,7 +16,7 @@ import {
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
-import _, { uniqBy } from 'lodash';
+import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
 
@@ -316,7 +316,7 @@ export class PoolSwapService {
             }
         }
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     private getSwapOutKey(swap: PrismaPoolSwap): string {

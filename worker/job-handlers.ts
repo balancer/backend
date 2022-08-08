@@ -11,6 +11,7 @@ import { protocolService } from '../modules/protocol/protocol.service';
 const runningJobs: Set<string> = new Set();
 
 async function runIfNotAlreadyRunning(id: string, fn: () => any): Promise<void> {
+    console.log('running jobs', [...runningJobs]);
     if (runningJobs.has(id)) {
         Sentry.captureEvent({
             event_id: id,
@@ -18,6 +19,7 @@ async function runIfNotAlreadyRunning(id: string, fn: () => any): Promise<void> 
             level: 'warning',
             contexts: { Job: { id } },
         });
+        console.log('Skipping job', id);
         return;
     }
     runningJobs.add(id);

@@ -2,21 +2,24 @@ model PrismaToken {
     address             String              @id
     symbol              String
     name                String
+    description         String?
     decimals            Int
 
     logoURI             String?
+    websiteUrl          String?
+    discordUrl          String?
+    telegramUrl         String?
+    twitterUsername     String?
     priority            Int                 @default(0)
     coingeckoPlatformId String?
     coingeckoContractAddress String?
     coingeckoTokenId    String?
 
-    data                PrismaTokenData?
     dynamicData         PrismaTokenDynamicData?
     currentPrice        PrismaTokenCurrentPrice?
     prices              PrismaTokenPrice[]
     types               PrismaTokenType[]
 
-    poolTokenSnapshots  PrismaBalancerPoolTokenSnapshot[]
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
 
@@ -26,8 +29,7 @@ model PrismaToken {
 
 
 model PrismaTokenCurrentPrice {
-    id                  String               @id
-    tokenAddress        String
+    tokenAddress        String               @id
     token               PrismaToken          @relation(fields:[tokenAddress], references: [address])
     updatedAt           DateTime             @updatedAt
     timestamp           Int
@@ -52,8 +54,8 @@ model PrismaTokenPrice {
 }
 
 model PrismaTokenDynamicData {
-    id                  String              @id
-    tokenAddress        String
+    coingeckoId         String
+    tokenAddress        String              @id
     token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
     updatedAt           DateTime            @updatedAt
 
@@ -69,20 +71,6 @@ model PrismaTokenDynamicData {
     priceChangePercent7d Float?
     priceChangePercent14d Float?
     priceChangePercent30d Float?
-}
-
-
-model PrismaTokenData {
-    id                  String              @id
-    tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
-    updatedAt           DateTime            @updatedAt
-
-    description         String?
-    websiteUrl          String?
-    discordUrl          String?
-    telegramUrl         String?
-    twitterUsername     String?
 }
 
 model PrismaTokenType {

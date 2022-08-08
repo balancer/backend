@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { sleep } from '../../common/promise';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
@@ -52,10 +51,10 @@ export class CoingeckoDataService {
 
                 operations.push(
                     prisma.prismaTokenDynamicData.upsert({
-                        where: { id: item.id },
+                        where: { tokenAddress: token.address },
                         update: data,
                         create: {
-                            id: item.id,
+                            coingeckoId: item.id,
                             tokenAddress: token.address,
                             ...data,
                         },
@@ -63,8 +62,7 @@ export class CoingeckoDataService {
                 );
             }
 
-            await prisma.$transaction(operations);
-            await sleep(200);
+            await Promise.all(operations);
         }
     }
 

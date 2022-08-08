@@ -44,10 +44,9 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
         );
 
         await prisma.prismaTokenCurrentPrice.upsert({
-            where: { id: fbeetsAddress },
+            where: { tokenAddress: fbeetsAddress },
             update: { price: fbeetsPrice },
             create: {
-                id: fbeetsAddress,
                 tokenAddress: fbeetsAddress,
                 timestamp,
                 price: fbeetsPrice,

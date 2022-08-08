@@ -40,9 +40,14 @@ type GqlHistoricalTokenPriceEntry {
 type GqlToken {
     address: String!
     name: String!
+    description: String
     symbol: String!
     decimals: Int!
     chainId: Int!
+    websiteUrl: String
+    discordUrl: String
+    telegramUrl: String
+    twitterUsername: String
     logoURI: String
     priority: Int!
     tradable: Boolean!
