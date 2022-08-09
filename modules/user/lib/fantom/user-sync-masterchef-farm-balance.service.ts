@@ -147,7 +147,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                 balance: amountStaked,
                 balanceNum: parseFloat(amountStaked),
                 userAddress,
-                poolId: staking.poolId,
+                poolId: poolId,
                 tokenAddress: staking.type === 'FRESH_BEETS' ? networkConfig.fbeets.address : poolAddress,
                 stakingId: staking.id,
             },
