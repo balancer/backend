@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import {
     balancerSubgraphService,
     BalancerSubgraphService,
@@ -7,7 +8,6 @@ import {
     BalancerPoolSnapshotFragment,
     OrderDirection,
     PoolSnapshot_OrderBy,
-    Swap_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { GqlPoolSnapshotDataRange } from '../../../schema';
 import moment from 'moment-timezone';
@@ -16,7 +16,7 @@ import { PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { CoingeckoService } from '../../../legacy/token-price/lib/coingecko.service';
-import { HistoricalPrice, TokenHistoricalPrices, TokenPrices } from '../../../legacy/token-price/token-price-types';
+import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 
 export class PoolSnapshotService {
@@ -146,10 +146,14 @@ export class PoolSnapshotService {
                     price: snapshot.sharePrice,
                 }));
             } else {
-                tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
-                    token.address,
-                    numDays,
-                );
+                try {
+                    tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
+                        token.address,
+                        numDays,
+                    );
+                } catch (error) {
+                    console.error(error);
+                }
             }
         }
 
