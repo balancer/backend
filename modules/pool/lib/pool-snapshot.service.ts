@@ -90,7 +90,7 @@ export class PoolSnapshotService {
         });
 
         for (const pool of poolsWithoutSnapshots) {
-            if (pool.tokens.filter((token) => !!token.nestedPoolId).length > 0) {
+            if (pool.type !== 'LINEAR' && pool.tokens.filter((token) => !!token.nestedPoolId).length > 0) {
                 await this.syncPoolSnapshotsForBoostedPool(pool.id, oneDayAgoStartOfDay);
             }
         }
@@ -128,7 +128,7 @@ export class PoolSnapshotService {
 
         const startTimestamp = timestampToSyncFrom > 0 ? timestampToSyncFrom : pool.createTime;
 
-        if (pool.tokens.filter((token) => !!token.nestedPoolId).length === 0) {
+        if (pool.type !== 'LINEAR' && pool.tokens.filter((token) => !!token.nestedPoolId).length === 0) {
             throw new Error('Not a boosted pool');
         }
 
