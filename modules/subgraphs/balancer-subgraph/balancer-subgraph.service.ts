@@ -37,6 +37,8 @@ import {
     BalancerUserFragment,
     BalancerUsersQueryVariables,
     getSdk,
+    OrderDirection,
+    Swap_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { env } from '../../../app/env';
 import _ from 'lodash';
@@ -106,6 +108,39 @@ export class BalancerSubgraphService {
 
     public async getAllSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapFragment[]> {
         return subgraphLoadAll<BalancerSwapFragment>(this.sdk.BalancerSwaps, 'swaps', args);
+    }
+
+    public async getAllSwapsWithPaging({
+        where,
+        block,
+        startTimestamp,
+    }: Pick<BalancerSwapsQueryVariables, 'where' | 'block'> & { startTimestamp: number }): Promise<
+        BalancerSwapFragment[]
+    > {
+        const limit = 1000;
+        let timestamp = startTimestamp;
+        let hasMore = true;
+        let swaps: BalancerSwapFragment[] = [];
+
+        while (hasMore) {
+            const response = await this.sdk.BalancerSwaps({
+                where: { ...where, timestamp_gt: timestamp },
+                block,
+                orderBy: Swap_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+                first: limit,
+            });
+
+            swaps = [...swaps, ...response.swaps];
+
+            if (response.swaps.length < limit) {
+                hasMore = false;
+            } else {
+                timestamp = response.swaps[response.swaps.length - 1].timestamp;
+            }
+        }
+
+        return swaps;
     }
 
     public async getAllGradualWeightUpdates(

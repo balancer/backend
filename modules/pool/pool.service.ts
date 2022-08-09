@@ -46,6 +46,7 @@ import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.servic
 import { Cache } from 'memory-cache';
 import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
 import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
+import { coingeckoService } from '../../legacy/token-price/lib/coingecko.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -254,6 +255,10 @@ export class PoolService {
     public async updateLifetimeValuesForAllPools() {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
+
+    public async initializeSnapshotsForBoostedPool(poolId: string) {
+        await this.poolSnapshotService.syncPoolSnapshotsForBoostedPool(poolId);
+    }
 }
 
 export const poolService = new PoolService(
@@ -281,5 +286,5 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
     isFantomNetwork() ? new MasterChefStakingService(masterchefService) : new GaugeStakingService(gaugeSerivce),
-    new PoolSnapshotService(balancerSubgraphService),
+    new PoolSnapshotService(balancerSubgraphService, coingeckoService),
 );
