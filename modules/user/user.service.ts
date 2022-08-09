@@ -9,6 +9,7 @@ import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
 import { isFantomNetwork } from '../config/network-config';
 import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
+import { prisma } from '../../prisma/prisma-client';
 
 export class UserService {
     constructor(
@@ -61,6 +62,25 @@ export class UserService {
 
     public async syncStakedBalances() {
         await this.stakedSyncService.syncStakedBalances();
+    }
+
+    public async syncUserBalance(userAddress: string, poolId: string) {
+        const pool = await prisma.prismaPool.findUnique({
+            where: { id: poolId },
+            include: { staking: true },
+            rejectOnNotFound: true,
+        });
+
+        await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
+
+        if (pool.staking) {
+            await this.stakedSyncService.syncUserBalance({
+                userAddress,
+                poolId: pool.id,
+                poolAddress: pool.address,
+                staking: pool.staking,
+            });
+        }
     }
 }
 

@@ -4,7 +4,7 @@ import { jsonRpcProvider } from '../../web3/contract';
 import ERC20Abi from '../abi/ERC20.json';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { Multicaller } from '../../web3/multicaller';
+import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
 import { isFantomNetwork, networkConfig } from '../../config/network-config';
 import { formatFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
@@ -12,6 +12,8 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
 import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
+import { isSameAddress } from '@balancer-labs/sdk';
+import { isAddress } from '@ethersproject/address';
 
 export class UserSyncWalletBalanceService {
     public async initBalancesForPools() {
@@ -137,37 +139,29 @@ export class UserSyncWalletBalanceService {
             balancesToFetch,
         });
 
-        await prismaBulkExecuteOperations([
-            //make sure all users exist
-            prisma.prismaUser.createMany({
-                data: balances.map((item) => ({ address: item.userAddress })),
-                skipDuplicates: true,
-            }),
-            //update balances
-            ...balances
-                .filter(({ userAddress }) => userAddress !== AddressZero)
-                .map(({ userAddress, erc20Address, balance }) => {
-                    const poolId = response.find((item) => item.address === erc20Address)?.id;
-
-                    return prisma.prismaUserWalletBalance.upsert({
-                        where: { id: `${poolId}-${userAddress}` },
-                        create: {
-                            id: `${poolId}-${userAddress}`,
-                            userAddress,
-                            poolId,
-                            tokenAddress: erc20Address,
-                            balance: formatFixed(balance, 18),
-                            balanceNum: parseFloat(formatFixed(balance, 18)),
-                        },
-                        update: { balance: formatFixed(balance, 18), balanceNum: parseFloat(formatFixed(balance, 18)) },
-                    });
+        await prismaBulkExecuteOperations(
+            [
+                //make sure all users exist
+                prisma.prismaUser.createMany({
+                    data: balances.map((item) => ({ address: item.userAddress })),
+                    skipDuplicates: true,
                 }),
-            prisma.prismaUserBalanceSyncStatus.upsert({
-                where: { type: 'WALLET' },
-                create: { type: 'WALLET', blockNumber: toBlock },
-                update: { blockNumber: toBlock },
-            }),
-        ], true);
+                //update balances
+                ...balances
+                    .filter(({ userAddress }) => userAddress !== AddressZero)
+                    .map((userBalance) => {
+                        const poolId = response.find((item) => item.address === userBalance.erc20Address)?.id;
+
+                        return this.getUserBalanceUpsert(userBalance, poolId!);
+                    }),
+                prisma.prismaUserBalanceSyncStatus.upsert({
+                    where: { type: 'WALLET' },
+                    create: { type: 'WALLET', blockNumber: toBlock },
+                    update: { blockNumber: toBlock },
+                }),
+            ],
+            true,
+        );
     }
 
     public async initBalancesForPool(poolId: string) {
@@ -191,6 +185,24 @@ export class UserSyncWalletBalanceService {
             ],
             true,
         );
+    }
+
+    public async syncUserBalance(userAddress: string, poolId: string, poolAddresses: string) {
+        const balancesToFetch = [{ erc20Address: poolAddresses, userAddress }];
+
+        if (isSameAddress(networkConfig.fbeets.poolAddress, poolAddresses)) {
+            balancesToFetch.push({ erc20Address: networkConfig.fbeets.address, userAddress });
+        }
+
+        const balances = await Multicaller.fetchBalances({
+            multicallAddress: networkConfig.multicall,
+            provider: jsonRpcProvider,
+            balancesToFetch,
+        });
+
+        const operations = balances.map((userBalance) => this.getUserBalanceUpsert(userBalance, poolId));
+
+        await Promise.all(operations);
     }
 
     private getPrismaUpsertForPoolShare(poolId: string, share: BalancerUserPoolShare) {
@@ -219,6 +231,26 @@ export class UserSyncWalletBalanceService {
                 balanceNum: parseFloat(user.fBeets),
             },
             update: { balance: user.fBeets, balanceNum: parseFloat(user.fBeets) },
+        });
+    }
+
+    private getUserBalanceUpsert(userBalance: MulticallUserBalance, poolId: string) {
+        const { userAddress, balance, erc20Address } = userBalance;
+
+        return prisma.prismaUserWalletBalance.upsert({
+            where: { id: `${poolId}-${userAddress}` },
+            create: {
+                id: `${poolId}-${userAddress}`,
+                userAddress,
+                poolId,
+                tokenAddress: erc20Address,
+                balance: formatFixed(balance, 18),
+                balanceNum: parseFloat(formatFixed(balance, 18)),
+            },
+            update: {
+                balance: formatFixed(balance, 18),
+                balanceNum: parseFloat(formatFixed(balance, 18)),
+            },
         });
     }
 }

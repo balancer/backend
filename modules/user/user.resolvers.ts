@@ -76,6 +76,13 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
+        userSyncBalance: async (parent, { poolId }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            await userService.syncUserBalance(accountAddress, poolId);
+
+            return 'success';
+        },
     },
 };
 

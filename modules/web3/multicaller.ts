@@ -7,7 +7,7 @@ import ERC20Abi from './abi/ERC20.json';
 import { Zero } from '@ethersproject/constants';
 import { BigNumber } from 'ethers';
 
-interface UserBalance {
+export interface MulticallUserBalance {
     erc20Address: string;
     userAddress: string;
     balance: BigNumber;
@@ -86,9 +86,9 @@ export class Multicaller {
         multicallAddress: string;
         provider: Provider;
         balancesToFetch: { erc20Address: string; userAddress: string }[];
-    }): Promise<UserBalance[]> {
+    }): Promise<MulticallUserBalance[]> {
         const chunks = _.chunk(balancesToFetch, 100);
-        let data: UserBalance[] = [];
+        let data: MulticallUserBalance[] = [];
 
         for (const chunk of chunks) {
             const multicall = new Multicaller(multicallAddress, provider, ERC20Abi);

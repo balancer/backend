@@ -7,6 +7,8 @@ extend type Query {
 }
 
 extend type Mutation {
+    userSyncBalance(poolId: String!): String!
+
     userInitWalletBalancesForAllPools: String!
     userInitWalletBalancesForPool(poolId: String!): String!
     userSyncWalletBalancesForAllPools: String!

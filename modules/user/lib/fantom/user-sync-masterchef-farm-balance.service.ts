@@ -13,8 +13,9 @@ import { networkConfig } from '../../../config/network-config';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { UserStakedBalanceService } from '../../user-types';
+import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../../user-types';
 import { AmountHumanReadable } from '../../../common/global-types';
+import { PrismaPoolStaking } from '@prisma/client';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     public async syncStakedBalances(): Promise<void> {
@@ -128,6 +129,29 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         );
 
         console.log('initStakedBalances: finished...');
+    }
+
+    public async syncUserBalance({ userAddress, poolId, poolAddress, staking }: UserSyncUserBalanceInput) {
+        const masterchef = getContractAt(networkConfig.masterchef.address, MasterChefAbi);
+        const userInfo: [BigNumber] = await masterchef.userInfo(staking.id, userAddress);
+        const amountStaked = formatFixed(userInfo[0], 18);
+
+        await prisma.prismaUserStakedBalance.upsert({
+            where: { id: `${staking.id}-${userAddress}` },
+            update: {
+                balance: amountStaked,
+                balanceNum: parseFloat(amountStaked),
+            },
+            create: {
+                id: `${staking.id}-${userAddress}`,
+                balance: amountStaked,
+                balanceNum: parseFloat(amountStaked),
+                userAddress,
+                poolId: staking.poolId,
+                tokenAddress: staking.type === 'FRESH_BEETS' ? networkConfig.fbeets.address : poolAddress,
+                stakingId: staking.id,
+            },
+        });
     }
 
     private async getAmountsForUsersWithBalanceChangesSinceStartBlock(
