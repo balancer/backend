@@ -71,6 +71,13 @@ export class UserService {
             rejectOnNotFound: true,
         });
 
+        // we make sure the user exists
+        await prisma.prismaUser.upsert({
+            where: { address: userAddress },
+            update: {},
+            create: { address: userAddress },
+        });
+
         await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
 
         if (pool.staking) {
