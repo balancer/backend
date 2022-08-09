@@ -130,6 +130,12 @@ export class UserSyncWalletBalanceService {
         );
 
         if (balancesToFetch.length === 0) {
+            await prisma.prismaUserBalanceSyncStatus.upsert({
+                where: { type: 'WALLET' },
+                create: { type: 'WALLET', blockNumber: toBlock },
+                update: { blockNumber: toBlock },
+            });
+
             return;
         }
 

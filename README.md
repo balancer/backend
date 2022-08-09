@@ -5,8 +5,8 @@
 Trigger the following mutations when you start from a clean DB:
 
 ```
-userInitWalletBalancesForAllPools
-poolReloadStakingForAllPools
-userInitStakedBalances
 poolSyncAllPoolsFromSubgraph
+poolReloadStakingForAllPools
+userInitWalletBalancesForAllPools
+userInitStakedBalances
 ```

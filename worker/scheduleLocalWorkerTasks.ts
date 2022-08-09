@@ -99,7 +99,7 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
                         console.timeEnd(taskName);
                     });
             });
-        }, 5000),
+        }, 1),
     );
 }
 
