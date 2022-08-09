@@ -11,7 +11,7 @@ export function startWorker() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        tracesSampleRate: 0.1,
+        tracesSampleRate: 0.01,
         environment: env.NODE_ENV,
         enabled: env.NODE_ENV === 'production',
         integrations: [
