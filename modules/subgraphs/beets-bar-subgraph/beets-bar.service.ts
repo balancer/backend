@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
+import { subgraphLoadAll } from '../subgraph-util';
 import {
     BeetsBarFragment,
     BeetsBarUserFragment,
@@ -118,10 +118,6 @@ export class BeetsBarSubgraphService {
         this.cache.put(`${ALL_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
 
         return users.find((user) => user.id === address) || null;
-    }
-
-    public async clearCacheAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_USERS_CACHE_KEY, block);
     }
 
     private get sdk() {

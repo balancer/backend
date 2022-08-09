@@ -1,5 +1,3 @@
-import { cache } from '../cache/cache';
-
 export async function subgraphLoadAll<T>(
     request: (variables: any) => Promise<any>,
     resultKey: string,
@@ -29,8 +27,4 @@ export async function subgraphLoadAll<T>(
     }
 
     return all;
-}
-
-export async function subgraphPurgeCacheKeyAtBlock(cacheKey: string, block: number): Promise<number> {
-    return cache.deleteKey(`${cacheKey}_${block}`);
 }

@@ -40,10 +40,9 @@ import {
 } from './generated/balancer-subgraph-types';
 import { env } from '../../../app/env';
 import _ from 'lodash';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../subgraph-util';
+import { subgraphLoadAll } from '../subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../common/time';
-import { cache } from '../../cache/cache';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 import { networkConfig } from '../../config/network-config';
 
@@ -206,30 +205,18 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerJoinExits(args);
     }
 
-    public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const response = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
-
-        await cache.putObjectValue(PORTFOLIO_POOLS_CACHE_KEY, response, 5);
-
-        return response;
-    }
-
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const memCached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
-
-        if (memCached) {
-            return memCached;
-        }
-
-        const cached = await cache.getObjectValue<BalancerPortfolioPoolsDataQuery>(PORTFOLIO_POOLS_CACHE_KEY);
+        const cached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
 
         if (cached) {
-            this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, cached, fiveMinutesInMs);
-
             return cached;
         }
 
-        return this.cachePortfolioPoolsData(previousBlockNumber);
+        const portfolioPools = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
+
+        this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, portfolioPools, fiveMinutesInMs);
+
+        return portfolioPools;
     }
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
@@ -254,16 +241,6 @@ export class BalancerSubgraphService {
         args: BalancerTradePairSnapshotsQueryVariables,
     ): Promise<BalancerTradePairSnapshotsQuery> {
         return this.sdk.BalancerTradePairSnapshots(args);
-    }
-
-    public async clearCacheAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_USERS_CACHE_KEY, block);
-        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
-        await subgraphPurgeCacheKeyAtBlock(ALL_JOIN_EXITS_CACHE_KEY, block);
-    }
-
-    public async clearPoolsAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
     }
 
     public async getPoolsWithActiveUpdates(timestamp: number): Promise<string[]> {

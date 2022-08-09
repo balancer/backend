@@ -25,8 +25,8 @@
         "@graphql-tools/merge": "^8.2.1",
         "@prisma/client": "^4.1.1",
         "@sanity/client": "^2.23.1",
-        "@sentry/node": "^7.8.0",
-        "@sentry/tracing": "^7.8.0",
+        "@sentry/node": "^7.9.0",
+        "@sentry/tracing": "^7.9.0",
         "apollo-server-core": "^3.5.0",
         "apollo-server-express": "^3.5.0",
         "axios": "^0.24.0",
@@ -45,10 +45,10 @@
         "moment-timezone": "^0.5.34",
         "node-cron": "^3.0.0",
         "prisma": "^4.1.1",
-        "redis": "^4.0.1",
         "safe-compare": "^1.1.4",
         "ts-dotenv": "^0.8.1",
-        "uuid": "^8.3.2"
+        "uuid": "^8.3.2",
+        "yarn": "^1.22.19"
     },
     "devDependencies": {
         "@graphql-codegen/add": "^3.1.0",
@@ -68,7 +68,6 @@
         "@types/node": "^16.11.7",
         "@types/node-cron": "^3.0.0",
         "@types/pino-http": "^5.8.1",
-        "@types/redis": "^2.8.17",
         "@types/safe-compare": "^1.1.0",
         "@types/signale": "^1.4.4",
         "@types/uuid": "^8.0.0",

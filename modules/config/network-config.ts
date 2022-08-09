@@ -142,7 +142,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         chain: {
             slug: 'optimism',
             id: 10,
-            nativeAssetAddress: '0x4200000000000000000000000000000000000006',
+            nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
             wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
         },
         subgraphs: {
