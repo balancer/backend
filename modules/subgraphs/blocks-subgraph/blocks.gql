@@ -1,3 +1,6 @@
 extend type Query {
     blocksGetAverageBlockTime: Float!
+    blocksGetBlocksPerSecond: Float!
+    blocksGetBlocksPerDay: Float!
+    blocksGetBlocksPerYear: Float!
 }

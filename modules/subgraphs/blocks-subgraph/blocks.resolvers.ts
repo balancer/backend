@@ -6,6 +6,16 @@ const balancerResolvers: Resolvers = {
         blocksGetAverageBlockTime: async (parent, {}, context) => {
             return blocksSubgraphService.getAverageBlockTime();
         },
+        blocksGetBlocksPerSecond: async (parent, {}, context) => {
+            const avgBlockTime = await blocksSubgraphService.getAverageBlockTime();
+            return 1 / avgBlockTime;
+        },
+        blocksGetBlocksPerDay: async (parent, {}, context) => {
+            return blocksSubgraphService.getBlocksPerDay();
+        },
+        blocksGetBlocksPerYear: async (parent, {}, context) => {
+            return blocksSubgraphService.getBlocksPerYear();
+        },
     },
 };
 
