@@ -32,9 +32,6 @@ export class GaugeAprService implements PoolAprService {
 
             let thirdPartyApr = 0;
             for (let rewardToken of streamer.rewardTokens) {
-                if (rewardToken.rewardsPerSecond === 0) {
-                    continue;
-                }
                 const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, rewardToken.address) || 0.1;
                 const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
