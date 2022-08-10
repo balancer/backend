@@ -1,4 +1,4 @@
-import { Config } from 'stellate-fantom';
+import { Config } from 'stellate';
 
 const config: Config = {
     config: {
