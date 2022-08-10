@@ -200,7 +200,7 @@ export class PoolSnapshotService {
                 id,
                 poolId,
                 timestamp: startTimestamp,
-                totalLiquidity,
+                totalLiquidity: totalLiquidity || 0,
                 totalShares: poolAtBlock.totalShares,
                 totalSharesNum: totalShares,
                 swapsCount: parseInt(poolAtBlock.swapsCount),
@@ -215,7 +215,12 @@ export class PoolSnapshotService {
                 totalSwapFee: parseFloat(poolAtBlock.totalSwapFee),
             };
 
-            await prisma.prismaPoolSnapshot.upsert({ where: { id }, create: data, update: data });
+            try {
+                await prisma.prismaPoolSnapshot.upsert({ where: { id }, create: data, update: data });
+            } catch (e) {
+                console.log('pool snapshot upsert for ' + id, data);
+                throw e;
+            }
         }
     }
 
