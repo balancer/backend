@@ -78,16 +78,20 @@ export class UserService {
             create: { address: userAddress },
         });
 
-        await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
+        const operations = [];
+        operations.push(this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address));
 
         if (pool.staking) {
-            await this.stakedSyncService.syncUserBalance({
-                userAddress,
-                poolId: pool.id,
-                poolAddress: pool.address,
-                staking: pool.staking,
-            });
+            operations.push(
+                this.stakedSyncService.syncUserBalance({
+                    userAddress,
+                    poolId: pool.id,
+                    poolAddress: pool.address,
+                    staking: pool.staking,
+                }),
+            );
         }
+        await Promise.all(operations);
     }
 }
 
