@@ -27,7 +27,7 @@ async function startServer() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        tracesSampleRate: 0.1,
+        tracesSampleRate: 0.05,
         environment: env.NODE_ENV,
         enabled: env.NODE_ENV === 'production',
         integrations: [
