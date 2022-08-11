@@ -133,7 +133,7 @@ export class PoolSnapshotService {
         }
 
         const swaps = await balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
-        const numDays = moment().endOf('day').diff(startTimestamp, 'days');
+        const numDays = moment().endOf('day').diff(moment.unix(startTimestamp), 'days');
 
         const tokenPriceMap: TokenHistoricalPrices = {};
 
