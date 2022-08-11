@@ -1,5 +1,6 @@
 extend type Query {
     protocolMetrics: GqlProtocolMetrics!
+    latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
 
 extend type Mutation {
@@ -15,4 +16,8 @@ type GqlProtocolMetrics {
     swapVolume24h: BigDecimal!
 }
 
-
+type GqlLatestSyncedBlocks {
+    userWalletSyncBlock: BigInt!
+    userStakeSyncBlock: BigInt!
+    poolSyncBlock: BigInt!
+}

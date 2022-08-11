@@ -494,6 +494,7 @@ input GqlPoolFilter {
 
 enum GqlPoolFilterCategory {
     INCENTIVIZED
+    BLACK_LISTED
 }
 
 enum GqlPoolFilterType {
