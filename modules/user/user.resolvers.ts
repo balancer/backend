@@ -84,6 +84,8 @@ const resolvers: Resolvers = {
             return 'success';
         },
         userSyncBalanceAllPools: async (parent, {}, context) => {
+            isAdminRoute(context);
+
             const accountAddress = getRequiredAccountAddress(context);
 
             await userService.syncUserBalanceAllPools(accountAddress);
