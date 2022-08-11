@@ -156,7 +156,10 @@ export class PoolSnapshotService {
                         numDays,
                     );
                 } catch (error) {
-                    console.error(error);
+                    console.error(`Error getting historical prices form coingecko, falling back to database`,error);
+                    tokenPriceMap[token.address] = await prisma.prismaTokenPrice.findMany({
+                        where: { tokenAddress: token.address, timestamp: { gte: startTimestamp } },
+                    });
                 }
             }
         }
