@@ -132,7 +132,7 @@ export class CoingeckoDataService {
             }),
         );
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     private async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
