@@ -25,7 +25,7 @@ export function startWorker() {
     app.use(Sentry.Handlers.tracingHandler());
     app.use(express.json());
 
-    // configureWorkerRoutes(app);
+    configureWorkerRoutes(app);
     app.use(
         Sentry.Handlers.errorHandler({
             shouldHandleError(): boolean {
@@ -34,7 +34,7 @@ export function startWorker() {
         }),
     );
 
-    // scheduleManualJobs();
+    scheduleManualJobs();
 
     app.listen(env.PORT, () => {
         console.log(`Worker listening on port ${env.PORT}`);
