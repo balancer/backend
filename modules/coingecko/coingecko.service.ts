@@ -24,7 +24,7 @@ interface MappedToken {
 /* coingecko has a rate limit of 50req/minute https://www.coingecko.com/en/api/documentation
    but since we have 2 workers running, we have to give each 25
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 25, interval: 'minute' });
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: 20, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
