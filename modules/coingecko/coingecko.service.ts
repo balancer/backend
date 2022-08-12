@@ -21,10 +21,15 @@ interface MappedToken {
     originalAddress?: string;
 }
 
-/* coingecko has a rate limit of 50req/minute https://www.coingecko.com/en/api/documentation
-   but since we have 2 workers running, we have to give each 25
+/* coingecko has a rate limit of 10-50req/minute 
+   https://www.coingecko.com/en/api/pricing:
+   Our free API has a rate limit of 10-50 calls per minute, 
+   if you exceed that limit you will be blocked until the next 1 minute window. 
+   Do revise your queries to ensure that you do not exceed our limits should
+   that happen.
+
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 20, interval: 'minute' });
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: 10, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
@@ -167,6 +172,7 @@ export class CoingeckoService {
 
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
+        requestRateLimiter.curIntervalStart;
         console.log('Remaining coingecko requests', remainingRequests);
         const { data } = await axios.get(this.baseUrl + endpoint);
         return data;
