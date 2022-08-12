@@ -1,5 +1,5 @@
 import { Price, TokenHistoricalPrices, TokenPrices } from './token-price-types';
-import { coingeckoService } from './lib/coingecko.service';
+import { coingeckoService } from '../../modules/coingecko/coingecko.service';
 import { balancerPriceService } from './lib/balancer-price.service';
 import { sleep } from '../../modules/common/promise';
 import _ from 'lodash';

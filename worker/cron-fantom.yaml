@@ -2,7 +2,7 @@ version: 1
 cron:
     - name: 'load-token-prices'
       url: '/load-token-prices'
-      schedule: '*/5 * * * *'
+      schedule: '* * * * *'
     - name: 'update-liquidity-for-all-pools'
       url: '/update-liquidity-for-all-pools'
       schedule: '* * * * *'
@@ -23,7 +23,7 @@ cron:
       schedule: '*/5 * * * *'
     - name: 'update-liquidity-24h-ago-for-all-pools'
       url: '/update-liquidity-24h-ago-for-all-pools'
-      schedule: '*/20 * * * *'
+      schedule: '*/5 * * * *'
     - name: 'sync-fbeets-ratio'
       url: '/sync-fbeets-ratio'
       schedule: '*/5 * * * *'

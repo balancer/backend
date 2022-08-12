@@ -13,6 +13,7 @@ import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange } from '../../schema';
 import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
@@ -156,11 +157,7 @@ export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
         ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
-        new CoingeckoPriceHandlerService(
-            networkConfig.coingecko.nativeAssetId,
-            networkConfig.coingecko.platformId,
-            networkConfig.weth.address,
-        ),
+        new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
