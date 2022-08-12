@@ -179,10 +179,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolInitializeSnapshotsForBoostedPool: async (parent, args, context) => {
+        poolInitializeSnapshotsForPool: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await poolService.initializeSnapshotsForBoostedPool(args.poolId);
+            await poolService.createPoolSnapshotsForPoolsMissingSubgraphData(args.poolId);
 
             return 'success';
         },

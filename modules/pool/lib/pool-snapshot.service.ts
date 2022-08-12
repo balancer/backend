@@ -90,8 +90,8 @@ export class PoolSnapshotService {
         });
 
         for (const pool of poolsWithoutSnapshots) {
-            if (pool.type !== 'LINEAR' && pool.tokens.filter((token) => !!token.nestedPoolId).length > 0) {
-                await this.syncPoolSnapshotsForBoostedPool(pool.id, oneDayAgoStartOfDay);
+            if (pool.type !== 'LINEAR') {
+                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, oneDayAgoStartOfDay);
             }
         }
     }
@@ -119,7 +119,7 @@ export class PoolSnapshotService {
         }
     }
 
-    public async syncPoolSnapshotsForBoostedPool(poolId: string, timestampToSyncFrom = 0) {
+    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, timestampToSyncFrom = 0) {
         const pool = await prisma.prismaPool.findUnique({
             where: { id: poolId },
             include: prismaPoolWithExpandedNesting.include,
@@ -128,8 +128,8 @@ export class PoolSnapshotService {
 
         const startTimestamp = timestampToSyncFrom > 0 ? timestampToSyncFrom : pool.createTime;
 
-        if (pool.type !== 'LINEAR' && pool.tokens.filter((token) => !!token.nestedPoolId).length === 0) {
-            throw new Error('Not a boosted pool');
+        if (pool.type === 'LINEAR') {
+            throw new Error('Unsupported pool type');
         }
 
         const swaps = await balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
@@ -156,7 +156,7 @@ export class PoolSnapshotService {
                         numDays,
                     );
                 } catch (error) {
-                    console.error(`Error getting historical prices form coingecko, falling back to database`,error);
+                    console.error(`Error getting historical prices form coingecko, falling back to database`, error);
                     tokenPriceMap[token.address] = await prisma.prismaTokenPrice.findMany({
                         where: { tokenAddress: token.address, timestamp: { gte: startTimestamp } },
                     });

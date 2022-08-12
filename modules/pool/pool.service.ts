@@ -256,8 +256,8 @@ export class PoolService {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
 
-    public async initializeSnapshotsForBoostedPool(poolId: string) {
-        await this.poolSnapshotService.syncPoolSnapshotsForBoostedPool(poolId);
+    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string) {
+        await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }
 }
 
