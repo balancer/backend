@@ -2,7 +2,7 @@ version: 1
 cron:
     - name: 'load-token-prices'
       url: '/load-token-prices'
-      schedule: '* * * * *'
+      schedule: '*/2 * * * *'
     - name: 'update-liquidity-for-all-pools'
       url: '/update-liquidity-for-all-pools'
       schedule: '* * * * *'

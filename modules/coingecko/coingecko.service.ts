@@ -29,7 +29,7 @@ interface MappedToken {
    that happen.
 
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 10, interval: 'minute' });
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: 15, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
