@@ -64,6 +64,13 @@ export class UserService {
         await this.stakedSyncService.syncStakedBalances();
     }
 
+    public async syncUserBalanceAllPools(userAddress: string) {
+        const allBalances = await this.userBalanceService.getUserPoolBalances(userAddress);
+        for (const userPoolBalance of allBalances) {
+            this.syncUserBalance(userAddress, userPoolBalance.poolId);
+        }
+    }
+
     public async syncUserBalance(userAddress: string, poolId: string) {
         const pool = await prisma.prismaPool.findUnique({
             where: { id: poolId },
