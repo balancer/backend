@@ -63,9 +63,14 @@ export class PoolSanityDataLoaderService {
         const itemsToAdd = newPoolIds.filter((poolId) => !currentPoolIds.includes(poolId));
         const itemsToRemove = currentPoolIds.filter((poolId) => !newPoolIds.includes(poolId));
 
+        // make sure the pools really exist to prevent sanity mistakes from breaking the system
+        const pools = await prisma.prismaPool.findMany({ where: { id: { in: itemsToAdd } }, select: { id: true } });
+        const poolIds = pools.map((pool) => pool.id);
+        const existingItemsToAdd = itemsToAdd.filter((poolId) => poolIds.includes(poolId));
+
         await prisma.$transaction([
             prisma.prismaPoolCategory.createMany({
-                data: itemsToAdd.map((poolId) => ({
+                data: existingItemsToAdd.map((poolId) => ({
                     id: `${poolId}-${category}`,
                     category,
                     poolId,
