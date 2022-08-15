@@ -137,6 +137,14 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
             }
 
+            if (pool.type === 'META_STABLE') {
+                const tokenAddresses = pool.tokens.map((token) => token.address);
+
+                tokenAddresses.forEach((token, i) => {
+                    multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getPriceRateCache', [token]);
+                });
+            }
+
             if (pool.type === 'PHANTOM_STABLE') {
                 // Overwrite totalSupply with virtualSupply for StablePhantom pools
                 multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
