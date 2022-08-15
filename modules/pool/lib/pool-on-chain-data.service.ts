@@ -32,6 +32,7 @@ interface MulticallExecuteResult {
     rate?: BigNumber;
     swapEnabled?: boolean;
     tokenRates?: BigNumber[];
+    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
     linearPools?: Record<
         string,
         {
@@ -143,7 +144,7 @@ export class PoolOnChainDataService {
                 const tokenAddresses = pool.tokens.map((token) => token.address);
 
                 tokenAddresses.forEach((token, i) => {
-                    multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getPriceRateCache', [token]);
+                    multiPool.call(`${pool.id}.metaPriceRateCache[${i}]`, pool.address, 'getPriceRateCache', [token]);
                 });
             }
 
@@ -288,10 +289,18 @@ export class PoolOnChainDataService {
                         );
                     }
 
-                    const priceRate =
-                        onchainData.tokenRates && onchainData.tokenRates[i] && onchainData.tokenRates[i].gt('0')
-                            ? formatFixed(onchainData.tokenRates[i], 18)
-                            : '1.0';
+                    let priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
+
+                    if (onchainData.metaPriceRateCache && onchainData.metaPriceRateCache[i][0].gt('0')) {
+                        if (poolId === '0x4fd63966879300cafafbb35d157dc5229278ed2300020000000000000000002b') {
+                            console.log(
+                                'meta token rate formatted',
+                                formatFixed(onchainData.metaPriceRateCache[i][0], 18),
+                            );
+                        }
+
+                        priceRate = formatFixed(onchainData.metaPriceRateCache[i][0], 18);
+                    }
 
                     if (
                         !poolToken.dynamicData ||
