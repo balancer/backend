@@ -280,7 +280,10 @@ export class PoolOnChainDataService {
 
                     const balance = formatFixed(poolTokens.balances[i], poolToken.token.decimals);
                     const weight = onchainData.weights ? formatFixed(onchainData.weights[i], 18) : null;
-                    const priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
+                    const priceRate =
+                        onchainData.tokenRates && onchainData.tokenRates[i] && onchainData.tokenRates[i].gt('0')
+                            ? formatFixed(onchainData.tokenRates[i], 18)
+                            : '1.0';
 
                     if (
                         !poolToken.dynamicData ||
