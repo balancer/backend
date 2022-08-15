@@ -445,6 +445,7 @@ export class PoolGqlLoaderService {
                         }
 
                         return {
+                            id: group,
                             title,
                             apr: `${apr}`,
                             subItems,
