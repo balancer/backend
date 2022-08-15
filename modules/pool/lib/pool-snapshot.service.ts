@@ -156,6 +156,7 @@ export class PoolSnapshotService {
                         numDays,
                     );
                 } catch (error: any) {
+                    Sentry.captureException(error);
                     console.error(
                         `Error getting historical prices form coingecko, falling back to database`,
                         error.message,
