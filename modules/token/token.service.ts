@@ -162,5 +162,5 @@ export const tokenService = new TokenService(
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ]),
-    new CoingeckoDataService(),
+    new CoingeckoDataService(coingeckoService),
 );

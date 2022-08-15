@@ -21,10 +21,44 @@ interface MappedToken {
     originalAddress?: string;
 }
 
-/* coingecko has a rate limit of 10-50req/minute 
+interface CoingeckoTokenMarketData {
+    id: string;
+    symbol: string;
+    name: string;
+    image: string;
+    current_price: number;
+    market_cap: number;
+    market_cap_rank: number;
+    fully_diluted_valuation: number | null;
+    total_volume: number;
+    high_24h: number;
+    low_24h: number;
+    price_change_24h: number;
+    price_change_percentage_24h: number;
+    market_cap_change_24h: number;
+    market_cap_change_percentage_24h: number;
+    circulating_supply: number;
+    total_supply: number;
+    max_supply: number | null;
+    ath: number;
+    ath_change_percentage: number;
+    ath_date: Date;
+    atl: number;
+    atl_change_percentage: number;
+    atl_date: Date;
+    roi: null;
+    last_updated: Date;
+    price_change_percentage_14d_in_currency: number;
+    price_change_percentage_1h_in_currency: number;
+    price_change_percentage_24h_in_currency: number;
+    price_change_percentage_30d_in_currency: number;
+    price_change_percentage_7d_in_currency: number;
+}
+
+/* coingecko has a rate limit of 10-50req/minute
    https://www.coingecko.com/en/api/pricing:
-   Our free API has a rate limit of 10-50 calls per minute, 
-   if you exceed that limit you will be blocked until the next 1 minute window. 
+   Our free API has a rate limit of 10-50 calls per minute,
+   if you exceed that limit you will be blocked until the next 1 minute window.
    Do revise your queries to ensure that you do not exceed our limits should
    that happen.
 
@@ -166,13 +200,23 @@ export class CoingeckoService {
         };
     }
 
-    private getAddress(address: string) {
-        return isAddress(address) ? getAddress(address) : address;
+    public async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
+        const endpoint = `/coins/markets?vs_currency=${this.fiatParam}&ids=${tokenIds}&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
+
+        return this.get<CoingeckoTokenMarketData[]>(endpoint);
+    }
+
+    public async getCoinCandlestickData(
+        tokenId: string,
+        days: 1 | 30,
+    ): Promise<[number, number, number, number, number][]> {
+        const endpoint = `/coins/${tokenId}/ohlc?vs_currency=usd&days=${days}`;
+
+        return this.get(endpoint);
     }
 
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
-        requestRateLimiter.curIntervalStart;
         console.log('Remaining coingecko requests', remainingRequests);
         const { data } = await axios.get(this.baseUrl + endpoint);
         return data;
