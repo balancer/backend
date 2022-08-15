@@ -18,6 +18,7 @@ import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { CoingeckoService } from '../../coingecko/coingecko.service';
 import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { sleep } from '../../common/promise';
 
 export class PoolSnapshotService {
     constructor(
@@ -155,7 +156,9 @@ export class PoolSnapshotService {
                         token.address,
                         numDays,
                     );
+                    await sleep(8000);
                 } catch (error: any) {
+                    Sentry.captureException(error);
                     console.error(
                         `Error getting historical prices form coingecko, falling back to database`,
                         error.message,
