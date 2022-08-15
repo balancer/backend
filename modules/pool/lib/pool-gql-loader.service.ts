@@ -287,9 +287,15 @@ export class PoolGqlLoaderService {
         //TODO: may need to build out the types here still
         switch (pool.type) {
             case 'STABLE':
-            case 'META_STABLE':
                 return {
                     __typename: 'GqlPoolStable',
+                    ...mappedData,
+                    amp: pool.stableDynamicData?.amp || '0',
+                    tokens: mappedData.tokens as GqlPoolToken[],
+                };
+            case 'META_STABLE':
+                return {
+                    __typename: 'GqlPoolMetaStable',
                     ...mappedData,
                     amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
@@ -376,7 +382,7 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
-        const aprItems = pool.aprItems?.filter(item => item.apr > 0) || [];
+        const aprItems = pool.aprItems?.filter((item) => item.apr > 0) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
         const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
         const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');

@@ -231,6 +231,25 @@ type GqlPoolStable implements GqlPoolBase {
     staking: GqlPoolStaking
 }
 
+type GqlPoolMetaStable implements GqlPoolBase {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig!
+    withdrawConfig: GqlPoolWithdrawConfig!
+    dynamicData: GqlPoolDynamicData!
+    allTokens: [GqlPoolTokenExpanded!]!
+
+    tokens: [GqlPoolToken!]!
+    amp: BigInt!
+    staking: GqlPoolStaking
+}
+
 type GqlPoolPhantomStable implements GqlPoolBase {
     id: ID!
     name: String!
@@ -336,6 +355,7 @@ type GqlPoolPhantomStableNested {
 union GqlPoolUnion =
       GqlPoolWeighted
     | GqlPoolStable
+    | GqlPoolMetaStable
     | GqlPoolLinear
     | GqlPoolPhantomStable
     | GqlPoolElement
