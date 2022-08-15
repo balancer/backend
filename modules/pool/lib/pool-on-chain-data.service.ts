@@ -3,6 +3,7 @@ import VaultAbi from '../abi/Vault.json';
 import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
 import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
+import MetaStablePool from '../abi/MetaStablePool.json';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
@@ -100,6 +101,7 @@ export class PoolOnChainDataService {
                     ...LinearPoolAbi,
                     ...LiquidityBootstrappingPoolAbi,
                     ...StablePhantomPoolAbi,
+                    ...MetaStablePool,
                 ].map((row) => [row.name, row]),
             ),
         );
@@ -164,9 +166,9 @@ export class PoolOnChainDataService {
 
         try {
             poolsOnChainData = (await multiPool.execute()) as Record<string, MulticallExecuteResult>;
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            throw `Issue with multicall execution.`;
+            throw `Issue with multicall execution. ${err.message}`;
         }
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
