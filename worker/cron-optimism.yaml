@@ -38,7 +38,7 @@ cron:
     #      schedule: '* * * * *'
     - name: 'sync-latest-snapshots-for-all-pools'
       url: '/sync-latest-snapshots-for-all-pools'
-      schedule: '* * * * *'
+      schedule: '1 * * * *'
     - name: 'update-lifetime-values-for-all-pools'
       url: '/update-lifetime-values-for-all-pools'
       schedule: '*/20 * * * *'
