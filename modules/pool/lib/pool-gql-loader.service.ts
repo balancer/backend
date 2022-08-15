@@ -467,7 +467,7 @@ export class PoolGqlLoaderService {
 
         return {
             //TODO could flag these as disabled in sanity
-            proportionalEnabled: pool.type !== 'PHANTOM_STABLE',
+            proportionalEnabled: pool.type !== 'PHANTOM_STABLE' && pool.type !== 'META_STABLE',
             singleAssetEnabled: true,
             options,
         };
