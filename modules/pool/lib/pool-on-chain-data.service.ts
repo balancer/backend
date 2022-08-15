@@ -282,23 +282,9 @@ export class PoolOnChainDataService {
                     const balance = formatFixed(poolTokens.balances[i], poolToken.token.decimals);
                     const weight = onchainData.weights ? formatFixed(onchainData.weights[i], 18) : null;
 
-                    if (poolId === '0x4fd63966879300cafafbb35d157dc5229278ed2300020000000000000000002b') {
-                        console.log(
-                            'meta token rates',
-                            onchainData.tokenRates?.map((rate) => rate.toString()),
-                        );
-                    }
-
                     let priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
 
                     if (onchainData.metaPriceRateCache && onchainData.metaPriceRateCache[i][0].gt('0')) {
-                        if (poolId === '0x4fd63966879300cafafbb35d157dc5229278ed2300020000000000000000002b') {
-                            console.log(
-                                'meta token rate formatted',
-                                formatFixed(onchainData.metaPriceRateCache[i][0], 18),
-                            );
-                        }
-
                         priceRate = formatFixed(onchainData.metaPriceRateCache[i][0], 18);
                     }
 
