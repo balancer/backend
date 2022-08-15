@@ -168,7 +168,7 @@ export class PoolOnChainDataService {
             poolsOnChainData = (await multiPool.execute()) as Record<string, MulticallExecuteResult>;
         } catch (err: any) {
             console.error(err);
-            throw `Issue with multicall execution. ${err.message}`;
+            throw `Issue with multicall execution. ${err}`;
         }
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
