@@ -1,35 +1,22 @@
 import { env } from '../../app/env';
 import { TokenDefinition, TokenPriceItem } from './token-types';
-import { prisma } from '../util/prisma-client';
-import { TokenDataLoaderService } from './src/token-data-loader.service';
-import { TokenPriceService } from './src/token-price.service';
-import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
-import { networkConfig } from '../config/network-config';
-import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import {
-    PrismaToken,
-    PrismaTokenCurrentPrice,
-    PrismaTokenDynamicData,
-    PrismaTokenPrice,
-    PrismaTokenData,
-} from '@prisma/client';
-import { CoingeckoDataService } from './src/coingecko-data.service';
+import { prisma } from '../../prisma/prisma-client';
+import { TokenDataLoaderService } from './lib/token-data-loader.service';
+import { TokenPriceService } from './lib/token-price.service';
+import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
+import { isFantomNetwork, networkConfig } from '../config/network-config';
+import { BptPriceHandlerService } from './lib/token-price-handlers/bpt-price-handler.service';
+import { LinearWrappedTokenPriceHandlerService } from './lib/token-price-handlers/linear-wrapped-token-price-handler.service';
+import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price-handler.service';
+import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { memCacheGetValueAndCacheIfNeeded } from '../util/mem-cache';
-import {
-    GqlTokenCandlestickChartDataItem,
-    GqlTokenChartDataRange,
-    GqlTokenPriceChartDataItem,
-    QueryTokenGetCandlestickChartDataArgs,
-    QueryTokenGetPriceChartDataArgs,
-    QueryTokenGetRelativePriceChartDataArgs,
-} from '../../schema';
-import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
+import { GqlTokenChartDataRange } from '../../schema';
+import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
-const WHITE_LISTED_TOKEN_PRICES_CACHE_KEY = 'token:prices:whitelist:current';
+const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
 const ALL_TOKENS_CACHE_KEY = 'tokens:all';
 
 export class TokenService {
@@ -46,8 +33,20 @@ export class TokenService {
         await this.tokenDataLoaderService.syncSanityTokenData();
     }
 
-    public async getTokens(): Promise<PrismaToken[]> {
-        return memCacheGetValueAndCacheIfNeeded(ALL_TOKENS_CACHE_KEY, () => prisma.prismaToken.findMany({}), 5 * 60);
+    public async getToken(address: string): Promise<PrismaToken | null> {
+        return prisma.prismaToken.findUnique({ where: { address: address.toLowerCase() } });
+    }
+
+    public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
+        let tokens: PrismaToken[] | null = this.cache.get(ALL_TOKENS_CACHE_KEY);
+        if (!tokens) {
+            tokens = await prisma.prismaToken.findMany({});
+            this.cache.put(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60 * 1000);
+        }
+        if (addresses) {
+            return tokens.filter((token) => addresses.includes(token.address));
+        }
+        return tokens;
     }
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {
@@ -56,6 +55,17 @@ export class TokenService {
             include: { types: true },
             orderBy: { priority: 'desc' },
         });
+
+        const weth = tokens.find((token) => token.address === networkConfig.weth.address);
+
+        if (weth) {
+            tokens.push({
+                ...weth,
+                name: networkConfig.eth.name,
+                address: networkConfig.eth.address,
+                symbol: networkConfig.eth.symbol,
+            });
+        }
 
         return tokens.map((token) => ({
             ...token,
@@ -72,11 +82,12 @@ export class TokenService {
     }
 
     public async getTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
-        return memCacheGetValueAndCacheIfNeeded(
-            TOKEN_PRICES_CACHE_KEY,
-            () => this.tokenPriceService.getCurrentTokenPrices(),
-            10,
-        );
+        let tokenPrices = this.cache.get(TOKEN_PRICES_CACHE_KEY);
+        if (!tokenPrices) {
+            tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
+            this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30 * 1000);
+        }
+        return tokenPrices;
     }
 
     public async getWhiteListedTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
@@ -128,23 +139,28 @@ export class TokenService {
         await this.coingeckoDataService.initChartData(tokenAddress);
     }
 
-    public async getTokenData(tokenAddress: string): Promise<PrismaTokenData | null> {
-        return prisma.prismaTokenData.findUnique({ where: { tokenAddress } });
+    public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
+        let tokenPrices24hAgo = this.cache.get(TOKEN_PRICES_24H_AGO_CACHE_KEY);
+        if (!tokenPrices24hAgo) {
+            tokenPrices24hAgo = await this.tokenPriceService.getTokenPriceFrom24hAgo();
+            this.cache.put(TOKEN_PRICES_24H_AGO_CACHE_KEY, tokenPrices24hAgo, 60 * 5 * 1000);
+        }
+        return tokenPrices24hAgo;
+    }
+
+    public async getHistoricalTokenPrices() {
+        return this.tokenPriceService.getHistoricalTokenPrices();
     }
 }
 
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
-        new FbeetsPriceHandlerService(),
-        new CoingeckoPriceHandlerService(
-            networkConfig.coingecko.nativeAssetId,
-            networkConfig.coingecko.platformId,
-            networkConfig.weth.address,
-        ),
+        ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
+        new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ]),
-    new CoingeckoDataService(),
+    new CoingeckoDataService(coingeckoService),
 );

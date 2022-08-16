@@ -37,14 +37,16 @@ import {
     BalancerUserFragment,
     BalancerUsersQueryVariables,
     getSdk,
+    OrderDirection,
+    Swap_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { env } from '../../../app/env';
 import _ from 'lodash';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
+import { subgraphLoadAll } from '../subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
-import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../util/time';
-import { cache } from '../../cache/cache';
+import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
+import { networkConfig } from '../../config/network-config';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -58,7 +60,7 @@ export class BalancerSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.BALANCER_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.balancer);
     }
 
     public async getMetadata() {
@@ -106,6 +108,39 @@ export class BalancerSubgraphService {
 
     public async getAllSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapFragment[]> {
         return subgraphLoadAll<BalancerSwapFragment>(this.sdk.BalancerSwaps, 'swaps', args);
+    }
+
+    public async getAllSwapsWithPaging({
+        where,
+        block,
+        startTimestamp,
+    }: Pick<BalancerSwapsQueryVariables, 'where' | 'block'> & { startTimestamp: number }): Promise<
+        BalancerSwapFragment[]
+    > {
+        const limit = 1000;
+        let timestamp = startTimestamp;
+        let hasMore = true;
+        let swaps: BalancerSwapFragment[] = [];
+
+        while (hasMore) {
+            const response = await this.sdk.BalancerSwaps({
+                where: { ...where, timestamp_gt: timestamp },
+                block,
+                orderBy: Swap_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+                first: limit,
+            });
+
+            swaps = [...swaps, ...response.swaps];
+
+            if (response.swaps.length < limit) {
+                hasMore = false;
+            } else {
+                timestamp = response.swaps[response.swaps.length - 1].timestamp;
+            }
+        }
+
+        return swaps;
     }
 
     public async getAllGradualWeightUpdates(
@@ -195,7 +230,7 @@ export class BalancerSubgraphService {
         return subgraphLoadAll<BalancerPoolFragment>(this.sdk.BalancerPools, 'pools', {
             ...args,
             where: {
-                totalShares_gt: applyTotalSharesFilter ? '0.00000000001' : undefined,
+                totalShares_not: applyTotalSharesFilter ? '0.00000000001' : undefined,
                 ...args.where,
             },
         });
@@ -205,30 +240,18 @@ export class BalancerSubgraphService {
         return this.sdk.BalancerJoinExits(args);
     }
 
-    public async cachePortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const response = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
-
-        await cache.putObjectValue(PORTFOLIO_POOLS_CACHE_KEY, response, 5);
-
-        return response;
-    }
-
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const memCached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
-
-        if (memCached) {
-            return memCached;
-        }
-
-        const cached = await cache.getObjectValue<BalancerPortfolioPoolsDataQuery>(PORTFOLIO_POOLS_CACHE_KEY);
+        const cached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
 
         if (cached) {
-            this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, cached, fiveMinutesInMs);
-
             return cached;
         }
 
-        return this.cachePortfolioPoolsData(previousBlockNumber);
+        const portfolioPools = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
+
+        this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, portfolioPools, fiveMinutesInMs);
+
+        return portfolioPools;
     }
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
@@ -253,16 +276,6 @@ export class BalancerSubgraphService {
         args: BalancerTradePairSnapshotsQueryVariables,
     ): Promise<BalancerTradePairSnapshotsQuery> {
         return this.sdk.BalancerTradePairSnapshots(args);
-    }
-
-    public async clearCacheAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_USERS_CACHE_KEY, block);
-        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
-        await subgraphPurgeCacheKeyAtBlock(ALL_JOIN_EXITS_CACHE_KEY, block);
-    }
-
-    public async clearPoolsAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_POOLS_CACHE_KEY, block);
     }
 
     public async getPoolsWithActiveUpdates(timestamp: number): Promise<string[]> {

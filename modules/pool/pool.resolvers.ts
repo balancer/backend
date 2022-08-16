@@ -1,7 +1,8 @@
 import { poolService } from './pool.service';
 import { Resolvers } from '../../schema';
-import { isAdminRoute } from '../util/resolver-util';
-import { prisma } from '../util/prisma-client';
+import { isAdminRoute } from '../auth/auth-context';
+import { prisma } from '../../prisma/prisma-client';
+import { jsonRpcProvider } from '../web3/contract';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -21,17 +22,7 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolSwaps(args);
         },
         poolGetBatchSwaps: async (parent, args, context) => {
-            const batchSwaps = await poolService.getPoolBatchSwaps(args);
-
-            return batchSwaps.map((batchSwap) => ({
-                ...batchSwap,
-                swaps: batchSwap.swaps.map((swap) => ({
-                    ...swap,
-                    poolTokens: swap.pool.tokens
-                        .filter((token) => token.address !== swap.pool.address)
-                        .map((token) => token.address),
-                })),
-            }));
+            return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
             return poolService.getPoolJoinExits(args);
@@ -41,6 +32,21 @@ const balancerResolvers: Resolvers = {
         },
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
+        },
+        poolGetSnapshots: async (parent, { id, range }, context) => {
+            const snapshots = await poolService.getSnapshotsForPool(id, range);
+
+            return snapshots.map((snapshot) => ({
+                ...snapshot,
+                totalLiquidity: `${snapshot.totalLiquidity}`,
+                sharePrice: `${snapshot.sharePrice}`,
+                volume24h: `${snapshot.volume24h}`,
+                fees24h: `${snapshot.fees24h}`,
+                totalSwapVolume: `${snapshot.totalSwapVolume}`,
+                totalSwapFee: `${snapshot.totalSwapFee}`,
+                swapsCount: `${snapshot.swapsCount}`,
+                holdersCount: `${snapshot.holdersCount}`,
+            }));
         },
     },
     Mutation: {
@@ -75,10 +81,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncSwapsForLast24Hours: async (parent, {}, context) => {
+        poolSyncSwapsForLast48Hours: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.syncSwapsForLast24Hours();
+            await poolService.syncSwapsForLast48Hours();
 
             return 'success';
         },
@@ -142,6 +148,49 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.syncStakingForPools();
+
+            return 'success';
+        },
+        poolUpdateLiquidity24hAgoForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.updateLiquidity24hAgoForAllPools();
+
+            return 'success';
+        },
+        poolLoadSnapshotsForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.loadSnapshotsForAllPools();
+
+            return 'success';
+        },
+        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
+
+            return 'success';
+        },
+        poolUpdateLifetimeValuesForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.updateLifetimeValuesForAllPools();
+
+            return 'success';
+        },
+        poolInitializeSnapshotsForPool: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.createPoolSnapshotsForPoolsMissingSubgraphData(args.poolId);
+
+            return 'success';
+        },
+        poolSyncPool: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            const latestBlockNumber = await jsonRpcProvider.getBlockNumber();
+            await poolService.updateOnChainDataForPools([poolId], latestBlockNumber);
 
             return 'success';
         },

@@ -1,8 +1,12 @@
+import * as Sentry from '@sentry/node';
 import { NextFunction, Request, Response } from 'express';
+import { Hub } from '@sentry/hub/types/hub';
 
 declare global {
     namespace Express {
-        interface Context {}
+        interface Context {
+            transaction: ReturnType<Hub['startTransaction']>;
+        }
 
         interface Request {
             context: Context;
@@ -11,7 +15,16 @@ declare global {
 }
 
 export async function contextMiddleware(req: Request, res: Response, next: NextFunction) {
+    const transaction = Sentry.startTransaction({
+        // op: 'gql',
+        name: 'GraphQLTransaction', // this will be the default name, unless the gql query has a name
+    });
+    Sentry.configureScope((scope) => {
+        scope.setSpan(transaction);
+    });
+
     // @ts-ignore
-    req.context = {};
+    req.context = { transaction };
+
     next();
 }

@@ -243,10 +243,16 @@ fragment BalancerPoolSnapshot on PoolSnapshot {
     pool {
         id
     }
+    amounts
     totalShares
     swapVolume
     swapFees
     timestamp
+    totalSwapVolume
+    totalLiquidity
+    totalSwapFee
+    swapsCount
+    holdersCount
 }
 
 query BalancerLatestPrices(

@@ -1,8 +1,8 @@
 import { BalancerSdkConfig, Network, SubgraphPoolBase } from '@balancer-labs/sdk';
-import { env } from '../../../app/env';
-import { tokenPriceService } from '../../token-price/token-price.service';
-import { prisma } from '../../util/prisma-client';
+import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolType } from '@prisma/client';
+import { tokenPriceService } from '../../../legacy/token-price/token-price.service';
+import { networkConfig } from '../../config/network-config';
 
 export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
     '250': {
@@ -43,10 +43,100 @@ export const BALANCER_SDK_CONFIG: { [chainId: string]: BalancerSdkConfig } = {
                 getNativeAssetPriceInToken: async (tokenAddress: string) => {
                     try {
                         const tokenPrices = await tokenPriceService.getTokenPrices();
-                        tokenPriceService.getPriceForToken(tokenPrices, env.WRAPPED_NATIVE_ASSET_ADDRESS);
+                        tokenPriceService.getPriceForToken(tokenPrices, networkConfig.chain.wrappedNativeAssetAddress);
                         const nativeAssetPrice = tokenPriceService.getPriceForToken(
                             tokenPrices,
-                            env.WRAPPED_NATIVE_ASSET_ADDRESS,
+                            networkConfig.chain.wrappedNativeAssetAddress,
+                        );
+                        const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, tokenAddress) || 1;
+
+                        return `${nativeAssetPrice / tokenPrice}`;
+                    } catch {
+                        return '0';
+                    }
+                },
+            },
+            poolDataService: {
+                getPools: async () => {
+                    const pools = await prisma.prismaPool.findMany({
+                        where: {
+                            dynamicData: {
+                                totalSharesNum: {
+                                    gt: 0.000000000001,
+                                },
+                            },
+                            categories: {
+                                none: { category: 'BLACK_LISTED' },
+                            },
+                        },
+                        include: {
+                            dynamicData: true,
+                            stableDynamicData: true,
+                            linearDynamicData: true,
+                            linearData: true,
+                            tokens: {
+                                include: { dynamicData: true, token: true },
+                                orderBy: { index: 'asc' },
+                            },
+                        },
+                    });
+
+                    const mappedPools: SubgraphPoolBase[] = pools.map((pool) => ({
+                        ...pool,
+                        ...pool.dynamicData!,
+                        ...pool.stableDynamicData,
+                        ...pool.linearData,
+                        ...pool.linearDynamicData,
+                        totalLiquidity: `${pool.dynamicData!.totalLiquidity}`,
+                        factory: pool.factory || undefined,
+                        poolType: mapPoolTypeToSubgraphPoolType(pool.type),
+                        tokensList: pool.tokens.map((token) => token.address),
+                        totalWeight: '1', //TODO: properly calculate this
+                        tokens: pool.tokens.map((token) => ({
+                            ...token.token!,
+                            ...token.dynamicData!,
+                        })),
+                    }));
+
+                    return mappedPools;
+                },
+            },
+        },
+    },
+    '10': {
+        network: {
+            chainId: 10 as Network,
+            addresses: {
+                contracts: {
+                    vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+                    multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+                    batchRelayer: '0x0000000000000000000000000000000000000000',
+                },
+                tokens: {
+                    wrappedNativeAsset: '0x4200000000000000000000000000000000000006',
+                },
+                linearFactories: {},
+            },
+            urls: {
+                subgraph: 'https://backend.beets-ftm-node.com/graphql',
+            },
+            pools: {},
+            fBeets: {
+                address: '0xfcef8a994209d6916EB2C86cDD2AFD60Aa6F54b1',
+                farmId: 22,
+                poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            },
+        },
+        rpcUrl: 'https://mainnet.optimism.io/',
+        sor: {
+            tokenPriceService: {
+                getNativeAssetPriceInToken: async (tokenAddress: string) => {
+                    try {
+                        const tokenPrices = await tokenPriceService.getTokenPrices();
+                        tokenPriceService.getPriceForToken(tokenPrices, networkConfig.chain.wrappedNativeAssetAddress);
+                        const nativeAssetPrice = tokenPriceService.getPriceForToken(
+                            tokenPrices,
+                            networkConfig.chain.wrappedNativeAssetAddress,
                         );
                         const tokenPrice = tokenPriceService.getPriceForToken(tokenPrices, tokenAddress) || 1;
 

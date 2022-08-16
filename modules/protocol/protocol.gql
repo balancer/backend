@@ -1,0 +1,23 @@
+extend type Query {
+    protocolMetrics: GqlProtocolMetrics!
+    latestSyncedBlocks: GqlLatestSyncedBlocks!
+}
+
+extend type Mutation {
+    protocolCacheMetrics: String!
+}
+
+type GqlProtocolMetrics {
+    totalLiquidity: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalSwapFee: BigDecimal!
+    poolCount: BigInt!
+    swapFee24h: BigDecimal!
+    swapVolume24h: BigDecimal!
+}
+
+type GqlLatestSyncedBlocks {
+    userWalletSyncBlock: BigInt!
+    userStakeSyncBlock: BigInt!
+    poolSyncBlock: BigInt!
+}

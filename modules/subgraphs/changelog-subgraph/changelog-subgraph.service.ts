@@ -1,7 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
-import { env } from '../../../app/env';
 import { getSdk } from './generated/changelog-subgraph-types';
-import { toString } from 'lodash';
+import { networkConfig } from '../../config/network-config';
 
 export type FarmChangeEvent = {
     __typename: 'FarmChangeEvent';
@@ -21,7 +20,7 @@ class ChangelogSubgraphService {
     private readonly client: GraphQLClient;
 
     constructor() {
-        this.client = new GraphQLClient(env.CHANGELOG_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.changelog);
     }
 
     public async getEntityChangeLogs(minBlockNumber: number): Promise<Array<FarmChangeEvent | PoolChangeEvent>> {

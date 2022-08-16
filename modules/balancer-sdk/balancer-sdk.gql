@@ -6,6 +6,11 @@ extend type Query {
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
     ): GqlSorGetSwapsResponse!
+    sorGetBatchSwapForTokensIn(
+        tokensIn: [GqlTokenAmountHumanReadable!]!
+        tokenOut: String!
+        swapOptions: GqlSorSwapOptionsInput!
+    ): GqlSorGetBatchSwapForTokensInResponse!
 }
 
 enum GqlSorSwapType {
@@ -65,4 +70,10 @@ type GqlSorSwapRouteHop {
     tokenOutAmount: BigDecimal!
     poolId: String!
     pool: GqlPoolMinimal!
+}
+
+type GqlSorGetBatchSwapForTokensInResponse {
+    tokenOutAmount: AmountHumanReadable!
+    swaps: [GqlSorSwap!]!
+    assets: [String!]!
 }

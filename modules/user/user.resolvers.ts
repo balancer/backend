@@ -1,6 +1,6 @@
 import { Resolvers } from '../../schema';
 import { userService } from './user.service';
-import { getRequiredAccountAddress, isAdminRoute } from '../util/resolver-util';
+import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { tokenService } from '../token/token.service';
 
 const resolvers: Resolvers = {
@@ -14,6 +14,15 @@ const resolvers: Resolvers = {
                 ...balance,
                 tokenPrice: tokenService.getPriceForToken(tokenPrices, balance.tokenAddress),
             }));
+        },
+        userGetPoolJoinExits: async (parent, { first, skip, poolId }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            return userService.getUserPoolInvestments(accountAddress, poolId, first, skip);
+        },
+        userGetSwaps: async (parent, { first, skip, poolId }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+            return userService.getUserSwaps(accountAddress, poolId, first, skip);
         },
         userGetFbeetsBalance: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
@@ -64,6 +73,22 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
 
             await userService.syncStakedBalances();
+
+            return 'success';
+        },
+        userSyncBalance: async (parent, { poolId }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            await userService.syncUserBalance(accountAddress, poolId);
+
+            return 'success';
+        },
+        userSyncBalanceAllPools: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            const accountAddress = getRequiredAccountAddress(context);
+
+            await userService.syncUserBalanceAllPools(accountAddress);
 
             return 'success';
         },

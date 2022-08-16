@@ -13,9 +13,10 @@ import {
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
 import { env } from '../../../app/env';
-import { subgraphLoadAll, subgraphPurgeCacheKeyAtBlock } from '../../util/subgraph-util';
-import { twentyFourHoursInMs } from '../../util/time';
+import { subgraphLoadAll } from '../subgraph-util';
+import { twentyFourHoursInMs } from '../../common/time';
 import { Cache, CacheClass } from 'memory-cache';
+import { networkConfig } from '../../config/network-config';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
 
@@ -25,7 +26,7 @@ export class MasterchefSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(env.MASTERCHEF_SUBGRAPH);
+        this.client = new GraphQLClient(networkConfig.subgraphs.masterchef);
     }
 
     public async getMetadata() {
@@ -85,10 +86,6 @@ export class MasterchefSubgraphService {
 
     public getFarmForPoolAddress(poolAddress: string, farms: FarmFragment[]): FarmFragment | null {
         return farms.find((farm) => farm.pair.toLowerCase() === poolAddress.toLowerCase()) || null;
-    }
-
-    public async clearCacheAtBlock(block: number) {
-        await subgraphPurgeCacheKeyAtBlock(ALL_FARM_USERS_CACHE_KEY, block);
     }
 
     public get sdk() {

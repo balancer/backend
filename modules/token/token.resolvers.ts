@@ -1,12 +1,11 @@
 import { Resolvers } from '../../schema';
-import { tokenPriceService } from '../token-price/token-price.service';
 import _ from 'lodash';
-import { isAdminRoute } from '../util/resolver-util';
+import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
 
 const resolvers: Resolvers = {
     Query: {
-        tokenGetTokens: async (parent, {}, context) => {
+        tokenGetTokens: async () => {
             return tokenService.getTokenDefinitions();
         },
         tokenGetCurrentPrices: async (parent, {}, context) => {
@@ -18,7 +17,7 @@ const resolvers: Resolvers = {
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses }, context) => {
-            const tokenPrices = await tokenPriceService.getHistoricalTokenPrices();
+            const tokenPrices = await tokenService.getHistoricalTokenPrices();
             const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
 
             return _.map(filtered, (entries, address) => ({
@@ -35,6 +34,7 @@ const resolvers: Resolvers = {
             return data
                 ? {
                       ...data,
+                      id: data.coingeckoId,
                       fdv: data.fdv ? `${data.fdv}` : null,
                       marketCap: data.marketCap ? `${data.marketCap}` : null,
                       updatedAt: data.updatedAt.toUTCString(),
@@ -46,6 +46,7 @@ const resolvers: Resolvers = {
 
             return items.map((item) => ({
                 ...item,
+                id: item.coingeckoId,
                 fdv: item.fdv ? `${item.fdv}` : null,
                 marketCap: item.marketCap ? `${item.marketCap}` : null,
                 updatedAt: item.updatedAt.toUTCString(),
@@ -82,14 +83,26 @@ const resolvers: Resolvers = {
             }));
         },
         tokenGetTokenData: async (parent, { address }, context) => {
-            return tokenService.getTokenData(address);
+            const token = await tokenService.getToken(address);
+            if (token) {
+                return {
+                    ...token,
+                    id: token.address,
+                    tokenAddress: token.address,
+                };
+            }
+            return null;
+        },
+        tokenGetTokensData: async (parent, { addresses }, context) => {
+            const tokens = await tokenService.getTokens(addresses);
+            return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
         },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenPriceService.cacheTokenPrices();
+            await tokenService.loadTokenPrices();
 
             return true;
         },

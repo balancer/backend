@@ -26,6 +26,11 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                         rewarders: true,
                     },
                 },
+                gauge: {
+                    include: {
+                        rewards: true,
+                    },
+                },
             },
         },
         categories: true,
@@ -184,6 +189,11 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                         rewarders: true,
                     },
                 },
+                gauge: {
+                    include: {
+                        rewards: true,
+                    },
+                },
             },
         },
     },
@@ -193,15 +203,7 @@ export type PrismaPoolMinimal = Prisma.PrismaPoolGetPayload<typeof prismaPoolMin
 
 export const prismaPoolBatchSwapWithSwaps = Prisma.validator<Prisma.PrismaPoolBatchSwapArgs>()({
     include: {
-        swaps: {
-            include: {
-                pool: {
-                    include: {
-                        tokens: true,
-                    },
-                },
-            },
-        },
+        swaps: true,
     },
 });
 

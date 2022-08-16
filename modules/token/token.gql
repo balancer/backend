@@ -12,6 +12,7 @@ extend type Query {
     tokenGetPriceChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenPriceChartDataItem!]!
     tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
     tokenGetTokenData(address: String!): GqlTokenData
+    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
 }
 
 extend type Mutation {
@@ -39,9 +40,14 @@ type GqlHistoricalTokenPriceEntry {
 type GqlToken {
     address: String!
     name: String!
+    description: String
     symbol: String!
     decimals: Int!
     chainId: Int!
+    websiteUrl: String
+    discordUrl: String
+    telegramUrl: String
+    twitterUsername: String
     logoURI: String
     priority: Int!
     tradable: Boolean!

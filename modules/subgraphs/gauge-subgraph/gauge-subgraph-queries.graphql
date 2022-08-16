@@ -1,0 +1,99 @@
+query GaugeLiquidityGauges(
+    $first: Int = 100
+    $orderBy: LiquidityGauge_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: LiquidityGauge_filter
+) {
+    liquidityGauges(skip: $skip, first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
+        id
+        poolId
+        totalSupply
+        tokens {
+            id
+            name
+            address
+            decimals
+            symbol
+        }
+        shares {
+            user {
+                id
+            }
+            balance
+        }
+    }
+}
+
+query GaugeLiquidityGaugeAddresses {
+    liquidityGauges {
+        id
+    }
+}
+
+query GaugeUserGauges($userAddress: ID!) {
+    user(id: $userAddress) {
+        id
+        gaugeShares {
+            balance
+            gauge {
+                id
+                poolId
+                tokens {
+                    name
+                    address
+                    decimals
+                    symbol
+                }
+            }
+        }
+    }
+}
+
+query GaugeShares(
+    $block: Block_height
+    $first: Int = 100
+    $orderBy: GaugeShare_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+) {
+    gaugeShares(block: $block, first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+        id
+        balance
+        gauge {
+            id
+            poolId
+            poolAddress
+        }
+        user {
+           id
+        }
+    }
+}
+
+query GaugeStreamers {
+    streamers {
+        id
+        rewardTokens {
+            name
+            address
+            decimals
+            symbol
+        }
+        gauge {
+            id
+            poolId
+            totalSupply
+        }
+    }
+}
+
+query GaugeGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

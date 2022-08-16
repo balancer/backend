@@ -19,6 +19,7 @@ model PrismaPool {
     stableDynamicData   PrismaPoolStableDynamicData?
     linearDynamicData   PrismaPoolLinearDynamicData?
 
+    snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
     categories          PrismaPoolCategory[]
@@ -46,7 +47,7 @@ enum PrismaPoolType {
 
 model PrismaPoolLinearData {
     id                  String              @id
-    poolId              String
+    poolId              String              @unique
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
 
     mainIndex           Int
@@ -55,7 +56,7 @@ model PrismaPoolLinearData {
 
 model PrismaPoolElementData {
     id                  String              @id
-    poolId              String
+    poolId              String              @unique
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
 
     unitSeconds         String
@@ -64,25 +65,53 @@ model PrismaPoolElementData {
 }
 
 model PrismaPoolDynamicData {
-    id                  String              @id
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId], references: [id])
-    blockNumber         Int
-    updatedAt           DateTime            @updatedAt
+    id                      String              @id
+    poolId                  String              @unique
+    pool                    PrismaPool          @relation(fields:[poolId], references: [id])
+    blockNumber             Int
+    updatedAt               DateTime            @updatedAt
 
-    swapFee             String
-    swapEnabled         Boolean
-    totalShares         String
-    totalSharesNum      Float               @default(0)
-    totalLiquidity      Float
-    volume24h           Float
-    fees24h             Float
-    apr                 Float               @default(0)
+    swapFee                 String
+    swapEnabled             Boolean
+    totalShares             String
+    totalSharesNum          Float               @default(0)
+    totalLiquidity          Float
+    volume24h               Float
+    fees24h                 Float
+    apr                     Float               @default(0)
+    volume48h               Float               @default(0)
+    fees48h                 Float               @default(0)
+    totalLiquidity24hAgo    Float              @default(0)
+    totalShares24hAgo       String              @default("0")
+    lifetimeVolume          Float               @default(0)
+    lifetimeSwapFees        Float               @default(0)
+    holdersCount            Int                 @default(0)
+    swapsCount              Int                 @default(0)
+
+    sharePriceAth           Float               @default(0)
+    sharePriceAthTimestamp  Int              @default(0)
+    sharePriceAtl           Float               @default(0)
+    sharePriceAtlTimestamp  Int              @default(0)
+
+    totalLiquidityAth       Float               @default(0)
+    totalLiquidityAthTimestamp Int              @default(0)
+    totalLiquidityAtl       Float               @default(0)
+    totalLiquidityAtlTimestamp Int              @default(0)
+
+    volume24hAth            Float               @default(0)
+    volume24hAthTimestamp   Int              @default(0)
+    volume24hAtl            Float               @default(0)
+    volume24hAtlTimestamp   Int              @default(0)
+
+    fees24hAth              Float               @default(0)
+    fees24hAthTimestamp     Int              @default(0)
+    fees24hAtl              Float               @default(0)
+    fees24hAtlTimestamp     Int              @default(0)
 }
 
 model PrismaPoolStableDynamicData {
     id                  String              @id
-    poolId              String
+    poolId              String              @unique
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -92,7 +121,7 @@ model PrismaPoolStableDynamicData {
 
 model PrismaPoolLinearDynamicData {
     id                  String              @id
-    poolId              String
+    poolId              String              @unique
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -118,7 +147,7 @@ model PrismaPoolToken {
 
 model PrismaPoolTokenDynamicData {
     id                  String              @id
-    poolTokenId         String
+    poolTokenId         String              @unique
     poolToken           PrismaPoolToken     @relation(fields:[poolTokenId], references: [id])
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -227,11 +256,12 @@ model PrismaPoolFilterMap {
 
 model PrismaPoolStaking {
     id                  String              @id
-    poolId              String
+    poolId              String              @unique
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     type                PrismaPoolStakingType
     address             String
     farm                PrismaPoolStakingMasterChefFarm?
+    gauge               PrismaPoolStakingGauge?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -245,8 +275,8 @@ enum PrismaPoolStakingType {
 
 model PrismaPoolStakingMasterChefFarm {
     id                  String              @id
-    stakingId           String
-    staking             PrismaPoolStaking          @relation(fields:[stakingId], references: [id])
+    stakingId           String              @unique
+    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
     beetsPerBlock       String
     rewarders           PrismaPoolStakingMasterChefFarmRewarder[]
 }
@@ -261,3 +291,38 @@ model PrismaPoolStakingMasterChefFarmRewarder {
     rewardPerSecond     String
 }
 
+model PrismaPoolStakingGauge {
+    id                  String              @id
+    stakingId           String              @unique
+    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+    gaugeAddress        String
+    rewards             PrismaPoolStakingGaugeReward[]
+}
+
+model PrismaPoolStakingGaugeReward{
+    id                  String              @id
+    gaugeId             String
+    gauge               PrismaPoolStakingGauge @relation(fields:[gaugeId], references: [id])
+    tokenAddress        String
+    rewardPerSecond     String
+}
+
+
+model PrismaPoolSnapshot {
+    id                  String              @id
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId], references: [id])
+    timestamp           Int
+
+    totalLiquidity      Float
+    sharePrice          Float
+    volume24h           Float
+    fees24h             Float
+    totalShares         String
+    totalSharesNum      Float
+    totalSwapVolume     Float
+    totalSwapFee        Float
+    swapsCount          Int
+    holdersCount        Int
+    amounts             String[]
+}

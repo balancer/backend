@@ -1,7 +1,0 @@
-scalar Date
-scalar GqlBigNumber
-scalar Bytes
-scalar BigInt
-scalar BigDecimal
-scalar JSON
-scalar AmountHumanReadable

@@ -1,15 +1,17 @@
-import { PoolCreatorService } from './src/pool-creator.service';
-import { PoolOnChainDataService } from './src/pool-on-chain-data.service';
-import { prisma } from '../util/prisma-client';
+import { PoolCreatorService } from './lib/pool-creator.service';
+import { PoolOnChainDataService } from './lib/pool-on-chain-data.service';
+import { prisma } from '../../prisma/prisma-client';
 import { Provider } from '@ethersproject/providers';
 import _ from 'lodash';
-import { PoolUsdDataService } from './src/pool-usd-data.service';
+import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import moment from 'moment-timezone';
 import {
+    GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
+    GqlPoolSnapshotDataRange,
     GqlPoolUnion,
     GqlPoolUserSwapVolume,
     QueryPoolGetBatchSwapsArgs,
@@ -18,35 +20,40 @@ import {
     QueryPoolGetSwapsArgs,
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
-import { PoolGqlLoaderService } from './src/pool-gql-loader.service';
-import { PoolSanityDataLoaderService } from './src/pool-sanity-data-loader.service';
-import { PoolAprUpdaterService } from './src/pool-apr-updater.service';
-import { SwapFeeAprService } from './apr-data-sources/swap-fee-apr.service';
-import { MasterchefFarmAprService } from './apr-data-sources/masterchef-farm-apr.service';
-import { SpookySwapAprService } from './apr-data-sources/spooky-swap-apr.service';
-import { YearnVaultAprService } from './apr-data-sources/yearn-vault-apr.service';
-import { PoolSyncService } from './src/pool-sync.service';
+import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
+import { PoolSanityDataLoaderService } from './lib/pool-sanity-data-loader.service';
+import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
+import { SwapFeeAprService } from './lib/apr-data-sources/swap-fee-apr.service';
+import { MasterchefFarmAprService } from './lib/apr-data-sources/fantom/masterchef-farm-apr.service';
+import { SpookySwapAprService } from './lib/apr-data-sources/fantom/spooky-swap-apr.service';
+import { YearnVaultAprService } from './lib/apr-data-sources/fantom/yearn-vault-apr.service';
+import { PoolSyncService } from './lib/pool-sync.service';
 import { tokenService } from '../token/token.service';
-import { PhantomStableAprService } from './apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from './apr-data-sources/boosted-pool-apr.service';
+import { PhantomStableAprService } from './lib/apr-data-sources/phantom-stable-apr.service';
+import { BoostedPoolAprService } from './lib/apr-data-sources/boosted-pool-apr.service';
 import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
-import { PoolSwapService } from './src/pool-swap.service';
+import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolStakingService } from './pool-types';
-import { MasterChefStakingService } from './staking/master-chef-staking.service';
+import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staking.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { networkConfig } from '../config/network-config';
-import { PrismaPoolBatchSwapWithSwaps } from '../../prisma/prisma-types';
+import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { userService } from '../user/user.service';
-import { jsonRpcProvider } from '../util/ethers';
-import { configService, ConfigService } from '../config/config.service';
-import { memCacheGetValue, memCacheSetValue } from '../util/mem-cache';
+import { jsonRpcProvider } from '../web3/contract';
+import { configService } from '../content/content.service';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { PoolSnapshotService } from './lib/pool-snapshot.service';
+import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
+import { Cache } from 'memory-cache';
+import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
+import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
 export class PoolService {
+    private cache = new Cache<string, any>();
     constructor(
         private readonly provider: Provider,
-        private readonly configService: ConfigService,
         private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
@@ -56,6 +63,7 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolStakingService: PoolStakingService,
+        private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -78,8 +86,18 @@ export class PoolService {
         return this.poolSwapService.getSwaps(args);
     }
 
-    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<PrismaPoolBatchSwapWithSwaps[]> {
-        return this.poolSwapService.getBatchSwaps(args);
+    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
+        const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
+        const poolIds = batchSwaps.map((batchSwap) => batchSwap.swaps.map((swap) => swap.poolId)).flat();
+        const pools = await this.getGqlPools({ where: { idIn: poolIds } });
+
+        return batchSwaps.map((batchSwap) => ({
+            ...batchSwap,
+            swaps: batchSwap.swaps.map((swap) => ({
+                ...swap,
+                pool: pools.find((pool) => pool.id === swap.poolId)!,
+            })),
+        }));
     }
 
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
@@ -91,7 +109,7 @@ export class PoolService {
     }
 
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const cached = await memCacheGetValue<GqlPoolFeaturedPoolGroup[]>(FEATURED_POOL_GROUPS_CACHE_KEY);
+        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(FEATURED_POOL_GROUPS_CACHE_KEY);
 
         if (cached) {
             return cached;
@@ -99,9 +117,13 @@ export class PoolService {
 
         const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
 
-        memCacheSetValue(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5);
+        this.cache.put(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5 * 1000);
 
         return featuredPoolGroups;
+    }
+
+    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -129,7 +151,7 @@ export class PoolService {
 
         if (poolIds.length > 0) {
             await this.updateOnChainDataForPools(poolIds, blockNumber);
-            await this.syncSwapsForLast24Hours();
+            await this.syncSwapsForLast48Hours();
             await this.updateVolumeAndFeeValuesForPools(poolIds);
         }
 
@@ -174,10 +196,10 @@ export class PoolService {
         console.timeEnd('updateVolumeAndFeeValuesForPools');
     }
 
-    public async syncSwapsForLast24Hours(): Promise<string[]> {
-        console.time('syncSwapsForLast24Hours');
-        const poolIds = await this.poolSwapService.syncSwapsForLast24Hours();
-        console.timeEnd('syncSwapsForLast24Hours');
+    public async syncSwapsForLast48Hours(): Promise<string[]> {
+        console.time('syncSwapsForLast48Hours');
+        const poolIds = await this.poolSwapService.syncSwapsForLast48Hours();
+        console.timeEnd('syncSwapsForLast48Hours');
 
         return poolIds;
     }
@@ -201,27 +223,68 @@ export class PoolService {
     public async realodAllPoolAprs() {
         await this.poolAprUpdaterService.realodAllPoolAprs();
     }
+
+    public async updateLiquidity24hAgoForAllPools() {
+        await this.poolUsdDataService.updateLiquidity24hAgoForAllPools();
+    }
+
+    public async loadSnapshotsForAllPools() {
+        await prisma.prismaPoolSnapshot.deleteMany({});
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true },
+            where: {
+                dynamicData: {
+                    totalSharesNum: {
+                        gt: 0.000000000001,
+                    },
+                },
+            },
+        });
+        const chunks = _.chunk(pools, 10);
+
+        for (const chunk of chunks) {
+            const poolIds = chunk.map((pool) => pool.id);
+            await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
+        }
+    }
+
+    public async syncLatestSnapshotsForAllPools(daysToSync?: number) {
+        await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
+    }
+
+    public async updateLifetimeValuesForAllPools() {
+        await this.poolUsdDataService.updateLifetimeValuesForAllPools();
+    }
+
+    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string) {
+        await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
+    }
 }
 
 export const poolService = new PoolService(
     jsonRpcProvider,
-    configService,
     new PoolCreatorService(userService),
     new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
-    new PoolUsdDataService(tokenService),
+    new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
     new PoolGqlLoaderService(configService),
     new PoolSanityDataLoaderService(),
-    //TODO: this will depend on the chain
     new PoolAprUpdaterService([
         //order matters for the boosted pool aprs: linear, phantom stable, then boosted
-        new SpookySwapAprService(tokenService),
-        new YearnVaultAprService(tokenService),
+        ...(isFantomNetwork() ? [new SpookySwapAprService(tokenService), new YearnVaultAprService(tokenService)] : []),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
-        new MasterchefFarmAprService(),
+        ...(isFantomNetwork()
+            ? [new MasterchefFarmAprService()]
+            : [
+                  new GaugeAprService(gaugeSerivce, tokenService, [
+                      networkConfig.beets.address,
+                      networkConfig.bal.address,
+                  ]),
+              ]),
     ]),
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
-    new MasterChefStakingService(masterchefService),
+    isFantomNetwork() ? new MasterChefStakingService(masterchefService) : new GaugeStakingService(gaugeSerivce),
+    new PoolSnapshotService(balancerSubgraphService, coingeckoService),
 );
