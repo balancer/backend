@@ -23,7 +23,7 @@ export class StaderStakedFtmAprService implements PoolAprService {
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
                         where: { id: `${pool.id}-sftmx-apr` },
-                        update: { apr: sftmxApr, type: 'IB_YIELD' },
+                        update: { apr: sftmxApr },
                         create: {
                             id: `${pool.id}-sftmx-apr`,
                             poolId: pool.id,
