@@ -1,47 +1,46 @@
+import * as _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { changelogSubgraphService } from '../../subgraphs/changelog-subgraph/changelog-subgraph.service';
 import { poolService } from '../pool.service';
+import { getContractAt, jsonRpcProvider } from '../../web3/contract';
+import { networkConfig } from '../../config/network-config';
+import VaultAbi from '../abi/Vault.json';
 
 export class PoolSyncService {
     public async syncChangedPools() {
-        try {
-            let lastSync = await prisma.prismaLastBlockSynced.findUnique({
-                where: { category: PrismaLastBlockSyncedCategory.POOLS },
-            });
-            const lastSyncBlock = lastSync?.blockNumber ?? 0;
+        let lastSync = await prisma.prismaLastBlockSynced.findUnique({
+            where: { category: PrismaLastBlockSyncedCategory.POOLS },
+        });
+        const lastSyncBlock = lastSync?.blockNumber ?? 0;
+        const latestBlock = await jsonRpcProvider.getBlockNumber();
 
-            const poolChangeEvents = await changelogSubgraphService.getPoolChangeEvents(lastSyncBlock + 1);
+        const startBlock = lastSyncBlock + 1;
+        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
 
-            let latestBlock = lastSyncBlock;
-            const poolIds = new Set<string>();
-            for (const poolChangeEvent of poolChangeEvents) {
-                const block = parseInt(poolChangeEvent.block);
-                if (block > latestBlock) {
-                    latestBlock = block;
-                }
-                poolIds.add(poolChangeEvent.poolId);
-            }
-            if (poolIds.size !== 0) {
-                console.log(`Syncing ${poolIds.size} pools`);
-                await poolService.updateOnChainDataForPools([...poolIds], latestBlock);
+        const contract = getContractAt(networkConfig.balancer.vault, VaultAbi);
 
-                const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
-                await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
+        const events = await contract.queryFilter({ address: networkConfig.balancer.vault }, startBlock, endBlock);
+        const filteredEvents = events.filter((event) =>
+            ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
+        );
+        const poolIds: string[] = _.uniq(filteredEvents.map((event) => event.args!.poolId));
+        if (poolIds.length !== 0) {
+            console.log(`Syncing ${poolIds.length} pools`);
+            await poolService.updateOnChainDataForPools(poolIds, latestBlock);
 
-                await prisma.prismaLastBlockSynced.upsert({
-                    where: { category: PrismaLastBlockSyncedCategory.POOLS },
-                    update: {
-                        blockNumber: latestBlock,
-                    },
-                    create: {
-                        category: PrismaLastBlockSyncedCategory.POOLS,
-                        blockNumber: latestBlock,
-                    },
-                });
-            }
-        } catch (error) {
-            console.error('Error syncing changed pools', error);
+            const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
+            await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
         }
+
+        await prisma.prismaLastBlockSynced.upsert({
+            where: { category: PrismaLastBlockSyncedCategory.POOLS },
+            update: {
+                blockNumber: latestBlock,
+            },
+            create: {
+                category: PrismaLastBlockSyncedCategory.POOLS,
+                blockNumber: latestBlock,
+            },
+        });
     }
 }
