@@ -5,9 +5,9 @@ import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 
 export class StaderStakedFtmAprService implements PoolAprService {
-    constructor(private readonly tokenService: TokenService) {}
+    private readonly SFTMX_ADDRESS = getAddress('0xd7028092c830b5c8fce061af2e593413ebbc1fc1');
 
-    SFTMX_ADDRESS = getAddress('0xd7028092c830b5c8fce061af2e593413ebbc1fc1');
+    constructor(private readonly tokenService: TokenService) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
