@@ -47,6 +47,7 @@ import { Cache } from 'memory-cache';
 import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
 import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
+import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -270,7 +271,13 @@ export const poolService = new PoolService(
     new PoolSanityDataLoaderService(),
     new PoolAprUpdaterService([
         //order matters for the boosted pool aprs: linear, phantom stable, then boosted
-        ...(isFantomNetwork() ? [new SpookySwapAprService(tokenService), new YearnVaultAprService(tokenService)] : []),
+        ...(isFantomNetwork()
+            ? [
+                  new SpookySwapAprService(tokenService),
+                  new YearnVaultAprService(tokenService),
+                  new StaderStakedFtmAprService(tokenService),
+              ]
+            : []),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),

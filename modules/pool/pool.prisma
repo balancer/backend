@@ -211,6 +211,7 @@ enum PrismaPoolAprType {
     THIRD_PARTY_REWARD
     LINEAR_BOOSTED
     PHANTOM_STABLE_BOOSTED
+    IB_YIELD
 }
 
 enum PrismaPoolAprItemGroup {
