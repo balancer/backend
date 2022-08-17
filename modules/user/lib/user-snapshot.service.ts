@@ -86,6 +86,7 @@ export class UserSnapshotService {
                 ...userSnapshot,
                 id: `${userAddress}-${currentTimestamp}`,
                 percentShare,
+                timestamp: currentTimestamp,
                 valueUSD: `${parseFloat(userSnapshot.totalBalance) * (poolSnapshot?.sharePrice || 0)}`,
                 fees24h: `${percentShare * (poolSnapshot?.fees24h || 0)}`,
                 volume24h: `${percentShare * (poolSnapshot?.volume24h || 0)}`,
