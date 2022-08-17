@@ -1,4 +1,5 @@
 import { Resolvers } from '../../../schema';
+import { isAdminRoute } from '../../auth/auth-context';
 import { blocksSubgraphService } from './blocks-subgraph.service';
 
 const balancerResolvers: Resolvers = {
@@ -15,6 +16,15 @@ const balancerResolvers: Resolvers = {
         },
         blocksGetBlocksPerYear: async (parent, {}, context) => {
             return blocksSubgraphService.getBlocksPerYear();
+        },
+    },
+    Mutation: {
+        cacheAverageBlockTime: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await blocksSubgraphService.cacheAverageBlockTime();
+
+            return 'success';
         },
     },
 };

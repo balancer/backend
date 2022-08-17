@@ -26,7 +26,7 @@ cron:
       schedule: '*/5 * * * *'
     - name: 'cache-average-block-time'
       url: '/cache-average-block-time'
-      schedule: '*/5 * * * *'
+      schedule: '*/30 * * * *'
     - name: 'sync-token-dynamic-data'
       url: '/sync-token-dynamic-data'
       schedule: '* * * * *'
