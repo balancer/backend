@@ -9,6 +9,7 @@ env:
         SUBGRAPH_ORIG: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'
         CHANGELOG_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog'
         GAUGE_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism'
+        USER_SNAPSHOT_SUBGRPAH: 'https://api.thegraph.com/subgraphs/name/danielmkm/user-balances-fantom'
 phases:
     install:
         commands:

@@ -30,6 +30,7 @@ export interface NetworkConfig {
         beetsBar: string;
         changelog: string;
         gauge: string;
+        userBalances: string;
     };
     sanity: {
         projectId: string;
@@ -83,6 +84,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
             masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
             gauge: 'https://#/',
+            userBalances: 'https://api.thegraph.com/subgraphs/name/danielmkm/user-balances-fantom',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -153,6 +155,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
             masterchef: 'https://',
             gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
+            userBalances: 'https://api.thegraph.com/subgraphs/name/danielmkm/bpt-balances',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

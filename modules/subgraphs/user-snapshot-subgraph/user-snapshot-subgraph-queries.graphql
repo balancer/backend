@@ -1,0 +1,43 @@
+query UserSnapshotGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}
+
+query UserBalanceSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: UserBalanceSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: UserBalanceSnapshot_filter
+    $block: Block_height
+) {
+    snapshots: userBalanceSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...UserBalanceSnapshot
+    }
+}
+
+fragment UserBalanceSnapshot on UserBalanceSnapshot {
+    id
+    timestamp
+    farmBalances
+    farms
+    gaugeBalances
+    gauges
+    walletBalances
+    walletTokens
+    user {
+        id
+    }
+}

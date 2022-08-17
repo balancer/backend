@@ -6,10 +6,12 @@ import { PrismaPoolStaking } from '@prisma/client';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap, GqlUserPoolSnapshot, QueryUserGetPoolSnapshotsArgs } from '../../schema';
 import { isFantomNetwork } from '../config/network-config';
 import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
 import { prisma } from '../../prisma/prisma-client';
+import { UserPoolSnapshot, UserSnapshotService } from './lib/user-snapshot.service';
+import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 
 export class UserService {
     constructor(
@@ -17,6 +19,7 @@ export class UserService {
         private readonly walletSyncService: UserSyncWalletBalanceService,
         private readonly stakedSyncService: UserStakedBalanceService,
         private readonly poolSwapService: PoolSwapService,
+        private readonly snapshotService: UserSnapshotService,
     ) {}
 
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
@@ -100,6 +103,12 @@ export class UserService {
         }
         await Promise.all(operations);
     }
+
+    public async getPoolSnapshots(
+        args: QueryUserGetPoolSnapshotsArgs & { userAddress: string },
+    ): Promise<UserPoolSnapshot[]> {
+        return this.snapshotService.getPoolSnapshots(args);
+    }
 }
 
 export const userService = new UserService(
@@ -107,4 +116,5 @@ export const userService = new UserService(
     new UserSyncWalletBalanceService(),
     isFantomNetwork() ? new UserSyncMasterchefFarmBalanceService() : new UserSyncGaugeBalanceService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
+    new UserSnapshotService(userSnapshotSubgraphService),
 );
