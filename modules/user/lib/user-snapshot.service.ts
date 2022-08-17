@@ -39,7 +39,7 @@ export class UserSnapshotService {
         const timestamp = moment().utc().startOf('day').subtract(numDays, 'days').unix();
         const pool = await prisma.prismaPool.findUniqueOrThrow({ where: { id: poolId }, include: { staking: true } });
         const { snapshots } = await this.userSnapshotSubgraphService.userBalanceSnapshots({
-            where: { user: userAddress, timestamp_gte: timestamp },
+            where: { user: userAddress },
             orderBy: UserBalanceSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
