@@ -6,6 +6,8 @@ import { networkConfig } from '../../../../config/network-config';
 import { oldBnum } from '../../../../big-number/old-big-number';
 import { formatFixed } from '@ethersproject/bignumber';
 
+const FARM_EMISSIONS_PERCENT = 0.872;
+
 export class MasterChefStakingService implements PoolStakingService {
     constructor(private readonly masterChefSubgraphService: MasterchefSubgraphService) {}
 
@@ -30,6 +32,7 @@ export class MasterChefStakingService implements PoolStakingService {
             const farmId = farm.id;
             const beetsPerBlock = formatFixed(
                 oldBnum(farm.masterChef.beetsPerBlock)
+                    .times(FARM_EMISSIONS_PERCENT)
                     .times(farm.allocPoint)
                     .div(farm.masterChef.totalAllocPoint)
                     .toFixed(0),

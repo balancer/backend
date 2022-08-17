@@ -49,9 +49,6 @@ export class BlocksSubgraphService {
     }
 
     public async cacheAverageBlockTime(): Promise<number> {
-        const start = moment().startOf('hour').subtract(6, 'hours').unix();
-        const end = moment().startOf('hour').unix();
-
         let blocks: BlockFragment[] = [];
 
         for (let i = 0; i < 6; i++) {
@@ -60,7 +57,6 @@ export class BlocksSubgraphService {
                 skip: i * 1000,
                 orderBy: Block_OrderBy.Number,
                 orderDirection: OrderDirection.Desc,
-                where: { timestamp_gt: `${start}`, timestamp_lt: `${end}` },
             });
 
             if (result.blocks.length === 0) {
@@ -75,22 +71,14 @@ export class BlocksSubgraphService {
             return 1;
         }
 
-        let timestamp: null | number = null;
-        let averageBlockTime = 0;
+        const timeDifference = parseInt(blocks[0].timestamp) - parseInt(blocks[blocks.length - 1].timestamp);
+        const averageBlockTime = timeDifference / blocks.length;
 
-        for (const block of blocks) {
-            if (timestamp !== null) {
-                const difference = timestamp - parseInt(block.timestamp);
+        await this.cache.put(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime}`);
 
-                averageBlockTime = averageBlockTime + difference;
-            }
+        console.log(`Caching average block time: ${averageBlockTime}`);
 
-            timestamp = parseInt(block.timestamp);
-        }
-
-        await this.cache.put(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime / blocks.length}`);
-
-        return averageBlockTime / blocks.length;
+        return averageBlockTime;
     }
 
     public async getBlocks(args: BlocksQueryVariables): Promise<BlocksQuery> {
