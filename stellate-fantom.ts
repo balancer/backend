@@ -2,7 +2,8 @@ import { Config } from 'stellate';
 
 const config: Config = {
     config: {
-        schema: 'https://backend-v2.beets-ftm-node.com',
+        schema: 'https://backend-v2.beets-ftm-node.com/graphql',
+        queryDepthLimit: 10,
         scopes: {
             AUTHENTICATED: 'header:accountaddress',
         },
@@ -32,6 +33,14 @@ const config: Config = {
                 swr: 15,
                 scope: 'AUTHENTICATED',
                 description: 'Time critical user queries',
+            },
+            {
+                types: {
+                    Query: ['latestSyncedBlocks', 'blocksGetAverageBlockTime'],
+                },
+                maxAge: 2,
+                swr: 5,
+                description: 'Time critical block data',
             },
         ],
         name: 'beetx-backend-v2',
