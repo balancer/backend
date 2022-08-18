@@ -191,7 +191,7 @@ export class TokenPriceService {
                 items.push({
                     id: `${tokenIn}-${tokenOut}-${tokenInItem.timestamp}`,
                     timestamp: tokenInItem.timestamp,
-                    price: tokenOutItem.close / tokenInItem.close,
+                    price: tokenInItem.close / tokenOutItem.close,
                 });
             }
         }
