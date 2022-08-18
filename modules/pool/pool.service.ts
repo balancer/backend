@@ -260,6 +260,10 @@ export class PoolService {
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string) {
         await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }
+
+    public async reloadPoolNestedTokens(poolId: string) {
+        await this.poolCreatorService.reloadPoolNestedTokens(poolId);
+    }
 }
 
 export const poolService = new PoolService(

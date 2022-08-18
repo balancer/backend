@@ -194,6 +194,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolReloadPoolNestedTokens: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.reloadPoolNestedTokens(poolId);
+
+            return 'success';
+        },
     },
 };
 
