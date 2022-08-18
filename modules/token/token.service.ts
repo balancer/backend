@@ -14,6 +14,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs } from '../../schema';
 import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
+import { BeetsPriceHandlerService } from './lib/token-price-handlers/beets-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
@@ -160,6 +161,7 @@ export class TokenService {
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
+        new BeetsPriceHandlerService(),
         ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
         new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
         new BptPriceHandlerService(),

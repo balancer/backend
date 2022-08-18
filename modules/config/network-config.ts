@@ -18,6 +18,7 @@ export interface NetworkConfig {
         addressFormatted: string;
     };
     rpcUrl: string;
+    beetsPriceProviderRpcUrl: string;
     coingecko: {
         nativeAssetId: string;
         platformId: string;
@@ -101,6 +102,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             platformId: 'fantom',
         },
         rpcUrl: 'https://rpc.ftm.tools',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
         sanity: {
             projectId: '1g2ag2hb',
             dataset: 'production',
@@ -172,6 +174,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             platformId: 'optimistic-ethereum',
         },
         rpcUrl: 'https://mainnet.optimism.io/',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
         sanity: {
             projectId: '1g2ag2hb',
             dataset: 'production',
