@@ -173,6 +173,9 @@ export class PoolSwapService {
      * duplicate effort. Return an array of poolIds with swaps added.
      */
     public async syncSwapsForLast48Hours(): Promise<string[]> {
+        const allPoolAddresses = (await prisma.prismaPool.findMany({ select: { address: true } })).map(
+            (item) => item.address,
+        );
         const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
         const twoDaysAgo = moment().subtract(2, 'day').unix();
@@ -205,7 +208,12 @@ export class PoolSwapService {
                 data: swaps.map((swap) => {
                     let valueUSD = parseFloat(swap.valueUSD);
 
-                    if (valueUSD === 0) {
+                    if (
+                        valueUSD === 0 ||
+                        //does the swap include a nested BPT
+                        allPoolAddresses.includes(swap.tokenIn) ||
+                        allPoolAddresses.includes(swap.tokenOut)
+                    ) {
                         const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn);
                         const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut);
 
