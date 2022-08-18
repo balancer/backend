@@ -193,6 +193,20 @@ export class TokenPriceService {
         return items;
     }
 
+    public async deleteTokenPrice({
+        timestamp,
+        tokenAddress,
+    }: {
+        tokenAddress: string;
+        timestamp: number;
+    }): Promise<boolean> {
+        const response = await prisma.prismaTokenPrice.delete({
+            where: { tokenAddress_timestamp: { tokenAddress, timestamp } },
+        });
+
+        return !!response;
+    }
+
     private getStartTimestampFromRange(range: GqlTokenChartDataRange) {
         return moment()
             .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
