@@ -72,6 +72,10 @@ export class PoolCreatorService {
         for (let i = 0; i < poolTokens.length; i++) {
             const token = poolTokens[i];
 
+            if (token.address === poolToLoad.address) {
+                continue;
+            }
+
             const nestedPool = subgraphPools.find((nestedPool) => {
                 const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
 
