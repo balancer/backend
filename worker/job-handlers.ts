@@ -19,12 +19,12 @@ async function runIfNotAlreadyRunning(
     res: any,
     next: NextFunction,
 ): Promise<void> {
+    if (runningJobs.has(id)) {
+        console.log('Skipping job', id);
+        res.sendStatus(200);
+        return;
+    }
     try {
-        if (runningJobs.has(id)) {
-            console.log('Skipping job', id);
-            res.sendStatus(200);
-            return;
-        }
         runningJobs.add(id);
         const transaction = Sentry.startTransaction({ name: id }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
