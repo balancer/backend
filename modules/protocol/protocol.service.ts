@@ -43,7 +43,15 @@ export class ProtocolService {
 
         const oneDayAgo = moment().subtract(24, 'hours').unix();
         const pools = await prisma.prismaPool.findMany({
-            where: { categories: { none: { category: 'BLACK_LISTED' } }, type: { notIn: ['LINEAR'] } },
+            where: {
+                categories: { none: { category: 'BLACK_LISTED' } },
+                type: { notIn: ['LINEAR'] },
+                dynamicData: {
+                    totalSharesNum: {
+                        gt: 0.000000000001,
+                    },
+                },
+            },
             include: { dynamicData: true },
         });
         const swaps = await prisma.prismaPoolSwap.findMany({ where: { timestamp: { gte: oneDayAgo } } });

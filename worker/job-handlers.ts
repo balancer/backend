@@ -106,10 +106,20 @@ export function configureWorkerRoutes(app: Express) {
         );
     });
 
-    app.post('/update-liquidity-for-all-pools', async (req, res, next) => {
+    app.post('/update-liquidity-for-active-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
-            'update-liquidity-for-all-pools',
-            () => poolService.updateLiquidityValuesForAllPools(),
+            'update-liquidity-for-active-pools',
+            () => poolService.updateLiquidityValuesForPools(),
+            defaultSamplingRate,
+            res,
+            next,
+        );
+    });
+
+    app.post('/update-liquidity-for-inactive-pools', async (req, res, next) => {
+        await runIfNotAlreadyRunning(
+            'update-liquidity-for-inactive-pools',
+            () => poolService.updateLiquidityValuesForPools(0, 0.00000000001),
             defaultSamplingRate,
             res,
             next,

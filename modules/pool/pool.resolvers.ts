@@ -70,7 +70,7 @@ const balancerResolvers: Resolvers = {
         poolUpdateLiquidityValuesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.updateLiquidityValuesForAllPools();
+            await poolService.updateLiquidityValuesForPools();
 
             return 'success';
         },

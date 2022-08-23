@@ -111,7 +111,7 @@ export function scheduleLocalWorkerTasks() {
 
     //every 30 seconds
     scheduleJob('*/30 * * * * *', 'poolUpdateLiquidityValuesForAllPools', TWO_MINUTES_IN_MS, async () => {
-        await poolService.updateLiquidityValuesForAllPools();
+        await poolService.updateLiquidityValuesForPools();
         await poolService.updatePoolAprs();
     });
 
