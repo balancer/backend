@@ -59,7 +59,7 @@ export class PoolGqlLoaderService {
             include: prismaPoolMinimal.include,
         });
 
-        return pools.map(this.mapToMinimalGqlPool);
+        return pools.map(pool => this.mapToMinimalGqlPool(pool));
     }
 
     public mapToMinimalGqlPool(pool: PrismaPoolMinimal): GqlPoolMinimal {
