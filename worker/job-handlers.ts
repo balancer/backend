@@ -65,19 +65,31 @@ export function configureWorkerRoutes(app: Express) {
         Sentry.configureScope((scope) => scope.setTransactionName(`POST /${job.type} - manual`));
         switch (job.type) {
             case 'sync-pools':
-                await runIfNotAlreadyRunning(job.type, poolService.syncChangedPools, defaultSamplingRate, res, next);
+                await runIfNotAlreadyRunning(
+                    job.type,
+                    () => poolService.syncChangedPools(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
                 break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.type,
-                    userService.syncWalletBalancesForAllPools,
+                    () => userService.syncWalletBalancesForAllPools(),
                     defaultSamplingRate,
                     res,
                     next,
                 );
                 break;
             case 'user-sync-staked-balances':
-                await runIfNotAlreadyRunning(job.type, userService.syncStakedBalances, defaultSamplingRate, res, next);
+                await runIfNotAlreadyRunning(
+                    job.type,
+                    () => userService.syncStakedBalances(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
                 break;
             default:
                 throw new Error(`Unhandled job type ${job.type}`);
@@ -85,13 +97,19 @@ export function configureWorkerRoutes(app: Express) {
     });
 
     app.post('/load-token-prices', async (req, res, next) => {
-        await runIfNotAlreadyRunning('load-token-prices', tokenService.loadTokenPrices, defaultSamplingRate, res, next);
+        await runIfNotAlreadyRunning(
+            'load-token-prices',
+            () => tokenService.loadTokenPrices(),
+            defaultSamplingRate,
+            res,
+            next,
+        );
     });
 
     app.post('/update-liquidity-for-all-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'update-liquidity-for-all-pools',
-            poolService.updateLiquidityValuesForAllPools,
+            () => poolService.updateLiquidityValuesForAllPools(),
             defaultSamplingRate,
             res,
             next,
@@ -111,7 +129,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/load-on-chain-data-for-pools-with-active-updates', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'load-on-chain-data-for-pools-with-active-updates',
-            poolService.loadOnChainDataForPoolsWithActiveUpdates,
+            () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
             defaultSamplingRate,
             res,
             next,
@@ -121,7 +139,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-new-pools-from-subgraph', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-new-pools-from-subgraph',
-            poolService.syncNewPoolsFromSubgraph,
+            () => poolService.syncNewPoolsFromSubgraph(),
             defaultSamplingRate,
             res,
             next,
@@ -131,7 +149,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-sanity-pool-data', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-sanity-pool-data',
-            poolService.syncSanityPoolData,
+            () => poolService.syncSanityPoolData(),
             defaultSamplingRate,
             res,
             next,
@@ -141,7 +159,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-tokens-from-pool-tokens', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-tokens-from-pool-tokens',
-            tokenService.syncSanityData,
+            () => tokenService.syncSanityData(),
             defaultSamplingRate,
             res,
             next,
@@ -151,7 +169,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-liquidity-24h-ago-for-all-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'update-liquidity-24h-ago-for-all-pools',
-            poolService.updateLiquidity24hAgoForAllPools,
+            () => poolService.updateLiquidity24hAgoForAllPools(),
             defaultSamplingRate,
             res,
             next,
@@ -159,13 +177,19 @@ export function configureWorkerRoutes(app: Express) {
     });
 
     app.post('/sync-fbeets-ratio', async (req, res, next) => {
-        await runIfNotAlreadyRunning('sync-fbeets-ratio', beetsService.syncFbeetsRatio, defaultSamplingRate, res, next);
+        await runIfNotAlreadyRunning(
+            'sync-fbeets-ratio',
+            () => beetsService.syncFbeetsRatio(),
+            defaultSamplingRate,
+            res,
+            next,
+        );
     });
 
     app.post('/cache-average-block-time', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'cache-average-block-time',
-            blocksSubgraphService.cacheAverageBlockTime,
+            () => blocksSubgraphService.cacheAverageBlockTime(),
             0.05,
             res,
             next,
@@ -175,7 +199,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-token-dynamic-data', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-token-dynamic-data',
-            tokenService.syncTokenDynamicData,
+            () => tokenService.syncTokenDynamicData(),
             defaultSamplingRate,
             res,
             next,
@@ -184,7 +208,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-staking-for-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-staking-for-pools',
-            poolService.syncStakingForPools,
+            () => poolService.syncStakingForPools(),
             defaultSamplingRate,
             res,
             next,
@@ -193,7 +217,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/cache-protocol-data', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'cache-protocol-data',
-            protocolService.cacheProtocolMetrics,
+            () => protocolService.cacheProtocolMetrics(),
             defaultSamplingRate,
             res,
             next,
@@ -202,7 +226,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/sync-latest-snapshots-for-all-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'sync-latest-snapshots-for-all-pools',
-            poolService.syncLatestSnapshotsForAllPools,
+            () => poolService.syncLatestSnapshotsForAllPools(),
             0.5,
             res,
             next,
@@ -211,7 +235,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/update-lifetime-values-for-all-pools', async (req, res, next) => {
         await runIfNotAlreadyRunning(
             'update-lifetime-values-for-all-pools',
-            poolService.updateLifetimeValuesForAllPools,
+            () => poolService.updateLifetimeValuesForAllPools(),
             0.05,
             res,
             next,
