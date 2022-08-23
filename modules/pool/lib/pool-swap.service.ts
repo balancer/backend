@@ -18,7 +18,7 @@ import {
 import { PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
+import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
 
 export class PoolSwapService {
     constructor(
@@ -143,7 +143,9 @@ export class PoolSwapService {
                 },
             },
             orderBy: { timestamp: 'desc' },
-            include: { swaps: true },
+            include: {
+                swaps: { include: { pool: { include: prismaPoolMinimal.include } } },
+            },
         });
     }
 

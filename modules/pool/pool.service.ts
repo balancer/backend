@@ -89,21 +89,13 @@ export class PoolService {
 
     public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
         const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
-        const poolIds = batchSwaps.map((batchSwap) => batchSwap.swaps.map((swap) => swap.poolId)).flat();
-        const pools = await this.getGqlPools({ where: { idIn: poolIds } });
 
         return batchSwaps.map((batchSwap) => ({
             ...batchSwap,
             swaps: batchSwap.swaps.map((swap) => {
-                const pool = pools.find((pool) => pool.id === swap.poolId)!;
-                if (!pool) {
-                    console.log(
-                        `Missing pool for swap ${JSON.stringify(swap)} in batchSwap ${JSON.stringify(batchSwap)}`,
-                    );
-                }
                 return {
                     ...swap,
-                    pool,
+                    pool: this.poolGqlLoaderService.mapToMinimalGqlPool(swap.pool),
                 };
             }),
         }));
