@@ -48,6 +48,7 @@ import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
 import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
+import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -281,7 +282,7 @@ export const poolService = new PoolService(
                   new YearnVaultAprService(tokenService),
                   new StaderStakedFtmAprService(tokenService),
               ]
-            : []),
+            : [new RocketPoolStakedEthAprService(tokenService)]),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
