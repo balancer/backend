@@ -83,6 +83,20 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
+        await prisma.prismaTokenPrice.upsert({
+            where: { tokenAddress_timestamp: { tokenAddress: networkConfig.beets.address, timestamp } },
+            update: { price: beetsPrice, close: beetsPrice },
+            create: {
+                tokenAddress: networkConfig.beets.address,
+                timestamp,
+                price: beetsPrice,
+                high: beetsPrice,
+                low: beetsPrice,
+                open: beetsPrice,
+                close: beetsPrice,
+            },
+        });
+
         return [networkConfig.beets.address];
     }
 }
