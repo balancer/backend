@@ -7,6 +7,7 @@ export const schema = {
     PORT: Number,
     NODE_ENV: String,
     CHAIN_ID: String,
+    DEPLOYMENT_ENV: String,
     ADMIN_API_KEY: String,
     SANITY_API_TOKEN: String,
     SENTRY_DSN: String,

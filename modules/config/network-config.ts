@@ -1,5 +1,7 @@
 import { env } from '../../app/env';
 
+export type DeploymentEnv = 'canary' | 'main';
+
 export interface NetworkConfig {
     chain: {
         slug: string;
@@ -65,7 +67,7 @@ export interface NetworkConfig {
     };
     avgBlockSpeed: number;
     sor: {
-        url: string;
+        [key in DeploymentEnv]: { url: string };
     };
 }
 
@@ -133,7 +135,12 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         avgBlockSpeed: 1,
         sor: {
-            url: 'https://22nltjhtfsyhecuudusuv2m5i40zeafa.lambda-url.eu-central-1.on.aws/',
+            main: {
+                url: 'https://seb3bxrechp46fx7h3d2ksmjce0minwk.lambda-url.ca-central-1.on.aws/',
+            },
+            canary: {
+                url: 'https://22nltjhtfsyhecuudusuv2m5i40zeafa.lambda-url.eu-central-1.on.aws/',
+            },
         },
         yearn: {
             vaultsEndpoint: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
@@ -201,7 +208,12 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         avgBlockSpeed: 1,
         sor: {
-            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
+            main: {
+                url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',
+            },
+            canary: {
+                url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
+            },
         },
         yearn: {
             vaultsEndpoint: 'https://#/',

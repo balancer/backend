@@ -6,7 +6,7 @@ import { oldBnum } from '../big-number/old-big-number';
 import axios from 'axios';
 import { FundManagement, SwapInfo, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
 import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../web3/addresses';
-import { networkConfig } from '../config/network-config';
+import { networkConfig, DeploymentEnv } from '../config/network-config';
 import { BigNumber } from 'ethers';
 import { TokenAmountHumanReadable } from '../common/global-types';
 import { AddressZero } from '@ethersproject/constants';
@@ -14,6 +14,7 @@ import { Contract } from '@ethersproject/contracts';
 import VaultAbi from '../pool/abi/Vault.json';
 import { jsonRpcProvider } from '../web3/contract';
 import { balancerSdk } from './src/balancer-sdk';
+import { env } from '../../app/env';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -39,16 +40,19 @@ export class BalancerSorService {
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
         const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
 
-        const { data } = await axios.post<{ swapInfo: SwapInfo }>(networkConfig.sor.url, {
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmountScaled,
-            swapOptions: {
-                maxPools: swapOptions.maxPools || 8,
-                forceRefresh: swapOptions.forceRefresh || false,
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(
+            networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
+            {
+                swapType,
+                tokenIn,
+                tokenOut,
+                swapAmountScaled,
+                swapOptions: {
+                    maxPools: swapOptions.maxPools || 8,
+                    forceRefresh: swapOptions.forceRefresh || false,
+                },
             },
-        });
+        );
         const swapInfo = data.swapInfo;
 
         /*const swapInfo = await balancerSdk.sor.getSwaps(
