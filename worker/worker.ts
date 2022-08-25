@@ -11,18 +11,19 @@ export function startWorker() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        tracesSampleRate: 0.01,
         environment: env.NODE_ENV,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Prisma({ client: prisma }),
-            new Tracing.Integrations.Express({ app }),
+            // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
+        sampleRate: 1,
     });
 
     app.use(Sentry.Handlers.requestHandler());
-    app.use(Sentry.Handlers.tracingHandler());
+    // starting a manual transaction in the job-handler, no need for this
+    // app.use(Sentry.Handlers.tracingHandler());
     app.use(express.json());
 
     configureWorkerRoutes(app);

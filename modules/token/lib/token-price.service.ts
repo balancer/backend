@@ -8,6 +8,7 @@ import { networkConfig } from '../../config/network-config';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
 import { Cache, CacheClass } from 'memory-cache';
+import * as Sentry from '@sentry/node';
 
 const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
@@ -134,6 +135,11 @@ export class TokenPriceService {
             try {
                 updated = await handler.updatePricesForTokens(acceptedTokens);
             } catch (e) {
+                console.error(e);
+                Sentry.captureException(e, (scope) => {
+                    scope.setTag('handler.exitIfFails', handler.exitIfFails);
+                    return scope;
+                });
                 if (handler.exitIfFails) {
                     throw e;
                 }
@@ -185,12 +191,26 @@ export class TokenPriceService {
                 items.push({
                     id: `${tokenIn}-${tokenOut}-${tokenInItem.timestamp}`,
                     timestamp: tokenInItem.timestamp,
-                    price: tokenOutItem.close / tokenInItem.close,
+                    price: tokenInItem.close / tokenOutItem.close,
                 });
             }
         }
 
         return items;
+    }
+
+    public async deleteTokenPrice({
+        timestamp,
+        tokenAddress,
+    }: {
+        tokenAddress: string;
+        timestamp: number;
+    }): Promise<boolean> {
+        const response = await prisma.prismaTokenPrice.delete({
+            where: { tokenAddress_timestamp: { tokenAddress, timestamp } },
+        });
+
+        return !!response;
     }
 
     private getStartTimestampFromRange(range: GqlTokenChartDataRange) {

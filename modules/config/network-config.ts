@@ -18,6 +18,7 @@ export interface NetworkConfig {
         addressFormatted: string;
     };
     rpcUrl: string;
+    beetsPriceProviderRpcUrl: string;
     coingecko: {
         nativeAssetId: string;
         platformId: string;
@@ -30,6 +31,7 @@ export interface NetworkConfig {
         beetsBar: string;
         changelog: string;
         gauge: string;
+        userBalances: string;
     };
     sanity: {
         projectId: string;
@@ -83,6 +85,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
             masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
             gauge: 'https://#/',
+            userBalances: 'https://api.thegraph.com/subgraphs/name/danielmkm/user-balances-fantom',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -99,6 +102,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             platformId: 'fantom',
         },
         rpcUrl: 'https://rpc.ftm.tools',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
         sanity: {
             projectId: '1g2ag2hb',
             dataset: 'production',
@@ -153,6 +157,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
             masterchef: 'https://',
             gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
+            userBalances: 'https://api.thegraph.com/subgraphs/name/danielmkm/bpt-balances',
         },
         eth: {
             address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -169,6 +174,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             platformId: 'optimistic-ethereum',
         },
         rpcUrl: 'https://mainnet.optimism.io/',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
         sanity: {
             projectId: '1g2ag2hb',
             dataset: 'production',

@@ -127,6 +127,11 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
+        tokenDeletePrice: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            return tokenService.deleteTokenPrice(args);
+        },
     },
 };
 

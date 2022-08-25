@@ -59,6 +59,40 @@ export class PoolCreatorService {
         return Array.from(poolIds);
     }
 
+    public async reloadPoolNestedTokens(poolId: string): Promise<void> {
+        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        const poolToLoad = subgraphPools.find((pool) => pool.id === poolId);
+
+        if (!poolToLoad) {
+            throw new Error('Pool with id does not exist');
+        }
+
+        const poolTokens = poolToLoad.tokens || [];
+
+        for (let i = 0; i < poolTokens.length; i++) {
+            const token = poolTokens[i];
+
+            if (token.address === poolToLoad.address) {
+                continue;
+            }
+
+            const nestedPool = subgraphPools.find((nestedPool) => {
+                const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
+
+                return nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'PHANTOM_STABLE');
+            });
+
+            if (nestedPool) {
+                await prisma.prismaPoolToken.update({
+                    where: { id: token.id },
+                    data: { nestedPoolId: nestedPool.id },
+                });
+            }
+        }
+
+        await this.createAllTokensRelationshipForPool(poolId);
+    }
+
     private async createPoolRecord(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[], blockNumber: number) {
         const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
         const poolTokens = pool.tokens || [];

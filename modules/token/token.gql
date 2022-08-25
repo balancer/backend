@@ -20,6 +20,7 @@ extend type Mutation {
     tokenSyncTokenDefinitions: String!
     tokenSyncTokenDynamicData: String!
     tokenInitChartData(tokenAddress: String!): String!
+    tokenDeletePrice(tokenAddress: String!, timestamp: Int!): Boolean!
 }
 
 type GqlTokenPrice {

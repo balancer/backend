@@ -86,7 +86,7 @@ export class PoolSnapshotService {
         await prismaBulkExecuteOperations(operations, true);
 
         const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
-            where: { id: { notIn: poolIds } },
+            where: { OR: [{ type: 'PHANTOM_STABLE' }, { tokens: { some: { nestedPoolId: { not: null } } } }] },
             include: { tokens: true },
         });
 
@@ -156,9 +156,9 @@ export class PoolSnapshotService {
                         token.address,
                         numDays,
                     );
-                    await sleep(8000);
+                    await sleep(5000);
                 } catch (error: any) {
-                    Sentry.captureException(error);
+                    // Sentry.captureException(error);
                     console.error(
                         `Error getting historical prices form coingecko, falling back to database`,
                         error.message,

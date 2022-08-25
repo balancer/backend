@@ -53,6 +53,20 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
+        await prisma.prismaTokenPrice.upsert({
+            where: { tokenAddress_timestamp: { tokenAddress: fbeetsAddress, timestamp } },
+            update: { price: fbeetsPrice, close: fbeetsPrice },
+            create: {
+                tokenAddress: fbeetsAddress,
+                timestamp,
+                price: fbeetsPrice,
+                high: fbeetsPrice,
+                low: fbeetsPrice,
+                open: fbeetsPrice,
+                close: fbeetsPrice,
+            },
+        });
+
         return [networkConfig.fbeets.address];
     }
 }

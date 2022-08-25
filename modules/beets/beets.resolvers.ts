@@ -7,6 +7,9 @@ const balancerResolvers: Resolvers = {
         beetsGetFbeetsRatio: async (parent, {}, context) => {
             return beetsService.getFbeetsRatio();
         },
+        beetsGetBeetsPrice: async (parent, {}, context) => {
+            return beetsService.getBeetsPrice();
+        },
     },
     Mutation: {
         beetsSyncFbeetsRatio: async (parent, {}, context) => {

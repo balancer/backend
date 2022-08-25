@@ -4,6 +4,7 @@ extend type Query {
     userGetStaking: [GqlPoolStaking!]!
     userGetPoolJoinExits(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolJoinExit!]!
     userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolSwap!]!
+    userGetPoolSnapshots(poolId: String!, numDays: Int!): [GqlUserPoolSnapshot!]!
 }
 
 extend type Mutation {
@@ -32,4 +33,16 @@ type GqlUserFbeetsBalance {
     totalBalance: AmountHumanReadable!
     walletBalance: AmountHumanReadable!
     stakedBalance: AmountHumanReadable!
+}
+
+type GqlUserPoolSnapshot {
+    id: ID!
+    timestamp: Int!
+    walletBalance: AmountHumanReadable!
+    gaugeBalance: AmountHumanReadable!
+    farmBalance: AmountHumanReadable!
+    totalBalance: AmountHumanReadable!
+    percentShare: Float!
+    valueUSD: AmountHumanReadable!
+    fees24h: AmountHumanReadable!
 }

@@ -11,9 +11,11 @@ import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price
 import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { GqlTokenChartDataRange } from '../../schema';
+import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs } from '../../schema';
 import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
+import { BeetsPriceHandlerService } from './lib/token-price-handlers/beets-price-handler.service';
+import { ClqdrPriceHandlerService } from './lib/token-price-handlers/clqdr-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
@@ -151,12 +153,18 @@ export class TokenService {
     public async getHistoricalTokenPrices() {
         return this.tokenPriceService.getHistoricalTokenPrices();
     }
+
+    public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {
+        return this.tokenPriceService.deleteTokenPrice(args);
+    }
 }
 
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
+        new BeetsPriceHandlerService(),
         ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
+        ...(isFantomNetwork() ? [new ClqdrPriceHandlerService()] : []),
         new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),

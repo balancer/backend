@@ -99,6 +99,22 @@ generates:
         schema: ${GAUGE_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types.ts:
+        schema: ${USER_SNAPSHOT_SUBGRPAH}
+        documents: 'modules/subgraphs/user-snapshot-subgraph/user-snapshot-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-schema.graphql:
+        schema: ${USER_SNAPSHOT_SUBGRPAH}
+        plugins:
+            - schema-ast
     graphql_schema_generated.ts:
         schema: ./modules/**/*.gql
         plugins:

@@ -3,6 +3,7 @@ import VaultAbi from '../abi/Vault.json';
 import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
 import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
+import MetaStablePool from '../abi/MetaStablePool.json';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
@@ -31,6 +32,7 @@ interface MulticallExecuteResult {
     rate?: BigNumber;
     swapEnabled?: boolean;
     tokenRates?: BigNumber[];
+    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
     linearPools?: Record<
         string,
         {
@@ -100,6 +102,7 @@ export class PoolOnChainDataService {
                     ...LinearPoolAbi,
                     ...LiquidityBootstrappingPoolAbi,
                     ...StablePhantomPoolAbi,
+                    ...MetaStablePool,
                 ].map((row) => [row.name, row]),
             ),
         );
@@ -137,6 +140,14 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
             }
 
+            if (pool.type === 'META_STABLE') {
+                const tokenAddresses = pool.tokens.map((token) => token.address);
+
+                tokenAddresses.forEach((token, i) => {
+                    multiPool.call(`${pool.id}.metaPriceRateCache[${i}]`, pool.address, 'getPriceRateCache', [token]);
+                });
+            }
+
             if (pool.type === 'PHANTOM_STABLE') {
                 // Overwrite totalSupply with virtualSupply for StablePhantom pools
                 multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
@@ -156,9 +167,9 @@ export class PoolOnChainDataService {
 
         try {
             poolsOnChainData = (await multiPool.execute()) as Record<string, MulticallExecuteResult>;
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            throw `Issue with multicall execution.`;
+            throw `Issue with multicall execution. ${err}`;
         }
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
@@ -270,7 +281,12 @@ export class PoolOnChainDataService {
 
                     const balance = formatFixed(poolTokens.balances[i], poolToken.token.decimals);
                     const weight = onchainData.weights ? formatFixed(onchainData.weights[i], 18) : null;
-                    const priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
+
+                    let priceRate = onchainData.tokenRates ? formatFixed(onchainData.tokenRates[i], 18) : '1.0';
+
+                    if (onchainData.metaPriceRateCache && onchainData.metaPriceRateCache[i][0].gt('0')) {
+                        priceRate = formatFixed(onchainData.metaPriceRateCache[i][0], 18);
+                    }
 
                     if (
                         !poolToken.dynamicData ||

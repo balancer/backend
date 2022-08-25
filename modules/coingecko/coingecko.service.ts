@@ -171,7 +171,6 @@ export class CoingeckoService {
                     console.warn(`Matching address for original address ${mappedToken.originalAddress} not found`);
                 } else {
                     prices[mappedToken.originalAddress] = results[resultAddress];
-                    delete prices[resultAddress];
                 }
             }
         }

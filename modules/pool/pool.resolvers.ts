@@ -70,7 +70,7 @@ const balancerResolvers: Resolvers = {
         poolUpdateLiquidityValuesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.updateLiquidityValuesForAllPools();
+            await poolService.updateLiquidityValuesForPools();
 
             return 'success';
         },
@@ -191,6 +191,13 @@ const balancerResolvers: Resolvers = {
 
             const latestBlockNumber = await jsonRpcProvider.getBlockNumber();
             await poolService.updateOnChainDataForPools([poolId], latestBlockNumber);
+
+            return 'success';
+        },
+        poolReloadPoolNestedTokens: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.reloadPoolNestedTokens(poolId);
 
             return 'success';
         },

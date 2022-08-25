@@ -4,3 +4,7 @@ extend type Query {
     blocksGetBlocksPerDay: Float!
     blocksGetBlocksPerYear: Float!
 }
+
+extend type Mutation {
+    cacheAverageBlockTime: String!
+}

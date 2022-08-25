@@ -47,6 +47,8 @@ import { Cache } from 'memory-cache';
 import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
 import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
+import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
+import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -88,15 +90,15 @@ export class PoolService {
 
     public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
         const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
-        const poolIds = batchSwaps.map((batchSwap) => batchSwap.swaps.map((swap) => swap.poolId)).flat();
-        const pools = await this.getGqlPools({ where: { idIn: poolIds } });
 
         return batchSwaps.map((batchSwap) => ({
             ...batchSwap,
-            swaps: batchSwap.swaps.map((swap) => ({
-                ...swap,
-                pool: pools.find((pool) => pool.id === swap.poolId)!,
-            })),
+            swaps: batchSwap.swaps.map((swap) => {
+                return {
+                    ...swap,
+                    pool: this.poolGqlLoaderService.mapToMinimalGqlPool(swap.pool),
+                };
+            }),
         }));
     }
 
@@ -186,8 +188,8 @@ export class PoolService {
         console.timeEnd('updateOnChainData');
     }
 
-    public async updateLiquidityValuesForAllPools(): Promise<void> {
-        await this.poolUsdDataService.updateLiquidityValuesForAllPools();
+    public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {
+        await this.poolUsdDataService.updateLiquidityValuesForPools(minShares, maxShares);
     }
 
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
@@ -259,6 +261,10 @@ export class PoolService {
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string) {
         await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }
+
+    public async reloadPoolNestedTokens(poolId: string) {
+        await this.poolCreatorService.reloadPoolNestedTokens(poolId);
+    }
 }
 
 export const poolService = new PoolService(
@@ -270,7 +276,13 @@ export const poolService = new PoolService(
     new PoolSanityDataLoaderService(),
     new PoolAprUpdaterService([
         //order matters for the boosted pool aprs: linear, phantom stable, then boosted
-        ...(isFantomNetwork() ? [new SpookySwapAprService(tokenService), new YearnVaultAprService(tokenService)] : []),
+        ...(isFantomNetwork()
+            ? [
+                  new SpookySwapAprService(tokenService),
+                  new YearnVaultAprService(tokenService),
+                  new StaderStakedFtmAprService(tokenService),
+              ]
+            : [new RocketPoolStakedEthAprService(tokenService)]),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),

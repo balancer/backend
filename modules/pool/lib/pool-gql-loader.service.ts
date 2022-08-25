@@ -59,14 +59,16 @@ export class PoolGqlLoaderService {
             include: prismaPoolMinimal.include,
         });
 
-        return pools.map((pool) => {
-            return {
-                ...pool,
-                decimals: 18,
-                dynamicData: this.getPoolDynamicData(pool),
-                allTokens: this.mapAllTokens(pool),
-            };
-        });
+        return pools.map(pool => this.mapToMinimalGqlPool(pool));
+    }
+
+    public mapToMinimalGqlPool(pool: PrismaPoolMinimal): GqlPoolMinimal {
+        return {
+            ...pool,
+            decimals: 18,
+            dynamicData: this.getPoolDynamicData(pool),
+            allTokens: this.mapAllTokens(pool),
+        };
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {

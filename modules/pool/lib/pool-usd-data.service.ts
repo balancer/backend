@@ -17,17 +17,30 @@ export class PoolUsdDataService {
      * Liquidity is dependent on token prices, so the values here are constantly in flux.
      * When updating, the easiest is to update all pools at once.
      */
-    public async updateLiquidityValuesForAllPools() {
+    public async updateLiquidityValuesForPools(
+        minShares: number = 0.00000000001,
+        maxShares: number = Number.MAX_SAFE_INTEGER,
+    ) {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const pools = await prisma.prismaPool.findMany({
             include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
+            where: {
+                dynamicData: {
+                    AND: [
+                        {
+                            totalSharesNum: { lte: maxShares },
+                        },
+                        {
+                            totalSharesNum: { gt: minShares },
+                        },
+                    ],
+                },
+            },
         });
-
-        const filtered = pools.filter((pool) => parseFloat(pool.dynamicData?.totalShares || '0') > 0.00000000001);
 
         let updates: any[] = [];
 
-        for (const pool of filtered) {
+        for (const pool of pools) {
             const balanceUSDs = pool.tokens.map((token) => ({
                 id: token.id,
                 balanceUSD:
