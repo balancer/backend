@@ -100,10 +100,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         }
 
         (farm.rewarder?.rewardTokens || [])
-            .filter(
-                (rewardToken) =>
-                    rewardToken.token !== networkConfig.beets.address && parseFloat(rewardToken.rewardPerSecond) > 0,
-            )
+            .filter((rewardToken) => rewardToken.token !== networkConfig.beets.address)
             .forEach((rewardToken) => {
                 const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
                 const rewardTokenPerYear =
