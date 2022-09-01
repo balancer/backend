@@ -76,7 +76,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.type,
-                    () => userService.syncWalletBalancesForAllPools(),
+                    () => userService.syncChangedWalletBalancesForAllPools(),
                     defaultSamplingRate,
                     res,
                     next,
@@ -85,7 +85,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'user-sync-staked-balances':
                 await runIfNotAlreadyRunning(
                     job.type,
-                    () => userService.syncStakedBalances(),
+                    () => userService.syncChangedStakedBalances(),
                     defaultSamplingRate,
                     res,
                     next,

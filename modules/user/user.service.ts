@@ -55,16 +55,16 @@ export class UserService {
         await this.walletSyncService.initBalancesForPool(poolId);
     }
 
-    public async syncWalletBalancesForAllPools() {
-        await this.walletSyncService.syncBalancesForAllPools();
+    public async syncChangedWalletBalancesForAllPools() {
+        await this.walletSyncService.syncChangedBalancesForAllPools();
     }
 
     public async initStakedBalances() {
         await this.stakedSyncService.initStakedBalances();
     }
 
-    public async syncStakedBalances() {
-        await this.stakedSyncService.syncStakedBalances();
+    public async syncChangedStakedBalances() {
+        await this.stakedSyncService.syncChangedStakedBalances();
     }
 
     public async syncUserBalanceAllPools(userAddress: string) {
