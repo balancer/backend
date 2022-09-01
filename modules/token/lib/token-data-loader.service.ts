@@ -97,15 +97,11 @@ export class TokenDataLoaderService {
         });
 
         const addToWhitelist = sanityTokens.filter((sanityToken) => {
-            return !whiteListedTokens.some((dbToken) => {
-                isSameAddress(sanityToken.address, dbToken.tokenAddress);
-            });
+            return !whiteListedTokens.some((dbToken) => isSameAddress(sanityToken.address, dbToken.tokenAddress));
         });
 
         const removeFromWhitelist = whiteListedTokens.filter((dbToken) => {
-            return !sanityTokens.some((sanityToken) => {
-                isSameAddress(dbToken.tokenAddress, sanityToken.address);
-            });
+            return !sanityTokens.some((sanityToken) => isSameAddress(dbToken.tokenAddress, sanityToken.address));
         });
 
         await prisma.prismaTokenType.createMany({
