@@ -49,7 +49,7 @@ const resolvers: Resolvers = {
         userSyncWalletBalancesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await userService.initWalletBalancesForAllPools();
+            await userService.syncWalletBalancesForAllPools();
 
             return 'success';
         },
