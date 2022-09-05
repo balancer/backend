@@ -35,6 +35,23 @@ export class PoolSnapshotService {
         });
     }
 
+    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
+        const timestamp = this.getTimestampForRange(range);
+
+        return prisma.prismaPoolSnapshot.findMany({
+            where: {
+                timestamp: { gte: timestamp },
+                totalSharesNum: {
+                    gt: 0.000000000001,
+                },
+                pool: {
+                    categories: { none: { category: 'BLACK_LISTED' } },
+                },
+            },
+            orderBy: { timestamp: 'asc' },
+        });
+    }
+
     //TODO: this could be optimized
     public async syncLatestSnapshotsForAllPools(daysToSync = 1) {
         let operations: any[] = [];
