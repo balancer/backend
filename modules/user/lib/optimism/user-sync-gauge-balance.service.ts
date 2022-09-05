@@ -59,7 +59,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log('initStakedBalances: finished...');
     }
 
-    public async syncStakedBalances(): Promise<void> {
+    public async syncChangedStakedBalances(): Promise<void> {
         // we always store the latest synced block
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({ where: { type: 'STAKED' } });
 

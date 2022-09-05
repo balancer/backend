@@ -67,22 +67,6 @@ generates:
         schema: ${BEETS_BAR_SUBGRAPH}
         plugins:
             - schema-ast
-    modules/subgraphs/changelog-subgraph/generated/changelog-subgraph-types.ts:
-        schema: ${CHANGELOG_SUBGRAPH}
-        documents: 'modules/subgraphs/changelog-subgraph/changelog-subgraph-queries.graphql'
-        plugins:
-            - typescript
-            - typescript-operations
-            - typescript-graphql-request
-        config:
-            scalars:
-                BigInt: string
-                Bytes: string
-                BigDecimal: string
-    modules/subgraphs/changelog-subgraph/generated/changelog-subgraph-schema.graphql:
-        schema: ${CHANGELOG_SUBGRAPH}
-        plugins:
-            - schema-ast
     modules/subgraphs/gauge-subgraph/generated/gauge-subgraph-types.ts:
         schema: ${GAUGE_SUBGRAPH}
         documents: 'modules/subgraphs/gauge-subgraph/gauge-subgraph-queries.graphql'

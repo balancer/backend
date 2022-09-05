@@ -11,6 +11,7 @@ import {
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
+    GqlPoolSnapshot,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
     GqlPoolUserSwapVolume,
@@ -49,6 +50,7 @@ import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-ap
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
 import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
+import { id } from 'ethers/lib/utils';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -122,6 +124,10 @@ export class PoolService {
         this.cache.put(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5 * 1000);
 
         return featuredPoolGroups;
+    }
+
+    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForAllPools(range);
     }
 
     public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {

@@ -59,7 +59,7 @@ export class PoolGqlLoaderService {
             include: prismaPoolMinimal.include,
         });
 
-        return pools.map(pool => this.mapToMinimalGqlPool(pool));
+        return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
     public mapToMinimalGqlPool(pool: PrismaPoolMinimal): GqlPoolMinimal {
@@ -158,6 +158,38 @@ export class PoolGqlLoaderService {
 
         const where = args.where;
         const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
+
+        const allTokensFilter = [];
+        where?.tokensIn?.forEach((token) => {
+            allTokensFilter.push({
+                allTokens: {
+                    some: {
+                        token: {
+                            address: {
+                                equals: token,
+                                mode: 'insensitive' as const,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+
+        if (where?.tokensNotIn) {
+            allTokensFilter.push({
+                allTokens: {
+                    every: {
+                        token: {
+                            address: {
+                                notIn: where.tokensNotIn || undefined,
+                                mode: 'insensitive' as const,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         const filterArgs: Prisma.PrismaPoolWhereInput = {
             dynamicData: {
                 totalSharesNum: {
@@ -168,28 +200,7 @@ export class PoolGqlLoaderService {
                 in: where?.poolTypeIn || undefined,
                 notIn: where?.poolTypeNotIn || undefined,
             },
-            allTokens: {
-                ...(where?.tokensNotIn
-                    ? {
-                          every: {
-                              token: {
-                                  address: {
-                                      notIn: where?.tokensNotIn || undefined,
-                                      mode: 'insensitive',
-                                  },
-                              },
-                          },
-                      }
-                    : {}),
-                some: {
-                    token: {
-                        address: {
-                            in: where?.tokensIn || undefined,
-                            mode: 'insensitive',
-                        },
-                    },
-                },
-            },
+            AND: allTokensFilter,
             id: {
                 in: where?.idIn || undefined,
                 notIn: where?.idNotIn || undefined,

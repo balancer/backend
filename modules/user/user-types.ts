@@ -2,7 +2,7 @@ import { AmountHumanReadable } from '../common/global-types';
 import { PrismaPoolStaking } from '@prisma/client';
 
 export interface UserStakedBalanceService {
-    syncStakedBalances(): Promise<void>;
+    syncChangedStakedBalances(): Promise<void>;
     initStakedBalances(): Promise<void>;
     syncUserBalance(input: UserSyncUserBalanceInput): Promise<void>;
 }

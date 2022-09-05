@@ -2,6 +2,7 @@ import { sanityClient } from '../../sanity/sanity';
 import { env } from '../../../app/env';
 import { prisma } from '../../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
+import { isSameAddress } from '@balancer-labs/sdk';
 
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
     '250': 'fantomToken',
@@ -89,14 +90,31 @@ export class TokenDataLoaderService {
             });
         }
 
-        //TODO: need to be able to remove whitelist
+        const whiteListedTokens = await prisma.prismaTokenType.findMany({
+            where: {
+                type: 'WHITE_LISTED',
+            },
+        });
+
+        const addToWhitelist = sanityTokens.filter((sanityToken) => {
+            return !whiteListedTokens.some((dbToken) => isSameAddress(sanityToken.address, dbToken.tokenAddress));
+        });
+
+        const removeFromWhitelist = whiteListedTokens.filter((dbToken) => {
+            return !sanityTokens.some((sanityToken) => isSameAddress(dbToken.tokenAddress, sanityToken.address));
+        });
+
         await prisma.prismaTokenType.createMany({
-            data: sanityTokens.map((token) => ({
+            data: addToWhitelist.map((token) => ({
                 id: `${token.address}-white-listed`,
                 tokenAddress: token.address.toLowerCase(),
                 type: 'WHITE_LISTED' as const,
             })),
             skipDuplicates: true,
+        });
+
+        await prisma.prismaTokenType.deleteMany({
+            where: { id: { in: removeFromWhitelist.map((token) => token.id) } },
         });
 
         await this.syncTokenTypes();
