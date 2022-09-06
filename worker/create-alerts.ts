@@ -20,7 +20,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
     for (const cronJob of jobs) {
-        const alarmName = `AUTO CRON ALARM: ${cronJob.name}`;
+        const alarmName = `AUTO CRON ALARM: ${cronJob.name} - ${networkConfig.chain.slug} - ${env.DEPLOYMENT_ENV}`;
 
         // alert if cron has not run once in the double interval (or once in a minute for short intervals)
         const threshold = 1;
@@ -39,11 +39,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
             }
         }
 
-        const foundAlarm = currentAlarms.MetricAlarms?.find(
-            (alarm) =>
-                alarm.AlarmName ===
-                `AUTO CRON ALARM: ${cronJob.name} - ${networkConfig.chain.slug} - ${env.DEPLOYMENT_ENV}`,
-        );
+        const foundAlarm = currentAlarms.MetricAlarms?.find((alarm) => alarm.AlarmName === alarmName);
         if (foundAlarm) {
             if (foundAlarm.Period != periodInSeconds) {
                 cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: [alarmName] }));
@@ -51,6 +47,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
                 continue;
             }
         }
+
         //make sure metric is available for alarm
         cronsMetricPublisher.publish(`${cronJob.name}-done`);
 
@@ -60,6 +57,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
             Trigger alarm if the cron ran less than once in ${periodInSeconds} seconds.`,
             ActionsEnabled: true,
             AlarmActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
+            OKActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
             MetricName: `${cronJob.name}-done`,
             Statistic: 'Sum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],
