@@ -22,8 +22,6 @@ phases:
             - yarn build
     post_build:
         commands:
-            - echo Set cron.yaml for chain $CHAIN_SLUG
-            - mv ./worker/cron-$CHAIN_SLUG.yaml ./cron.yaml
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn
 #      - npx graphcdn push

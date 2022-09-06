@@ -15,6 +15,7 @@
         "prisma-merge": "ts-node prisma/prisma-merge.ts"
     },
     "dependencies": {
+        "@aws-sdk/client-cloudwatch": "^3.159.0",
         "@aws-sdk/client-sqs": "^3.137.0",
         "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo",
         "@ethersproject/address": "^5.6.0",
