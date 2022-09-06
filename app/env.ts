@@ -12,6 +12,7 @@ export const schema = {
     SANITY_API_TOKEN: String,
     SENTRY_DSN: String,
     WORKER_QUEUE_URL: String,
+    AWS_REGION: String,
 };
 
 export const env: Env = load(schema, {

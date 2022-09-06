@@ -4,7 +4,7 @@ import { env } from '../app/env';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from '../prisma/prisma-client';
 import { configureWorkerRoutes } from './job-handlers';
-import { scheduleManualJobs } from './manual-jobs';
+import { createAlerts, scheduleJobs as scheduleJobs } from './manual-jobs';
 
 export function startWorker() {
     const app = express();
@@ -35,7 +35,8 @@ export function startWorker() {
         }),
     );
 
-    scheduleManualJobs();
+    scheduleJobs();
+    createAlerts();
 
     app.listen(env.PORT, () => {
         console.log(`Worker listening on port ${env.PORT}`);

@@ -13,10 +13,10 @@ extend type Mutation {
 
     userInitWalletBalancesForAllPools: String!
     userInitWalletBalancesForPool(poolId: String!): String!
-    userSyncWalletBalancesForAllPools: String!
+    userSyncChangedWalletBalancesForAllPools: String!
 
     userInitStakedBalances: String!
-    userSyncStakedBalances: String!
+    userSyncChangedStakedBalances: String!
 }
 
 type GqlUserPoolBalance {

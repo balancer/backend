@@ -18,7 +18,7 @@ import { AmountHumanReadable } from '../../../common/global-types';
 import { PrismaPoolStaking } from '@prisma/client';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
-    public async syncStakedBalances(): Promise<void> {
+    public async syncChangedStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({ where: { type: 'STAKED' } });
 
         if (!status) {

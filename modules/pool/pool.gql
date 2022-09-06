@@ -23,6 +23,7 @@ extend type Query {
     poolGetUserSwapVolume(first: Int, skip: Int, where: GqlUserSwapVolumeFilter): [GqlPoolUserSwapVolume!]!
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
 }
 
 extend type Mutation {

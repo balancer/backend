@@ -5,8 +5,8 @@ import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../modules/user/user.service';
-import { WorkerJob } from './manual-jobs';
 import { protocolService } from '../modules/protocol/protocol.service';
+import { cronsMetricPublisher } from '../modules/metrics/cron.metric';
 
 const runningJobs: Set<string> = new Set();
 
@@ -34,6 +34,10 @@ async function runIfNotAlreadyRunning(
         console.time(id);
         console.log(`Start job ${id}`);
         await fn();
+        cronsMetricPublisher.publish(`${id}-done`);
+        if (Math.random() > samplingRate) {
+            transaction.sampled = false;
+        }
     } catch (error) {
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
         if (transaction) {
@@ -48,9 +52,6 @@ async function runIfNotAlreadyRunning(
         console.timeEnd(id);
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
         if (transaction) {
-            if (Math.random() > samplingRate) {
-                transaction.sampled = false;
-            }
             transaction.finish();
         }
         console.log(`Finished job ${id}`);
@@ -61,12 +62,11 @@ async function runIfNotAlreadyRunning(
 export function configureWorkerRoutes(app: Express) {
     // all manual triggered (e.g. fast running) jobs will be handled here
     app.post('/', async (req, res, next) => {
-        const job = req.body as WorkerJob;
-        Sentry.configureScope((scope) => scope.setTransactionName(`POST /${job.type} - manual`));
-        switch (job.type) {
-            case 'sync-pools':
+        const job = req.body as { name: string };
+        switch (job.name) {
+            case 'sync-changed-pools':
                 await runIfNotAlreadyRunning(
-                    job.type,
+                    job.name,
                     () => poolService.syncChangedPools(),
                     defaultSamplingRate,
                     res,
@@ -75,8 +75,8 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
-                    job.type,
-                    () => userService.syncWalletBalancesForAllPools(),
+                    job.name,
+                    () => userService.syncChangedWalletBalancesForAllPools(),
                     defaultSamplingRate,
                     res,
                     next,
@@ -84,171 +84,160 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'user-sync-staked-balances':
                 await runIfNotAlreadyRunning(
-                    job.type,
-                    () => userService.syncStakedBalances(),
+                    job.name,
+                    () => userService.syncChangedStakedBalances(),
                     defaultSamplingRate,
                     res,
                     next,
                 );
                 break;
+            case 'load-token-prices':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => tokenService.loadTokenPrices(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'update-liquidity-for-active-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.updateLiquidityValuesForPools(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'update-liquidity-for-inactive-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.updateLiquidityValuesForPools(0, 0.00000000001),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'update-pool-apr':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.updatePoolAprs(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'load-on-chain-data-for-pools-with-active-updates':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-new-pools-from-subgraph':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.syncNewPoolsFromSubgraph(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-sanity-pool-data':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.syncSanityPoolData(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-tokens-from-pool-tokens':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => tokenService.syncSanityData(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'update-liquidity-24h-ago-for-all-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.updateLiquidity24hAgoForAllPools(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-fbeets-ratio':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => beetsService.syncFbeetsRatio(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'cache-average-block-time':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => blocksSubgraphService.cacheAverageBlockTime(),
+                    0.05,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-token-dynamic-data':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => tokenService.syncTokenDynamicData(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-staking-for-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.syncStakingForPools(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'cache-protocol-data':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => protocolService.cacheProtocolMetrics(),
+                    defaultSamplingRate,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-latest-snapshots-for-all-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.syncLatestSnapshotsForAllPools(),
+                    0.5,
+                    res,
+                    next,
+                );
+                break;
+            case 'update-lifetime-values-for-all-pools':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.updateLifetimeValuesForAllPools(),
+                    0.05,
+                    res,
+                    next,
+                );
+                break;
             default:
-                throw new Error(`Unhandled job type ${job.type}`);
+                res.sendStatus(400);
+                throw new Error(`Unhandled job type ${job.name}`);
         }
-    });
-
-    app.post('/load-token-prices', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'load-token-prices',
-            () => tokenService.loadTokenPrices(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/update-liquidity-for-active-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'update-liquidity-for-active-pools',
-            () => poolService.updateLiquidityValuesForPools(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/update-liquidity-for-inactive-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'update-liquidity-for-inactive-pools',
-            () => poolService.updateLiquidityValuesForPools(0, 0.00000000001),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/update-pool-apr', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'update-pool-apr',
-            () => poolService.updatePoolAprs(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/load-on-chain-data-for-pools-with-active-updates', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'load-on-chain-data-for-pools-with-active-updates',
-            () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/sync-new-pools-from-subgraph', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-new-pools-from-subgraph',
-            () => poolService.syncNewPoolsFromSubgraph(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/sync-sanity-pool-data', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-sanity-pool-data',
-            () => poolService.syncSanityPoolData(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/sync-tokens-from-pool-tokens', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-tokens-from-pool-tokens',
-            () => tokenService.syncSanityData(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/update-liquidity-24h-ago-for-all-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'update-liquidity-24h-ago-for-all-pools',
-            () => poolService.updateLiquidity24hAgoForAllPools(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/sync-fbeets-ratio', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-fbeets-ratio',
-            () => beetsService.syncFbeetsRatio(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-
-    app.post('/cache-average-block-time', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'cache-average-block-time',
-            () => blocksSubgraphService.cacheAverageBlockTime(),
-            0.05,
-            res,
-            next,
-        );
-    });
-
-    app.post('/sync-token-dynamic-data', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-token-dynamic-data',
-            () => tokenService.syncTokenDynamicData(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-    app.post('/sync-staking-for-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-staking-for-pools',
-            () => poolService.syncStakingForPools(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-    app.post('/cache-protocol-data', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'cache-protocol-data',
-            () => protocolService.cacheProtocolMetrics(),
-            defaultSamplingRate,
-            res,
-            next,
-        );
-    });
-    app.post('/sync-latest-snapshots-for-all-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'sync-latest-snapshots-for-all-pools',
-            () => poolService.syncLatestSnapshotsForAllPools(),
-            0.5,
-            res,
-            next,
-        );
-    });
-    app.post('/update-lifetime-values-for-all-pools', async (req, res, next) => {
-        await runIfNotAlreadyRunning(
-            'update-lifetime-values-for-all-pools',
-            () => poolService.updateLifetimeValuesForAllPools(),
-            0.05,
-            res,
-            next,
-        );
     });
 }

@@ -89,7 +89,7 @@ export class UserSyncWalletBalanceService {
         console.log('initBalancesForPools: finished performing db operations...');
     }
 
-    public async syncBalancesForAllPools() {
+    public async syncChangedBalancesForAllPools() {
         const erc20Interface = new ethers.utils.Interface(ERC20Abi);
         const latestBlock = await jsonRpcProvider.getBlockNumber();
         const syncStatus = await prisma.prismaUserBalanceSyncStatus.findUnique({ where: { type: 'WALLET' } });
