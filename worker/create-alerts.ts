@@ -65,7 +65,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
             EvaluationPeriods: 1,
             DatapointsToAlarm: 1,
             Threshold: threshold,
-            ComparisonOperator: 'LessThanOrEqualToThreshold',
+            ComparisonOperator: 'LessThanThreshold',
             TreatMissingData: 'missing',
             Namespace: cronsMetricPublisher.namespace,
         });
