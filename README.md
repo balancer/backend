@@ -60,5 +60,12 @@ https://backend-optimism-v2-canary.beets-ftm-node.com/graphql
 
 ## Contributing
 
-To contribute, branch from `v2-main` and open a PR against `v2-canary`. It will
-be reviewed and eventually merged into v2-canary for testing.
+We follow the model of [gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) using the following naming for branches:
+
+-   main: v2-main
+-   development: v2-canary
+-   feature: feature/\*
+-   release: realease/\*
+-   hotfix: hf/\*
+
+To contribute, branch from `v2-canary` (which is our development branch) and open a PR against `v2-canary` once the feature is complete. It will be reviewed and eventually merged into v2-canary.
