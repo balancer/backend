@@ -5,6 +5,9 @@ import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { networkConfig } from '../../../../config/network-config';
 import { oldBnum } from '../../../../big-number/old-big-number';
 import { formatFixed } from '@ethersproject/bignumber';
+import { getContractAt } from '../../../../web3/contract';
+import ERC20Abi from '../../../../web3//abi/ERC20.json';
+import { BigNumber } from 'ethers';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -63,7 +66,11 @@ export class MasterChefStakingService implements PoolStakingService {
             if (farm.rewarder) {
                 for (const rewardToken of farm.rewarder.rewardTokens || []) {
                     const id = `${farmId}-${farm.rewarder.id}-${rewardToken.token}`;
-                    const rewardPerSecond = formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals);
+                    const erc20Token = await getContractAt(rewardToken.token, ERC20Abi);
+                    const rewardBalance: BigNumber = await erc20Token.balanceOf(farm.rewarder.id);
+                    const rewardPerSecond = rewardBalance.gt(0)
+                        ? formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals)
+                        : '0.0';
 
                     operations.push(
                         prisma.prismaPoolStakingMasterChefFarmRewarder.upsert({

@@ -138,10 +138,9 @@ export class PoolSnapshotService {
     }
 
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, timestampToSyncFrom = 0) {
-        const pool = await prisma.prismaPool.findUnique({
+        const pool = await prisma.prismaPool.findUniqueOrThrow({
             where: { id: poolId },
             include: prismaPoolWithExpandedNesting.include,
-            rejectOnNotFound: true,
         });
 
         const startTimestamp = timestampToSyncFrom > 0 ? timestampToSyncFrom : pool.createTime;
