@@ -75,10 +75,9 @@ export class UserService {
     }
 
     public async syncUserBalance(userAddress: string, poolId: string) {
-        const pool = await prisma.prismaPool.findUnique({
+        const pool = await prisma.prismaPool.findUniqueOrThrow({
             where: { id: poolId },
             include: { staking: true },
-            rejectOnNotFound: true,
         });
 
         // we make sure the user exists
