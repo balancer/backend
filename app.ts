@@ -40,6 +40,7 @@ async function startServer() {
         beforeSend(event, hint) {
             const error = hint.originalException;
             if (error && error.toString().includes('Unknown token')) {
+                console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
             return event;
