@@ -175,9 +175,6 @@ export class PoolSwapService {
      * duplicate effort. Return an array of poolIds with swaps added.
      */
     public async syncSwapsForLast48Hours(): Promise<string[]> {
-        const allPoolAddresses = (await prisma.prismaPool.findMany({ select: { address: true } })).map(
-            (item) => item.address,
-        );
         const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
         const twoDaysAgo = moment().subtract(2, 'day').unix();

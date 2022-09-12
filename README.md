@@ -69,3 +69,4 @@ We follow the model of [gitflow](https://www.atlassian.com/git/tutorials/compari
 -   hotfix: hf/\*
 
 To contribute, branch from `v2-canary` (which is our development branch) and open a PR against `v2-canary` once the feature is complete. It will be reviewed and eventually merged into v2-canary.
+
