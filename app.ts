@@ -37,6 +37,13 @@ async function startServer() {
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
+        beforeSend(event, hint) {
+            const error = hint.originalException;
+            if (error && error.toString().includes('Unknown token')) {
+                return null;
+            }
+            return event;
+        },
     });
 
     app.use(Sentry.Handlers.requestHandler());
