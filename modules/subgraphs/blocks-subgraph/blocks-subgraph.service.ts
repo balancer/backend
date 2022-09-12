@@ -76,8 +76,6 @@ export class BlocksSubgraphService {
 
         await this.cache.put(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime}`);
 
-        console.log(`Caching average block time: ${averageBlockTime}`);
-
         return averageBlockTime;
     }
 
