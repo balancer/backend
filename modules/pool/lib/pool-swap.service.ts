@@ -208,22 +208,18 @@ export class PoolSwapService {
             await prisma.prismaPoolSwap.createMany({
                 skipDuplicates: true,
                 data: swaps.map((swap) => {
-                    let valueUSD = parseFloat(swap.valueUSD);
+                    let valueUSD = 0;
+                    const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn);
+                    const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut);
 
-                    if (
-                        valueUSD === 0 ||
-                        //does the swap include a nested BPT
-                        allPoolAddresses.includes(swap.tokenIn) ||
-                        allPoolAddresses.includes(swap.tokenOut)
-                    ) {
-                        const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn);
-                        const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut);
+                    if (tokenInPrice > 0) {
+                        valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);
+                    } else {
+                        valueUSD = tokenOutPrice * parseFloat(swap.tokenAmountOut);
+                    }
 
-                        if (tokenInPrice > 0) {
-                            valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);
-                        } else {
-                            valueUSD = tokenOutPrice * parseFloat(swap.tokenAmountOut);
-                        }
+                    if (valueUSD === 0) {
+                        valueUSD = parseFloat(swap.valueUSD);
                     }
 
                     poolIds.add(swap.poolId.id);
