@@ -79,7 +79,11 @@ export class UserBalanceService {
                                         rewarders: true,
                                     },
                                 },
-                                gauge: true,
+                                gauge: {
+                                    include: {
+                                        rewards: true,
+                                    },
+                                },
                             },
                         },
                     },
