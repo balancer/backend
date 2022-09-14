@@ -48,8 +48,9 @@ export class BalancerSorService {
                 tokenOut,
                 swapAmountScaled,
                 swapOptions: {
-                    maxPools: swapOptions.maxPools || 8,
-                    forceRefresh: swapOptions.forceRefresh || false,
+                    maxPools: swapOptions.maxPools || networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
+                    forceRefresh:
+                        swapOptions.forceRefresh || networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
                 },
             },
         );

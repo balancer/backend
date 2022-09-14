@@ -17,7 +17,7 @@
     "dependencies": {
         "@aws-sdk/client-cloudwatch": "^3.159.0",
         "@aws-sdk/client-sqs": "^3.137.0",
-        "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#daniel/sor-generic-path-algo",
+        "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#beethovenx-master",
         "@ethersproject/address": "^5.6.0",
         "@ethersproject/bignumber": "^5.6.0",
         "@ethersproject/constants": "^5.6.0",

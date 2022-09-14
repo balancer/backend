@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import { env } from '../../app/env';
 
 export type DeploymentEnv = 'canary' | 'main';
@@ -67,7 +68,13 @@ export interface NetworkConfig {
     };
     avgBlockSpeed: number;
     sor: {
-        [key in DeploymentEnv]: { url: string };
+        [key in DeploymentEnv]: {
+            url: string;
+            maxPools: number;
+            forceRefresh: boolean;
+            gasPrice: BigNumber;
+            swapGas: BigNumber;
+        };
     };
 }
 
@@ -137,9 +144,17 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         sor: {
             main: {
                 url: 'https://seb3bxrechp46fx7h3d2ksmjce0minwk.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
             },
             canary: {
                 url: 'https://22nltjhtfsyhecuudusuv2m5i40zeafa.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
             },
         },
         yearn: {
@@ -210,9 +225,17 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         sor: {
             main: {
                 url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
             },
             canary: {
                 url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
             },
         },
         yearn: {
