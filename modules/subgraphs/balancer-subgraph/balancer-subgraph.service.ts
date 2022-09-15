@@ -32,6 +32,8 @@ import {
     BalancerTokenPriceFragment,
     BalancerTokenPricesQuery,
     BalancerTokenPricesQueryVariables,
+    BalancerTokensQuery,
+    BalancerTokensQueryVariables,
     BalancerTradePairSnapshotsQuery,
     BalancerTradePairSnapshotsQueryVariables,
     BalancerUserFragment,
@@ -86,6 +88,10 @@ export class BalancerSubgraphService {
 
     public async getTokenPrices(args: BalancerTokenPricesQueryVariables): Promise<BalancerTokenPricesQuery> {
         return this.sdk.BalancerTokenPrices(args);
+    }
+
+    public async getTokens(args: BalancerTokensQueryVariables): Promise<BalancerTokensQuery> {
+        return this.sdk.BalancerTokens(args);
     }
 
     public async getPoolSnapshots(args: BalancerPoolSnapshotsQueryVariables): Promise<BalancerPoolSnapshotsQuery> {
@@ -279,7 +285,9 @@ export class BalancerSubgraphService {
     }
 
     public async getPoolsWithActiveUpdates(timestamp: number): Promise<string[]> {
-        const { ampUpdates, gradualWeightUpdates } = await this.sdk.BalancerGetPoolsWithActiveUpdates({ timestamp });
+        const { ampUpdates, gradualWeightUpdates } = await this.sdk.BalancerGetPoolsWithActiveUpdates({
+            timestamp: `${timestamp}`,
+        });
 
         return [...ampUpdates, ...gradualWeightUpdates].map((item) => item.poolId.id);
     }

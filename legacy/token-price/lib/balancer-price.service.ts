@@ -11,24 +11,22 @@ export class BalancerPriceService {
     public async getTokenPrices(addresses: string[], coingeckoPrices: TokenPrices): Promise<TokenPrices> {
         const balancerTokenPrices: TokenPrices = {};
 
-        const { tokenPrices } = await balancerSubgraphService.getTokenPrices({
+        const { tokens } = await balancerSubgraphService.getTokens({
             first: 1000, //TODO: this could stop working at some point
-            orderBy: TokenPrice_OrderBy.Timestamp,
-            orderDirection: OrderDirection.Desc,
-            where: { asset_in: addresses },
+            where: { address_in: addresses },
         });
 
         for (const address of addresses) {
-            const tokenPrice = tokenPrices.find((tokenPrice) => tokenPrice.asset === address);
+            const token = tokens.find((token) => token.address === address);
 
-            if (tokenPrice) {
-                if (coingeckoPrices[tokenPrice.pricingAsset]) {
+            if (token && token.latestPrice && token.latestUSDPrice) {
+                if (coingeckoPrices[token.latestPrice.pricingAsset]) {
                     balancerTokenPrices[address] = {
-                        usd: (coingeckoPrices[tokenPrice.pricingAsset]?.usd || 0) * parseFloat(tokenPrice.price),
+                        usd: coingeckoPrices[token.latestPrice.pricingAsset].usd * parseFloat(token.latestPrice.price),
                     };
                 } else {
                     balancerTokenPrices[address] = {
-                        usd: parseFloat(tokenPrice.priceUSD),
+                        usd: parseFloat(token.latestUSDPrice),
                     };
                 }
             }

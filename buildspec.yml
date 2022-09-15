@@ -1,7 +1,7 @@
 version: 0.2
 env:
     variables:
-        BALANCER_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx'
+        BALANCER_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism'
         MASTERCHEF_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2'
         BLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks'
         BEETS_BAR_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'

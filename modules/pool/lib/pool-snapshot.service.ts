@@ -82,8 +82,8 @@ export class PoolSnapshotService {
             const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
 
             const poolOperations = snapshots.map((snapshot, index) => {
-                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].totalSwapVolume;
-                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].totalSwapFee;
+                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
+                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].swapFees;
 
                 const data = this.getPrismaPoolSnapshotFromSubgraphData(
                     snapshot,
@@ -127,8 +127,8 @@ export class PoolSnapshotService {
 
             await prisma.prismaPoolSnapshot.createMany({
                 data: snapshots.map((snapshot, index) => {
-                    let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].totalSwapVolume;
-                    let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].totalSwapFee;
+                    let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].swapVolume;
+                    let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].swapFees;
 
                     return this.getPrismaPoolSnapshotFromSubgraphData(snapshot, prevTotalSwapVolume, prevTotalSwapFee);
                 }),
@@ -262,23 +262,23 @@ export class PoolSnapshotService {
         prevTotalSwapVolume: string,
         prevTotalSwapFee: string,
     ): PrismaPoolSnapshot {
-        const totalLiquidity = parseFloat(snapshot.totalLiquidity);
+        const totalLiquidity = parseFloat(snapshot.liquidity);
         const totalShares = parseFloat(snapshot.totalShares);
 
         return {
             id: snapshot.id,
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
-            totalLiquidity: parseFloat(snapshot.totalLiquidity),
+            totalLiquidity: parseFloat(snapshot.liquidity),
             totalShares: snapshot.totalShares,
             totalSharesNum: parseFloat(snapshot.totalShares),
-            totalSwapVolume: parseFloat(snapshot.totalSwapVolume),
-            totalSwapFee: parseFloat(snapshot.totalSwapFee),
+            totalSwapVolume: parseFloat(snapshot.swapVolume),
+            totalSwapFee: parseFloat(snapshot.swapFees),
             swapsCount: parseInt(snapshot.swapsCount),
             holdersCount: parseInt(snapshot.holdersCount),
             amounts: snapshot.amounts,
-            volume24h: Math.max(parseFloat(snapshot.totalSwapVolume) - parseFloat(prevTotalSwapVolume), 0),
-            fees24h: Math.max(parseFloat(snapshot.totalSwapFee) - parseFloat(prevTotalSwapFee), 0),
+            volume24h: Math.max(parseFloat(snapshot.swapVolume) - parseFloat(prevTotalSwapVolume), 0),
+            fees24h: Math.max(parseFloat(snapshot.swapFees) - parseFloat(prevTotalSwapFee), 0),
             sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
         };
     }
