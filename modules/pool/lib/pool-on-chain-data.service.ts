@@ -106,7 +106,7 @@ export class PoolOnChainDataService {
                     ...StablePhantomPoolAbi,
                     ...MetaStablePool,
                     ...ComposableStablePoolAbi,
-                    ...WeightedPoolV2Abi,
+                    //...WeightedPoolV2Abi,
                 ].map((row) => [row.name, row]),
             ),
         );
