@@ -14,7 +14,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isPoolWithPreMintedBpt, isWeightedPoolV2, isStablePool } from './pool-utils';
+import { isComposableStablePool, isWeightedPoolV2, isStablePool } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { WeiPerEther } from '@ethersproject/constants';
 
