@@ -38,20 +38,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
                     (tokenPrice) => tokenPrice.tokenAddress == mainToken.address,
                 );
 
-                console.log(token.symbol, {
-                    pool: pool.name,
-                    mainToken,
-                    wrappedToken,
-                    mainTokenPrice,
-                });
-
                 if (mainTokenPrice && wrappedToken.dynamicData) {
-                    console.log(
-                        'price',
-                        mainTokenPrice.price,
-                        wrappedToken.dynamicData.priceRate,
-                        parseFloat(wrappedToken.dynamicData.priceRate),
-                    );
                     const price = mainTokenPrice.price * parseFloat(wrappedToken.dynamicData.priceRate);
 
                     operations.push(
