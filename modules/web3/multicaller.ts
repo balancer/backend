@@ -63,22 +63,6 @@ export class Multicaller {
             this.provider,
         );
 
-        for (const call of this.calls) {
-            try {
-                await multi.aggregate(
-                    [call].map(([address, functionName, params]) => [
-                        address,
-                        this.interface.encodeFunctionData(functionName, params),
-                    ]),
-                    this.options,
-                );
-            } catch (e) {
-                console.log('multicall call failed');
-                console.log(call);
-                console.log(e);
-            }
-        }
-
         const [, res] = await multi.aggregate(
             this.calls.map(([address, functionName, params]) => [
                 address,

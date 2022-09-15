@@ -1,5 +1,6 @@
 import { PrismaPoolType } from '@prisma/client';
 import { networkConfig } from '../../config/network-config';
+import { isSameAddress } from '@balancer-labs/sdk';
 
 type PoolWithTypeAndFactory = {
     type: PrismaPoolType;
@@ -11,9 +12,12 @@ export function isStablePool(poolType: PrismaPoolType) {
 }
 
 export function isWeightedPoolV2(pool: PoolWithTypeAndFactory): boolean {
-    return pool.type === 'WEIGHTED' && pool.factory === networkConfig.balancer.weightedPoolV2Factory;
+    return pool.type === 'WEIGHTED' && isSameAddress(pool.factory || '', networkConfig.balancer.weightedPoolV2Factory);
 }
 
 export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
-    return pool.type === 'PHANTOM_STABLE' && pool.factory === networkConfig.balancer.coposableStablePoolFactory;
+    return (
+        pool.type === 'PHANTOM_STABLE' &&
+        isSameAddress(pool.factory || '', networkConfig.balancer.coposableStablePoolFactory)
+    );
 }
