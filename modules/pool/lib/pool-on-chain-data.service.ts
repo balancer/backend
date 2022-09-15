@@ -7,6 +7,8 @@ import MetaStablePool from '../abi/MetaStablePool.json';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
+import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
+import WeightedPoolV2Abi from '../abi/WeightedPoolV2.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber } from 'ethers';
@@ -103,6 +105,8 @@ export class PoolOnChainDataService {
                     ...LiquidityBootstrappingPoolAbi,
                     ...StablePhantomPoolAbi,
                     ...MetaStablePool,
+                    ...ComposableStablePoolAbi,
+                    ...WeightedPoolV2Abi,
                 ].map((row) => [row.name, row]),
             ),
         );
