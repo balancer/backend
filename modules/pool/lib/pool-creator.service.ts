@@ -291,6 +291,8 @@ export class PoolCreatorService {
                 return 'META_STABLE';
             case 'StablePhantom':
                 return 'PHANTOM_STABLE';
+            case 'ComposableStable':
+                return 'PHANTOM_STABLE';
             case 'Linear':
                 return 'LINEAR';
             case 'Element':

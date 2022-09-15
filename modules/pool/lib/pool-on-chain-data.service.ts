@@ -14,7 +14,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { poolIsStablePool } from './pool-utils';
+import { isComposableStablePool, isPoolWithPreMintedBpt, isWeightedPoolV2, isStablePool } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { WeiPerEther } from '@ethersproject/constants';
 
@@ -116,13 +116,12 @@ export class PoolOnChainDataService {
             }
 
             multiPool.call(`${pool.id}.poolTokens`, this.vaultAddress, 'getPoolTokens', [pool.id]);
-            multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
 
             // TO DO - Make this part of class to make more flexible?
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.weights`, pool.address, 'getNormalizedWeights');
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
-            } else if (poolIsStablePool(pool.type)) {
+            } else if (isStablePool(pool.type)) {
                 // MetaStable & StablePhantom is the same as Stable for multicall purposes
                 multiPool.call(`${pool.id}.amp`, pool.address, 'getAmplificationParameter');
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
@@ -148,18 +147,24 @@ export class PoolOnChainDataService {
                 });
             }
 
-            if (pool.type === 'PHANTOM_STABLE') {
-                // Overwrite totalSupply with virtualSupply for StablePhantom pools
+            if (isComposableStablePool(pool) || isWeightedPoolV2(pool)) {
+                // the new ComposableStablePool and WeightedPool mint bpts for protocol fees which are included in the getActualSupply call
+                multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getActualSupply');
+            } else if (pool.type === 'LINEAR' || pool.type === 'PHANTOM_STABLE') {
+                // the old phantom stable and linear pool does not have this and expose the actual supply as virtualSupply
                 multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
+            } else {
+                //default to totalSupply for any other pool type
+                multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+            }
+
+            if (pool.type === 'PHANTOM_STABLE') {
+                //we retrieve token rates for phantom stable and composable stable pools
                 const tokenAddresses = pool.tokens.map((token) => token.address);
 
                 tokenAddresses.forEach((token, i) => {
                     multiPool.call(`${pool.id}.tokenRates[${i}]`, pool.address, 'getTokenRate', [token]);
                 });
-            }
-
-            if (pool.type === 'LINEAR') {
-                multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
             }
         });
 
@@ -180,7 +185,7 @@ export class PoolOnChainDataService {
             const { poolTokens } = onchainData;
 
             try {
-                if (poolIsStablePool(pool.type)) {
+                if (isStablePool(pool.type)) {
                     if (!onchainData.amp) {
                         console.log('onchain data', onchainData);
                         console.error(`Stable Pool Missing Amp: ${poolId}`);
