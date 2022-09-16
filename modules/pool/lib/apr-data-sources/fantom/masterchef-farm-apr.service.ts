@@ -40,7 +40,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const farmTvl = totalShares > 0 ? (farmBptBalance / totalShares) * totalLiquidity : 0;
 
-            const items = this.calculateFarmApr(pool.id, farm, farmTvl, blocksPerYear, tokenPrices);
+            const items = await this.calculateFarmApr(pool.id, farm, farmTvl, blocksPerYear, tokenPrices);
 
             items.forEach((item) => {
                 operations.push(
@@ -68,13 +68,13 @@ export class MasterchefFarmAprService implements PoolAprService {
         await prismaBulkExecuteOperations(operations);
     }
 
-    private calculateFarmApr(
+    private async calculateFarmApr(
         poolId: string,
         farm: FarmFragment,
         farmTvl: number,
         blocksPerYear: number,
         tokenPrices: PrismaTokenCurrentPrice[],
-    ): PrismaPoolAprItem[] {
+    ): Promise<PrismaPoolAprItem[]> {
         if (farmTvl <= 0) {
             return [];
         }
@@ -99,12 +99,16 @@ export class MasterchefFarmAprService implements PoolAprService {
             });
         }
 
-        (farm.rewarder?.rewardTokens || [])
-            .filter((rewardToken) => rewardToken.token !== networkConfig.beets.address)
-            .forEach((rewardToken) => {
+        if (farm.rewarder) {
+            for (const rewardToken of farm.rewarder?.rewardTokens) {
+                const farmRewarder = await prisma.prismaPoolStakingMasterChefFarmRewarder.findUniqueOrThrow({
+                    where: {
+                        id: `${farm.id.toLowerCase()}-${farm.rewarder?.id.toLowerCase()}-${rewardToken.token.toLowerCase()}`,
+                    },
+                });
                 const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
                 const rewardTokenPerYear =
-                    parseFloat(formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals)) * secondsPerYear;
+                    parseFloat(formatFixed(farmRewarder.rewardPerSecond, rewardToken.decimals)) * secondsPerYear;
                 const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;
 
@@ -118,7 +122,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                     type: 'THIRD_PARTY_REWARD',
                     group: null,
                 });
-            });
+            }
+        }
 
         return items;
     }
