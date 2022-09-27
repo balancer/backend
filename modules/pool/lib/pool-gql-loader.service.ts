@@ -32,6 +32,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
 import { ContentService } from '../../content/content.service';
+import { isWeightedPoolV2 } from './pool-utils';
 
 export class PoolGqlLoaderService {
     constructor(private readonly configService: ContentService) {}
@@ -284,6 +285,8 @@ export class PoolGqlLoaderService {
     }
 
     private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
+        const bpt = pool.tokens.find((token) => token.address === pool.address);
+
         const mappedData = {
             ...pool,
             decimals: 18,
@@ -318,6 +321,7 @@ export class PoolGqlLoaderService {
                     __typename: 'GqlPoolPhantomStable',
                     ...mappedData,
                     amp: pool.stableDynamicData?.amp || '0',
+                    bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'LINEAR':
                 return {
@@ -328,6 +332,7 @@ export class PoolGqlLoaderService {
                     wrappedIndex: pool.linearData?.wrappedIndex || 0,
                     lowerTarget: pool.linearDynamicData?.lowerTarget || '0',
                     upperTarget: pool.linearDynamicData?.upperTarget || '0',
+                    bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'ELEMENT':
                 return {
@@ -455,6 +460,8 @@ export class PoolGqlLoaderService {
                             case 'YEARN':
                                 title = 'Yearn boosted APR';
                                 break;
+                            case 'REAPER':
+                                title = 'Reaper boosted APR';
                         }
 
                         return {
@@ -492,7 +499,7 @@ export class PoolGqlLoaderService {
         let options: GqlPoolWithdrawOption[] = [];
 
         for (const poolToken of poolTokens) {
-            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, false)];
+            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, false, true)];
         }
 
         return {
@@ -507,6 +514,7 @@ export class PoolGqlLoaderService {
         pool: PrismaPoolWithExpandedNesting,
         poolToken: PrismaPoolTokenWithExpandedNesting,
         supportsNativeAsset: boolean,
+        isWithdraw?: boolean,
     ): { poolTokenAddress: string; poolTokenIndex: number; tokenOptions: GqlPoolToken[] }[] {
         const nestedPool = poolToken.nestedPool;
         const options: GqlPoolInvestOption[] = [];
@@ -539,8 +547,10 @@ export class PoolGqlLoaderService {
         } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
 
-            if (pool.type === 'PHANTOM_STABLE') {
+            if (pool.type === 'PHANTOM_STABLE' || (isWithdraw && isWeightedPoolV2(pool))) {
                 //when nesting a phantom stable inside a phantom stable, all of the underlying tokens can be used when investing
+                //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
+                // ie: USDC/DAI/USDT for nested bbaUSD
                 for (const nestedToken of nestedTokens) {
                     options.push({
                         poolTokenIndex: poolToken.index,
@@ -643,6 +653,7 @@ export class PoolGqlLoaderService {
             balance: poolToken.dynamicData?.balance || '0',
             index: poolToken.index,
             weight: poolToken.dynamicData?.weight,
+            totalBalance: poolToken.dynamicData?.balance || '0',
         };
     }
 
@@ -660,17 +671,20 @@ export class PoolGqlLoaderService {
             ...pool.linearDynamicData!,
             tokens: pool.tokens
                 .filter((token) => token.address !== pool.address)
-                .map((token) =>
-                    this.mapPoolTokenToGql({
-                        ...token,
-                        dynamicData: token.dynamicData
-                            ? {
-                                  ...token.dynamicData,
-                                  balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
-                              }
-                            : null,
-                    }),
-                ),
+                .map((token) => {
+                    return {
+                        ...this.mapPoolTokenToGql({
+                            ...token,
+                            dynamicData: token.dynamicData
+                                ? {
+                                      ...token.dynamicData,
+                                      balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
+                                  }
+                                : null,
+                        }),
+                        totalBalance: token.dynamicData?.balance || '0',
+                    };
+                }),
             totalLiquidity: `${totalLiquidity}`,
             totalShares: pool.dynamicData?.totalShares || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
@@ -681,6 +695,8 @@ export class PoolGqlLoaderService {
         pool: PrismaNestedPoolWithSingleLayerNesting,
         percentOfSupplyNested: number,
     ): GqlPoolPhantomStableNested {
+        const bpt = pool.tokens.find((token) => token.address === pool.address);
+
         return {
             __typename: 'GqlPoolPhantomStableNested',
             ...pool,
@@ -711,6 +727,7 @@ export class PoolGqlLoaderService {
                                 nestedPool,
                                 percentOfSupplyNested * percentOfLinearSupplyNested,
                             ),
+                            totalBalance: token.dynamicData?.balance || '0',
                         };
                     }
 
@@ -720,6 +737,7 @@ export class PoolGqlLoaderService {
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
             amp: pool.stableDynamicData?.amp || '0',
+            bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
         };
     }
 

@@ -51,6 +51,8 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
 import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 import { id } from 'ethers/lib/utils';
+import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
+import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -288,10 +290,23 @@ export const poolService = new PoolService(
                   new YearnVaultAprService(tokenService),
                   new StaderStakedFtmAprService(tokenService),
               ]
-            : [new RocketPoolStakedEthAprService(tokenService)]),
+            : [
+                  new RocketPoolStakedEthAprService(tokenService, networkConfig.balancer.yieldProtocolFeePercentage),
+                  new WstethAprService(
+                      tokenService,
+                      networkConfig.lido!.wstEthAprEndpoint,
+                      networkConfig.lido!.wstEthContract,
+                      networkConfig.balancer.yieldProtocolFeePercentage,
+                  ),
+                  new ReaperCryptAprService(
+                      tokenService,
+                      networkConfig.reaper!.cryptsEndpoint,
+                      networkConfig.reaper?.cryptsOverrides,
+                  ),
+              ]),
         new PhantomStableAprService(),
-        new BoostedPoolAprService(),
-        new SwapFeeAprService(),
+        new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
+        new SwapFeeAprService(networkConfig.balancer.swapProtocolFeePercentage),
         ...(isFantomNetwork()
             ? [new MasterchefFarmAprService()]
             : [

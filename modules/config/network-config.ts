@@ -56,6 +56,8 @@ export interface NetworkConfig {
         vault: string;
         weightedPoolV2Factory: string;
         coposableStablePoolFactory: string;
+        yieldProtocolFeePercentage: number;
+        swapProtocolFeePercentage: number;
     };
     multicall: string;
     masterchef: {
@@ -67,6 +69,14 @@ export interface NetworkConfig {
     };
     yearn: {
         vaultsEndpoint: string;
+    };
+    lido?: {
+        wstEthContract: string;
+        wstEthAprEndpoint: string;
+    };
+    reaper?: {
+        cryptsEndpoint: string;
+        cryptsOverrides: Record<string, string>;
     };
     avgBlockSpeed: number;
     sor: {
@@ -134,6 +144,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
             coposableStablePoolFactory: '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
             weightedPoolV2Factory: '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
+            swapProtocolFeePercentage: 0.25,
+            yieldProtocolFeePercentage: 0.25,
         },
         multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
         masterchef: {
@@ -199,7 +211,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             nativeAssetId: 'ethereum',
             platformId: 'optimistic-ethereum',
         },
-        rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/t93buMUWGLi-yfOqFXesPBtfYUcAfhez',
+        rpcUrl: 'https://rpc.ankr.com/optimism',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
         sanity: {
             projectId: '1g2ag2hb',
@@ -221,6 +233,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
             coposableStablePoolFactory: '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
             weightedPoolV2Factory: '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
+            swapProtocolFeePercentage: 0.5,
+            yieldProtocolFeePercentage: 0.5,
         },
         multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
         masterchef: {
@@ -246,6 +260,19 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         yearn: {
             vaultsEndpoint: 'https://#/',
+        },
+        lido: {
+            wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
+            wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
+        },
+        reaper: {
+            cryptsEndpoint: 'https://yzo0r3ahok.execute-api.us-east-1.amazonaws.com/dev/api/optimism/crypts',
+            cryptsOverrides: {
+                '0xdf2d2c477078d2cd563648abbb913da3db247c00': '0xaa3b2f7c6ffad072ab65d144b349ed44558f1d80', // WETH
+                '0x7ecc9d0ee071c7b86d0ae2101231a3615564009e': '0x4f086a048c33f3bf9011dd2265861ce812624f2c', //USDC
+                '0x75441c125890612f95b5fbf3f73db0c25f5573cd': '0xefcbf2bd622ce716d3344c09e77e7a74071e6ce2', // DAI
+                // '': '0x6fed42d8bf5010e5710927fe0de15f91f916204d', // WBTC
+            },
         },
         copper: {
             proxyAddress: '0x0000000000000000000000000000000000000000',

@@ -1,8 +1,11 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
+import { isComposableStablePool, isWeightedPoolV2 } from '../pool-utils';
 
 export class BoostedPoolAprService implements PoolAprService {
+    constructor(private readonly yieldProtocolFeePercentage: number) {}
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const boostedPools = pools.filter(
             (pool) =>
@@ -36,22 +39,27 @@ export class BoostedPoolAprService implements PoolAprService {
                     continue;
                 }
 
+                const collectsYieldFee = isWeightedPoolV2(pool) || isComposableStablePool(pool);
                 for (const aprItem of tokenAprItems) {
                     const itemId = `${pool.id}-${aprItem.id}`;
                     const { totalShares } = token.nestedPool.dynamicData;
                     const tokenBalance = parseFloat(token.dynamicData.balance);
                     const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
+                    let grossApr = apr;
+                    if (collectsYieldFee) {
+                        grossApr = apr * this.yieldProtocolFeePercentage;
+                    }
 
                     await prisma.prismaPoolAprItem.upsert({
                         where: { id: itemId },
                         create: {
                             id: itemId,
                             poolId: pool.id,
-                            apr: apr || 0,
+                            apr: grossApr,
                             title: aprItem.title,
                             group: aprItem.group,
                         },
-                        update: { apr: apr || 0 },
+                        update: { apr: grossApr },
                     });
                 }
             }
