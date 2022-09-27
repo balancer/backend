@@ -45,9 +45,9 @@ export class BoostedPoolAprService implements PoolAprService {
                     const { totalShares } = token.nestedPool.dynamicData;
                     const tokenBalance = parseFloat(token.dynamicData.balance);
                     const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
-                    let grossApr = apr;
+                    let userApr = apr;
                     if (collectsYieldFee) {
-                        grossApr = apr * (1 - this.yieldProtocolFeePercentage);
+                        userApr = apr * (1 - this.yieldProtocolFeePercentage);
                     }
 
                     await prisma.prismaPoolAprItem.upsert({
@@ -55,11 +55,11 @@ export class BoostedPoolAprService implements PoolAprService {
                         create: {
                             id: itemId,
                             poolId: pool.id,
-                            apr: grossApr,
+                            apr: userApr,
                             title: aprItem.title,
                             group: aprItem.group,
                         },
-                        update: { apr: grossApr },
+                        update: { apr: userApr },
                     });
                 }
             }

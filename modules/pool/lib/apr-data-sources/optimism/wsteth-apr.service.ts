@@ -30,7 +30,7 @@ export class WstethAprService implements PoolAprService {
                 const wstethPercentage =
                     (parseFloat(wstethTokenBalance) * wstethPrice) / pool.dynamicData.totalLiquidity;
                 const wstethApr = pool.dynamicData.totalLiquidity > 0 ? wstethBaseApr * wstethPercentage : 0;
-                const grossApr = wstethBaseApr * (1 - this.yieldProtocolFeePercentage);
+                const userApr = wstethBaseApr * (1 - this.yieldProtocolFeePercentage);
                 const collectsYieldFee =
                     isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
 
@@ -40,10 +40,10 @@ export class WstethAprService implements PoolAprService {
                         id: itemId,
                         poolId: pool.id,
                         title: `LIDO APR`,
-                        apr: collectsYieldFee ? grossApr : wstethApr,
+                        apr: collectsYieldFee ? userApr : wstethApr,
                         type: 'IB_YIELD',
                     },
-                    update: { apr: collectsYieldFee ? grossApr : wstethApr },
+                    update: { apr: collectsYieldFee ? userApr : wstethApr },
                 });
             }
         }
