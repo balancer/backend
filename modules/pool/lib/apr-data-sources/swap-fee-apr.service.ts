@@ -16,7 +16,7 @@ export class SwapFeeAprService implements PoolAprService {
                         ? (pool.dynamicData.fees24h * 365) / pool.dynamicData.totalLiquidity
                         : 0;
 
-                const grossApr = apr * this.swapProtocolFeePercentage;
+                const grossApr = apr * (1 - this.swapProtocolFeePercentage);
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({

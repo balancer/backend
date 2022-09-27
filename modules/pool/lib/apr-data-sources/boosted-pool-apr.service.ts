@@ -47,7 +47,7 @@ export class BoostedPoolAprService implements PoolAprService {
                     const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
                     let grossApr = apr;
                     if (collectsYieldFee) {
-                        grossApr = apr * this.yieldProtocolFeePercentage;
+                        grossApr = apr * (1 - this.yieldProtocolFeePercentage);
                     }
 
                     await prisma.prismaPoolAprItem.upsert({
