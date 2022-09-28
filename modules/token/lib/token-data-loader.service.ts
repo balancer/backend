@@ -54,7 +54,6 @@ export class TokenDataLoaderService {
             let tokenData = {};
             if (sanityToken.coingeckoTokenId) {
                 tokenData = {
-                    description: sanityToken.description || null,
                     websiteUrl: sanityToken.websiteUrl || null,
                     discordUrl: sanityToken.discordUrl || null,
                     telegramUrl: sanityToken.telegramUrl || null,
@@ -66,6 +65,7 @@ export class TokenDataLoaderService {
                 where: { address: tokenAddress },
                 create: {
                     name: sanityToken.name,
+                    description: sanityToken.description || null,
                     address: tokenAddress,
                     symbol: sanityToken.symbol,
                     decimals: sanityToken.decimals,
@@ -78,6 +78,7 @@ export class TokenDataLoaderService {
                 },
                 update: {
                     name: sanityToken.name,
+                    description: sanityToken.description || null,
                     symbol: sanityToken.symbol,
                     //use set to ensure we overwrite the underlying value if it is removed in sanity
                     logoURI: { set: sanityToken.logoURI || null },
