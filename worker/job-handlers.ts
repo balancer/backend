@@ -38,6 +38,8 @@ async function runIfNotAlreadyRunning(
         if (Math.random() > samplingRate) {
             transaction.sampled = false;
         }
+        console.log(`Finished job ${id}`);
+        res.sendStatus(200);
     } catch (error) {
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
         if (transaction) {
@@ -46,6 +48,7 @@ async function runIfNotAlreadyRunning(
         Sentry.configureScope((scope) => {
             scope.setTag('error', id);
         });
+        console.log(`Error job ${id}`);
         next(error);
     } finally {
         runningJobs.delete(id);
@@ -54,8 +57,6 @@ async function runIfNotAlreadyRunning(
         if (transaction) {
             transaction.finish();
         }
-        console.log(`Finished job ${id}`);
-        res.sendStatus(200);
     }
 }
 
