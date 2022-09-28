@@ -12,7 +12,8 @@
         "watch": "concurrently \"nodemon app\" \"yarn generate --watch\"",
         "build": "tsc",
         "generate": "graphql-codegen --config codegen.yml -r dotenv/config",
-        "prisma-merge": "ts-node prisma/prisma-merge.ts"
+        "prisma-merge": "ts-node prisma/prisma-merge.ts",
+        "test": "jest"
     },
     "dependencies": {
         "@aws-sdk/client-cloudwatch": "^3.159.0",
@@ -65,7 +66,7 @@
         "@graphql-codegen/typescript-resolvers": "2.4.1",
         "@graphql-tools/schema": "^8.3.1",
         "@types/graphql-type-json": "^0.3.2",
-        "@types/jest": "^27.0.3",
+        "@types/jest": "^28.1.6",
         "@types/lodash": "^4.14.177",
         "@types/memory-cache": "^0.2.1",
         "@types/node": "^16.11.7",
@@ -76,12 +77,13 @@
         "@types/uuid": "^8.0.0",
         "concurrently": "^6.4.0",
         "execa": "^4.1.0",
-        "jest": "^27.4.5",
+        "jest": "^28.1.3",
         "jest-watch-typeahead": "^1.0.0",
+        "msw": "^0.47.3",
         "nodemon": "^2.0.15",
         "prettier": "^2.0.2",
         "testcontainers": "^8.0.0",
-        "ts-jest": "^27.1.1",
+        "ts-jest": "^28.0.7",
         "ts-node": "^10.4.0",
         "typescript": "^4.5.3"
     }
