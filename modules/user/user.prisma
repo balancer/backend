@@ -1,43 +1,46 @@
 model PrismaUser {
-    address             String              @id
+    address                 String              @id
 
-    walletBalances  PrismaUserWalletBalance[]
-    stakedBalances  PrismaUserStakedBalance[]
+    userSnapshots           PrismaUserPoolBalanceSnapshot[]
+
+    walletBalances          PrismaUserWalletBalance[]
+    stakedBalances          PrismaUserStakedBalance[]
 }
 
 model PrismaUserWalletBalance {
-    id                  String              @id
-    balance             String
-    balanceNum          Float
-    updatedAt           DateTime            @updatedAt
+    id                      String              @id
+    balance                 String
+    balanceNum              Float
+    updatedAt               DateTime            @updatedAt
 
-    userAddress         String
-    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+    userAddress             String
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
-    poolId              String?
-    pool                PrismaPool?          @relation(fields:[poolId], references: [id])
+    poolId                  String?
+    pool                    PrismaPool?         @relation(fields:[poolId], references: [id])
 
-    tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    tokenAddress            String
+    token                   PrismaToken         @relation(fields:[tokenAddress], references: [address])
 }
 
+
 model PrismaUserStakedBalance {
-    id                  String              @id
-    balance             String
-    balanceNum          Float
-    updatedAt           DateTime            @updatedAt
+    id                      String              @id
+    balance                 String
+    balanceNum              Float
+    updatedAt               DateTime            @updatedAt
 
-    userAddress         String
-    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+    userAddress             String
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
-    poolId              String?
-    pool                PrismaPool?          @relation(fields:[poolId], references: [id])
+    poolId                  String?
+    pool                    PrismaPool?          @relation(fields:[poolId], references: [id])
 
-    tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    tokenAddress            String
+    token                   PrismaToken         @relation(fields:[tokenAddress], references: [address])
 
-    stakingId           String
-    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+    stakingId               String
+    staking                 PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
 }
 
 model PrismaUserBalanceSyncStatus {
@@ -48,4 +51,24 @@ model PrismaUserBalanceSyncStatus {
 enum PrismaUserBalanceType {
     WALLET
     STAKED
+}
+
+model PrismaUserPoolBalanceSnapshot {
+    id                      String              @id
+
+    userAddress             String
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    timestamp               Int
+
+    poolToken               String
+    poolId                  String?
+    pool                    PrismaPool?          @relation(fields:[poolId], references:[id])
+
+    walletBalance           String
+    gaugeBalance            String
+    farmBalance             String
+    totalBalance            String
+    percentShare            String
+    totalValueUSD           String
+    fees24h                 String
 }

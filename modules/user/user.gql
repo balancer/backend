@@ -4,7 +4,8 @@ extend type Query {
     userGetStaking: [GqlPoolStaking!]!
     userGetPoolJoinExits(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolJoinExit!]!
     userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolSwap!]!
-    userGetPoolSnapshots(poolId: String!, numDays: Int!): [GqlUserPoolSnapshot!]!
+    userGetPortfolioSnapshots(days: Int!): [GqlUserPortfolioSnapshot!]!
+    userGetPoolSnapshots(poolId: String!, range: GqlUserSnapshotDataRange!): [GqlUserPoolSnapshot!]!
 }
 
 extend type Mutation {
@@ -35,14 +36,41 @@ type GqlUserFbeetsBalance {
     stakedBalance: AmountHumanReadable!
 }
 
-type GqlUserPoolSnapshot {
-    id: ID!
+type GqlUserPortfolioSnapshot {
     timestamp: Int!
     walletBalance: AmountHumanReadable!
     gaugeBalance: AmountHumanReadable!
     farmBalance: AmountHumanReadable!
     totalBalance: AmountHumanReadable!
-    percentShare: Float!
-    valueUSD: AmountHumanReadable!
+    totalValueUSD: AmountHumanReadable!
     fees24h: AmountHumanReadable!
+    totalFees: AmountHumanReadable!
+    pools: [GqlUserPoolSnapshot!]!
+}
+
+type GqlUserPoolSnapshot {
+    id: ID!
+    timestamp: Int!
+    # poolId: String!
+    # poolAddress: String!
+    # poolName: String!
+    percentShare: Float!
+    walletBalance: AmountHumanReadable!
+    gaugeBalance: AmountHumanReadable!
+    farmBalance: AmountHumanReadable!
+    totalBalance: AmountHumanReadable!
+    totalValueUSD: AmountHumanReadable!
+    fees24h: AmountHumanReadable!
+    # totalFees: AmountHumanReadable!
+    # percentageOfPortfolio: Float!
+    # priceChange24h: AmountHumanReadable!
+    # priceChangePercent24h: Float!
+}
+
+enum GqlUserSnapshotDataRange {
+    THIRTY_DAYS
+    NINETY_DAYS
+    ONE_HUNDRED_EIGHTY_DAYS
+    ONE_YEAR
+    ALL_TIME
 }

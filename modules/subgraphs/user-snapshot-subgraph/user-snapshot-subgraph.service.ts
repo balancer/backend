@@ -48,6 +48,58 @@ export class UserSnapshotSubgraphService {
         });
     }
 
+    public async getUserBalanceSnapshotsWithPaging(
+        fromTimestamp: number,
+        toTimestamp: number,
+        userAddress: string,
+    ): Promise<UserBalanceSnapshotsQuery> {
+        let allSnapshots: UserBalanceSnapshotsQuery = {
+            snapshots: [],
+        };
+        do {
+            const result = await this.sdk.UserBalanceSnapshots({
+                where: { timestamp_gte: fromTimestamp, timestamp_lte: toTimestamp, user: userAddress.toLowerCase() },
+                first: 1000,
+                orderBy: UserBalanceSnapshot_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+            });
+            if (result.snapshots.length === 0) {
+                break;
+            }
+            allSnapshots.snapshots = [...allSnapshots.snapshots, ...result.snapshots];
+            fromTimestamp = result.snapshots[result.snapshots.length - 1].timestamp + 1;
+        } while (true);
+
+        return allSnapshots;
+    }
+
+    public async getUserBalanceSnapshotsWithPagingForDays(numDays: number): Promise<UserBalanceSnapshotsQuery> {
+        let timestamp = 0;
+        if (numDays > 0) {
+            timestamp = moment().utc().startOf('day').subtract(numDays, 'days').unix();
+        }
+
+        let allSnapshots: UserBalanceSnapshotsQuery = {
+            snapshots: [],
+        };
+        let lastId = '';
+        do {
+            const result = await this.sdk.UserBalanceSnapshots({
+                where: { timestamp_gte: timestamp, id_gt: lastId },
+                first: 1000,
+                orderBy: UserBalanceSnapshot_OrderBy.Id,
+                orderDirection: OrderDirection.Asc,
+            });
+            if (result.snapshots.length == 0) {
+                break;
+            }
+            allSnapshots.snapshots = [...allSnapshots.snapshots, ...result.snapshots];
+            lastId = result.snapshots[result.snapshots.length - 1].id;
+        } while (true);
+
+        return allSnapshots;
+    }
+
     public get sdk() {
         return getSdk(this.client);
     }

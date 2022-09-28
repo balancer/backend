@@ -31,6 +31,9 @@ model PrismaPool {
 
     userWalletBalances  PrismaUserWalletBalance[]
     userStakedBalances  PrismaUserStakedBalance[]
+
+    userPoolBalanceSnapshots    PrismaUserPoolBalanceSnapshot[]
+
 }
 
 enum PrismaPoolType {
