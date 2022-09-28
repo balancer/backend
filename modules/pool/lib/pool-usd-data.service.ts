@@ -86,8 +86,14 @@ export class PoolUsdDataService {
         );
 
         let updates: any[] = [];
+        const allPools = await prisma.prismaPool.findMany({ select: { id: true } });
+        const allPoolIds = allPools.map((pool) => pool.id);
 
         for (const pool of subgraphPools) {
+            if (!allPoolIds.includes(pool.id)) {
+                console.log(`Update pool liquidity 24h ago: Missing pool with id ${pool.id}. skippipng`);
+                continue;
+            }
             const balanceUSDs = (pool.tokens || []).map((token) => ({
                 id: token.id,
                 balanceUSD:
@@ -167,7 +173,14 @@ export class PoolUsdDataService {
             _count: { userAddress: true },
         });
 
+        const allPools = await prisma.prismaPool.findMany({ select: { id: true } });
+        const allPoolIds = allPools.map((pool) => pool.id);
+
         for (const pool of subgraphPools) {
+            if (!allPoolIds.includes(pool.id)) {
+                console.log(`Update lifetime values for pool: Missing pool with id ${pool.id}. skippipng`);
+                continue;
+            }
             const staked = stakedUsers.find((stakedUser) => stakedUser.poolId === pool.id);
 
             updates.push(
