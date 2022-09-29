@@ -1,16 +1,14 @@
 import { UserSnapshotSubgraphService } from '../../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { prisma } from '../../../prisma/prisma-client';
-import { parseUnits } from 'ethers/lib/utils';
 import moment from 'moment-timezone';
 import { UserPoolSnapshot } from '../user-types';
 import { GqlUserSnapshotDataRange } from '../../../schema';
 import { PoolSnapshotService } from '../../pool/lib/pool-snapshot.service';
-import { formatFixed } from '@ethersproject/bignumber';
 import { networkConfig } from '../../config/network-config';
-import { Prisma, PrismaPoolSnapshot } from '@prisma/client';
+import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { BigNumber } from 'ethers';
 import { secondsPerDay } from '../../common/time';
+import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
@@ -35,14 +33,14 @@ export class UserSnapshotService {
 
         for (const user of users) {
             const userAddress = user.userAddress;
-            const subgraphSnapshotForUser =
+            const userSnapshotsFromSubgraph =
                 await this.userSnapshotSubgraphService.getUserBalanceSnapshotsForUserAndRange(
                     0,
                     moment().unix(),
                     userAddress,
                 );
             // no snapshots for the user in the requested timerange
-            if (!subgraphSnapshotForUser) {
+            if (!userSnapshotsFromSubgraph) {
                 continue;
             }
 
@@ -65,11 +63,11 @@ export class UserSnapshotService {
             for (const latestStoredUserPoolSnapshot of latestStoredPoolSnapshotsOfUser) {
                 let previousStoredUserPoolSnapshotHasBalance =
                     parseFloat(latestStoredUserPoolSnapshot.totalBalance) > 0;
-                for (const subgraphSnapshot of subgraphSnapshotForUser.snapshots) {
-                    if (!subgraphSnapshot || !latestStoredUserPoolSnapshot.poolId) {
+                for (const userSubgraphSnapshot of userSnapshotsFromSubgraph.snapshots) {
+                    if (!userSubgraphSnapshot || !latestStoredUserPoolSnapshot.poolId) {
                         continue;
                     }
-                    if (subgraphSnapshot.timestamp >= latestStoredUserPoolSnapshot.timestamp) {
+                    if (userSubgraphSnapshot.timestamp >= latestStoredUserPoolSnapshot.timestamp) {
                         // subgraph snapshot is newer or from today. If it is > 0 balance, we need to enrich and persist.
                         const pool = await prisma.prismaPool.findUniqueOrThrow({
                             where: {
@@ -80,75 +78,30 @@ export class UserSnapshotService {
                             },
                         });
 
-                        /*
-                        The snapshot consists of 6 arrays which follow the same structure. For each type (wallet, farm, gauge) it has a "index" array and a "balance" array:
-                        - walletTokens -> walletBalances
-                        - Gauges -> GaugeBalances
-                        - Farms -> FarmBalances
-
-                        The index array indicates the position of the walletToken, gauge or farm in the balance array. e.g.:
-                        - walletTokens: ["token1", "token2"]
-                        - walletBalances: ["200", "100"]
-                        This means the user has 200 of token1 and 100 of token2 in his wallet. 
-                        */
-                        // exctract data for the pool we need.
-                        const walletIndex = subgraphSnapshot.walletTokens.indexOf(pool.address);
-                        let walletBalance = walletIndex !== -1 ? subgraphSnapshot.walletBalances[walletIndex] : '0';
-                        const gaugeIndex = subgraphSnapshot.gauges.indexOf(pool.staking?.id ?? '');
-                        const gaugeBalance = gaugeIndex !== -1 ? subgraphSnapshot.gaugeBalances[gaugeIndex] : '0';
-                        const farmIndex = subgraphSnapshot.farms.indexOf(pool.staking?.id ?? '');
-                        let farmBalance = farmIndex !== -1 ? subgraphSnapshot.farmBalances[farmIndex] : '0';
-
-                        // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
-                        // we also need to multiply the staked amount by the fbeets->bpt ratio
-                        if (pool.id === networkConfig.fbeets.poolId) {
-                            const fBeetsWalletIdx = subgraphSnapshot.walletTokens.indexOf(networkConfig.fbeets.address);
-                            const fBeetsWalletBalance =
-                                fBeetsWalletIdx !== -1 ? subgraphSnapshot.walletBalances[fBeetsWalletIdx] : '0';
-                            walletBalance = (
-                                parseFloat(walletBalance) +
-                                parseFloat(fBeetsWalletBalance) * this.FBEETS_BPT_RATIO
-                            ).toString();
-
-                            farmBalance = (parseFloat(farmBalance) * this.FBEETS_BPT_RATIO).toString();
-                        }
-
-                        const totalBalance =
-                            parseFloat(walletBalance) + parseFloat(gaugeBalance) + parseFloat(farmBalance);
+                        // extract data from snapshot for the requested pool
+                        const { totalBalance, walletBalance, gaugeBalance, farmBalance } =
+                            this.extractBalancesFromSnapshot(userSubgraphSnapshot, pool);
 
                         if (totalBalance > 0) {
                             //enrich with poolsnapshot data and save
                             const poolSnapshot = await this.poolSnapshotService.getSnapshotForPool(
                                 latestStoredUserPoolSnapshot.poolId,
-                                subgraphSnapshot.timestamp,
+                                userSubgraphSnapshot.timestamp,
                             );
 
                             /*
                             Could be that the poolsnapshot is delayed (beethoven subgraph is much slower than bpt subgraph),
                             so we will persist 0 $ value if there is a totalBalance > 0 and try to get the when we serve the data
                             */
-                            const percentShare = poolSnapshot ? totalBalance / poolSnapshot?.totalSharesNum : 0;
-
-                            const userPoolBalanceSnapshotData = {
-                                id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${
-                                    subgraphSnapshot.timestamp
-                                }`,
-                                timestamp: subgraphSnapshot.timestamp,
-                                userAddress: subgraphSnapshot.user.id.toLowerCase(),
-                                poolId: pool.id,
-                                poolToken: pool.address,
+                            const userPoolBalanceSnapshotData = this.createUserPoolSnapshotData(
+                                poolSnapshot,
+                                pool,
+                                userSubgraphSnapshot,
+                                totalBalance,
                                 walletBalance,
                                 gaugeBalance,
                                 farmBalance,
-                                percentShare: `${percentShare}`,
-                                totalBalance: `${totalBalance}`,
-                                totalValueUSD: `${totalBalance * (poolSnapshot?.sharePrice || 0)}`,
-                                fees24h: `${
-                                    percentShare *
-                                    (poolSnapshot?.fees24h || 0) *
-                                    (1 - networkConfig.balancer.swapProtocolFeePercentage)
-                                }`,
-                            };
+                            );
 
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
@@ -161,11 +114,11 @@ export class UserSnapshotService {
                         } else if (previousStoredUserPoolSnapshotHasBalance) {
                             // if the snapshot has total balance of 0, we store it if the previously stored snapshot had a balance. This is to indicate that the user has left the pool.
                             const userPoolBalanceSnapshotData = {
-                                id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${
-                                    subgraphSnapshot.timestamp
+                                id: `${pool.id}-${userSubgraphSnapshot.user.id.toLowerCase()}-${
+                                    userSubgraphSnapshot.timestamp
                                 }`,
-                                timestamp: subgraphSnapshot.timestamp,
-                                userAddress: subgraphSnapshot.user.id.toLowerCase(),
+                                timestamp: userSubgraphSnapshot.timestamp,
+                                userAddress: userSubgraphSnapshot.user.id.toLowerCase(),
                                 poolId: pool.id,
                                 poolToken: pool.address,
                                 walletBalance,
@@ -263,34 +216,16 @@ export class UserSnapshotService {
             If there are consecutive 0 total balance snapshots, only the first one is persisted. This is to avoid unnecessary 0 value 
             snapshots in the database. These 0 balance gaps must be filled when serving the request.
             */
-            for (const userSnapshot of userSnapshotsFromSubgraph.snapshots) {
+            for (const userSubgraphSnapshot of userSnapshotsFromSubgraph.snapshots) {
                 const poolSnapshotForTimestamp = poolSnapshots.find(
-                    (poolSnapshot) => userSnapshot.timestamp === poolSnapshot.timestamp,
+                    (poolSnapshot) => userSubgraphSnapshot.timestamp === poolSnapshot.timestamp,
                 );
 
-                // exctract data for the pool we need
-                const walletIdx = userSnapshot.walletTokens.indexOf(pool.address);
-                let walletBalance = walletIdx !== -1 ? userSnapshot.walletBalances[walletIdx] : '0';
-                const gaugeIdx = userSnapshot.gauges.indexOf(pool.staking?.id || '');
-                const gaugeBalance = gaugeIdx !== -1 ? userSnapshot.gaugeBalances[gaugeIdx] : '0';
-                const farmIdx = userSnapshot.farms.indexOf(pool.staking?.id || '');
-                let farmBalance = farmIdx !== -1 ? userSnapshot.farmBalances[farmIdx] : '0';
-
-                // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
-                // we also need to multiply the staked amount by the fbeets->bpt ratio
-                if (poolId === networkConfig.fbeets.poolId) {
-                    const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(networkConfig.fbeets.address);
-                    const fBeetsWalletBalance =
-                        fBeetsWalletIdx !== -1 ? userSnapshot.walletBalances[fBeetsWalletIdx] : '0';
-                    walletBalance = (
-                        parseFloat(walletBalance) +
-                        parseFloat(fBeetsWalletBalance) * this.FBEETS_BPT_RATIO
-                    ).toString();
-
-                    farmBalance = (parseFloat(farmBalance) * this.FBEETS_BPT_RATIO).toString();
-                }
-
-                const totalBalance = parseFloat(walletBalance) + parseFloat(gaugeBalance) + parseFloat(farmBalance);
+                // extract data from snapshot for the requested pool
+                const { totalBalance, walletBalance, gaugeBalance, farmBalance } = this.extractBalancesFromSnapshot(
+                    userSubgraphSnapshot,
+                    pool,
+                );
 
                 /*
                 We get ALL snapshots from the subgraph for the user. Total balance will be 0 until he joined the pool we need.
@@ -310,32 +245,17 @@ export class UserSnapshotService {
                     continue;
                 }
 
-                /*
-                Could be that the poolsnapshot is delayed (beethoven subgraph is much slower than bpt subgraph),
-                so we will persist 0 $ value if there is a totalBalance > 0 and try to get the snapshot when we serve the data
-                */
-                const percentShare = poolSnapshotForTimestamp
-                    ? totalBalance / poolSnapshotForTimestamp?.totalSharesNum
-                    : 0;
-
-                prismaInput.push({
-                    id: `${pool.id}-${userSnapshot.user.id.toLowerCase()}-${userSnapshot.timestamp}`,
-                    timestamp: userSnapshot.timestamp,
-                    userAddress: userSnapshot.user.id.toLowerCase(),
-                    poolId: pool.id,
-                    poolToken: pool.address,
+                const userPoolBalanceSnapshotData = this.createUserPoolSnapshotData(
+                    poolSnapshotForTimestamp,
+                    pool,
+                    userSubgraphSnapshot,
+                    totalBalance,
                     walletBalance,
                     gaugeBalance,
                     farmBalance,
-                    percentShare: `${percentShare}`,
-                    totalBalance: `${totalBalance}`,
-                    totalValueUSD: `${totalBalance * (poolSnapshotForTimestamp?.sharePrice || 0)}`,
-                    fees24h: `${
-                        percentShare *
-                        (poolSnapshotForTimestamp?.fees24h || 0) *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
-                    }`,
-                });
+                );
+
+                prismaInput.push(userPoolBalanceSnapshotData);
             }
             await prisma.prismaUserPoolBalanceSnapshot.createMany({
                 data: prismaInput,
@@ -411,10 +331,7 @@ export class UserSnapshotService {
                 });
             }
 
-            if (
-                parseUnits(currentSnapshot.totalBalance, 18).gt(0) &&
-                parseUnits(currentSnapshot.totalValueUSD, 18).eq(0)
-            ) {
+            if (parseFloat(currentSnapshot.totalBalance) > 0 && parseFloat(currentSnapshot.totalValueUSD) === 0) {
                 // We didn't have a poolsnapshot at the time of persistance, let's see if we have one now and persist
                 const poolSnapshot = poolSnapshots.find(
                     (poolSnapshot) => poolSnapshot.timestamp === currentSnapshot.timestamp,
@@ -449,7 +366,7 @@ export class UserSnapshotService {
         }
 
         // finally, we have to check if there are missing snapshots from the last snpshot until today and fill in those gaps (if the latest balance is > 0)
-        if (parseUnits(userPoolSnapshots[userPoolSnapshots.length - 1].totalBalance, 18).gt(0)) {
+        if (parseFloat(userPoolSnapshots[userPoolSnapshots.length - 1].totalBalance) > 0) {
             while (userPoolSnapshots[userPoolSnapshots.length - 1].timestamp < moment().startOf('day').unix()) {
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];
                 const currentTimestamp = previousUserSnapshot.timestamp + secondsPerDay;
@@ -474,6 +391,75 @@ export class UserSnapshotService {
             }
         }
         return userPoolSnapshots;
+    }
+
+    private createUserPoolSnapshotData(
+        poolSnapshot: PrismaPoolSnapshot | undefined | null,
+        pool: PrismaPool & { staking: PrismaPoolStaking | null },
+        subgraphSnapshot: UserBalanceSnapshotFragment,
+        totalBalance: number,
+        walletBalance: string,
+        gaugeBalance: string,
+        farmBalance: string,
+    ) {
+        const percentShare = poolSnapshot ? totalBalance / poolSnapshot?.totalSharesNum : 0;
+
+        const userPoolBalanceSnapshotData = {
+            id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${subgraphSnapshot.timestamp}`,
+            timestamp: subgraphSnapshot.timestamp,
+            userAddress: subgraphSnapshot.user.id.toLowerCase(),
+            poolId: pool.id,
+            poolToken: pool.address,
+            walletBalance,
+            gaugeBalance,
+            farmBalance,
+            percentShare: `${percentShare}`,
+            totalBalance: `${totalBalance}`,
+            totalValueUSD: `${totalBalance * (poolSnapshot?.sharePrice || 0)}`,
+            fees24h: `${
+                percentShare * (poolSnapshot?.fees24h || 0) * (1 - networkConfig.balancer.swapProtocolFeePercentage)
+            }`,
+        };
+        return userPoolBalanceSnapshotData;
+    }
+
+    /*
+    The snapshot consists of 6 arrays which follow the same structure. For each type (wallet, farm, gauge) it has a "index" array and a "balance" array:
+    - walletTokens -> walletBalances
+    - Gauges -> GaugeBalances
+    - Farms -> FarmBalances
+
+    The index array indicates the position of the walletToken, gauge or farm in the balance array. e.g.:
+    - walletTokens: ["token1", "token2"]
+    - walletBalances: ["200", "100"]
+    This means the user has 200 of token1 and 100 of token2 in his wallet. 
+    */
+    private extractBalancesFromSnapshot(
+        userSnapshot: UserBalanceSnapshotFragment,
+        pool: PrismaPool & { staking: PrismaPoolStaking | null },
+    ) {
+        const walletIdx = userSnapshot.walletTokens.indexOf(pool.address);
+        let walletBalance = walletIdx !== -1 ? userSnapshot.walletBalances[walletIdx] : '0';
+        const gaugeIdx = userSnapshot.gauges.indexOf(pool.staking?.id || '');
+        const gaugeBalance = gaugeIdx !== -1 ? userSnapshot.gaugeBalances[gaugeIdx] : '0';
+        const farmIdx = userSnapshot.farms.indexOf(pool.staking?.id || '');
+        let farmBalance = farmIdx !== -1 ? userSnapshot.farmBalances[farmIdx] : '0';
+
+        // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
+        // we also need to multiply the staked amount by the fbeets->bpt ratio
+        if (pool.id === networkConfig.fbeets.poolId) {
+            const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(networkConfig.fbeets.address);
+            const fBeetsWalletBalance = fBeetsWalletIdx !== -1 ? userSnapshot.walletBalances[fBeetsWalletIdx] : '0';
+            walletBalance = (
+                parseFloat(walletBalance) +
+                parseFloat(fBeetsWalletBalance) * this.FBEETS_BPT_RATIO
+            ).toString();
+
+            farmBalance = (parseFloat(farmBalance) * this.FBEETS_BPT_RATIO).toString();
+        }
+
+        const totalBalance = parseFloat(walletBalance) + parseFloat(gaugeBalance) + parseFloat(farmBalance);
+        return { totalBalance, walletBalance, gaugeBalance, farmBalance };
     }
 
     private async getStoredSnapshotsForUserForPoolFromTimestamp(
