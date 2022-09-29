@@ -466,7 +466,7 @@ export class PoolGqlLoaderService {
                         }
 
                         return {
-                            id: group,
+                            id: `${pool.id}-${group}`,
                             title,
                             apr: `${apr}`,
                             subItems,
@@ -635,6 +635,7 @@ export class PoolGqlLoaderService {
             const percentOfSupplyNested =
                 totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
 
+            //50_000_000_000_000
             return {
                 ...this.mapPoolTokenToGql(token),
                 __typename: 'GqlPoolTokenPhantomStable',
