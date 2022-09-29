@@ -4,7 +4,11 @@ import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { commandSync } from 'execa';
 import { setPrisma } from '../../prisma/prisma-client';
-import { TestDatabaseContainer } from './jest-test-helpers';
+
+export type TestDatabaseContainer = {
+    postgres: StartedTestContainer;
+    stop: () => Promise<void>;
+};
 
 export type TestDatabasePrismaConfig = {
     generateClient: boolean;

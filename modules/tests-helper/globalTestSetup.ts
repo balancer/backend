@@ -1,5 +1,4 @@
-import { TestDatabaseContainer } from './jest-test-helpers';
-import { startTestDb } from './setupTestDatabase';
+import { startTestDb, TestDatabaseContainer } from './setupTestDatabase';
 import { mockServer } from './mocks/mockHttpServer';
 let db: TestDatabaseContainer;
 

@@ -1,4 +1,3 @@
-import { StartedTestContainer } from 'testcontainers';
 import { Prisma, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import moment from 'moment';
@@ -6,11 +5,6 @@ import _ from 'lodash';
 
 export type DeepPartial<T> = {
     [P in keyof T]?: DeepPartial<T[P]>;
-};
-
-export type TestDatabaseContainer = {
-    postgres: StartedTestContainer;
-    stop: () => Promise<void>;
 };
 
 type DefaulToken = 'usdc' | 'wftm' | 'wbtc' | 'weth' | 'beets' | 'dai' | 'boo' | 'fba' | 'fbeets';
