@@ -3,14 +3,14 @@ import { graphql } from 'msw';
 import { prisma } from '../../prisma/prisma-client';
 import { networkConfig } from '../config/network-config';
 import {
-    createSchemaForTest as createDedicatedSchemaForTest,
     createWeightedPoolFromDefault,
     defaultTokens,
     createRandomSnapshotsForPool,
     createRandomSnapshotsForPoolForTimestamp,
     createUserPoolBalanceSnapshot,
 } from '../tests-helper/jest-test-helpers';
-import { server } from '../tests-helper/mocks/server';
+import { createIndividualDatabaseSchemaForTest as createDedicatedSchemaForTest } from '../tests-helper/setupTestDatabase';
+import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { userService } from './user.service';
 
 /*
@@ -89,11 +89,14 @@ beforeAll(async () => {
 }, 60000);
 
 afterEach(async () => {
-    server.resetHandlers();
+    mockServer.resetHandlers();
     await prisma.prismaUserPoolBalanceSnapshot.deleteMany({});
 });
 
-beforeEach(async () => {});
+// Clean up after the tests are finished.
+afterAll(async () => {
+    await prisma.$disconnect();
+});
 
 test('The user requests the user stats for the first time, requesting from snapshot, persiting to db.', async () => {
     /*
@@ -118,7 +121,7 @@ test('The user requests the user stats for the first time, requesting from snaps
 
     const timestampOfLastReturnedSnapshot = today;
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -261,7 +264,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
 
     const timestampOfLastReturnedSnapshot = oneDayAgo;
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -401,7 +404,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
     const twoDaysAgo = today - 2 * oneDayInSeconds;
     const timestampOfLastReturnedSnapshot = twoDaysAgo;
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -472,7 +475,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
     expect(snapshotsFromService[1].percentShare).toBe(0);
 });
 
-test('0 $ value user snapshots if there is no pool snapshot', async () => {
+test('retrun 0 $ value user snapshots if there is no pool snapshot for the given days', async () => {
     /*
     Scenario: 
     - The user requests the user stats for the first time
@@ -508,7 +511,7 @@ test('0 $ value user snapshots if there is no pool snapshot', async () => {
     await createRandomSnapshotsForPoolForTimestamp(pool2.id, pool2.tokens.length, threeDaysAgo);
     await createRandomSnapshotsForPoolForTimestamp(pool2.id, pool2.tokens.length, twoDaysAgo);
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -597,7 +600,7 @@ test('0 $ value user snapshots if there is no pool snapshot', async () => {
     expect(parseFloat(snapshotsAfterAdditionalPoolSnapshot[3].totalValueUSD)).toBeGreaterThan(0);
 });
 
-test('Persisted user snapshots are synced', async () => {
+test('User snapshots in the database must be picked up and synced by the sync process.', async () => {
     /*
     Scenario:
     - The user has once requested the user stats for pool1
@@ -637,7 +640,7 @@ test('Persisted user snapshots are synced', async () => {
         totalBalance: '1',
     });
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -766,7 +769,7 @@ test('Persisted user snapshots are synced', async () => {
     }
 });
 
-test('Sync and get pool with gaps', async () => {
+test('User has left and re-entered the pool. Make sure the sync does not persist the 0 total value snapshots in the gaps.', async () => {
     /*
     Scenario:
     - The user has once requested the user stats for pool1
@@ -805,7 +808,7 @@ test('Sync and get pool with gaps', async () => {
         totalBalance: '1',
     });
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -982,7 +985,7 @@ test('Sync and get pool with gaps', async () => {
     }
 });
 
-test('update todays snapshot', async () => {
+test('Todays user snapshot must be gradually updated based on an updated pool snapshot.', async () => {
     /*
     Behaviour under test:
     - The user has once requested the user stats for pool1
@@ -994,7 +997,7 @@ test('update todays snapshot', async () => {
 
     const newestSnapshotTimestamp = today;
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -1123,7 +1126,7 @@ test('update todays snapshot', async () => {
     }
 });
 
-test('get fidelio balance', async () => {
+test('User requests pool snapshots for Fidelio Duetto Pool. Make sure fBeets are correctly accounted for.', async () => {
     /*
     Scenario:
     - Request snapshots for the fidelio duetto pool
@@ -1142,7 +1145,7 @@ test('get fidelio balance', async () => {
     const fbeets = networkConfig.fbeets.address;
     const fbeetsFarm = networkConfig.fbeets.farmId;
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -1268,7 +1271,7 @@ test('get fidelio balance', async () => {
     }
 });
 
-test('sync fidelio balance', async () => {
+test('Sync user snapshots for Fidelio Duetto pool. Make sure fBeets are correctly accounted for when persisting.', async () => {
     /*
     Scenario:
     - sync snapshots for fidelio pool
@@ -1306,7 +1309,7 @@ test('sync fidelio balance', async () => {
         totalBalance: '1',
     });
 
-    server.use(
+    mockServer.use(
         ...[
             graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
                 const requestJson = await req.json();
@@ -1430,9 +1433,4 @@ test('sync fidelio balance', async () => {
         //make sure we have a pool snapshot for each user snapshot
         expect(foundPoolSnapshot).toBe(true);
     }
-});
-
-// Clean up after the tests are finished.
-afterAll(async () => {
-    await prisma.$disconnect();
 });

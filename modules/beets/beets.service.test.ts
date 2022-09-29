@@ -1,19 +1,23 @@
 import { prisma } from '../../prisma/prisma-client';
 import { isFantomNetwork } from '../config/network-config';
-import { createSchemaForTest } from '../tests-helper/jest-test-helpers';
-import { server } from '../tests-helper/mocks/server';
+import { createIndividualDatabaseSchemaForTest } from '../tests-helper/setupTestDatabase';
+import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { beetsService } from './beets.service';
 import { rpcHandlers } from './mock-handlers/rpc';
 
 beforeAll(async () => {
-    await createSchemaForTest();
+    await createIndividualDatabaseSchemaForTest();
 });
 
 beforeEach(async () => {
-    server.use(...rpcHandlers);
+    mockServer.use(...rpcHandlers);
 });
 
-test('retrieve fBeets ratio before synced', async () => {
+afterAll(async () => {
+    prisma.$disconnect();
+});
+
+test('retrieve fBeets ratio before initial sync - fails', async () => {
     let ratio;
     try {
         ratio = await beetsService.getFbeetsRatio();
@@ -47,8 +51,4 @@ test('retrieve updated fBeets ratio', async () => {
     } else {
         expect(ratio).toBe('1.0');
     }
-});
-
-afterAll(async () => {
-    prisma.$disconnect();
 });

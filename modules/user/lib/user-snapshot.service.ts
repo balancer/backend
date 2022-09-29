@@ -25,7 +25,7 @@ export class UserSnapshotService {
 
         let operations: any[] = [];
 
-        // get all unique users
+        // get all unique users which have a snapshot stored
         const users = await prisma.prismaUserPoolBalanceSnapshot.findMany({
             distinct: ['userAddress'],
             select: {
@@ -35,17 +35,18 @@ export class UserSnapshotService {
 
         for (const user of users) {
             const userAddress = user.userAddress;
-            const subgraphSnapshotForUser = await this.userSnapshotSubgraphService.getUserBalanceSnapshotsWithPaging(
-                0,
-                moment().unix(),
-                userAddress,
-            );
+            const subgraphSnapshotForUser =
+                await this.userSnapshotSubgraphService.getUserBalanceSnapshotsForUserAndRange(
+                    0,
+                    moment().unix(),
+                    userAddress,
+                );
             // no snapshots for the user in the requested timerange
             if (!subgraphSnapshotForUser) {
                 continue;
             }
 
-            // get all pools where we have snapshots for this user
+            // get the latest snapshot for each unique user/pool pair
             const latestStoredPoolSnapshotsOfUser = await prisma.prismaUserPoolBalanceSnapshot.findMany({
                 where: { userAddress: userAddress },
                 orderBy: { timestamp: 'desc' },
@@ -53,32 +54,23 @@ export class UserSnapshotService {
             });
 
             /*
-            For each latest stored user pool snapshot, we need to sync from subgraph. We only write to the db if the
-            subgraph snapshot has a >0 total balance for the pool 
-            -or- 
-            if the latest stored user pool snapshot is >0 total balance and the subgraph snapshot has 0 total balance for the pool. This is
-            to indicate that a user has left the pool.
+            For each latest stored user pool snapshot, we need to sync from subgraph. We only store user snapshots for pools with an existing snapshot if they meet one of the following criteria:
+            - total balance of subgraph snapshot is not 0
+            - total balance of subgraph snapshot is 0, but the total balance of the previous stored user pool snapshot was > 0, meaning the user has left the pool. 
+            
+            A snapshot reflects always the state by the end of the day (UTC). Snapshots for the current day are gradually updated to reflect the current state. 
+            Therefore we have to handle those snapshots different than the ones for already closed days. 
 
-            We need to gradually sync/upsert todays snapshot, because the poolsnapshot is also gradually upserted 
-            (fees and volume increase in the course of the day). Hence we need to check subgraphSnapshot.timestamp >= latestStoredUserPoolSnapshot.timestamp) 
-
-
-            Loop through subgraph snapshots 
-            - if subgraph snapshot is newer or same than latest stored user pool snapshot:
-              - if subgraph snapshot is > 0 balance:
-                 enrich and persist
-              - else if latest stored user pool snapshot > 0:
-                persist 0 total balance snapshot (must become new latest stored snapshot)
-              - else:
-                do nothing: do not persist consecutive 0 total balance snapshot
             */
             for (const latestStoredUserPoolSnapshot of latestStoredPoolSnapshotsOfUser) {
-                let latestStoredUserPoolSnapshotHasBalance = parseFloat(latestStoredUserPoolSnapshot.totalBalance) > 0;
+                let previousStoredUserPoolSnapshotHasBalance =
+                    parseFloat(latestStoredUserPoolSnapshot.totalBalance) > 0;
                 for (const subgraphSnapshot of subgraphSnapshotForUser.snapshots) {
                     if (!subgraphSnapshot || !latestStoredUserPoolSnapshot.poolId) {
                         continue;
                     }
                     if (subgraphSnapshot.timestamp >= latestStoredUserPoolSnapshot.timestamp) {
+                        // subgraph snapshot is newer or from today. If it is > 0 balance, we need to enrich and persist.
                         const pool = await prisma.prismaPool.findUniqueOrThrow({
                             where: {
                                 id: latestStoredUserPoolSnapshot.poolId,
@@ -88,13 +80,24 @@ export class UserSnapshotService {
                             },
                         });
 
-                        // exctract data for the pool we need
-                        const walletIdx = subgraphSnapshot.walletTokens.indexOf(pool.address);
-                        let walletBalance = walletIdx !== -1 ? subgraphSnapshot.walletBalances[walletIdx] : '0';
-                        const gaugeIdx = subgraphSnapshot.gauges.indexOf(pool.staking?.id || '');
-                        const gaugeBalance = gaugeIdx !== -1 ? subgraphSnapshot.gaugeBalances[gaugeIdx] : '0';
-                        const farmIdx = subgraphSnapshot.farms.indexOf(pool.staking?.id || '');
-                        let farmBalance = farmIdx !== -1 ? subgraphSnapshot.farmBalances[farmIdx] : '0';
+                        /*
+                        The snapshot consists of 6 arrays which follow the same structure. For each type (wallet, farm, gauge) it has a "index" array and a "balance" array:
+                        - walletTokens -> walletBalances
+                        - Gauges -> GaugeBalances
+                        - Farms -> FarmBalances
+
+                        The index array indicates the position of the walletToken, gauge or farm in the balance array. e.g.:
+                        - walletTokens: ["token1", "token2"]
+                        - walletBalances: ["200", "100"]
+                        This means the user has 200 of token1 and 100 of token2 in his wallet. 
+                        */
+                        // exctract data for the pool we need.
+                        const walletIndex = subgraphSnapshot.walletTokens.indexOf(pool.address);
+                        let walletBalance = walletIndex !== -1 ? subgraphSnapshot.walletBalances[walletIndex] : '0';
+                        const gaugeIndex = subgraphSnapshot.gauges.indexOf(pool.staking?.id ?? '');
+                        const gaugeBalance = gaugeIndex !== -1 ? subgraphSnapshot.gaugeBalances[gaugeIndex] : '0';
+                        const farmIndex = subgraphSnapshot.farms.indexOf(pool.staking?.id ?? '');
+                        let farmBalance = farmIndex !== -1 ? subgraphSnapshot.farmBalances[farmIndex] : '0';
 
                         // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
                         // we also need to multiply the staked amount by the fbeets->bpt ratio
@@ -159,8 +162,9 @@ export class UserSnapshotService {
                                     update: userPoolBalanceSnapshotData,
                                 }),
                             );
-                            latestStoredUserPoolSnapshotHasBalance = true;
-                        } else if (latestStoredUserPoolSnapshotHasBalance) {
+                            previousStoredUserPoolSnapshotHasBalance = true;
+                        } else if (previousStoredUserPoolSnapshotHasBalance) {
+                            // if the snapshot has total balance of 0, we store it if the previously stored snapshot had a balance. This is to indicate that the user has left the pool.
                             const userPoolBalanceSnapshotData = {
                                 id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${
                                     subgraphSnapshot.timestamp
@@ -185,7 +189,7 @@ export class UserSnapshotService {
                                     update: userPoolBalanceSnapshotData,
                                 }),
                             );
-                            latestStoredUserPoolSnapshotHasBalance = false;
+                            previousStoredUserPoolSnapshotHasBalance = false;
                         }
                     }
                 }
@@ -215,11 +219,12 @@ export class UserSnapshotService {
 
         // no stored snapshots, retrieve from subgraph and store all
         if (storedUserSnapshotsFromRange.length === 0) {
-            const userSnapshotsFromSubgraph = await this.userSnapshotSubgraphService.getUserBalanceSnapshotsWithPaging(
-                0,
-                moment().unix(),
-                userAddress,
-            );
+            const userSnapshotsFromSubgraph =
+                await this.userSnapshotSubgraphService.getUserBalanceSnapshotsForUserAndRange(
+                    0,
+                    moment().unix(),
+                    userAddress,
+                );
 
             const pool = await prisma.prismaPool.findUniqueOrThrow({
                 where: {

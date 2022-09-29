@@ -1,7 +1,7 @@
 import { rest } from 'msw';
 
-export const handlers = [
-    //test containers
+export const testcontainerHandlers = [
+    //testcontainers
     rest.get('http://localhost/containers/*', async (req, res, ctx) => {
         return req.passthrough();
     }),

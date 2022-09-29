@@ -1,12 +1,8 @@
-import { GenericContainer, StartedTestContainer } from 'testcontainers';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import { Prisma, PrismaClient, PrismaPoolType } from '@prisma/client';
-import { commandSync } from 'execa';
-import { prisma, setPrisma } from '../../prisma/prisma-client';
+import { StartedTestContainer } from 'testcontainers';
+import { Prisma, PrismaPoolType } from '@prisma/client';
+import { prisma } from '../../prisma/prisma-client';
 import moment from 'moment';
 import _ from 'lodash';
-import { time } from 'console';
 
 export type DeepPartial<T> = {
     [P in keyof T]?: DeepPartial<T[P]>;
@@ -282,80 +278,4 @@ export async function createUserPoolBalanceSnapshot(
     await prisma.prismaUserPoolBalanceSnapshot.create({
         data: _.merge(defaultUserBalanceSnapshot, snapshot),
     });
-}
-
-export type TestDatabasePrismaConfig = {
-    generateClient: boolean;
-    schemaFile: string;
-};
-
-export type TestDatabaseConfig = {
-    user: string;
-    password: string;
-    dbName: string;
-};
-
-const defaultTestDatabaseConfig: TestDatabaseConfig = {
-    user: 'beetx',
-    password: 'let-me-in',
-    dbName: 'beetx',
-};
-
-const defaultTestDatabasePrismaConfig: TestDatabasePrismaConfig = {
-    generateClient: true,
-    schemaFile: path.join(__dirname, '../../prisma/schema.prisma'),
-};
-
-// module.exports = async function globalCreateTestDb() {
-//     createTestDb();
-// };
-
-let postgres: StartedTestContainer;
-
-export async function startTestDb(
-    dbConfig: TestDatabaseConfig = defaultTestDatabaseConfig,
-): Promise<TestDatabaseContainer> {
-    try {
-        postgres = await new GenericContainer('postgres')
-            .withEnv('POSTGRES_USER', dbConfig.user)
-            .withEnv('POSTGRES_PASSWORD', dbConfig.password)
-            .withEnv('POSTGRES_DB', dbConfig.dbName)
-            .withExposedPorts(5432)
-            .start();
-
-        return {
-            postgres,
-            stop: async () => {
-                await postgres.stop();
-            },
-        };
-    } catch (error) {
-        console.error('Error spinning up test database', error);
-        throw error;
-    }
-}
-
-export async function createSchemaForTest(
-    prismaConfig: TestDatabasePrismaConfig = defaultTestDatabasePrismaConfig,
-    dbConfig: TestDatabaseConfig = defaultTestDatabaseConfig,
-) {
-    const schema = `test_${uuidv4()}`;
-    const connectionString = `postgresql://${dbConfig.user}:${
-        dbConfig.password
-    }@${postgres.getHost()}:${postgres.getMappedPort(5432)}/${dbConfig.dbName}?schema=${schema}`;
-
-    commandSync(`yarn prisma db push --schema ${prismaConfig.schemaFile} --skip-generate`, {
-        env: {
-            DATABASE_URL: connectionString,
-        },
-    });
-    const prisma = new PrismaClient({
-        datasources: {
-            db: {
-                url: connectionString,
-            },
-        },
-    });
-
-    setPrisma(prisma);
 }
