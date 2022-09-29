@@ -46,7 +46,9 @@ export class BoostedPoolAprService implements PoolAprService {
                     const tokenBalance = parseFloat(token.dynamicData.balance);
                     const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
                     let userApr = apr;
-                    if (collectsYieldFee) {
+
+                    //phantom stable boosted items already have the yield fee removed
+                    if (collectsYieldFee && aprItem.type !== 'PHANTOM_STABLE_BOOSTED') {
                         userApr = apr * (1 - this.yieldProtocolFeePercentage);
                     }
 

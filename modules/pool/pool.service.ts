@@ -300,7 +300,7 @@ export const poolService = new PoolService(
                   ),
                   new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
               ]),
-        new PhantomStableAprService(),
+        new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(networkConfig.balancer.swapProtocolFeePercentage),
         ...(isFantomNetwork()
