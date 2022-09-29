@@ -160,7 +160,7 @@ test('The user requests the user stats for the first time, requesting from snaps
                                 gauges: [],
                                 gaugeBalances: [],
                                 farms: [farmId1],
-                                farmBalances: ['1.0'],
+                                farmBalances: ['1'],
                             },
                             {
                                 id: `${userAddress}-${today}`,
@@ -202,7 +202,7 @@ test('The user requests the user stats for the first time, requesting from snaps
     expect(snapshotsFromService[1].timestamp).toBe(today - 2 * secondsPerDay);
 
     expect(snapshotsFromService[2].walletBalance).toBe('0.5');
-    expect(snapshotsFromService[2].farmBalance).toBe('1.0');
+    expect(snapshotsFromService[2].farmBalance).toBe('1');
     expect(snapshotsFromService[2].totalBalance).toBe('1.5');
     expect(snapshotsFromService[2].timestamp).toBe(today - 1 * secondsPerDay);
 
@@ -669,7 +669,7 @@ test('User snapshots in the database must be picked up and synced by the sync pr
                                 gauges: [],
                                 gaugeBalances: [],
                                 farms: [farmId1],
-                                farmBalances: ['1.0'],
+                                farmBalances: ['1'],
                             },
                             {
                                 id: `${userAddress}-${today}`,
@@ -722,7 +722,7 @@ test('User snapshots in the database must be picked up and synced by the sync pr
     expect(snapshotsAfterSync[1].timestamp).toBe(twoDaysAgo);
 
     expect(snapshotsAfterSync[2].walletBalance).toBe('0.5');
-    expect(snapshotsAfterSync[2].farmBalance).toBe('1.0');
+    expect(snapshotsAfterSync[2].farmBalance).toBe('1');
     expect(snapshotsAfterSync[2].totalBalance).toBe('1.5');
     expect(snapshotsAfterSync[2].timestamp).toBe(oneDayAgo);
 
@@ -923,10 +923,10 @@ test('User has left and re-entered the pool. Make sure the sync does not persist
     // check if balances are calculated correctly
     expect(snapshotsAfterSync[0].timestamp).toBe(sevenDaysAgo);
     expect(snapshotsAfterSync[0].walletBalance).toBe('1');
-    expect(snapshotsAfterSync[0].totalBalance).toBe('1.0');
+    expect(snapshotsAfterSync[0].totalBalance).toBe('1');
     expect(snapshotsAfterSync[1].timestamp).toBe(sixDaysAgo);
     expect(snapshotsAfterSync[1].walletBalance).toBe('1');
-    expect(snapshotsAfterSync[1].totalBalance).toBe('1.0');
+    expect(snapshotsAfterSync[1].totalBalance).toBe('1');
 
     expect(snapshotsAfterSync[2].timestamp).toBe(fiveDaysAgo);
     expect(snapshotsAfterSync[2].walletBalance).toBe('0');

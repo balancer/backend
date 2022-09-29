@@ -386,7 +386,7 @@ export class UserSnapshotService {
             */
             while (
                 currentSnapshot.timestamp >
-                userPoolSnapshots[userPoolSnapshots.length - 1].timestamp + secondsPerDay;
+                userPoolSnapshots[userPoolSnapshots.length - 1].timestamp + secondsPerDay
             ) {
                 //need to fill the gap from last snapshot
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];
