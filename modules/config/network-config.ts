@@ -67,16 +67,15 @@ export interface NetworkConfig {
     copper: {
         proxyAddress: string;
     };
+    reaper?: {
+        linearPoolFactory: string;
+    };
     yearn: {
         vaultsEndpoint: string;
     };
     lido?: {
         wstEthContract: string;
         wstEthAprEndpoint: string;
-    };
-    reaper?: {
-        cryptsEndpoint: string;
-        cryptsOverrides: Record<string, string>;
     };
     avgBlockSpeed: number;
     sor: {
@@ -261,18 +260,12 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         yearn: {
             vaultsEndpoint: 'https://#/',
         },
+        reaper: {
+            linearPoolFactory: '0x19968d4b7126904fd665ed25417599df9604df83',
+        },
         lido: {
             wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
             wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
-        },
-        reaper: {
-            cryptsEndpoint: 'https://yzo0r3ahok.execute-api.us-east-1.amazonaws.com/dev/api/optimism/crypts',
-            cryptsOverrides: {
-                '0xdf2d2c477078d2cd563648abbb913da3db247c00': '0xaa3b2f7c6ffad072ab65d144b349ed44558f1d80', // WETH
-                '0x7ecc9d0ee071c7b86d0ae2101231a3615564009e': '0x4f086a048c33f3bf9011dd2265861ce812624f2c', //USDC
-                '0x75441c125890612f95b5fbf3f73db0c25f5573cd': '0xefcbf2bd622ce716d3344c09e77e7a74071e6ce2', // DAI
-                // '': '0x6fed42d8bf5010e5710927fe0de15f91f916204d', // WBTC
-            },
         },
         copper: {
             proxyAddress: '0x0000000000000000000000000000000000000000',

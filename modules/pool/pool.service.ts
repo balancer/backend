@@ -298,11 +298,7 @@ export const poolService = new PoolService(
                       networkConfig.lido!.wstEthContract,
                       networkConfig.balancer.yieldProtocolFeePercentage,
                   ),
-                  new ReaperCryptAprService(
-                      tokenService,
-                      networkConfig.reaper!.cryptsEndpoint,
-                      networkConfig.reaper?.cryptsOverrides,
-                  ),
+                  new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
               ]),
         new PhantomStableAprService(),
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
