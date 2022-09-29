@@ -33,6 +33,7 @@ import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
 import { ContentService } from '../../content/content.service';
 import { isWeightedPoolV2 } from './pool-utils';
+import { oldBnum } from '../../big-number/old-big-number';
 
 export class PoolGqlLoaderService {
     constructor(private readonly configService: ContentService) {}
@@ -776,15 +777,15 @@ export class PoolGqlLoaderService {
         const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
         const wrappedToken = nestedPool.tokens[nestedPool.linearData.wrappedIndex];
 
-        const mainTokenBalance = parseFloat(mainToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
-        const wrappedTokenBalance = parseFloat(wrappedToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
+        const wrappedTokenBalance = oldBnum(wrappedToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
+        const mainTokenBalance = oldBnum(mainToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
 
         return {
-            mainTokenBalance: `${mainTokenBalance}`,
-            wrappedTokenBalance: `${wrappedTokenBalance}`,
-            totalMainTokenBalance: `${
-                mainTokenBalance + wrappedTokenBalance * parseFloat(wrappedToken.dynamicData?.priceRate || '1')
-            }`,
+            mainTokenBalance: `${mainTokenBalance.toFixed(mainToken.token.decimals)}`,
+            wrappedTokenBalance: `${wrappedTokenBalance.toFixed(wrappedToken.token.decimals)}`,
+            totalMainTokenBalance: `${mainTokenBalance
+                .plus(wrappedTokenBalance.times(wrappedToken.dynamicData?.priceRate || '1'))
+                .toFixed(mainToken.token.decimals)}`,
         };
     }
 }
