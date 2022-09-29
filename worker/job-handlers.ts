@@ -29,6 +29,7 @@ async function runIfNotAlreadyRunning(
         const transaction = Sentry.startTransaction({ name: id }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
             scope.setSpan(transaction);
+            scope.setTransactionName(`POST /${id}`);
         });
         transaction.sampled = true;
         console.time(id);
