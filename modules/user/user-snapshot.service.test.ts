@@ -8,10 +8,11 @@ import {
     createRandomSnapshotsForPool,
     createRandomSnapshotsForPoolForTimestamp,
     createUserPoolBalanceSnapshot,
-} from '../tests-helper/jest-test-helpers';
+} from '../tests-helper/poolTestdataHelpers';
 import { createIndividualDatabaseSchemaForTest as createDedicatedSchemaForTest } from '../tests-helper/setupTestDatabase';
 import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { userService } from './user.service';
+import { secondsPerDay } from '../common/time';
 
 /*
 TEST SETUP:
@@ -35,14 +36,13 @@ const userAddress = '0x0000000000000000000000000000000000000001';
 const FBEETS_BPT_RATIO: number = 1.0271;
 
 const today = moment().startOf('day').unix();
-const oneDayInSeconds = 86400;
-const sevenDaysAgo = today - 7 * oneDayInSeconds;
-const sixDaysAgo = today - 6 * oneDayInSeconds;
-const fiveDaysAgo = today - 5 * oneDayInSeconds;
-const fourDaysAgo = today - 4 * oneDayInSeconds;
-const threeDaysAgo = today - 3 * oneDayInSeconds;
-const twoDaysAgo = today - 2 * oneDayInSeconds;
-const oneDayAgo = today - 1 * oneDayInSeconds;
+const sevenDaysAgo = today - 7 * secondsPerDay;
+const sixDaysAgo = today - 6 * secondsPerDay;
+const fiveDaysAgo = today - 5 * secondsPerDay;
+const fourDaysAgo = today - 4 * secondsPerDay;
+const threeDaysAgo = today - 3 * secondsPerDay;
+const twoDaysAgo = today - 2 * secondsPerDay;
+const oneDayAgo = today - 1 * secondsPerDay;
 
 beforeAll(async () => {
     await createDedicatedSchemaForTest();
@@ -197,17 +197,17 @@ test('The user requests the user stats for the first time, requesting from snaps
 
     // check if balances are calculated correctly
     expect(snapshotsFromService[0].walletBalance).toBe('1');
-    expect(snapshotsFromService[0].timestamp).toBe(today - 3 * oneDayInSeconds);
+    expect(snapshotsFromService[0].timestamp).toBe(today - 3 * secondsPerDay);
     expect(snapshotsFromService[1].walletBalance).toBe('1');
-    expect(snapshotsFromService[1].timestamp).toBe(today - 2 * oneDayInSeconds);
+    expect(snapshotsFromService[1].timestamp).toBe(today - 2 * secondsPerDay);
 
     expect(snapshotsFromService[2].walletBalance).toBe('0.5');
     expect(snapshotsFromService[2].farmBalance).toBe('1.0');
     expect(snapshotsFromService[2].totalBalance).toBe('1.5');
-    expect(snapshotsFromService[2].timestamp).toBe(today - 1 * oneDayInSeconds);
+    expect(snapshotsFromService[2].timestamp).toBe(today - 1 * secondsPerDay);
 
     expect(snapshotsFromService[3].walletBalance).toBe('0');
-    expect(snapshotsFromService[3].timestamp).toBe(today - 0 * oneDayInSeconds);
+    expect(snapshotsFromService[3].timestamp).toBe(today - 0 * secondsPerDay);
 
     const poolSnapshots = await prisma.prismaPoolSnapshot.findMany({
         where: { poolId: poolId1 },
@@ -256,11 +256,6 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
 - Third snapshot from yesterday, where he has 1 bpt from pool1 in his wallet
 
 */
-    const today = moment().startOf('day').unix();
-    const oneDayInSeconds = 86400;
-    const threeDaysAgo = today - 3 * oneDayInSeconds;
-    const twoDaysAgo = today - 2 * oneDayInSeconds;
-    const oneDayAgo = today - 1 * oneDayInSeconds;
 
     const timestampOfLastReturnedSnapshot = oneDayAgo;
 
@@ -383,7 +378,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
     }
 });
 
-test('user left pool, no 0 snapshots returned', async () => {
+test('When user left pool, no more snapshots are returned', async () => {
     /*
 Scenario: 
 - The user requests the user stats for the first time
@@ -398,11 +393,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
 - Seconds snapshot from two days ago, where he has no balance
 
 */
-    const today = moment().startOf('day').unix();
-    const oneDayInSeconds = 86400;
-    const threeDaysAgo = today - 3 * oneDayInSeconds;
-    const twoDaysAgo = today - 2 * oneDayInSeconds;
-    const timestampOfLastReturnedSnapshot = twoDaysAgo;
+    const timestampOfLastReturnedSnapshot = secondsPerDay;
 
     mockServer.use(
         ...[
@@ -475,17 +466,17 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
     expect(snapshotsFromService[1].percentShare).toBe(0);
 });
 
-test('retrun 0 $ value user snapshots if there is no pool snapshot for the given days', async () => {
+test('Return a snapshot with 0 valueUSD if there is no pool snapshot for the given day. When pool snapshot becomes present, return and persist correct valueUSD for the given day.', async () => {
     /*
     Scenario: 
     - The user requests the user stats for the first time
     - The user joined pool2 three days ago and is still in the pool
-    - Poolsnapshots are only available for two days, therefore only two $ value > 0 snapshots are present
-    - Adding a "delayed" poolSnapshot which changes the value of the user snapshot
+    - Poolsnapshots are only available for two days, therefore only two valueUSD > 0 snapshots are present
+    - Adding another "delayed" poolSnapshot after the frist query for today, which changes the valueUSD of the user snapshot for today
 
     Behaviour under test:
     - Pool2 has only two snapshots for three days ago and two days ago. 
-    - We should have 4 usersnapshots but only the ones from three and two days ago should have $ values.
+    - We should have 4 usersnapshots but only the ones from three and two days ago should have USD values.
     - We then create another pool snapshot for today
     - We should now have 3 usersnapshots with $ values
 
@@ -493,8 +484,6 @@ test('retrun 0 $ value user snapshots if there is no pool snapshot for the given
     - Create one snapshots for user
     - First snapshot from three days ago, where he has 1 bpts from pool1 in his wallet
     - create two pool snapshots for pool2 for three days ago and two days ago
-   
-
     */
 
     const timestampOfLastReturnedSnapshot = threeDaysAgo;
@@ -604,6 +593,7 @@ test('User snapshots in the database must be picked up and synced by the sync pr
     /*
     Scenario:
     - The user has once requested the user stats for pool1
+    - We manually add a user pool snapshot to simulate that user stats on this pool have already been requested once
     - Since one user snapshot is in the database, the userBalanceSync should query the subgraph and sync all missing snapshots until now
 
     Behaviour under test:
@@ -721,7 +711,7 @@ test('User snapshots in the database must be picked up and synced by the sync pr
     // check if snapshots have been persisted (only three, one is inferred at query)
     expect(snapshotsFromDb.length).toBe(3);
 
-    // after the sync, the all 4 snapshots should be present
+    // after the sync, all 4 snapshots should be present
     const snapshotsAfterSync = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
     expect(snapshotsAfterSync.length).toBe(4);
 
@@ -773,6 +763,7 @@ test('User has left and re-entered the pool. Make sure the sync does not persist
     /*
     Scenario:
     - The user has once requested the user stats for pool1
+    - We manually add a user pool snapshot to simulate that user stats on this pool have already been requested once
     - Since one user snapshot is in the database, the userBalanceSync should query the subgraph and sync all missing snapshots until now
     - user joined pool seven days ago, left again five days ago, joined pool and farm again three days ago, left both two days ago
 

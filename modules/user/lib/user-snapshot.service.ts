@@ -10,9 +10,9 @@ import { networkConfig } from '../../config/network-config';
 import { Prisma, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { BigNumber } from 'ethers';
+import { secondsPerDay } from '../../common/time';
 
 export class UserSnapshotService {
-    private readonly ONE_DAY_IN_SECONDS: number = 86400;
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
 
     constructor(
@@ -113,11 +113,10 @@ export class UserSnapshotService {
                             farmBalance = (parseFloat(farmBalance) * this.FBEETS_BPT_RATIO).toString();
                         }
 
-                        const totalBalanceScaled = parseUnits(walletBalance, 18)
-                            .add(parseUnits(gaugeBalance, 18))
-                            .add(parseUnits(farmBalance, 18));
+                        const totalBalance =
+                            parseFloat(walletBalance) + parseFloat(gaugeBalance) + parseFloat(farmBalance);
 
-                        if (totalBalanceScaled.gt(0)) {
+                        if (totalBalance > 0) {
                             //enrich with poolsnapshot data and save
                             const poolSnapshot = await this.poolSnapshotService.getSnapshotForPool(
                                 latestStoredUserPoolSnapshot.poolId,
@@ -128,9 +127,7 @@ export class UserSnapshotService {
                             Could be that the poolsnapshot is delayed (beethoven subgraph is much slower than bpt subgraph),
                             so we will persist 0 $ value if there is a totalBalance > 0 and try to get the when we serve the data
                             */
-                            const percentShare = poolSnapshot
-                                ? parseFloat(formatFixed(totalBalanceScaled, 18)) / poolSnapshot?.totalSharesNum
-                                : 0;
+                            const percentShare = poolSnapshot ? totalBalance / poolSnapshot?.totalSharesNum : 0;
 
                             const userPoolBalanceSnapshotData = {
                                 id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${
@@ -144,10 +141,8 @@ export class UserSnapshotService {
                                 gaugeBalance,
                                 farmBalance,
                                 percentShare: `${percentShare}`,
-                                totalBalance: formatFixed(totalBalanceScaled, 18),
-                                totalValueUSD: `${
-                                    parseFloat(formatFixed(totalBalanceScaled, 18)) * (poolSnapshot?.sharePrice || 0)
-                                }`,
+                                totalBalance: `${totalBalance}`,
+                                totalValueUSD: `${totalBalance * (poolSnapshot?.sharePrice || 0)}`,
                                 fees24h: `${
                                     percentShare *
                                     (poolSnapshot?.fees24h || 0) *
@@ -283,7 +278,6 @@ export class UserSnapshotService {
 
                 // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
                 // we also need to multiply the staked amount by the fbeets->bpt ratio
-                let fBeetsWalletBalanceScaled = BigNumber.from(0);
                 if (poolId === networkConfig.fbeets.poolId) {
                     const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(networkConfig.fbeets.address);
                     const fBeetsWalletBalance =
@@ -295,34 +289,33 @@ export class UserSnapshotService {
 
                     farmBalance = (parseFloat(farmBalance) * this.FBEETS_BPT_RATIO).toString();
                 }
-                let totalBalanceScaled = parseUnits(walletBalance, 18)
-                    .add(parseUnits(gaugeBalance, 18))
-                    .add(parseUnits(farmBalance, 18));
+
+                const totalBalance = parseFloat(walletBalance) + parseFloat(gaugeBalance) + parseFloat(farmBalance);
 
                 /*
                 We get ALL snapshots from the subgraph for the user. Total balance will be 0 until he joined the pool we need.
                 Therefore we want to skip all 0 total balance snapshot at the beginning.
                 */
-                if (prismaInput.length === 0 && totalBalanceScaled.eq(0)) {
+                if (prismaInput.length === 0 && totalBalance === 0) {
                     continue;
                 }
 
                 /*
                 If a user left a pool, the snapshot from the subgraph won't list the pool balance with '0'.
-                In fact, the pool address (or farm or gage id) won't show up in the array. We therefore need to push the FIRST
+                In fact, the pool address (or farm or gage id) won't show up in the array. We therefore need to store the FIRST
                 0 total balance snapshot to show that he left the pool, but want to skip any consecutive 0 total value
                 snapshots to avoid unnecessary 0 total balance snapshots in the database.
                 */
-                if (totalBalanceScaled.eq(0) && prismaInput[prismaInput.length - 1].totalBalance === '0') {
+                if (totalBalance === 0 && prismaInput[prismaInput.length - 1].totalBalance === '0') {
                     continue;
                 }
 
                 /*
                 Could be that the poolsnapshot is delayed (beethoven subgraph is much slower than bpt subgraph),
-                so we will persist 0 $ value if there is a totalBalance > 0 and try to get the when we serve the data
+                so we will persist 0 $ value if there is a totalBalance > 0 and try to get the snapshot when we serve the data
                 */
                 const percentShare = poolSnapshotForTimestamp
-                    ? parseFloat(formatFixed(totalBalanceScaled, 18)) / poolSnapshotForTimestamp?.totalSharesNum
+                    ? totalBalance / poolSnapshotForTimestamp?.totalSharesNum
                     : 0;
 
                 prismaInput.push({
@@ -335,10 +328,8 @@ export class UserSnapshotService {
                     gaugeBalance,
                     farmBalance,
                     percentShare: `${percentShare}`,
-                    totalBalance: formatFixed(totalBalanceScaled, 18),
-                    totalValueUSD: `${
-                        parseFloat(formatFixed(totalBalanceScaled, 18)) * (poolSnapshotForTimestamp?.sharePrice || 0)
-                    }`,
+                    totalBalance: `${totalBalance}`,
+                    totalValueUSD: `${totalBalance * (poolSnapshotForTimestamp?.sharePrice || 0)}`,
                     fees24h: `${
                         percentShare *
                         (poolSnapshotForTimestamp?.fees24h || 0) *
@@ -372,33 +363,34 @@ export class UserSnapshotService {
 
         // The first snapshot in the database must be >0 total value, push that
         const userPoolSnapshots: UserPoolSnapshot[] = [];
-        userPoolSnapshots.push({
-            timestamp: storedUserSnapshotsFromRange[0].timestamp,
-            walletBalance: storedUserSnapshotsFromRange[0].walletBalance,
-            farmBalance: storedUserSnapshotsFromRange[0].farmBalance,
-            gaugeBalance: storedUserSnapshotsFromRange[0].gaugeBalance,
-            totalBalance: storedUserSnapshotsFromRange[0].totalBalance,
-            totalValueUSD: storedUserSnapshotsFromRange[0].totalValueUSD,
-            fees24h: storedUserSnapshotsFromRange[0].fees24h,
-            percentShare: parseFloat(storedUserSnapshotsFromRange[0].percentShare),
-        });
-        let firstIteration = true;
-        for (const snapshot of storedUserSnapshotsFromRange) {
-            // skip first
-            if (firstIteration) {
-                firstIteration = false;
-                continue;
-            }
-            // as long as the current snapshot is newer than the last snapshot in the result array + 1 day,
-            // it means there is a gap that we need to fill
-
+        const firstSnapshot = storedUserSnapshotsFromRange.shift();
+        if (firstSnapshot) {
+            userPoolSnapshots.push({
+                timestamp: firstSnapshot.timestamp,
+                walletBalance: firstSnapshot.walletBalance,
+                farmBalance: firstSnapshot.farmBalance,
+                gaugeBalance: firstSnapshot.gaugeBalance,
+                totalBalance: firstSnapshot.totalBalance,
+                totalValueUSD: firstSnapshot.totalValueUSD,
+                fees24h: firstSnapshot.fees24h,
+                percentShare: parseFloat(firstSnapshot.percentShare),
+            });
+        }
+        for (const currentSnapshot of storedUserSnapshotsFromRange) {
+            /*
+            as long as the currentSnapshot is newer than (timestamp + 1 day) of the last snapshot in userPoolSnapshots, it means there is a gap that we need to fill. 
+            E.g. we have snapshots for day 1 and 4 -> currentSnapshot.timestamp=4 (day 1 already stored above), which is newer than 1+1, so we fill the gap for day 2.
+            currentSnapshot.timestamp=4 is newer than 2+1, need to fill gap for day 3.
+            currentSnapshot.timestamp=4 is not newer than 3+1, no gap, persist currentSnapshot
+            etc.
+            */
             while (
-                snapshot.timestamp >
-                userPoolSnapshots[userPoolSnapshots.length - 1].timestamp + this.ONE_DAY_IN_SECONDS
+                currentSnapshot.timestamp >
+                userPoolSnapshots[userPoolSnapshots.length - 1].timestamp + secondsPerDay;
             ) {
                 //need to fill the gap from last snapshot
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];
-                const currentTimestamp = previousUserSnapshot.timestamp + this.ONE_DAY_IN_SECONDS;
+                const currentTimestamp = previousUserSnapshot.timestamp + secondsPerDay;
                 const poolSnapshot = poolSnapshots.find((snapshot) => snapshot.timestamp === currentTimestamp);
                 const percentShare = poolSnapshot
                     ? parseFloat(previousUserSnapshot.totalBalance) / poolSnapshot.totalSharesNum
@@ -419,43 +411,48 @@ export class UserSnapshotService {
                 });
             }
 
-            // We didn't have a poolsnapshot at the time of persistance, let's see if we have one now and persist
-            if (parseUnits(snapshot.totalBalance, 18).gt(0) && parseUnits(snapshot.totalValueUSD, 18).eq(0)) {
+            if (
+                parseUnits(currentSnapshot.totalBalance, 18).gt(0) &&
+                parseUnits(currentSnapshot.totalValueUSD, 18).eq(0)
+            ) {
+                // We didn't have a poolsnapshot at the time of persistance, let's see if we have one now and persist
                 const poolSnapshot = poolSnapshots.find(
-                    (poolSnapshot) => poolSnapshot.timestamp === snapshot.timestamp,
+                    (poolSnapshot) => poolSnapshot.timestamp === currentSnapshot.timestamp,
                 );
                 if (poolSnapshot) {
-                    const percentShare = parseFloat(snapshot.totalBalance) / poolSnapshot.totalSharesNum;
-                    snapshot.percentShare = percentShare.toString();
-                    snapshot.totalValueUSD = `${parseFloat(snapshot.totalBalance) * (poolSnapshot.sharePrice || 0)}`;
-                    snapshot.fees24h = `${
+                    const percentShare = parseFloat(currentSnapshot.totalBalance) / poolSnapshot.totalSharesNum;
+                    currentSnapshot.percentShare = percentShare.toString();
+                    currentSnapshot.totalValueUSD = `${
+                        parseFloat(currentSnapshot.totalBalance) * (poolSnapshot.sharePrice || 0)
+                    }`;
+                    currentSnapshot.fees24h = `${
                         percentShare *
                         (poolSnapshot.fees24h || 0) *
                         (1 - networkConfig.balancer.swapProtocolFeePercentage)
                     }`;
                     await prisma.prismaUserPoolBalanceSnapshot.update({
-                        where: { id: snapshot.id },
-                        data: snapshot,
+                        where: { id: currentSnapshot.id },
+                        data: currentSnapshot,
                     });
                 }
             }
             userPoolSnapshots.push({
-                timestamp: snapshot.timestamp,
-                walletBalance: snapshot.walletBalance,
-                farmBalance: snapshot.farmBalance,
-                gaugeBalance: snapshot.gaugeBalance,
-                totalBalance: snapshot.totalBalance,
-                totalValueUSD: snapshot.totalValueUSD,
-                fees24h: snapshot.fees24h,
-                percentShare: parseFloat(snapshot.percentShare),
+                timestamp: currentSnapshot.timestamp,
+                walletBalance: currentSnapshot.walletBalance,
+                farmBalance: currentSnapshot.farmBalance,
+                gaugeBalance: currentSnapshot.gaugeBalance,
+                totalBalance: currentSnapshot.totalBalance,
+                totalValueUSD: currentSnapshot.totalValueUSD,
+                fees24h: currentSnapshot.fees24h,
+                percentShare: parseFloat(currentSnapshot.percentShare),
             });
         }
 
-        // find and fill gap from last snapshot to today (if its balance is > 0)
+        // finally, we have to check if there are missing snapshots from the last snpshot until today and fill in those gaps (if the latest balance is > 0)
         if (parseUnits(userPoolSnapshots[userPoolSnapshots.length - 1].totalBalance, 18).gt(0)) {
             while (userPoolSnapshots[userPoolSnapshots.length - 1].timestamp < moment().startOf('day').unix()) {
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];
-                const currentTimestamp = previousUserSnapshot.timestamp + this.ONE_DAY_IN_SECONDS;
+                const currentTimestamp = previousUserSnapshot.timestamp + secondsPerDay;
                 const poolSnapshot = poolSnapshots.find((snapshot) => snapshot.timestamp === currentTimestamp);
                 const percentShare = poolSnapshot
                     ? parseFloat(previousUserSnapshot.totalBalance) / poolSnapshot.totalSharesNum
