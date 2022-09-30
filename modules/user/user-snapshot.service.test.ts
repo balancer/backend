@@ -98,7 +98,7 @@ afterAll(async () => {
     await prisma.$disconnect();
 });
 
-test('The user requests the user stats for the first time, requesting from snapshot, persiting to db.', async () => {
+test('The user requests the user stats for the first time, requesting from subgraph, persiting to db.', async () => {
     /*
     Scenario: 
     - The user requests the user stats for the first time
