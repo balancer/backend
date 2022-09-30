@@ -548,7 +548,7 @@ export class PoolGqlLoaderService {
         } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
 
-            if (pool.type === 'PHANTOM_STABLE' || (isWithdraw && isWeightedPoolV2(pool))) {
+            if (pool.type === 'PHANTOM_STABLE' || isWeightedPoolV2(pool)) {
                 //when nesting a phantom stable inside a phantom stable, all of the underlying tokens can be used when investing
                 //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
                 // ie: USDC/DAI/USDT for nested bbaUSD
