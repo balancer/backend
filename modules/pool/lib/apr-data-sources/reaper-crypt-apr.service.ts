@@ -48,7 +48,7 @@ export class ReaperCryptAprService implements PoolAprService {
                     group: 'REAPER',
                     type: 'LINEAR_BOOSTED',
                 },
-                update: { apr: apr },
+                update: { title: `${wrappedToken.token.symbol} APR`, apr: apr },
             });
         }
     }

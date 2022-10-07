@@ -37,7 +37,7 @@ export class PhantomStableAprService implements PoolAprService {
                             group: aprItem.group,
                             type: 'PHANTOM_STABLE_BOOSTED',
                         },
-                        update: { apr: userApr, type: 'PHANTOM_STABLE_BOOSTED' },
+                        update: { apr: userApr, title: aprItem.title, type: 'PHANTOM_STABLE_BOOSTED' },
                     });
                 }
             }
