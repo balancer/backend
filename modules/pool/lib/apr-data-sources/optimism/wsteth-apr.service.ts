@@ -43,7 +43,7 @@ export class WstethAprService implements PoolAprService {
                         apr: collectsYieldFee ? userApr : wstethApr,
                         type: 'IB_YIELD',
                     },
-                    update: { apr: collectsYieldFee ? userApr : wstethApr },
+                    update: { apr: collectsYieldFee ? userApr : wstethApr, title: `stETH APR` },
                 });
             }
         }
