@@ -63,7 +63,7 @@ export class BoostedPoolAprService implements PoolAprService {
                             title: aprItem.title,
                             group: aprItem.group,
                         },
-                        update: { apr: userApr },
+                        update: { apr: userApr, title: aprItem.title },
                     });
                 }
             }
