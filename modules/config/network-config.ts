@@ -77,6 +77,10 @@ export interface NetworkConfig {
         wstEthContract: string;
         wstEthAprEndpoint: string;
     };
+    overnight?: {
+        aprEndpoint: string;
+        linearPoolFactory: string;
+    };
     avgBlockSpeed: number;
     sor: {
         [key in DeploymentEnv]: {
@@ -266,6 +270,10 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         lido: {
             wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
             wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
+        },
+        overnight: {
+            aprEndpoint: 'https://api.overnight.fi/optimism',
+            linearPoolFactory: '0x4c4287b07d293e361281bceee8715c8cdeb64e34',
         },
         copper: {
             proxyAddress: '0x0000000000000000000000000000000000000000',

@@ -463,6 +463,8 @@ export class PoolGqlLoaderService {
                                 break;
                             case 'REAPER':
                                 title = 'Reaper boosted APR';
+                            case 'OVERNIGHT':
+                                title = 'Overnight boosted APR';
                         }
 
                         return {
