@@ -10,7 +10,7 @@ import { cronsMetricPublisher } from '../modules/metrics/cron.metric';
 
 const runningJobs: Set<string> = new Set();
 
-const defaultSamplingRate = 0.01;
+const defaultSamplingRate = 0.005;
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -187,7 +187,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => blocksSubgraphService.cacheAverageBlockTime(),
-                    0.05,
+                    0.02,
                     res,
                     next,
                 );
@@ -223,7 +223,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => poolService.syncLatestSnapshotsForAllPools(),
-                    0.5,
+                    0.1,
                     res,
                     next,
                 );
@@ -232,7 +232,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => poolService.updateLifetimeValuesForAllPools(),
-                    0.05,
+                    0.02,
                     res,
                     next,
                 );
