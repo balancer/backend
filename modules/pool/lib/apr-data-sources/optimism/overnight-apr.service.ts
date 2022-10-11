@@ -51,7 +51,7 @@ export class OvernightAprService implements PoolAprService {
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * mainTokenPrice;
             const totalLiquidity = pool.dynamicData.totalLiquidity;
-            const apr = totalLiquidity > 0 ? aprData.value * (poolWrappedLiquidity / totalLiquidity) : 0;
+            const apr = totalLiquidity > 0 ? aprData.value / 100 * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id: itemId },
