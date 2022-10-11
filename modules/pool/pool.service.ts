@@ -53,6 +53,7 @@ import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/r
 import { id } from 'ethers/lib/utils';
 import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
 import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
+import { OvernightAprService } from './lib/apr-data-sources/optimism/overnight-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -299,6 +300,7 @@ export const poolService = new PoolService(
                       networkConfig.balancer.yieldProtocolFeePercentage,
                   ),
                   new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
+                  new OvernightAprService(networkConfig.overnight!.aprEndpoint, tokenService),
               ]),
         new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
