@@ -300,11 +300,7 @@ export const poolService = new PoolService(
                       networkConfig.balancer.yieldProtocolFeePercentage,
                   ),
                   new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
-                  new OvernightAprService(
-                      networkConfig.overnight!.linearPoolFactory,
-                      networkConfig.overnight!.aprEndpoint,
-                      tokenService,
-                  ),
+                  new OvernightAprService(networkConfig.overnight!.aprEndpoint, tokenService),
               ]),
         new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),

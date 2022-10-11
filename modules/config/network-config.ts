@@ -79,7 +79,6 @@ export interface NetworkConfig {
     };
     overnight?: {
         aprEndpoint: string;
-        linearPoolFactory: string;
     };
     avgBlockSpeed: number;
     sor: {
@@ -273,7 +272,6 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         overnight: {
             aprEndpoint: 'https://api.overnight.fi/optimism',
-            linearPoolFactory: '0x4c4287b07d293e361281bceee8715c8cdeb64e34',
         },
         copper: {
             proxyAddress: '0x0000000000000000000000000000000000000000',
