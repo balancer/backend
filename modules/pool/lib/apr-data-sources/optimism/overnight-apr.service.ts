@@ -13,16 +13,23 @@ type OvernightApr = {
 
 export class OvernightAprService implements PoolAprService {
     private readonly overnightTokens: Record<string, string> = {
+        //these should always be stored in all lowercase
         '0xa348700745d249c3b49d2c2acac9a5ae8155f826': 'usd+',
         '0x9e88f7cf6c9fc2895dfaa1b7c21d446ec1749f89': 'dai+',
     };
+    private readonly wrappedTokenAddresses = Object.keys(this.overnightTokens);
 
     constructor(private readonly overnightAprEndpoint: string, private readonly tokenService: TokenService) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
+        const overnightLinearPools = pools.filter(
+            (pool) =>
+                pool.type === 'LINEAR' &&
+                pool.tokens.some((token) => this.wrappedTokenAddresses.includes(token.address)),
+        );
 
-        for (const pool of pools) {
+        for (const pool of overnightLinearPools) {
             if (!pool.linearData || !pool.dynamicData) {
                 continue;
             }
@@ -31,20 +38,10 @@ export class OvernightAprService implements PoolAprService {
 
             const linearData = pool.linearData;
             const wrappedToken = pool.tokens[linearData.wrappedIndex];
-
-            let apiQueryName;
-            for (const token in this.overnightTokens) {
-                if (isSameAddress(token, wrappedToken.address)) {
-                    apiQueryName = this.overnightTokens[token];
-                }
-            }
-
-            if (!apiQueryName) {
-                continue;
-            }
+            const apiQuerySlug = this.overnightTokens[wrappedToken.token.address];
 
             const { data: aprData } = await axios.get<OvernightApr>(
-                `${this.overnightAprEndpoint}/${apiQueryName}/fin-data/avg-apr/week`,
+                `${this.overnightAprEndpoint}/${apiQuerySlug}/fin-data/avg-apr/week`,
             );
 
             const mainToken = pool.tokens[linearData.mainIndex];
