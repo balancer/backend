@@ -1,4 +1,3 @@
-import { getAddress } from '@ethersproject/address';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
@@ -6,7 +5,7 @@ import { PoolAprService } from '../../../pool-types';
 
 export class StaderStakedFtmAprService implements PoolAprService {
     private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
-    private readonly SFTMX_APR = 0.125;
+    private readonly SFTMX_APR = 0.046;
 
     constructor(private readonly tokenService: TokenService) {}
 
