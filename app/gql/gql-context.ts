@@ -1,4 +1,4 @@
-import { Hub } from '@sentry/hub/types/hub';
+import { Hub } from '@sentry/node';
 
 export interface Context {
     accountAddress: string | null;
