@@ -9,6 +9,8 @@ import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking } from '@pris
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { secondsPerDay } from '../../common/time';
 import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
+import e from 'express';
+import { first } from 'lodash';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
@@ -157,16 +159,20 @@ export class UserSnapshotService {
         userAddress = userAddress.toLowerCase();
         poolId = poolId.toLowerCase();
 
-        let storedUserSnapshotsFromRange = await this.getStoredSnapshotsForUserForPoolFromTimestamp(
+        const storedUserSnapshotsForPool = await this.getStoredSnapshotsForUserForPoolFromTimestamp(
             userAddress,
-            oldestRequestedSnapshotTimestamp,
+            0,
             poolId,
+        );
+
+        let storedUserSnapshotsInRangeForPool = storedUserSnapshotsForPool.filter(
+            (snapshot) => snapshot.timestamp >= oldestRequestedSnapshotTimestamp,
         );
 
         let poolSnapshots: PrismaPoolSnapshot[] = [];
 
         // no stored snapshots, retrieve from subgraph and store all
-        if (storedUserSnapshotsFromRange.length === 0) {
+        if (storedUserSnapshotsForPool.length === 0) {
             const userSnapshotsFromSubgraph =
                 await this.userSnapshotSubgraphService.getUserBalanceSnapshotsForUserAndRange(
                     0,
@@ -261,7 +267,7 @@ export class UserSnapshotService {
                 data: prismaInput,
             });
 
-            storedUserSnapshotsFromRange = await this.getStoredSnapshotsForUserForPoolFromTimestamp(
+            storedUserSnapshotsInRangeForPool = await this.getStoredSnapshotsForUserForPoolFromTimestamp(
                 userAddress,
                 oldestRequestedSnapshotTimestamp,
                 poolId,
@@ -274,29 +280,79 @@ export class UserSnapshotService {
         }
 
         /*
+        
+
         If a user joined a pool and did not interact with the pool (or any other pool) for a few days, those snapshots 
         will be missing from the subgraph and also in the database. When the user requests his snapshots for a given pool
-        we need to find and fill the gaps between the first and the last snapshot we have in the database
-        In addition, if the last snapshot is not a 0 total balance snapshot (which would mean the user left the pool) we will also 
-        need to fill the gaps from the last snapshot until today.
+        we need to find and fill the gaps between the first and the last snapshot we have in the database.
+
+        1st) If there is no snapshot for the oldestRequestedTimestamp but there is an older one, we need to infer from the older one to the oldestRequestedTimestamp
+        2nd) We need to find and fill the gaps between the oldestRequestedTimestamp and the latest stored snapshot we have in the database.
+        3rd) If the latest stored snapshot is not a 0 total balance snapshot (which would mean the user left the pool) we will also 
+        need to fill the gaps from the latest stored snapshot until today.
         */
 
         // The first snapshot in the database must be >0 total value, push that
         const userPoolSnapshots: UserPoolSnapshot[] = [];
-        const firstSnapshot = storedUserSnapshotsFromRange.shift();
-        if (firstSnapshot) {
-            userPoolSnapshots.push({
-                timestamp: firstSnapshot.timestamp,
-                walletBalance: firstSnapshot.walletBalance,
-                farmBalance: firstSnapshot.farmBalance,
-                gaugeBalance: firstSnapshot.gaugeBalance,
-                totalBalance: firstSnapshot.totalBalance,
-                totalValueUSD: firstSnapshot.totalValueUSD,
-                fees24h: firstSnapshot.fees24h,
-                percentShare: parseFloat(firstSnapshot.percentShare),
+
+        // 1st) if we either have no stored snapshots for the range or only newer ones, we need to check if we have an older and infer
+        if (
+            storedUserSnapshotsInRangeForPool.length === 0 ||
+            storedUserSnapshotsInRangeForPool[0].timestamp > oldestRequestedSnapshotTimestamp
+        ) {
+            const olderSnapshot = await prisma.prismaUserPoolBalanceSnapshot.findFirst({
+                where: {
+                    userAddress: userAddress,
+                    timestamp: {
+                        lt: oldestRequestedSnapshotTimestamp,
+                    },
+                    poolId: poolId,
+                },
+                orderBy: { timestamp: 'desc' },
             });
+            if (olderSnapshot) {
+                const poolSnapshot = poolSnapshots.find(
+                    (snapshot) => snapshot.timestamp === oldestRequestedSnapshotTimestamp,
+                );
+                const percentShare = poolSnapshot
+                    ? parseFloat(olderSnapshot.totalBalance) / poolSnapshot.totalSharesNum
+                    : 0;
+                userPoolSnapshots.push({
+                    timestamp: oldestRequestedSnapshotTimestamp,
+                    walletBalance: olderSnapshot.walletBalance,
+                    farmBalance: olderSnapshot.farmBalance,
+                    gaugeBalance: olderSnapshot.gaugeBalance,
+                    totalBalance: olderSnapshot.totalBalance,
+                    percentShare: percentShare,
+                    totalValueUSD: `${parseFloat(olderSnapshot.totalBalance) * (poolSnapshot?.sharePrice || 0)}`,
+                    fees24h: `${
+                        percentShare *
+                        (poolSnapshot?.fees24h || 0) *
+                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                    }`,
+                });
+            }
         }
-        for (const currentSnapshot of storedUserSnapshotsFromRange) {
+
+        // We need the fist snapshot already in the userPoolSnapshots array because we are accessing previous indexes below.
+        // We only need to do this here if we didn't already push one snapshot above.
+        if (userPoolSnapshots.length === 0) {
+            const firstSnapshot = storedUserSnapshotsInRangeForPool.shift();
+            if (firstSnapshot) {
+                // check
+                userPoolSnapshots.push({
+                    timestamp: firstSnapshot.timestamp,
+                    walletBalance: firstSnapshot.walletBalance,
+                    farmBalance: firstSnapshot.farmBalance,
+                    gaugeBalance: firstSnapshot.gaugeBalance,
+                    totalBalance: firstSnapshot.totalBalance,
+                    totalValueUSD: firstSnapshot.totalValueUSD,
+                    fees24h: firstSnapshot.fees24h,
+                    percentShare: parseFloat(firstSnapshot.percentShare),
+                });
+            }
+        }
+        for (const currentSnapshot of storedUserSnapshotsInRangeForPool) {
             /*
             as long as the currentSnapshot is newer than (timestamp + 1 day) of the last snapshot in userPoolSnapshots, it means there is a gap that we need to fill. 
             E.g. we have snapshots for day 1 and 4 -> currentSnapshot.timestamp=4 (day 1 already stored above), which is newer than 1+1, so we fill the gap for day 2.
@@ -365,7 +421,7 @@ export class UserSnapshotService {
             });
         }
 
-        // finally, we have to check if there are missing snapshots from the last snpshot until today and fill in those gaps (if the latest balance is > 0)
+        // finally, we have to check if there are missing snapshots from the last snapshot until today and fill in those gaps (if the latest balance is > 0)
         if (parseFloat(userPoolSnapshots[userPoolSnapshots.length - 1].totalBalance) > 0) {
             while (userPoolSnapshots[userPoolSnapshots.length - 1].timestamp < moment().startOf('day').unix()) {
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];

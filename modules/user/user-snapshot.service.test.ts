@@ -78,7 +78,7 @@ beforeAll(async () => {
     );
 
     // create 30 snapshotsfor pool1
-    await createRandomSnapshotsForPool(fidelio.id, fidelio.tokens.length, 30);
+    await createRandomSnapshotsForPool(fidelio.id, fidelio.tokens.length, 365);
 
     // create user
     await prisma.prismaUser.create({
@@ -237,6 +237,97 @@ test('The user requests the user stats for the first time, requesting from subgr
         //make sure we have a pool snapshot for each user snapshot
         expect(foundPoolSnapshot).toBe(true);
     }
+});
+
+test('User in in the pool for a very long time, requests various different time ranges.', async () => {
+    /*
+    Scenario: 
+    - The user joined pool1 one year ago and is in there ever since, never changed position.
+    - Requests different time ranges
+
+    Behaviour under test:
+    - If the various time ranges return correct number of snapshots
+    - Only one snapshot a year ago, all other snapshots should be inferred up to today
+
+    Mock data for user-balance-subgraph (important that timestamps are ASC, as this is requested like this form the function under test):
+    - Create 1 snapshot one year ago for the user in the subgraph
+    
+    Also create 365 Snapshots for the pool.
+
+    */
+
+    const oneYearAgo = today - 365 * secondsPerDay;
+    const timestampOfLastReturnedSnapshot = oneYearAgo;
+
+    mockServer.use(
+        ...[
+            graphql.query('UserBalanceSnapshots', async (req, res, ctx) => {
+                const requestJson = await req.json();
+                if (requestJson.variables.where.timestamp_gte > timestampOfLastReturnedSnapshot) {
+                    return res(
+                        ctx.data({
+                            snapshots: [],
+                        }),
+                    );
+                }
+                // important, sort snapshots ASC
+                return res(
+                    ctx.data({
+                        snapshots: [
+                            {
+                                id: `${userAddress}-${oneYearAgo}`,
+                                user: {
+                                    id: userAddress,
+                                },
+                                timestamp: oneYearAgo,
+                                walletTokens: [poolAddress1],
+                                walletBalances: ['10'],
+                                gauges: [],
+                                gaugeBalances: [],
+                                farms: [farmId1],
+                                farmBalances: ['5'],
+                            },
+                        ],
+                    }),
+                );
+            }),
+        ],
+    );
+
+    const thirtySnapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        'THIRTY_DAYS',
+    );
+
+    //also includes the one from today
+    expect(thirtySnapshotsFromService.length).toBe(31);
+    const thirtySnapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
+        where: {
+            userAddress: userAddress,
+        },
+        include: { pool: true },
+    });
+
+    // check if the 3 snapshots have been persisted
+    expect(thirtySnapshotsFromDb.length).toBe(1);
+
+    const ninetySnapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        'NINETY_DAYS',
+    );
+    //also includes the one from today
+    expect(ninetySnapshotsFromService.length).toBe(91);
+    const ninetySnapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
+        where: {
+            userAddress: userAddress,
+        },
+        include: { pool: true },
+    });
+
+    // check if the 3 snapshots have been persisted
+    expect(ninetySnapshotsFromDb.length).toBe(1);
 });
 
 test('user leaves pool and joins pool again', async () => {
