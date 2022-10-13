@@ -48,11 +48,6 @@ const resolvers: Resolvers = {
                 range,
             );
         },
-        userGetPortfolioSnapshots: async (parent, { days }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            return userService.getPortfolioSnapshotsForUser(accountAddress, days);
-        },
     },
     Mutation: {
         userSyncChangedWalletBalancesForAllPools: async (parent, {}, context) => {
