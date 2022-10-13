@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
+import { Hub } from '@sentry/node';
 import { NextFunction, Request, Response } from 'express';
-import { Hub } from '@sentry/hub/types/hub';
 
 declare global {
     namespace Express {

@@ -33,6 +33,7 @@ import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
 import { ContentService } from '../../content/content.service';
 import { isWeightedPoolV2 } from './pool-utils';
+import { oldBnum } from '../../big-number/old-big-number';
 
 export class PoolGqlLoaderService {
     constructor(private readonly configService: ContentService) {}
@@ -462,10 +463,13 @@ export class PoolGqlLoaderService {
                                 break;
                             case 'REAPER':
                                 title = 'Reaper boosted APR';
+                                break;
+                            case 'OVERNIGHT':
+                                title = 'Overnight boosted APR';
                         }
 
                         return {
-                            id: group,
+                            id: `${pool.id}-${group}`,
                             title,
                             apr: `${apr}`,
                             subItems,
@@ -547,7 +551,7 @@ export class PoolGqlLoaderService {
         } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
 
-            if (pool.type === 'PHANTOM_STABLE' || (isWithdraw && isWeightedPoolV2(pool))) {
+            if (pool.type === 'PHANTOM_STABLE' || isWeightedPoolV2(pool)) {
                 //when nesting a phantom stable inside a phantom stable, all of the underlying tokens can be used when investing
                 //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
                 // ie: USDC/DAI/USDT for nested bbaUSD
@@ -634,6 +638,7 @@ export class PoolGqlLoaderService {
             const percentOfSupplyNested =
                 totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
 
+            //50_000_000_000_000
             return {
                 ...this.mapPoolTokenToGql(token),
                 __typename: 'GqlPoolTokenPhantomStable',
@@ -776,15 +781,15 @@ export class PoolGqlLoaderService {
         const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
         const wrappedToken = nestedPool.tokens[nestedPool.linearData.wrappedIndex];
 
-        const mainTokenBalance = parseFloat(mainToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
-        const wrappedTokenBalance = parseFloat(wrappedToken.dynamicData?.balance || '0') * percentOfSupplyInPool;
+        const wrappedTokenBalance = oldBnum(wrappedToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
+        const mainTokenBalance = oldBnum(mainToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
 
         return {
-            mainTokenBalance: `${mainTokenBalance}`,
-            wrappedTokenBalance: `${wrappedTokenBalance}`,
-            totalMainTokenBalance: `${
-                mainTokenBalance + wrappedTokenBalance * parseFloat(wrappedToken.dynamicData?.priceRate || '1')
-            }`,
+            mainTokenBalance: `${mainTokenBalance.toFixed(mainToken.token.decimals)}`,
+            wrappedTokenBalance: `${wrappedTokenBalance.toFixed(wrappedToken.token.decimals)}`,
+            totalMainTokenBalance: `${mainTokenBalance
+                .plus(wrappedTokenBalance.times(wrappedToken.dynamicData?.priceRate || '1'))
+                .toFixed(mainToken.token.decimals)}`,
         };
     }
 }

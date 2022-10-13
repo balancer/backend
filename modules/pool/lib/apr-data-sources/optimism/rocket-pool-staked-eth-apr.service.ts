@@ -6,7 +6,7 @@ import { isComposableStablePool, isWeightedPoolV2 } from '../../pool-utils';
 
 export class RocketPoolStakedEthAprService implements PoolAprService {
     private readonly RETH_ADDRESS = '0x9bcef72be871e61ed4fbbc7630889bee758eb81d';
-    private readonly RETH_APR = 0.0513;
+    private readonly RETH_APR = 0.0425;
 
     constructor(private readonly tokenService: TokenService, private readonly yieldProtocolFeePercentage: number) {}
 

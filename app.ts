@@ -103,7 +103,7 @@ async function startServer() {
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 
-    if (process.env.NODE_ENV === 'local') {
+    if (process.env.NODE_ENV === 'local' && process.env.CRONS === 'true') {
         try {
             scheduleLocalWorkerTasks();
         } catch (e) {

@@ -53,6 +53,7 @@ import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/r
 import { id } from 'ethers/lib/utils';
 import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
 import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
+import { OvernightAprService } from './lib/apr-data-sources/optimism/overnight-apr.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -298,13 +299,10 @@ export const poolService = new PoolService(
                       networkConfig.lido!.wstEthContract,
                       networkConfig.balancer.yieldProtocolFeePercentage,
                   ),
-                  new ReaperCryptAprService(
-                      tokenService,
-                      networkConfig.reaper!.cryptsEndpoint,
-                      networkConfig.reaper?.cryptsOverrides,
-                  ),
+                  new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
+                  new OvernightAprService(networkConfig.overnight!.aprEndpoint, tokenService),
               ]),
-        new PhantomStableAprService(),
+        new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(networkConfig.balancer.swapProtocolFeePercentage),
         ...(isFantomNetwork()

@@ -39,13 +39,17 @@ export class BoostedPoolAprService implements PoolAprService {
                     continue;
                 }
 
-                const collectsYieldFee = isWeightedPoolV2(pool) || isComposableStablePool(pool);
+                const collectsYieldFee =
+                    (isWeightedPoolV2(pool) || isComposableStablePool(pool)) &&
+                    //nested phantom stables already have the yield fee removed
+                    token.nestedPool.type !== 'PHANTOM_STABLE';
                 for (const aprItem of tokenAprItems) {
                     const itemId = `${pool.id}-${aprItem.id}`;
                     const { totalShares } = token.nestedPool.dynamicData;
                     const tokenBalance = parseFloat(token.dynamicData.balance);
                     const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
                     let userApr = apr;
+
                     if (collectsYieldFee) {
                         userApr = apr * (1 - this.yieldProtocolFeePercentage);
                     }
@@ -59,7 +63,7 @@ export class BoostedPoolAprService implements PoolAprService {
                             title: aprItem.title,
                             group: aprItem.group,
                         },
-                        update: { apr: userApr },
+                        update: { apr: userApr, title: aprItem.title },
                     });
                 }
             }

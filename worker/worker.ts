@@ -35,8 +35,10 @@ export function startWorker() {
         }),
     );
 
-    scheduleJobs();
-    createAlerts();
+    if (env.NODE_ENV !== 'local') {
+        scheduleJobs();
+        createAlerts();
+    }
 
     app.listen(env.PORT, () => {
         console.log(`Worker listening on port ${env.PORT}`);
