@@ -353,7 +353,7 @@ export class UserSnapshotService {
             }
         }
         for (const currentSnapshot of storedUserSnapshotsInRangeForPool) {
-            /*
+            /* 2nd)
             as long as the currentSnapshot is newer than (timestamp + 1 day) of the last snapshot in userPoolSnapshots, it means there is a gap that we need to fill. 
             E.g. we have snapshots for day 1 and 4 -> currentSnapshot.timestamp=4 (day 1 already stored above), which is newer than 1+1, so we fill the gap for day 2.
             currentSnapshot.timestamp=4 is newer than 2+1, need to fill gap for day 3.
@@ -421,7 +421,7 @@ export class UserSnapshotService {
             });
         }
 
-        // finally, we have to check if there are missing snapshots from the last snapshot until today and fill in those gaps (if the latest balance is > 0)
+        // 3rd) we have to check if there are missing snapshots from the last snapshot until today and fill in those gaps (if the latest balance is > 0)
         if (parseFloat(userPoolSnapshots[userPoolSnapshots.length - 1].totalBalance) > 0) {
             while (userPoolSnapshots[userPoolSnapshots.length - 1].timestamp < moment().startOf('day').unix()) {
                 const previousUserSnapshot = userPoolSnapshots[userPoolSnapshots.length - 1];
