@@ -248,6 +248,7 @@ test('User in in the pool for a very long time, requests various different time 
     Behaviour under test:
     - If the various time ranges return correct number of snapshots
     - Only one snapshot a year ago, all other snapshots should be inferred up to today
+    - Only one year old snapshot, make sure that also snapshots are returned for shorter timeframes
 
     Mock data for user-balance-subgraph (important that timestamps are ASC, as this is requested like this form the function under test):
     - Create 1 snapshot one year ago for the user in the subgraph

@@ -9,8 +9,6 @@ import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking } from '@pris
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { secondsPerDay } from '../../common/time';
 import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
-import e from 'express';
-import { first } from 'lodash';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
