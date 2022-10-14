@@ -1,20 +1,19 @@
-import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
-import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
-import { UserPoolBalance, UserPoolSnapshot, UserPortfolioSnapshot, UserStakedBalanceService } from './user-types';
-import { UserBalanceService } from './lib/user-balance.service';
 import { PrismaPoolStaking } from '@prisma/client';
-import { PoolSwapService } from '../pool/lib/pool-swap.service';
-import { tokenService } from '../token/token.service';
-import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
-import { isFantomNetwork } from '../config/network-config';
-import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
 import { prisma } from '../../prisma/prisma-client';
-import { UserSnapshotService } from './lib/user-snapshot.service';
-import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
-import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
+import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import _ from 'lodash';
+import { isFantomNetwork } from '../config/network-config';
+import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
+import { PoolSwapService } from '../pool/lib/pool-swap.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
+import { tokenService } from '../token/token.service';
+import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
+import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
+import { UserBalanceService } from './lib/user-balance.service';
+import { UserSnapshotService } from './lib/user-snapshot.service';
+import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
+import { UserPoolBalance, UserPoolSnapshot, UserStakedBalanceService } from './user-types';
 
 export class UserService {
     constructor(
