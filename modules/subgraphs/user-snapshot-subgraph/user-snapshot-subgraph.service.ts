@@ -34,18 +34,29 @@ export class UserSnapshotSubgraphService {
         return this.sdk.UserBalanceSnapshots(args);
     }
 
-    public async getUserBalanceSnapshotsForLastNDays(
+    public async getUserBalanceSnapshotsForUserAndRange(
+        fromTimestamp: number,
+        toTimestamp: number,
         userAddress: string,
-        numDays: number,
     ): Promise<UserBalanceSnapshotsQuery> {
-        //TODO: what if numDays is > 1000? we've got some time before we need to worry about this though
-        const timestamp = moment().utc().startOf('day').subtract(numDays, 'days').unix();
+        let allSnapshots: UserBalanceSnapshotsQuery = {
+            snapshots: [],
+        };
+        do {
+            const result = await this.sdk.UserBalanceSnapshots({
+                where: { timestamp_gte: fromTimestamp, timestamp_lte: toTimestamp, user: userAddress.toLowerCase() },
+                first: 1000,
+                orderBy: UserBalanceSnapshot_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Asc,
+            });
+            if (result.snapshots.length === 0) {
+                break;
+            }
+            allSnapshots.snapshots.push(...result.snapshots);
+            fromTimestamp = result.snapshots[result.snapshots.length - 1].timestamp + 1;
+        } while (true);
 
-        return this.sdk.UserBalanceSnapshots({
-            where: { user: userAddress.toLowerCase(), timestamp_gte: timestamp },
-            orderBy: UserBalanceSnapshot_OrderBy.Timestamp,
-            orderDirection: OrderDirection.Asc,
-        });
+        return allSnapshots;
     }
 
     public get sdk() {

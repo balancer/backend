@@ -35,6 +35,12 @@ export class PoolSnapshotService {
         });
     }
 
+    public async getSnapshotForPool(poolId: string, timestamp: number) {
+        return prisma.prismaPoolSnapshot.findUnique({
+            where: { id: `${poolId}-${timestamp}` },
+        });
+    }
+
     public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
 
