@@ -69,4 +69,8 @@ export const optimismJobs = [
         name: 'user-sync-staked-balances',
         interval: every(10, 'seconds'),
     },
+    // {
+    //     name: 'sync-user-snapshots',
+    //     interval: every(1, 'hours'),
+    // },
 ];
