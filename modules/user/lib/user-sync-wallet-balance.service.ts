@@ -53,6 +53,7 @@ export class UserSyncWalletBalanceService {
         }
 
         let operations: any[] = [];
+        operations.push(prisma.prismaUserWalletBalance.deleteMany());
 
         for (const pool of pools) {
             const poolShares = shares.filter((share) => share.poolAddress.toLowerCase() === pool.address);
