@@ -70,6 +70,7 @@ const balancerResolvers: Resolvers = {
 
             return {
                 ...latestPrice,
+                ...{ priceUSD: '0' },
                 __typename: 'GqlBalancerTokenLatestPrice',
             };
         },
