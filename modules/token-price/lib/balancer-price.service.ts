@@ -15,18 +15,27 @@ export class BalancerPriceService {
             where: { asset_in: addresses },
         });
 
-        for (const address of addresses) {
-            const tokenPrice = tokenPrices.find((tokenPrice) => tokenPrice.asset === address);
+        const { tokens } = await balancerSubgraphService.getTokens({
+            first: 1000, //TODO: this could stop working at some point
+            where: { address_in: addresses },
+        });
 
-            if (tokenPrice) {
-                if (coingeckoPrices[tokenPrice.pricingAsset]) {
-                    balancerTokenPrices[address] = {
-                        usd: (coingeckoPrices[tokenPrice.pricingAsset]?.usd || 0) * parseFloat(tokenPrice.price),
-                    };
-                } else {
-                    balancerTokenPrices[address] = {
-                        usd: parseFloat(tokenPrice.priceUSD),
-                    };
+        for (const address of addresses) {
+            const token = tokens.find((token) => token.address === address);
+
+            if (token) {
+                if (token.latestPrice && token.latestUSDPrice) {
+                    if (coingeckoPrices[token.latestPrice.pricingAsset]) {
+                        balancerTokenPrices[address] = {
+                            usd:
+                                (coingeckoPrices[token.latestPrice.pricingAsset]?.usd || 0) *
+                                parseFloat(token.latestPrice.price),
+                        };
+                    } else {
+                        balancerTokenPrices[address] = {
+                            usd: parseFloat(token.latestUSDPrice),
+                        };
+                    }
                 }
             }
         }

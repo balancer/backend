@@ -104,6 +104,26 @@ query BalancerTokenPrices(
     }
 }
 
+query BalancerTokens(
+    $skip: Int
+    $first: Int
+    $orderBy: Token_orderBy
+    $orderDirection: OrderDirection
+    $where: Token_filter
+    $block: Block_height
+) {
+    tokens(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...BalancerToken
+    }
+}
+
 fragment BalancerTokenPrice on TokenPrice {
     id
     poolId {
@@ -115,7 +135,16 @@ fragment BalancerTokenPrice on TokenPrice {
     price
     block
     timestamp
-    priceUSD
+}
+
+fragment BalancerToken on Token {
+    address
+    id
+    latestPrice {
+        pricingAsset
+        price
+    }
+    latestUSDPrice
 }
 
 fragment BalancerPool on Pool {
@@ -159,7 +188,6 @@ fragment BalancerPoolToken on PoolToken {
     decimals
     address
     balance
-    invested
     weight
     priceRate
 }
@@ -304,7 +332,6 @@ fragment BalancerLatestPrice on LatestPrice {
     }
     pricingAsset
     block
-    priceUSD
 }
 
 fragment BalancerJoinExit on JoinExit {
