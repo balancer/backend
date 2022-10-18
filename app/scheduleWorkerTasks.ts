@@ -4,7 +4,6 @@ import { blocksSubgraphService } from '../modules/blocks-subgraph/blocks-subgrap
 import { balancerSubgraphService } from '../modules/balancer-subgraph/balancer-subgraph.service';
 import { balancerService } from '../modules/balancer/balancer.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { portfolioService } from '../modules/portfolio/portfolio.service';
 import moment from 'moment-timezone';
 import { sleep } from '../modules/util/promise';
 import { tokenService } from '../modules/token/token.service';
@@ -146,25 +145,25 @@ export function scheduleWorkerTasks() {
         await balancerSubgraphService.cachePortfolioPoolsData(parseInt(previousBlock.number));
     });
 
-    scheduleJob('5 0 * * *', 'cache-daily-data', TWENTY_MINUTES_IN_MS, async () => {
-        console.log('Starting new cron to cache daily data.');
-        const timestamp = moment.tz('GMT').startOf('day').unix();
+    // scheduleJob('5 0 * * *', 'cache-daily-data', TWENTY_MINUTES_IN_MS, async () => {
+    //     console.log('Starting new cron to cache daily data.');
+    //     const timestamp = moment.tz('GMT').startOf('day').unix();
 
-        //retry loop in case of timeouts from the subgraph
-        for (let i = 0; i < 10; i++) {
-            try {
-                await portfolioService.cacheRawDataForTimestamp(timestamp);
-                console.log('Finished cron to cache daily data.');
-                break;
-            } catch (e) {
-                console.log(
-                    `Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`,
-                    e,
-                );
-                await sleep(5000);
-            }
-        }
-    });
+    //     //retry loop in case of timeouts from the subgraph
+    //     for (let i = 0; i < 10; i++) {
+    //         try {
+    //             await portfolioService.cacheRawDataForTimestamp(timestamp);
+    //             console.log('Finished cron to cache daily data.');
+    //             break;
+    //         } catch (e) {
+    //             console.log(
+    //                 `Error happened during daily caching <${timestamp}>. Running again for the ${i}th time.`,
+    //                 e,
+    //             );
+    //             await sleep(5000);
+    //         }
+    //     }
+    // });
 
     console.log('scheduled cron jobs');
 }
