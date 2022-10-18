@@ -118,8 +118,8 @@ type GqlBalancerTokenLatestPrice {
     block: BigInt!
     id: ID!
     price: BigDecimal!
-    priceUSD: BigDecimal!
     pricingAsset: Bytes!
+    priceUSD: BigDecimal!
 }
 
 type GqlBalancerPoolSnapshot {
