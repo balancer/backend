@@ -36,7 +36,11 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
         categories: true,
         allTokens: {
             include: {
-                token: true,
+                token: {
+                    include: {
+                        types: true,
+                    },
+                },
             },
         },
         aprItems: true,
@@ -180,7 +184,11 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
         categories: true,
         allTokens: {
             include: {
-                token: true,
+                token: {
+                    include: {
+                        types: true,
+                    },
+                },
             },
         },
         aprItems: true,
