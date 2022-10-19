@@ -362,11 +362,9 @@ export class PoolGqlLoaderService {
             const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
             const isNested = !poolToken;
             const isPhantomBpt = token.tokenAddress === pool.address;
-            const isTopLevelMainToken = !isPhantomBpt && !isNested && token.poolId === null;
-            const isNestedMainToken =
-                isNested &&
-                token.poolId === null &&
-                !token.token.types.some((type) => type.type === 'LINEAR_WRAPPED_TOKEN');
+            const isMainToken = !token.token.types.some(
+                (type) => type.type === 'LINEAR_WRAPPED_TOKEN' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
+            );
 
             return {
                 ...token.token,
@@ -374,7 +372,7 @@ export class PoolGqlLoaderService {
                 weight: poolToken?.dynamicData?.weight,
                 isNested,
                 isPhantomBpt,
-                isMainToken: isTopLevelMainToken || isNestedMainToken,
+                isMainToken,
             };
         });
     }
