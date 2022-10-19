@@ -290,6 +290,7 @@ export const poolService = new PoolService(
                   new SpookySwapAprService(tokenService),
                   new YearnVaultAprService(tokenService),
                   new StaderStakedFtmAprService(tokenService),
+                  new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactories, tokenService),
               ]
             : [
                   new RocketPoolStakedEthAprService(tokenService, networkConfig.balancer.yieldProtocolFeePercentage),
@@ -299,7 +300,7 @@ export const poolService = new PoolService(
                       networkConfig.lido!.wstEthContract,
                       networkConfig.balancer.yieldProtocolFeePercentage,
                   ),
-                  new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactory, tokenService),
+                  new ReaperCryptAprService(networkConfig.reaper!.linearPoolFactories, tokenService),
                   new OvernightAprService(networkConfig.overnight!.aprEndpoint, tokenService),
               ]),
         new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),

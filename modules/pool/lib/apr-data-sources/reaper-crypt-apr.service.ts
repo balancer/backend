@@ -9,13 +9,13 @@ import ReaperCryptStrategyAbi from './abi/ReaperCryptStrategy.json';
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
 
-    constructor(private readonly linearPoolFactory: string, private readonly tokenService: TokenService) {}
+    constructor(private readonly linearPoolFactories: string[], private readonly tokenService: TokenService) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
 
         for (const pool of pools) {
-            if (pool.factory !== this.linearPoolFactory || !pool.linearData || !pool.dynamicData) {
+            if (!this.linearPoolFactories.includes(pool.factory || '') || !pool.linearData || !pool.dynamicData) {
                 continue;
             }
 

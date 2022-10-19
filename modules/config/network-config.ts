@@ -68,7 +68,7 @@ export interface NetworkConfig {
         proxyAddress: string;
     };
     reaper?: {
-        linearPoolFactory: string;
+        linearPoolFactories: string[];
     };
     yearn: {
         vaultsEndpoint: string;
@@ -181,6 +181,9 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         copper: {
             proxyAddress: '0xbC8a71C75ffbd2807c021F4F81a8832392dEF93c',
         },
+        reaper: {
+            linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
+        },
     },
     '10': {
         chain: {
@@ -264,7 +267,10 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             vaultsEndpoint: 'https://#/',
         },
         reaper: {
-            linearPoolFactory: '0x19968d4b7126904fd665ed25417599df9604df83',
+            linearPoolFactories: [
+                '0x19968d4b7126904fd665ed25417599df9604df83',
+                '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
+            ],
         },
         lido: {
             wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
