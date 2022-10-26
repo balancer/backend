@@ -90,6 +90,14 @@ export interface NetworkConfig {
             swapGas: BigNumber;
         };
     };
+    datastudio: {
+        [key in DeploymentEnv]: {
+            user: string;
+            sheetId: string;
+            compositionTabName: string;
+            databaseTabName: string;
+        };
+    };
 }
 
 const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
@@ -183,6 +191,20 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         reaper: {
             linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
+        },
+        datastudio: {
+            main: {
+                user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+                sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
+                databaseTabName: 'Database v2',
+                compositionTabName: 'Pool Composition v2',
+            },
+            canary: {
+                user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+                sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
+                databaseTabName: 'Database v2',
+                compositionTabName: 'Pool Composition v2',
+            },
         },
     },
     '10': {
@@ -281,6 +303,20 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         copper: {
             proxyAddress: '0x0000000000000000000000000000000000000000',
+        },
+        datastudio: {
+            main: {
+                user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+                sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
+                databaseTabName: 'DatabaseOptimism v2',
+                compositionTabName: 'Pool Composition Optimism v2',
+            },
+            canary: {
+                user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+                sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
+                databaseTabName: 'DatabaseOptimism v2',
+                compositionTabName: 'Pool Composition Optimism v2',
+            },
         },
     },
 };

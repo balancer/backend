@@ -7,6 +7,7 @@ import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/bloc
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
 import { cronsMetricPublisher } from '../modules/metrics/cron.metric';
+import { datastudioService } from '../modules/datastudio/datastudio.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -239,6 +240,9 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-user-snapshots':
                 await runIfNotAlreadyRunning(job.name, () => userService.syncUserBalanceSnapshots(), 0.01, res, next);
+                break;
+            case 'feed-data-to-datastudio':
+                await runIfNotAlreadyRunning(job.name, () => datastudioService.feedPoolData(), 0.0, res, next);
                 break;
             default:
                 res.sendStatus(400);
