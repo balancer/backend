@@ -63,6 +63,7 @@ export class DatastudioService {
                         token: true,
                     },
                 },
+                categories: true,
             },
         });
         for (const pool of pools) {
@@ -100,6 +101,8 @@ export class DatastudioService {
 
             const swapFee = pool.dynamicData?.swapFee || `0`;
 
+            const blacklisted = pool.categories.find((category) => category.category === 'BLACK_LISTED');
+
             poolDataRow.push(
                 today.format('DD MMM YYYY'),
                 `${today.unix()}`,
@@ -121,6 +124,7 @@ export class DatastudioService {
                 `1`,
                 lpSwapFee,
                 protocolSwapFee,
+                blacklisted ? 'yes' : 'no',
             );
             allPoolDataRows.push(poolDataRow);
 
