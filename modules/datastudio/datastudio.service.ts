@@ -41,7 +41,7 @@ export class DatastudioService {
             return;
         }
 
-        const today = moment.tz('GMT').startOf('day');
+        const endOfYesterday = moment.tz('GMT').endOf('day').subtract(1, 'day');
 
         const allPoolDataRows: string[][] = [];
         const allPoolCompositionRows: string[][] = [];
@@ -73,14 +73,14 @@ export class DatastudioService {
             let protocolSwapFee = `0`;
             let dailySwaps = `0`;
 
-            const yesterday = moment.tz('GMT').startOf('day').subtract(1, 'day').unix();
+            const endOfDayBeforeYesterday = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
 
             let lastTotalSwaps = `0`;
             //find last entry of pool in currentSheet and get total swaps
             if (currentSheetValues.data.values) {
                 // string[row][column], index 1 is address, index 5 total swap count
                 currentSheetValues.data.values.forEach((row: string[]) => {
-                    if (pool.address === row[1] && yesterday.toString() === row[0]) {
+                    if (pool.address === row[1] && endOfDayBeforeYesterday.toString() === row[0]) {
                         lastTotalSwaps = row[5];
                     }
                 });
@@ -104,8 +104,8 @@ export class DatastudioService {
             const blacklisted = pool.categories.find((category) => category.category === 'BLACK_LISTED');
 
             poolDataRow.push(
-                today.format('DD MMM YYYY'),
-                `${today.unix()}`,
+                endOfYesterday.format('DD MMM YYYY'),
+                `${endOfYesterday.unix()}`,
                 pool.address,
                 pool.type,
                 pool.name,
