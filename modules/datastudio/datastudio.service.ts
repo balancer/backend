@@ -31,7 +31,8 @@ export class DatastudioService {
             range: range,
         });
 
-        let lastRun = moment.tz('GMT').startOf('day').subtract(1, 'day').unix();
+        // if there are no values in the sheet, take end of the day before yesterday which means the feed will run now
+        let lastRun = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
         if (currentSheetValues.data.values) {
             lastRun = currentSheetValues.data.values[currentSheetValues.data.values.length - 1][0];
         }
@@ -40,8 +41,6 @@ export class DatastudioService {
             // 24 hours did not pass since the last run
             return;
         }
-
-        const endOfYesterday = moment.tz('GMT').endOf('day').subtract(1, 'day');
 
         const allPoolDataRows: string[][] = [];
         const allPoolCompositionRows: string[][] = [];
@@ -66,6 +65,10 @@ export class DatastudioService {
                 categories: true,
             },
         });
+
+        const endOfYesterday = moment.tz('GMT').endOf('day').subtract(1, 'day');
+        const endOfDayBeforeYesterday = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
+
         for (const pool of pools) {
             let sharesChange = `0`;
             let tvlChange = `0`;
@@ -73,10 +76,8 @@ export class DatastudioService {
             let protocolSwapFee = `0`;
             let dailySwaps = `0`;
 
-            const endOfDayBeforeYesterday = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
-
             let lastTotalSwaps = `0`;
-            //find last entry of pool in currentSheet and get total swaps
+            //find last entry of pool in currentSheet and get total swaps. If no previous value present, set previous value to 0
             if (currentSheetValues.data.values) {
                 // string[row][column], index 1 is address, index 5 total swap count
                 currentSheetValues.data.values.forEach((row: string[]) => {
