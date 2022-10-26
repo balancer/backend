@@ -5,13 +5,14 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from '../prisma/prisma-client';
 import { configureWorkerRoutes } from './job-handlers';
 import { createAlerts, scheduleJobs as scheduleJobs } from './manual-jobs';
+import { networkConfig } from '../modules/config/network-config';
 
 export function startWorker() {
     const app = express();
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        environment: env.NODE_ENV,
+        environment: `${networkConfig.chain.slug}-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Prisma({ client: prisma }),
