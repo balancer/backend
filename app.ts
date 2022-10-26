@@ -21,6 +21,7 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from './prisma/prisma-client';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
+import { networkConfig } from './modules/config/network-config';
 
 async function startServer() {
     const app = createExpressApp();
@@ -28,7 +29,7 @@ async function startServer() {
     Sentry.init({
         dsn: env.SENTRY_DSN,
         tracesSampleRate: 0.005,
-        environment: env.NODE_ENV,
+        environment: `${networkConfig.chain.slug}-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Apollo(),
