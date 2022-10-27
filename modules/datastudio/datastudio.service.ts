@@ -153,7 +153,11 @@ export class DatastudioService {
             }
         }
 
+        console.log(`Appending ${allPoolDataRows.length} rows to ${this.databaseTabeName}.`);
+
         this.appendDataInSheet(this.databaseTabeName, 'A1:T1', allPoolDataRows, jwtClient);
+
+        console.log(`Updating ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
 
         this.updateDataInSheet(
             this.compositionTabName,
