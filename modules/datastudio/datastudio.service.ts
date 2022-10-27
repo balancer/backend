@@ -170,16 +170,18 @@ export class DatastudioService {
                 if (pool.staking.farm) {
                     const beetsPerDay = parseFloat(pool.staking.farm.beetsPerBlock) * blocksPerDay;
                     const beetsValuePerDay = parseFloat(beetsPrice) * beetsPerDay;
-                    allEmissionDataRows.push([
-                        endOfYesterday.format('DD MMM YYYY'),
-                        `${endOfYesterday.unix()}`,
-                        pool.address,
-                        pool.name,
-                        'BEETS',
-                        networkConfig.beets.address,
-                        `${beetsPerDay}`,
-                        `${beetsValuePerDay}`,
-                    ]);
+                    if (beetsPerDay > 0) {
+                        allEmissionDataRows.push([
+                            endOfYesterday.format('DD MMM YYYY'),
+                            `${endOfYesterday.unix()}`,
+                            pool.address,
+                            pool.name,
+                            'BEETS',
+                            networkConfig.beets.address,
+                            `${beetsPerDay}`,
+                            `${beetsValuePerDay}`,
+                        ]);
+                    }
                     if (pool.staking.farm.rewarders) {
                         for (const rewarder of pool.staking.farm.rewarders) {
                             const rewardToken = await tokenService.getToken(rewarder.tokenAddress);
@@ -189,17 +191,18 @@ export class DatastudioService {
                             const rewardsPerDay = parseFloat(rewarder.rewardPerSecond) * secondsPerDay;
                             const rewardsValuePerDay =
                                 tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress) * rewardsPerDay;
-
-                            allEmissionDataRows.push([
-                                endOfYesterday.format('DD MMM YYYY'),
-                                `${endOfYesterday.unix()}`,
-                                pool.address,
-                                pool.name,
-                                rewardToken.symbol,
-                                rewardToken.address,
-                                `${rewardsPerDay}`,
-                                `${rewardsValuePerDay}`,
-                            ]);
+                            if (rewardsPerDay > 0) {
+                                allEmissionDataRows.push([
+                                    endOfYesterday.format('DD MMM YYYY'),
+                                    `${endOfYesterday.unix()}`,
+                                    pool.address,
+                                    pool.name,
+                                    rewardToken.symbol,
+                                    rewardToken.address,
+                                    `${rewardsPerDay}`,
+                                    `${rewardsValuePerDay}`,
+                                ]);
+                            }
                         }
                     }
                 }
@@ -212,17 +215,18 @@ export class DatastudioService {
                         const rewardsPerDay = parseFloat(reward.rewardPerSecond) * secondsPerDay;
                         const rewardsValuePerDay =
                             tokenService.getPriceForToken(tokenPrices, reward.tokenAddress) * rewardsPerDay;
-
-                        allEmissionDataRows.push([
-                            endOfYesterday.format('DD MMM YYYY'),
-                            `${endOfYesterday.unix()}`,
-                            pool.address,
-                            pool.name,
-                            rewardToken.symbol,
-                            rewardToken.address,
-                            `${rewardsPerDay}`,
-                            `${rewardsValuePerDay}`,
-                        ]);
+                        if (rewardsPerDay > 0) {
+                            allEmissionDataRows.push([
+                                endOfYesterday.format('DD MMM YYYY'),
+                                `${endOfYesterday.unix()}`,
+                                pool.address,
+                                pool.name,
+                                rewardToken.symbol,
+                                rewardToken.address,
+                                `${rewardsPerDay}`,
+                                `${rewardsValuePerDay}`,
+                            ]);
+                        }
                     }
                 }
             }
