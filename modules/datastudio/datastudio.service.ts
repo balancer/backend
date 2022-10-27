@@ -6,14 +6,20 @@ import moment from 'moment-timezone';
 import { JWT } from 'google-auth-library';
 import { SecretsManager, secretsManager } from './secrets-manager';
 import { googleJwtClient, GoogleJwtClient } from './google-jwt-client';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { tokenService } from '../token/token.service';
+import { beetsService } from '../beets/beets.service';
+import { secondsPerDay } from '../common/time';
+import { truncate } from 'lodash';
 
 export class DatastudioService {
     constructor(
         private readonly secretsManager: SecretsManager,
         private readonly jwtClientHelper: GoogleJwtClient,
-        private readonly databaseTabeName: string,
+        private readonly databaseTabName: string,
         private readonly sheetId: string,
         private readonly compositionTabName: string,
+        private readonly emissionDataTabName: string,
         private readonly swapProtocolFeePercentage: number,
     ) {}
 
@@ -23,7 +29,7 @@ export class DatastudioService {
 
         const sheets = google.sheets({ version: 'v4' });
 
-        const range = `${this.databaseTabeName}!B2:G`;
+        const range = `${this.databaseTabName}!B2:G`;
         let currentSheetValues;
         currentSheetValues = await sheets.spreadsheets.values.get({
             auth: jwtClient,
@@ -44,6 +50,7 @@ export class DatastudioService {
 
         const allPoolDataRows: string[][] = [];
         const allPoolCompositionRows: string[][] = [];
+        const allEmissionDataRows: string[][] = [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 dynamicData: {
@@ -63,6 +70,12 @@ export class DatastudioService {
                     },
                 },
                 categories: true,
+                staking: {
+                    include: {
+                        farm: { include: { rewarders: true } },
+                        gauge: { include: { rewards: true } },
+                    },
+                },
             },
         });
 
@@ -98,13 +111,12 @@ export class DatastudioService {
                 dailySwaps = `${pool.dynamicData.swapsCount - parseFloat(lastTotalSwaps)}`;
             }
 
-            const poolDataRow: string[] = [];
-
             const swapFee = pool.dynamicData?.swapFee || `0`;
 
             const blacklisted = pool.categories.find((category) => category.category === 'BLACK_LISTED');
 
-            poolDataRow.push(
+            // add pool data
+            allPoolDataRows.push([
                 endOfYesterday.format('DD MMM YYYY'),
                 `${endOfYesterday.unix()}`,
                 pool.address,
@@ -126,8 +138,7 @@ export class DatastudioService {
                 lpSwapFee,
                 protocolSwapFee,
                 blacklisted ? 'yes' : 'no',
-            );
-            allPoolDataRows.push(poolDataRow);
+            ]);
 
             const allTokens = pool.allTokens.map((token) => {
                 const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
@@ -138,9 +149,9 @@ export class DatastudioService {
                 };
             });
 
+            // add pool composition data
             for (const token of allTokens) {
-                const poolCompositionRow: string[] = [];
-                poolCompositionRow.push(
+                allPoolCompositionRows.push([
                     token.address,
                     token.name,
                     pool.id,
@@ -148,14 +159,78 @@ export class DatastudioService {
                     token.symbol,
                     token.weight ? token.weight : `0`,
                     pool.name,
-                );
-                allPoolCompositionRows.push(poolCompositionRow);
+                ]);
+            }
+
+            // add emission data
+            if (pool.staking) {
+                const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
+                const tokenPrices = await tokenService.getTokenPrices();
+                const beetsPrice = await beetsService.getBeetsPrice();
+                if (pool.staking.farm) {
+                    const beetsPerDay = parseFloat(pool.staking.farm.beetsPerBlock) * blocksPerDay;
+                    const beetsValuePerDay = parseFloat(beetsPrice) * beetsPerDay;
+                    allEmissionDataRows.push([
+                        endOfYesterday.format('DD MMM YYYY'),
+                        `${endOfYesterday.unix()}`,
+                        pool.address,
+                        pool.name,
+                        'BEETS',
+                        networkConfig.beets.address,
+                        `${beetsPerDay}`,
+                        `${beetsValuePerDay}`,
+                    ]);
+                    if (pool.staking.farm.rewarders) {
+                        for (const rewarder of pool.staking.farm.rewarders) {
+                            const rewardToken = await tokenService.getToken(rewarder.tokenAddress);
+                            if (!rewardToken) {
+                                continue;
+                            }
+                            const rewardsPerDay = parseFloat(rewarder.rewardPerSecond) * secondsPerDay;
+                            const rewardsValuePerDay =
+                                tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress) * rewardsPerDay;
+
+                            allEmissionDataRows.push([
+                                endOfYesterday.format('DD MMM YYYY'),
+                                `${endOfYesterday.unix()}`,
+                                pool.address,
+                                pool.name,
+                                rewardToken.symbol,
+                                rewardToken.address,
+                                `${rewardsPerDay}`,
+                                `${rewardsValuePerDay}`,
+                            ]);
+                        }
+                    }
+                }
+                if (pool.staking.gauge) {
+                    for (const reward of pool.staking.gauge.rewards) {
+                        const rewardToken = await tokenService.getToken(reward.tokenAddress);
+                        if (!rewardToken) {
+                            continue;
+                        }
+                        const rewardsPerDay = parseFloat(reward.rewardPerSecond) * secondsPerDay;
+                        const rewardsValuePerDay =
+                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress) * rewardsPerDay;
+
+                        allEmissionDataRows.push([
+                            endOfYesterday.format('DD MMM YYYY'),
+                            `${endOfYesterday.unix()}`,
+                            pool.address,
+                            pool.name,
+                            rewardToken.symbol,
+                            rewardToken.address,
+                            `${rewardsPerDay}`,
+                            `${rewardsValuePerDay}`,
+                        ]);
+                    }
+                }
             }
         }
 
-        console.log(`Appending ${allPoolDataRows.length} rows to ${this.databaseTabeName}.`);
+        console.log(`Appending ${allPoolDataRows.length} rows to ${this.databaseTabName}.`);
 
-        this.appendDataInSheet(this.databaseTabeName, 'A1:T1', allPoolDataRows, jwtClient);
+        this.appendDataInSheet(this.databaseTabName, 'A1:T1', allPoolDataRows, jwtClient);
 
         console.log(`Updating ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
 
@@ -165,6 +240,10 @@ export class DatastudioService {
             allPoolCompositionRows,
             jwtClient,
         );
+
+        console.log(`Appending ${allEmissionDataRows.length} rows to ${this.emissionDataTabName}.`);
+
+        this.appendDataInSheet(this.emissionDataTabName, 'A1:H1', allEmissionDataRows, jwtClient);
     }
 
     private async updateDataInSheet(tabName: string, rowRange: string, rows: string[][], jwtClient: JWT) {
@@ -206,5 +285,6 @@ export const datastudioService = new DatastudioService(
     networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName,
     networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].sheetId,
     networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName,
+    networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName,
     networkConfig.balancer.swapProtocolFeePercentage,
 );

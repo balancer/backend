@@ -96,6 +96,7 @@ export interface NetworkConfig {
             sheetId: string;
             compositionTabName: string;
             databaseTabName: string;
+            emissionDataTabName: string;
         };
     };
 }
@@ -198,12 +199,14 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
                 databaseTabName: 'Database v2',
                 compositionTabName: 'Pool Composition v2',
+                emissionDataTabName: 'EmissionData',
             },
             canary: {
                 user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
                 sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
                 databaseTabName: 'Database v2',
                 compositionTabName: 'Pool Composition v2',
+                emissionDataTabName: 'EmissionData',
             },
         },
     },
@@ -310,12 +313,14 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
                 databaseTabName: 'DatabaseOptimism v2',
                 compositionTabName: 'Pool Composition Optimism v2',
+                emissionDataTabName: 'EmissionData',
             },
             canary: {
                 user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
                 sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
                 databaseTabName: 'DatabaseOptimism v2',
                 compositionTabName: 'Pool Composition Optimism v2',
+                emissionDataTabName: 'EmissionData',
             },
         },
     },
