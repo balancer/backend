@@ -102,9 +102,9 @@ export class DatastudioService {
 
             if (pool.dynamicData) {
                 sharesChange = `${
-                    parseFloat(pool.dynamicData.totalShares24hAgo) - parseFloat(pool.dynamicData.totalShares)
+                    parseFloat(pool.dynamicData.totalShares) - parseFloat(pool.dynamicData.totalShares24hAgo)
                 }`;
-                tvlChange = `${pool.dynamicData.totalLiquidity24hAgo - pool.dynamicData.totalLiquidity}`;
+                tvlChange = `${pool.dynamicData.totalLiquidity - pool.dynamicData.totalLiquidity24hAgo}`;
                 lpSwapFee = `${pool.dynamicData.fees24h * (1 - this.swapProtocolFeePercentage)}`;
                 protocolSwapFee = `${pool.dynamicData.fees24h * this.swapProtocolFeePercentage}`;
 
