@@ -35,6 +35,7 @@ export class DatastudioService {
             auth: jwtClient,
             spreadsheetId: this.sheetId,
             range: range,
+            valueRenderOption: 'UNFORMATTED_VALUE',
         });
 
         // if there are no values in the sheet, take end of the day before yesterday which means the feed will run now
@@ -89,13 +90,13 @@ export class DatastudioService {
             let protocolSwapFee = `0`;
             let dailySwaps = `0`;
 
-            let lastTotalSwaps = `0`;
+            let yesterdaySwapsCount = `0`;
             //find last entry of pool in currentSheet and get total swaps. If no previous value present, set previous value to 0
             if (currentSheetValues.data.values) {
                 // string[row][column], index 1 is address, index 5 total swap count
                 currentSheetValues.data.values.forEach((row: string[]) => {
                     if (pool.address === row[1] && endOfDayBeforeYesterday.toString() === row[0]) {
-                        lastTotalSwaps = row[5];
+                        yesterdaySwapsCount = row[5];
                     }
                 });
             }
@@ -108,7 +109,7 @@ export class DatastudioService {
                 lpSwapFee = `${pool.dynamicData.fees24h * (1 - this.swapProtocolFeePercentage)}`;
                 protocolSwapFee = `${pool.dynamicData.fees24h * this.swapProtocolFeePercentage}`;
 
-                dailySwaps = `${pool.dynamicData.swapsCount - parseFloat(lastTotalSwaps)}`;
+                dailySwaps = `${pool.dynamicData.swapsCount - parseFloat(yesterdaySwapsCount)}`;
             }
 
             const swapFee = pool.dynamicData?.swapFee || `0`;
