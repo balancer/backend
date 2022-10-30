@@ -35,7 +35,13 @@ export class BoostedPoolAprService implements PoolAprService {
             for (const token of tokens) {
                 const tokenAprItems = aprItems.filter((item) => item.poolId === token.nestedPoolId);
 
-                if (!pool.dynamicData || !token.dynamicData || !token.nestedPool || !token.nestedPool.dynamicData) {
+                if (
+                    !pool.dynamicData ||
+                    !token.dynamicData ||
+                    !token.nestedPool ||
+                    !token.nestedPool.dynamicData ||
+                    token.dynamicData.balanceUSD === 0
+                ) {
                     continue;
                 }
 
@@ -47,6 +53,7 @@ export class BoostedPoolAprService implements PoolAprService {
                 for (const aprItem of tokenAprItems) {
                     const itemId = `${pool.id}-${aprItem.id}`;
                     //scale the apr as a % of total liquidity
+
                     const apr = aprItem.apr * (token.dynamicData.balanceUSD / pool.dynamicData.totalLiquidity);
                     let userApr = apr;
 
