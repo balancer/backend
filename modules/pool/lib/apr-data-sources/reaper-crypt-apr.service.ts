@@ -1,3 +1,4 @@
+import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { TokenService } from '../../../token/token.service';
@@ -8,6 +9,9 @@ import ReaperCryptStrategyAbi from './abi/ReaperCryptStrategy.json';
 
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
+
+    private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
+    private readonly SFTMX_APR = 0.046;
 
     constructor(private readonly linearPoolFactories: string[], private readonly tokenService: TokenService) {}
 
@@ -36,7 +40,7 @@ export class ReaperCryptAprService implements PoolAprService {
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
             const totalLiquidity = pool.dynamicData.totalLiquidity;
-            const apr = totalLiquidity > 0 ? avgAprAcross5Harvests * (poolWrappedLiquidity / totalLiquidity) : 0;
+            let apr = totalLiquidity > 0 ? avgAprAcross5Harvests * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id: itemId },
@@ -50,6 +54,26 @@ export class ReaperCryptAprService implements PoolAprService {
                 },
                 update: { title: `${wrappedToken.token.symbol} APR`, apr: apr },
             });
+
+            // if we have sftmx as the main token in this linear pool, we want to take the linear APR top level and
+            // we also need to adapt the APR since the vault APR is denominated in sFTMx, so we need to apply the growth rate
+            // and add the sftmx base apr to the unwrapped portion
+            if (isSameAddress(mainToken.address, this.SFTMX_ADDRESS)) {
+                const vaultApr =
+                    totalLiquidity > 0
+                        ? ((1 + avgAprAcross5Harvests) * (1 + this.SFTMX_APR) - 1) *
+                          (poolWrappedLiquidity / totalLiquidity)
+                        : 0;
+                const sFtmXApr =
+                    totalLiquidity > 0
+                        ? (this.SFTMX_APR * (totalLiquidity - poolWrappedLiquidity)) / totalLiquidity
+                        : 0;
+                apr = vaultApr + sFtmXApr;
+                await prisma.prismaPoolAprItem.update({
+                    where: { id: itemId },
+                    data: { group: null, apr: apr, title: 'Boosted sFTMx APR' },
+                });
+            }
         }
     }
 }
