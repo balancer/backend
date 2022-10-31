@@ -13,7 +13,11 @@ export class ReaperCryptAprService implements PoolAprService {
     private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
     private readonly SFTMX_APR = 0.046;
 
-    constructor(private readonly linearPoolFactories: string[], private readonly tokenService: TokenService) {}
+    constructor(
+        private readonly linearPoolFactories: string[],
+        private readonly averageAPRAcrossLastNHarvests: number,
+        private readonly tokenService: TokenService,
+    ) {}
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
@@ -32,15 +36,16 @@ export class ReaperCryptAprService implements PoolAprService {
             const cryptContract = getContractAt(wrappedToken.address, ReaperCryptAbi);
             const cryptStrategyAddress = await cryptContract.strategy();
             const strategyContract = getContractAt(cryptStrategyAddress, ReaperCryptStrategyAbi);
-            const avgAprAcross2Harvests =
-                (await strategyContract.averageAPRAcrossLastNHarvests(2)) / this.APR_PERCENT_DIVISOR;
+            const avgAprAcrossXHarvests =
+                (await strategyContract.averageAPRAcrossLastNHarvests(this.averageAPRAcrossLastNHarvests)) /
+                this.APR_PERCENT_DIVISOR;
 
             const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, mainToken.address);
             const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
             const totalLiquidity = pool.dynamicData.totalLiquidity;
-            let apr = totalLiquidity > 0 ? avgAprAcross2Harvests * (poolWrappedLiquidity / totalLiquidity) : 0;
+            let apr = totalLiquidity > 0 ? avgAprAcrossXHarvests * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id: itemId },
@@ -61,7 +66,7 @@ export class ReaperCryptAprService implements PoolAprService {
             if (isSameAddress(mainToken.address, this.SFTMX_ADDRESS)) {
                 const vaultApr =
                     totalLiquidity > 0
-                        ? ((1 + avgAprAcross2Harvests) * (1 + this.SFTMX_APR) - 1) *
+                        ? ((1 + avgAprAcrossXHarvests) * (1 + this.SFTMX_APR) - 1) *
                           (poolWrappedLiquidity / totalLiquidity)
                         : 0;
                 const sFtmXApr =

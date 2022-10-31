@@ -67,8 +67,9 @@ export interface NetworkConfig {
     copper: {
         proxyAddress: string;
     };
-    reaper?: {
+    reaper: {
         linearPoolFactories: string[];
+        averageAPRAcrossLastNHarvests: number;
     };
     yearn: {
         vaultsEndpoint: string;
@@ -192,6 +193,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         reaper: {
             linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
+            averageAPRAcrossLastNHarvests: 5,
         },
         datastudio: {
             main: {
@@ -296,6 +298,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '0x19968d4b7126904fd665ed25417599df9604df83',
                 '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
             ],
+            averageAPRAcrossLastNHarvests: 2,
         },
         lido: {
             wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
