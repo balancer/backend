@@ -63,6 +63,9 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
+        poolGetLinearPools: async () => {
+            return poolService.getGqlLinearPools();
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
