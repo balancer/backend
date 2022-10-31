@@ -24,6 +24,7 @@ extend type Query {
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetLinearPools: [GqlPoolLinear!]!
 }
 
 extend type Mutation {
