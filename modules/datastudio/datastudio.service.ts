@@ -94,8 +94,8 @@ export class DatastudioService {
             //find last entry of pool in currentSheet and get total swaps. If no previous value present, set previous value to 0
             if (currentSheetValues.data.values) {
                 // string[row][column], index 1 is address, index 5 total swap count
-                currentSheetValues.data.values.forEach((row: string[]) => {
-                    if (pool.address === row[1] && endOfDayBeforeYesterday.toString() === row[0]) {
+                currentSheetValues.data.values.forEach((row) => {
+                    if (pool.address === row[1] && endOfDayBeforeYesterday === row[0]) {
                         yesterdaySwapsCount = row[5];
                     }
                 });
@@ -121,7 +121,7 @@ export class DatastudioService {
                 endOfYesterday.format('DD MMM YYYY'),
                 `${endOfYesterday.unix()}`,
                 pool.address,
-                pool.type,
+                pool.type.toString(),
                 pool.name,
                 swapFee,
                 pool.dynamicData?.swapsCount ? `${pool.dynamicData.swapsCount}` : `0`,
