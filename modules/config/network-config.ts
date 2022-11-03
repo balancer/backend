@@ -301,7 +301,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             averageAPRAcrossLastNHarvests: 2,
         },
         lido: {
-            wstEthAprEndpoint: 'https://stake.lido.fi/api/steth-apr',
+            wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
             wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
         },
         overnight: {

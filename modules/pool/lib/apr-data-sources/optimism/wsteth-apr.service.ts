@@ -24,8 +24,10 @@ export class WstethAprService implements PoolAprService {
             const wstethTokenBalance = wstethToken?.dynamicData?.balance;
             if (wstethTokenBalance && pool.dynamicData) {
                 if (!wstethBaseApr) {
-                    const { data } = await axios.get<string>(this.wstethAprEndpoint);
-                    wstethBaseApr = parseFloat(data) / 100;
+                    const { data } = await axios.get<{
+                        data: { aprs: [{ timeUnix: number; apr: number }]; smaApr: number };
+                    }>(this.wstethAprEndpoint);
+                    wstethBaseApr = data.data.smaApr / 100;
                 }
                 const wstethPercentage =
                     (parseFloat(wstethTokenBalance) * wstethPrice) / pool.dynamicData.totalLiquidity;
