@@ -662,7 +662,7 @@ type GqlPoolJoinExit {
     sender: String!
     poolId: String!
     timestamp: Int!
-    valueUSD: String!
+    valueUSD: String
     tx: String!
     amounts: [GqlPoolJoinExitAmount!]!
 }
