@@ -11,6 +11,7 @@ import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { secondsPerDay } from '../common/time';
 import { truncate } from 'lodash';
+import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 
 export class DatastudioService {
     constructor(
@@ -21,6 +22,7 @@ export class DatastudioService {
         private readonly compositionTabName: string,
         private readonly emissionDataTabName: string,
         private readonly swapProtocolFeePercentage: number,
+        private readonly chainSlug: string,
     ) {}
 
     public async feedPoolData() {
@@ -115,13 +117,20 @@ export class DatastudioService {
             const swapFee = pool.dynamicData?.swapFee || `0`;
 
             const blacklisted = pool.categories.find((category) => category.category === 'BLACK_LISTED');
+            let poolType = pool.type.toString();
+            if (isComposableStablePool(pool)) {
+                poolType = 'COMPOSABLE_STABLE';
+            }
+            if (isWeightedPoolV2(pool)) {
+                poolType = 'WEIGHTED_V2';
+            }
 
             // add pool data
             allPoolDataRows.push([
                 endOfYesterday.format('DD MMM YYYY'),
                 `${endOfYesterday.unix()}`,
                 pool.address,
-                pool.type.toString(),
+                poolType,
                 pool.name,
                 swapFee,
                 pool.dynamicData?.swapsCount ? `${pool.dynamicData.swapsCount}` : `0`,
@@ -139,6 +148,7 @@ export class DatastudioService {
                 lpSwapFee,
                 protocolSwapFee,
                 blacklisted ? 'yes' : 'no',
+                this.chainSlug,
             ]);
 
             const allTokens = pool.allTokens.map((token) => {
@@ -147,12 +157,15 @@ export class DatastudioService {
                 return {
                     ...token.token,
                     weight: poolToken?.dynamicData?.weight,
+                    balance: poolToken?.dynamicData?.balance ? poolToken?.dynamicData?.balance : 'not available',
                 };
             });
 
             // add pool composition data
             for (const token of allTokens) {
                 allPoolCompositionRows.push([
+                    endOfYesterday.format('DD MMM YYYY'),
+                    `${endOfYesterday.unix()}`,
                     token.address,
                     token.name,
                     pool.id,
@@ -160,6 +173,7 @@ export class DatastudioService {
                     token.symbol,
                     token.weight ? token.weight : `0`,
                     pool.name,
+                    `${token.balance}`,
                 ]);
             }
 
@@ -235,16 +249,11 @@ export class DatastudioService {
 
         console.log(`Appending ${allPoolDataRows.length} rows to ${this.databaseTabName}.`);
 
-        this.appendDataInSheet(this.databaseTabName, 'A1:T1', allPoolDataRows, jwtClient);
+        this.appendDataInSheet(this.databaseTabName, 'A1:V1', allPoolDataRows, jwtClient);
 
-        console.log(`Updating ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
+        console.log(`Appending ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
 
-        this.updateDataInSheet(
-            this.compositionTabName,
-            `A2:G${allPoolCompositionRows.length + 1}`,
-            allPoolCompositionRows,
-            jwtClient,
-        );
+        this.appendDataInSheet(this.compositionTabName, `A1:J1`, allPoolCompositionRows, jwtClient);
 
         console.log(`Appending ${allEmissionDataRows.length} rows to ${this.emissionDataTabName}.`);
 
@@ -292,4 +301,5 @@ export const datastudioService = new DatastudioService(
     networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName,
     networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName,
     networkConfig.balancer.swapProtocolFeePercentage,
+    networkConfig.chain.slug,
 );
