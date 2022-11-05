@@ -106,7 +106,12 @@ export function getDailyTimestampsWithBuffer(numDays: number): number[] {
     while (current.isAfter(endTime)) {
         timestamps = [
             ...timestamps,
-            //we create a buffer of 3 seconds to match on to ensure we get at least one block for this hour
+            //we create a buffer of 20 seconds to match on to ensure we get at least one block for this hour
+            current.clone().subtract(10, 'second').unix(),
+            current.clone().subtract(9, 'second').unix(),
+            current.clone().subtract(8, 'second').unix(),
+            current.clone().subtract(7, 'second').unix(),
+            current.clone().subtract(6, 'second').unix(),
             current.clone().subtract(5, 'second').unix(),
             current.clone().subtract(4, 'second').unix(),
             current.clone().subtract(3, 'second').unix(),
@@ -118,6 +123,11 @@ export function getDailyTimestampsWithBuffer(numDays: number): number[] {
             current.clone().add(3, 'second').unix(),
             current.clone().add(4, 'second').unix(),
             current.clone().add(5, 'second').unix(),
+            current.clone().add(6, 'second').unix(),
+            current.clone().add(7, 'second').unix(),
+            current.clone().add(8, 'second').unix(),
+            current.clone().add(9, 'second').unix(),
+            current.clone().add(10, 'second').unix(),
         ];
 
         current = current.subtract(1, 'day');
