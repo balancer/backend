@@ -54,8 +54,8 @@ export interface NetworkConfig {
     };
     balancer: {
         vault: string;
-        weightedPoolV2Factory: string;
-        coposableStablePoolFactory: string;
+        weightedPoolV2Factories: string[];
+        composableStablePoolFactories: string[];
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
     };
@@ -154,8 +154,14 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         balancer: {
             vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
-            coposableStablePoolFactory: '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
-            weightedPoolV2Factory: '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
+            composableStablePoolFactories: [
+                '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
+                '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
+            ],
+            weightedPoolV2Factories: [
+                '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
+                '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
+            ],
             swapProtocolFeePercentage: 0.25,
             yieldProtocolFeePercentage: 0.25,
         },
@@ -263,8 +269,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         balancer: {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-            coposableStablePoolFactory: '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
-            weightedPoolV2Factory: '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
+            composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
+            weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
             swapProtocolFeePercentage: 0.5,
             yieldProtocolFeePercentage: 0.5,
         },
