@@ -11,13 +11,19 @@ export function isStablePool(poolType: PrismaPoolType) {
     return poolType === 'STABLE' || poolType === 'META_STABLE' || poolType === 'PHANTOM_STABLE';
 }
 
-export function isWeightedPoolV2(pool: PoolWithTypeAndFactory): boolean {
-    return pool.type === 'WEIGHTED' && isSameAddress(pool.factory || '', networkConfig.balancer.weightedPoolV2Factory);
+export function isWeightedPoolV2(pool: PoolWithTypeAndFactory) {
+    return (
+        pool.type === 'WEIGHTED' &&
+        networkConfig.balancer.weightedPoolV2Factories.find((factory) => isSameAddress(pool.factory || '', factory)) !==
+            undefined
+    );
 }
 
 export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
     return (
         pool.type === 'PHANTOM_STABLE' &&
-        isSameAddress(pool.factory || '', networkConfig.balancer.coposableStablePoolFactory)
+        networkConfig.balancer.composableStablePoolFactories.find((factory) =>
+            isSameAddress(pool.factory || '', factory),
+        ) !== undefined
     );
 }
