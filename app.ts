@@ -44,6 +44,14 @@ async function startServer() {
                 console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
+            if (
+                error?.toString().includes('fractional component exceeds decimals') &&
+                event.request?.headers &&
+                event.request.headers['user-agent'].includes('Python aiohttp')
+            ) {
+                console.log(`The following error occurred but was not sent to Sentry: ${error}`);
+                return null;
+            }
             return event;
         },
     });
