@@ -155,7 +155,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         balancer: {
             vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
             composableStablePoolFactories: ['0x5AdAF6509BCEc3219455348AC45d6D3261b1A990'],
-            weightedPoolV2Factories: ['0x8ea1c497c16726E097f62C8C9FBD944143F27090'],
+            weightedPoolV2Factories: ['0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb'],
             swapProtocolFeePercentage: 0.25,
             yieldProtocolFeePercentage: 0.25,
         },
