@@ -15,7 +15,7 @@ export class OvernightAprService implements PoolAprService {
     private readonly overnightTokens: Record<string, string> = {
         //these should always be stored in all lowercase
         '0xa348700745d249c3b49d2c2acac9a5ae8155f826': 'usd+',
-        '0x9e88f7cf6c9fc2895dfaa1b7c21d446ec1749f89': 'dai+',
+        '0x0b8f31480249cc717081928b8af733f45f6915bb': 'dai+',
     };
     private readonly wrappedTokenAddresses = Object.keys(this.overnightTokens);
 
@@ -51,7 +51,7 @@ export class OvernightAprService implements PoolAprService {
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * mainTokenPrice;
             const totalLiquidity = pool.dynamicData.totalLiquidity;
-            const apr = totalLiquidity > 0 ? aprData.value / 100 * (poolWrappedLiquidity / totalLiquidity) : 0;
+            const apr = totalLiquidity > 0 ? (aprData.value / 100) * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id: itemId },
