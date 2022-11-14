@@ -53,7 +53,7 @@ export class ReliquaryStakingService implements PoolStakingService {
                     where: { id: farmId },
                     create: {
                         id: farmId,
-                        stakingId: farmId,
+                        stakingId: `reliquary-${farmId}`,
                         name: farm.name,
                         beetsPerSecond: beetsPerSecond,
                     },

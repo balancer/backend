@@ -245,7 +245,7 @@ export class UserSyncWalletBalanceService {
             create: {
                 id: `fbeets-${userAddress}`,
                 userAddress: userAddress,
-                tokenAddress: this.fbeetsAddress,
+                tokenAddress: networkConfig.fbeets!.address,
                 balance,
                 balanceNum: parseFloat(balance),
             },
