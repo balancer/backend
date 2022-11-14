@@ -118,18 +118,6 @@ export class PoolOnChainDataService {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
                 return;
             }
-            if (
-                [
-                    '0x1583817b28251844a826f92016cbbbb5aa783824000000000000000000000576',
-                    '0x198a22e73aadd2d0ea8e2963799d38ae26adee2e000000000000000000000577',
-                    '0xd69959fa7910ceb3a2d359ed33cb8297670b69370000000000000000000005b2',
-                    '0xf86785fe1cefd5069e6df1b4b54b72b1992003110000000000000000000005b3',
-                    '0xf7705cd188a8ac806d28f85bdb13a38313e985ff0000000000000000000005b7',
-                    '0x9a8f6d18c55f2f117170390c74e67200777889000002000000000000000005cf',
-                ].includes(pool.id)
-            ) {
-                return;
-            }
             multiPool.call(`${pool.id}.poolTokens`, this.vaultAddress, 'getPoolTokens', [pool.id]);
 
             // TO DO - Make this part of class to make more flexible?
