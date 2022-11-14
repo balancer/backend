@@ -16,6 +16,8 @@ export class UserSnapshotService {
     constructor(
         private readonly userSnapshotSubgraphService: UserSnapshotSubgraphService,
         private readonly poolSnapshotService: PoolSnapshotService,
+        private readonly fbeetsAddress: string,
+        private readonly fbeetsPoolId: string,
     ) {}
 
     public async syncUserSnapshots() {
@@ -501,8 +503,8 @@ export class UserSnapshotService {
 
         // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
         // we also need to multiply the staked amount by the fbeets->bpt ratio
-        if (pool.id === networkConfig.fbeets.poolId) {
-            const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(networkConfig.fbeets.address);
+        if (pool.id === this.fbeetsPoolId) {
+            const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(this.fbeetsAddress);
             const fBeetsWalletBalance = fBeetsWalletIdx !== -1 ? userSnapshot.walletBalances[fBeetsWalletIdx] : '0';
             walletBalance = (
                 parseFloat(walletBalance) +

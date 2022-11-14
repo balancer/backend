@@ -40,7 +40,7 @@ extend type Mutation {
     poolSyncPoolAllTokensRelationship: String!
     poolReloadAllPoolAprs: String!
     poolSyncTotalShares: String!
-    poolReloadStakingForAllPools: String!
+    poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
     poolSyncStakingForPools: String!
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
@@ -619,15 +619,30 @@ type GqlPoolStaking {
     address: String!
     farm: GqlPoolStakingMasterChefFarm
     gauge: GqlPoolStakingGauge
+    reliquary: GqlPoolStakingReliquaryFarm
 }
 
 type GqlPoolStakingMasterChefFarm {
     id: ID!
     beetsPerBlock: String!
-    rewarders: [GqlPoolStakingMasterChefFarmRewarder!]
+    rewarders: [GqlPoolStakingFarmRewarder!]
 }
 
-type GqlPoolStakingMasterChefFarmRewarder {
+type GqlPoolStakingReliquaryFarm {
+    id: ID!
+    beetsPerSecond: String!
+    levels: [GqlPoolStakingReliquarFarmLevel!]
+}
+type GqlPoolStakingReliquarFarmLevel {
+    id: ID!
+    level: Int!
+    balance: BigDecimal!
+    requiredMaturity: Int!
+    allocationPoints: Int!
+    apr: BigDecimal!
+}
+
+type GqlPoolStakingFarmRewarder {
     id: ID!
     address: String!
     tokenAddress: String!
@@ -650,6 +665,7 @@ enum GqlPoolStakingType {
     MASTER_CHEF
     GAUGE
     FRESH_BEETS
+    RELIQUARY
 }
 
 input GqlPoolJoinExitFilter {

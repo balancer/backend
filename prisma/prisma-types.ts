@@ -31,6 +31,11 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                         rewards: true,
                     },
                 },
+                reliquary: {
+                    include: {
+                        levels: true,
+                    },
+                },
             },
         },
         categories: true,

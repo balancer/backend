@@ -26,7 +26,7 @@ export class MasterchefSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.masterchef);
+        this.client = new GraphQLClient(networkConfig.subgraphs.masterchef!);
     }
 
     public async getMetadata() {

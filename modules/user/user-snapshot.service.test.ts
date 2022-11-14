@@ -65,12 +65,12 @@ beforeAll(async () => {
 
     const fidelio = await createWeightedPoolFromDefault(
         {
-            id: networkConfig.fbeets.poolId,
+            id: networkConfig.fbeets!.poolId,
             name: 'Fidelio Duetto',
-            address: networkConfig.fbeets.poolAddress,
+            address: networkConfig.fbeets!.poolAddress,
             staking: {
                 create: {
-                    id: networkConfig.fbeets.farmId,
+                    id: networkConfig.fbeets!.farmId,
                 },
             },
         },
@@ -1223,10 +1223,10 @@ test('User requests pool snapshots for Fidelio Duetto Pool. Make sure fBeets are
 
     const newestSnapshotTimestamp = oneDayAgo;
 
-    const fidelioPoolId = networkConfig.fbeets.poolId;
-    const fidelioPoolAddress = networkConfig.fbeets.poolAddress;
-    const fbeets = networkConfig.fbeets.address;
-    const fbeetsFarm = networkConfig.fbeets.farmId;
+    const fidelioPoolId = networkConfig.fbeets!.poolId;
+    const fidelioPoolAddress = networkConfig.fbeets!.poolAddress;
+    const fbeets = networkConfig.fbeets!.address;
+    const fbeetsFarm = networkConfig.fbeets!.farmId;
 
     mockServer.use(
         ...[
@@ -1371,10 +1371,10 @@ test('Sync user snapshots for Fidelio Duetto pool. Make sure fBeets are correctl
 
     const newestSnapshotTimestamp = oneDayAgo;
 
-    const fidelioPoolId = networkConfig.fbeets.poolId;
-    const fidelioPoolAddress = networkConfig.fbeets.poolAddress;
-    const fbeets = networkConfig.fbeets.address;
-    const fbeetsFarm = networkConfig.fbeets.farmId;
+    const fidelioPoolId = networkConfig.fbeets!.poolId;
+    const fidelioPoolAddress = networkConfig.fbeets!.poolAddress;
+    const fbeets = networkConfig.fbeets!.address;
+    const fbeetsFarm = networkConfig.fbeets!.farmId;
 
     await createUserPoolBalanceSnapshot({
         id: `${fidelioPoolId}-${userAddress}-${threeDaysAgo}`,

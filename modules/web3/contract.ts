@@ -15,6 +15,6 @@ export function returnChecksum() {
 
 export const jsonRpcProvider = new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl);
 
-export function getContractAt(address: string, abi: any): Contract {
-    return new Contract(address, abi, jsonRpcProvider);
+export function getContractAt<T extends Contract>(address: string, abi: any): T {
+    return new Contract(address, abi, jsonRpcProvider) as T;
 }

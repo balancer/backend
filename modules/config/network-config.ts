@@ -30,10 +30,10 @@ export interface NetworkConfig {
         startDate: string;
         balancer: string;
         blocks: string;
-        masterchef: string;
-        beetsBar: string;
-        changelog: string;
-        gauge: string;
+        masterchef?: string;
+        reliquary?: string;
+        beetsBar?: string;
+        gauge?: string;
         userBalances: string;
     };
     sanity: {
@@ -43,11 +43,14 @@ export interface NetworkConfig {
     beets: {
         address: string;
     };
-    fbeets: {
+    fbeets?: {
         address: string;
         farmId: string;
+        reliquaryFarmPid: number;
         poolId: string;
+        poolIdV2: string;
         poolAddress: string;
+        poolAddressV2: string;
     };
     bal: {
         address: string;
@@ -64,7 +67,10 @@ export interface NetworkConfig {
         address: string;
         excludedFarmIds: string[];
     };
-    copper: {
+    reliquary?: {
+        address: string;
+    };
+    copper?: {
         proxyAddress: string;
     };
     reaper: {
@@ -115,9 +121,8 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
             beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
             blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
-            changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog',
             masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
-            gauge: 'https://#/',
+            reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
             userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
         },
         eth: {
@@ -146,8 +151,11 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         fbeets: {
             address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
             farmId: '22',
+            reliquaryFarmPid: 1,
             poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
+            poolIdV2: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019', // set when pool created
             poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
+            poolAddressV2: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837', // test fidelio duetto bpt v2
         },
         bal: {
             address: '',
@@ -167,6 +175,9 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '28', //OHM bonding farm
                 '9', //old fidellio dueto (non fbeets)
             ],
+        },
+        reliquary: {
+            address: '0xb0FC43069089d0fA02baAa896ac2eFcb596D7D05',
         },
         avgBlockSpeed: 1,
         sor: {
@@ -224,8 +235,6 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism',
             beetsBar: 'https://',
             blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-            changelog: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog-optimism',
-            masterchef: 'https://',
             gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
             userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
         },
@@ -251,12 +260,6 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         beets: {
             address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
-        },
-        fbeets: {
-            address: '0x0000000000000000000000000000000000000000',
-            farmId: '-1',
-            poolId: '0x0000000000000000000000000000000000000000',
-            poolAddress: '0x0000000000000000000000000000000000000000',
         },
         bal: {
             address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
@@ -306,9 +309,6 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         overnight: {
             aprEndpoint: 'https://api.overnight.fi/optimism',
-        },
-        copper: {
-            proxyAddress: '0x0000000000000000000000000000000000000000',
         },
         datastudio: {
             main: {

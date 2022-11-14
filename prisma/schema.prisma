@@ -299,6 +299,7 @@ model PrismaPoolStaking {
     address             String
     farm                PrismaPoolStakingMasterChefFarm?
     gauge               PrismaPoolStakingGauge?
+    reliquary           PrismaPoolStakingReliquaryFarm?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -307,6 +308,7 @@ model PrismaPoolStaking {
 enum PrismaPoolStakingType {
     MASTER_CHEF
     GAUGE
+    RELIQUARY
     FRESH_BEETS
 }
 
@@ -342,6 +344,27 @@ model PrismaPoolStakingGaugeReward{
     gauge               PrismaPoolStakingGauge @relation(fields:[gaugeId], references: [id])
     tokenAddress        String
     rewardPerSecond     String
+}
+
+
+model PrismaPoolStakingReliquaryFarm {
+    id                  String              @id
+    stakingId           String              @unique
+    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+    name                String
+    beetsPerSecond      String
+    levels              PrismaPoolStakingReliquaryFarmLevel[]
+}
+
+model PrismaPoolStakingReliquaryFarmLevel {
+    id                  String              @id
+    farmId              String
+    farm                PrismaPoolStakingReliquaryFarm  @relation(fields:[farmId], references: [id])
+    level               Int
+    balance             String
+    requiredMaturity    Int
+    allocationPoints    Int
+    apr                 Float
 }
 
 
@@ -510,6 +533,7 @@ model PrismaUserBalanceSyncStatus {
 enum PrismaUserBalanceType {
     WALLET
     STAKED
+    RELIQUARY
 }
 
 model PrismaUserPoolBalanceSnapshot {

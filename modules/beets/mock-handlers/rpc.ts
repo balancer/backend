@@ -28,7 +28,7 @@ export const rpcHandlers = [
         }
         //read contract
         if (body.method === 'eth_call') {
-            if (body.params[0].to === networkConfig.fbeets.address) {
+            if (body.params[0].to === networkConfig.fbeets!.address) {
                 //assume call for total supply
                 return res(
                     ctx.status(200),
@@ -39,7 +39,7 @@ export const rpcHandlers = [
                     }),
                 );
             }
-            if (body.params[0].to === networkConfig.fbeets.poolAddress) {
+            if (body.params[0].to === networkConfig.fbeets!.poolAddress) {
                 //assume call for bpt balance
                 return res(
                     ctx.status(200),

@@ -2,6 +2,7 @@ import { PoolStakingService } from '../../../pool-types';
 import { GaugeSerivce } from './gauge-service';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
+import { PrismaPoolStakingType } from '@prisma/client';
 
 export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeService: GaugeSerivce) {}
@@ -63,10 +64,13 @@ export class GaugeStakingService implements PoolStakingService {
 
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
-    public async reloadStakingForAllPools(): Promise<void> {
-        await prisma.prismaPoolStakingGaugeReward.deleteMany({});
-        await prisma.prismaPoolStakingGauge.deleteMany({});
-        await prisma.prismaPoolStaking.deleteMany({});
-        await this.syncStakingForPools();
+    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
+        if (stakingTypes.includes('GAUGE')) {
+            await prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'GAUGE' } } });
+            await prisma.prismaPoolStakingGaugeReward.deleteMany({});
+            await prisma.prismaPoolStakingGauge.deleteMany({});
+            await prisma.prismaPoolStaking.deleteMany({});
+            await this.syncStakingForPools();
+        }
     }
 }

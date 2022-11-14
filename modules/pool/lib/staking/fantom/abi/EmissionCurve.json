@@ -1,0 +1,346 @@
+{
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "lastRewardTime",
+            "type": "uint256"
+          }
+        ],
+        "name": "getRate",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "rate",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      }
+    ],
+    "bytecode": {
+      "object": "0x608080604052346014576080908161001a8239f35b600080fdfe6080806040526004361015601257600080fd5b60003560e01c635776409414602657600080fd5b3460455760203660031901126045578067016345785d8a000060209252f35b600080fdfea2646970667358221220247589498b5bd3b96930dcfb98bea6cfc28ea514dcbc6387b7db5aebb190aa0764736f6c63430008110033",
+      "sourceMap": "109:156:2:-:0;;;;;;;;;;;;;;;;;",
+      "linkReferences": {}
+    },
+    "deployedBytecode": {
+      "object": "0x6080806040526004361015601257600080fd5b60003560e01c635776409414602657600080fd5b3460455760203660031901126045578067016345785d8a000060209252f35b600080fdfea2646970667358221220247589498b5bd3b96930dcfb98bea6cfc28ea514dcbc6387b7db5aebb190aa0764736f6c63430008110033",
+      "sourceMap": "109:156:2:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;109:156:2;;;;;250:4;109:156;;;;;;;",
+      "linkReferences": {}
+    },
+    "methodIdentifiers": {
+      "getRate(uint256)": "57764094"
+    },
+    "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lastRewardTime\",\"type\":\"uint256\"}],\"name\":\"getRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"rate\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/emission_curves/Constant.sol\":\"Constant\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":base64/=lib/base64/\",\":cache_path /= 'forge-cache'/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":libs /= ['lib']/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":out /= 'out'/\",\":script /= 'scripts'/\",\":src /= 'contracts'/\",\":test /= 'test/foundry'/\",\":v2-core/=lib/v2-core/contracts/\"],\"viaIR\":true},\"sources\":{\"contracts/emission_curves/Constant.sol\":{\"keccak256\":\"0x3323fa2de46c161539bc746b72d67ad576ad66dce0148d892ff1b4eb9fe7fd9b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ce3827666c57621686175d381a62735a8fe973961b69d431085d41b71d6382b3\",\"dweb:/ipfs/QmSwYRuHMeyRhqF8SNJLGmxBMBDAnTjH792b1fmKDQgrP7\"]},\"contracts/interfaces/IEmissionCurve.sol\":{\"keccak256\":\"0x5233bf8981580a565c9eb3c1ed8e4ebbea32ffa2d46266b80134d614eb41bbd0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://f16a7554f4a4e95dae2822021d6dc1d9cc45395ab7fcfe52e94ea36787f1b170\",\"dweb:/ipfs/QmSyNZmhet4bdS7N1yrUA3FLfFrP3FcmwoL2dtgqKztnUK\"]}},\"version\":1}",
+    "metadata": {
+      "compiler": {
+        "version": "0.8.17+commit.8df45f5f"
+      },
+      "language": "Solidity",
+      "output": {
+        "abi": [
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "lastRewardTime",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "pure",
+            "type": "function",
+            "name": "getRate",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "rate",
+                "type": "uint256"
+              }
+            ]
+          }
+        ],
+        "devdoc": {
+          "kind": "dev",
+          "methods": {},
+          "version": 1
+        },
+        "userdoc": {
+          "kind": "user",
+          "methods": {},
+          "version": 1
+        }
+      },
+      "settings": {
+        "remappings": [
+          ":base64/=lib/base64/",
+          ":cache_path /= 'forge-cache'/",
+          ":ds-test/=lib/forge-std/lib/ds-test/src/",
+          ":forge-std/=lib/forge-std/src/",
+          ":libs /= ['lib']/",
+          ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+          ":out /= 'out'/",
+          ":script /= 'scripts'/",
+          ":src /= 'contracts'/",
+          ":test /= 'test/foundry'/",
+          ":v2-core/=lib/v2-core/contracts/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "contracts/emission_curves/Constant.sol": "Constant"
+        },
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "contracts/emission_curves/Constant.sol": {
+          "keccak256": "0x3323fa2de46c161539bc746b72d67ad576ad66dce0148d892ff1b4eb9fe7fd9b",
+          "urls": [
+            "bzz-raw://ce3827666c57621686175d381a62735a8fe973961b69d431085d41b71d6382b3",
+            "dweb:/ipfs/QmSwYRuHMeyRhqF8SNJLGmxBMBDAnTjH792b1fmKDQgrP7"
+          ],
+          "license": "MIT"
+        },
+        "contracts/interfaces/IEmissionCurve.sol": {
+          "keccak256": "0x5233bf8981580a565c9eb3c1ed8e4ebbea32ffa2d46266b80134d614eb41bbd0",
+          "urls": [
+            "bzz-raw://f16a7554f4a4e95dae2822021d6dc1d9cc45395ab7fcfe52e94ea36787f1b170",
+            "dweb:/ipfs/QmSyNZmhet4bdS7N1yrUA3FLfFrP3FcmwoL2dtgqKztnUK"
+          ],
+          "license": "MIT"
+        }
+      },
+      "version": 1
+    },
+    "ast": {
+      "absolutePath": "contracts/emission_curves/Constant.sol",
+      "id": 3164,
+      "exportedSymbols": {
+        "Constant": [
+          3163
+        ],
+        "IEmissionCurve": [
+          3481
+        ]
+      },
+      "nodeType": "SourceUnit",
+      "src": "35:232:2",
+      "nodes": [
+        {
+          "id": 3146,
+          "nodeType": "PragmaDirective",
+          "src": "35:24:2",
+          "literals": [
+            "solidity",
+            "^",
+            "0.8",
+            ".15"
+          ]
+        },
+        {
+          "id": 3147,
+          "nodeType": "ImportDirective",
+          "src": "63:42:2",
+          "absolutePath": "contracts/interfaces/IEmissionCurve.sol",
+          "file": "../interfaces/IEmissionCurve.sol",
+          "nameLocation": "-1:-1:-1",
+          "scope": 3164,
+          "sourceUnit": 3482,
+          "symbolAliases": [],
+          "unitAlias": ""
+        },
+        {
+          "id": 3163,
+          "nodeType": "ContractDefinition",
+          "src": "109:156:2",
+          "nodes": [
+            {
+              "id": 3162,
+              "nodeType": "FunctionDefinition",
+              "src": "151:111:2",
+              "body": {
+                "id": 3161,
+                "nodeType": "Block",
+                "src": "232:30:2",
+                "statements": [
+                  {
+                    "expression": {
+                      "id": 3159,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftHandSide": {
+                        "id": 3157,
+                        "name": "rate",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 3155,
+                        "src": "243:4:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "nodeType": "Assignment",
+                      "operator": "=",
+                      "rightHandSide": {
+                        "hexValue": "31653137",
+                        "id": 3158,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "250:4:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_100000000000000000_by_1",
+                          "typeString": "int_const 100000000000000000"
+                        },
+                        "value": "1e17"
+                      },
+                      "src": "243:11:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 3160,
+                    "nodeType": "ExpressionStatement",
+                    "src": "243:11:2"
+                  }
+                ]
+              },
+              "baseFunctions": [
+                3480
+              ],
+              "functionSelector": "57764094",
+              "implemented": true,
+              "kind": "function",
+              "modifiers": [],
+              "name": "getRate",
+              "nameLocation": "160:7:2",
+              "overrides": {
+                "id": 3153,
+                "nodeType": "OverrideSpecifier",
+                "overrides": [],
+                "src": "203:8:2"
+              },
+              "parameters": {
+                "id": 3152,
+                "nodeType": "ParameterList",
+                "parameters": [
+                  {
+                    "constant": false,
+                    "id": 3151,
+                    "mutability": "mutable",
+                    "name": "lastRewardTime",
+                    "nameLocation": "173:14:2",
+                    "nodeType": "VariableDeclaration",
+                    "scope": 3162,
+                    "src": "168:19:2",
+                    "stateVariable": false,
+                    "storageLocation": "default",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "typeName": {
+                      "id": 3150,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "168:4:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "visibility": "internal"
+                  }
+                ],
+                "src": "167:21:2"
+              },
+              "returnParameters": {
+                "id": 3156,
+                "nodeType": "ParameterList",
+                "parameters": [
+                  {
+                    "constant": false,
+                    "id": 3155,
+                    "mutability": "mutable",
+                    "name": "rate",
+                    "nameLocation": "226:4:2",
+                    "nodeType": "VariableDeclaration",
+                    "scope": 3162,
+                    "src": "221:9:2",
+                    "stateVariable": false,
+                    "storageLocation": "default",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "typeName": {
+                      "id": 3154,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "221:4:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "visibility": "internal"
+                  }
+                ],
+                "src": "220:11:2"
+              },
+              "scope": 3163,
+              "stateMutability": "pure",
+              "virtual": false,
+              "visibility": "external"
+            }
+          ],
+          "abstract": false,
+          "baseContracts": [
+            {
+              "baseName": {
+                "id": 3148,
+                "name": "IEmissionCurve",
+                "nameLocations": [
+                  "130:14:2"
+                ],
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 3481,
+                "src": "130:14:2"
+              },
+              "id": 3149,
+              "nodeType": "InheritanceSpecifier",
+              "src": "130:14:2"
+            }
+          ],
+          "canonicalName": "Constant",
+          "contractDependencies": [],
+          "contractKind": "contract",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            3163,
+            3481
+          ],
+          "name": "Constant",
+          "nameLocation": "118:8:2",
+          "scope": 3164,
+          "usedErrors": []
+        }
+      ],
+      "license": "MIT"
+    },
+    "id": 2
+  }

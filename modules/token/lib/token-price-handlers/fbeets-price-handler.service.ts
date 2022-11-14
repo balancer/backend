@@ -6,19 +6,20 @@ import { networkConfig } from '../../../config/network-config';
 import _ from 'lodash';
 
 export class FbeetsPriceHandlerService implements TokenPriceHandler {
+    constructor(private readonly fbeetsAddress: string, private readonly fbeetsPoolId: string) {}
     public readonly exitIfFails = false;
     public readonly id = 'FbeetsPriceHandlerService';
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return [networkConfig.fbeets.address];
+        return [this.fbeetsAddress];
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         const timestamp = timestampRoundedUpToNearestHour();
-        const fbeetsAddress = networkConfig.fbeets.address;
+        const fbeetsAddress = this.fbeetsAddress;
         const fbeets = await prisma.prismaFbeets.findFirst({});
         const pool = await prisma.prismaPool.findUnique({
-            where: { id: networkConfig.fbeets.poolId },
+            where: { id: this.fbeetsPoolId },
             include: { dynamicData: true, tokens: { include: { dynamicData: true, token: true } } },
         });
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -67,6 +68,6 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
-        return [networkConfig.fbeets.address];
+        return [this.fbeetsAddress];
     }
 }

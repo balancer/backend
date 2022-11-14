@@ -8,6 +8,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { getContractAt } from '../../../../web3/contract';
 import ERC20Abi from '../../../../web3//abi/ERC20.json';
 import { BigNumber } from 'ethers';
+import { PrismaPoolStakingType } from '@prisma/client';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -23,9 +24,9 @@ export class MasterChefStakingService implements PoolStakingService {
         const operations: any[] = [];
 
         for (const farm of filteredFarms) {
-            const isFbeetsFarm = farm.id === networkConfig.fbeets.farmId;
+            const isFbeetsFarm = farm.id === networkConfig.fbeets!.farmId;
             const pool = pools.find((pool) =>
-                isFbeetsFarm ? pool.id === networkConfig.fbeets.poolId : pool.address === farm.pair,
+                isFbeetsFarm ? pool.id === networkConfig.fbeets!.poolId : pool.address === farm.pair,
             );
 
             if (!pool) {
@@ -49,7 +50,7 @@ export class MasterChefStakingService implements PoolStakingService {
                             id: farm.id,
                             poolId: pool.id,
                             type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                            address: isFbeetsFarm ? networkConfig.fbeets.address : farm.masterChef.id,
+                            address: isFbeetsFarm ? networkConfig.fbeets!.address : farm.masterChef.id,
                         },
                     }),
                 );
@@ -92,10 +93,15 @@ export class MasterChefStakingService implements PoolStakingService {
         await prismaBulkExecuteOperations(operations, true);
     }
 
-    public async reloadStakingForAllPools() {
-        await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({});
-        await prisma.prismaPoolStakingMasterChefFarm.deleteMany({});
-        await prisma.prismaPoolStaking.deleteMany({});
-        await this.syncStakingForPools();
+    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]) {
+        if (stakingTypes.includes('MASTER_CHEF')) {
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: { OR: [{ staking: { type: 'MASTER_CHEF' } }, { staking: { type: 'FRESH_BEETS' } }] },
+            });
+            await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({});
+            await prisma.prismaPoolStakingMasterChefFarm.deleteMany({});
+            await prisma.prismaPoolStaking.deleteMany({ where: { type: 'MASTER_CHEF' } });
+            await this.syncStakingForPools();
+        }
     }
 }

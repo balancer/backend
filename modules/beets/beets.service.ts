@@ -24,7 +24,7 @@ export class BeetsService {
 
 export const beetsService = new BeetsService(
     new FbeetsService(
-        getContractAt(networkConfig.fbeets.address, FreshBeetsAbi),
-        getContractAt(networkConfig.fbeets.poolAddress, ERC20),
+        getContractAt(networkConfig.fbeets?.address ?? '', FreshBeetsAbi),
+        getContractAt(networkConfig.fbeets?.poolAddress ?? '', ERC20),
     ),
 );

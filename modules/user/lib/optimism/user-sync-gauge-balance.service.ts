@@ -11,9 +11,13 @@ import { Multicaller } from '../../../web3/multicaller';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { OrderDirection } from '../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+import { PrismaPoolStakingType } from '@prisma/client';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
-    public async initStakedBalances(): Promise<void> {
+    public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
+        if (!stakingTypes.includes('GAUGE')) {
+            return;
+        }
         const { block } = await gaugeSerivce.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
         const gaugeShares = await this.loadAllSubgraphUsers();

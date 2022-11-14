@@ -1,14 +1,15 @@
-import { PrismaPoolStaking } from '@prisma/client';
+import { PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { isFantomNetwork } from '../config/network-config';
+import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
+import { UserSyncReliquaryFarmBalanceService } from './lib/fantom/user-sync-reliquary-farm-balance.service';
 import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
 import { UserBalanceService } from './lib/user-balance.service';
 import { UserSnapshotService } from './lib/user-snapshot.service';
@@ -19,7 +20,7 @@ export class UserService {
     constructor(
         private readonly userBalanceService: UserBalanceService,
         private readonly walletSyncService: UserSyncWalletBalanceService,
-        private readonly stakedSyncService: UserStakedBalanceService,
+        private readonly stakedSyncServices: UserStakedBalanceService[],
         private readonly poolSwapService: PoolSwapService,
         private readonly snapshotService: UserSnapshotService,
     ) {}
@@ -61,12 +62,12 @@ export class UserService {
         await this.walletSyncService.syncChangedBalancesForAllPools();
     }
 
-    public async initStakedBalances() {
-        await this.stakedSyncService.initStakedBalances();
+    public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]) {
+        await Promise.all(this.stakedSyncServices.map((service) => service.initStakedBalances(stakingTypes)));
     }
 
     public async syncChangedStakedBalances() {
-        await this.stakedSyncService.syncChangedStakedBalances();
+        await Promise.all(this.stakedSyncServices.map((service) => service.syncChangedStakedBalances()));
     }
 
     public async syncUserBalanceAllPools(userAddress: string) {
@@ -89,20 +90,20 @@ export class UserService {
             create: { address: userAddress },
         });
 
-        const operations = [];
-        operations.push(this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address));
+        await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
 
         if (pool.staking) {
-            operations.push(
-                this.stakedSyncService.syncUserBalance({
-                    userAddress,
-                    poolId: pool.id,
-                    poolAddress: pool.address,
-                    staking: pool.staking,
-                }),
+            await Promise.all(
+                this.stakedSyncServices.map((service) =>
+                    service.syncUserBalance({
+                        userAddress,
+                        poolId: pool.id,
+                        poolAddress: pool.address,
+                        staking: pool.staking!,
+                    }),
+                ),
             );
         }
-        await Promise.all(operations);
     }
 
     public async syncUserBalanceSnapshots() {
@@ -119,12 +120,23 @@ export class UserService {
 }
 
 export const userService = new UserService(
-    new UserBalanceService(),
-    new UserSyncWalletBalanceService(),
-    isFantomNetwork() ? new UserSyncMasterchefFarmBalanceService() : new UserSyncGaugeBalanceService(),
+    new UserBalanceService(networkConfig.fbeets?.address ?? ''),
+    new UserSyncWalletBalanceService(
+        networkConfig.balancer.vault,
+        networkConfig.fbeets?.address ?? '',
+        networkConfig.fbeets?.poolAddress ?? '',
+    ),
+    isFantomNetwork()
+        ? [
+              new UserSyncMasterchefFarmBalanceService(networkConfig.fbeets!.address, networkConfig.fbeets!.farmId),
+              new UserSyncReliquaryFarmBalanceService(networkConfig.reliquary!.address),
+          ]
+        : [new UserSyncGaugeBalanceService()],
     new PoolSwapService(tokenService, balancerSubgraphService),
     new UserSnapshotService(
         userSnapshotSubgraphService,
         new PoolSnapshotService(balancerSubgraphService, coingeckoService),
+        networkConfig.fbeets?.address ?? '',
+        networkConfig.fbeets?.poolId ?? '',
     ),
 );

@@ -7,6 +7,8 @@ import { networkConfig } from '../../config/network-config';
 import { PrismaPoolStaking } from '@prisma/client';
 
 export class UserBalanceService {
+    constructor(private readonly fbeetsAddress: string) {}
+
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
@@ -47,8 +49,8 @@ export class UserBalanceService {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
-                walletBalances: { where: { tokenAddress: networkConfig.fbeets.address } },
-                stakedBalances: { where: { tokenAddress: networkConfig.fbeets.address } },
+                walletBalances: { where: { tokenAddress: this.fbeetsAddress } },
+                stakedBalances: { where: { tokenAddress: this.fbeetsAddress } },
             },
         });
 
@@ -58,7 +60,7 @@ export class UserBalanceService {
         const walletNum = parseUnits(walletBalance?.balance || '0', 18);
 
         return {
-            tokenAddress: networkConfig.fbeets.address,
+            tokenAddress: this.fbeetsAddress,
             totalBalance: formatFixed(stakedNum.add(walletNum), 18),
             stakedBalance: stakedBalance?.balance || '0',
             walletBalance: walletBalance?.balance || '0',
@@ -84,6 +86,7 @@ export class UserBalanceService {
                                         rewards: true,
                                     },
                                 },
+                                reliquary: true,
                             },
                         },
                     },

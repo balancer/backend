@@ -163,7 +163,9 @@ export const tokenService = new TokenService(
     new TokenDataLoaderService(),
     new TokenPriceService([
         new BeetsPriceHandlerService(),
-        ...(isFantomNetwork() ? [new FbeetsPriceHandlerService()] : []),
+        ...(isFantomNetwork()
+            ? [new FbeetsPriceHandlerService(networkConfig.fbeets!.address, networkConfig.fbeets!.poolId)]
+            : []),
         ...(isFantomNetwork() ? [new ClqdrPriceHandlerService()] : []),
         new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
         new BptPriceHandlerService(),

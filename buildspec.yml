@@ -3,6 +3,7 @@ env:
     variables:
         BALANCER_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism'
         MASTERCHEF_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2'
+        RELIQUARY_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary'
         BLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks'
         BEETS_BAR_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'
         YEARN_VAULTS_ENDPOINT: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all'

@@ -18,9 +18,9 @@ export class BeetsBarSubgraphService {
     cache: CacheClass<string, any>;
     private readonly client: GraphQLClient;
 
-    constructor() {
+    constructor(private readonly fbeetsAddress: string, beetsBarSubgraph: string) {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.beetsBar);
+        this.client = new GraphQLClient(beetsBarSubgraph);
     }
 
     public async getMetadata() {
@@ -44,7 +44,7 @@ export class BeetsBarSubgraphService {
     }> {
         const { beetsBarUser, beetsBar, previousBeetsBarUser, previousBeetsBar } = await this.sdk.BeetsBarPortfolioData(
             {
-                barId: networkConfig.fbeets.address,
+                barId: this.fbeetsAddress,
                 userAddress,
                 previousBlockNumber,
             },
@@ -67,7 +67,7 @@ export class BeetsBarSubgraphService {
             }
         }
 
-        const { bar } = await this.sdk.GetBeetsBar({ id: networkConfig.fbeets.address, block: { number: block } });
+        const { bar } = await this.sdk.GetBeetsBar({ id: this.fbeetsAddress, block: { number: block } });
 
         this.cache.put(`${BEETS_BAR_CACHE_KEY_PREFIX}:${block}`, bar ?? this.emptyBeetsBar, twentyFourHoursInMs);
 
@@ -85,7 +85,7 @@ export class BeetsBarSubgraphService {
             return cached;
         }
 
-        const { bar } = await this.sdk.GetBeetsBar({ id: networkConfig.fbeets.address });
+        const { bar } = await this.sdk.GetBeetsBar({ id: this.fbeetsAddress });
 
         if (!bar) {
             return this.emptyBeetsBar;
@@ -126,8 +126,8 @@ export class BeetsBarSubgraphService {
 
     private get emptyBeetsBar(): BeetsBarFragment {
         return {
-            id: networkConfig.fbeets.address,
-            address: networkConfig.fbeets.address,
+            id: this.fbeetsAddress,
+            address: this.fbeetsAddress,
             block: '',
             decimals: 19,
             fBeetsBurned: '0',
@@ -144,4 +144,7 @@ export class BeetsBarSubgraphService {
     }
 }
 
-export const beetsBarService = new BeetsBarSubgraphService();
+export const beetsBarService = new BeetsBarSubgraphService(
+    networkConfig.fbeets!.address,
+    networkConfig.subgraphs.beetsBar!,
+);

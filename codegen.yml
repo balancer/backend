@@ -35,6 +35,22 @@ generates:
         schema: ${MASTERCHEF_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types.ts:
+        schema: ${RELIQUARY_SUBGRAPH}
+        documents: 'modules/subgraphs/reliquary-subgraph/reliquary-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/subgraphs/reliquary-subgraph/generated/reliquary-subgraph-schema.graphql:
+        schema: ${RELIQUARY_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/subgraphs/blocks-subgraph/generated/blocks-subgraph-types.ts:
         schema: ${BLOCKS_SUBGRAPH}
         documents: 'modules/subgraphs/blocks-subgraph/block-subgraph-queries.graphql'

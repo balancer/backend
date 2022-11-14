@@ -11,7 +11,7 @@ export class GaugeSubgraphService {
     private readonly client: GraphQLClient;
 
     constructor() {
-        this.client = new GraphQLClient(networkConfig.subgraphs.gauge);
+        this.client = new GraphQLClient(networkConfig.subgraphs.gauge ?? '');
     }
     public async getAllGauges(args: GaugeLiquidityGaugesQueryVariables) {
         const gaugesQuery = await this.sdk.GaugeLiquidityGauges(args);

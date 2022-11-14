@@ -71,10 +71,10 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userInitStakedBalances: async (parent, {}, context) => {
+        userInitStakedBalances: async (parent, { stakingTypes }, context) => {
             isAdminRoute(context);
 
-            await userService.initStakedBalances();
+            await userService.initStakedBalances(stakingTypes);
 
             return 'success';
         },

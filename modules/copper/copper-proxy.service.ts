@@ -2,7 +2,7 @@ import CopperProxyAbi from '../lge/abi/CopperProxy.json';
 import { getContractAt } from '../web3/contract';
 import { networkConfig } from '../config/network-config';
 
-const copperProxyContract = getContractAt(networkConfig.copper.proxyAddress, CopperProxyAbi);
+const copperProxyContract = getContractAt(networkConfig.copper!.proxyAddress, CopperProxyAbi);
 
 export async function getLbpPoolOwner(poolAddress: string): Promise<string> {
     const poolData = await copperProxyContract.getPoolData(poolAddress);

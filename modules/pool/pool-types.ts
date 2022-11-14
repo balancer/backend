@@ -1,3 +1,4 @@
+import { PrismaPoolStakingType } from '@prisma/client';
 import { PrismaPoolWithExpandedNesting } from '../../prisma/prisma-types';
 
 export interface PoolAprService {
@@ -6,5 +7,5 @@ export interface PoolAprService {
 
 export interface PoolStakingService {
     syncStakingForPools(): Promise<void>;
-    reloadStakingForAllPools(): Promise<void>;
+    reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void>;
 }

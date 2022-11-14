@@ -1,18 +1,15 @@
-import { PoolCreatorService } from './lib/pool-creator.service';
-import { PoolOnChainDataService } from './lib/pool-on-chain-data.service';
-import { prisma } from '../../prisma/prisma-client';
 import { Provider } from '@ethersproject/providers';
+import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
-import { PoolUsdDataService } from './lib/pool-usd-data.service';
-import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
+import { prisma } from '../../prisma/prisma-client';
 import {
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolLinear,
     GqlPoolMinimal,
-    GqlPoolSnapshot,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
     GqlPoolUserSwapVolume,
@@ -22,39 +19,43 @@ import {
     QueryPoolGetSwapsArgs,
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
-import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
-import { PoolSanityDataLoaderService } from './lib/pool-sanity-data-loader.service';
-import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
-import { SwapFeeAprService } from './lib/apr-data-sources/swap-fee-apr.service';
-import { MasterchefFarmAprService } from './lib/apr-data-sources/fantom/masterchef-farm-apr.service';
-import { SpookySwapAprService } from './lib/apr-data-sources/fantom/spooky-swap-apr.service';
-import { YearnVaultAprService } from './lib/apr-data-sources/fantom/yearn-vault-apr.service';
-import { PoolSyncService } from './lib/pool-sync.service';
-import { tokenService } from '../token/token.service';
-import { PhantomStableAprService } from './lib/apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from './lib/apr-data-sources/boosted-pool-apr.service';
-import { PrismaPoolFilter, PrismaPoolSwap } from '@prisma/client';
-import { PoolSwapService } from './lib/pool-swap.service';
-import { PoolStakingService } from './pool-types';
-import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staking.service';
-import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 import { isFantomNetwork, networkConfig } from '../config/network-config';
+import { configService } from '../content/content.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { reliquaryService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../web3/contract';
-import { configService } from '../content/content.service';
-import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { PoolSnapshotService } from './lib/pool-snapshot.service';
-import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
-import { Cache } from 'memory-cache';
-import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
-import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
+import { BoostedPoolAprService } from './lib/apr-data-sources/boosted-pool-apr.service';
+import { MasterchefFarmAprService } from './lib/apr-data-sources/fantom/masterchef-farm-apr.service';
+import { ReliquaryFarmAprService } from './lib/apr-data-sources/fantom/reliquary-farm-apr.service';
+import { SpookySwapAprService } from './lib/apr-data-sources/fantom/spooky-swap-apr.service';
 import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
-import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
-import { id } from 'ethers/lib/utils';
-import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
-import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
+import { YearnVaultAprService } from './lib/apr-data-sources/fantom/yearn-vault-apr.service';
 import { OvernightAprService } from './lib/apr-data-sources/optimism/overnight-apr.service';
+import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
+import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
+import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
+import { PhantomStableAprService } from './lib/apr-data-sources/phantom-stable-apr.service';
+import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
+import { SwapFeeAprService } from './lib/apr-data-sources/swap-fee-apr.service';
+import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
+import { PoolCreatorService } from './lib/pool-creator.service';
+import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
+import { PoolOnChainDataService } from './lib/pool-on-chain-data.service';
+import { PoolSanityDataLoaderService } from './lib/pool-sanity-data-loader.service';
+import { PoolSnapshotService } from './lib/pool-snapshot.service';
+import { PoolSwapService } from './lib/pool-swap.service';
+import { PoolSyncService } from './lib/pool-sync.service';
+import { PoolUsdDataService } from './lib/pool-usd-data.service';
+import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staking.service';
+import { ReliquaryStakingService } from './lib/staking/fantom/reliquary-staking.service';
+import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
+import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
+import { PoolStakingService } from './pool-types';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
@@ -70,7 +71,7 @@ export class PoolService {
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
-        private readonly poolStakingService: PoolStakingService,
+        private readonly poolStakingServices: PoolStakingService[],
         private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
@@ -148,8 +149,10 @@ export class PoolService {
         return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
     }
 
-    public async reloadStakingForAllPools(): Promise<void> {
-        return this.poolStakingService.reloadStakingForAllPools();
+    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
+        await Promise.all(
+            this.poolStakingServices.map((stakingService) => stakingService.reloadStakingForAllPools(stakingTypes)),
+        );
     }
 
     public async syncPoolAllTokensRelationship(): Promise<void> {
@@ -225,7 +228,7 @@ export class PoolService {
     }
 
     public async syncStakingForPools() {
-        await this.poolStakingService.syncStakingForPools();
+        await Promise.all(this.poolStakingServices.map((stakingService) => stakingService.syncStakingForPools()));
     }
 
     public async updatePoolAprs() {
@@ -315,7 +318,7 @@ export const poolService = new PoolService(
         new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(networkConfig.balancer.swapProtocolFeePercentage),
         ...(isFantomNetwork()
-            ? [new MasterchefFarmAprService()]
+            ? [new MasterchefFarmAprService(), new ReliquaryFarmAprService()]
             : [
                   new GaugeAprService(gaugeSerivce, tokenService, [
                       networkConfig.beets.address,
@@ -325,6 +328,11 @@ export const poolService = new PoolService(
     ]),
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
-    isFantomNetwork() ? new MasterChefStakingService(masterchefService) : new GaugeStakingService(gaugeSerivce),
+    isFantomNetwork()
+        ? [
+              new MasterChefStakingService(masterchefService),
+              new ReliquaryStakingService(networkConfig.reliquary!.address, reliquaryService),
+          ]
+        : [new GaugeStakingService(gaugeSerivce)],
     new PoolSnapshotService(balancerSubgraphService, coingeckoService),
 );

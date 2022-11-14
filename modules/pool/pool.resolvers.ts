@@ -158,7 +158,7 @@ const balancerResolvers: Resolvers = {
         poolReloadStakingForAllPools: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await poolService.reloadStakingForAllPools();
+            await poolService.reloadStakingForAllPools(args.stakingTypes);
 
             return 'success';
         },

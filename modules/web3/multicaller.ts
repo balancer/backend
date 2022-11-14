@@ -39,7 +39,7 @@ export class Multicaller {
         return this;
     }
 
-    async execute(from: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+    async execute<T extends Record<string, any>>(from = {}): Promise<T> {
         const obj = from;
         // not print the full exception for now, not polluting the log too much
         try {
@@ -51,7 +51,7 @@ export class Multicaller {
         }
         this.calls = [];
         this.paths = [];
-        return obj;
+        return obj as T;
     }
 
     private async executeMulticall(): Promise<Result[]> {

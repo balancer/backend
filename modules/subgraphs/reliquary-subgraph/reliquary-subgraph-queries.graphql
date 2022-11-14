@@ -1,0 +1,138 @@
+query Reliquary($id: ID!, $block: Block_height) {
+    reliquary(id: $id, block: $block) {
+        id
+        emissionToken {
+            id
+            address
+            name
+            symbol
+            decimals
+        }
+        totalAllocPoint
+        poolCount
+        relicCount
+        emissionCurve {
+            id
+            address
+            rewardPerSecond
+        }
+    }
+}
+
+query ReliquaryRelics(
+    $skip: Int
+    $first: Int
+    $orderBy: Relic_orderBy
+    $orderDirection: OrderDirection
+    $where: Relic_filter
+    $block: Block_height
+) {
+    relics(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...ReliquaryRelic
+    }
+}
+
+query ReliquaryUsers(
+    $skip: Int
+    $first: Int
+    $orderBy: User_orderBy
+    $orderDirection: OrderDirection
+    $where: User_filter
+    $block: Block_height
+) {
+    reliquaryUsers: users(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...ReliquaryUser
+    }
+}
+
+query ReliquaryPools(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    farms: pools(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...ReliquaryFarm
+    }
+}
+
+fragment ReliquaryUser on User {
+    address
+    relics {
+        ...ReliquaryRelic
+    }
+}
+
+fragment ReliquaryRelic on Relic {
+    id
+    relicId
+    pid
+    userAddress
+    balance
+    level
+    entryTimestamp
+    pool {
+        poolTokenAddress
+    }
+}
+
+fragment ReliquaryFarm on Pool {
+    id
+    pid
+    name
+    rewarder {
+        id
+        emissions {
+            rewardToken {
+                id
+                address
+                name
+                symbol
+                decimals
+            }
+            rewardPerSecond
+        }
+    }
+    poolTokenAddress
+    totalBalance
+    relicCount
+    allocPoint
+    levels {
+        level
+        balance
+        allocationPoints
+        requiredMaturity
+    }
+}
+query ReliquaryGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

@@ -12,9 +12,14 @@ import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.se
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { jsonRpcProvider } from '../../web3/contract';
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
-import ERC20Abi from '../abi/ERC20.json';
+import ERC20Abi from '../../web3/abi/ERC20.json';
 
 export class UserSyncWalletBalanceService {
+    constructor(
+        private readonly vaultAddress: string,
+        private readonly fbeetsAddress: string,
+        private readonly fbeetsPoolAddress: string,
+    ) {}
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
         const { block } = await balancerSubgraphService.getMetadata();
@@ -39,7 +44,7 @@ export class UserSyncWalletBalanceService {
                 ...(await balancerSubgraphService.getAllPoolShares({
                     where: {
                         poolId_in: chunk,
-                        userAddress_not_in: [AddressZero, networkConfig.balancer.vault.toLowerCase()],
+                        userAddress_not_in: [AddressZero, this.vaultAddress],
                         balance_not: '0',
                     },
                 })),
@@ -115,7 +120,7 @@ export class UserSyncWalletBalanceService {
             events
                 .filter((event) =>
                     //we also need to track fbeets balance
-                    [...poolAddresses, networkConfig.fbeets.address].includes(event.address.toLowerCase()),
+                    [...poolAddresses, this.fbeetsAddress].includes(event.address.toLowerCase()),
                 )
                 .map((event) => {
                     const parsed = erc20Interface.parseLog(event);
@@ -156,7 +161,7 @@ export class UserSyncWalletBalanceService {
                 ...balances
                     .filter(({ userAddress }) => userAddress !== AddressZero)
                     .map((userBalance) => {
-                        if (isSameAddress(userBalance.erc20Address, networkConfig.fbeets.address)) {
+                        if (isSameAddress(userBalance.erc20Address, this.fbeetsAddress)) {
                             return this.getUserWalletBalanceUpsertForFbeets(
                                 userBalance.userAddress,
                                 formatFixed(userBalance.balance, 18),
@@ -201,8 +206,8 @@ export class UserSyncWalletBalanceService {
     public async syncUserBalance(userAddress: string, poolId: string, poolAddresses: string) {
         const balancesToFetch = [{ erc20Address: poolAddresses, userAddress }];
 
-        if (isSameAddress(networkConfig.fbeets.poolAddress, poolAddresses)) {
-            balancesToFetch.push({ erc20Address: networkConfig.fbeets.address, userAddress });
+        if (isSameAddress(this.fbeetsPoolAddress, poolAddresses)) {
+            balancesToFetch.push({ erc20Address: this.fbeetsAddress, userAddress });
         }
 
         const balances = await Multicaller.fetchBalances({
@@ -237,7 +242,7 @@ export class UserSyncWalletBalanceService {
             create: {
                 id: `fbeets-${userAddress}`,
                 userAddress: userAddress,
-                tokenAddress: networkConfig.fbeets.address,
+                tokenAddress: this.fbeetsAddress,
                 balance,
                 balanceNum: parseFloat(balance),
             },
