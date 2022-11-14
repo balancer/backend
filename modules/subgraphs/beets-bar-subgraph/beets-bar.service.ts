@@ -145,6 +145,6 @@ export class BeetsBarSubgraphService {
 }
 
 export const beetsBarService = new BeetsBarSubgraphService(
-    networkConfig.fbeets!.address,
-    networkConfig.subgraphs.beetsBar!,
+    networkConfig.fbeets?.address ?? '',
+    networkConfig.subgraphs.beetsBar ?? '',
 );

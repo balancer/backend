@@ -4,6 +4,7 @@ import { networkConfig } from '../config/network-config';
 import FreshBeetsAbi from './abi/FreshBeets.json';
 import ERC20 from './abi/ERC20.json';
 import { tokenService } from '../token/token.service';
+import { AddressZero } from '@ethersproject/constants';
 
 export class BeetsService {
     constructor(private readonly fBeetsService: FbeetsService) {}
@@ -24,7 +25,7 @@ export class BeetsService {
 
 export const beetsService = new BeetsService(
     new FbeetsService(
-        getContractAt(networkConfig.fbeets?.address ?? '', FreshBeetsAbi),
-        getContractAt(networkConfig.fbeets?.poolAddress ?? '', ERC20),
+        getContractAt(networkConfig.fbeets?.address ?? AddressZero, FreshBeetsAbi),
+        getContractAt(networkConfig.fbeets?.poolAddress ?? AddressZero, ERC20),
     ),
 );
