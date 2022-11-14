@@ -15,7 +15,7 @@ export class PoolSyncService {
         const latestBlock = await jsonRpcProvider.getBlockNumber();
 
         const startBlock = lastSyncBlock + 1;
-        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
+        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
 
         const contract = getContractAt(networkConfig.balancer.vault, VaultAbi);
 
