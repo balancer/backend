@@ -15,11 +15,7 @@ import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 
 export class UserSyncWalletBalanceService {
-    constructor(
-        private readonly vaultAddress: string,
-        private readonly fbeetsAddress: string,
-        private readonly fbeetsPoolAddress: string,
-    ) {}
+    constructor(private readonly vaultAddress: string) {}
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
         const { block } = await balancerSubgraphService.getMetadata();
@@ -116,11 +112,15 @@ export class UserSyncWalletBalanceService {
             toBlock,
         });
 
+        const relevantERC20Addresses = poolAddresses;
+        if (isFantomNetwork()) {
+            relevantERC20Addresses.push(networkConfig.fbeets!.address);
+        }
         const balancesToFetch = _.uniqBy(
             events
                 .filter((event) =>
                     //we also need to track fbeets balance
-                    [...poolAddresses, this.fbeetsAddress].includes(event.address.toLowerCase()),
+                    relevantERC20Addresses.includes(event.address.toLowerCase()),
                 )
                 .map((event) => {
                     const parsed = erc20Interface.parseLog(event);
@@ -161,7 +161,10 @@ export class UserSyncWalletBalanceService {
                 ...balances
                     .filter(({ userAddress }) => userAddress !== AddressZero)
                     .map((userBalance) => {
-                        if (isSameAddress(userBalance.erc20Address, this.fbeetsAddress)) {
+                        if (
+                            isFantomNetwork() &&
+                            isSameAddress(userBalance.erc20Address, networkConfig.fbeets!.address)
+                        ) {
                             return this.getUserWalletBalanceUpsertForFbeets(
                                 userBalance.userAddress,
                                 formatFixed(userBalance.balance, 18),
@@ -206,8 +209,8 @@ export class UserSyncWalletBalanceService {
     public async syncUserBalance(userAddress: string, poolId: string, poolAddresses: string) {
         const balancesToFetch = [{ erc20Address: poolAddresses, userAddress }];
 
-        if (isSameAddress(this.fbeetsPoolAddress, poolAddresses)) {
-            balancesToFetch.push({ erc20Address: this.fbeetsAddress, userAddress });
+        if (isFantomNetwork() && isSameAddress(networkConfig.fbeets!.poolAddress, poolAddresses)) {
+            balancesToFetch.push({ erc20Address: networkConfig.fbeets!.address, userAddress });
         }
 
         const balances = await Multicaller.fetchBalances({
