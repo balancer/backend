@@ -121,11 +121,7 @@ export class UserService {
 
 export const userService = new UserService(
     new UserBalanceService(networkConfig.fbeets?.address ?? ''),
-    new UserSyncWalletBalanceService(
-        networkConfig.balancer.vault,
-        networkConfig.fbeets?.address ?? '',
-        networkConfig.fbeets?.poolAddress ?? '',
-    ),
+    new UserSyncWalletBalanceService(networkConfig.balancer.vault),
     isFantomNetwork()
         ? [
               new UserSyncMasterchefFarmBalanceService(networkConfig.fbeets!.address, networkConfig.fbeets!.farmId),
