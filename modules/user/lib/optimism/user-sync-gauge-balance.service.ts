@@ -77,7 +77,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
+        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
 
         const multicall = new Multicaller(networkConfig.multicall, jsonRpcProvider, RewardsOnlyGaugeAbi);
 
