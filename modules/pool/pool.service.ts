@@ -175,7 +175,14 @@ export class PoolService {
     }
 
     public async loadOnChainDataForAllPools(): Promise<void> {
-        const result = await prisma.prismaPool.findMany({ select: { id: true } });
+        const result = await prisma.prismaPool.findMany({
+            select: { id: true },
+            where: {
+                categories: {
+                    none: { category: 'BLACK_LISTED' },
+                },
+            },
+        });
         const poolIds = result.map((item) => item.id);
         const blockNumber = await this.provider.getBlockNumber();
 
