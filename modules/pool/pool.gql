@@ -483,6 +483,8 @@ type GqlPoolLinearPoolWrappedToken {
 
 type GqlPoolApr {
     total: BigDecimal!
+    min: BigDecimal
+    max: BigDecimal
     swapApr: BigDecimal!
     nativeRewardApr: BigDecimal!
     thirdPartyApr: BigDecimal!

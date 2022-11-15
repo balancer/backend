@@ -203,9 +203,18 @@ model PrismaPoolAprItem {
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
     title               String
     apr                 Float
+    range               PrismaPoolAprRange?
 
     type                PrismaPoolAprType?
     group               PrismaPoolAprItemGroup?
+}
+
+model PrismaPoolAprRange {
+    id                  String              @id
+    aprItemId           String              @unique
+    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId], references: [id])
+    min                 Float
+    max                 Float
 }
 
 enum PrismaPoolAprType {

@@ -48,8 +48,12 @@ export class ReliquaryFarmAprService implements PoolAprService {
             for (let farmLevel of subgraphFarm.levels) {
                 const levelSupply = parseFloat(farmLevel.balance);
                 const aprShare = (farmLevel.allocationPoints * levelSupply) / totalWeightedSupply;
-                const apr = (beetsValuePerYear * aprShare) / (levelSupply * pricePerShare);
-                if (apr < minApr) {
+                const apr = levelSupply !== 0 ? (beetsValuePerYear * aprShare) / (levelSupply * pricePerShare) : 0;
+
+                if (minApr === 0 && maxApr === 0) {
+                    minApr = apr;
+                    maxApr = apr;
+                } else if (apr !== 0 && apr < minApr) {
                     minApr = apr;
                 } else if (apr > maxApr) {
                     maxApr = apr;
@@ -66,37 +70,31 @@ export class ReliquaryFarmAprService implements PoolAprService {
                 );
             }
 
-            if (maxApr > 0) {
-                const minAprItem = {
-                    id: `${pool.id}-min-beets-apr`,
-                    poolId: pool.id,
-                    title: 'BEETS min reward APR',
-                    apr: minApr,
-                    type: PrismaPoolAprType.NATIVE_REWARD,
-                    group: null,
-                };
-                const maxAprItem = {
-                    id: `${pool.id}-max-beets-apr`,
-                    poolId: pool.id,
-                    title: 'BEETS max reward APR',
-                    apr: maxApr,
-                    type: PrismaPoolAprType.NATIVE_REWARD,
-                    group: null,
-                };
-
-                operations.push(
-                    prisma.prismaPoolAprItem.upsert({
-                        where: { id: minAprItem.id },
-                        update: minAprItem,
-                        create: minAprItem,
-                    }),
-                    prisma.prismaPoolAprItem.upsert({
-                        where: { id: maxAprItem.id },
-                        update: maxAprItem,
-                        create: maxAprItem,
-                    }),
-                );
-            }
+            operations.push(
+                prisma.prismaPoolAprItem.upsert({
+                    where: { id: `${pool.id}-beets-apr` },
+                    update: {
+                        range: {
+                            update: { min: minApr, max: maxApr },
+                        },
+                    },
+                    create: {
+                        id: `${pool.id}-beets-apr`,
+                        poolId: pool.id,
+                        title: 'BEETS reward APR',
+                        apr: 0,
+                        range: {
+                            create: {
+                                id: `${pool.id}-beets-apr-range`,
+                                min: minApr,
+                                max: maxApr,
+                            },
+                        },
+                        type: PrismaPoolAprType.NATIVE_REWARD,
+                        group: null,
+                    },
+                }),
+            );
         }
 
         const poolsWithNoAllocPoints = farms
