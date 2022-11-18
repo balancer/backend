@@ -19,6 +19,7 @@ import {
     GqlPoolNestingType,
     GqlPoolPhantomStableNested,
     GqlPoolToken,
+    GqlPoolTokenDisplay,
     GqlPoolTokenExpanded,
     GqlPoolTokenUnion,
     GqlPoolUnion,
@@ -80,6 +81,7 @@ export class PoolGqlLoaderService {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
+            displayTokens: this.mapDisplayTokens(pool),
         };
     }
 
@@ -383,6 +385,56 @@ export class PoolGqlLoaderService {
                 isNested,
                 isPhantomBpt,
                 isMainToken,
+            };
+        });
+    }
+
+    private mapDisplayTokens(pool: PrismaPoolMinimal): GqlPoolTokenDisplay[] {
+        return pool.tokens.map((poolToken) => {
+            const allToken = pool.allTokens.find((allToken) => allToken.tokenAddress === poolToken.address)!;
+
+            if (poolToken.nestedPool?.type === 'LINEAR') {
+                const mainToken = allToken.nestedPool?.allTokens.find(
+                    (nestedToken) =>
+                        !nestedToken.token.types.some(
+                            (type) =>
+                                type.type === 'LINEAR_WRAPPED_TOKEN' ||
+                                type.type === 'PHANTOM_BPT' ||
+                                type.type === 'BPT',
+                        ),
+                );
+
+                if (mainToken) {
+                    return {
+                        id: `${pool.id}-${mainToken.token.address}`,
+                        ...mainToken.token,
+                        weight: poolToken?.dynamicData?.weight,
+                    };
+                }
+            } else if (poolToken.nestedPool?.type === 'PHANTOM_STABLE') {
+                const mainTokens =
+                    allToken.nestedPool?.allTokens.filter(
+                        (nestedToken) =>
+                            !nestedToken.token.types.some(
+                                (type) =>
+                                    type.type === 'LINEAR_WRAPPED_TOKEN' ||
+                                    type.type === 'PHANTOM_BPT' ||
+                                    type.type === 'BPT',
+                            ),
+                    ) || [];
+
+                return {
+                    id: `${pool.id}-${poolToken.token.address}`,
+                    ...poolToken.token,
+                    weight: poolToken?.dynamicData?.weight,
+                    nestedTokens: mainTokens.map((mainToken) => ({ id: '', ...mainToken.token })),
+                };
+            }
+
+            return {
+                id: `${pool.id}-${poolToken.token.address}`,
+                ...poolToken.token,
+                weight: poolToken?.dynamicData?.weight,
             };
         });
     }

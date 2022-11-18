@@ -26,6 +26,7 @@ model PrismaPool {
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 
     allTokens           PrismaPoolExpandedTokens[]
+    allTokensNested     PrismaPoolExpandedTokens[] @relation(name: "NestedPoolForAllToken")
     filters             PrismaPoolFilterMap[]
     staking             PrismaPoolStaking?
 
@@ -249,6 +250,9 @@ model PrismaPoolExpandedTokens {
     token               PrismaToken         @relation(fields:[tokenAddress], references: [address])
     poolId              String
     pool                PrismaPool          @relation(fields:[poolId], references: [id])
+
+    nestedPoolId        String?
+    nestedPool          PrismaPool?         @relation(name: "NestedPoolForAllToken", fields:[nestedPoolId], references: [id])
 
     @@id([tokenAddress, poolId])
 }

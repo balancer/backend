@@ -6,6 +6,7 @@ import { PrismaPoolType } from '@prisma/client';
 import _ from 'lodash';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { UserService } from '../../user/user.service';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
@@ -94,6 +95,40 @@ export class PoolCreatorService {
         }
 
         await this.createAllTokensRelationshipForPool(poolId);
+    }
+
+    public async reloadAllTokenNestedPoolIds(): Promise<void> {
+        let operations: any[] = [];
+        const pools = await prisma.prismaPool.findMany({ ...prismaPoolWithExpandedNesting });
+
+        for (const pool of pools) {
+            const nestedTokens = _.flattenDeep(
+                pool.tokens.map((token) => [
+                    ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
+                        ...nestedToken,
+                        nestedPoolId: token.nestedPool?.id,
+                    })),
+                    ...(token.nestedPool?.tokens.map((nestedToken) =>
+                        (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
+                            ...doubleNestedToken,
+                            nestedPoolId: nestedToken.nestedPool?.id,
+                        })),
+                    ) || []),
+                ]),
+            );
+
+            operations = [
+                ...operations,
+                ...nestedTokens.map((token) =>
+                    prisma.prismaPoolExpandedTokens.update({
+                        where: { tokenAddress_poolId: { tokenAddress: token.address, poolId: pool.id } },
+                        data: { nestedPoolId: token.nestedPoolId },
+                    }),
+                ),
+            ];
+        }
+
+        await prismaBulkExecuteOperations(operations);
     }
 
     private async createPoolRecord(pool: BalancerPoolFragment, allPools: BalancerPoolFragment[], blockNumber: number) {
@@ -239,8 +274,16 @@ export class PoolCreatorService {
         const allTokens = _.flattenDeep(
             pool.tokens.map((token) => [
                 token,
-                ...(token.nestedPool?.tokens || []),
-                ...(token.nestedPool?.tokens.map((token) => token.nestedPool?.tokens || []) || []),
+                ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
+                    ...nestedToken,
+                    nestedPoolId: token.nestedPool?.id,
+                })),
+                ...(token.nestedPool?.tokens.map((nestedToken) =>
+                    (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
+                        ...doubleNestedToken,
+                        nestedPoolId: nestedToken.nestedPool?.id,
+                    })),
+                ) || []),
             ]),
         );
 
@@ -249,6 +292,7 @@ export class PoolCreatorService {
             data: allTokens.map((token) => ({
                 poolId,
                 tokenAddress: token.address,
+                nestedPoolId: token.nestedPoolId || null,
             })),
         });
     }

@@ -49,6 +49,7 @@ extend type Mutation {
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
     poolReloadPoolNestedTokens(poolId: String!): String!
+    poolReloadAllTokenNestedPoolIds: String!
 }
 
 type GqlPoolMinimal {
@@ -60,6 +61,7 @@ type GqlPoolMinimal {
     owner: Bytes
     factory: Bytes
     createTime: Int!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -757,4 +759,13 @@ type GqlPoolSnapshot {
     holdersCount: String!
     sharePrice: String!
     amounts: [String!]!
+}
+
+type GqlPoolTokenDisplay {
+    id: ID!
+    address: String!
+    name: String!
+    symbol: String!
+    weight: BigDecimal
+    nestedTokens: [GqlPoolTokenDisplay!]
 }

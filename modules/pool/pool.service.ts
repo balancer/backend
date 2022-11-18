@@ -289,6 +289,10 @@ export class PoolService {
     public async reloadPoolNestedTokens(poolId: string) {
         await this.poolCreatorService.reloadPoolNestedTokens(poolId);
     }
+
+    public async reloadAllTokenNestedPoolIds() {
+        await this.poolCreatorService.reloadAllTokenNestedPoolIds();
+    }
 }
 
 export const poolService = new PoolService(
