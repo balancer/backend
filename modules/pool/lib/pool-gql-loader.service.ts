@@ -393,7 +393,7 @@ export class PoolGqlLoaderService {
         return pool.tokens
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
-                const allToken = pool.allTokens.find((allToken) => allToken.tokenAddress === poolToken.address)!;
+                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address)!;
 
                 if (allToken.nestedPool?.type === 'LINEAR') {
                     const mainToken = allToken.nestedPool.allTokens.find(

@@ -112,31 +112,22 @@ export class PoolCreatorService {
                 pool.tokens
                     .filter((token) => token.address !== pool.address)
                     .map((token) => [
-                        ...(token.nestedPool?.tokens || [])
-                            .filter((nestedToken) => nestedToken.address !== token.nestedPool?.address)
-                            .map((nestedToken) => ({
-                                address: nestedToken.token.address,
-                                symbol: nestedToken.token.symbol,
-                                nestedPoolId: token.nestedPool?.id,
-                            })),
+                        ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
+                            ...nestedToken,
+                            nestedPoolId: token.nestedPool?.id,
+                        })),
                         ...(token.nestedPool?.tokens.map((nestedToken) =>
-                            (nestedToken.nestedPool?.tokens || [])
-                                .filter(
-                                    (doubleNestedToken) =>
-                                        doubleNestedToken.address !== nestedToken.nestedPool?.address,
-                                )
-                                .map((doubleNestedToken) => ({
-                                    address: doubleNestedToken.token.address,
-                                    symbol: doubleNestedToken.token.symbol,
-                                    nestedPoolId: nestedToken.nestedPool?.id,
-                                })),
+                            (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
+                                ...doubleNestedToken,
+                                nestedPoolId: nestedToken.nestedPool?.id,
+                            })),
                         ) || []),
                     ]),
             );
 
             operations = [
                 ...operations,
-                ..._.uniqBy(nestedTokens, (token) => token.address).map((token) =>
+                ...nestedTokens.map((token) =>
                     prisma.prismaPoolExpandedTokens.update({
                         where: { tokenAddress_poolId: { tokenAddress: token.address, poolId: pool.id } },
                         data: { nestedPoolId: token.nestedPoolId },
