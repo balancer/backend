@@ -101,20 +101,28 @@ export class PoolCreatorService {
         let operations: any[] = [];
         const pools = await prisma.prismaPool.findMany({ ...prismaPoolWithExpandedNesting });
 
+        //clear any existing
+        await prisma.prismaPoolExpandedTokens.updateMany({
+            where: {},
+            data: { nestedPoolId: null },
+        });
+
         for (const pool of pools) {
             const nestedTokens = _.flattenDeep(
-                pool.tokens.map((token) => [
-                    ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
-                        ...nestedToken,
-                        nestedPoolId: token.nestedPool?.id,
-                    })),
-                    ...(token.nestedPool?.tokens.map((nestedToken) =>
-                        (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
-                            ...doubleNestedToken,
-                            nestedPoolId: nestedToken.nestedPool?.id,
+                pool.tokens
+                    .filter((token) => token.address !== pool.address)
+                    .map((token) => [
+                        ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
+                            ...nestedToken,
+                            nestedPoolId: token.nestedPool?.id,
                         })),
-                    ) || []),
-                ]),
+                        ...(token.nestedPool?.tokens.map((nestedToken) =>
+                            (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
+                                ...doubleNestedToken,
+                                nestedPoolId: nestedToken.nestedPool?.id,
+                            })),
+                        ) || []),
+                    ]),
             );
 
             operations = [
