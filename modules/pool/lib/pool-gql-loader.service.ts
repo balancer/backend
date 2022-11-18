@@ -429,7 +429,10 @@ export class PoolGqlLoaderService {
                         id: `${pool.id}-${poolToken.token.address}`,
                         ...poolToken.token,
                         weight: poolToken?.dynamicData?.weight,
-                        nestedTokens: mainTokens.map((mainToken) => ({ id: '', ...mainToken.token })),
+                        nestedTokens: mainTokens.map((mainToken) => ({
+                            id: `${pool.id}-${poolToken.token.address}-${mainToken.tokenAddress}`,
+                            ...mainToken.token,
+                        })),
                     };
                 }
 
