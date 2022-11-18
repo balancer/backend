@@ -393,8 +393,8 @@ export class PoolGqlLoaderService {
         return pool.tokens.map((poolToken) => {
             const allToken = pool.allTokens.find((allToken) => allToken.tokenAddress === poolToken.address)!;
 
-            if (poolToken.nestedPool?.type === 'LINEAR') {
-                const mainToken = allToken.nestedPool?.allTokens.find(
+            if (allToken.nestedPool?.type === 'LINEAR') {
+                const mainToken = allToken.nestedPool.allTokens.find(
                     (nestedToken) =>
                         !nestedToken.token.types.some(
                             (type) =>
@@ -411,9 +411,9 @@ export class PoolGqlLoaderService {
                         weight: poolToken?.dynamicData?.weight,
                     };
                 }
-            } else if (poolToken.nestedPool?.type === 'PHANTOM_STABLE') {
+            } else if (allToken.nestedPool?.type === 'PHANTOM_STABLE') {
                 const mainTokens =
-                    allToken.nestedPool?.allTokens.filter(
+                    allToken.nestedPool.allTokens.filter(
                         (nestedToken) =>
                             !nestedToken.token.types.some(
                                 (type) =>
