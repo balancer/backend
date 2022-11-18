@@ -390,30 +390,13 @@ export class PoolGqlLoaderService {
     }
 
     private mapDisplayTokens(pool: PrismaPoolMinimal): GqlPoolTokenDisplay[] {
-        return pool.tokens.map((poolToken) => {
-            const allToken = pool.allTokens.find((allToken) => allToken.tokenAddress === poolToken.address)!;
+        return pool.tokens
+            .filter((token) => token.address !== pool.address)
+            .map((poolToken) => {
+                const allToken = pool.allTokens.find((allToken) => allToken.tokenAddress === poolToken.address)!;
 
-            if (allToken.nestedPool?.type === 'LINEAR') {
-                const mainToken = allToken.nestedPool.allTokens.find(
-                    (nestedToken) =>
-                        !nestedToken.token.types.some(
-                            (type) =>
-                                type.type === 'LINEAR_WRAPPED_TOKEN' ||
-                                type.type === 'PHANTOM_BPT' ||
-                                type.type === 'BPT',
-                        ),
-                );
-
-                if (mainToken) {
-                    return {
-                        id: `${pool.id}-${mainToken.token.address}`,
-                        ...mainToken.token,
-                        weight: poolToken?.dynamicData?.weight,
-                    };
-                }
-            } else if (allToken.nestedPool?.type === 'PHANTOM_STABLE') {
-                const mainTokens =
-                    allToken.nestedPool.allTokens.filter(
+                if (allToken.nestedPool?.type === 'LINEAR') {
+                    const mainToken = allToken.nestedPool.allTokens.find(
                         (nestedToken) =>
                             !nestedToken.token.types.some(
                                 (type) =>
@@ -421,22 +404,41 @@ export class PoolGqlLoaderService {
                                     type.type === 'PHANTOM_BPT' ||
                                     type.type === 'BPT',
                             ),
-                    ) || [];
+                    );
+
+                    if (mainToken) {
+                        return {
+                            id: `${pool.id}-${mainToken.token.address}`,
+                            ...mainToken.token,
+                            weight: poolToken?.dynamicData?.weight,
+                        };
+                    }
+                } else if (allToken.nestedPool?.type === 'PHANTOM_STABLE') {
+                    const mainTokens =
+                        allToken.nestedPool.allTokens.filter(
+                            (nestedToken) =>
+                                !nestedToken.token.types.some(
+                                    (type) =>
+                                        type.type === 'LINEAR_WRAPPED_TOKEN' ||
+                                        type.type === 'PHANTOM_BPT' ||
+                                        type.type === 'BPT',
+                                ),
+                        ) || [];
+
+                    return {
+                        id: `${pool.id}-${poolToken.token.address}`,
+                        ...poolToken.token,
+                        weight: poolToken?.dynamicData?.weight,
+                        nestedTokens: mainTokens.map((mainToken) => ({ id: '', ...mainToken.token })),
+                    };
+                }
 
                 return {
                     id: `${pool.id}-${poolToken.token.address}`,
                     ...poolToken.token,
                     weight: poolToken?.dynamicData?.weight,
-                    nestedTokens: mainTokens.map((mainToken) => ({ id: '', ...mainToken.token })),
                 };
-            }
-
-            return {
-                id: `${pool.id}-${poolToken.token.address}`,
-                ...poolToken.token,
-                weight: poolToken?.dynamicData?.weight,
-            };
-        });
+            });
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
