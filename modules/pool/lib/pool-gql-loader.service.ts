@@ -311,6 +311,7 @@ export class PoolGqlLoaderService {
                 .filter((token) => token.address !== pool.address)
                 .map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
+            displayTokens: this.mapDisplayTokens(pool),
         };
 
         //TODO: may need to build out the types here still

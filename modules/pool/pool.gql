@@ -93,6 +93,7 @@ interface GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
 
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
     dynamicData: GqlPoolDynamicData!
@@ -191,6 +192,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
     tokens: [GqlPoolTokenUnion!]!
@@ -210,6 +212,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
     tokens: [GqlPoolTokenUnion!]!
@@ -229,6 +232,7 @@ type GqlPoolStable implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
     tokens: [GqlPoolToken!]!
@@ -248,6 +252,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
     tokens: [GqlPoolToken!]!
@@ -267,6 +272,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -287,6 +293,7 @@ type GqlPoolElement implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
 
@@ -309,6 +316,7 @@ type GqlPoolLinear implements GqlPoolBase {
     investConfig: GqlPoolInvestConfig!
     withdrawConfig: GqlPoolWithdrawConfig!
     dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
 
