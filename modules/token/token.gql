@@ -21,6 +21,7 @@ extend type Mutation {
     tokenSyncTokenDynamicData: String!
     tokenInitChartData(tokenAddress: String!): String!
     tokenDeletePrice(tokenAddress: String!, timestamp: Int!): Boolean!
+    tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
 }
 
 type GqlTokenPrice {
@@ -101,4 +102,11 @@ type GqlTokenData {
     discordUrl: String
     telegramUrl: String
     twitterUsername: String
+}
+
+enum GqlTokenType {
+    WHITE_LISTED
+    BPT
+    PHANTOM_BPT
+    LINEAR_WRAPPED_TOKEN
 }

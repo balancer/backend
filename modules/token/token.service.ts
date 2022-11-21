@@ -11,7 +11,7 @@ import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price
 import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs } from '../../schema';
+import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
 import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { BeetsPriceHandlerService } from './lib/token-price-handlers/beets-price-handler.service';
@@ -156,6 +156,10 @@ export class TokenService {
 
     public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {
         return this.tokenPriceService.deleteTokenPrice(args);
+    }
+
+    public async deleteTokenType({ tokenAddress, type }: MutationTokenDeleteTokenTypeArgs) {
+        await prisma.prismaTokenType.delete({ where: { tokenAddress_type: { tokenAddress, type } } });
     }
 }
 
