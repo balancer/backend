@@ -390,10 +390,6 @@ export class PoolGqlLoaderService {
     }
 
     private mapDisplayTokens(pool: PrismaPoolMinimal): GqlPoolTokenDisplay[] {
-        if (pool.id === '0x6222ae1d2a9f6894da50aa25cb7b303497f9bebd000000000000000000000046') {
-            console.log(JSON.stringify(pool.allTokens));
-        }
-
         return pool.tokens
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
