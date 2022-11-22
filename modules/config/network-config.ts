@@ -329,9 +329,9 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             canary: {
                 user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
                 sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
-                databaseTabName: 'DatabaseOptimism v2',
-                compositionTabName: 'Pool Composition Optimism v2',
-                emissionDataTabName: 'EmissionData Optimism',
+                databaseTabName: 'Database v2',
+                compositionTabName: 'Pool Composition v2',
+                emissionDataTabName: 'EmissionData',
             },
         },
     },

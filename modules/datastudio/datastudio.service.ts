@@ -178,6 +178,7 @@ export class DatastudioService {
                     token.symbol,
                     token.weight ? token.weight : `0`,
                     `${token.balance}`,
+                    this.chainSlug,
                 ]);
             }
 
@@ -200,6 +201,7 @@ export class DatastudioService {
                             networkConfig.beets.address,
                             `${beetsPerDay}`,
                             `${beetsValuePerDay}`,
+                            this.chainSlug,
                         ]);
                     }
                     if (pool.staking.farm.rewarders) {
@@ -222,6 +224,7 @@ export class DatastudioService {
                                     rewardToken.address,
                                     `${rewardsPerDay}`,
                                     `${rewardsValuePerDay}`,
+                                    this.chainSlug,
                                 ]);
                             }
                         }
@@ -247,6 +250,7 @@ export class DatastudioService {
                                 rewardToken.address,
                                 `${rewardsPerDay}`,
                                 `${rewardsValuePerDay}`,
+                                this.chainSlug,
                             ]);
                         }
                     }
@@ -260,11 +264,11 @@ export class DatastudioService {
 
         console.log(`Appending ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
 
-        this.appendDataInSheet(this.compositionTabName, `A1:K1`, allPoolCompositionRows, jwtClient);
+        this.appendDataInSheet(this.compositionTabName, `A1:L1`, allPoolCompositionRows, jwtClient);
 
         console.log(`Appending ${allEmissionDataRows.length} rows to ${this.emissionDataTabName}.`);
 
-        this.appendDataInSheet(this.emissionDataTabName, 'A1:I1', allEmissionDataRows, jwtClient);
+        this.appendDataInSheet(this.emissionDataTabName, 'A1:J1', allEmissionDataRows, jwtClient);
     }
 
     private async updateDataInSheet(tabName: string, rowRange: string, rows: string[][], jwtClient: JWT) {
@@ -291,6 +295,7 @@ export class DatastudioService {
             spreadsheetId: this.sheetId,
             range: `${tabName}!${rowRange}`,
             valueInputOption: 'USER_ENTERED',
+            insertDataOption: 'INSERT_ROWS',
             requestBody: {
                 majorDimension: 'ROWS',
                 range: `${tabName}!${rowRange}`,
