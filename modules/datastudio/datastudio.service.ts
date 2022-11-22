@@ -10,7 +10,6 @@ import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgr
 import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { secondsPerDay } from '../common/time';
-import { truncate } from 'lodash';
 import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 
 export class DatastudioService {
@@ -31,19 +30,48 @@ export class DatastudioService {
 
         const sheets = google.sheets({ version: 'v4' });
 
-        const range = `${this.databaseTabName}!B2:J`;
+        const timestampRange = `${this.databaseTabName}!B:B`;
+        const poolAddressRange = `${this.databaseTabName}!D:D`;
+        const totalSwapRange = `${this.databaseTabName}!J:J`;
+        const chainRange = `${this.databaseTabName}!V:V`;
         let currentSheetValues;
-        currentSheetValues = await sheets.spreadsheets.values.get({
+        currentSheetValues = await sheets.spreadsheets.values.batchGet({
             auth: jwtClient,
             spreadsheetId: this.sheetId,
-            range: range,
+            ranges: [timestampRange, poolAddressRange, totalSwapRange, chainRange],
             valueRenderOption: 'UNFORMATTED_VALUE',
         });
 
         // if there are no values in the sheet, take end of the day before yesterday which means the feed will run now
         let lastRun = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
-        if (currentSheetValues.data.values) {
-            lastRun = currentSheetValues.data.values[currentSheetValues.data.values.length - 1][0];
+        let timestampValues: number[][] = [];
+        let poolAddressValues: string[][] = [];
+        let totalSwapValues: string[][] = [];
+        let chainValues: string[][] = [];
+        if (currentSheetValues.data.valueRanges) {
+            timestampValues = currentSheetValues.data.valueRanges[0].values || [];
+            if (timestampValues[0][0].toString() !== 'Timestamp') {
+                throw new Error('Wrong row for timestamp');
+            }
+            poolAddressValues = currentSheetValues.data.valueRanges[1].values || [];
+            if (poolAddressValues[0][0].toString() !== 'address') {
+                throw new Error('Wrong row for address');
+            }
+            totalSwapValues = currentSheetValues.data.valueRanges[2].values || [];
+            if (totalSwapValues[0][0].toString() !== 'swapsCount') {
+                throw new Error('Wrong row for swapsCount');
+            }
+            chainValues = currentSheetValues.data.valueRanges[3].values || [];
+            if (chainValues[0][0].toString() !== 'chain') {
+                throw new Error('Wrong row for chain');
+            }
+        }
+
+        for (let i = timestampValues.length - 1; i >= 0; i--) {
+            if (chainValues[i][0] === this.chainSlug) {
+                lastRun = timestampValues[i][0];
+                break;
+            }
         }
 
         if (lastRun > moment.tz('GMT').subtract(1, 'day').unix()) {
@@ -95,14 +123,16 @@ export class DatastudioService {
             let dailySwaps = `0`;
 
             let yesterdaySwapsCount = `0`;
-            //find last entry of pool in currentSheet and get total swaps. If no previous value present, set previous value to 0
-            if (currentSheetValues.data.values) {
-                // string[row][column], index 2 is address, index 8 total swap count
-                currentSheetValues.data.values.forEach((row) => {
-                    if (pool.address === row[2] && endOfDayBeforeYesterday === row[0]) {
-                        yesterdaySwapsCount = row[8];
-                    }
-                });
+            //find last entry of pool in currentSheet for the correct chain and get total swaps. If no previous value present, set previous value to 0
+            for (let i = poolAddressValues.length - 1; i >= 0; i--) {
+                if (
+                    chainValues[i][0] === this.chainSlug &&
+                    poolAddressValues[i][0] === pool.address &&
+                    timestampValues[i][0] === endOfDayBeforeYesterday
+                ) {
+                    yesterdaySwapsCount = totalSwapValues[i][0];
+                    break;
+                }
             }
 
             if (pool.dynamicData) {
