@@ -20,11 +20,9 @@ export class PhantomStableAprService implements PoolAprService {
             for (const token of linearPoolTokens) {
                 const aprItem = aprItems.find((item) => item.poolId === token.nestedPoolId);
 
-                if (aprItem && token.dynamicData && token.nestedPool && token.nestedPool.dynamicData) {
+                if (aprItem && token.dynamicData && pool.dynamicData) {
                     const itemId = `${pool.id}-${token.token.address}-${token.index}`;
-                    const { totalShares } = token.nestedPool.dynamicData;
-                    const tokenBalance = parseFloat(token.dynamicData.balance);
-                    const apr = aprItem.apr * (tokenBalance / parseFloat(totalShares));
+                    const apr = aprItem.apr * (token.dynamicData.balanceUSD / pool.dynamicData?.totalLiquidity);
                     const userApr = collectsYieldFee ? apr * (1 - this.yieldProtocolFeePercentage) : apr;
 
                     await prisma.prismaPoolAprItem.upsert({
