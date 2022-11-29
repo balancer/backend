@@ -19,7 +19,9 @@ export class BoostedPoolAprService implements PoolAprService {
                     return false;
                 }
 
-                //for phantom stable pools, the linear apr items have already been set
+                //for phantom stable pools, the linear apr items have already been set in PhantomStableAprService,
+                //so we're only concerned with finding the apr for phantom stable BPTs nested inside of
+                //this phantom stable
                 if (pool.type === 'PHANTOM_STABLE') {
                     return token.nestedPool?.type === 'PHANTOM_STABLE';
                 }
