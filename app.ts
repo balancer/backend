@@ -45,7 +45,7 @@ async function startServer() {
                 return null;
             }
             if (
-                error?.toString().includes('fractional component exceeds decimals') &&
+                error?.toString().includes('SOR: invalid swap amount input') &&
                 event.request?.headers &&
                 event.request.headers['user-agent'].includes('Python')
             ) {

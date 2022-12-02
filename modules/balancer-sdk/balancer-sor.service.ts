@@ -38,7 +38,13 @@ export class BalancerSorService {
         tokenOut = replaceEthWithZeroAddress(tokenOut);
 
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
-        const swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
+        let swapAmountScaled = BigNumber.from(`0`);
+        try {
+            swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
+        } catch (e) {
+            console.log(`Invalid input: Could not parse swapAmount ${swapAmount} with decimals ${tokenDecimals}`);
+            throw new Error('SOR: invalid swap amount input');
+        }
 
         const { data } = await axios.post<{ swapInfo: SwapInfo }>(
             networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
