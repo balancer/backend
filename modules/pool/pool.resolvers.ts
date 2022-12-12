@@ -76,9 +76,8 @@ const balancerResolvers: Resolvers = {
                 relicCount: `${snapshot.relicCount}`,
                 userCount: `${snapshot.userCount}`,
                 totalBalance: snapshot.totalBalance,
-                totalDeposited: snapshot.totalDeposited,
-                totalWithdrawn: snapshot.totalWithdrawn,
-                amounts: snapshot.amounts,
+                dailyDeposited: snapshot.dailyDeposited,
+                dailyWithdrawn: snapshot.dailyWithdrawn,
             }));
         },
     },

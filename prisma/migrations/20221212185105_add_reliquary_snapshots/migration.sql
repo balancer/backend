@@ -6,9 +6,8 @@ CREATE TABLE "PrismaReliquaryFarmSnapshot" (
     "relicCount" INTEGER NOT NULL,
     "userCount" INTEGER NOT NULL,
     "totalBalance" TEXT NOT NULL,
-    "totalDeposited" TEXT NOT NULL,
-    "totalWithdrawn" TEXT NOT NULL,
-    "amounts" TEXT[],
+    "dailyDeposited" TEXT NOT NULL,
+    "dailyWithdrawn" TEXT NOT NULL,
 
     CONSTRAINT "PrismaReliquaryFarmSnapshot_pkey" PRIMARY KEY ("id")
 );

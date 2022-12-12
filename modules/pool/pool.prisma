@@ -378,7 +378,6 @@ model PrismaReliquaryFarmSnapshot {
     relicCount          Int
     userCount           Int
     totalBalance        String
-    totalDeposited      String
-    totalWithdrawn      String
-    amounts             String[]
+    dailyDeposited      String
+    dailyWithdrawn      String
 }

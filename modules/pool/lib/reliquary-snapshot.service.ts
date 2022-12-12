@@ -63,13 +63,9 @@ export class ReliquarySnapshotService {
         const farmSnapshots = farmSnapshotsQuery.farmSnapshots;
         for (const farmId of farmIds) {
             const snapshots = farmSnapshots.filter((snapshot) => snapshot.farmId === farmId);
-            const pool = await prisma.prismaPool.findFirst({ where: { staking: { reliquary: { id: `${farmId}` } } } });
 
             const farmOperations = [];
             for (const snapshot of snapshots) {
-                const poolSnapshot = await prisma.prismaPoolSnapshot.findUnique({
-                    where: { id: `${pool!.id}-${snapshot.snapshotTimestamp}` },
-                });
                 // if we sync snapshots from the past, we want relics from end of that day. If we sync from today, we want relics up to now
                 const timestampForSnapshot =
                     snapshot.snapshotTimestamp + oneDayInMinutes * 60 < moment().utc().unix()
@@ -88,9 +84,8 @@ export class ReliquarySnapshotService {
                     relicCount: snapshot.relicCount,
                     userCount: uniqueUsers.length,
                     totalBalance: snapshot.totalBalance,
-                    totalDeposited: snapshot.totalDeposited,
-                    totalWithdrawn: snapshot.totalWithdrawn,
-                    amounts: poolSnapshot?.amounts,
+                    dailyDeposited: snapshot.dailyDeposited,
+                    dailyWithdrawn: snapshot.dailyWithdrawn,
                 };
                 farmOperations.push(
                     prisma.prismaReliquaryFarmSnapshot.upsert({
