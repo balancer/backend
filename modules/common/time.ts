@@ -13,7 +13,8 @@ export const twentyFourHoursInMs = 24 * oneHourInMs;
 export const twentyFourHoursInSecs = twentyFourHoursInMs / oneSecondInMs;
 
 export const oneDayInMinutes = 60 * 24;
-export const thirtyDaysInSeconds = 60 * 60 * 24;
+export const oneDayInSeconds = oneDayInMinutes * 60;
+export const thirtyDaysInSeconds = 60 * 60 * 24 * 30;
 export const thirtyDaysInMinutes = oneDayInMinutes * 30;
 export const timeNowInMs = Math.floor(Date.now() / oneSecondInMs);
 

@@ -244,6 +244,15 @@ export function configureWorkerRoutes(app: Express) {
             case 'feed-data-to-datastudio':
                 await runIfNotAlreadyRunning(job.name, () => datastudioService.feedPoolData(), 0.0, res, next);
                 break;
+            case 'sync-latest-reliquary-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => poolService.syncLatestReliquarySnapshotsForAllFarms(),
+                    0.1,
+                    res,
+                    next,
+                );
+                break;
             default:
                 res.sendStatus(400);
                 throw new Error(`Unhandled job type ${job.name}`);
