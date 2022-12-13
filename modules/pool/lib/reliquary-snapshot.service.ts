@@ -145,22 +145,6 @@ export class ReliquarySnapshotService {
                     block: { number: parseFloat(blockAtTimestamp.number) },
                 });
 
-                for (const level of levelsAtBlock.poolLevels) {
-                    const data = {
-                        id: `${level.id}-${snapshot.id}`,
-                        farmSnapshotId: snapshot.id,
-                        level: `${level.level}`,
-                        balance: level.balance,
-                    };
-                    farmOperations.push(
-                        prisma.prismaReliquaryLevelSnapshot.upsert({
-                            where: { id: `${level.id}-${snapshot.id}` },
-                            create: data,
-                            update: data,
-                        }),
-                    );
-                }
-
                 const uniqueUsers = _.uniq(relicsInFarm.map((relic) => relic.userAddress));
                 const data = {
                     id: snapshot.id,
@@ -179,6 +163,22 @@ export class ReliquarySnapshotService {
                         update: data,
                     }),
                 );
+
+                for (const level of levelsAtBlock.poolLevels) {
+                    const data = {
+                        id: `${level.id}-${snapshot.id}`,
+                        farmSnapshotId: snapshot.id,
+                        level: `${level.level}`,
+                        balance: level.balance,
+                    };
+                    farmOperations.push(
+                        prisma.prismaReliquaryLevelSnapshot.upsert({
+                            where: { id: `${level.id}-${snapshot.id}` },
+                            create: data,
+                            update: data,
+                        }),
+                    );
+                }
             }
             operations.push(...farmOperations);
         }
