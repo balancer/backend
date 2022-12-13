@@ -1,18 +1,20 @@
 import { GraphQLClient } from 'graphql-request';
-import { Cache, CacheClass } from 'memory-cache';
 import { networkConfig } from '../../config/network-config';
 import { subgraphLoadAll } from '../subgraph-util';
 import {
     getSdk,
     ReliquaryFarmFragment,
+    ReliquaryFarmSnapshotsQuery,
+    ReliquaryFarmSnapshotsQueryVariables,
     ReliquaryPoolsQuery,
     ReliquaryPoolsQueryVariables,
     ReliquaryQuery,
     ReliquaryQueryVariables,
     ReliquaryRelicFragment,
+    ReliquaryRelicSnapshotsQuery,
+    ReliquaryRelicSnapshotsQueryVariables,
     ReliquaryRelicsQuery,
     ReliquaryRelicsQueryVariables,
-    ReliquaryUserFragment,
     ReliquaryUsersQuery,
     ReliquaryUsersQueryVariables,
 } from './generated/reliquary-subgraph-types';
@@ -58,9 +60,17 @@ export class ReliquarySubgraphService {
         return subgraphLoadAll<ReliquaryFarmFragment>(this.sdk.ReliquaryPools, 'farms', args);
     }
 
+    public async getFarmSnapshots(args: ReliquaryFarmSnapshotsQueryVariables): Promise<ReliquaryFarmSnapshotsQuery> {
+        return this.sdk.ReliquaryFarmSnapshots(args);
+    }
+
+    public async getRelicSnapshots(args: ReliquaryRelicSnapshotsQueryVariables): Promise<ReliquaryRelicSnapshotsQuery> {
+        return this.sdk.ReliquaryRelicSnapshots(args);
+    }
+
     public get sdk() {
         return getSdk(this.client);
     }
 }
 
-export const reliquaryService = new ReliquarySubgraphService();
+export const reliquarySubgraphService = new ReliquarySubgraphService();

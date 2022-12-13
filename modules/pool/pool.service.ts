@@ -25,7 +25,7 @@ import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { reliquaryService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../web3/contract';
@@ -51,6 +51,7 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
+import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staking.service';
 import { ReliquaryStakingService } from './lib/staking/fantom/reliquary-staking.service';
 import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
@@ -73,6 +74,7 @@ export class PoolService {
         private readonly poolSwapService: PoolSwapService,
         private readonly poolStakingServices: PoolStakingService[],
         private readonly poolSnapshotService: PoolSnapshotService,
+        private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -141,6 +143,10 @@ export class PoolService {
 
     public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
         return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
+    }
+
+    public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
+        return this.reliquarySnapshotService.getSnapshotsForFarm(id, range);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -278,6 +284,16 @@ export class PoolService {
         await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
     }
 
+    public async syncLatestReliquarySnapshotsForAllFarms(daysToSync?: number) {
+        await this.reliquarySnapshotService.syncLatestSnapshotsForAllFarms(daysToSync);
+    }
+
+    public async loadReliquarySnapshotsForAllFarms() {
+        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({});
+        const farmIds = farms.map((farm) => parseFloat(farm.id));
+        await this.reliquarySnapshotService.loadAllSnapshotsForFarms(farmIds);
+    }
+
     public async updateLifetimeValuesForAllPools() {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
@@ -342,8 +358,9 @@ export const poolService = new PoolService(
     isFantomNetwork()
         ? [
               new MasterChefStakingService(masterchefService),
-              new ReliquaryStakingService(networkConfig.reliquary!.address, reliquaryService),
+              new ReliquaryStakingService(networkConfig.reliquary!.address, reliquarySubgraphService),
           ]
         : [new GaugeStakingService(gaugeSerivce)],
     new PoolSnapshotService(balancerSubgraphService, coingeckoService),
+    new ReliquarySnapshotService(reliquarySubgraphService),
 );

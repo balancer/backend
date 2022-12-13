@@ -86,4 +86,8 @@ export const fantomJobs: WorkerJob[] = [
         name: 'sync-user-snapshots',
         interval: every(1, 'hours'),
     },
+    {
+        name: 'sync-latest-reliquary-snapshots',
+        interval: every(1, 'hours'),
+    },
 ];

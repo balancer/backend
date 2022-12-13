@@ -367,6 +367,7 @@ model PrismaPoolStakingReliquaryFarm {
     name                String
     beetsPerSecond      String
     levels              PrismaPoolStakingReliquaryFarmLevel[]
+    snapshots           PrismaReliquaryFarmSnapshot[]
 }
 
 model PrismaPoolStakingReliquaryFarmLevel {
@@ -398,6 +399,18 @@ model PrismaPoolSnapshot {
     swapsCount          Int
     holdersCount        Int
     amounts             String[]
+}
+
+model PrismaReliquaryFarmSnapshot {
+    id                  String              @id
+    farmId              String
+    stakingFarm         PrismaPoolStakingReliquaryFarm  @relation(fields:[farmId], references: [id])
+    timestamp           Int
+    relicCount          Int
+    userCount           Int
+    totalBalance        String
+    dailyDeposited      String
+    dailyWithdrawn      String
 }
 
 

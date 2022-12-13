@@ -79,6 +79,59 @@ query ReliquaryPools(
     }
 }
 
+query ReliquaryFarmSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: DailyPoolSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: DailyPoolSnapshot_filter
+    $block: Block_height
+) {
+    farmSnapshots: dailyPoolSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        farmId: poolId
+        snapshotTimestamp
+        totalBalance
+        dailyDeposited
+        dailyWithdrawn
+        relicCount
+    }
+}
+
+query ReliquaryRelicSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: DailyRelicSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: DailyRelicSnapshot_filter
+    $block: Block_height
+) {
+    relicSnapshots: dailyRelicSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        relicId
+        snapshotTimestamp
+        userAddress
+        poolId
+        balance
+        entryTimestamp
+        level
+    }
+}
+
 fragment ReliquaryUser on User {
     address
     relics {
@@ -127,6 +180,7 @@ fragment ReliquaryFarm on Pool {
         requiredMaturity
     }
 }
+
 query ReliquaryGetMeta {
     meta: _meta {
         block {

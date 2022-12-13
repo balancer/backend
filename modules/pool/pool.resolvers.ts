@@ -66,6 +66,20 @@ const balancerResolvers: Resolvers = {
         poolGetLinearPools: async () => {
             return poolService.getGqlLinearPools();
         },
+        poolGetReliquaryFarmSnapshots: async (parent, { id, range }, context) => {
+            const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range);
+
+            return snapshots.map((snapshot) => ({
+                id: snapshot.id,
+                farmId: snapshot.farmId,
+                timestamp: snapshot.timestamp,
+                relicCount: `${snapshot.relicCount}`,
+                userCount: `${snapshot.userCount}`,
+                totalBalance: snapshot.totalBalance,
+                dailyDeposited: snapshot.dailyDeposited,
+                dailyWithdrawn: snapshot.dailyWithdrawn,
+            }));
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
@@ -223,6 +237,13 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.reloadAllTokenNestedPoolIds();
+
+            return 'success';
+        },
+        poolLoadReliquarySnapshotsForAllFarms: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.loadReliquarySnapshotsForAllFarms();
 
             return 'success';
         },
