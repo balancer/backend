@@ -172,14 +172,19 @@ export class BlocksSubgraphService {
             orderDirection: OrderDirection.Desc,
             orderBy: Block_OrderBy.Timestamp,
             where: {
-                timestamp_gt: `${timestamp - 4 * blockTime}`,
-                timestamp_lt: `${timestamp + 4 * blockTime}`,
+                timestamp_gt: `${timestamp - 10 * blockTime}`,
+                timestamp_lt: `${timestamp + 10 * blockTime}`,
             },
         };
 
         const allBlocks = await this.getAllBlocks(args);
 
-        return allBlocks[0];
+        const closest = allBlocks.reduce((a, b) => {
+            return Math.abs(parseFloat(b.timestamp) - timestamp) < Math.abs(parseFloat(a.timestamp) - timestamp)
+                ? b
+                : a;
+        });
+        return closest;
     }
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {

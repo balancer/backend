@@ -78,6 +78,7 @@ const balancerResolvers: Resolvers = {
                 totalBalance: snapshot.totalBalance,
                 dailyDeposited: snapshot.dailyDeposited,
                 dailyWithdrawn: snapshot.dailyWithdrawn,
+                levelBalances: snapshot.levelBalances,
             }));
         },
     },

@@ -6,6 +6,8 @@ import {
     ReliquaryFarmFragment,
     ReliquaryFarmSnapshotsQuery,
     ReliquaryFarmSnapshotsQueryVariables,
+    ReliquaryPoolLevelsQuery,
+    ReliquaryPoolLevelsQueryVariables,
     ReliquaryPoolsQuery,
     ReliquaryPoolsQueryVariables,
     ReliquaryQuery,
@@ -50,6 +52,10 @@ export class ReliquarySubgraphService {
 
     public async getRelics(args: ReliquaryRelicsQueryVariables): Promise<ReliquaryRelicsQuery> {
         return this.sdk.ReliquaryRelics(args);
+    }
+
+    public async getPoolLevels(args: ReliquaryPoolLevelsQueryVariables): Promise<ReliquaryPoolLevelsQuery> {
+        return this.sdk.ReliquaryPoolLevels(args);
     }
 
     public async getAllRelics(args: ReliquaryRelicsQueryVariables): Promise<ReliquaryRelicFragment[]> {

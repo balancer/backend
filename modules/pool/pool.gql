@@ -781,6 +781,13 @@ type GqlReliquaryFarmSnapshot {
     totalBalance: String!
     dailyDeposited: String!
     dailyWithdrawn: String!
+    levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
+}
+
+type GqlReliquaryFarmLevelSnapshot {
+    id: ID!
+    level: String!
+    balance: String!
 }
 
 type GqlPoolTokenDisplay {

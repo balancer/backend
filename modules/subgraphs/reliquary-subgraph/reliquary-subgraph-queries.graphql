@@ -132,6 +132,30 @@ query ReliquaryRelicSnapshots(
     }
 }
 
+query ReliquaryPoolLevels(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolLevel_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolLevel_filter
+    $block: Block_height
+) {
+    poolLevels(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        id
+        level
+        balance
+        requiredMaturity
+        allocationPoints
+    }
+}
+
 fragment ReliquaryUser on User {
     address
     relics {

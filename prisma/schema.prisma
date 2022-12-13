@@ -411,8 +411,16 @@ model PrismaReliquaryFarmSnapshot {
     totalBalance        String
     dailyDeposited      String
     dailyWithdrawn      String
+    levelBalances       PrismaReliquaryLevelSnapshot[]
 }
 
+model PrismaReliquaryLevelSnapshot {
+    id                  String              @id
+    farmSnapshotId      String
+    farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId], references: [id])
+    level               String
+    balance             String
+}
 
 model PrismaToken {
     address             String              @id
