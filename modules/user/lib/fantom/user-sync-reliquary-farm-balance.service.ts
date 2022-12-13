@@ -14,7 +14,7 @@ import {
     Relic_OrderBy,
     ReliquaryRelicFragment,
 } from '../../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
-import { reliquaryService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
+import { reliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
 import ReliquaryAbi from '../../../web3/abi/Reliquary.json';
 import { getContractAt, jsonRpcProvider } from '../../../web3/contract';
 import { Multicaller } from '../../../web3/multicaller';
@@ -76,7 +76,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             include: { staking: true },
         });
         const latestBlock = await jsonRpcProvider.getBlockNumber();
-        const farms = await reliquaryService.getAllFarms({});
+        const farms = await reliquarySubgraphService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
         const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
@@ -138,7 +138,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         if (!stakingTypes.includes('RELIQUARY')) {
             return;
         }
-        const { block } = await reliquaryService.getMetadata();
+        const { block } = await reliquarySubgraphService.getMetadata();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
         const relics = await this.loadAllSubgraphRelics();
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
@@ -300,7 +300,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         let skip = 0;
 
         while (hasMore) {
-            const { relics } = await reliquaryService.getRelics({
+            const { relics } = await reliquarySubgraphService.getRelics({
                 where: { relicId_gt: latestRelicId, balance_gt: '0' },
                 first: pageSize,
                 skip,

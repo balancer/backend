@@ -25,7 +25,7 @@ import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { reliquaryService as reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { jsonRpcProvider } from '../web3/contract';

@@ -73,4 +73,4 @@ export class ReliquarySubgraphService {
     }
 }
 
-export const reliquaryService = new ReliquarySubgraphService();
+export const reliquarySubgraphService = new ReliquarySubgraphService();

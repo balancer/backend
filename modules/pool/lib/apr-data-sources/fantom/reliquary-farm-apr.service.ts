@@ -5,13 +5,13 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { networkConfig } from '../../../../config/network-config';
-import { reliquaryService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
+import { reliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 
 export class ReliquaryFarmAprService implements PoolAprService {
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const farms = await reliquaryService.getAllFarms({});
+        const farms = await reliquarySubgraphService.getAllFarms({});
 
         const tokenPrices = await tokenService.getTokenPrices();
         const operations: any[] = [];
