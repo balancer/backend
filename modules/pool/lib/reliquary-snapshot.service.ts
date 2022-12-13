@@ -135,7 +135,8 @@ export class ReliquarySnapshotService {
                     snapshot.snapshotTimestamp + oneDayInMinutes * 60 < moment().utc().unix()
                         ? snapshot.snapshotTimestamp + oneDayInMinutes * 60
                         : moment().utc().unix();
-                const blockAtTimestamp = await blocksSubgraphService.getBlockForTimestamp(timestampForSnapshot - 20);
+                // accomodate for lagging subgraph and subtract 300 seconds
+                const blockAtTimestamp = await blocksSubgraphService.getBlockForTimestamp(timestampForSnapshot - 300);
                 const relicsInFarm = await this.reliquarySubgraphService.getAllRelics({
                     where: { pid: farmId },
                     block: { number: parseFloat(blockAtTimestamp.number) },
