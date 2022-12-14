@@ -10,16 +10,17 @@ import {
 } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { oneDayInMinutes, oneDayInSeconds } from '../../common/time';
+import { time } from 'console';
+import { PrismaReliquaryLevelSnapshot, PrismaReliquaryTokenBalanceSnapshot } from '@prisma/client';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
 
     public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
-
         return prisma.prismaReliquaryFarmSnapshot.findMany({
             where: { farmId: `${farmId}`, timestamp: { gte: timestamp } },
-            include: { levelBalances: true },
+            include: { levelBalances: true, tokenBalances: true },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -130,13 +131,24 @@ export class ReliquarySnapshotService {
 
             const farmOperations = [];
             for (const snapshot of snapshots) {
-                // if we sync snapshots from the past, we want relics from end of that day. If we sync from today, we want relics up to now
+                // If we sync snapshots from the past, we want relics from end of that day.
+                // If we sync from today, we want relics up to nowish (accomodate for subgraph lagging)
                 const timestampForSnapshot =
                     snapshot.snapshotTimestamp + oneDayInMinutes * 60 < moment().utc().unix()
                         ? snapshot.snapshotTimestamp + oneDayInMinutes * 60
-                        : moment().utc().unix();
-                // accomodate for lagging subgraph and subtract 300 seconds
-                const blockAtTimestamp = await blocksSubgraphService.getBlockForTimestamp(timestampForSnapshot - 300);
+                        : moment().utc().unix() - 600;
+
+                const pool = await prisma.prismaPool.findFirstOrThrow({
+                    where: { staking: { reliquary: { id: `${farmId}` } } },
+                    include: { tokens: { include: { token: true } } },
+                });
+
+                const mostRecentPoolSnapshot = await prisma.prismaPoolSnapshot.findFirstOrThrow({
+                    where: { poolId: pool.id, timestamp: { lte: timestampForSnapshot } },
+                    orderBy: { timestamp: 'desc' },
+                });
+
+                const blockAtTimestamp = await blocksSubgraphService.getBlockForTimestamp(timestampForSnapshot);
                 const relicsInFarm = await this.reliquarySubgraphService.getAllRelics({
                     where: { pid: farmId },
                     block: { number: parseFloat(blockAtTimestamp.number) },
@@ -166,7 +178,7 @@ export class ReliquarySnapshotService {
                 );
 
                 for (const level of levelsAtBlock.poolLevels) {
-                    const data = {
+                    const data: PrismaReliquaryLevelSnapshot = {
                         id: `${level.id}-${snapshot.id}`,
                         farmSnapshotId: snapshot.id,
                         level: `${level.level}`,
@@ -175,6 +187,27 @@ export class ReliquarySnapshotService {
                     farmOperations.push(
                         prisma.prismaReliquaryLevelSnapshot.upsert({
                             where: { id: `${level.id}-${snapshot.id}` },
+                            create: data,
+                            update: data,
+                        }),
+                    );
+                }
+
+                const sharePercentage = parseFloat(snapshot.totalBalance) / mostRecentPoolSnapshot.totalSharesNum;
+
+                for (const token of pool.tokens) {
+                    const data: PrismaReliquaryTokenBalanceSnapshot = {
+                        id: `${token.id}-${snapshot.id}`,
+                        farmSnapshotId: snapshot.id,
+                        address: token.address,
+                        symbol: token.token.symbol,
+                        name: token.token.name,
+                        decimals: token.token.decimals,
+                        balance: `${parseFloat(mostRecentPoolSnapshot.amounts[token.index]) * sharePercentage}`,
+                    };
+                    farmOperations.push(
+                        prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
+                            where: { id: `${token.id}-${snapshot.id}` },
                             create: data,
                             update: data,
                         }),

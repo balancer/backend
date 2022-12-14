@@ -402,7 +402,7 @@ model PrismaPoolSnapshot {
 }
 
 model PrismaReliquaryFarmSnapshot {
-    id                  String              @id
+    id                  String                          @id
     farmId              String
     stakingFarm         PrismaPoolStakingReliquaryFarm  @relation(fields:[farmId], references: [id])
     timestamp           Int
@@ -412,15 +412,28 @@ model PrismaReliquaryFarmSnapshot {
     dailyDeposited      String
     dailyWithdrawn      String
     levelBalances       PrismaReliquaryLevelSnapshot[]
+    tokenBalances       PrismaReliquaryTokenBalanceSnapshot[]
 }
 
 model PrismaReliquaryLevelSnapshot {
-    id                  String              @id
-    farmSnapshotId      String
+    id                  String                      @id
+    farmSnapshotId      String              
     farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId], references: [id])
     level               String
     balance             String
 }
+
+model PrismaReliquaryTokenBalanceSnapshot {
+    id                  String                      @id
+    farmSnapshotId      String
+    farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId], references: [id])
+    address             String
+    symbol              String
+    name                String
+    decimals            Int
+    balance             String
+}
+
 
 model PrismaToken {
     address             String              @id
