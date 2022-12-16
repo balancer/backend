@@ -227,7 +227,10 @@ export class PoolSnapshotService {
             });
 
             if (!poolAtBlock) {
-                throw new Error(`pool does not exist at block id: ${poolId}, block: ${block.number}`);
+                console.log(
+                    `pool does not exist at block. Pool id: ${poolId}, block: ${block.number}, skipping block...`,
+                );
+                continue;
             }
 
             const tokenPrices = this.getTokenPricesForTimestamp(endTimestamp, tokenPriceMap);
