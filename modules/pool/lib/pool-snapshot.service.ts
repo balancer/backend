@@ -115,7 +115,7 @@ export class PoolSnapshotService {
 
         for (const pool of poolsWithoutSnapshots) {
             if (pool.type !== 'LINEAR') {
-                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, oneDayAgoStartOfDay);
+                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
             }
         }
     }
