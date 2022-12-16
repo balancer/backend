@@ -58,10 +58,17 @@ export class PoolSnapshotService {
         });
     }
 
-    //TODO: this could be optimized
-    public async syncLatestSnapshotsForAllPools(daysToSync = 1) {
+    /*
+    Per default, this method syncs the snapshot from today and from yesterday. It is important to also sync the snapshot from
+    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
+    */
+    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
         let operations: any[] = [];
-        const oneDayAgoStartOfDay = moment().utc().startOf('day').subtract(daysToSync, 'days').unix();
+        const oneDayAgoStartOfDay = moment()
+            .utc()
+            .startOf('day')
+            .subtract(daysToSync - 1, 'days')
+            .unix();
 
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { timestamp_gte: oneDayAgoStartOfDay },
@@ -71,11 +78,7 @@ export class PoolSnapshotService {
 
         const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
             where: {
-                timestamp: moment()
-                    .utc()
-                    .startOf('day')
-                    .subtract(daysToSync + 1, 'days')
-                    .unix(),
+                timestamp: moment().utc().startOf('day').subtract(daysToSync, 'days').unix(),
             },
         });
 
