@@ -5,22 +5,106 @@ import { UserPoolSnapshot } from '../user-types';
 import { GqlUserSnapshotDataRange } from '../../../schema';
 import { PoolSnapshotService } from '../../pool/lib/pool-snapshot.service';
 import { networkConfig } from '../../config/network-config';
-import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking } from '@prisma/client';
+import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking, PrismaUserRelicSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { secondsPerDay } from '../../common/time';
+import { oneDayInSeconds, secondsPerDay } from '../../common/time';
 import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
+import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquaryRelicSnapshotFragment } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
+import { time } from 'console';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
 
     constructor(
         private readonly userSnapshotSubgraphService: UserSnapshotSubgraphService,
+        private readonly reliquarySubgraphService: ReliquarySubgraphService,
         private readonly poolSnapshotService: PoolSnapshotService,
         private readonly fbeetsAddress: string,
         private readonly fbeetsPoolId: string,
     ) {}
 
-    public async syncUserSnapshots() {
+    public async getUserRelicSnapshots(userAddress: string, range: GqlUserSnapshotDataRange) {
+        const firstTimestamp = this.getTimestampForRange(range);
+        const snapshots = await prisma.prismaUserReliquarySnapshot.findMany({
+            where: { userAddress: userAddress, timestamp: { gte: firstTimestamp } },
+            orderBy: { timestamp: 'asc' },
+        });
+
+        let firstSnapshot = snapshots.shift();
+        if (!firstSnapshot) {
+            return [];
+        }
+        // there is not snapshot for the first timestamp, need to create manually from the previous one
+        if (firstSnapshot.timestamp !== firstTimestamp) {
+            const snapshotBefore = await prisma.prismaUserReliquarySnapshot.findFirstOrThrow({
+                where: { userAddress: userAddress, timestamp: { lt: firstTimestamp } },
+                orderBy: { timestamp: 'desc' },
+            });
+            firstSnapshot = snapshotBefore;
+        }
+        // fill in the gaps to return a complete set
+        const completeSnapshots: PrismaUserRelicSnapshot[] = [firstSnapshot];
+        for (const snapshot of snapshots) {
+            // if the previous snapshot is older than 1 day, manually derive a snapshot
+            let previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+            while (previousSnapshot.timestamp + oneDayInSeconds < snapshot.timestamp) {
+                completeSnapshots.push({
+                    ...previousSnapshot,
+                    id: `${snapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
+                    timestamp: previousSnapshot.timestamp + oneDayInSeconds,
+                });
+                previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+            }
+            completeSnapshots.push(snapshot);
+        }
+        // fill gaps until today
+        const lastRealSnapshot = completeSnapshots[completeSnapshots.length - 1];
+        let previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+        while (previousSnapshot.timestamp < moment().startOf('day').unix()) {
+            completeSnapshots.push({
+                ...lastRealSnapshot,
+                id: `${lastRealSnapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
+                timestamp: previousSnapshot.timestamp + oneDayInSeconds,
+            });
+            previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+        }
+
+        return completeSnapshots;
+    }
+
+    public async syncLatestUserRelicSnapshots(numDays = 1) {
+        const thisMorning = moment().utc().subtract(numDays, 'days').startOf('day').unix();
+        const relicSnapshots = await this.reliquarySubgraphService.getAllRelicSnapshotsSince(thisMorning);
+        await this.upsertRelicSnapshots(relicSnapshots);
+    }
+
+    public async loadAllUserRelicSnapshots() {
+        const relicSnapshots = await this.reliquarySubgraphService.getAllRelicSnapshotsSince();
+        await this.upsertRelicSnapshots(relicSnapshots);
+    }
+
+    private async upsertRelicSnapshots(relicSnapshots: ReliquaryRelicSnapshotFragment[]) {
+        let operations: any[] = [];
+        for (const snapshot of relicSnapshots) {
+            const data: PrismaUserRelicSnapshot = {
+                ...snapshot,
+                farmId: `${snapshot.poolId}`,
+                timestamp: snapshot.snapshotTimestamp,
+                userAddress: snapshot.userAddress.toLowerCase(),
+            };
+            operations.push(
+                prisma.prismaUserRelicSnapshot.upsert({
+                    where: { id: snapshot.id },
+                    create: data,
+                    update: data,
+                }),
+            );
+        }
+        await prismaBulkExecuteOperations(operations, true);
+    }
+
+    public async syncUserPoolBalanceSnapshots() {
         // sync all snapshots that we have stored
 
         let operations: any[] = [];
@@ -149,7 +233,7 @@ export class UserSnapshotService {
         await prismaBulkExecuteOperations(operations, false);
     }
 
-    public async getUserSnapshotsForPool(
+    public async getUserPoolBalanceSnapshotsForPool(
         userAddress: string,
         poolId: string,
         range: GqlUserSnapshotDataRange,

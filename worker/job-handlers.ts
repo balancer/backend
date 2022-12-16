@@ -253,6 +253,9 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
+            case 'sync-latest-relic-snapshots':
+                await runIfNotAlreadyRunning(job.name, () => userService.asyncSyncUserRelicSnapshots(), 0.1, res, next);
+                break;
             default:
                 res.sendStatus(400);
                 throw new Error(`Unhandled job type ${job.name}`);

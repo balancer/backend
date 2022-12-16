@@ -205,6 +205,17 @@ fragment ReliquaryFarm on Pool {
     }
 }
 
+fragment ReliquaryRelicSnapshot on DailyRelicSnapshot {
+    id
+    relicId
+    snapshotTimestamp
+    userAddress
+    poolId
+    balance
+    entryTimestamp
+    level
+}
+
 query ReliquaryGetMeta {
     meta: _meta {
         block {

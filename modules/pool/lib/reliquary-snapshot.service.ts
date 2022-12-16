@@ -33,7 +33,7 @@ export class ReliquarySnapshotService {
     }
 
     public async syncLatestSnapshotsForAllFarms() {
-        const thisMorning = moment().utc().startOf('day').unix();
+        const thisMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
         const { farmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
             where: { snapshotTimestamp_gte: thisMorning },

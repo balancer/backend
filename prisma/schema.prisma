@@ -368,6 +368,7 @@ model PrismaPoolStakingReliquaryFarm {
     beetsPerSecond      String
     levels              PrismaPoolStakingReliquaryFarmLevel[]
     snapshots           PrismaReliquaryFarmSnapshot[]
+    relicSnapshots      PrismaRelicSnapshot[]
 }
 
 model PrismaPoolStakingReliquaryFarmLevel {
@@ -531,6 +532,7 @@ model PrismaUser {
     address                 String              @id
 
     userSnapshots           PrismaUserPoolBalanceSnapshot[]
+    reliquarySnapshots          PrismaUserReliquarySnapshot[]
 
     walletBalances          PrismaUserWalletBalance[]
     stakedBalances          PrismaUserStakedBalance[]
@@ -601,4 +603,30 @@ model PrismaUserPoolBalanceSnapshot {
     percentShare            String
     totalValueUSD           String
     fees24h                 String
+}
+
+model PrismaUserReliquarySnapshot {
+    id                      String              @id
+
+    userAddress             String
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    timestamp               Int
+
+    totalBalance            String
+    relicCount              Int
+
+    relics                  PrismaRelicSnapshot[]
+}
+
+model PrismaRelicSnapshot {
+    id                      String              @id
+    userSnapshotId          String
+    userSnapshot            PrismaUserReliquarySnapshot @relation(fields:[userSnapshotId], references:[id])
+
+    relicId                 Int
+    farmId                  String
+    farm                    PrismaPoolStakingReliquaryFarm @relation(fields:[farmId], references: [id])
+    balance                 String
+    entryTimestamp          Int
+    level                   Int
 }
