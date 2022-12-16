@@ -143,20 +143,20 @@ export class PoolSnapshotService {
         }
     }
 
-    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, timestampToSyncFrom = 0) {
+    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, numDays = -1) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
             where: { id: poolId },
             include: prismaPoolWithExpandedNesting.include,
         });
 
-        const startTimestamp = timestampToSyncFrom > 0 ? timestampToSyncFrom : pool.createTime;
+        const startTimestamp =
+            numDays >= 0 ? moment().utc().startOf('day').subtract(numDays, 'days').unix() : pool.createTime;
 
         if (pool.type === 'LINEAR') {
             throw new Error('Unsupported pool type');
         }
 
         const swaps = await balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
-        const numDays = moment().endOf('day').diff(moment.unix(startTimestamp), 'days');
 
         const tokenPriceMap: TokenHistoricalPrices = {};
 

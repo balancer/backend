@@ -260,6 +260,10 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidity24hAgoForAllPools();
     }
 
+    public async loadSnapshotsForPools(poolIds: string[]) {
+        await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
+    }
+
     public async loadSnapshotsForAllPools() {
         await prisma.prismaPoolSnapshot.deleteMany({});
         const pools = await prisma.prismaPool.findMany({
