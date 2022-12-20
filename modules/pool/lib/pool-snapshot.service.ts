@@ -58,10 +58,17 @@ export class PoolSnapshotService {
         });
     }
 
-    //TODO: this could be optimized
-    public async syncLatestSnapshotsForAllPools(daysToSync = 1) {
+    /*
+    Per default, this method syncs the snapshot from today and from yesterday. It is important to also sync the snapshot from
+    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
+    */
+    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
         let operations: any[] = [];
-        const oneDayAgoStartOfDay = moment().utc().startOf('day').subtract(daysToSync, 'days').unix();
+        const oneDayAgoStartOfDay = moment()
+            .utc()
+            .startOf('day')
+            .subtract(daysToSync - 1, 'days')
+            .unix();
 
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { timestamp_gte: oneDayAgoStartOfDay },
@@ -71,11 +78,7 @@ export class PoolSnapshotService {
 
         const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
             where: {
-                timestamp: moment()
-                    .utc()
-                    .startOf('day')
-                    .subtract(daysToSync + 1, 'days')
-                    .unix(),
+                timestamp: moment().utc().startOf('day').subtract(daysToSync, 'days').unix(),
             },
         });
 
@@ -115,7 +118,7 @@ export class PoolSnapshotService {
 
         for (const pool of poolsWithoutSnapshots) {
             if (pool.type !== 'LINEAR') {
-                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, oneDayAgoStartOfDay);
+                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
             }
         }
     }
@@ -143,20 +146,20 @@ export class PoolSnapshotService {
         }
     }
 
-    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, timestampToSyncFrom = 0) {
+    public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, numDays = -1) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
             where: { id: poolId },
             include: prismaPoolWithExpandedNesting.include,
         });
 
-        const startTimestamp = timestampToSyncFrom > 0 ? timestampToSyncFrom : pool.createTime;
+        const startTimestamp =
+            numDays >= 0 ? moment().utc().startOf('day').subtract(numDays, 'days').unix() : pool.createTime;
 
         if (pool.type === 'LINEAR') {
             throw new Error('Unsupported pool type');
         }
 
         const swaps = await balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
-        const numDays = moment().endOf('day').diff(moment.unix(startTimestamp), 'days');
 
         const tokenPriceMap: TokenHistoricalPrices = {};
 
@@ -224,7 +227,10 @@ export class PoolSnapshotService {
             });
 
             if (!poolAtBlock) {
-                throw new Error(`pool does not exist at block id: ${poolId}, block: ${block.number}`);
+                console.log(
+                    `pool does not exist at block. Pool id: ${poolId}, block: ${block.number}, skipping block...`,
+                );
+                continue;
             }
 
             const tokenPrices = this.getTokenPricesForTimestamp(endTimestamp, tokenPriceMap);

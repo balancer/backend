@@ -199,6 +199,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolLoadSnapshotsForPools: async (parent, { poolIds }, context) => {
+            isAdminRoute(context);
+
+            await poolService.loadSnapshotsForPools(poolIds);
+
+            return 'success';
+        },
         poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
             isAdminRoute(context);
 

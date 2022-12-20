@@ -9,7 +9,7 @@ import { googleJwtClient, GoogleJwtClient } from './google-jwt-client';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
-import { secondsPerDay } from '../common/time';
+import { oneDayInSeconds, secondsPerDay } from '../common/time';
 import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 
 export class DatastudioService {
@@ -74,12 +74,12 @@ export class DatastudioService {
             }
         }
 
-        if (lastRun > moment.tz('GMT').subtract(1, 'day').unix()) {
+        const now = moment.tz('GMT').unix();
+
+        if (lastRun > now - oneDayInSeconds) {
             // 24 hours did not pass since the last run
             return;
         }
-
-        const now = moment.tz('GMT').unix();
 
         const allPoolDataRows: string[][] = [];
         const allPoolCompositionRows: string[][] = [];
