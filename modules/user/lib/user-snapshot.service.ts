@@ -11,8 +11,7 @@ import { oneDayInSeconds, secondsPerDay } from '../../common/time';
 import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquaryRelicSnapshotFragment } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
-import { time } from 'console';
-import _, { first } from 'lodash';
+import _ from 'lodash';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
