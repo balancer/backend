@@ -1,5 +1,6 @@
 import { AmountHumanReadable } from '../common/global-types';
 import { PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
+import { Relic } from '../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 
 export interface UserStakedBalanceService {
     syncChangedStakedBalances(): Promise<void>;
@@ -20,6 +21,21 @@ export interface UserSyncUserBalanceInput {
     poolId: string;
     poolAddress: string;
     staking: PrismaPoolStaking;
+}
+
+export interface UserRelicSnapshot {
+    timestamp: number;
+    totalBalance: string;
+    relicCount: number;
+    relicSnapshots: RelicSnapshot[];
+}
+
+export interface RelicSnapshot {
+    relicId: number;
+    farmId: string;
+    balance: string;
+    entryTimestamp: number;
+    level: number;
 }
 
 // for portfolio

@@ -48,6 +48,11 @@ const resolvers: Resolvers = {
                 range,
             );
         },
+        userGetRelicSnapshots: async (parent, { farmId, range }, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+
+            return userService.getUserRelicSnapshots(accountAddress.toLowerCase(), farmId, range);
+        },
     },
     Mutation: {
         userSyncChangedWalletBalancesForAllPools: async (parent, {}, context) => {
@@ -98,6 +103,13 @@ const resolvers: Resolvers = {
             const accountAddress = getRequiredAccountAddress(context);
 
             await userService.syncUserBalanceAllPools(accountAddress);
+
+            return 'success';
+        },
+        userLoadAllRelicSnapshots: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await userService.loadAllUserRelicSnapshots();
 
             return 'success';
         },

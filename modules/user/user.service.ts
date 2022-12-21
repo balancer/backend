@@ -6,6 +6,7 @@ import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
@@ -22,7 +23,7 @@ export class UserService {
         private readonly walletSyncService: UserSyncWalletBalanceService,
         private readonly stakedSyncServices: UserStakedBalanceService[],
         private readonly poolSwapService: PoolSwapService,
-        private readonly snapshotService: UserSnapshotService,
+        private readonly userSnapshotService: UserSnapshotService,
     ) {}
 
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
@@ -48,6 +49,18 @@ export class UserService {
 
     public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
         return this.userBalanceService.getUserStaking(address);
+    }
+
+    public async getUserBalanceSnapshotsForPool(
+        accountAddress: string,
+        poolId: string,
+        days: GqlUserSnapshotDataRange,
+    ): Promise<UserPoolSnapshot[]> {
+        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, days);
+    }
+
+    public async getUserRelicSnapshots(accountAddress: string, farmId: string, days: GqlUserSnapshotDataRange) {
+        return this.userSnapshotService.getUserRelicSnapshotsForFarm(accountAddress, farmId, days);
     }
 
     public async initWalletBalancesForAllPools() {
@@ -107,15 +120,15 @@ export class UserService {
     }
 
     public async syncUserBalanceSnapshots() {
-        await this.snapshotService.syncUserSnapshots();
+        await this.userSnapshotService.syncUserPoolBalanceSnapshots();
     }
 
-    public async getUserBalanceSnapshotsForPool(
-        accountAddress: string,
-        poolId: string,
-        days: GqlUserSnapshotDataRange,
-    ): Promise<UserPoolSnapshot[]> {
-        return this.snapshotService.getUserSnapshotsForPool(accountAddress, poolId, days);
+    public async asyncSyncUserRelicSnapshots() {
+        await this.userSnapshotService.syncLatestUserRelicSnapshots();
+    }
+
+    public async loadAllUserRelicSnapshots() {
+        await this.userSnapshotService.loadAllUserRelicSnapshots();
     }
 }
 
@@ -131,6 +144,7 @@ export const userService = new UserService(
     new PoolSwapService(tokenService, balancerSubgraphService),
     new UserSnapshotService(
         userSnapshotSubgraphService,
+        reliquarySubgraphService,
         new PoolSnapshotService(balancerSubgraphService, coingeckoService),
         networkConfig.fbeets?.address ?? '',
         networkConfig.fbeets?.poolId ?? '',

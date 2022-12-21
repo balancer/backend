@@ -121,14 +121,7 @@ query ReliquaryRelicSnapshots(
         where: $where
         block: $block
     ) {
-        id
-        relicId
-        snapshotTimestamp
-        userAddress
-        poolId
-        balance
-        entryTimestamp
-        level
+        ...ReliquaryRelicSnapshot
     }
 }
 
@@ -203,6 +196,17 @@ fragment ReliquaryFarm on Pool {
         allocationPoints
         requiredMaturity
     }
+}
+
+fragment ReliquaryRelicSnapshot on DailyRelicSnapshot {
+    id
+    relicId
+    snapshotTimestamp
+    userAddress
+    poolId
+    balance
+    entryTimestamp
+    level
 }
 
 query ReliquaryGetMeta {

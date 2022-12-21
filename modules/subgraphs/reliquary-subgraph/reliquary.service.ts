@@ -2,7 +2,9 @@ import { GraphQLClient } from 'graphql-request';
 import { networkConfig } from '../../config/network-config';
 import { subgraphLoadAll } from '../subgraph-util';
 import {
+    DailyRelicSnapshot_OrderBy,
     getSdk,
+    OrderDirection,
     ReliquaryFarmFragment,
     ReliquaryFarmSnapshotsQuery,
     ReliquaryFarmSnapshotsQueryVariables,
@@ -13,6 +15,7 @@ import {
     ReliquaryQuery,
     ReliquaryQueryVariables,
     ReliquaryRelicFragment,
+    ReliquaryRelicSnapshotFragment,
     ReliquaryRelicSnapshotsQuery,
     ReliquaryRelicSnapshotsQueryVariables,
     ReliquaryRelicsQuery,
@@ -64,6 +67,30 @@ export class ReliquarySubgraphService {
 
     public async getAllFarms(args: ReliquaryPoolsQueryVariables): Promise<ReliquaryFarmFragment[]> {
         return subgraphLoadAll<ReliquaryFarmFragment>(this.sdk.ReliquaryPools, 'farms', args);
+    }
+
+    public async getAllRelicSnapshotsSince(timestamp = 0): Promise<ReliquaryRelicSnapshotFragment[]> {
+        let allSnapshots: ReliquaryRelicSnapshotFragment[] = [];
+        let snapshotId = '0';
+        do {
+            const result = await this.sdk.ReliquaryRelicSnapshots({
+                where: { id_gt: snapshotId, snapshotTimestamp_gte: timestamp },
+                first: 1000,
+                orderBy: DailyRelicSnapshot_OrderBy.Id,
+                orderDirection: OrderDirection.Desc,
+            });
+            if (result.relicSnapshots.length === 0) {
+                break;
+            }
+            allSnapshots.push(...result.relicSnapshots);
+            snapshotId = result.relicSnapshots[result.relicSnapshots.length - 1].id;
+
+            if (result.relicSnapshots.length < 1000) {
+                break;
+            }
+        } while (true);
+
+        return allSnapshots;
     }
 
     public async getFarmSnapshots(args: ReliquaryFarmSnapshotsQueryVariables): Promise<ReliquaryFarmSnapshotsQuery> {

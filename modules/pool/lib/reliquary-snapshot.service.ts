@@ -33,10 +33,10 @@ export class ReliquarySnapshotService {
     }
 
     public async syncLatestSnapshotsForAllFarms() {
-        const thisMorning = moment().utc().startOf('day').unix();
+        const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
         const { farmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
-            where: { snapshotTimestamp_gte: thisMorning },
+            where: { snapshotTimestamp_gte: yesterdayMorning },
             orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
             orderDirection: OrderDirection.Asc,
         });
@@ -48,14 +48,14 @@ export class ReliquarySnapshotService {
         for (const farm of reliquaryFarms) {
             if (!farmIdsInSubgraphSnapshots.includes(parseFloat(farm.id))) {
                 const yesterdaysSnapshot = farm.snapshots.find(
-                    (snapshot) => snapshot.timestamp === thisMorning - oneDayInSeconds,
+                    (snapshot) => snapshot.timestamp === yesterdayMorning - oneDayInSeconds,
                 );
                 if (yesterdaysSnapshot) {
                     farmSnapshots.push({
-                        id: `${yesterdaysSnapshot.id.split('-')[0]}-${thisMorning}`,
+                        id: `${yesterdaysSnapshot.id.split('-')[0]}-${yesterdayMorning}`,
                         farmId: parseFloat(yesterdaysSnapshot.farmId),
                         relicCount: yesterdaysSnapshot.relicCount,
-                        snapshotTimestamp: thisMorning,
+                        snapshotTimestamp: yesterdayMorning,
                         dailyDeposited: `0`,
                         dailyWithdrawn: `0`,
                         totalBalance: yesterdaysSnapshot.totalBalance,

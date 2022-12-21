@@ -293,6 +293,7 @@ export class PoolService {
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
+        await prisma.prismaPoolStakingReliquaryFarm.deleteMany({});
         const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({});
         const farmIds = farms.map((farm) => parseFloat(farm.id));
         for (const farmId of farmIds) {
