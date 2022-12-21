@@ -29,23 +29,27 @@ export class UserSnapshotService {
         const userSnapshots: UserRelicSnapshot[] = [];
 
         const firstTimestamp = this.getTimestampForRange(range);
-        const snapshots = await prisma.prismaUserRelicSnapshot.findMany({
-            where: { userAddress: userAddress, farmId: farmId, timestamp: { gte: firstTimestamp } },
+        const allSnapshots = await prisma.prismaUserRelicSnapshot.findMany({
+            where: { userAddress: userAddress, farmId: farmId },
             orderBy: { timestamp: 'asc' },
         });
 
-        const relicIds = _.uniq(snapshots.map((snapshot) => snapshot.relicId));
+        const allRelicIds = _.uniq(allSnapshots.map((snapshot) => snapshot.relicId));
 
-        for (const relicId of relicIds) {
-            const relicSnapshots = snapshots.filter((snapshot) => snapshot.relicId === relicId);
+        for (const relicId of allRelicIds) {
+            const relicSnapshots = allSnapshots.filter(
+                (snapshot) => snapshot.relicId === relicId && snapshot.timestamp >= firstTimestamp,
+            );
 
             let firstSnapshot = relicSnapshots.shift();
-            if (!firstSnapshot) {
-                return [];
-            }
-            // if the firstSnapshot is younger than what is requested, we try to find an older one to derive from
-            // if we can't find and older one, then the firstSnapshot is the oldest we have and will be used
-            if (firstSnapshot.timestamp > firstTimestamp) {
+
+            /*
+            if the firstSnapshot is not available (because it's older) or if it is younger than what is requested, 
+            we try to find an older one to derive from
+            if we can't find and older one, then if we found a younger snapshot before it will be used, 
+            otherwise we don't have any snapshots for this relic
+            */
+            if (!firstSnapshot || firstSnapshot.timestamp > firstTimestamp) {
                 const snapshotBeforeFirstTimestamp = await prisma.prismaUserRelicSnapshot.findFirst({
                     where: { relicId: relicId, timestamp: { lt: firstTimestamp } },
                     orderBy: { timestamp: 'desc' },
@@ -56,6 +60,9 @@ export class UserSnapshotService {
                         timestamp: firstTimestamp,
                     };
                 }
+            }
+            if (!firstSnapshot) {
+                continue;
             }
             // fill in the gaps to return a complete set
             const completeSnapshots: PrismaUserRelicSnapshot[] = [firstSnapshot];
