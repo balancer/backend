@@ -337,7 +337,7 @@ model PrismaPoolStakingReliquaryFarm {
     beetsPerSecond      String
     levels              PrismaPoolStakingReliquaryFarmLevel[]
     snapshots           PrismaReliquaryFarmSnapshot[]
-    relicSnapshots      PrismaRelicSnapshot[]
+    relicSnapshots      PrismaUserRelicSnapshot[]
 }
 
 model PrismaPoolStakingReliquaryFarmLevel {

@@ -60,7 +60,7 @@ export class UserService {
     }
 
     public async getUserRelicSnapshots(accountAddress: string, days: GqlUserSnapshotDataRange) {
-        return this.userSnapshotService.getUserRelicSnapshots(accountAddress, days);
+        return this.userSnapshotService.getUserRelicSnapshotsForFarm(accountAddress, days);
     }
 
     public async initWalletBalancesForAllPools() {

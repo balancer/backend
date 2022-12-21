@@ -70,7 +70,14 @@ type GqlUserPoolSnapshot {
 }
 
 type GqlUserRelicSnapshot {
+    userAddress: String!
     timestamp: Int!
+    totalBalance: String!
+    relicCount: Int!
+    relicSnapshots: [GqlRelicSnapshot!]!
+}
+
+type GqlRelicSnapshot {
     relicId: Int!
     farmId: String!
     balance: String!

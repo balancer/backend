@@ -121,14 +121,7 @@ query ReliquaryRelicSnapshots(
         where: $where
         block: $block
     ) {
-        id
-        relicId
-        snapshotTimestamp
-        userAddress
-        poolId
-        balance
-        entryTimestamp
-        level
+        ...ReliquaryRelicSnapshot
     }
 }
 

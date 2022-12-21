@@ -1,7 +1,7 @@
 import { UserSnapshotSubgraphService } from '../../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { prisma } from '../../../prisma/prisma-client';
 import moment from 'moment-timezone';
-import { UserPoolSnapshot } from '../user-types';
+import { UserPoolSnapshot, UserRelicSnapshot } from '../user-types';
 import { GqlUserSnapshotDataRange } from '../../../schema';
 import { PoolSnapshotService } from '../../pool/lib/pool-snapshot.service';
 import { networkConfig } from '../../config/network-config';
@@ -24,10 +24,13 @@ export class UserSnapshotService {
         private readonly fbeetsPoolId: string,
     ) {}
 
-    public async getUserRelicSnapshots(userAddress: string, range: GqlUserSnapshotDataRange) {
+    // user can have multiple relics in the same farm
+    public async getUserRelicSnapshotsForFarm(userAddress: string, farmId: string, range: GqlUserSnapshotDataRange) {
+        const userSnapshots: UserRelicSnapshot[] = [];
+
         const firstTimestamp = this.getTimestampForRange(range);
-        const snapshots = await prisma.prismaUserReliquarySnapshot.findMany({
-            where: { userAddress: userAddress, timestamp: { gte: firstTimestamp } },
+        const snapshots = await prisma.prismaUserRelicSnapshot.findMany({
+            where: { userAddress: userAddress, farmId: farmId, timestamp: { gte: firstTimestamp } },
             orderBy: { timestamp: 'asc' },
         });
 
@@ -35,13 +38,19 @@ export class UserSnapshotService {
         if (!firstSnapshot) {
             return [];
         }
-        // there is not snapshot for the first timestamp, need to create manually from the previous one
-        if (firstSnapshot.timestamp !== firstTimestamp) {
-            const snapshotBefore = await prisma.prismaUserReliquarySnapshot.findFirstOrThrow({
+        // if the firstSnapshot is younger than what is requested, we try to find an older one to derive from
+        // if we can't find and older one, then the firstSnapshot is the oldest we have and will be used
+        if (firstSnapshot.timestamp > firstTimestamp) {
+            const snapshotBeforeFirstTimestamp = await prisma.prismaUserRelicSnapshot.findFirst({
                 where: { userAddress: userAddress, timestamp: { lt: firstTimestamp } },
                 orderBy: { timestamp: 'desc' },
             });
-            firstSnapshot = snapshotBefore;
+            if (snapshotBeforeFirstTimestamp) {
+                firstSnapshot = {
+                    ...snapshotBeforeFirstTimestamp,
+                    timestamp: firstTimestamp,
+                };
+            }
         }
         // fill in the gaps to return a complete set
         const completeSnapshots: PrismaUserRelicSnapshot[] = [firstSnapshot];
@@ -74,8 +83,8 @@ export class UserSnapshotService {
     }
 
     public async syncLatestUserRelicSnapshots(numDays = 1) {
-        const thisMorning = moment().utc().subtract(numDays, 'days').startOf('day').unix();
-        const relicSnapshots = await this.reliquarySubgraphService.getAllRelicSnapshotsSince(thisMorning);
+        const yesterdayMorning = moment().utc().subtract(numDays, 'days').startOf('day').unix();
+        const relicSnapshots = await this.reliquarySubgraphService.getAllRelicSnapshotsSince(yesterdayMorning);
         await this.upsertRelicSnapshots(relicSnapshots);
     }
 
