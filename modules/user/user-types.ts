@@ -24,7 +24,6 @@ export interface UserSyncUserBalanceInput {
 }
 
 export interface UserRelicSnapshot {
-    userAddress: string;
     timestamp: number;
     totalBalance: string;
     relicCount: number;

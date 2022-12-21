@@ -6,7 +6,7 @@ extend type Query {
     userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolSwap!]!
     userGetPortfolioSnapshots(days: Int!): [GqlUserPortfolioSnapshot!]!
     userGetPoolSnapshots(poolId: String!, range: GqlUserSnapshotDataRange!): [GqlUserPoolSnapshot!]!
-    userGetRelicSnapshots(range: GqlUserSnapshotDataRange!): [GqlUserRelicSnapshot!]!
+    userGetRelicSnapshots(farmId: String!, range: GqlUserSnapshotDataRange!): [GqlUserRelicSnapshot!]!
 }
 
 extend type Mutation {
@@ -70,7 +70,6 @@ type GqlUserPoolSnapshot {
 }
 
 type GqlUserRelicSnapshot {
-    userAddress: String!
     timestamp: Int!
     totalBalance: String!
     relicCount: Int!

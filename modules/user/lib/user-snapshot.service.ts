@@ -12,6 +12,7 @@ import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgr
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquaryRelicSnapshotFragment } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import { time } from 'console';
+import _, { first } from 'lodash';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
@@ -24,7 +25,7 @@ export class UserSnapshotService {
         private readonly fbeetsPoolId: string,
     ) {}
 
-    // user can have multiple relics in the same farm
+    // problem: user can have multiple relics in the same farm with different snapshots
     public async getUserRelicSnapshotsForFarm(userAddress: string, farmId: string, range: GqlUserSnapshotDataRange) {
         const userSnapshots: UserRelicSnapshot[] = [];
 
@@ -34,52 +35,91 @@ export class UserSnapshotService {
             orderBy: { timestamp: 'asc' },
         });
 
-        let firstSnapshot = snapshots.shift();
-        if (!firstSnapshot) {
-            return [];
-        }
-        // if the firstSnapshot is younger than what is requested, we try to find an older one to derive from
-        // if we can't find and older one, then the firstSnapshot is the oldest we have and will be used
-        if (firstSnapshot.timestamp > firstTimestamp) {
-            const snapshotBeforeFirstTimestamp = await prisma.prismaUserRelicSnapshot.findFirst({
-                where: { userAddress: userAddress, timestamp: { lt: firstTimestamp } },
-                orderBy: { timestamp: 'desc' },
-            });
-            if (snapshotBeforeFirstTimestamp) {
-                firstSnapshot = {
-                    ...snapshotBeforeFirstTimestamp,
-                    timestamp: firstTimestamp,
-                };
+        const relicIds = _.uniq(snapshots.map((snapshot) => snapshot.relicId));
+
+        for (const relicId of relicIds) {
+            const relicSnapshots = snapshots.filter((snapshot) => snapshot.relicId === relicId);
+
+            let firstSnapshot = relicSnapshots.shift();
+            if (!firstSnapshot) {
+                return [];
             }
-        }
-        // fill in the gaps to return a complete set
-        const completeSnapshots: PrismaUserRelicSnapshot[] = [firstSnapshot];
-        for (const snapshot of snapshots) {
-            // if the previous snapshot is older than 1 day, manually derive a snapshot
+            // if the firstSnapshot is younger than what is requested, we try to find an older one to derive from
+            // if we can't find and older one, then the firstSnapshot is the oldest we have and will be used
+            if (firstSnapshot.timestamp > firstTimestamp) {
+                const snapshotBeforeFirstTimestamp = await prisma.prismaUserRelicSnapshot.findFirst({
+                    where: { relicId: relicId, timestamp: { lt: firstTimestamp } },
+                    orderBy: { timestamp: 'desc' },
+                });
+                if (snapshotBeforeFirstTimestamp) {
+                    firstSnapshot = {
+                        ...snapshotBeforeFirstTimestamp,
+                        timestamp: firstTimestamp,
+                    };
+                }
+            }
+            // fill in the gaps to return a complete set
+            const completeSnapshots: PrismaUserRelicSnapshot[] = [firstSnapshot];
+            // this.addToUserSnapshots(userSnapshots, firstSnapshot);
+            for (const snapshot of relicSnapshots) {
+                // if the previous snapshot is older than 1 day, manually derive a snapshot
+                let previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+                while (previousSnapshot.timestamp + oneDayInSeconds < snapshot.timestamp) {
+                    completeSnapshots.push({
+                        ...previousSnapshot,
+                        id: `${snapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
+                        timestamp: previousSnapshot.timestamp + oneDayInSeconds,
+                    });
+                    previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+                }
+
+                completeSnapshots.push(snapshot);
+            }
+            // fill gaps until today
+            const lastRealSnapshot = completeSnapshots[completeSnapshots.length - 1];
             let previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
-            while (previousSnapshot.timestamp + oneDayInSeconds < snapshot.timestamp) {
+            while (previousSnapshot.timestamp < moment().startOf('day').unix()) {
                 completeSnapshots.push({
-                    ...previousSnapshot,
-                    id: `${snapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
+                    ...lastRealSnapshot,
+                    id: `${lastRealSnapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
                     timestamp: previousSnapshot.timestamp + oneDayInSeconds,
                 });
                 previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
             }
-            completeSnapshots.push(snapshot);
-        }
-        // fill gaps until today
-        const lastRealSnapshot = completeSnapshots[completeSnapshots.length - 1];
-        let previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
-        while (previousSnapshot.timestamp < moment().startOf('day').unix()) {
-            completeSnapshots.push({
-                ...lastRealSnapshot,
-                id: `${lastRealSnapshot.id}-${previousSnapshot.timestamp + oneDayInSeconds}`,
-                timestamp: previousSnapshot.timestamp + oneDayInSeconds,
-            });
-            previousSnapshot = completeSnapshots[completeSnapshots.length - 1];
+            this.addToUserSnapshots(userSnapshots, completeSnapshots);
         }
 
-        return completeSnapshots;
+        return userSnapshots;
+    }
+
+    private addToUserSnapshots(userSnapshots: UserRelicSnapshot[], relicSnapshots: PrismaUserRelicSnapshot[]) {
+        for (const relicSnapshot of relicSnapshots) {
+            let userSnapshotForTimestampIndex = userSnapshots.findIndex(
+                (userSnapshot) => userSnapshot.timestamp === relicSnapshot.timestamp,
+            );
+            if (userSnapshotForTimestampIndex === -1) {
+                userSnapshots.push({
+                    timestamp: relicSnapshot.timestamp,
+                    totalBalance: `0`,
+                    relicCount: 0,
+                    relicSnapshots: [],
+                });
+                userSnapshotForTimestampIndex = userSnapshots.length - 1;
+            }
+            userSnapshots[userSnapshotForTimestampIndex].relicSnapshots.push({
+                relicId: relicSnapshot.relicId,
+                farmId: relicSnapshot.farmId,
+                balance: relicSnapshot.balance,
+                entryTimestamp: relicSnapshot.entryTimestamp,
+                level: relicSnapshot.level,
+            });
+
+            userSnapshots[userSnapshotForTimestampIndex].relicCount++;
+            userSnapshots[userSnapshotForTimestampIndex].totalBalance = `${
+                parseFloat(userSnapshots[userSnapshotForTimestampIndex].totalBalance) +
+                parseFloat(relicSnapshot.balance)
+            }`;
+        }
     }
 
     public async syncLatestUserRelicSnapshots(numDays = 1) {
@@ -97,10 +137,14 @@ export class UserSnapshotService {
         let operations: any[] = [];
         for (const snapshot of relicSnapshots) {
             const data: PrismaUserRelicSnapshot = {
-                ...snapshot,
                 farmId: `${snapshot.poolId}`,
                 timestamp: snapshot.snapshotTimestamp,
                 userAddress: snapshot.userAddress.toLowerCase(),
+                balance: snapshot.balance,
+                entryTimestamp: snapshot.entryTimestamp,
+                id: snapshot.id,
+                level: snapshot.level,
+                relicId: snapshot.relicId,
             };
             operations.push(
                 prisma.prismaUserRelicSnapshot.upsert({
