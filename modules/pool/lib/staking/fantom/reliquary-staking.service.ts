@@ -1,5 +1,6 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { PrismaPoolStakingType } from '@prisma/client';
+import _ from 'lodash';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
@@ -48,26 +49,17 @@ export class ReliquaryStakingService implements PoolStakingService {
                 );
             }
 
-            operations.push(
-                prisma.prismaPoolStakingReliquaryFarm.upsert({
-                    where: { id: farmId },
-                    create: {
-                        id: farmId,
-                        stakingId: `reliquary-${farmId}`,
-                        name: farm.name,
-                        beetsPerSecond: beetsPerSecond,
-                    },
-                    update: {
-                        beetsPerSecond: beetsPerSecond,
-                        name: farm.name,
-                    },
-                }),
-            );
+            let totalBalance = `0`;
+            let totalWeightedBalance = `0`;
 
+            const levelOperations = [];
             for (let farmLevel of farm.levels) {
                 const { allocationPoints, balance, level, requiredMaturity } = farmLevel;
 
-                operations.push(
+                totalBalance = `${parseFloat(totalBalance) + parseFloat(balance)}`;
+                totalWeightedBalance = `${parseFloat(totalWeightedBalance) + parseFloat(balance) * allocationPoints}`;
+
+                levelOperations.push(
                     prisma.prismaPoolStakingReliquaryFarmLevel.upsert({
                         where: { id: `${farmId}-${level}` },
                         create: {
@@ -86,6 +78,26 @@ export class ReliquaryStakingService implements PoolStakingService {
                     }),
                 );
             }
+            operations.push(
+                prisma.prismaPoolStakingReliquaryFarm.upsert({
+                    where: { id: farmId },
+                    create: {
+                        id: farmId,
+                        stakingId: `reliquary-${farmId}`,
+                        name: farm.name,
+                        beetsPerSecond: beetsPerSecond,
+                        totalBalance: totalBalance.toString(),
+                        totalWeightedBalance: totalWeightedBalance.toString(),
+                    },
+                    update: {
+                        beetsPerSecond: beetsPerSecond,
+                        totalBalance: totalBalance.toString(),
+                        totalWeightedBalance: totalWeightedBalance.toString(),
+                        name: farm.name,
+                    },
+                }),
+            );
+            operations.push(...levelOperations);
         }
 
         await prismaBulkExecuteOperations(operations, true);

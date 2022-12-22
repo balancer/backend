@@ -330,14 +330,16 @@ model PrismaPoolStakingGaugeReward{
 
 
 model PrismaPoolStakingReliquaryFarm {
-    id                  String              @id
-    stakingId           String              @unique
-    staking             PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
-    name                String
-    beetsPerSecond      String
-    levels              PrismaPoolStakingReliquaryFarmLevel[]
-    snapshots           PrismaReliquaryFarmSnapshot[]
-    relicSnapshots      PrismaUserRelicSnapshot[]
+    id                      String              @id
+    stakingId               String              @unique
+    staking                 PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+    name                    String
+    beetsPerSecond          String
+    totalBalance            String              @default("0")
+    totalWeightedBalance    String              @default("0")
+    levels                  PrismaPoolStakingReliquaryFarmLevel[]
+    snapshots               PrismaReliquaryFarmSnapshot[]
+    relicSnapshots          PrismaUserRelicSnapshot[]
 }
 
 model PrismaPoolStakingReliquaryFarmLevel {
