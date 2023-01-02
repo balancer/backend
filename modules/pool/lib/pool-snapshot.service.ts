@@ -59,7 +59,7 @@ export class PoolSnapshotService {
     }
 
     /*
-    Per default, this method syncs the snapshot from today and from yesterday. It is important to also sync the snapshot from
+    Per default, this method syncs the snapshot from today and from yesterday (daysTosync=2). It is important to also sync the snapshot from
     yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
     */
     public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
@@ -70,6 +70,7 @@ export class PoolSnapshotService {
             .subtract(daysToSync - 1, 'days')
             .unix();
 
+        // per default (daysToSync=2) returns snapshots from yesterday and today
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
             where: { timestamp_gte: oneDayAgoStartOfDay },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
@@ -154,6 +155,10 @@ export class PoolSnapshotService {
 
         const startTimestamp =
             numDays >= 0 ? moment().utc().startOf('day').subtract(numDays, 'days').unix() : pool.createTime;
+
+        if (numDays < 0) {
+            numDays = moment().diff(moment.unix(startTimestamp), 'days');
+        }
 
         if (pool.type === 'LINEAR') {
             throw new Error('Unsupported pool type');
