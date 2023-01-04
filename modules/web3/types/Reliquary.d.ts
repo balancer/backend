@@ -2,4178 +2,2458 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import {
-  ethers,
-  EventFilter,
-  Signer,
-  BigNumber,
-  BigNumberish,
-  PopulatedTransaction,
-} from "ethers";
-import {
-  Contract,
-  ContractTransaction,
-  Overrides,
-  CallOverrides,
-} from "@ethersproject/contracts";
-import { BytesLike } from "@ethersproject/bytes";
-import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
+import { ethers, EventFilter, Signer, BigNumber, BigNumberish, PopulatedTransaction } from 'ethers';
+import { Contract, ContractTransaction, Overrides, CallOverrides } from '@ethersproject/contracts';
+import { BytesLike } from '@ethersproject/bytes';
+import { Listener, Provider } from '@ethersproject/providers';
+import { FunctionFragment, EventFragment, Result } from '@ethersproject/abi';
 
 interface ReliquaryInterface extends ethers.utils.Interface {
-  functions: {
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "addPool(uint256,address,address,uint256[],uint256[],string,address)": FunctionFragment;
-    "approve(address,uint256)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "burn(uint256)": FunctionFragment;
-    "createRelicAndDeposit(address,uint256,uint256)": FunctionFragment;
-    "deposit(uint256,uint256)": FunctionFragment;
-    "emergencyWithdraw(uint256)": FunctionFragment;
-    "emissionCurve()": FunctionFragment;
-    "getApproved(uint256)": FunctionFragment;
-    "getLevelInfo(uint256)": FunctionFragment;
-    "getPoolInfo(uint256)": FunctionFragment;
-    "getPositionForId(uint256)": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
-    "getRoleMember(bytes32,uint256)": FunctionFragment;
-    "getRoleMemberCount(bytes32)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "harvest(uint256,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
-    "isApprovedForAll(address,address)": FunctionFragment;
-    "isApprovedOrOwner(address,uint256)": FunctionFragment;
-    "levelOnUpdate(uint256)": FunctionFragment;
-    "massUpdatePools(uint256[])": FunctionFragment;
-    "merge(uint256,uint256)": FunctionFragment;
-    "modifyMaturity(uint256,uint256)": FunctionFragment;
-    "modifyPool(uint256,uint256,address,string,address,bool)": FunctionFragment;
-    "multicall(bytes[])": FunctionFragment;
-    "name()": FunctionFragment;
-    "nftDescriptor(uint256)": FunctionFragment;
-    "ownerOf(uint256)": FunctionFragment;
-    "pendingReward(uint256)": FunctionFragment;
-    "pendingRewardsOfOwner(address)": FunctionFragment;
-    "poolLength()": FunctionFragment;
-    "poolToken(uint256)": FunctionFragment;
-    "relicPositionsOfOwner(address)": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "rewardToken()": FunctionFragment;
-    "rewarder(uint256)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256)": FunctionFragment;
-    "setApprovalForAll(address,bool)": FunctionFragment;
-    "setEmissionCurve(address)": FunctionFragment;
-    "shift(uint256,uint256,uint256)": FunctionFragment;
-    "split(uint256,uint256,address)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "symbol()": FunctionFragment;
-    "tokenByIndex(uint256)": FunctionFragment;
-    "tokenOfOwnerByIndex(address,uint256)": FunctionFragment;
-    "tokenURI(uint256)": FunctionFragment;
-    "totalAllocPoint()": FunctionFragment;
-    "totalSupply()": FunctionFragment;
-    "transferFrom(address,address,uint256)": FunctionFragment;
-    "updateLastMaturityBonus(uint256)": FunctionFragment;
-    "updatePool(uint256)": FunctionFragment;
-    "updatePosition(uint256)": FunctionFragment;
-    "withdraw(uint256,uint256)": FunctionFragment;
-    "withdrawAndHarvest(uint256,uint256,address)": FunctionFragment;
-  };
+    functions: {
+        'DEFAULT_ADMIN_ROLE()': FunctionFragment;
+        'addPool(uint256,address,address,uint256[],uint256[],string,address)': FunctionFragment;
+        'approve(address,uint256)': FunctionFragment;
+        'balanceOf(address)': FunctionFragment;
+        'burn(uint256)': FunctionFragment;
+        'createRelicAndDeposit(address,uint256,uint256)': FunctionFragment;
+        'deposit(uint256,uint256)': FunctionFragment;
+        'emergencyWithdraw(uint256)': FunctionFragment;
+        'emissionCurve()': FunctionFragment;
+        'getApproved(uint256)': FunctionFragment;
+        'getLevelInfo(uint256)': FunctionFragment;
+        'getPoolInfo(uint256)': FunctionFragment;
+        'getPositionForId(uint256)': FunctionFragment;
+        'getRoleAdmin(bytes32)': FunctionFragment;
+        'getRoleMember(bytes32,uint256)': FunctionFragment;
+        'getRoleMemberCount(bytes32)': FunctionFragment;
+        'grantRole(bytes32,address)': FunctionFragment;
+        'harvest(uint256,address)': FunctionFragment;
+        'hasRole(bytes32,address)': FunctionFragment;
+        'isApprovedForAll(address,address)': FunctionFragment;
+        'isApprovedOrOwner(address,uint256)': FunctionFragment;
+        'levelOnUpdate(uint256)': FunctionFragment;
+        'massUpdatePools(uint256[])': FunctionFragment;
+        'merge(uint256,uint256)': FunctionFragment;
+        'modifyPool(uint256,uint256,address,string,address,bool)': FunctionFragment;
+        'multicall(bytes[])': FunctionFragment;
+        'name()': FunctionFragment;
+        'nftDescriptor(uint256)': FunctionFragment;
+        'ownerOf(uint256)': FunctionFragment;
+        'pendingReward(uint256)': FunctionFragment;
+        'pendingRewardsOfOwner(address)': FunctionFragment;
+        'poolLength()': FunctionFragment;
+        'poolToken(uint256)': FunctionFragment;
+        'relicPositionsOfOwner(address)': FunctionFragment;
+        'renounceRole(bytes32,address)': FunctionFragment;
+        'revokeRole(bytes32,address)': FunctionFragment;
+        'rewardToken()': FunctionFragment;
+        'rewarder(uint256)': FunctionFragment;
+        'safeTransferFrom(address,address,uint256)': FunctionFragment;
+        'setApprovalForAll(address,bool)': FunctionFragment;
+        'setEmissionCurve(address)': FunctionFragment;
+        'shift(uint256,uint256,uint256)': FunctionFragment;
+        'split(uint256,uint256,address)': FunctionFragment;
+        'supportsInterface(bytes4)': FunctionFragment;
+        'symbol()': FunctionFragment;
+        'tokenByIndex(uint256)': FunctionFragment;
+        'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
+        'tokenURI(uint256)': FunctionFragment;
+        'totalAllocPoint()': FunctionFragment;
+        'totalSupply()': FunctionFragment;
+        'transferFrom(address,address,uint256)': FunctionFragment;
+        'updatePool(uint256)': FunctionFragment;
+        'updatePosition(uint256)': FunctionFragment;
+        'withdraw(uint256,uint256)': FunctionFragment;
+        'withdrawAndHarvest(uint256,uint256,address)': FunctionFragment;
+    };
 
-  encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addPool",
-    values: [
-      BigNumberish,
-      string,
-      string,
-      BigNumberish[],
-      BigNumberish[],
-      string,
-      string
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "approve",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
-  encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
-  encodeFunctionData(
-    functionFragment: "createRelicAndDeposit",
-    values: [string, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deposit",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "emergencyWithdraw",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "emissionCurve",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getApproved",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getLevelInfo",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPoolInfo",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPositionForId",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleAdmin",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleMember",
-    values: [BytesLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleMemberCount",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "grantRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "harvest",
-    values: [BigNumberish, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isApprovedForAll",
-    values: [string, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isApprovedOrOwner",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "levelOnUpdate",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "massUpdatePools",
-    values: [BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "merge",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "modifyMaturity",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "modifyPool",
-    values: [BigNumberish, BigNumberish, string, string, string, boolean]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "multicall",
-    values: [BytesLike[]]
-  ): string;
-  encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "nftDescriptor",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ownerOf",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "pendingReward",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "pendingRewardsOfOwner",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "poolLength",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "poolToken",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "relicPositionsOfOwner",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "rewardToken",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "rewarder",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "safeTransferFrom",
-    values: [string, string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setApprovalForAll",
-    values: [string, boolean]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setEmissionCurve",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "shift",
-    values: [BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "split",
-    values: [BigNumberish, BigNumberish, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "tokenByIndex",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "tokenOfOwnerByIndex",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "tokenURI",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "totalAllocPoint",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "totalSupply",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferFrom",
-    values: [string, string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateLastMaturityBonus",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updatePool",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updatePosition",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawAndHarvest",
-    values: [BigNumberish, BigNumberish, string]
-  ): string;
+    encodeFunctionData(functionFragment: 'DEFAULT_ADMIN_ROLE', values?: undefined): string;
+    encodeFunctionData(
+        functionFragment: 'addPool',
+        values: [BigNumberish, string, string, BigNumberish[], BigNumberish[], string, string],
+    ): string;
+    encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
+    encodeFunctionData(functionFragment: 'burn', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'createRelicAndDeposit', values: [string, BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'deposit', values: [BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'emergencyWithdraw', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'emissionCurve', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'getApproved', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getLevelInfo', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getPoolInfo', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getPositionForId', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getRoleAdmin', values: [BytesLike]): string;
+    encodeFunctionData(functionFragment: 'getRoleMember', values: [BytesLike, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getRoleMemberCount', values: [BytesLike]): string;
+    encodeFunctionData(functionFragment: 'grantRole', values: [BytesLike, string]): string;
+    encodeFunctionData(functionFragment: 'harvest', values: [BigNumberish, string]): string;
+    encodeFunctionData(functionFragment: 'hasRole', values: [BytesLike, string]): string;
+    encodeFunctionData(functionFragment: 'isApprovedForAll', values: [string, string]): string;
+    encodeFunctionData(functionFragment: 'isApprovedOrOwner', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'levelOnUpdate', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'massUpdatePools', values: [BigNumberish[]]): string;
+    encodeFunctionData(functionFragment: 'merge', values: [BigNumberish, BigNumberish]): string;
+    encodeFunctionData(
+        functionFragment: 'modifyPool',
+        values: [BigNumberish, BigNumberish, string, string, string, boolean],
+    ): string;
+    encodeFunctionData(functionFragment: 'multicall', values: [BytesLike[]]): string;
+    encodeFunctionData(functionFragment: 'name', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'nftDescriptor', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'ownerOf', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'pendingReward', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'pendingRewardsOfOwner', values: [string]): string;
+    encodeFunctionData(functionFragment: 'poolLength', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'poolToken', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'relicPositionsOfOwner', values: [string]): string;
+    encodeFunctionData(functionFragment: 'renounceRole', values: [BytesLike, string]): string;
+    encodeFunctionData(functionFragment: 'revokeRole', values: [BytesLike, string]): string;
+    encodeFunctionData(functionFragment: 'rewardToken', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'rewarder', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
+    encodeFunctionData(functionFragment: 'setEmissionCurve', values: [string]): string;
+    encodeFunctionData(functionFragment: 'shift', values: [BigNumberish, BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'split', values: [BigNumberish, BigNumberish, string]): string;
+    encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+    encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'tokenByIndex', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'tokenOfOwnerByIndex', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'tokenURI', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'totalAllocPoint', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'updatePool', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'updatePosition', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'withdraw', values: [BigNumberish, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'withdrawAndHarvest', values: [BigNumberish, BigNumberish, string]): string;
 
-  decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "addPool", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "createRelicAndDeposit",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "emergencyWithdraw",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "emissionCurve",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getApproved",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getLevelInfo",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPoolInfo",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPositionForId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleMember",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleMemberCount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "harvest", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isApprovedForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "isApprovedOrOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "levelOnUpdate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "massUpdatePools",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "merge", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "modifyMaturity",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "modifyPool", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "nftDescriptor",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "pendingReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "pendingRewardsOfOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "poolLength", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "poolToken", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "relicPositionsOfOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "rewardToken",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "rewarder", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "safeTransferFrom",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setApprovalForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEmissionCurve",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "shift", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "split", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenByIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenOfOwnerByIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "totalAllocPoint",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "totalSupply",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferFrom",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateLastMaturityBonus",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "updatePool", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "updatePosition",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawAndHarvest",
-    data: BytesLike
-  ): Result;
+    decodeFunctionResult(functionFragment: 'DEFAULT_ADMIN_ROLE', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'addPool', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'createRelicAndDeposit', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'emergencyWithdraw', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'emissionCurve', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getLevelInfo', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getPoolInfo', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getPositionForId', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getRoleAdmin', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getRoleMember', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getRoleMemberCount', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'grantRole', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'harvest', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'hasRole', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'isApprovedOrOwner', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'levelOnUpdate', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'massUpdatePools', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'merge', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'modifyPool', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'multicall', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'nftDescriptor', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'pendingReward', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'pendingRewardsOfOwner', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'poolLength', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'poolToken', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'relicPositionsOfOwner', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'renounceRole', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'revokeRole', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'rewardToken', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'rewarder', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setEmissionCurve', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'shift', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'split', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'tokenByIndex', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'tokenOfOwnerByIndex', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'totalAllocPoint', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'updatePool', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'updatePosition', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'withdrawAndHarvest', data: BytesLike): Result;
 
-  events: {
-    "Approval(address,address,uint256)": EventFragment;
-    "ApprovalForAll(address,address,bool)": EventFragment;
-    "CreateRelic(uint256,address,uint256)": EventFragment;
-    "Deposit(uint256,uint256,address,uint256)": EventFragment;
-    "EmergencyWithdraw(uint256,uint256,address,uint256)": EventFragment;
-    "Harvest(uint256,uint256,address,uint256)": EventFragment;
-    "LevelChanged(uint256,uint256)": EventFragment;
-    "LogPoolAddition(uint256,uint256,address,address,address)": EventFragment;
-    "LogPoolModified(uint256,uint256,address,address)": EventFragment;
-    "LogSetEmissionCurve(address)": EventFragment;
-    "LogUpdatePool(uint256,uint256,uint256,uint256)": EventFragment;
-    "MaturityBonus(uint256,address,uint256,uint256)": EventFragment;
-    "Merge(uint256,uint256,uint256)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
-    "Shift(uint256,uint256,uint256)": EventFragment;
-    "Split(uint256,uint256,uint256)": EventFragment;
-    "Transfer(address,address,uint256)": EventFragment;
-    "Withdraw(uint256,uint256,address,uint256)": EventFragment;
-  };
+    events: {
+        'Approval(address,address,uint256)': EventFragment;
+        'ApprovalForAll(address,address,bool)': EventFragment;
+        'RoleAdminChanged(bytes32,bytes32,bytes32)': EventFragment;
+        'RoleGranted(bytes32,address,address)': EventFragment;
+        'RoleRevoked(bytes32,address,address)': EventFragment;
+        'Transfer(address,address,uint256)': EventFragment;
+    };
 
-  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "CreateRelic"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EmergencyWithdraw"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Harvest"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LevelChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LogPoolAddition"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LogPoolModified"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LogSetEmissionCurve"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LogUpdatePool"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MaturityBonus"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Merge"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Shift"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Split"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'RoleAdminChanged'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'RoleGranted'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'RoleRevoked'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
 }
 
 export class Reliquary extends Contract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
-
-  on(event: EventFilter | string, listener: Listener): this;
-  once(event: EventFilter | string, listener: Listener): this;
-  addListener(eventName: EventFilter | string, listener: Listener): this;
-  removeAllListeners(eventName: EventFilter | string): this;
-  removeListener(eventName: any, listener: Listener): this;
-
-  interface: ReliquaryInterface;
-
-  functions: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<[string]>;
-
-    addPool(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "addPool(uint256,address,address,uint256[],uint256[],string,address)"(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    approve(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "approve(address,uint256)"(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "balanceOf(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    burn(
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "burn(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    createRelicAndDeposit(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "createRelicAndDeposit(address,uint256,uint256)"(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    deposit(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "deposit(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    emergencyWithdraw(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "emergencyWithdraw(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    emissionCurve(overrides?: CallOverrides): Promise<[string]>;
-
-    "emissionCurve()"(overrides?: CallOverrides): Promise<[string]>;
-
-    getApproved(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "getApproved(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    getLevelInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [BigNumber[], BigNumber[], BigNumber[]] & {
-          requiredMaturity: BigNumber[];
-          allocPoint: BigNumber[];
-          balance: BigNumber[];
-        }
-      ] & {
-        levelInfo: [BigNumber[], BigNumber[], BigNumber[]] & {
-          requiredMaturity: BigNumber[];
-          allocPoint: BigNumber[];
-          balance: BigNumber[];
-        };
-      }
-    >;
-
-    "getLevelInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [BigNumber[], BigNumber[], BigNumber[]] & {
-          requiredMaturity: BigNumber[];
-          allocPoint: BigNumber[];
-          balance: BigNumber[];
-        }
-      ] & {
-        levelInfo: [BigNumber[], BigNumber[], BigNumber[]] & {
-          requiredMaturity: BigNumber[];
-          allocPoint: BigNumber[];
-          balance: BigNumber[];
-        };
-      }
-    >;
-
-    getPoolInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [BigNumber, BigNumber, BigNumber, string] & {
-          accRewardPerShare: BigNumber;
-          lastRewardTime: BigNumber;
-          allocPoint: BigNumber;
-          name: string;
-        }
-      ] & {
-        pool: [BigNumber, BigNumber, BigNumber, string] & {
-          accRewardPerShare: BigNumber;
-          lastRewardTime: BigNumber;
-          allocPoint: BigNumber;
-          name: string;
-        };
-      }
-    >;
-
-    "getPoolInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [BigNumber, BigNumber, BigNumber, string] & {
-          accRewardPerShare: BigNumber;
-          lastRewardTime: BigNumber;
-          allocPoint: BigNumber;
-          name: string;
-        }
-      ] & {
-        pool: [BigNumber, BigNumber, BigNumber, string] & {
-          accRewardPerShare: BigNumber;
-          lastRewardTime: BigNumber;
-          allocPoint: BigNumber;
-          name: string;
-        };
-      }
-    >;
-
-    getPositionForId(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        }
-      ] & {
-        position: [
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        };
-      }
-    >;
-
-    "getPositionForId(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        [
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        }
-      ] & {
-        position: [
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        };
-      }
-    >;
-
-    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    getRoleMember(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "getRoleMember(bytes32,uint256)"(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    harvest(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "harvest(uint256,address)"(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    isApprovedForAll(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    "isApprovedForAll(address,address)"(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    isApprovedOrOwner(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    "isApprovedOrOwner(address,uint256)"(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    levelOnUpdate(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { level: BigNumber }>;
-
-    "levelOnUpdate(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { level: BigNumber }>;
-
-    massUpdatePools(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "massUpdatePools(uint256[])"(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    merge(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "merge(uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    modifyMaturity(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "modifyMaturity(uint256,uint256)"(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    modifyPool(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "modifyPool(uint256,uint256,address,string,address,bool)"(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    multicall(
-      data: BytesLike[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "multicall(bytes[])"(
-      data: BytesLike[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    name(overrides?: CallOverrides): Promise<[string]>;
-
-    "name()"(overrides?: CallOverrides): Promise<[string]>;
-
-    nftDescriptor(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "nftDescriptor(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    ownerOf(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "ownerOf(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    pendingReward(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { pending: BigNumber }>;
-
-    "pendingReward(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { pending: BigNumber }>;
-
-    pendingRewardsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        ([BigNumber, BigNumber, BigNumber] & {
-          relicId: BigNumber;
-          poolId: BigNumber;
-          pendingReward: BigNumber;
-        })[]
-      ] & {
-        pendingRewards: ([BigNumber, BigNumber, BigNumber] & {
-          relicId: BigNumber;
-          poolId: BigNumber;
-          pendingReward: BigNumber;
-        })[];
-      }
-    >;
-
-    "pendingRewardsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        ([BigNumber, BigNumber, BigNumber] & {
-          relicId: BigNumber;
-          poolId: BigNumber;
-          pendingReward: BigNumber;
-        })[]
-      ] & {
-        pendingRewards: ([BigNumber, BigNumber, BigNumber] & {
-          relicId: BigNumber;
-          poolId: BigNumber;
-          pendingReward: BigNumber;
-        })[];
-      }
-    >;
-
-    poolLength(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { pools: BigNumber }>;
-
-    "poolLength()"(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { pools: BigNumber }>;
-
-    poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
-
-    "poolToken(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    relicPositionsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        BigNumber[],
-        ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[]
-      ] & {
-        relicIds: BigNumber[];
-        positionInfos: ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[];
-      }
-    >;
-
-    "relicPositionsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [
-        BigNumber[],
-        ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[]
-      ] & {
-        relicIds: BigNumber[];
-        positionInfos: ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[];
-      }
-    >;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    rewardToken(overrides?: CallOverrides): Promise<[string]>;
-
-    "rewardToken()"(overrides?: CallOverrides): Promise<[string]>;
-
-    rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
-
-    "rewarder(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "safeTransferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "safeTransferFrom(address,address,uint256,bytes)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    setApprovalForAll(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setApprovalForAll(address,bool)"(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    setEmissionCurve(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setEmissionCurve(address)"(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    shift(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "shift(uint256,uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    split(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "split(uint256,uint256,address)"(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    "supportsInterface(bytes4)"(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    symbol(overrides?: CallOverrides): Promise<[string]>;
-
-    "symbol()"(overrides?: CallOverrides): Promise<[string]>;
-
-    tokenByIndex(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "tokenByIndex(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    tokenOfOwnerByIndex(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "tokenOfOwnerByIndex(address,uint256)"(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    tokenURI(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "tokenURI(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    totalAllocPoint(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "totalAllocPoint()"(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    transferFrom(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "transferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    updateLastMaturityBonus(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "updateLastMaturityBonus(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    updatePool(
-      pid: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "updatePool(uint256)"(
-      pid: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    updatePosition(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "updatePosition(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    withdraw(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "withdraw(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    withdrawAndHarvest(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "withdrawAndHarvest(uint256,uint256,address)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-  };
-
-  DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
-
-  addPool(
-    allocPoint: BigNumberish,
-    _poolToken: string,
-    _rewarder: string,
-    requiredMaturity: BigNumberish[],
-    allocPoints: BigNumberish[],
-    name: string,
-    _nftDescriptor: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "addPool(uint256,address,address,uint256[],uint256[],string,address)"(
-    allocPoint: BigNumberish,
-    _poolToken: string,
-    _rewarder: string,
-    requiredMaturity: BigNumberish[],
-    allocPoints: BigNumberish[],
-    name: string,
-    _nftDescriptor: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  approve(
-    to: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "approve(address,uint256)"(
-    to: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-  "balanceOf(address)"(
-    owner: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  burn(
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "burn(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  createRelicAndDeposit(
-    to: string,
-    pid: BigNumberish,
-    amount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "createRelicAndDeposit(address,uint256,uint256)"(
-    to: string,
-    pid: BigNumberish,
-    amount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  deposit(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "deposit(uint256,uint256)"(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  emergencyWithdraw(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "emergencyWithdraw(uint256)"(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  emissionCurve(overrides?: CallOverrides): Promise<string>;
-
-  "emissionCurve()"(overrides?: CallOverrides): Promise<string>;
-
-  getApproved(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "getApproved(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  getLevelInfo(
-    pid: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber[], BigNumber[], BigNumber[]] & {
-      requiredMaturity: BigNumber[];
-      allocPoint: BigNumber[];
-      balance: BigNumber[];
-    }
-  >;
-
-  "getLevelInfo(uint256)"(
-    pid: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber[], BigNumber[], BigNumber[]] & {
-      requiredMaturity: BigNumber[];
-      allocPoint: BigNumber[];
-      balance: BigNumber[];
-    }
-  >;
-
-  getPoolInfo(
-    pid: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber, string] & {
-      accRewardPerShare: BigNumber;
-      lastRewardTime: BigNumber;
-      allocPoint: BigNumber;
-      name: string;
-    }
-  >;
-
-  "getPoolInfo(uint256)"(
-    pid: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber, string] & {
-      accRewardPerShare: BigNumber;
-      lastRewardTime: BigNumber;
-      allocPoint: BigNumber;
-      name: string;
-    }
-  >;
-
-  getPositionForId(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber
-    ] & {
-      amount: BigNumber;
-      rewardDebt: BigNumber;
-      rewardCredit: BigNumber;
-      entry: BigNumber;
-      poolId: BigNumber;
-      level: BigNumber;
-      genesis: BigNumber;
-      lastMaturityBonus: BigNumber;
-    }
-  >;
-
-  "getPositionForId(uint256)"(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber
-    ] & {
-      amount: BigNumber;
-      rewardDebt: BigNumber;
-      rewardCredit: BigNumber;
-      entry: BigNumber;
-      poolId: BigNumber;
-      level: BigNumber;
-      genesis: BigNumber;
-      lastMaturityBonus: BigNumber;
-    }
-  >;
-
-  getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-  "getRoleAdmin(bytes32)"(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  getRoleMember(
-    role: BytesLike,
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "getRoleMember(bytes32,uint256)"(
-    role: BytesLike,
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  getRoleMemberCount(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "getRoleMemberCount(bytes32)"(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  grantRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "grantRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  harvest(
-    relicId: BigNumberish,
-    harvestTo: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "harvest(uint256,address)"(
-    relicId: BigNumberish,
-    harvestTo: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  hasRole(
-    role: BytesLike,
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "hasRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  isApprovedForAll(
-    owner: string,
-    operator: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "isApprovedForAll(address,address)"(
-    owner: string,
-    operator: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  isApprovedOrOwner(
-    spender: string,
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "isApprovedOrOwner(address,uint256)"(
-    spender: string,
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  levelOnUpdate(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "levelOnUpdate(uint256)"(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  massUpdatePools(
-    pids: BigNumberish[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "massUpdatePools(uint256[])"(
-    pids: BigNumberish[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  merge(
-    fromId: BigNumberish,
-    toId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "merge(uint256,uint256)"(
-    fromId: BigNumberish,
-    toId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  modifyMaturity(
-    relicId: BigNumberish,
-    points: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "modifyMaturity(uint256,uint256)"(
-    relicId: BigNumberish,
-    points: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  modifyPool(
-    pid: BigNumberish,
-    allocPoint: BigNumberish,
-    _rewarder: string,
-    name: string,
-    _nftDescriptor: string,
-    overwriteRewarder: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "modifyPool(uint256,uint256,address,string,address,bool)"(
-    pid: BigNumberish,
-    allocPoint: BigNumberish,
-    _rewarder: string,
-    name: string,
-    _nftDescriptor: string,
-    overwriteRewarder: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  multicall(
-    data: BytesLike[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "multicall(bytes[])"(
-    data: BytesLike[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  name(overrides?: CallOverrides): Promise<string>;
-
-  "name()"(overrides?: CallOverrides): Promise<string>;
-
-  nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "nftDescriptor(uint256)"(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "ownerOf(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  pendingReward(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "pendingReward(uint256)"(
-    relicId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  pendingRewardsOfOwner(
-    owner: string,
-    overrides?: CallOverrides
-  ): Promise<
-    ([BigNumber, BigNumber, BigNumber] & {
-      relicId: BigNumber;
-      poolId: BigNumber;
-      pendingReward: BigNumber;
-    })[]
-  >;
-
-  "pendingRewardsOfOwner(address)"(
-    owner: string,
-    overrides?: CallOverrides
-  ): Promise<
-    ([BigNumber, BigNumber, BigNumber] & {
-      relicId: BigNumber;
-      poolId: BigNumber;
-      pendingReward: BigNumber;
-    })[]
-  >;
-
-  poolLength(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "poolLength()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-  poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "poolToken(uint256)"(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  relicPositionsOfOwner(
-    owner: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [
-      BigNumber[],
-      ([
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      })[]
-    ] & {
-      relicIds: BigNumber[];
-      positionInfos: ([
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      })[];
-    }
-  >;
-
-  "relicPositionsOfOwner(address)"(
-    owner: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [
-      BigNumber[],
-      ([
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      })[]
-    ] & {
-      relicIds: BigNumber[];
-      positionInfos: ([
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      })[];
-    }
-  >;
-
-  renounceRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "renounceRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  revokeRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "revokeRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  rewardToken(overrides?: CallOverrides): Promise<string>;
-
-  "rewardToken()"(overrides?: CallOverrides): Promise<string>;
-
-  rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "rewarder(uint256)"(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "safeTransferFrom(address,address,uint256)"(
-    from: string,
-    to: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "safeTransferFrom(address,address,uint256,bytes)"(
-    from: string,
-    to: string,
-    tokenId: BigNumberish,
-    data: BytesLike,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  setApprovalForAll(
-    operator: string,
-    approved: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setApprovalForAll(address,bool)"(
-    operator: string,
-    approved: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  setEmissionCurve(
-    _emissionCurve: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setEmissionCurve(address)"(
-    _emissionCurve: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  shift(
-    fromId: BigNumberish,
-    toId: BigNumberish,
-    amount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "shift(uint256,uint256,uint256)"(
-    fromId: BigNumberish,
-    toId: BigNumberish,
-    amount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  split(
-    fromId: BigNumberish,
-    amount: BigNumberish,
-    to: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "split(uint256,uint256,address)"(
-    fromId: BigNumberish,
-    amount: BigNumberish,
-    to: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "supportsInterface(bytes4)"(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  symbol(overrides?: CallOverrides): Promise<string>;
-
-  "symbol()"(overrides?: CallOverrides): Promise<string>;
-
-  tokenByIndex(
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "tokenByIndex(uint256)"(
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  tokenOfOwnerByIndex(
-    owner: string,
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "tokenOfOwnerByIndex(address,uint256)"(
-    owner: string,
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "tokenURI(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  totalAllocPoint(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "totalAllocPoint()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-  totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-  transferFrom(
-    from: string,
-    to: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "transferFrom(address,address,uint256)"(
-    from: string,
-    to: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  updateLastMaturityBonus(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "updateLastMaturityBonus(uint256)"(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  updatePool(
-    pid: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "updatePool(uint256)"(
-    pid: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  updatePosition(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "updatePosition(uint256)"(
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  withdraw(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "withdraw(uint256,uint256)"(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  withdrawAndHarvest(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    harvestTo: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "withdrawAndHarvest(uint256,uint256,address)"(
-    amount: BigNumberish,
-    relicId: BigNumberish,
-    harvestTo: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  callStatic: {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+
+    on(event: EventFilter | string, listener: Listener): this;
+    once(event: EventFilter | string, listener: Listener): this;
+    addListener(eventName: EventFilter | string, listener: Listener): this;
+    removeAllListeners(eventName: EventFilter | string): this;
+    removeListener(eventName: any, listener: Listener): this;
+
+    interface: ReliquaryInterface;
+
+    functions: {
+        DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+        'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<[string]>;
+
+        addPool(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'addPool(uint256,address,address,uint256[],uint256[],string,address)'(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        approve(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'approve(address,uint256)'(
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'balanceOf(address)'(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        burn(tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'burn(uint256)'(tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        createRelicAndDeposit(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'createRelicAndDeposit(address,uint256,uint256)'(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        deposit(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'deposit(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        emergencyWithdraw(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'emergencyWithdraw(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        emissionCurve(overrides?: CallOverrides): Promise<[string]>;
+
+        'emissionCurve()'(overrides?: CallOverrides): Promise<[string]>;
+
+        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'getApproved(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        getLevelInfo(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber[], BigNumber[], BigNumber[]] & {
+                    requiredMaturities: BigNumber[];
+                    multipliers: BigNumber[];
+                    balance: BigNumber[];
+                },
+            ] & {
+                levelInfo: [BigNumber[], BigNumber[], BigNumber[]] & {
+                    requiredMaturities: BigNumber[];
+                    multipliers: BigNumber[];
+                    balance: BigNumber[];
+                };
+            }
+        >;
+
+        'getLevelInfo(uint256)'(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber[], BigNumber[], BigNumber[]] & {
+                    requiredMaturities: BigNumber[];
+                    multipliers: BigNumber[];
+                    balance: BigNumber[];
+                },
+            ] & {
+                levelInfo: [BigNumber[], BigNumber[], BigNumber[]] & {
+                    requiredMaturities: BigNumber[];
+                    multipliers: BigNumber[];
+                    balance: BigNumber[];
+                };
+            }
+        >;
+
+        getPoolInfo(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber, BigNumber, BigNumber, string] & {
+                    accRewardPerShare: BigNumber;
+                    lastRewardTime: BigNumber;
+                    allocPoint: BigNumber;
+                    name: string;
+                },
+            ] & {
+                pool: [BigNumber, BigNumber, BigNumber, string] & {
+                    accRewardPerShare: BigNumber;
+                    lastRewardTime: BigNumber;
+                    allocPoint: BigNumber;
+                    name: string;
+                };
+            }
+        >;
+
+        'getPoolInfo(uint256)'(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber, BigNumber, BigNumber, string] & {
+                    accRewardPerShare: BigNumber;
+                    lastRewardTime: BigNumber;
+                    allocPoint: BigNumber;
+                    name: string;
+                },
+            ] & {
+                pool: [BigNumber, BigNumber, BigNumber, string] & {
+                    accRewardPerShare: BigNumber;
+                    lastRewardTime: BigNumber;
+                    allocPoint: BigNumber;
+                    name: string;
+                };
+            }
+        >;
+
+        getPositionForId(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                },
+            ] & {
+                position: [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                };
+            }
+        >;
+
+        'getPositionForId(uint256)'(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                },
+            ] & {
+                position: [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                };
+            }
+        >;
+
+        getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
+
+        'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
+
+        getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'getRoleMember(bytes32,uint256)'(
+            role: BytesLike,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<[string]>;
+
+        getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'grantRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        harvest(relicId: BigNumberish, harvestTo: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'harvest(uint256,address)'(
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+        'hasRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+        'isApprovedForAll(address,address)'(
+            owner: string,
+            operator: string,
+            overrides?: CallOverrides,
+        ): Promise<[boolean]>;
+
+        isApprovedOrOwner(spender: string, relicId: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+
+        'isApprovedOrOwner(address,uint256)'(
+            spender: string,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<[boolean]>;
+
+        levelOnUpdate(relicId: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { level: BigNumber }>;
+
+        'levelOnUpdate(uint256)'(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<[BigNumber] & { level: BigNumber }>;
+
+        massUpdatePools(pids: BigNumberish[], overrides?: Overrides): Promise<ContractTransaction>;
+
+        'massUpdatePools(uint256[])'(pids: BigNumberish[], overrides?: Overrides): Promise<ContractTransaction>;
+
+        merge(fromId: BigNumberish, toId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'merge(uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        modifyPool(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'modifyPool(uint256,uint256,address,string,address,bool)'(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        multicall(data: BytesLike[], overrides?: Overrides): Promise<ContractTransaction>;
+
+        'multicall(bytes[])'(data: BytesLike[], overrides?: Overrides): Promise<ContractTransaction>;
+
+        name(overrides?: CallOverrides): Promise<[string]>;
+
+        'name()'(overrides?: CallOverrides): Promise<[string]>;
+
+        nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'nftDescriptor(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'ownerOf(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        pendingReward(relicId: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { pending: BigNumber }>;
+
+        'pendingReward(uint256)'(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<[BigNumber] & { pending: BigNumber }>;
+
+        pendingRewardsOfOwner(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                ([BigNumber, BigNumber, BigNumber] & {
+                    relicId: BigNumber;
+                    poolId: BigNumber;
+                    pendingReward: BigNumber;
+                })[],
+            ] & {
+                pendingRewards: ([BigNumber, BigNumber, BigNumber] & {
+                    relicId: BigNumber;
+                    poolId: BigNumber;
+                    pendingReward: BigNumber;
+                })[];
+            }
+        >;
+
+        'pendingRewardsOfOwner(address)'(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                ([BigNumber, BigNumber, BigNumber] & {
+                    relicId: BigNumber;
+                    poolId: BigNumber;
+                    pendingReward: BigNumber;
+                })[],
+            ] & {
+                pendingRewards: ([BigNumber, BigNumber, BigNumber] & {
+                    relicId: BigNumber;
+                    poolId: BigNumber;
+                    pendingReward: BigNumber;
+                })[];
+            }
+        >;
+
+        poolLength(overrides?: CallOverrides): Promise<[BigNumber] & { pools: BigNumber }>;
+
+        'poolLength()'(overrides?: CallOverrides): Promise<[BigNumber] & { pools: BigNumber }>;
+
+        poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'poolToken(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        relicPositionsOfOwner(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                BigNumber[],
+                ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[],
+            ] & {
+                relicIds: BigNumber[];
+                positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[];
+            }
+        >;
+
+        'relicPositionsOfOwner(address)'(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                BigNumber[],
+                ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[],
+            ] & {
+                relicIds: BigNumber[];
+                positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[];
+            }
+        >;
+
+        renounceRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'renounceRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'revokeRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        rewardToken(overrides?: CallOverrides): Promise<[string]>;
+
+        'rewardToken()'(overrides?: CallOverrides): Promise<[string]>;
+
+        rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'rewarder(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'safeTransferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'safeTransferFrom(address,address,uint256,bytes)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            data: BytesLike,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        setApprovalForAll(operator: string, approved: boolean, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'setApprovalForAll(address,bool)'(
+            operator: string,
+            approved: boolean,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        setEmissionCurve(_emissionCurve: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'setEmissionCurve(address)'(_emissionCurve: string, overrides?: Overrides): Promise<ContractTransaction>;
+
+        shift(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'shift(uint256,uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        split(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'split(uint256,uint256,address)'(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
+
+        'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
+
+        symbol(overrides?: CallOverrides): Promise<[string]>;
+
+        'symbol()'(overrides?: CallOverrides): Promise<[string]>;
+
+        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'tokenByIndex(uint256)'(index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'tokenOfOwnerByIndex(address,uint256)'(
+            owner: string,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<[BigNumber]>;
+
+        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        'tokenURI(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+
+        totalAllocPoint(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'totalAllocPoint()'(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        'totalSupply()'(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        transferFrom(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'transferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        updatePool(pid: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'updatePool(uint256)'(pid: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        updatePosition(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'updatePosition(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        withdraw(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+
+        'withdraw(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        withdrawAndHarvest(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+
+        'withdrawAndHarvest(uint256,uint256,address)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<ContractTransaction>;
+    };
+
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
+    'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<string>;
 
     addPool(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+        allocPoint: BigNumberish,
+        _poolToken: string,
+        _rewarder: string,
+        requiredMaturities: BigNumberish[],
+        levelMultipliers: BigNumberish[],
+        name: string,
+        _nftDescriptor: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    "addPool(uint256,address,address,uint256[],uint256[],string,address)"(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'addPool(uint256,address,address,uint256[],uint256[],string,address)'(
+        allocPoint: BigNumberish,
+        _poolToken: string,
+        _rewarder: string,
+        requiredMaturities: BigNumberish[],
+        levelMultipliers: BigNumberish[],
+        name: string,
+        _nftDescriptor: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    approve(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    approve(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "approve(address,uint256)"(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'approve(address,uint256)'(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "balanceOf(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'balanceOf(address)'(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    burn(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    burn(tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "burn(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'burn(uint256)'(tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
     createRelicAndDeposit(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+        to: string,
+        pid: BigNumberish,
+        amount: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    "createRelicAndDeposit(address,uint256,uint256)"(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'createRelicAndDeposit(address,uint256,uint256)'(
+        to: string,
+        pid: BigNumberish,
+        amount: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    deposit(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    deposit(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "deposit(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'deposit(uint256,uint256)'(
+        amount: BigNumberish,
+        relicId: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    emergencyWithdraw(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    emergencyWithdraw(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "emergencyWithdraw(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'emergencyWithdraw(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
     emissionCurve(overrides?: CallOverrides): Promise<string>;
 
-    "emissionCurve()"(overrides?: CallOverrides): Promise<string>;
+    'emissionCurve()'(overrides?: CallOverrides): Promise<string>;
 
-    getApproved(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "getApproved(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'getApproved(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     getLevelInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
+        pid: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [BigNumber[], BigNumber[], BigNumber[]] & {
-        requiredMaturity: BigNumber[];
-        allocPoint: BigNumber[];
-        balance: BigNumber[];
-      }
+        [BigNumber[], BigNumber[], BigNumber[]] & {
+            requiredMaturities: BigNumber[];
+            multipliers: BigNumber[];
+            balance: BigNumber[];
+        }
     >;
 
-    "getLevelInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
+    'getLevelInfo(uint256)'(
+        pid: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [BigNumber[], BigNumber[], BigNumber[]] & {
-        requiredMaturity: BigNumber[];
-        allocPoint: BigNumber[];
-        balance: BigNumber[];
-      }
+        [BigNumber[], BigNumber[], BigNumber[]] & {
+            requiredMaturities: BigNumber[];
+            multipliers: BigNumber[];
+            balance: BigNumber[];
+        }
     >;
 
     getPoolInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
+        pid: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, string] & {
-        accRewardPerShare: BigNumber;
-        lastRewardTime: BigNumber;
-        allocPoint: BigNumber;
-        name: string;
-      }
+        [BigNumber, BigNumber, BigNumber, string] & {
+            accRewardPerShare: BigNumber;
+            lastRewardTime: BigNumber;
+            allocPoint: BigNumber;
+            name: string;
+        }
     >;
 
-    "getPoolInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
+    'getPoolInfo(uint256)'(
+        pid: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, string] & {
-        accRewardPerShare: BigNumber;
-        lastRewardTime: BigNumber;
-        allocPoint: BigNumber;
-        name: string;
-      }
+        [BigNumber, BigNumber, BigNumber, string] & {
+            accRewardPerShare: BigNumber;
+            lastRewardTime: BigNumber;
+            allocPoint: BigNumber;
+            name: string;
+        }
     >;
 
     getPositionForId(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
+        relicId: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      }
+        [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+            amount: BigNumber;
+            rewardDebt: BigNumber;
+            rewardCredit: BigNumber;
+            entry: BigNumber;
+            poolId: BigNumber;
+            level: BigNumber;
+        }
     >;
 
-    "getPositionForId(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
+    'getPositionForId(uint256)'(
+        relicId: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<
-      [
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
-        amount: BigNumber;
-        rewardDebt: BigNumber;
-        rewardCredit: BigNumber;
-        entry: BigNumber;
-        poolId: BigNumber;
-        level: BigNumber;
-        genesis: BigNumber;
-        lastMaturityBonus: BigNumber;
-      }
+        [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+            amount: BigNumber;
+            rewardDebt: BigNumber;
+            rewardCredit: BigNumber;
+            entry: BigNumber;
+            poolId: BigNumber;
+            level: BigNumber;
+        }
     >;
 
     getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-    getRoleMember(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "getRoleMember(bytes32,uint256)"(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'getRoleMember(bytes32,uint256)'(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'grantRole(bytes32,address)'(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    harvest(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    harvest(relicId: BigNumberish, harvestTo: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "harvest(uint256,address)"(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'harvest(uint256,address)'(
+        relicId: BigNumberish,
+        harvestTo: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
+    hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
+
+    'hasRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
+
+    isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+
+    'isApprovedForAll(address,address)'(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+
+    isApprovedOrOwner(spender: string, relicId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
+    'isApprovedOrOwner(address,uint256)'(
+        spender: string,
+        relicId: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<boolean>;
 
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    levelOnUpdate(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    isApprovedForAll(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    'levelOnUpdate(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "isApprovedForAll(address,address)"(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    massUpdatePools(pids: BigNumberish[], overrides?: Overrides): Promise<ContractTransaction>;
 
-    isApprovedOrOwner(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    'massUpdatePools(uint256[])'(pids: BigNumberish[], overrides?: Overrides): Promise<ContractTransaction>;
 
-    "isApprovedOrOwner(address,uint256)"(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    merge(fromId: BigNumberish, toId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    levelOnUpdate(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "levelOnUpdate(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    massUpdatePools(
-      pids: BigNumberish[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "massUpdatePools(uint256[])"(
-      pids: BigNumberish[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    merge(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "merge(uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    modifyMaturity(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "modifyMaturity(uint256,uint256)"(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'merge(uint256,uint256)'(
+        fromId: BigNumberish,
+        toId: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
     modifyPool(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
+        pid: BigNumberish,
+        allocPoint: BigNumberish,
+        _rewarder: string,
+        name: string,
+        _nftDescriptor: string,
+        overwriteRewarder: boolean,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    "modifyPool(uint256,uint256,address,string,address,bool)"(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'modifyPool(uint256,uint256,address,string,address,bool)'(
+        pid: BigNumberish,
+        allocPoint: BigNumberish,
+        _rewarder: string,
+        name: string,
+        _nftDescriptor: string,
+        overwriteRewarder: boolean,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    multicall(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
+    multicall(data: BytesLike[], overrides?: Overrides): Promise<ContractTransaction>;
 
-    "multicall(bytes[])"(
-      data: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<string[]>;
+    'multicall(bytes[])'(data: BytesLike[], overrides?: Overrides): Promise<ContractTransaction>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
-    "name()"(overrides?: CallOverrides): Promise<string>;
+    'name()'(overrides?: CallOverrides): Promise<string>;
 
-    nftDescriptor(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "nftDescriptor(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'nftDescriptor(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "ownerOf(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'ownerOf(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    pendingReward(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    pendingReward(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "pendingReward(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'pendingReward(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     pendingRewardsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
+        owner: string,
+        overrides?: CallOverrides,
     ): Promise<
-      ([BigNumber, BigNumber, BigNumber] & {
-        relicId: BigNumber;
-        poolId: BigNumber;
-        pendingReward: BigNumber;
-      })[]
+        ([BigNumber, BigNumber, BigNumber] & {
+            relicId: BigNumber;
+            poolId: BigNumber;
+            pendingReward: BigNumber;
+        })[]
     >;
 
-    "pendingRewardsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
+    'pendingRewardsOfOwner(address)'(
+        owner: string,
+        overrides?: CallOverrides,
     ): Promise<
-      ([BigNumber, BigNumber, BigNumber] & {
-        relicId: BigNumber;
-        poolId: BigNumber;
-        pendingReward: BigNumber;
-      })[]
+        ([BigNumber, BigNumber, BigNumber] & {
+            relicId: BigNumber;
+            poolId: BigNumber;
+            pendingReward: BigNumber;
+        })[]
     >;
 
     poolLength(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "poolLength()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'poolLength()'(overrides?: CallOverrides): Promise<BigNumber>;
 
     poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "poolToken(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'poolToken(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     relicPositionsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
+        owner: string,
+        overrides?: CallOverrides,
     ): Promise<
-      [
-        BigNumber[],
-        ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
+        [
+            BigNumber[],
+            ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            })[],
         ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[]
-      ] & {
-        relicIds: BigNumber[];
-        positionInfos: ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[];
-      }
+            relicIds: BigNumber[];
+            positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            })[];
+        }
     >;
 
-    "relicPositionsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
+    'relicPositionsOfOwner(address)'(
+        owner: string,
+        overrides?: CallOverrides,
     ): Promise<
-      [
-        BigNumber[],
-        ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
+        [
+            BigNumber[],
+            ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            })[],
         ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[]
-      ] & {
-        relicIds: BigNumber[];
-        positionInfos: ([
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          BigNumber
-        ] & {
-          amount: BigNumber;
-          rewardDebt: BigNumber;
-          rewardCredit: BigNumber;
-          entry: BigNumber;
-          poolId: BigNumber;
-          level: BigNumber;
-          genesis: BigNumber;
-          lastMaturityBonus: BigNumber;
-        })[];
-      }
+            relicIds: BigNumber[];
+            positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            })[];
+        }
     >;
 
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    renounceRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'renounceRole(bytes32,address)'(
+        role: BytesLike,
+        account: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'revokeRole(bytes32,address)'(
+        role: BytesLike,
+        account: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
     rewardToken(overrides?: CallOverrides): Promise<string>;
 
-    "rewardToken()"(overrides?: CallOverrides): Promise<string>;
+    'rewardToken()'(overrides?: CallOverrides): Promise<string>;
 
     rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "rewarder(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'rewarder(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "safeTransferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'safeTransferFrom(address,address,uint256)'(
+        from: string,
+        to: string,
+        tokenId: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      data: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'safeTransferFrom(address,address,uint256,bytes)'(
+        from: string,
+        to: string,
+        tokenId: BigNumberish,
+        data: BytesLike,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    setApprovalForAll(
-      operator: string,
-      approved: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    setApprovalForAll(operator: string, approved: boolean, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "setApprovalForAll(address,bool)"(
-      operator: string,
-      approved: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'setApprovalForAll(address,bool)'(
+        operator: string,
+        approved: boolean,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    setEmissionCurve(
-      _emissionCurve: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    setEmissionCurve(_emissionCurve: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "setEmissionCurve(address)"(
-      _emissionCurve: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'setEmissionCurve(address)'(_emissionCurve: string, overrides?: Overrides): Promise<ContractTransaction>;
 
     shift(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+        fromId: BigNumberish,
+        toId: BigNumberish,
+        amount: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    "shift(uint256,uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'shift(uint256,uint256,uint256)'(
+        fromId: BigNumberish,
+        toId: BigNumberish,
+        amount: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    split(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    split(fromId: BigNumberish, amount: BigNumberish, to: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "split(uint256,uint256,address)"(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'split(uint256,uint256,address)'(
+        fromId: BigNumberish,
+        amount: BigNumberish,
+        to: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
-    "supportsInterface(bytes4)"(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
     symbol(overrides?: CallOverrides): Promise<string>;
 
-    "symbol()"(overrides?: CallOverrides): Promise<string>;
+    'symbol()'(overrides?: CallOverrides): Promise<string>;
 
-    tokenByIndex(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "tokenByIndex(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    'tokenByIndex(uint256)'(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    tokenOfOwnerByIndex(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "tokenOfOwnerByIndex(address,uint256)"(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
+    'tokenOfOwnerByIndex(address,uint256)'(
+        owner: string,
+        index: BigNumberish,
+        overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    "tokenURI(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    'tokenURI(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     totalAllocPoint(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "totalAllocPoint()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'totalAllocPoint()'(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
+    'totalSupply()'(overrides?: CallOverrides): Promise<BigNumber>;
 
-    transferFrom(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "transferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'transferFrom(address,address,uint256)'(
+        from: string,
+        to: string,
+        tokenId: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
-    updateLastMaturityBonus(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    updatePool(pid: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "updateLastMaturityBonus(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'updatePool(uint256)'(pid: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    updatePool(pid: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    updatePosition(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "updatePool(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'updatePosition(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    updatePosition(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    withdraw(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "updatePosition(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    withdraw(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "withdraw(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    'withdraw(uint256,uint256)'(
+        amount: BigNumberish,
+        relicId: BigNumberish,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
 
     withdrawAndHarvest(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "withdrawAndHarvest(uint256,uint256,address)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-  };
-
-  filters: {
-    Approval(
-      owner: string | null,
-      approved: string | null,
-      tokenId: BigNumberish | null
-    ): EventFilter;
-
-    ApprovalForAll(
-      owner: string | null,
-      operator: string | null,
-      approved: null
-    ): EventFilter;
-
-    CreateRelic(
-      pid: BigNumberish | null,
-      to: string | null,
-      relicId: BigNumberish | null
-    ): EventFilter;
-
-    Deposit(
-      pid: BigNumberish | null,
-      amount: null,
-      to: string | null,
-      relicId: BigNumberish | null
-    ): EventFilter;
-
-    EmergencyWithdraw(
-      pid: BigNumberish | null,
-      amount: null,
-      to: string | null,
-      relicId: BigNumberish | null
-    ): EventFilter;
-
-    Harvest(
-      pid: BigNumberish | null,
-      amount: null,
-      to: string | null,
-      relicId: BigNumberish | null
-    ): EventFilter;
-
-    LevelChanged(relicId: BigNumberish | null, newLevel: null): EventFilter;
-
-    LogPoolAddition(
-      pid: BigNumberish | null,
-      allocPoint: null,
-      poolToken: string | null,
-      rewarder: string | null,
-      nftDescriptor: null
-    ): EventFilter;
-
-    LogPoolModified(
-      pid: BigNumberish | null,
-      allocPoint: null,
-      rewarder: string | null,
-      nftDescriptor: null
-    ): EventFilter;
-
-    LogSetEmissionCurve(emissionCurveAddress: string | null): EventFilter;
-
-    LogUpdatePool(
-      pid: BigNumberish | null,
-      lastRewardTime: null,
-      lpSupply: null,
-      accRewardPerShare: null
-    ): EventFilter;
-
-    MaturityBonus(
-      pid: BigNumberish | null,
-      to: string | null,
-      relicId: BigNumberish | null,
-      bonus: null
-    ): EventFilter;
-
-    Merge(
-      fromId: BigNumberish | null,
-      toId: BigNumberish | null,
-      amount: null
-    ): EventFilter;
-
-    RoleAdminChanged(
-      role: BytesLike | null,
-      previousAdminRole: BytesLike | null,
-      newAdminRole: BytesLike | null
-    ): EventFilter;
-
-    RoleGranted(
-      role: BytesLike | null,
-      account: string | null,
-      sender: string | null
-    ): EventFilter;
-
-    RoleRevoked(
-      role: BytesLike | null,
-      account: string | null,
-      sender: string | null
-    ): EventFilter;
-
-    Shift(
-      fromId: BigNumberish | null,
-      toId: BigNumberish | null,
-      amount: null
-    ): EventFilter;
-
-    Split(
-      fromId: BigNumberish | null,
-      toId: BigNumberish | null,
-      amount: null
-    ): EventFilter;
-
-    Transfer(
-      from: string | null,
-      to: string | null,
-      tokenId: BigNumberish | null
-    ): EventFilter;
-
-    Withdraw(
-      pid: BigNumberish | null,
-      amount: null,
-      to: string | null,
-      relicId: BigNumberish | null
-    ): EventFilter;
-  };
-
-  estimateGas: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    addPool(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "addPool(uint256,address,address,uint256[],uint256[],string,address)"(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    approve(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "approve(address,uint256)"(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "balanceOf(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    burn(tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
-
-    "burn(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    createRelicAndDeposit(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "createRelicAndDeposit(address,uint256,uint256)"(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    deposit(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "deposit(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    emergencyWithdraw(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "emergencyWithdraw(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    emissionCurve(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "emissionCurve()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getApproved(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getApproved(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getLevelInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getLevelInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getPoolInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getPoolInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getPositionForId(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getPositionForId(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRoleMember(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getRoleMember(bytes32,uint256)"(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    harvest(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "harvest(uint256,address)"(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    isApprovedForAll(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "isApprovedForAll(address,address)"(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    isApprovedOrOwner(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "isApprovedOrOwner(address,uint256)"(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    levelOnUpdate(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "levelOnUpdate(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    massUpdatePools(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "massUpdatePools(uint256[])"(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    merge(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "merge(uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    modifyMaturity(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "modifyMaturity(uint256,uint256)"(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    modifyPool(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "modifyPool(uint256,uint256,address,string,address,bool)"(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    multicall(data: BytesLike[], overrides?: Overrides): Promise<BigNumber>;
-
-    "multicall(bytes[])"(
-      data: BytesLike[],
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    name(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "name()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    nftDescriptor(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "nftDescriptor(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    ownerOf(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "ownerOf(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    pendingReward(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "pendingReward(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    pendingRewardsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "pendingRewardsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    poolLength(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "poolLength()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    poolToken(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "poolToken(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    relicPositionsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "relicPositionsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "rewardToken()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "rewarder(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "safeTransferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "safeTransferFrom(address,address,uint256,bytes)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setApprovalForAll(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setApprovalForAll(address,bool)"(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setEmissionCurve(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setEmissionCurve(address)"(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    shift(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "shift(uint256,uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    split(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "split(uint256,uint256,address)"(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "supportsInterface(bytes4)"(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    symbol(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "symbol()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    tokenByIndex(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "tokenByIndex(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    tokenOfOwnerByIndex(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "tokenOfOwnerByIndex(address,uint256)"(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    tokenURI(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "tokenURI(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    totalAllocPoint(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "totalAllocPoint()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    transferFrom(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "transferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    updateLastMaturityBonus(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "updateLastMaturityBonus(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    updatePool(pid: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
-
-    "updatePool(uint256)"(
-      pid: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    updatePosition(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "updatePosition(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    withdraw(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "withdraw(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    withdrawAndHarvest(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "withdrawAndHarvest(uint256,uint256,address)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    DEFAULT_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "DEFAULT_ADMIN_ROLE()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    addPool(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "addPool(uint256,address,address,uint256[],uint256[],string,address)"(
-      allocPoint: BigNumberish,
-      _poolToken: string,
-      _rewarder: string,
-      requiredMaturity: BigNumberish[],
-      allocPoints: BigNumberish[],
-      name: string,
-      _nftDescriptor: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    approve(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "approve(address,uint256)"(
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    balanceOf(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "balanceOf(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    burn(
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "burn(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    createRelicAndDeposit(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "createRelicAndDeposit(address,uint256,uint256)"(
-      to: string,
-      pid: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    deposit(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "deposit(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    emergencyWithdraw(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "emergencyWithdraw(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    emissionCurve(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "emissionCurve()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getApproved(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getApproved(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getLevelInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getLevelInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getPoolInfo(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getPoolInfo(uint256)"(
-      pid: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getPositionForId(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getPositionForId(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRoleMember(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getRoleMember(bytes32,uint256)"(
-      role: BytesLike,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRoleMemberCount(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getRoleMemberCount(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    harvest(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "harvest(uint256,address)"(
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    isApprovedForAll(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "isApprovedForAll(address,address)"(
-      owner: string,
-      operator: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    isApprovedOrOwner(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "isApprovedOrOwner(address,uint256)"(
-      spender: string,
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    levelOnUpdate(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "levelOnUpdate(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    massUpdatePools(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "massUpdatePools(uint256[])"(
-      pids: BigNumberish[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    merge(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "merge(uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    modifyMaturity(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "modifyMaturity(uint256,uint256)"(
-      relicId: BigNumberish,
-      points: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    modifyPool(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "modifyPool(uint256,uint256,address,string,address,bool)"(
-      pid: BigNumberish,
-      allocPoint: BigNumberish,
-      _rewarder: string,
-      name: string,
-      _nftDescriptor: string,
-      overwriteRewarder: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    multicall(
-      data: BytesLike[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "multicall(bytes[])"(
-      data: BytesLike[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "name()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    nftDescriptor(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "nftDescriptor(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    ownerOf(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "ownerOf(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    pendingReward(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "pendingReward(uint256)"(
-      relicId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    pendingRewardsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "pendingRewardsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    poolLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "poolLength()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    poolToken(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "poolToken(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    relicPositionsOfOwner(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "relicPositionsOfOwner(address)"(
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "rewardToken()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rewarder(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "rewarder(uint256)"(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "safeTransferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "safeTransferFrom(address,address,uint256,bytes)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    setApprovalForAll(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setApprovalForAll(address,bool)"(
-      operator: string,
-      approved: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    setEmissionCurve(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setEmissionCurve(address)"(
-      _emissionCurve: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    shift(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "shift(uint256,uint256,uint256)"(
-      fromId: BigNumberish,
-      toId: BigNumberish,
-      amount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    split(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "split(uint256,uint256,address)"(
-      fromId: BigNumberish,
-      amount: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "supportsInterface(bytes4)"(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "symbol()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    tokenByIndex(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "tokenByIndex(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    tokenOfOwnerByIndex(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "tokenOfOwnerByIndex(address,uint256)"(
-      owner: string,
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    tokenURI(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "tokenURI(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    totalAllocPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "totalAllocPoint()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    transferFrom(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "transferFrom(address,address,uint256)"(
-      from: string,
-      to: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    updateLastMaturityBonus(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "updateLastMaturityBonus(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    updatePool(
-      pid: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "updatePool(uint256)"(
-      pid: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    updatePosition(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "updatePosition(uint256)"(
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    withdraw(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "withdraw(uint256,uint256)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    withdrawAndHarvest(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "withdrawAndHarvest(uint256,uint256,address)"(
-      amount: BigNumberish,
-      relicId: BigNumberish,
-      harvestTo: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-  };
+        amount: BigNumberish,
+        relicId: BigNumberish,
+        harvestTo: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
+
+    'withdrawAndHarvest(uint256,uint256,address)'(
+        amount: BigNumberish,
+        relicId: BigNumberish,
+        harvestTo: string,
+        overrides?: Overrides,
+    ): Promise<ContractTransaction>;
+
+    callStatic: {
+        DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+
+        'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<string>;
+
+        addPool(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        'addPool(uint256,address,address,uint256[],uint256[],string,address)'(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        approve(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'approve(address,uint256)'(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'balanceOf(address)'(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        burn(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'burn(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        createRelicAndDeposit(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        'createRelicAndDeposit(address,uint256,uint256)'(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        deposit(amount: BigNumberish, relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'deposit(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        emergencyWithdraw(relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'emergencyWithdraw(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        emissionCurve(overrides?: CallOverrides): Promise<string>;
+
+        'emissionCurve()'(overrides?: CallOverrides): Promise<string>;
+
+        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'getApproved(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        getLevelInfo(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber[], BigNumber[], BigNumber[]] & {
+                requiredMaturities: BigNumber[];
+                multipliers: BigNumber[];
+                balance: BigNumber[];
+            }
+        >;
+
+        'getLevelInfo(uint256)'(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber[], BigNumber[], BigNumber[]] & {
+                requiredMaturities: BigNumber[];
+                multipliers: BigNumber[];
+                balance: BigNumber[];
+            }
+        >;
+
+        getPoolInfo(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber, BigNumber, BigNumber, string] & {
+                accRewardPerShare: BigNumber;
+                lastRewardTime: BigNumber;
+                allocPoint: BigNumber;
+                name: string;
+            }
+        >;
+
+        'getPoolInfo(uint256)'(
+            pid: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber, BigNumber, BigNumber, string] & {
+                accRewardPerShare: BigNumber;
+                lastRewardTime: BigNumber;
+                allocPoint: BigNumber;
+                name: string;
+            }
+        >;
+
+        getPositionForId(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            }
+        >;
+
+        'getPositionForId(uint256)'(
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<
+            [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                amount: BigNumber;
+                rewardDebt: BigNumber;
+                rewardCredit: BigNumber;
+                entry: BigNumber;
+                poolId: BigNumber;
+                level: BigNumber;
+            }
+        >;
+
+        getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
+
+        'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<string>;
+
+        getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'getRoleMember(bytes32,uint256)'(
+            role: BytesLike,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<string>;
+
+        getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        grantRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        'grantRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        harvest(relicId: BigNumberish, harvestTo: string, overrides?: CallOverrides): Promise<void>;
+
+        'harvest(uint256,address)'(relicId: BigNumberish, harvestTo: string, overrides?: CallOverrides): Promise<void>;
+
+        hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
+
+        'hasRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<boolean>;
+
+        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+
+        'isApprovedForAll(address,address)'(
+            owner: string,
+            operator: string,
+            overrides?: CallOverrides,
+        ): Promise<boolean>;
+
+        isApprovedOrOwner(spender: string, relicId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
+        'isApprovedOrOwner(address,uint256)'(
+            spender: string,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<boolean>;
+
+        levelOnUpdate(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'levelOnUpdate(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        massUpdatePools(pids: BigNumberish[], overrides?: CallOverrides): Promise<void>;
+
+        'massUpdatePools(uint256[])'(pids: BigNumberish[], overrides?: CallOverrides): Promise<void>;
+
+        merge(fromId: BigNumberish, toId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'merge(uint256,uint256)'(fromId: BigNumberish, toId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        modifyPool(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        'modifyPool(uint256,uint256,address,string,address,bool)'(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        multicall(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
+
+        'multicall(bytes[])'(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
+
+        name(overrides?: CallOverrides): Promise<string>;
+
+        'name()'(overrides?: CallOverrides): Promise<string>;
+
+        nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'nftDescriptor(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'ownerOf(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        pendingReward(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'pendingReward(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        pendingRewardsOfOwner(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            ([BigNumber, BigNumber, BigNumber] & {
+                relicId: BigNumber;
+                poolId: BigNumber;
+                pendingReward: BigNumber;
+            })[]
+        >;
+
+        'pendingRewardsOfOwner(address)'(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            ([BigNumber, BigNumber, BigNumber] & {
+                relicId: BigNumber;
+                poolId: BigNumber;
+                pendingReward: BigNumber;
+            })[]
+        >;
+
+        poolLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'poolLength()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'poolToken(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        relicPositionsOfOwner(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                BigNumber[],
+                ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[],
+            ] & {
+                relicIds: BigNumber[];
+                positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[];
+            }
+        >;
+
+        'relicPositionsOfOwner(address)'(
+            owner: string,
+            overrides?: CallOverrides,
+        ): Promise<
+            [
+                BigNumber[],
+                ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[],
+            ] & {
+                relicIds: BigNumber[];
+                positionInfos: ([BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
+                    amount: BigNumber;
+                    rewardDebt: BigNumber;
+                    rewardCredit: BigNumber;
+                    entry: BigNumber;
+                    poolId: BigNumber;
+                    level: BigNumber;
+                })[];
+            }
+        >;
+
+        renounceRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        'renounceRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        revokeRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        'revokeRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<void>;
+
+        rewardToken(overrides?: CallOverrides): Promise<string>;
+
+        'rewardToken()'(overrides?: CallOverrides): Promise<string>;
+
+        rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'rewarder(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'safeTransferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        'safeTransferFrom(address,address,uint256,bytes)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            data: BytesLike,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        setApprovalForAll(operator: string, approved: boolean, overrides?: CallOverrides): Promise<void>;
+
+        'setApprovalForAll(address,bool)'(
+            operator: string,
+            approved: boolean,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        setEmissionCurve(_emissionCurve: string, overrides?: CallOverrides): Promise<void>;
+
+        'setEmissionCurve(address)'(_emissionCurve: string, overrides?: CallOverrides): Promise<void>;
+
+        shift(fromId: BigNumberish, toId: BigNumberish, amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'shift(uint256,uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        split(fromId: BigNumberish, amount: BigNumberish, to: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'split(uint256,uint256,address)'(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+
+        'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+
+        symbol(overrides?: CallOverrides): Promise<string>;
+
+        'symbol()'(overrides?: CallOverrides): Promise<string>;
+
+        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'tokenByIndex(uint256)'(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'tokenOfOwnerByIndex(address,uint256)'(
+            owner: string,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        'tokenURI(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        totalAllocPoint(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'totalAllocPoint()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'totalSupply()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'transferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        updatePool(pid: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'updatePool(uint256)'(pid: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        updatePosition(relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'updatePosition(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        withdraw(amount: BigNumberish, relicId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        'withdraw(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        withdrawAndHarvest(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+
+        'withdrawAndHarvest(uint256,uint256,address)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: CallOverrides,
+        ): Promise<void>;
+    };
+
+    filters: {
+        Approval(owner: string | null, approved: string | null, tokenId: BigNumberish | null): EventFilter;
+
+        ApprovalForAll(owner: string | null, operator: string | null, approved: null): EventFilter;
+
+        RoleAdminChanged(
+            role: BytesLike | null,
+            previousAdminRole: BytesLike | null,
+            newAdminRole: BytesLike | null,
+        ): EventFilter;
+
+        RoleGranted(role: BytesLike | null, account: string | null, sender: string | null): EventFilter;
+
+        RoleRevoked(role: BytesLike | null, account: string | null, sender: string | null): EventFilter;
+
+        Transfer(from: string | null, to: string | null, tokenId: BigNumberish | null): EventFilter;
+    };
+
+    estimateGas: {
+        DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        addPool(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'addPool(uint256,address,address,uint256[],uint256[],string,address)'(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        approve(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'approve(address,uint256)'(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'balanceOf(address)'(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        burn(tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'burn(uint256)'(tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        createRelicAndDeposit(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'createRelicAndDeposit(address,uint256,uint256)'(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        deposit(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'deposit(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        emergencyWithdraw(relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'emergencyWithdraw(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        emissionCurve(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'emissionCurve()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getApproved(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getLevelInfo(pid: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getLevelInfo(uint256)'(pid: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getPoolInfo(pid: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getPoolInfo(uint256)'(pid: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getPositionForId(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getPositionForId(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getRoleMember(bytes32,uint256)'(
+            role: BytesLike,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'grantRole(bytes32,address)'(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        harvest(relicId: BigNumberish, harvestTo: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'harvest(uint256,address)'(relicId: BigNumberish, harvestTo: string, overrides?: Overrides): Promise<BigNumber>;
+
+        hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'hasRole(bytes32,address)'(role: BytesLike, account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'isApprovedForAll(address,address)'(
+            owner: string,
+            operator: string,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        isApprovedOrOwner(spender: string, relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'isApprovedOrOwner(address,uint256)'(
+            spender: string,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        levelOnUpdate(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'levelOnUpdate(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        massUpdatePools(pids: BigNumberish[], overrides?: Overrides): Promise<BigNumber>;
+
+        'massUpdatePools(uint256[])'(pids: BigNumberish[], overrides?: Overrides): Promise<BigNumber>;
+
+        merge(fromId: BigNumberish, toId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'merge(uint256,uint256)'(fromId: BigNumberish, toId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        modifyPool(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'modifyPool(uint256,uint256,address,string,address,bool)'(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        multicall(data: BytesLike[], overrides?: Overrides): Promise<BigNumber>;
+
+        'multicall(bytes[])'(data: BytesLike[], overrides?: Overrides): Promise<BigNumber>;
+
+        name(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'name()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'nftDescriptor(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'ownerOf(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        pendingReward(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'pendingReward(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        pendingRewardsOfOwner(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'pendingRewardsOfOwner(address)'(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        poolLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'poolLength()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'poolToken(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        relicPositionsOfOwner(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'relicPositionsOfOwner(address)'(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        renounceRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'renounceRole(bytes32,address)'(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'revokeRole(bytes32,address)'(role: BytesLike, account: string, overrides?: Overrides): Promise<BigNumber>;
+
+        rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'rewardToken()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'rewarder(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'safeTransferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'safeTransferFrom(address,address,uint256,bytes)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            data: BytesLike,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        setApprovalForAll(operator: string, approved: boolean, overrides?: Overrides): Promise<BigNumber>;
+
+        'setApprovalForAll(address,bool)'(
+            operator: string,
+            approved: boolean,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        setEmissionCurve(_emissionCurve: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'setEmissionCurve(address)'(_emissionCurve: string, overrides?: Overrides): Promise<BigNumber>;
+
+        shift(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'shift(uint256,uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        split(fromId: BigNumberish, amount: BigNumberish, to: string, overrides?: Overrides): Promise<BigNumber>;
+
+        'split(uint256,uint256,address)'(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+        symbol(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'symbol()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'tokenByIndex(uint256)'(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'tokenOfOwnerByIndex(address,uint256)'(
+            owner: string,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<BigNumber>;
+
+        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        'tokenURI(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        totalAllocPoint(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'totalAllocPoint()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+        'totalSupply()'(overrides?: CallOverrides): Promise<BigNumber>;
+
+        transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'transferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        updatePool(pid: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'updatePool(uint256)'(pid: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        updatePosition(relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'updatePosition(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        withdraw(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<BigNumber>;
+
+        'withdraw(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        withdrawAndHarvest(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+
+        'withdrawAndHarvest(uint256,uint256,address)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<BigNumber>;
+    };
+
+    populateTransaction: {
+        DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'DEFAULT_ADMIN_ROLE()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        addPool(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'addPool(uint256,address,address,uint256[],uint256[],string,address)'(
+            allocPoint: BigNumberish,
+            _poolToken: string,
+            _rewarder: string,
+            requiredMaturities: BigNumberish[],
+            levelMultipliers: BigNumberish[],
+            name: string,
+            _nftDescriptor: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        approve(to: string, tokenId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'approve(address,uint256)'(
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        balanceOf(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'balanceOf(address)'(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        burn(tokenId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'burn(uint256)'(tokenId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        createRelicAndDeposit(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'createRelicAndDeposit(address,uint256,uint256)'(
+            to: string,
+            pid: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        deposit(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'deposit(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        emergencyWithdraw(relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'emergencyWithdraw(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        emissionCurve(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'emissionCurve()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getApproved(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getLevelInfo(pid: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getLevelInfo(uint256)'(pid: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getPoolInfo(pid: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getPoolInfo(uint256)'(pid: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getPositionForId(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getPositionForId(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getRoleAdmin(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getRoleMember(role: BytesLike, index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getRoleMember(bytes32,uint256)'(
+            role: BytesLike,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        getRoleMemberCount(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'getRoleMemberCount(bytes32)'(role: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        grantRole(role: BytesLike, account: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'grantRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        harvest(relicId: BigNumberish, harvestTo: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'harvest(uint256,address)'(
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        hasRole(role: BytesLike, account: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'hasRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'isApprovedForAll(address,address)'(
+            owner: string,
+            operator: string,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        isApprovedOrOwner(
+            spender: string,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        'isApprovedOrOwner(address,uint256)'(
+            spender: string,
+            relicId: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        levelOnUpdate(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'levelOnUpdate(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        massUpdatePools(pids: BigNumberish[], overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'massUpdatePools(uint256[])'(pids: BigNumberish[], overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        merge(fromId: BigNumberish, toId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'merge(uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        modifyPool(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'modifyPool(uint256,uint256,address,string,address,bool)'(
+            pid: BigNumberish,
+            allocPoint: BigNumberish,
+            _rewarder: string,
+            name: string,
+            _nftDescriptor: string,
+            overwriteRewarder: boolean,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        multicall(data: BytesLike[], overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'multicall(bytes[])'(data: BytesLike[], overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'name()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        nftDescriptor(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'nftDescriptor(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'ownerOf(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        pendingReward(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'pendingReward(uint256)'(relicId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        pendingRewardsOfOwner(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'pendingRewardsOfOwner(address)'(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        poolLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'poolLength()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        poolToken(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'poolToken(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        relicPositionsOfOwner(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'relicPositionsOfOwner(address)'(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        renounceRole(role: BytesLike, account: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'renounceRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        revokeRole(role: BytesLike, account: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'revokeRole(bytes32,address)'(
+            role: BytesLike,
+            account: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'rewardToken()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        rewarder(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'rewarder(uint256)'(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'safeTransferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'safeTransferFrom(address,address,uint256,bytes)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            data: BytesLike,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        setApprovalForAll(operator: string, approved: boolean, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'setApprovalForAll(address,bool)'(
+            operator: string,
+            approved: boolean,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        setEmissionCurve(_emissionCurve: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'setEmissionCurve(address)'(_emissionCurve: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        shift(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'shift(uint256,uint256,uint256)'(
+            fromId: BigNumberish,
+            toId: BigNumberish,
+            amount: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        split(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'split(uint256,uint256,address)'(
+            fromId: BigNumberish,
+            amount: BigNumberish,
+            to: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'supportsInterface(bytes4)'(interfaceId: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'symbol()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'tokenByIndex(uint256)'(index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        tokenOfOwnerByIndex(
+            owner: string,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        'tokenOfOwnerByIndex(address,uint256)'(
+            owner: string,
+            index: BigNumberish,
+            overrides?: CallOverrides,
+        ): Promise<PopulatedTransaction>;
+
+        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'tokenURI(uint256)'(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        totalAllocPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'totalAllocPoint()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        'totalSupply()'(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        transferFrom(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'transferFrom(address,address,uint256)'(
+            from: string,
+            to: string,
+            tokenId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        updatePool(pid: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'updatePool(uint256)'(pid: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        updatePosition(relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'updatePosition(uint256)'(relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        withdraw(amount: BigNumberish, relicId: BigNumberish, overrides?: Overrides): Promise<PopulatedTransaction>;
+
+        'withdraw(uint256,uint256)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        withdrawAndHarvest(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+
+        'withdrawAndHarvest(uint256,uint256,address)'(
+            amount: BigNumberish,
+            relicId: BigNumberish,
+            harvestTo: string,
+            overrides?: Overrides,
+        ): Promise<PopulatedTransaction>;
+    };
 }
