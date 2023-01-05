@@ -122,7 +122,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
             blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
             masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
-            reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary-test',
+            reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
             userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
         },
         eth: {
