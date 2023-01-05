@@ -151,11 +151,11 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         fbeets: {
             address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
             farmId: '22',
-            reliquaryFarmPid: 0,
+            reliquaryFarmPid: 1,
             poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-            poolIdV2: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019', // set when pool created
+            poolIdV2: '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec',
             poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
-            poolAddressV2: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837', // test fidelio duetto bpt v2
+            poolAddressV2: '0x9e4341acef4147196e99d648c5e43b3fc9d02678',
         },
         bal: {
             address: '',
