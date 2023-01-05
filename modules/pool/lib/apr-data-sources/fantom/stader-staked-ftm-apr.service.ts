@@ -9,6 +9,10 @@ export class StaderStakedFtmAprService implements PoolAprService {
 
     constructor(private readonly tokenService: TokenService) {}
 
+    public getAprServiceName(): string {
+        return 'StaderStakedFtmAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const sftmxPrice = this.tokenService.getPriceForToken(tokenPrices, this.SFTMX_ADDRESS);

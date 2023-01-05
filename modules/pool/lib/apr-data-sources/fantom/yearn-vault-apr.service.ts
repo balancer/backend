@@ -9,6 +9,10 @@ import { networkConfig } from '../../../../config/network-config';
 export class YearnVaultAprService implements PoolAprService {
     constructor(private readonly tokenService: TokenService) {}
 
+    public getAprServiceName(): string {
+        return 'YearnVaultAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const { data } = await axios.get<YearnVault[]>(networkConfig.yearn.vaultsEndpoint);
         const tokenPrices = await this.tokenService.getTokenPrices();

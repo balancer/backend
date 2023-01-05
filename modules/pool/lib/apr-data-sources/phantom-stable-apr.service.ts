@@ -6,6 +6,10 @@ import { isComposableStablePool } from '../pool-utils';
 export class PhantomStableAprService implements PoolAprService {
     constructor(private readonly yieldProtocolFeePercentage: number) {}
 
+    public getAprServiceName(): string {
+        return 'PhantomStableAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const phantomStablePools = pools.filter((pool) => pool.type === 'PHANTOM_STABLE');
 

@@ -20,6 +20,10 @@ export class ReaperCryptAprService implements PoolAprService {
         private readonly tokenService: TokenService,
     ) {}
 
+    public getAprServiceName(): string {
+        return 'ReaperCryptAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
 

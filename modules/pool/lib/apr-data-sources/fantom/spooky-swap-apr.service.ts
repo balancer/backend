@@ -9,6 +9,10 @@ const BOO_TOKEN_ADDRESS = '0x841FAD6EAe12c286d1Fd18d1d525DFfA75C7EFFE'.toLowerCa
 export class SpookySwapAprService implements PoolAprService {
     constructor(private readonly tokenService: TokenService) {}
 
+    public getAprServiceName(): string {
+        return 'SpookySwapAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const { data } = await axios.get<string>('https://api.spooky.fi/api/xboo', {});

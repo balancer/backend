@@ -11,12 +11,14 @@ export class PoolAprUpdaterService {
     public async updatePoolAprs() {
         const pools = await prisma.prismaPool.findMany(prismaPoolWithExpandedNesting);
 
+        const failedAprServices = [];
         for (const aprService of this.aprServices) {
             try {
                 await aprService.updateAprForPools(pools);
             } catch (e) {
                 console.log(`Error during APR update of aprService:`, e);
                 Sentry.captureException(e);
+                failedAprServices.push(aprService.getAprServiceName());
             }
         }
 
@@ -38,6 +40,9 @@ export class PoolAprUpdaterService {
         }
 
         await prismaBulkExecuteOperations(operations);
+        if (failedAprServices.length > 0) {
+            throw new Error(`The following APR services failed: ${failedAprServices}`);
+        }
     }
 
     public async realodAllPoolAprs() {

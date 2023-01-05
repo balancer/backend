@@ -21,6 +21,10 @@ export class OvernightAprService implements PoolAprService {
 
     constructor(private readonly overnightAprEndpoint: string, private readonly tokenService: TokenService) {}
 
+    public getAprServiceName(): string {
+        return 'OvernightAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const overnightLinearPools = pools.filter(

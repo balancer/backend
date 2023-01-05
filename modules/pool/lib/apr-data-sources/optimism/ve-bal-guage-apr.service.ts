@@ -13,6 +13,11 @@ export class GaugeAprService implements PoolAprService {
         private readonly tokenService: TokenService,
         private readonly primaryTokens: string[],
     ) {}
+
+    public getAprServiceName(): string {
+        return 'GaugeAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const operations: any[] = [];
         const gaugeStreamers = await this.gaugeService.getStreamers();

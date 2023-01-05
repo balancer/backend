@@ -13,6 +13,10 @@ import { PoolAprService } from '../../../pool-types';
 const FARM_EMISSIONS_PERCENT = 0.872;
 
 export class MasterchefFarmAprService implements PoolAprService {
+    public getAprServiceName(): string {
+        return 'MasterchefFarmAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const farms = await masterchefService.getAllFarms({});
 

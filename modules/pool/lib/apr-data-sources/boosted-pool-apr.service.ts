@@ -6,6 +6,10 @@ import { isComposableStablePool, isWeightedPoolV2 } from '../pool-utils';
 export class BoostedPoolAprService implements PoolAprService {
     constructor(private readonly yieldProtocolFeePercentage: number) {}
 
+    public getAprServiceName(): string {
+        return 'BoostedPoolAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const boostedPools = pools.filter(
             (pool) =>

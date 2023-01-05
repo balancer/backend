@@ -10,6 +10,10 @@ export class RocketPoolStakedEthAprService implements PoolAprService {
 
     constructor(private readonly tokenService: TokenService, private readonly yieldProtocolFeePercentage: number) {}
 
+    public getAprServiceName(): string {
+        return 'RocketPoolStakedEthAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const rethPrice = this.tokenService.getPriceForToken(tokenPrices, this.RETH_ADDRESS);

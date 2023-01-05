@@ -10,6 +10,10 @@ import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 
 export class ReliquaryFarmAprService implements PoolAprService {
+    public getAprServiceName(): string {
+        return 'ReliquaryFarmAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const farms = await reliquarySubgraphService.getAllFarms({});
 

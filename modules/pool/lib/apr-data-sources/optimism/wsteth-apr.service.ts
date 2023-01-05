@@ -12,6 +12,11 @@ export class WstethAprService implements PoolAprService {
         private readonly wstethContractAddress: string,
         private readonly yieldProtocolFeePercentage: number,
     ) {}
+
+    public getAprServiceName(): string {
+        return 'WstethAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const wstethPrice = this.tokenService.getPriceForToken(tokenPrices, this.wstethContractAddress);

@@ -6,6 +6,10 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 export class SwapFeeAprService implements PoolAprService {
     constructor(private readonly swapProtocolFeePercentage: number) {}
 
+    public getAprServiceName(): string {
+        return 'SwapFeeAprService';
+    }
+
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const operations: any[] = [];
 
