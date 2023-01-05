@@ -182,6 +182,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '34', //OHM bonding farm
                 '28', //OHM bonding farm
                 '9', //old fidellio dueto (non fbeets)
+                '98', //reliquary beets streaming farm
             ],
         },
         reliquary: {
