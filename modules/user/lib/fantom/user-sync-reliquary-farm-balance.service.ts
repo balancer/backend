@@ -28,8 +28,6 @@ type ReliquaryPosition = {
     entry: BigNumber;
     poolId: BigNumber;
     level: BigNumber;
-    genesis: BigNumber;
-    lastMaturityBonus: BigNumber;
 };
 
 type BalanceChangedEvent = Event & {
