@@ -101,18 +101,6 @@ export class ReliquaryFarmAprService implements PoolAprService {
             );
         }
 
-        const poolsWithNoAllocPoints = farms
-            .filter((farm) => farm.allocPoint === 0)
-            .map((farm) => farm.poolTokenAddress.toLowerCase());
-
-        //TODO: this could be optimized, doesn't need to be run everytime
-        await prisma.prismaPoolAprItem.deleteMany({
-            where: {
-                type: 'NATIVE_REWARD',
-                pool: { address: { in: poolsWithNoAllocPoints } },
-            },
-        });
-
         await prismaBulkExecuteOperations(operations);
     }
 }
