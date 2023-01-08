@@ -40,11 +40,16 @@ export class GaugeAprService implements PoolAprService {
                 const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, rewardToken.address) || 0.1;
                 const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
-                const rewardApr = gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
+                let rewardApr = gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
                 const isThirdPartyApr = !this.primaryTokens.includes(rewardToken.address);
                 if (isThirdPartyApr) {
                     thirdPartyApr += rewardApr;
+                }
+
+                //TODO: remove reward apr for it's mai life (remove later)
+                if (pool.id === '0x1f131ec1175f023ee1534b16fa8ab237c00e238100000000000000000000004a') {
+                    rewardApr = 0;
                 }
 
                 const item: PrismaPoolAprItem = {

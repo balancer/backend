@@ -173,7 +173,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
             ],
             swapProtocolFeePercentage: 0.25,
-            yieldProtocolFeePercentage: 0.25,
+            yieldProtocolFeePercentage: 0,
         },
         multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
         masterchef: {
@@ -278,7 +278,7 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
             weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
             swapProtocolFeePercentage: 0.5,
-            yieldProtocolFeePercentage: 0.5,
+            yieldProtocolFeePercentage: 0,
         },
         multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
         masterchef: {
