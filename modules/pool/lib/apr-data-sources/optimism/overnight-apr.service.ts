@@ -48,7 +48,7 @@ export class OvernightAprService implements PoolAprService {
                 `${this.overnightAprEndpoint}/${apiQuerySlug}/fin-data/avg-apr/week`,
                 {
                     headers: {
-                        Cookie: 'allow=beets',
+                        cookie: 'beets',
                     },
                 },
             );
