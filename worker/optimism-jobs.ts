@@ -39,7 +39,7 @@ export const optimismJobs = [
     },
     {
         name: 'cache-average-block-time',
-        interval: every(30, 'minutes'),
+        interval: every(1, 'hours'),
     },
     {
         name: 'sync-token-dynamic-data',
@@ -55,7 +55,7 @@ export const optimismJobs = [
     },
     {
         name: 'update-lifetime-values-for-all-pools',
-        interval: every(20, 'minutes'),
+        interval: every(30, 'minutes'),
     },
     {
         name: 'sync-changed-pools',

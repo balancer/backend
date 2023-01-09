@@ -11,7 +11,7 @@ import { datastudioService } from '../modules/datastudio/datastudio.service';
 
 const runningJobs: Set<string> = new Set();
 
-const defaultSamplingRate = 0.005;
+const defaultSamplingRate = 0.001;
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -188,7 +188,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => blocksSubgraphService.cacheAverageBlockTime(),
-                    0.02,
+                    0.001,
                     res,
                     next,
                 );
@@ -224,7 +224,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => poolService.syncLatestSnapshotsForAllPools(),
-                    0.1,
+                    0.01,
                     res,
                     next,
                 );
@@ -233,7 +233,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => poolService.updateLifetimeValuesForAllPools(),
-                    0.02,
+                    defaultSamplingRate,
                     res,
                     next,
                 );
@@ -248,13 +248,19 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     () => poolService.syncLatestReliquarySnapshotsForAllFarms(),
-                    0.1,
+                    0.01,
                     res,
                     next,
                 );
                 break;
             case 'sync-latest-relic-snapshots':
-                await runIfNotAlreadyRunning(job.name, () => userService.asyncSyncUserRelicSnapshots(), 0.1, res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    () => userService.asyncSyncUserRelicSnapshots(),
+                    0.01,
+                    res,
+                    next,
+                );
                 break;
             default:
                 res.sendStatus(400);
