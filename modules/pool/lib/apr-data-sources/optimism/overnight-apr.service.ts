@@ -46,11 +46,6 @@ export class OvernightAprService implements PoolAprService {
 
             const { data: aprData } = await axios.get<OvernightApr>(
                 `${this.overnightAprEndpoint}/${apiQuerySlug}/fin-data/avg-apr/week`,
-                {
-                    headers: {
-                        cookie: 'beets',
-                    },
-                },
             );
 
             const mainToken = pool.tokens[linearData.mainIndex];
