@@ -3,7 +3,7 @@ import { every } from './intervals';
 export const optimismJobs = [
     {
         name: 'load-token-prices',
-        interval: every(1, 'minutes'),
+        interval: every(2, 'minutes'),
     },
     {
         name: 'update-liquidity-for-inactive-pools',
@@ -43,7 +43,7 @@ export const optimismJobs = [
     },
     {
         name: 'sync-token-dynamic-data',
-        interval: every(1, 'minutes'),
+        interval: every(2, 'minutes'),
     },
     {
         name: 'sync-staking-for-pools',

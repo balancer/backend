@@ -48,7 +48,7 @@ export const fantomJobs: WorkerJob[] = [
     },
     {
         name: 'sync-token-dynamic-data',
-        interval: every(1, 'minutes'),
+        interval: every(2, 'minutes'),
     },
     {
         name: 'sync-staking-for-pools',
