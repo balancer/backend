@@ -26,7 +26,7 @@ export class PoolSyncService {
         const poolIds: string[] = _.uniq(filteredEvents.map((event) => event.args!.poolId));
         if (poolIds.length !== 0) {
             console.log(`Syncing ${poolIds.length} pools`);
-            await poolService.updateOnChainDataForPools(poolIds, latestBlock);
+            await poolService.updateOnChainDataForPools(poolIds, endBlock);
 
             const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
             await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
@@ -35,11 +35,11 @@ export class PoolSyncService {
         await prisma.prismaLastBlockSynced.upsert({
             where: { category: PrismaLastBlockSyncedCategory.POOLS },
             update: {
-                blockNumber: latestBlock,
+                blockNumber: endBlock,
             },
             create: {
                 category: PrismaLastBlockSyncedCategory.POOLS,
-                blockNumber: latestBlock,
+                blockNumber: endBlock,
             },
         });
     }
