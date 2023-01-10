@@ -95,7 +95,7 @@ export class CoingeckoService {
     /**
      *  Rate limit for the CoinGecko API is 10 calls each second per IP address.
      */
-    public async getTokenPrices(addresses: string[], addressesPerRequest = 200): Promise<TokenPrices> {
+    public async getTokenPrices(addresses: string[], addressesPerRequest = 100): Promise<TokenPrices> {
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
 
