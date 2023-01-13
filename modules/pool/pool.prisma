@@ -383,6 +383,7 @@ model PrismaReliquaryFarmSnapshot {
     totalBalance        String
     dailyDeposited      String
     dailyWithdrawn      String
+    totalLiquidity      String                          @default("0")
     levelBalances       PrismaReliquaryLevelSnapshot[]
     tokenBalances       PrismaReliquaryTokenBalanceSnapshot[]
 }

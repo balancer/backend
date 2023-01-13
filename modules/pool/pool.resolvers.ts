@@ -76,6 +76,7 @@ const balancerResolvers: Resolvers = {
                 relicCount: `${snapshot.relicCount}`,
                 userCount: `${snapshot.userCount}`,
                 totalBalance: snapshot.totalBalance,
+                totalLiquidity: snapshot.totalLiquidity,
                 dailyDeposited: snapshot.dailyDeposited,
                 dailyWithdrawn: snapshot.dailyWithdrawn,
                 levelBalances: snapshot.levelBalances,

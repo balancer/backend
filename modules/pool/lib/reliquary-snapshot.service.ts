@@ -11,7 +11,11 @@ import {
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { oneDayInMinutes, oneDayInSeconds } from '../../common/time';
 import { time } from 'console';
-import { PrismaReliquaryLevelSnapshot, PrismaReliquaryTokenBalanceSnapshot } from '@prisma/client';
+import {
+    PrismaReliquaryFarmSnapshot,
+    PrismaReliquaryLevelSnapshot,
+    PrismaReliquaryTokenBalanceSnapshot,
+} from '@prisma/client';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
@@ -158,8 +162,10 @@ export class ReliquarySnapshotService {
                     block: { number: parseFloat(blockAtTimestamp.number) },
                 });
 
+                const sharePercentage = parseFloat(snapshot.totalBalance) / mostRecentPoolSnapshot.totalSharesNum;
+
                 const uniqueUsers = _.uniq(relicsInFarm.map((relic) => relic.userAddress));
-                const data = {
+                const data: PrismaReliquaryFarmSnapshot = {
                     id: snapshot.id,
                     farmId: `${snapshot.farmId}`,
                     timestamp: snapshot.snapshotTimestamp,
@@ -168,6 +174,7 @@ export class ReliquarySnapshotService {
                     totalBalance: snapshot.totalBalance,
                     dailyDeposited: snapshot.dailyDeposited,
                     dailyWithdrawn: snapshot.dailyWithdrawn,
+                    totalLiquidity: `${mostRecentPoolSnapshot.totalLiquidity * sharePercentage}`,
                 };
                 farmOperations.push(
                     prisma.prismaReliquaryFarmSnapshot.upsert({
@@ -192,8 +199,6 @@ export class ReliquarySnapshotService {
                         }),
                     );
                 }
-
-                const sharePercentage = parseFloat(snapshot.totalBalance) / mostRecentPoolSnapshot.totalSharesNum;
 
                 for (const token of pool.tokens) {
                     const data: PrismaReliquaryTokenBalanceSnapshot = {
