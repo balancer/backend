@@ -3,7 +3,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
-import { isComposableStablePool, isWeightedPoolV2 } from '../../pool-utils';
+import { collectsYieldFee } from '../../pool-utils';
 
 export class WstethAprService implements PoolAprService {
     constructor(
@@ -38,8 +38,6 @@ export class WstethAprService implements PoolAprService {
                     (parseFloat(wstethTokenBalance) * wstethPrice) / pool.dynamicData.totalLiquidity;
                 const wstethApr = pool.dynamicData.totalLiquidity > 0 ? wstethBaseApr * wstethPercentage : 0;
                 const userApr = wstethApr * (1 - this.yieldProtocolFeePercentage);
-                const collectsYieldFee =
-                    isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
 
                 await prisma.prismaPoolAprItem.upsert({
                     where: { id: itemId },
@@ -47,10 +45,10 @@ export class WstethAprService implements PoolAprService {
                         id: itemId,
                         poolId: pool.id,
                         title: `stETH APR`,
-                        apr: collectsYieldFee ? userApr : wstethApr,
+                        apr: collectsYieldFee(pool) ? userApr : wstethApr,
                         type: 'IB_YIELD',
                     },
-                    update: { apr: collectsYieldFee ? userApr : wstethApr, title: `stETH APR` },
+                    update: { apr: collectsYieldFee(pool) ? userApr : wstethApr, title: `stETH APR` },
                 });
             }
         }

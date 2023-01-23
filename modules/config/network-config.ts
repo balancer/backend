@@ -59,6 +59,7 @@ export interface NetworkConfig {
         vault: string;
         weightedPoolV2Factories: string[];
         composableStablePoolFactories: string[];
+        poolsInRecoveryMode: string[];
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
     };
@@ -172,8 +173,9 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
                 '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
                 '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
             ],
+            poolsInRecoveryMode: [''],
             swapProtocolFeePercentage: 0.25,
-            yieldProtocolFeePercentage: 0,
+            yieldProtocolFeePercentage: 0.25,
         },
         multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
         masterchef: {
@@ -277,8 +279,35 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
             composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
             weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
+            poolsInRecoveryMode: [
+                '0x05e7732bf9ae5592e6aa05afe8cd80f7ab0a7bea',
+                '0x359ea8618c405023fc4b98dab1b01f373792a126',
+                '0x3fdb6fb126521a28f06893f9629da12f7b7266eb',
+                '0x435272180a4125f3b47c92826f482fc6cc165958',
+                '0x785f08fb77ec934c01736e30546f87b4daccbe50',
+                '0x899f737750db562b88c1e412ee1902980d3a4844',
+                '0x981fb05b738e981ac532a99e77170ecb4bc27aef',
+                '0xb0de49429fbb80c635432bbad0b3965b28560177',
+                '0xc77e5645dbe48d54afc06655e39d3fe17eb76c1c',
+                '0xe0b50b0635b90f7021d2618f76ab9a31b92d0094',
+                '0xf30db0ca4605e5115df91b56bd299564dca02666',
+                '0x1f131ec1175f023ee1534b16fa8ab237c00e2381',
+                '0x428e1cc3099cf461b87d124957a0d48273f334b1',
+                '0x479a7d1fcdd71ce0c2ed3184bfbe9d23b92e8337',
+                '0x593acbfb1eaf3b6ec86fa60325d816996fdcbc0d',
+                '0x6222ae1d2a9f6894da50aa25cb7b303497f9bebd',
+                '0x62de5ca16a618e22f6dfe5315ebd31acb10c44b6',
+                '0x7d6bff131b359da66d92f215fd4e186003bfaa42',
+                '0x96a78983932b8739d1117b16d30c15607926b0c5',
+                '0x9964b1bd3cc530e5c58ba564e45d45290f677be2',
+                '0xb0f2c34b9cd5c377c5efbba3b31e67114810cbc8',
+                '0xb1c9ac57594e9b1ec0f3787d9f6744ef4cb0a024',
+                '0xde45f101250f2ca1c0f8adfc172576d10c12072d',
+                '0xf572649606db4743d217a2fa6e8b8eb79742c24a',
+                '0x373b347bc87998b151a5e9b6bb6ca692b766648a',
+            ],
             swapProtocolFeePercentage: 0.5,
-            yieldProtocolFeePercentage: 0,
+            yieldProtocolFeePercentage: 0.5,
         },
         multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
         masterchef: {

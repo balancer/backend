@@ -1,7 +1,7 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { isComposableStablePool, isWeightedPoolV2 } from '../pool-utils';
+import { collectsYieldFee, isComposableStablePool, isWeightedPoolV2 } from '../pool-utils';
 
 export class BoostedPoolAprService implements PoolAprService {
     constructor(private readonly yieldProtocolFeePercentage: number) {}
@@ -51,11 +51,6 @@ export class BoostedPoolAprService implements PoolAprService {
                     continue;
                 }
 
-                const collectsYieldFee =
-                    (isWeightedPoolV2(pool) || isComposableStablePool(pool)) &&
-                    //nested phantom stables already have the yield fee removed
-                    token.nestedPool.type !== 'PHANTOM_STABLE';
-
                 for (const aprItem of tokenAprItems) {
                     const itemId = `${pool.id}-${aprItem.id}`;
                     //scale the apr as a % of total liquidity
@@ -63,7 +58,11 @@ export class BoostedPoolAprService implements PoolAprService {
                     const apr = aprItem.apr * (token.dynamicData.balanceUSD / pool.dynamicData.totalLiquidity);
                     let userApr = apr;
 
-                    if (collectsYieldFee) {
+                    if (
+                        collectsYieldFee(pool) &&
+                        //nested phantom stables already have the yield fee removed
+                        token.nestedPool.type !== 'PHANTOM_STABLE'
+                    ) {
                         userApr = apr * (1 - this.yieldProtocolFeePercentage);
                     }
 
