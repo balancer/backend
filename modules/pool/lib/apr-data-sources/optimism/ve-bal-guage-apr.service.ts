@@ -47,14 +47,6 @@ export class GaugeAprService implements PoolAprService {
                     thirdPartyApr += rewardApr;
                 }
 
-                //TODO: remove reward apr for it's mai life (remove later)
-                if (
-                    pool.id === '0x1f131ec1175f023ee1534b16fa8ab237c00e238100000000000000000000004a' ||
-                    pool.id === '0x479a7d1fcdd71ce0c2ed3184bfbe9d23b92e8337000000000000000000000049'
-                ) {
-                    rewardApr = 0;
-                }
-
                 const item: PrismaPoolAprItem = {
                     id: `${pool.id}-${rewardToken.symbol}-apr`,
                     poolId: pool.id,
