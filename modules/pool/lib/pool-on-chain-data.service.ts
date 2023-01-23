@@ -134,7 +134,11 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
 
                 multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-                multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
+                // this fails if a pool has not yet been initialized
+                // TODO what happens if a pool is drained? totalShares become 0?
+                if (pool.dynamicData && pool.dynamicData?.totalSharesNum > 0) {
+                    multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
+                }
                 multiPool.call(`${pool.id}.wrappedTokenRate`, pool.address, 'getWrappedTokenRate');
             }
 
@@ -152,7 +156,13 @@ export class PoolOnChainDataService {
 
             if (isComposableStablePool(pool) || isWeightedPoolV2(pool)) {
                 // the new ComposableStablePool and WeightedPool mint bpts for protocol fees which are included in the getActualSupply call
-                multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getActualSupply');
+                // getActualSupply fails for not initialized pools (pools where totalSupply = 0)
+                // until it is initialized, we'll use the totalSupply since it is also also updated but not 100% accurate it should be good enough
+                if (pool.dynamicData && pool.dynamicData?.totalSharesNum === 0) {
+                    multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+                } else {
+                    multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getActualSupply');
+                }
             } else if (pool.type === 'LINEAR' || pool.type === 'PHANTOM_STABLE') {
                 // the old phantom stable and linear pool does not have this and expose the actual supply as virtualSupply
                 multiPool.call(`${pool.id}.totalSupply`, pool.address, 'getVirtualSupply');
