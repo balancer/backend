@@ -29,7 +29,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         }
 
         const pools = await prisma.prismaPool.findMany({
-            where: { OR: { staking: { type: 'FRESH_BEETS' } }, staking: { type: 'MASTER_CHEF' } },
+            where: { OR: [{ staking: { type: 'FRESH_BEETS' } }, { staking: { type: 'MASTER_CHEF' } }] },
             include: { staking: true },
         });
         const latestBlock = await jsonRpcProvider.getBlockNumber();
