@@ -10,7 +10,7 @@ import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgr
 import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { oneDayInSeconds, secondsPerDay } from '../common/time';
-import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
+import { collectsSwapFee, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 
 export class DatastudioService {
     constructor(
@@ -142,6 +142,10 @@ export class DatastudioService {
                 tvlChange = `${pool.dynamicData.totalLiquidity - pool.dynamicData.totalLiquidity24hAgo}`;
                 lpSwapFee = `${pool.dynamicData.fees24h * (1 - this.swapProtocolFeePercentage)}`;
                 protocolSwapFee = `${pool.dynamicData.fees24h * this.swapProtocolFeePercentage}`;
+                if (collectsSwapFee(pool)) {
+                    lpSwapFee = `${pool.dynamicData.fees24h}`;
+                    protocolSwapFee = `0`;
+                }
 
                 dailySwaps = `${pool.dynamicData.swapsCount - parseFloat(yesterdaySwapsCount)}`;
             }
