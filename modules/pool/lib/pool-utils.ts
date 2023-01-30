@@ -35,3 +35,7 @@ export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
         (isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE')
     );
 }
+
+export function collectsSwapFee(pool: PoolWithTypeAndFactory) {
+    return !networkConfig.balancer.poolsInRecoveryMode.includes(pool.address);
+}

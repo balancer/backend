@@ -2,6 +2,7 @@ import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { collectsSwapFee } from '../pool-utils';
 
 export class SwapFeeAprService implements PoolAprService {
     constructor(private readonly swapProtocolFeePercentage: number) {}
@@ -29,7 +30,7 @@ export class SwapFeeAprService implements PoolAprService {
                             id: `${pool.id}-swap-apr`,
                             poolId: pool.id,
                             title: 'Swap fees APR',
-                            apr: userApr,
+                            apr: collectsSwapFee(pool) ? userApr : apr,
                             type: 'SWAP_FEE',
                         },
                         update: { apr: userApr },
