@@ -142,7 +142,7 @@ export class DatastudioService {
                 tvlChange = `${pool.dynamicData.totalLiquidity - pool.dynamicData.totalLiquidity24hAgo}`;
                 lpSwapFee = `${pool.dynamicData.fees24h * (1 - this.swapProtocolFeePercentage)}`;
                 protocolSwapFee = `${pool.dynamicData.fees24h * this.swapProtocolFeePercentage}`;
-                if (collectsSwapFee(pool)) {
+                if (!collectsSwapFee(pool)) {
                     lpSwapFee = `${pool.dynamicData.fees24h}`;
                     protocolSwapFee = `0`;
                 }
