@@ -41,7 +41,7 @@ export class ReliquarySnapshotService {
         const thisMorning = moment().utc().startOf('day').unix();
 
         // this returns the latest snapshot per farm, if there is one
-        const { farmSnapshots: allFarmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
+        const { farmSnapshots: latestFarmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
             where: { snapshotTimestamp_gte: thisMorning },
             orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
             orderDirection: OrderDirection.Asc,
@@ -49,14 +49,15 @@ export class ReliquarySnapshotService {
 
         const reliquaryFarms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ include: { snapshots: true } });
 
-        const farmIdsInSubgraphSnapshots = _.uniq(allFarmSnapshots.map((snapshot) => snapshot.farmId));
-        // the subgraph does not create a snapshot when there are not deposits or withdraws. If we don't have a snapshot for today, create from yesterday
+        const farmIdsInSubgraphSnapshots = _.uniq(latestFarmSnapshots.map((snapshot) => snapshot.farmId));
+        // the subgraph does not create a snapshot when there are not deposits or withdraws.
+        // If we don't have a snapshot for today, create from yesterday
         for (const farm of reliquaryFarms) {
-            const farmSnapshots = allFarmSnapshots.filter((snapshot) => snapshot.farmId === parseFloat(farm.id));
-            if (farmSnapshots.length === 0) {
+            const farmSnapshot = latestFarmSnapshots.find((snapshot) => snapshot.farmId === parseFloat(farm.id));
+            if (!farmSnapshot) {
                 const yesterdaysSnapshot = farm.snapshots.find((snapshot) => snapshot.timestamp === yesterdayMorning);
                 if (yesterdaysSnapshot) {
-                    allFarmSnapshots.push({
+                    latestFarmSnapshots.push({
                         id: `${yesterdaysSnapshot.id.split('-')[0]}-${thisMorning}`,
                         farmId: parseFloat(yesterdaysSnapshot.farmId),
                         relicCount: yesterdaysSnapshot.relicCount,
@@ -65,11 +66,12 @@ export class ReliquarySnapshotService {
                         dailyWithdrawn: `0`,
                         totalBalance: yesterdaysSnapshot.totalBalance,
                     });
+                    farmIdsInSubgraphSnapshots.push(parseFloat(yesterdaysSnapshot.farmId));
                 }
             }
         }
 
-        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, allFarmSnapshots);
+        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, latestFarmSnapshots);
     }
 
     public async loadAllSnapshotsForFarm(farmId: number) {
@@ -92,7 +94,7 @@ export class ReliquarySnapshotService {
             while (previousSnapshot.snapshotTimestamp + oneDayInSeconds < snapshot.snapshotTimestamp) {
                 snapshotsToSave.push({
                     ...previousSnapshot,
-                    id: `${previousSnapshot.id}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
+                    id: `${previousSnapshot.id.split('-')[0]}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
                     snapshotTimestamp: previousSnapshot.snapshotTimestamp + oneDayInSeconds,
                     dailyDeposited: `0`,
                     dailyWithdrawn: `0`,
@@ -108,7 +110,7 @@ export class ReliquarySnapshotService {
         while (previousSnapshot.snapshotTimestamp < moment().startOf('day').unix()) {
             snapshotsToSave.push({
                 ...lastRealSnapshot,
-                id: `${lastRealSnapshot.id}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
+                id: `${lastRealSnapshot.id.split('-')[0]}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
                 snapshotTimestamp: previousSnapshot.snapshotTimestamp + oneDayInSeconds,
                 dailyDeposited: `0`,
                 dailyWithdrawn: `0`,
