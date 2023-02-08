@@ -138,7 +138,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         }
         const { block } = await reliquarySubgraphService.getMetadata();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
-        const relics = await this.loadAllSubgraphRelics();
+        const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
         console.log('initStakedReliquaryBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
@@ -287,35 +287,5 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             ...userFarmBalance,
             amount: formatFixed(userFarmBalance.amount, 18),
         }));
-    }
-
-    private async loadAllSubgraphRelics(): Promise<ReliquaryRelicFragment[]> {
-        const pageSize = 1000;
-        const MAX_SKIP = 5000;
-        let allRelics: ReliquaryRelicFragment[] = [];
-        let latestRelicId = 0;
-        let hasMore = true;
-        let skip = 0;
-
-        while (hasMore) {
-            const { relics } = await reliquarySubgraphService.getRelics({
-                where: { relicId_gt: latestRelicId, balance_gt: '0' },
-                first: pageSize,
-                skip,
-                orderBy: Relic_OrderBy.EntryTimestamp,
-                orderDirection: OrderDirection.Asc,
-            });
-
-            allRelics.push(...relics);
-            hasMore = relics.length >= pageSize;
-
-            skip += pageSize;
-
-            if (skip > MAX_SKIP) {
-                latestRelicId = relics[relics.length - 1].relicId;
-                skip = 0;
-            }
-        }
-        return allRelics;
     }
 }
