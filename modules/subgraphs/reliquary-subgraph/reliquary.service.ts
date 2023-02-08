@@ -2,10 +2,13 @@ import { GraphQLClient } from 'graphql-request';
 import { networkConfig } from '../../config/network-config';
 import { subgraphLoadAll } from '../subgraph-util';
 import {
+    DailyPoolSnapshot_OrderBy,
     DailyRelicSnapshot_OrderBy,
     getSdk,
     OrderDirection,
+    Relic_OrderBy,
     ReliquaryFarmFragment,
+    ReliquaryFarmSnapshotFragment,
     ReliquaryFarmSnapshotsQuery,
     ReliquaryFarmSnapshotsQueryVariables,
     ReliquaryPoolLevelsQuery,
@@ -61,8 +64,34 @@ export class ReliquarySubgraphService {
         return this.sdk.ReliquaryPoolLevels(args);
     }
 
-    public async getAllRelics(args: ReliquaryRelicsQueryVariables): Promise<ReliquaryRelicFragment[]> {
-        return subgraphLoadAll<ReliquaryRelicFragment>(this.sdk.ReliquaryRelics, 'relics', args);
+    public async getAllRelicsWithPaging({
+        where,
+        block,
+    }: Pick<ReliquaryRelicsQueryVariables, 'where' | 'block'>): Promise<ReliquaryRelicFragment[]> {
+        const limit = 1000;
+        let hasMore = true;
+        let relics: ReliquaryRelicFragment[] = [];
+        let id = 0;
+
+        while (hasMore) {
+            const response = await this.sdk.ReliquaryRelics({
+                where: { ...where, relicId_gt: id },
+                block,
+                orderBy: Relic_OrderBy.Id,
+                orderDirection: OrderDirection.Asc,
+                first: limit,
+            });
+
+            relics = [...relics, ...response.relics];
+
+            if (response.relics.length < limit) {
+                hasMore = false;
+            } else {
+                id = response.relics[response.relics.length - 1].relicId;
+            }
+        }
+
+        return relics;
     }
 
     public async getAllFarms(args: ReliquaryPoolsQueryVariables): Promise<ReliquaryFarmFragment[]> {
@@ -91,6 +120,32 @@ export class ReliquarySubgraphService {
         } while (true);
 
         return allSnapshots;
+    }
+
+    public async getAllFarmSnapshotsForFarm(farmId: number): Promise<ReliquaryFarmSnapshotFragment[]> {
+        const limit = 1000;
+        let hasMore = true;
+        let snapshots: ReliquaryFarmSnapshotFragment[] = [];
+        let timestamp = 0;
+
+        while (hasMore) {
+            const response = await this.sdk.ReliquaryFarmSnapshots({
+                where: { snapshotTimestamp_gt: timestamp, poolId: farmId },
+                orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
+                orderDirection: OrderDirection.Asc,
+                first: limit,
+            });
+
+            snapshots = [...snapshots, ...response.farmSnapshots];
+
+            if (response.farmSnapshots.length < limit) {
+                hasMore = false;
+            } else {
+                timestamp = response.farmSnapshots[response.farmSnapshots.length - 1].snapshotTimestamp;
+            }
+        }
+
+        return snapshots;
     }
 
     public async getFarmSnapshots(args: ReliquaryFarmSnapshotsQueryVariables): Promise<ReliquaryFarmSnapshotsQuery> {

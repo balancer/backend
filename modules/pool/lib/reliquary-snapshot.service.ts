@@ -4,13 +4,8 @@ import moment from 'moment-timezone';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
-import {
-    DailyPoolSnapshot_OrderBy,
-    OrderDirection,
-} from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { oneDayInMinutes, oneDayInSeconds } from '../../common/time';
-import { time } from 'console';
+import { oneDayInMinutes } from '../../common/time';
 import {
     PrismaReliquaryFarmSnapshot,
     PrismaReliquaryLevelSnapshot,
@@ -38,86 +33,19 @@ export class ReliquarySnapshotService {
 
     public async syncLatestSnapshotsForAllFarms() {
         const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
-        const thisMorning = moment().utc().startOf('day').unix();
 
-        // this returns the latest snapshot per farm, if there is one
+        // this returns the last two snapshot per farm, if there are any
         const { farmSnapshots: latestFarmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
-            where: { snapshotTimestamp_gte: thisMorning },
-            orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
-            orderDirection: OrderDirection.Asc,
+            where: { snapshotTimestamp_gte: yesterdayMorning },
         });
-
-        const reliquaryFarms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ include: { snapshots: true } });
-
         const farmIdsInSubgraphSnapshots = _.uniq(latestFarmSnapshots.map((snapshot) => snapshot.farmId));
-        // the subgraph does not create a snapshot when there are not deposits or withdraws.
-        // If we don't have a snapshot for today, create from yesterday
-        for (const farm of reliquaryFarms) {
-            const farmSnapshot = latestFarmSnapshots.find((snapshot) => snapshot.farmId === parseFloat(farm.id));
-            if (!farmSnapshot) {
-                const yesterdaysSnapshot = farm.snapshots.find((snapshot) => snapshot.timestamp === yesterdayMorning);
-                if (yesterdaysSnapshot) {
-                    latestFarmSnapshots.push({
-                        id: `${yesterdaysSnapshot.id.split('-')[0]}-${thisMorning}`,
-                        farmId: parseFloat(yesterdaysSnapshot.farmId),
-                        relicCount: yesterdaysSnapshot.relicCount,
-                        snapshotTimestamp: thisMorning,
-                        dailyDeposited: `0`,
-                        dailyWithdrawn: `0`,
-                        totalBalance: yesterdaysSnapshot.totalBalance,
-                    });
-                    farmIdsInSubgraphSnapshots.push(parseFloat(yesterdaysSnapshot.farmId));
-                }
-            }
-        }
 
         await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, latestFarmSnapshots);
     }
 
     public async loadAllSnapshotsForFarm(farmId: number) {
-        //assuming the we don't have more than 1,000 snapshots, we should be ok.
-        // todo implement proper getAll function
-        const farmSnapshots = await this.reliquarySubgraphService.getFarmSnapshots({
-            where: { poolId: farmId },
-            orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
-            orderDirection: OrderDirection.Asc,
-            first: 1000,
-        });
-        const firstSnapshot = farmSnapshots.farmSnapshots.shift();
-        if (!firstSnapshot) {
-            return;
-        }
-        const snapshotsToSave = [firstSnapshot];
-        for (const snapshot of farmSnapshots.farmSnapshots) {
-            // if the previous snapshot is older than 1 day, manually derive a snapshot
-            let previousSnapshot = snapshotsToSave[snapshotsToSave.length - 1];
-            while (previousSnapshot.snapshotTimestamp + oneDayInSeconds < snapshot.snapshotTimestamp) {
-                snapshotsToSave.push({
-                    ...previousSnapshot,
-                    id: `${previousSnapshot.id.split('-')[0]}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
-                    snapshotTimestamp: previousSnapshot.snapshotTimestamp + oneDayInSeconds,
-                    dailyDeposited: `0`,
-                    dailyWithdrawn: `0`,
-                });
-                previousSnapshot = snapshotsToSave[snapshotsToSave.length - 1];
-            }
-
-            snapshotsToSave.push(snapshot);
-        }
-        // fill gaps until today
-        const lastRealSnapshot = snapshotsToSave[snapshotsToSave.length - 1];
-        let previousSnapshot = snapshotsToSave[snapshotsToSave.length - 1];
-        while (previousSnapshot.snapshotTimestamp < moment().startOf('day').unix()) {
-            snapshotsToSave.push({
-                ...lastRealSnapshot,
-                id: `${lastRealSnapshot.id.split('-')[0]}-${previousSnapshot.snapshotTimestamp + oneDayInSeconds}`,
-                snapshotTimestamp: previousSnapshot.snapshotTimestamp + oneDayInSeconds,
-                dailyDeposited: `0`,
-                dailyWithdrawn: `0`,
-            });
-            previousSnapshot = snapshotsToSave[snapshotsToSave.length - 1];
-        }
-        await this.upsertFarmSnapshots([farmId], snapshotsToSave);
+        const farmSnapshots = await this.reliquarySubgraphService.getAllFarmSnapshotsForFarm(farmId);
+        await this.upsertFarmSnapshots([farmId], farmSnapshots);
     }
 
     private async upsertFarmSnapshots(
@@ -156,7 +84,7 @@ export class ReliquarySnapshotService {
                 });
 
                 const blockAtTimestamp = await blocksSubgraphService.getBlockForTimestamp(timestampForSnapshot);
-                const relicsInFarm = await this.reliquarySubgraphService.getAllRelics({
+                const relicsInFarm = await this.reliquarySubgraphService.getAllRelicsWithPaging({
                     where: { pid: farmId },
                     block: { number: parseFloat(blockAtTimestamp.number) },
                 });
