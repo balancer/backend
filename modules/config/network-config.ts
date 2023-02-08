@@ -277,8 +277,14 @@ const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
         },
         balancer: {
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-            composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
-            weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
+            composableStablePoolFactories: [
+                '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
+                '0xe2e901ab09f37884ba31622df3ca7fc19aa443be',
+            ],
+            weightedPoolV2Factories: [
+                '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
+                '0xa0dabebaad1b243bbb243f933013d560819eb66f',
+            ],
             poolsInRecoveryMode: [
                 '0x05e7732bf9ae5592e6aa05afe8cd80f7ab0a7bea',
                 '0x359ea8618c405023fc4b98dab1b01f373792a126',
