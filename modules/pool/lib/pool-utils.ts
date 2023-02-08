@@ -37,5 +37,7 @@ export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
 }
 
 export function collectsSwapFee(pool: PoolWithTypeAndFactory) {
-    return !networkConfig.balancer.poolsInRecoveryMode.includes(pool.address);
+    return (
+        !networkConfig.balancer.poolsInRecoveryMode.includes(pool.address) && pool.type !== 'LIQUIDITY_BOOTSTRAPPING'
+    );
 }
