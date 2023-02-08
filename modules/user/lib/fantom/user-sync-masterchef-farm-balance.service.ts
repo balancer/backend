@@ -36,7 +36,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const farms = await masterchefService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
+        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             networkConfig.masterchef.address,
             startBlock,
