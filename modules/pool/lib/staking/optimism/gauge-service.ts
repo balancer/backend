@@ -1,15 +1,13 @@
 import moment from 'moment-timezone';
-import { Provider } from '@ethersproject/providers';
 import { GaugeSubgraphService } from '../../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { Multicaller } from '../../../../web3/multicaller';
 import { scaleDown } from '../../../../big-number/big-number';
-import { networkConfig } from '../../../../config/network-config';
 import ChildChainStreamerAbi from './abi/ChildChainStreamer.json';
-import { jsonRpcProvider } from '../../../../web3/contract';
 import {
     GaugeLiquidityGaugesQueryVariables,
     GaugeSharesQueryVariables,
 } from '../../../../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 export type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string };
 export type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
@@ -37,12 +35,16 @@ export type GaugeUserShare = {
 };
 
 export class GaugeSerivce {
-    constructor(private readonly provider: Provider, private readonly gaugeSubgraphService: GaugeSubgraphService) {}
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
 
     public async getStreamers(): Promise<GaugeStreamer[]> {
         const streamers = await this.gaugeSubgraphService.getStreamers();
 
-        const multiCaller = new Multicaller(networkConfig.multicall, this.provider, ChildChainStreamerAbi);
+        const multiCaller = new Multicaller(
+            networkContext.data.multicall,
+            networkContext.provider,
+            ChildChainStreamerAbi,
+        );
 
         for (let streamer of streamers) {
             streamer.rewardTokens?.forEach((rewardToken) => {
@@ -118,4 +120,4 @@ export class GaugeSerivce {
     }
 }
 
-export const gaugeSerivce = new GaugeSerivce(jsonRpcProvider, new GaugeSubgraphService());
+export const gaugeSerivce = new GaugeSerivce(new GaugeSubgraphService());

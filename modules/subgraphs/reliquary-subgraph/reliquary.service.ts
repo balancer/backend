@@ -1,5 +1,4 @@
 import { GraphQLClient } from 'graphql-request';
-import { networkConfig } from '../../config/network-config';
 import { subgraphLoadAll } from '../subgraph-util';
 import {
     DailyRelicSnapshot_OrderBy,
@@ -23,13 +22,10 @@ import {
     ReliquaryUsersQuery,
     ReliquaryUsersQueryVariables,
 } from './generated/reliquary-subgraph-types';
+import { networkContext } from '../../network/network-context.service';
 
 export class ReliquarySubgraphService {
-    private readonly client: GraphQLClient;
-
-    constructor() {
-        this.client = new GraphQLClient(networkConfig.subgraphs.reliquary!);
-    }
+    constructor() {}
 
     public async getMetadata() {
         const { meta } = await this.sdk.ReliquaryGetMeta();
@@ -102,7 +98,9 @@ export class ReliquarySubgraphService {
     }
 
     public get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.reliquary!);
+
+        return getSdk(client);
     }
 }
 

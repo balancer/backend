@@ -6,6 +6,7 @@ import { secondsPerYear } from '../../../../common/time';
 import { PrismaPoolAprItem } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class GaugeAprService implements PoolAprService {
     constructor(
@@ -49,6 +50,7 @@ export class GaugeAprService implements PoolAprService {
 
                 const item: PrismaPoolAprItem = {
                     id: `${pool.id}-${rewardToken.symbol}-apr`,
+                    chain: networkContext.chain,
                     poolId: pool.id,
                     title: `${rewardToken.symbol} reward APR`,
                     apr: rewardApr,
@@ -58,7 +60,7 @@ export class GaugeAprService implements PoolAprService {
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id: item.id },
+                        where: { id_chain: { id: item.id, chain: networkContext.chain } },
                         update: item,
                         create: item,
                     }),

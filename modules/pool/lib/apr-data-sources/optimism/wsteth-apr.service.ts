@@ -4,6 +4,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { collectsYieldFee } from '../../pool-utils';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class WstethAprService implements PoolAprService {
     constructor(
@@ -40,9 +41,10 @@ export class WstethAprService implements PoolAprService {
                 const userApr = wstethApr * (1 - this.yieldProtocolFeePercentage);
 
                 await prisma.prismaPoolAprItem.upsert({
-                    where: { id: itemId },
+                    where: { id_chain: { id: itemId, chain: networkContext.chain } },
                     create: {
                         id: itemId,
+                        chain: networkContext.chain,
                         poolId: pool.id,
                         title: `stETH APR`,
                         apr: collectsYieldFee(pool) ? userApr : wstethApr,

@@ -30,18 +30,18 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { networkConfig } from '../../config/network-config';
 import { Prisma } from '@prisma/client';
 import { ContentService } from '../../content/content.service';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
+import { networkContext } from '../../network/network-context.service';
 
 export class PoolGqlLoaderService {
     constructor(private readonly configService: ContentService) {}
 
     public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
-            where: { id },
+            where: { id_chain: { id, chain: networkContext.chain } },
             include: prismaPoolWithExpandedNesting.include,
         });
 
@@ -687,7 +687,7 @@ export class PoolGqlLoaderService {
 
         if (nestedPool && nestedPool.type === 'LINEAR' && nestedPool.linearData) {
             const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
-            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkConfig.weth.address);
+            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkContext.data.weth.address);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -701,11 +701,11 @@ export class PoolGqlLoaderService {
                                   ...mainToken,
                                   token: {
                                       ...poolToken.token,
-                                      symbol: networkConfig.eth.symbol,
-                                      address: networkConfig.eth.address,
-                                      name: networkConfig.eth.name,
+                                      symbol: networkContext.data.eth.symbol,
+                                      address: networkContext.data.eth.address,
+                                      name: networkContext.data.eth.name,
                                   },
-                                  id: `${pool.id}-${networkConfig.eth.address}`,
+                                  id: `${pool.id}-${networkContext.data.eth.address}`,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(mainToken)],
@@ -754,7 +754,7 @@ export class PoolGqlLoaderService {
                 });
             }
         } else {
-            const isWrappedNativeAsset = isSameAddress(poolToken.address, networkConfig.weth.address);
+            const isWrappedNativeAsset = isSameAddress(poolToken.address, networkContext.data.weth.address);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -767,11 +767,11 @@ export class PoolGqlLoaderService {
                                   ...poolToken,
                                   token: {
                                       ...poolToken.token,
-                                      symbol: networkConfig.eth.symbol,
-                                      address: networkConfig.eth.address,
-                                      name: networkConfig.eth.name,
+                                      symbol: networkContext.data.eth.symbol,
+                                      address: networkContext.data.eth.address,
+                                      name: networkContext.data.eth.name,
                                   },
-                                  id: `${pool.id}-${networkConfig.eth.address}`,
+                                  id: `${pool.id}-${networkContext.data.eth.address}`,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],

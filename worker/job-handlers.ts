@@ -6,8 +6,8 @@ import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
-import { cronsMetricPublisher } from '../modules/metrics/cron.metric';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
+import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 
 const runningJobs: Set<string> = new Set();
 
@@ -26,6 +26,7 @@ async function runIfNotAlreadyRunning(
         return;
     }
     try {
+        const cronsMetricPublisher = getCronMetricsPublisher();
         runningJobs.add(id);
         const transaction = Sentry.startTransaction({ name: id }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
@@ -63,7 +64,7 @@ async function runIfNotAlreadyRunning(
 }
 
 export function configureWorkerRoutes(app: Express) {
-    // all manual triggered (e.g. fast running) jobs will be handled here
+    // all manual triggered (e.g. fast running) workerJobs will be handled here
     app.post('/', async (req, res, next) => {
         const job = req.body as { name: string };
         switch (job.name) {

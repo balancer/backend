@@ -1,10 +1,6 @@
 import { FbeetsService } from './lib/fbeets.service';
-import { getContractAt } from '../web3/contract';
-import { networkConfig } from '../config/network-config';
-import FreshBeetsAbi from './abi/FreshBeets.json';
-import ERC20 from './abi/ERC20.json';
 import { tokenService } from '../token/token.service';
-import { AddressZero } from '@ethersproject/constants';
+import { networkContext } from '../network/network-context.service';
 
 export class BeetsService {
     constructor(private readonly fBeetsService: FbeetsService) {}
@@ -19,13 +15,8 @@ export class BeetsService {
 
     public async getBeetsPrice(): Promise<string> {
         const tokenPrices = await tokenService.getTokenPrices();
-        return tokenService.getPriceForToken(tokenPrices, networkConfig.beets.address).toString();
+        return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address).toString();
     }
 }
 
-export const beetsService = new BeetsService(
-    new FbeetsService(
-        getContractAt(networkConfig.fbeets?.address ?? AddressZero, FreshBeetsAbi),
-        getContractAt(networkConfig.fbeets?.poolAddress ?? AddressZero, ERC20),
-    ),
-);
+export const beetsService = new BeetsService(new FbeetsService());

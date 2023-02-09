@@ -2,6 +2,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class StaderStakedFtmAprService implements PoolAprService {
     private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
@@ -25,10 +26,11 @@ export class StaderStakedFtmAprService implements PoolAprService {
                 const sftmxApr = pool.dynamicData.totalLiquidity > 0 ? this.SFTMX_APR * sftmxPercentage : 0;
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id: `${pool.id}-sftmx-apr` },
+                        where: { id_chain: { id: `${pool.id}-sftmx-apr`, chain: networkContext.chain } },
                         update: { apr: sftmxApr },
                         create: {
                             id: `${pool.id}-sftmx-apr`,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             apr: sftmxApr,
                             title: 'sFTMx APR',

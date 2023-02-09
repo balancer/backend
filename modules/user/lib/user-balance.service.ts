@@ -3,11 +3,11 @@ import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
-import { networkConfig } from '../../config/network-config';
 import { PrismaPoolStaking } from '@prisma/client';
+import { networkContext } from '../../network/network-context.service';
 
 export class UserBalanceService {
-    constructor(private readonly fbeetsAddress: string) {}
+    constructor() {}
 
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
         const user = await prisma.prismaUser.findUnique({
@@ -46,11 +46,13 @@ export class UserBalanceService {
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
+        const fbeetsAddress = networkContext.data.fbeets?.address || '';
+
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
-                walletBalances: { where: { tokenAddress: this.fbeetsAddress } },
-                stakedBalances: { where: { tokenAddress: this.fbeetsAddress } },
+                walletBalances: { where: { tokenAddress: fbeetsAddress } },
+                stakedBalances: { where: { tokenAddress: fbeetsAddress } },
             },
         });
 
@@ -60,7 +62,7 @@ export class UserBalanceService {
         const walletNum = parseUnits(walletBalance?.balance || '0', 18);
 
         return {
-            tokenAddress: this.fbeetsAddress,
+            tokenAddress: fbeetsAddress,
             totalBalance: formatFixed(stakedNum.add(walletNum), 18),
             stakedBalance: stakedBalance?.balance || '0',
             walletBalance: walletBalance?.balance || '0',

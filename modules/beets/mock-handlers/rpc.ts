@@ -1,9 +1,9 @@
 import { rest } from 'msw';
-import { networkConfig } from '../../config/network-config';
+import { networkContext } from '../../network/network-context.service';
 
 export const rpcHandlers = [
     //RPC requests
-    rest.post(networkConfig.rpcUrl, async (req, res, ctx) => {
+    rest.post(networkContext.data.rpcUrl, async (req, res, ctx) => {
         const body = await req.json();
         // initial request by ethers to detect chain
         if (body.method === 'eth_chainId') {
@@ -12,7 +12,7 @@ export const rpcHandlers = [
                 ctx.json({
                     id: body.id,
                     jsonrpc: body.jsonrpc,
-                    result: '0x' + networkConfig.chain.id.toString(16),
+                    result: '0x' + networkContext.data.chain.id.toString(16),
                 }),
             );
         }
@@ -22,13 +22,13 @@ export const rpcHandlers = [
                 ctx.json({
                     id: body.id,
                     jsonrpc: body.jsonrpc,
-                    result: networkConfig.chain.id.toString(),
+                    result: networkContext.data.chain.id.toString(),
                 }),
             );
         }
         //read contract
         if (body.method === 'eth_call') {
-            if (body.params[0].to === networkConfig.fbeets!.address) {
+            if (body.params[0].to === networkContext.data.fbeets!.address) {
                 //assume call for total supply
                 return res(
                     ctx.status(200),
@@ -39,7 +39,7 @@ export const rpcHandlers = [
                     }),
                 );
             }
-            if (body.params[0].to === networkConfig.fbeets!.poolAddress) {
+            if (body.params[0].to === networkContext.data.fbeets!.poolAddress) {
                 //assume call for bpt balance
                 return res(
                     ctx.status(200),

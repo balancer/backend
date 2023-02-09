@@ -7,6 +7,7 @@ import { getContractAt } from '../../../web3/contract';
 import { PoolAprService } from '../../pool-types';
 import ReaperCryptAbi from './abi/ReaperCrypt.json';
 import ReaperCryptStrategyAbi from './abi/ReaperCryptStrategy.json';
+import { networkContext } from '../../../network/network-context.service';
 
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
@@ -65,9 +66,10 @@ export class ReaperCryptAprService implements PoolAprService {
             let apr = totalLiquidity > 0 ? avgAprAcrossXHarvests * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
-                where: { id: itemId },
+                where: { id_chain: { id: itemId, chain: networkContext.chain } },
                 create: {
                     id: itemId,
+                    chain: networkContext.chain,
                     poolId: pool.id,
                     title: `${wrappedToken.token.symbol} APR`,
                     apr: apr,
@@ -92,7 +94,7 @@ export class ReaperCryptAprService implements PoolAprService {
                         : 0;
                 apr = vaultApr + sFtmXApr;
                 await prisma.prismaPoolAprItem.update({
-                    where: { id: itemId },
+                    where: { id_chain: { id: itemId, chain: networkContext.chain } },
                     data: { group: null, apr: apr, title: 'Boosted sFTMx APR' },
                 });
             }

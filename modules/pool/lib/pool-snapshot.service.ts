@@ -16,9 +16,10 @@ import { PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { CoingeckoService } from '../../coingecko/coingecko.service';
-import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { sleep } from '../../common/promise';
+import { networkContext } from '../../network/network-context.service';
+import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
 export class PoolSnapshotService {
     constructor(
@@ -37,7 +38,7 @@ export class PoolSnapshotService {
 
     public async getSnapshotForPool(poolId: string, timestamp: number) {
         return prisma.prismaPoolSnapshot.findUnique({
-            where: { id: `${poolId}-${timestamp}` },
+            where: { id_chain: { id: `${poolId}-${timestamp}`, chain: networkContext.chain } },
         });
     }
 
@@ -102,7 +103,7 @@ export class PoolSnapshotService {
                 );
 
                 return prisma.prismaPoolSnapshot.upsert({
-                    where: { id: snapshot.id },
+                    where: { id_chain: { id: snapshot.id, chain: networkContext.chain } },
                     create: data,
                     update: data,
                 });
@@ -149,7 +150,7 @@ export class PoolSnapshotService {
 
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, numDays = -1) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
-            where: { id: poolId },
+            where: { id_chain: { id: poolId, chain: networkContext.chain } },
             include: prismaPoolWithExpandedNesting.include,
         });
 
@@ -248,6 +249,7 @@ export class PoolSnapshotService {
             const id = `${poolId}-${startTimestamp}`;
             const data = {
                 id,
+                chain: networkContext.chain,
                 poolId,
                 timestamp: startTimestamp,
                 totalLiquidity: totalLiquidity || 0,
@@ -266,7 +268,11 @@ export class PoolSnapshotService {
             };
 
             try {
-                await prisma.prismaPoolSnapshot.upsert({ where: { id }, create: data, update: data });
+                await prisma.prismaPoolSnapshot.upsert({
+                    where: { id_chain: { id, chain: networkContext.chain } },
+                    create: data,
+                    update: data,
+                });
             } catch (e) {
                 console.log('pool snapshot upsert for ' + id, data);
                 throw e;
@@ -284,6 +290,7 @@ export class PoolSnapshotService {
 
         return {
             id: snapshot.id,
+            chain: networkContext.chain,
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
             totalLiquidity: parseFloat(snapshot.liquidity),

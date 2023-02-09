@@ -4,9 +4,14 @@ import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { networkContext } from '../../network/network-context.service';
 
 export class PoolAprUpdaterService {
-    constructor(private readonly aprServices: PoolAprService[]) {}
+    constructor() {}
+
+    private get aprServices(): PoolAprService[] {
+        return networkContext.config.poolAprServices;
+    }
 
     public async updatePoolAprs() {
         const pools = await prisma.prismaPool.findMany(prismaPoolWithExpandedNesting);
@@ -33,7 +38,7 @@ export class PoolAprUpdaterService {
         for (const poolId in grouped) {
             operations.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id: poolId },
+                    where: { id_chain: { id: poolId, chain: networkContext.chain } },
                     data: { apr: _.sumBy(grouped[poolId], (item) => item.apr) },
                 }),
             );

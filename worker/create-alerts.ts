@@ -5,14 +5,15 @@ import {
     PutMetricAlarmCommand,
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../app/env';
-import { networkConfig } from '../modules/config/network-config';
-import { cronsMetricPublisher } from '../modules/metrics/cron.metric';
+import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { WorkerJob } from './manual-jobs';
+import { networkContext } from '../modules/network/network-context.service';
 
 const euAlarmTopic = 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_Alarms_Topic';
 const caAlarmTopic = 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic';
 
 export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
+    const cronsMetricPublisher = getCronMetricsPublisher();
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
@@ -20,7 +21,7 @@ export async function createAlertsIfNotExist(jobs: WorkerJob[]): Promise<void> {
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
     for (const cronJob of jobs) {
-        const alarmName = `AUTO CRON ALARM: ${cronJob.name} - ${networkConfig.chain.slug} - ${env.DEPLOYMENT_ENV}`;
+        const alarmName = `AUTO CRON ALARM: ${cronJob.name} - ${networkContext.data.chain.slug} - ${env.DEPLOYMENT_ENV}`;
 
         // alert if cron has not run once in the double interval (or once in a minute for short intervals)
         const threshold = 1;

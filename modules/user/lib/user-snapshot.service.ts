@@ -4,7 +4,6 @@ import moment from 'moment-timezone';
 import { UserPoolSnapshot, UserRelicSnapshot } from '../user-types';
 import { GqlUserSnapshotDataRange } from '../../../schema';
 import { PoolSnapshotService } from '../../pool/lib/pool-snapshot.service';
-import { networkConfig } from '../../config/network-config';
 import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking, PrismaUserRelicSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { oneDayInSeconds, secondsPerDay } from '../../common/time';
@@ -12,6 +11,7 @@ import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgr
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquaryRelicSnapshotFragment } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import _ from 'lodash';
+import { networkContext } from '../../network/network-context.service';
 
 export class UserSnapshotService {
     private readonly FBEETS_BPT_RATIO: number = 1.0271;
@@ -20,8 +20,6 @@ export class UserSnapshotService {
         private readonly userSnapshotSubgraphService: UserSnapshotSubgraphService,
         private readonly reliquarySubgraphService: ReliquarySubgraphService,
         private readonly poolSnapshotService: PoolSnapshotService,
-        private readonly fbeetsAddress: string,
-        private readonly fbeetsPoolId: string,
     ) {}
 
     // problem: user can have multiple relics in the same farm with different snapshots
@@ -144,6 +142,7 @@ export class UserSnapshotService {
         for (const snapshot of relicSnapshots) {
             const data: PrismaUserRelicSnapshot = {
                 farmId: `${snapshot.poolId}`,
+                chain: networkContext.chain,
                 timestamp: snapshot.snapshotTimestamp,
                 userAddress: snapshot.userAddress.toLowerCase(),
                 balance: snapshot.balance,
@@ -154,7 +153,7 @@ export class UserSnapshotService {
             };
             operations.push(
                 prisma.prismaUserRelicSnapshot.upsert({
-                    where: { id: snapshot.id },
+                    where: { id_chain: { id: snapshot.id, chain: networkContext.chain } },
                     create: data,
                     update: data,
                 }),
@@ -216,7 +215,10 @@ export class UserSnapshotService {
                         // subgraph snapshot is newer or from today. If it is > 0 balance, we need to enrich and persist.
                         const pool = await prisma.prismaPool.findUniqueOrThrow({
                             where: {
-                                id: latestStoredUserPoolSnapshot.poolId,
+                                id_chain: {
+                                    id: latestStoredUserPoolSnapshot.poolId,
+                                    chain: networkContext.chain,
+                                },
                             },
                             include: {
                                 staking: true,
@@ -250,7 +252,9 @@ export class UserSnapshotService {
 
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
-                                    where: { id: userPoolBalanceSnapshotData.id },
+                                    where: {
+                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: networkContext.chain },
+                                    },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,
                                 }),
@@ -262,6 +266,7 @@ export class UserSnapshotService {
                                 id: `${pool.id}-${userSubgraphSnapshot.user.id.toLowerCase()}-${
                                     userSubgraphSnapshot.timestamp
                                 }`,
+                                chain: networkContext.chain,
                                 timestamp: userSubgraphSnapshot.timestamp,
                                 userAddress: userSubgraphSnapshot.user.id.toLowerCase(),
                                 poolId: pool.id,
@@ -277,7 +282,9 @@ export class UserSnapshotService {
 
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
-                                    where: { id: userPoolBalanceSnapshotData.id },
+                                    where: {
+                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: networkContext.chain },
+                                    },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,
                                 }),
@@ -325,7 +332,7 @@ export class UserSnapshotService {
 
             const pool = await prisma.prismaPool.findUniqueOrThrow({
                 where: {
-                    id: poolId,
+                    id_chain: { id: poolId, chain: networkContext.chain },
                 },
                 include: {
                     staking: true,
@@ -471,7 +478,7 @@ export class UserSnapshotService {
                     fees24h: `${
                         percentShare *
                         (poolSnapshot?.fees24h || 0) *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 });
             }
@@ -525,7 +532,7 @@ export class UserSnapshotService {
                     fees24h: `${
                         percentShare *
                         (poolSnapshot?.fees24h || 0) *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 });
             }
@@ -544,10 +551,10 @@ export class UserSnapshotService {
                     currentSnapshot.fees24h = `${
                         percentShare *
                         (poolSnapshot.fees24h || 0) *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`;
                     await prisma.prismaUserPoolBalanceSnapshot.update({
-                        where: { id: currentSnapshot.id },
+                        where: { id_chain: { id: currentSnapshot.id, chain: networkContext.chain } },
                         data: currentSnapshot,
                     });
                 }
@@ -584,7 +591,7 @@ export class UserSnapshotService {
                     fees24h: `${
                         percentShare *
                         (poolSnapshot?.fees24h || 0) *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 });
             }
@@ -605,6 +612,7 @@ export class UserSnapshotService {
 
         const userPoolBalanceSnapshotData = {
             id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${subgraphSnapshot.timestamp}`,
+            chain: networkContext.chain,
             timestamp: subgraphSnapshot.timestamp,
             userAddress: subgraphSnapshot.user.id.toLowerCase(),
             poolId: pool.id,
@@ -616,7 +624,9 @@ export class UserSnapshotService {
             totalBalance: `${totalBalance}`,
             totalValueUSD: `${totalBalance * (poolSnapshot?.sharePrice || 0)}`,
             fees24h: `${
-                percentShare * (poolSnapshot?.fees24h || 0) * (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                percentShare *
+                (poolSnapshot?.fees24h || 0) *
+                (1 - networkContext.data.balancer.swapProtocolFeePercentage)
             }`,
         };
         return userPoolBalanceSnapshotData;
@@ -646,8 +656,8 @@ export class UserSnapshotService {
 
         // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
         // we also need to multiply the staked amount by the fbeets->bpt ratio
-        if (pool.id === this.fbeetsPoolId) {
-            const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(this.fbeetsAddress);
+        if (pool.id === networkContext.data.fbeets?.poolId) {
+            const fBeetsWalletIdx = userSnapshot.walletTokens.indexOf(networkContext.data.fbeets?.address || '');
             const fBeetsWalletBalance = fBeetsWalletIdx !== -1 ? userSnapshot.walletBalances[fBeetsWalletIdx] : '0';
             walletBalance = (
                 parseFloat(walletBalance) +

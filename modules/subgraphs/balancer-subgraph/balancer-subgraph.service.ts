@@ -4,9 +4,7 @@ import {
     BalancerAmpUpdateFragment,
     BalancerAmpUpdatesQueryVariables,
     BalancerGradualWeightUpdateFragment,
-    BalancerGradualWeightUpdatesQuery,
     BalancerGradualWeightUpdatesQueryVariables,
-    BalancerJoinExitFragment,
     BalancerJoinExitsQuery,
     BalancerJoinExitsQueryVariables,
     BalancerLatestPriceFragment,
@@ -16,7 +14,6 @@ import {
     BalancerPoolQuery,
     BalancerPoolQueryVariables,
     BalancerPoolShareFragment,
-    BalancerPoolSharesQuery,
     BalancerPoolSharesQueryVariables,
     BalancerPoolSnapshotFragment,
     BalancerPoolSnapshotsQuery,
@@ -42,13 +39,11 @@ import {
     OrderDirection,
     Swap_OrderBy,
 } from './generated/balancer-subgraph-types';
-import { env } from '../../../app/env';
-import _ from 'lodash';
 import { subgraphLoadAll } from '../subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
-import { fiveMinutesInMs, fiveMinutesInSeconds, twentyFourHoursInMs } from '../../common/time';
+import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
-import { networkConfig } from '../../config/network-config';
+import { networkContext } from '../../network/network-context.service';
 
 const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
 const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
@@ -58,11 +53,9 @@ const USER_CACHE_KEY_PREFIX = 'balance-subgraph_user:';
 
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;
-    private readonly client: GraphQLClient;
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.balancer);
     }
 
     public async getMetadata() {
@@ -293,7 +286,9 @@ export class BalancerSubgraphService {
     }
 
     private get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.balancer);
+
+        return getSdk(client);
     }
 
     private normalizeBalancerUser(user: BalancerUserFragment): BalancerUserFragment {

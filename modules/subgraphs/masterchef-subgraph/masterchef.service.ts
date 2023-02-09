@@ -1,4 +1,3 @@
-import { GraphQLClient } from 'graphql-request';
 import {
     FarmFragment,
     FarmUserFragment,
@@ -12,21 +11,19 @@ import {
     MasterchefUsersQueryVariables,
     QueryMasterChefsArgs,
 } from './generated/masterchef-subgraph-types';
-import { env } from '../../../app/env';
 import { subgraphLoadAll } from '../subgraph-util';
 import { twentyFourHoursInMs } from '../../common/time';
 import { Cache, CacheClass } from 'memory-cache';
-import { networkConfig } from '../../config/network-config';
+import { GraphQLClient } from 'graphql-request';
+import { networkContext } from '../../network/network-context.service';
 
 const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
 
 export class MasterchefSubgraphService {
     private readonly cache: CacheClass<string, any>;
-    private readonly client: GraphQLClient;
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.masterchef!);
     }
 
     public async getMetadata() {
@@ -89,7 +86,9 @@ export class MasterchefSubgraphService {
     }
 
     public get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.masterchef!);
+
+        return getSdk(client);
     }
 }
 

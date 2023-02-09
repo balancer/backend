@@ -1,12 +1,13 @@
 import { google } from 'googleapis';
 import { env } from '../../app/env';
 import { JWT } from 'google-auth-library';
-import { DeploymentEnv, networkConfig } from '../config/network-config';
+import { networkContext } from '../network/network-context.service';
+import { DeploymentEnv } from '../network/network-config-types';
 
 export class GoogleJwtClient {
     public async getAuthorizedSheetsClient(privateKey: string): Promise<JWT> {
         const jwtClient = new google.auth.JWT(
-            networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].user,
+            networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].user,
             undefined,
             privateKey,
             'https://www.googleapis.com/auth/spreadsheets',

@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
 import { CoingeckoService } from '../../coingecko/coingecko.service';
+import { networkContext } from '../../network/network-context.service';
 
 export class CoingeckoDataService {
     constructor(private readonly conigeckoService: CoingeckoService) {}
@@ -48,10 +49,11 @@ export class CoingeckoDataService {
 
                     operations.push(
                         prisma.prismaTokenDynamicData.upsert({
-                            where: { tokenAddress: token.address },
+                            where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
                             update: data,
                             create: {
                                 coingeckoId: item.id,
+                                chain: networkContext.chain,
                                 tokenAddress: token.address,
                                 ...data,
                             },
@@ -69,7 +71,14 @@ export class CoingeckoDataService {
         tokenAddress = tokenAddress.toLowerCase();
 
         const operations: any[] = [];
-        const token = await prisma.prismaToken.findUnique({ where: { address: tokenAddress } });
+        const token = await prisma.prismaToken.findUnique({
+            where: {
+                address_chain: {
+                    address: tokenAddress,
+                    chain: networkContext.chain,
+                },
+            },
+        });
 
         if (!token || !token.coingeckoTokenId) {
             throw new Error('Missing token or token is missing coingecko token id');
@@ -103,6 +112,7 @@ export class CoingeckoDataService {
                     .filter((item) => item[0] / 1000 <= latestTimestamp)
                     .map((item) => ({
                         tokenAddress,
+                        chain: networkContext.chain,
                         timestamp: item[0] / 1000,
                         open: item[1],
                         high: item[2],
@@ -118,6 +128,7 @@ export class CoingeckoDataService {
             prisma.prismaTokenPrice.createMany({
                 data: hourlyData.map((item) => ({
                     tokenAddress,
+                    chain: networkContext.chain,
                     timestamp: Math.floor(item[0] / 1000),
                     open: item[1],
                     high: item[2],

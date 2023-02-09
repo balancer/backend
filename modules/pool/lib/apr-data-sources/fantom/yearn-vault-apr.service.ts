@@ -4,7 +4,7 @@ import axios from 'axios';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
 import { YearnVault } from '../apr-types';
-import { networkConfig } from '../../../../config/network-config';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class YearnVaultAprService implements PoolAprService {
     constructor(private readonly tokenService: TokenService) {}
@@ -14,7 +14,7 @@ export class YearnVaultAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const { data } = await axios.get<YearnVault[]>(networkConfig.yearn.vaultsEndpoint);
+        const { data } = await axios.get<YearnVault[]>(networkContext.data.yearn.vaultsEndpoint);
         const tokenPrices = await this.tokenService.getTokenPrices();
 
         for (const pool of pools) {
@@ -42,9 +42,10 @@ export class YearnVaultAprService implements PoolAprService {
             const apr = totalLiquidity > 0 ? vault.apy.net_apy * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
-                where: { id: itemId },
+                where: { id_chain: { id: itemId, chain: networkContext.chain } },
                 create: {
                     id: itemId,
+                    chain: networkContext.chain,
                     poolId: pool.id,
                     title: `${vault.symbol} APR`,
                     apr,

@@ -2,24 +2,28 @@ import * as _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { poolService } from '../pool.service';
-import { getContractAt, jsonRpcProvider } from '../../web3/contract';
-import { networkConfig } from '../../config/network-config';
+import { getContractAt } from '../../web3/contract';
 import VaultAbi from '../abi/Vault.json';
+import { networkContext } from '../../network/network-context.service';
 
 export class PoolSyncService {
     public async syncChangedPools() {
         let lastSync = await prisma.prismaLastBlockSynced.findUnique({
-            where: { category: PrismaLastBlockSyncedCategory.POOLS },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
         });
         const lastSyncBlock = lastSync?.blockNumber ?? 0;
-        const latestBlock = await jsonRpcProvider.getBlockNumber();
+        const latestBlock = await networkContext.provider.getBlockNumber();
 
         const startBlock = lastSyncBlock + 1;
         const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
 
-        const contract = getContractAt(networkConfig.balancer.vault, VaultAbi);
+        const contract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
 
-        const events = await contract.queryFilter({ address: networkConfig.balancer.vault }, startBlock, endBlock);
+        const events = await contract.queryFilter(
+            { address: networkContext.data.balancer.vault },
+            startBlock,
+            endBlock,
+        );
         const filteredEvents = events.filter((event) =>
             ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
         );
@@ -33,7 +37,7 @@ export class PoolSyncService {
         }
 
         await prisma.prismaLastBlockSynced.upsert({
-            where: { category: PrismaLastBlockSyncedCategory.POOLS },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
             update: {
                 blockNumber: endBlock,
             },

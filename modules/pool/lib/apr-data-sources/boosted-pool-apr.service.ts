@@ -1,7 +1,8 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { collectsYieldFee, isComposableStablePool, isWeightedPoolV2 } from '../pool-utils';
+import { collectsYieldFee } from '../pool-utils';
+import { networkContext } from '../../../network/network-context.service';
 
 export class BoostedPoolAprService implements PoolAprService {
     constructor(private readonly yieldProtocolFeePercentage: number) {}
@@ -67,9 +68,10 @@ export class BoostedPoolAprService implements PoolAprService {
                     }
 
                     await prisma.prismaPoolAprItem.upsert({
-                        where: { id: itemId },
+                        where: { id_chain: { id: itemId, chain: networkContext.chain } },
                         create: {
                             id: itemId,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             apr: userApr,
                             title: aprItem.title,

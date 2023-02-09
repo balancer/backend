@@ -3,7 +3,7 @@ import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
 import { contextMiddleware } from './app/middleware/contextMiddleware';
-import { accountMiddleware } from './app/middleware/accountMiddleware';
+import { sessionMiddleware } from './app/middleware/sessionMiddleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import {
@@ -21,7 +21,6 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from './prisma/prisma-client';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
-import { networkConfig } from './modules/config/network-config';
 
 async function startServer() {
     const app = createExpressApp();
@@ -29,7 +28,7 @@ async function startServer() {
     Sentry.init({
         dsn: env.SENTRY_DSN,
         tracesSampleRate: 0.005,
-        environment: `${networkConfig.chain.slug}-${env.DEPLOYMENT_ENV}`,
+        environment: `${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Apollo(),
@@ -74,7 +73,7 @@ async function startServer() {
 
     app.use(corsMiddleware);
     app.use(contextMiddleware);
-    app.use(accountMiddleware);
+    app.use(sessionMiddleware);
 
     //startWorker(app);
     loadRestRoutes(app);

@@ -1,8 +1,8 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from '@gnosis.pm/safe-core-sdk';
 import { ethers, providers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { networkConfig } from '../config/network-config';
 import { Cache } from 'memory-cache';
+import { networkContext } from '../network/network-context.service';
 
 const CACHE_KEY_PREFIX = 'gnosis-address-is-multisig_';
 const TIMEOUT = 2592000; //30 days
@@ -41,7 +41,7 @@ export class GnosisSafeService {
     }
 
     private async getAdapter() {
-        const provider = new providers.JsonRpcProvider(networkConfig.rpcUrl);
+        const provider = new providers.JsonRpcProvider(networkContext.data.rpcUrl);
         const signer = ethers.Wallet.createRandom();
 
         return new EthersAdapter({

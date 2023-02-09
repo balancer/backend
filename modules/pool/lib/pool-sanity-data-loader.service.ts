@@ -1,7 +1,7 @@
-import { sanityClient } from '../../sanity/sanity';
-import { env } from '../../../app/env';
+import { getSanityClient } from '../../sanity/sanity';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolCategoryType } from '@prisma/client';
+import { networkContext } from '../../network/network-context.service';
 
 interface SanityPoolConfig {
     incentivizedPools: string[];
@@ -15,7 +15,7 @@ interface SanityPoolConfig {
 
 export class PoolSanityDataLoaderService {
     public async syncPoolSanityData() {
-        const response = await sanityClient.fetch(`*[_type == "config" && chainId == ${env.CHAIN_ID}][0]{
+        const response = await getSanityClient().fetch(`*[_type == "config" && chainId == ${networkContext.chainId}][0]{
             incentivizedPools,
             blacklistedPools,
             poolFilters
@@ -40,6 +40,7 @@ export class PoolSanityDataLoaderService {
             prisma.prismaPoolFilter.createMany({
                 data: config.poolFilters.map((item) => ({
                     id: item.id,
+                    chain: networkContext.chain,
                     title: item.title,
                 })),
                 skipDuplicates: true,
@@ -49,6 +50,7 @@ export class PoolSanityDataLoaderService {
                     .map((item) => {
                         return item.pools.map((poolId) => ({
                             id: `${item.id}-${poolId}`,
+                            chain: networkContext.chain,
                             poolId,
                             filterId: item.id,
                         }));
@@ -72,6 +74,7 @@ export class PoolSanityDataLoaderService {
             prisma.prismaPoolCategory.createMany({
                 data: existingItemsToAdd.map((poolId) => ({
                     id: `${poolId}-${category}`,
+                    chain: networkContext.chain,
                     category,
                     poolId,
                 })),

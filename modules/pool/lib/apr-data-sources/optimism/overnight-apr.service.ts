@@ -1,10 +1,9 @@
-import { isSameAddress } from '@balancer-labs/sdk';
 import axios from 'axios';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
-import { networkConfig } from '../../../../config/network-config';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 type OvernightApr = {
     value: number;
@@ -58,9 +57,10 @@ export class OvernightAprService implements PoolAprService {
             const apr = totalLiquidity > 0 ? (aprData.value / 100) * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
-                where: { id: itemId },
+                where: { id_chain: { id: itemId, chain: networkContext.chain } },
                 create: {
                     id: itemId,
+                    chain: networkContext.chain,
                     poolId: pool.id,
                     title: `${wrappedToken.token.symbol} APR`,
                     apr,

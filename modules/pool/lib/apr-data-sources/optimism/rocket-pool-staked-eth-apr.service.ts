@@ -3,6 +3,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { collectsYieldFee, isComposableStablePool, isWeightedPoolV2 } from '../../pool-utils';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class RocketPoolStakedEthAprService implements PoolAprService {
     private readonly RETH_ADDRESS = '0x9bcef72be871e61ed4fbbc7630889bee758eb81d';
@@ -28,10 +29,11 @@ export class RocketPoolStakedEthAprService implements PoolAprService {
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id: `${pool.id}-reth-apr` },
+                        where: { id_chain: { id: `${pool.id}-reth-apr`, chain: networkContext.chain } },
                         update: { apr: collectsYieldFee(pool) ? userApr : rethApr },
                         create: {
                             id: `${pool.id}-reth-apr`,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             apr: collectsYieldFee(pool) ? userApr : rethApr,
                             title: 'rETH APR',

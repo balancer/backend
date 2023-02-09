@@ -3,6 +3,7 @@ import { GaugeSerivce } from './gauge-service';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { PrismaPoolStakingType } from '@prisma/client';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeService: GaugeSerivce) {}
@@ -29,6 +30,7 @@ export class GaugeStakingService implements PoolStakingService {
                     prisma.prismaPoolStaking.create({
                         data: {
                             id: gaugeStreamer.gaugeAddress,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             type: 'GAUGE',
                             address: gaugeStreamer.gaugeAddress,
@@ -47,6 +49,7 @@ export class GaugeStakingService implements PoolStakingService {
                     prisma.prismaPoolStakingGaugeReward.upsert({
                         create: {
                             id,
+                            chain: networkContext.chain,
                             gaugeId: gaugeStreamer.gaugeAddress,
                             tokenAddress: rewardToken.address,
                             rewardPerSecond: `${rewardToken.rewardsPerSecond}`,
@@ -54,7 +57,7 @@ export class GaugeStakingService implements PoolStakingService {
                         update: {
                             rewardPerSecond: `${rewardToken.rewardsPerSecond}`,
                         },
-                        where: { id },
+                        where: { id_chain: { id, chain: networkContext.chain } },
                     }),
                 );
             }

@@ -2,6 +2,7 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
+import { networkContext } from '../../../network/network-context.service';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -32,10 +33,17 @@ export class BptPriceHandlerService implements TokenPriceHandler {
 
                 operations.push(
                     prisma.prismaTokenPrice.upsert({
-                        where: { tokenAddress_timestamp: { tokenAddress: token.address, timestamp } },
+                        where: {
+                            tokenAddress_timestamp_chain: {
+                                tokenAddress: token.address,
+                                timestamp,
+                                chain: networkContext.chain,
+                            },
+                        },
                         update: { price: price, close: price },
                         create: {
                             tokenAddress: token.address,
+                            chain: networkContext.chain,
                             timestamp,
                             price,
                             high: price,
@@ -48,10 +56,11 @@ export class BptPriceHandlerService implements TokenPriceHandler {
 
                 operations.push(
                     prisma.prismaTokenCurrentPrice.upsert({
-                        where: { tokenAddress: token.address },
+                        where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
                         update: { price: price },
                         create: {
                             tokenAddress: token.address,
+                            chain: networkContext.chain,
                             timestamp,
                             price,
                         },

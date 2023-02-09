@@ -1,19 +1,19 @@
 import axios from 'axios';
 import { twentyFourHoursInSecs } from '../common/time';
 import _ from 'lodash';
+import moment from 'moment-timezone';
+import { tokenService } from '../token/token.service';
+import { TokenDefinition } from '../token/token-types';
+import { isAddress } from 'ethers/lib/utils';
+import { RateLimiter } from 'limiter';
+import { networkContext } from '../network/network-context.service';
 import {
     CoingeckoPriceResponse,
     HistoricalPrice,
     HistoricalPriceResponse,
     Price,
     TokenPrices,
-} from '../../legacy/token-price/token-price-types';
-import moment from 'moment-timezone';
-import { tokenService } from '../token/token.service';
-import { TokenDefinition } from '../token/token-types';
-import { getAddress, isAddress } from 'ethers/lib/utils';
-import { networkConfig } from '../config/network-config';
-import { RateLimiter } from 'limiter';
+} from './coingecko-types';
 
 interface MappedToken {
     platform: string;
@@ -68,24 +68,18 @@ const requestRateLimiter = new RateLimiter({ tokensPerInterval: 15, interval: 'm
 export class CoingeckoService {
     private readonly baseUrl: string;
     private readonly fiatParam: string;
-    private readonly platformId: string;
-    private readonly nativeAssetId: string;
-    private readonly nativeAssetAddress: string;
 
     constructor() {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
-        this.platformId = networkConfig.coingecko.platformId;
-        this.nativeAssetId = networkConfig.coingecko.nativeAssetId;
-        this.nativeAssetAddress = networkConfig.chain.nativeAssetAddress;
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
         try {
             const response = await this.get<CoingeckoPriceResponse>(
-                `/simple/price?ids=${this.nativeAssetId}&vs_currencies=${this.fiatParam}`,
+                `/simple/price?ids=${networkContext.data.coingecko.nativeAssetId}&vs_currencies=${this.fiatParam}`,
             );
-            return response[this.nativeAssetId];
+            return response[networkContext.data.coingecko.nativeAssetId];
         } catch (error) {
             //console.error('Unable to fetch Ether price', error);
             throw error;
@@ -125,8 +119,8 @@ export class CoingeckoService {
             const results = this.parsePaginatedTokens(paginatedResults, mapped);
 
             // Inject native asset price if included in requested addresses
-            if (addresses.includes(this.nativeAssetAddress)) {
-                results[this.nativeAssetAddress] = await this.getNativeAssetPrice();
+            if (addresses.includes(networkContext.data.chain.nativeAssetAddress)) {
+                results[networkContext.data.chain.nativeAssetAddress] = await this.getNativeAssetPrice();
             }
 
             return results;
@@ -194,7 +188,7 @@ export class CoingeckoService {
         }
 
         return {
-            platform: this.platformId,
+            platform: networkContext.data.coingecko.platformId,
             address: address.toLowerCase(),
         };
     }

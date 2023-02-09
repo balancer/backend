@@ -1,9 +1,9 @@
 import { prisma } from '../../prisma/prisma-client';
-import { isFantomNetwork } from '../config/network-config';
 import { createIndividualDatabaseSchemaForTest } from '../tests-helper/setupTestDatabase';
 import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { beetsService } from './beets.service';
 import { rpcHandlers } from './mock-handlers/rpc';
+import { networkContext } from '../network/network-context.service';
 
 beforeAll(async () => {
     await createIndividualDatabaseSchemaForTest();
@@ -24,7 +24,7 @@ test('retrieve fBeets ratio before initial sync - fails', async () => {
     } catch (e: any) {
         expect(e.message).toBe('Fbeets data has not yet been synced');
     }
-    if (!isFantomNetwork()) {
+    if (!networkContext.isFantomNetwork) {
         expect(ratio).toBe('1.0');
     }
 
@@ -32,7 +32,7 @@ test('retrieve fBeets ratio before initial sync - fails', async () => {
 });
 
 test('sync fBeets ratio', async () => {
-    if (isFantomNetwork()) {
+    if (networkContext.isFantomNetwork) {
         let fbeets;
         fbeets = await prisma.prismaFbeets.findFirst({});
         expect(fbeets).toBe(null);
@@ -46,7 +46,7 @@ test('sync fBeets ratio', async () => {
 test('retrieve updated fBeets ratio', async () => {
     await beetsService.syncFbeetsRatio();
     const ratio = await beetsService.getFbeetsRatio();
-    if (isFantomNetwork()) {
+    if (networkContext.isFantomNetwork) {
         expect(ratio).toBe('2');
     } else {
         expect(ratio).toBe('1.0');

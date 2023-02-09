@@ -6,15 +6,14 @@ import { oldBnum } from '../big-number/old-big-number';
 import axios from 'axios';
 import { FundManagement, SwapInfo, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
 import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../web3/addresses';
-import { networkConfig, DeploymentEnv } from '../config/network-config';
 import { BigNumber } from 'ethers';
 import { TokenAmountHumanReadable } from '../common/global-types';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import VaultAbi from '../pool/abi/Vault.json';
-import { jsonRpcProvider } from '../web3/contract';
-import { balancerSdk } from './src/balancer-sdk';
 import { env } from '../../app/env';
+import { networkContext } from '../network/network-context.service';
+import { DeploymentEnv } from '../network/network-config-types';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -47,16 +46,18 @@ export class BalancerSorService {
         }
 
         const { data } = await axios.post<{ swapInfo: SwapInfo }>(
-            networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
+            networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
             {
                 swapType,
                 tokenIn,
                 tokenOut,
                 swapAmountScaled,
                 swapOptions: {
-                    maxPools: swapOptions.maxPools || networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
+                    maxPools:
+                        swapOptions.maxPools || networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
                     forceRefresh:
-                        swapOptions.forceRefresh || networkConfig.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
+                        swapOptions.forceRefresh ||
+                        networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
                 },
             },
         );
@@ -211,7 +212,7 @@ export class BalancerSorService {
     }
 
     private queryBatchSwap(swapType: SwapTypes, swaps: SwapV2[], assets: string[]): Promise<string[]> {
-        const vaultContract = new Contract(networkConfig.balancer.vault, VaultAbi, jsonRpcProvider);
+        const vaultContract = new Contract(networkContext.data.balancer.vault, VaultAbi, networkContext.provider);
         const funds: FundManagement = {
             sender: AddressZero,
             recipient: AddressZero,

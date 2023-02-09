@@ -1,18 +1,18 @@
 import moment from 'moment';
 import { graphql } from 'msw';
 import { prisma } from '../../prisma/prisma-client';
-import { networkConfig } from '../config/network-config';
 import {
-    createWeightedPoolFromDefault,
-    defaultTokens,
     createRandomSnapshotsForPool,
     createRandomSnapshotsForPoolForTimestamp,
     createUserPoolBalanceSnapshot,
+    createWeightedPoolFromDefault,
+    defaultTokens,
 } from '../tests-helper/poolTestdataHelpers';
 import { createIndividualDatabaseSchemaForTest as createDedicatedSchemaForTest } from '../tests-helper/setupTestDatabase';
 import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { userService } from './user.service';
 import { secondsPerDay } from '../common/time';
+import { networkContext } from '../network/network-context.service';
 
 /*
 TEST SETUP:
@@ -65,12 +65,12 @@ beforeAll(async () => {
 
     const fidelio = await createWeightedPoolFromDefault(
         {
-            id: networkConfig.fbeets!.poolId,
+            id: networkContext.data.fbeets!.poolId,
             name: 'Fidelio Duetto',
-            address: networkConfig.fbeets!.poolAddress,
+            address: networkContext.data.fbeets!.poolAddress,
             staking: {
                 create: {
-                    id: networkConfig.fbeets!.farmId,
+                    id: networkContext.data.fbeets!.farmId,
                 },
             },
         },
@@ -228,7 +228,7 @@ test('The user requests the user stats for the first time, requesting from subgr
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -459,7 +459,7 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -840,7 +840,7 @@ test('User snapshots in the database must be picked up and synced by the sync pr
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -1057,7 +1057,7 @@ test('User has left and re-entered the pool. Make sure the sync does not persist
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -1141,7 +1141,7 @@ test('Todays user snapshot must be gradually updated based on an updated pool sn
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -1153,7 +1153,7 @@ test('Todays user snapshot must be gradually updated based on an updated pool sn
 
     // update poolsnapshot of today
     await prisma.prismaPoolSnapshot.update({
-        where: { id: `${poolId1}-${today}` },
+        where: { id_chain: { id: `${poolId1}-${today}`, chain: 'FANTOM' } },
         data: {
             totalLiquidity: 1000,
             volume24h: 500,
@@ -1198,7 +1198,7 @@ test('Todays user snapshot must be gradually updated based on an updated pool sn
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -1223,10 +1223,10 @@ test('User requests pool snapshots for Fidelio Duetto Pool. Make sure fBeets are
 
     const newestSnapshotTimestamp = oneDayAgo;
 
-    const fidelioPoolId = networkConfig.fbeets!.poolId;
-    const fidelioPoolAddress = networkConfig.fbeets!.poolAddress;
-    const fbeets = networkConfig.fbeets!.address;
-    const fbeetsFarm = networkConfig.fbeets!.farmId;
+    const fidelioPoolId = networkContext.data.fbeets!.poolId;
+    const fidelioPoolAddress = networkContext.data.fbeets!.poolAddress;
+    const fbeets = networkContext.data.fbeets!.address;
+    const fbeetsFarm = networkContext.data.fbeets!.farmId;
 
     mockServer.use(
         ...[
@@ -1343,7 +1343,7 @@ test('User requests pool snapshots for Fidelio Duetto Pool. Make sure fBeets are
                     `${
                         userBalanceSnapshot.percentShare *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;
@@ -1371,10 +1371,10 @@ test('Sync user snapshots for Fidelio Duetto pool. Make sure fBeets are correctl
 
     const newestSnapshotTimestamp = oneDayAgo;
 
-    const fidelioPoolId = networkConfig.fbeets!.poolId;
-    const fidelioPoolAddress = networkConfig.fbeets!.poolAddress;
-    const fbeets = networkConfig.fbeets!.address;
-    const fbeetsFarm = networkConfig.fbeets!.farmId;
+    const fidelioPoolId = networkContext.data.fbeets!.poolId;
+    const fidelioPoolAddress = networkContext.data.fbeets!.poolAddress;
+    const fbeets = networkContext.data.fbeets!.address;
+    const fbeetsFarm = networkContext.data.fbeets!.farmId;
 
     await createUserPoolBalanceSnapshot({
         id: `${fidelioPoolId}-${userAddress}-${threeDaysAgo}`,
@@ -1507,7 +1507,7 @@ test('Sync user snapshots for Fidelio Duetto pool. Make sure fBeets are correctl
                     `${
                         parseFloat(userBalanceSnapshot.percentShare) *
                         poolSnapshot.fees24h *
-                        (1 - networkConfig.balancer.swapProtocolFeePercentage)
+                        (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`,
                 );
                 foundPoolSnapshot = true;

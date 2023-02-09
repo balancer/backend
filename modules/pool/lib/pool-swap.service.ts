@@ -19,6 +19,7 @@ import { PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
+import { networkContext } from '../../network/network-context.service';
 
 export class PoolSwapService {
     constructor(
@@ -224,6 +225,7 @@ export class PoolSwapService {
 
                     return {
                         id: swap.id,
+                        chain: networkContext.chain,
                         timestamp: swap.timestamp,
                         poolId: swap.poolId.id,
                         userAddress: swap.userAddress.id,
@@ -296,6 +298,7 @@ export class PoolSwapService {
                         prisma.prismaPoolBatchSwap.create({
                             data: {
                                 id: startSwap.id,
+                                chain: networkContext.chain,
                                 timestamp: startSwap.timestamp,
                                 userAddress: startSwap.userAddress,
                                 tokenIn: startSwap.tokenIn,
@@ -310,7 +313,7 @@ export class PoolSwapService {
                         }),
                         ...batchSwaps.map((swap, index) =>
                             prisma.prismaPoolSwap.update({
-                                where: { id: swap.id },
+                                where: { id_chain: { id: swap.id, chain: networkContext.chain } },
                                 data: { batchSwapId: startSwap.id, batchSwapIdx: index },
                             }),
                         ),

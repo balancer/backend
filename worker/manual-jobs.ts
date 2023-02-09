@@ -1,8 +1,6 @@
-import { isFantomNetwork } from '../modules/config/network-config';
 import { createAlertsIfNotExist } from './create-alerts';
-import { fantomJobs } from './fantom-jobs';
-import { optimismJobs } from './optimism-jobs';
 import { workerQueue } from './queue';
+import { networkContext } from '../modules/network/network-context.service';
 
 export type WorkerJob = {
     name: string;
@@ -16,17 +14,9 @@ async function scheduleJobWithInterval(jobs: WorkerJob[]): Promise<void> {
 }
 
 export async function scheduleJobs(): Promise<void> {
-    if (isFantomNetwork()) {
-        await scheduleJobWithInterval(fantomJobs);
-    } else {
-        await scheduleJobWithInterval(optimismJobs);
-    }
+    await scheduleJobWithInterval(networkContext.config.workerJobs);
 }
 
 export async function createAlerts(): Promise<void> {
-    if (isFantomNetwork()) {
-        await createAlertsIfNotExist(fantomJobs);
-    } else {
-        await createAlertsIfNotExist(optimismJobs);
-    }
+    await createAlertsIfNotExist(networkContext.config.workerJobs);
 }

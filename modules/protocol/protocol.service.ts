@@ -2,9 +2,9 @@ import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { Cache } from 'memory-cache';
-import { PrismaUserBalanceType, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { GqlLatestSyncedBlocks } from '../../schema';
+import { PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
+import { networkContext } from '../network/network-context.service';
 
 export type ProtocolMetrics = {
     poolCount: string;
@@ -82,15 +82,15 @@ export class ProtocolService {
 
     public async getLatestSyncedBlocks(): Promise<LatestsSyncedBlocks> {
         const userStakeSyncBlock = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type: PrismaUserBalanceType.STAKED },
+            where: { type_chain: { type: PrismaUserBalanceType.STAKED, chain: networkContext.chain } },
         });
 
         const userWalletSyncBlock = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type: PrismaUserBalanceType.WALLET },
+            where: { type_chain: { type: PrismaUserBalanceType.WALLET, chain: networkContext.chain } },
         });
 
         const poolSyncBlock = await prisma.prismaLastBlockSynced.findUnique({
-            where: { category: PrismaLastBlockSyncedCategory.POOLS },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
         });
 
         return {

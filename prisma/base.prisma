@@ -11,9 +11,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Chain {
+    MAINNET
+    POLYGON
+    ARBITRUM
+    FANTOM
+    OPTIMISM
+}
 
 model PrismaLastBlockSynced {
-    category            PrismaLastBlockSyncedCategory @id
+    @@id([category, chain])
+
+    category            PrismaLastBlockSyncedCategory
+    chain               Chain       @default(MAINNET)
     blockNumber         Int
 }
 

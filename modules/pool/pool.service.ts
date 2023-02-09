@@ -20,28 +20,12 @@ import {
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
-import { jsonRpcProvider } from '../web3/contract';
-import { BoostedPoolAprService } from './lib/apr-data-sources/boosted-pool-apr.service';
-import { MasterchefFarmAprService } from './lib/apr-data-sources/fantom/masterchef-farm-apr.service';
-import { ReliquaryFarmAprService } from './lib/apr-data-sources/fantom/reliquary-farm-apr.service';
-import { SpookySwapAprService } from './lib/apr-data-sources/fantom/spooky-swap-apr.service';
-import { StaderStakedFtmAprService } from './lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
-import { YearnVaultAprService } from './lib/apr-data-sources/fantom/yearn-vault-apr.service';
-import { OvernightAprService } from './lib/apr-data-sources/optimism/overnight-apr.service';
-import { RocketPoolStakedEthAprService } from './lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
-import { GaugeAprService } from './lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
-import { WstethAprService } from './lib/apr-data-sources/optimism/wsteth-apr.service';
-import { PhantomStableAprService } from './lib/apr-data-sources/phantom-stable-apr.service';
-import { ReaperCryptAprService } from './lib/apr-data-sources/reaper-crypt-apr.service';
-import { SwapFeeAprService } from './lib/apr-data-sources/swap-fee-apr.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolCreatorService } from './lib/pool-creator.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
@@ -52,18 +36,14 @@ import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { MasterChefStakingService } from './lib/staking/fantom/master-chef-staking.service';
-import { ReliquaryStakingService } from './lib/staking/fantom/reliquary-staking.service';
-import { gaugeSerivce } from './lib/staking/optimism/gauge-service';
-import { GaugeStakingService } from './lib/staking/optimism/gauge-staking.service';
 import { PoolStakingService } from './pool-types';
+import { networkContext } from '../network/network-context.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
 
 export class PoolService {
     private cache = new Cache<string, any>();
     constructor(
-        private readonly provider: Provider,
         private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
@@ -72,10 +52,13 @@ export class PoolService {
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
-        private readonly poolStakingServices: PoolStakingService[],
         private readonly poolSnapshotService: PoolSnapshotService,
         private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
+
+    private get poolStakingServices(): PoolStakingService[] {
+        return networkContext.config.poolStakingServices;
+    }
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
         return this.poolGqlLoaderService.getPool(id);
@@ -150,7 +133,7 @@ export class PoolService {
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
-        const blockNumber = await this.provider.getBlockNumber();
+        const blockNumber = await networkContext.provider.getBlockNumber();
 
         return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
     }
@@ -170,7 +153,7 @@ export class PoolService {
     }
 
     public async syncNewPoolsFromSubgraph(): Promise<string[]> {
-        const blockNumber = await this.provider.getBlockNumber();
+        const blockNumber = await networkContext.provider.getBlockNumber();
 
         const poolIds = await this.poolCreatorService.syncNewPoolsFromSubgraph(blockNumber);
 
@@ -193,28 +176,28 @@ export class PoolService {
             },
         });
         const poolIds = result.map((item) => item.id);
-        const blockNumber = await this.provider.getBlockNumber();
+        const blockNumber = await networkContext.provider.getBlockNumber();
 
         const chunks = _.chunk(poolIds, 100);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainData(chunk, this.provider, blockNumber);
+            await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);
         }
     }
 
     public async updateOnChainDataForPools(poolIds: string[], blockNumber: number) {
-        await this.poolOnChainDataService.updateOnChainData(poolIds, this.provider, blockNumber);
+        await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
     }
 
     public async loadOnChainDataForPoolsWithActiveUpdates() {
-        const blockNumber = await this.provider.getBlockNumber();
+        const blockNumber = await networkContext.provider.getBlockNumber();
         const timestamp = moment().subtract(5, 'minutes').unix();
         console.time('getPoolsWithActiveUpdates');
         const poolIds = await balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
         console.timeEnd('getPoolsWithActiveUpdates');
 
         console.time('updateOnChainData');
-        await this.poolOnChainDataService.updateOnChainData(poolIds, this.provider, blockNumber);
+        await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
         console.timeEnd('updateOnChainData');
     }
 
@@ -321,55 +304,14 @@ export class PoolService {
 }
 
 export const poolService = new PoolService(
-    jsonRpcProvider,
     new PoolCreatorService(userService),
-    new PoolOnChainDataService(networkConfig.multicall, networkConfig.balancer.vault, tokenService),
+    new PoolOnChainDataService(tokenService),
     new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
     new PoolGqlLoaderService(configService),
     new PoolSanityDataLoaderService(),
-    new PoolAprUpdaterService([
-        //order matters for the boosted pool aprs: linear, phantom stable, then boosted
-        ...(isFantomNetwork()
-            ? [
-                  new SpookySwapAprService(tokenService),
-                  new YearnVaultAprService(tokenService),
-                  new StaderStakedFtmAprService(tokenService),
-              ]
-            : [
-                  new RocketPoolStakedEthAprService(tokenService, networkConfig.balancer.yieldProtocolFeePercentage),
-                  new WstethAprService(
-                      tokenService,
-                      networkConfig.lido!.wstEthAprEndpoint,
-                      networkConfig.lido!.wstEthContract,
-                      networkConfig.balancer.yieldProtocolFeePercentage,
-                  ),
-                  new OvernightAprService(networkConfig.overnight!.aprEndpoint, tokenService),
-              ]),
-        new ReaperCryptAprService(
-            networkConfig.reaper.linearPoolFactories,
-            networkConfig.reaper.averageAPRAcrossLastNHarvests,
-            tokenService,
-        ),
-        new PhantomStableAprService(networkConfig.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(networkConfig.balancer.yieldProtocolFeePercentage),
-        new SwapFeeAprService(networkConfig.balancer.swapProtocolFeePercentage),
-        ...(isFantomNetwork()
-            ? [new MasterchefFarmAprService(), new ReliquaryFarmAprService()]
-            : [
-                  new GaugeAprService(gaugeSerivce, tokenService, [
-                      networkConfig.beets.address,
-                      networkConfig.bal.address,
-                  ]),
-              ]),
-    ]),
+    new PoolAprUpdaterService(),
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
-    isFantomNetwork()
-        ? [
-              new MasterChefStakingService(masterchefService),
-              new ReliquaryStakingService(networkConfig.reliquary!.address, reliquarySubgraphService),
-          ]
-        : [new GaugeStakingService(gaugeSerivce)],
     new PoolSnapshotService(balancerSubgraphService, coingeckoService),
     new ReliquarySnapshotService(reliquarySubgraphService),
 );

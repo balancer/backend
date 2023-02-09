@@ -1,8 +1,5 @@
 import { Cache, CacheClass } from 'memory-cache';
 import { GraphQLClient } from 'graphql-request';
-import { networkConfig } from '../../config/network-config';
-
-import moment from 'moment-timezone';
 import {
     getSdk,
     OrderDirection,
@@ -10,14 +7,13 @@ import {
     UserBalanceSnapshot_OrderBy,
     UserBalanceSnapshotsQuery,
 } from './generated/user-snapshot-subgraph-types';
+import { networkContext } from '../../network/network-context.service';
 
 export class UserSnapshotSubgraphService {
     private readonly cache: CacheClass<string, any>;
-    private readonly client: GraphQLClient;
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.userBalances);
     }
 
     public async getMetadata() {
@@ -60,7 +56,9 @@ export class UserSnapshotSubgraphService {
     }
 
     public get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.userBalances);
+
+        return getSdk(client);
     }
 }
 

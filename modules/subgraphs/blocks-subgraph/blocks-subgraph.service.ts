@@ -17,8 +17,8 @@ import {
 } from '../../common/time';
 import { subgraphLoadAll } from '../subgraph-util';
 import moment from 'moment-timezone';
-import { networkConfig } from '../../config/network-config';
 import { Cache, CacheClass } from 'memory-cache';
+import { networkContext } from '../../network/network-context.service';
 
 const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
 const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
@@ -35,7 +35,7 @@ export class BlocksSubgraphService {
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkConfig.subgraphs.blocks);
+        this.client = new GraphQLClient(networkContext.data.subgraphs.blocks);
     }
 
     public async getAverageBlockTime(): Promise<number> {
@@ -137,7 +137,7 @@ export class BlocksSubgraphService {
     }
 
     public async cacheBlockFrom24HoursAgo(): Promise<BlockFragment> {
-        const blockTime = networkConfig.avgBlockSpeed;
+        const blockTime = networkContext.data.avgBlockSpeed;
 
         const args: BlocksQueryVariables = {
             orderDirection: OrderDirection.Desc,
@@ -166,7 +166,7 @@ export class BlocksSubgraphService {
     }
 
     public async getBlockForTimestamp(timestamp: number): Promise<BlockFragment> {
-        const blockTime = networkConfig.avgBlockSpeed;
+        const blockTime = networkContext.data.avgBlockSpeed;
 
         const args: BlocksQueryVariables = {
             orderDirection: OrderDirection.Desc,
@@ -189,7 +189,7 @@ export class BlocksSubgraphService {
 
     public async getDailyBlocks(numDays: number): Promise<BlockFragment[]> {
         const today = moment.tz('GMT').format('YYYY-MM-DD');
-        const maxDays = moment.tz('GMT').diff(moment.tz(networkConfig.subgraphs.startDate, 'GMT'), 'days');
+        const maxDays = moment.tz('GMT').diff(moment.tz(networkContext.data.subgraphs.startDate, 'GMT'), 'days');
         numDays = maxDays < numDays ? maxDays : numDays;
 
         const timestampsWithBuffer = getDailyTimestampsWithBuffer(numDays);

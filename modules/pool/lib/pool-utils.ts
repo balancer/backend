@@ -1,6 +1,6 @@
 import { PrismaPoolType } from '@prisma/client';
-import { networkConfig } from '../../config/network-config';
 import { isSameAddress } from '@balancer-labs/sdk';
+import { networkContext } from '../../network/network-context.service';
 
 type PoolWithTypeAndFactory = {
     address: string;
@@ -15,15 +15,16 @@ export function isStablePool(poolType: PrismaPoolType) {
 export function isWeightedPoolV2(pool: PoolWithTypeAndFactory) {
     return (
         pool.type === 'WEIGHTED' &&
-        networkConfig.balancer.weightedPoolV2Factories.find((factory) => isSameAddress(pool.factory || '', factory)) !==
-            undefined
+        networkContext.data.balancer.weightedPoolV2Factories.find((factory) =>
+            isSameAddress(pool.factory || '', factory),
+        ) !== undefined
     );
 }
 
 export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
     return (
         pool.type === 'PHANTOM_STABLE' &&
-        networkConfig.balancer.composableStablePoolFactories.find((factory) =>
+        networkContext.data.balancer.composableStablePoolFactories.find((factory) =>
             isSameAddress(pool.factory || '', factory),
         ) !== undefined
     );
@@ -31,11 +32,11 @@ export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
     return (
-        !networkConfig.balancer.poolsInRecoveryMode.includes(pool.address) &&
+        !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address) &&
         (isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE')
     );
 }
 
 export function collectsSwapFee(pool: PoolWithTypeAndFactory) {
-    return !networkConfig.balancer.poolsInRecoveryMode.includes(pool.address);
+    return !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address);
 }

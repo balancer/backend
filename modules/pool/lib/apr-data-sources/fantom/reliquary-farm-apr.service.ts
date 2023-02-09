@@ -4,10 +4,10 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
-import { networkConfig } from '../../../../config/network-config';
 import { reliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class ReliquaryFarmAprService implements PoolAprService {
     public getAprServiceName(): string {
@@ -32,7 +32,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const pricePerShare = totalLiquidity / totalShares;
 
-            const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkConfig.beets.address);
+            const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address);
             const farmBeetsPerYear = parseFloat(farm.beetsPerSecond) * secondsPerYear;
             const beetsValuePerYear = beetsPrice * farmBeetsPerYear;
 
@@ -65,7 +65,10 @@ export class ReliquaryFarmAprService implements PoolAprService {
                 operations.push(
                     prisma.prismaPoolStakingReliquaryFarmLevel.update({
                         where: {
-                            id: `${subgraphFarm.pid}-${farmLevel.level}`,
+                            id_chain: {
+                                id: `${subgraphFarm.pid}-${farmLevel.level}`,
+                                chain: networkContext.chain,
+                            },
                         },
                         data: {
                             apr: apr,
@@ -76,7 +79,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
 
             operations.push(
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id: `${pool.id}-beets-apr` },
+                    where: { id_chain: { id: `${pool.id}-beets-apr`, chain: networkContext.chain } },
                     update: {
                         range: {
                             update: { min: minApr, max: maxApr },
@@ -84,6 +87,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
                     },
                     create: {
                         id: `${pool.id}-beets-apr`,
+                        chain: networkContext.chain,
                         poolId: pool.id,
                         title: 'BEETS reward APR',
                         apr: 0,

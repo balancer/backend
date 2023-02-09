@@ -1,11 +1,13 @@
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
-import { networkConfig } from '../config/network-config';
+import { networkContext } from '../network/network-context.service';
 
-export const sanityClient = SanityClient({
-    projectId: networkConfig.sanity.projectId,
-    dataset: networkConfig.sanity.dataset,
-    apiVersion: '2021-12-15',
-    token: env.SANITY_API_TOKEN,
-    useCdn: false,
-});
+export function getSanityClient() {
+    return SanityClient({
+        projectId: networkContext.data.sanity.projectId,
+        dataset: networkContext.data.sanity.dataset,
+        apiVersion: '2021-12-15',
+        token: env.SANITY_API_TOKEN,
+        useCdn: false,
+    });
+}

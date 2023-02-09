@@ -5,6 +5,7 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { networkContext } from '../../network/network-context.service';
 
 export class PoolUsdDataService {
     constructor(
@@ -54,7 +55,7 @@ export class PoolUsdDataService {
             for (const item of balanceUSDs) {
                 updates.push(
                     prisma.prismaPoolTokenDynamicData.update({
-                        where: { id: item.id },
+                        where: { id_chain: { id: item.id, chain: networkContext.chain } },
                         data: { balanceUSD: item.balanceUSD },
                     }),
                 );
@@ -62,7 +63,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id: pool.id },
+                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                     data: { totalLiquidity },
                 }),
             );
@@ -103,7 +104,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id: pool.id },
+                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                     data: { totalLiquidity24hAgo: totalLiquidity, totalShares24hAgo: pool.totalShares },
                 }),
             );
@@ -149,7 +150,7 @@ export class PoolUsdDataService {
             ) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id: pool.id },
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: { volume24h, fees24h, volume48h, fees48h },
                     }),
                 );
@@ -172,7 +173,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id: pool.id },
+                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                     data: {
                         lifetimeVolume: parseFloat(pool.totalSwapVolume),
                         lifetimeSwapFees: parseFloat(pool.totalSwapFee),
@@ -196,7 +197,7 @@ export class PoolUsdDataService {
 
                 updates.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id: pool.id },
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: {
                             sharePriceAth: sharePriceAth.sharePrice,
                             sharePriceAthTimestamp: sharePriceAth.timestamp,

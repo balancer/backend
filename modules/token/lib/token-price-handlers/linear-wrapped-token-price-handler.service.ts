@@ -2,6 +2,7 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
+import { networkContext } from '../../../network/network-context.service';
 
 export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -43,10 +44,17 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
 
                     operations.push(
                         prisma.prismaTokenPrice.upsert({
-                            where: { tokenAddress_timestamp: { tokenAddress: token.address, timestamp } },
+                            where: {
+                                tokenAddress_timestamp_chain: {
+                                    tokenAddress: token.address,
+                                    timestamp,
+                                    chain: networkContext.chain,
+                                },
+                            },
                             update: { price, close: price },
                             create: {
                                 tokenAddress: token.address,
+                                chain: networkContext.chain,
                                 timestamp,
                                 price,
                                 high: price,
@@ -59,10 +67,11 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
 
                     operations.push(
                         prisma.prismaTokenCurrentPrice.upsert({
-                            where: { tokenAddress: token.address },
+                            where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
                             update: { price: price },
                             create: {
                                 tokenAddress: token.address,
+                                chain: networkContext.chain,
                                 timestamp,
                                 price,
                             },

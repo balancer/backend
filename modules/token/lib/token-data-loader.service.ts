@@ -1,8 +1,8 @@
-import { sanityClient } from '../../sanity/sanity';
-import { env } from '../../../app/env';
+import { getSanityClient } from '../../sanity/sanity';
 import { prisma } from '../../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
+import { networkContext } from '../../network/network-context.service';
 
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
     '250': 'fantomToken',
@@ -29,8 +29,8 @@ interface SanityToken {
 
 export class TokenDataLoaderService {
     public async syncSanityTokenData(): Promise<void> {
-        const sanityTokens = await sanityClient.fetch<SanityToken[]>(`
-            *[_type=="${SANITY_TOKEN_TYPE_MAP[env.CHAIN_ID]}"] {
+        const sanityTokens = await getSanityClient().fetch<SanityToken[]>(`
+            *[_type=="${SANITY_TOKEN_TYPE_MAP[networkContext.chainId]}"] {
                 name,
                 address,
                 symbol,
@@ -69,10 +69,13 @@ export class TokenDataLoaderService {
             }
 
             await prisma.prismaToken.upsert({
-                where: { address: tokenAddress },
+                where: {
+                    address_chain: { address: tokenAddress, chain: networkContext.chain },
+                },
                 create: {
                     name: sanityToken.name,
                     address: tokenAddress,
+                    chain: networkContext.chain,
                     symbol: sanityToken.symbol,
                     decimals: sanityToken.decimals,
                     logoURI: sanityToken.logoURI,
@@ -113,6 +116,7 @@ export class TokenDataLoaderService {
         await prisma.prismaTokenType.createMany({
             data: addToWhitelist.map((token) => ({
                 id: `${token.address}-white-listed`,
+                chain: networkContext.chain,
                 tokenAddress: token.address.toLowerCase(),
                 type: 'WHITE_LISTED' as const,
             })),
@@ -138,6 +142,7 @@ export class TokenDataLoaderService {
             if (pool && !tokenTypes.includes('BPT')) {
                 types.push({
                     id: `${token.address}-bpt`,
+                    chain: networkContext.chain,
                     type: 'BPT',
                     tokenAddress: token.address,
                 });
@@ -146,6 +151,7 @@ export class TokenDataLoaderService {
             if ((pool?.type === 'PHANTOM_STABLE' || pool?.type === 'LINEAR') && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
+                    chain: networkContext.chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
                 });
@@ -158,6 +164,7 @@ export class TokenDataLoaderService {
             if (linearPool && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
                     id: `${token.address}-linear-wrapped`,
+                    chain: networkContext.chain,
                     type: 'LINEAR_WRAPPED_TOKEN',
                     tokenAddress: token.address,
                 });

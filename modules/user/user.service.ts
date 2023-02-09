@@ -2,29 +2,29 @@ import { PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { isFantomNetwork, networkConfig } from '../config/network-config';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
-import { UserSyncMasterchefFarmBalanceService } from './lib/fantom/user-sync-masterchef-farm-balance.service';
-import { UserSyncReliquaryFarmBalanceService } from './lib/fantom/user-sync-reliquary-farm-balance.service';
-import { UserSyncGaugeBalanceService } from './lib/optimism/user-sync-gauge-balance.service';
 import { UserBalanceService } from './lib/user-balance.service';
 import { UserSnapshotService } from './lib/user-snapshot.service';
 import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
 import { UserPoolBalance, UserPoolSnapshot, UserStakedBalanceService } from './user-types';
+import { networkContext } from '../network/network-context.service';
 
 export class UserService {
     constructor(
         private readonly userBalanceService: UserBalanceService,
         private readonly walletSyncService: UserSyncWalletBalanceService,
-        private readonly stakedSyncServices: UserStakedBalanceService[],
         private readonly poolSwapService: PoolSwapService,
         private readonly userSnapshotService: UserSnapshotService,
     ) {}
+
+    private get stakedSyncServices(): UserStakedBalanceService[] {
+        return networkContext.config.userStakedBalanceServices;
+    }
 
     public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
         return this.userBalanceService.getUserPoolBalances(address);
@@ -92,7 +92,7 @@ export class UserService {
 
     public async syncUserBalance(userAddress: string, poolId: string) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
-            where: { id: poolId },
+            where: { id_chain: { id: poolId, chain: networkContext.chain } },
             include: { staking: true },
         });
 
@@ -133,20 +133,12 @@ export class UserService {
 }
 
 export const userService = new UserService(
-    new UserBalanceService(networkConfig.fbeets?.address ?? ''),
-    new UserSyncWalletBalanceService(networkConfig.balancer.vault),
-    isFantomNetwork()
-        ? [
-              new UserSyncMasterchefFarmBalanceService(networkConfig.fbeets!.address, networkConfig.fbeets!.farmId),
-              new UserSyncReliquaryFarmBalanceService(networkConfig.reliquary!.address),
-          ]
-        : [new UserSyncGaugeBalanceService()],
+    new UserBalanceService(),
+    new UserSyncWalletBalanceService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
     new UserSnapshotService(
         userSnapshotSubgraphService,
         reliquarySubgraphService,
         new PoolSnapshotService(balancerSubgraphService, coingeckoService),
-        networkConfig.fbeets?.address ?? '',
-        networkConfig.fbeets?.poolId ?? '',
     ),
 );

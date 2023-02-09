@@ -3,19 +3,12 @@ import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../../prisma/prisma-client';
 import { TokenDataLoaderService } from './lib/token-data-loader.service';
 import { TokenPriceService } from './lib/token-price.service';
-import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
-import { isFantomNetwork, networkConfig } from '../config/network-config';
-import { BptPriceHandlerService } from './lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from './lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from './lib/token-price-handlers/swaps-price-handler.service';
 import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
-import { FbeetsPriceHandlerService } from './lib/token-price-handlers/fbeets-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { BeetsPriceHandlerService } from './lib/token-price-handlers/beets-price-handler.service';
-import { ClqdrPriceHandlerService } from './lib/token-price-handlers/clqdr-price-handler.service';
+import { networkContext } from '../network/network-context.service';
 
 const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
@@ -36,7 +29,14 @@ export class TokenService {
     }
 
     public async getToken(address: string): Promise<PrismaToken | null> {
-        return prisma.prismaToken.findUnique({ where: { address: address.toLowerCase() } });
+        return prisma.prismaToken.findUnique({
+            where: {
+                address_chain: {
+                    address: address.toLowerCase(),
+                    chain: networkContext.chain,
+                },
+            },
+        });
     }
 
     public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
@@ -58,20 +58,20 @@ export class TokenService {
             orderBy: { priority: 'desc' },
         });
 
-        const weth = tokens.find((token) => token.address === networkConfig.weth.address);
+        const weth = tokens.find((token) => token.address === networkContext.data.weth.address);
 
         if (weth) {
             tokens.push({
                 ...weth,
-                name: networkConfig.eth.name,
-                address: networkConfig.eth.address,
-                symbol: networkConfig.eth.symbol,
+                name: networkContext.data.eth.name,
+                address: networkContext.data.eth.address,
+                symbol: networkContext.data.eth.symbol,
             });
         }
 
         return tokens.map((token) => ({
             ...token,
-            chainId: parseInt(env.CHAIN_ID),
+            chainId: networkContext.data.chain.id,
             //TODO: some linear wrapped tokens are tradable. ie: xBOO
             tradable: !token.types.find(
                 (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'LINEAR_WRAPPED_TOKEN',
@@ -116,7 +116,14 @@ export class TokenService {
     }
 
     public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {
-        return prisma.prismaTokenDynamicData.findUnique({ where: { tokenAddress: tokenAddress.toLowerCase() } });
+        return prisma.prismaTokenDynamicData.findUnique({
+            where: {
+                tokenAddress_chain: {
+                    tokenAddress: tokenAddress.toLowerCase(),
+                    chain: networkContext.chain,
+                },
+            },
+        });
     }
 
     public async getTokensDynamicData(tokenAddresses: string[]): Promise<PrismaTokenDynamicData[]> {
@@ -159,22 +166,20 @@ export class TokenService {
     }
 
     public async deleteTokenType({ tokenAddress, type }: MutationTokenDeleteTokenTypeArgs) {
-        await prisma.prismaTokenType.delete({ where: { tokenAddress_type: { tokenAddress, type } } });
+        await prisma.prismaTokenType.delete({
+            where: {
+                tokenAddress_type_chain: {
+                    tokenAddress,
+                    type,
+                    chain: networkContext.chain,
+                },
+            },
+        });
     }
 }
 
 export const tokenService = new TokenService(
     new TokenDataLoaderService(),
-    new TokenPriceService([
-        new BeetsPriceHandlerService(),
-        ...(isFantomNetwork()
-            ? [new FbeetsPriceHandlerService(networkConfig.fbeets!.address, networkConfig.fbeets!.poolId)]
-            : []),
-        ...(isFantomNetwork() ? [new ClqdrPriceHandlerService()] : []),
-        new CoingeckoPriceHandlerService(networkConfig.weth.address, coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ]),
+    new TokenPriceService(),
     new CoingeckoDataService(coingeckoService),
 );

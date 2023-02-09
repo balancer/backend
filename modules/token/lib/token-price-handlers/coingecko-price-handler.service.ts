@@ -3,6 +3,7 @@ import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { CoingeckoService } from '../../../coingecko/coingecko.service';
+import { networkContext } from '../../../network/network-context.service';
 
 export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
@@ -35,10 +36,17 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
             }
 
             await prisma.prismaTokenPrice.upsert({
-                where: { tokenAddress_timestamp: { tokenAddress: this.weth, timestamp } },
+                where: {
+                    tokenAddress_timestamp_chain: {
+                        tokenAddress: this.weth,
+                        timestamp,
+                        chain: networkContext.chain,
+                    },
+                },
                 update: { price: usdPrice, close: usdPrice },
                 create: {
                     tokenAddress: this.weth,
+                    chain: networkContext.chain,
                     timestamp,
                     price: usdPrice,
                     high: usdPrice,
@@ -66,10 +74,17 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
             if (exists && priceUsd) {
                 operations.push(
                     prisma.prismaTokenPrice.upsert({
-                        where: { tokenAddress_timestamp: { tokenAddress: normalizedTokenAddress, timestamp } },
+                        where: {
+                            tokenAddress_timestamp_chain: {
+                                tokenAddress: normalizedTokenAddress,
+                                timestamp,
+                                chain: networkContext.chain,
+                            },
+                        },
                         update: { price: priceUsd, close: priceUsd },
                         create: {
                             tokenAddress: normalizedTokenAddress,
+                            chain: networkContext.chain,
                             timestamp,
                             price: priceUsd,
                             high: priceUsd,
@@ -83,10 +98,13 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
 
                 operations.push(
                     prisma.prismaTokenCurrentPrice.upsert({
-                        where: { tokenAddress: normalizedTokenAddress },
+                        where: {
+                            tokenAddress_chain: { tokenAddress: normalizedTokenAddress, chain: networkContext.chain },
+                        },
                         update: { price: priceUsd },
                         create: {
                             tokenAddress: normalizedTokenAddress,
+                            chain: networkContext.chain,
                             timestamp,
                             price: priceUsd,
                             coingecko: true,

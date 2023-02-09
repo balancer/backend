@@ -2,7 +2,7 @@ import { poolService } from './pool.service';
 import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
-import { jsonRpcProvider } from '../web3/contract';
+import { networkContext } from '../network/network-context.service';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -165,7 +165,7 @@ const balancerResolvers: Resolvers = {
 
             for (const item of items) {
                 await prisma.prismaPoolDynamicData.update({
-                    where: { id: item.id },
+                    where: { id_chain: { id: item.id, chain: networkContext.chain } },
                     data: { totalSharesNum: parseFloat(item.totalShares) },
                 });
             }
@@ -231,7 +231,7 @@ const balancerResolvers: Resolvers = {
         poolSyncPool: async (parent, { poolId }, context) => {
             isAdminRoute(context);
 
-            const latestBlockNumber = await jsonRpcProvider.getBlockNumber();
+            const latestBlockNumber = await networkContext.provider.getBlockNumber();
             await poolService.updateOnChainDataForPools([poolId], latestBlockNumber);
 
             return 'success';

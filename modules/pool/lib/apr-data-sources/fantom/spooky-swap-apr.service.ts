@@ -3,6 +3,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import axios from 'axios';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
+import { networkContext } from '../../../../network/network-context.service';
 
 const BOO_TOKEN_ADDRESS = '0x841FAD6EAe12c286d1Fd18d1d525DFfA75C7EFFE'.toLowerCase();
 
@@ -39,10 +40,11 @@ export class SpookySwapAprService implements PoolAprService {
 
             operations.push(
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id: `${pool.id}-xboo-apr` },
+                    where: { id_chain: { id: `${pool.id}-xboo-apr`, chain: networkContext.chain } },
                     update: { apr, type: 'LINEAR_BOOSTED' },
                     create: {
                         id: `${pool.id}-xboo-apr`,
+                        chain: networkContext.chain,
                         poolId: pool.id,
                         apr,
                         title: 'xBOO boosted APR',

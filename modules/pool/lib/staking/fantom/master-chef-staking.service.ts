@@ -2,13 +2,13 @@ import { PoolStakingService } from '../../../pool-types';
 import { MasterchefSubgraphService } from '../../../../subgraphs/masterchef-subgraph/masterchef.service';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
-import { networkConfig } from '../../../../config/network-config';
 import { oldBnum } from '../../../../big-number/old-big-number';
 import { formatFixed } from '@ethersproject/bignumber';
 import { getContractAt } from '../../../../web3/contract';
 import ERC20Abi from '../../../../web3//abi/ERC20.json';
 import { BigNumber } from 'ethers';
 import { PrismaPoolStakingType } from '@prisma/client';
+import { networkContext } from '../../../../network/network-context.service';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -17,16 +17,16 @@ export class MasterChefStakingService implements PoolStakingService {
 
     public async syncStakingForPools(): Promise<void> {
         const farms = await this.masterChefSubgraphService.getAllFarms({});
-        const filteredFarms = farms.filter((farm) => !networkConfig.masterchef.excludedFarmIds.includes(farm.id));
+        const filteredFarms = farms.filter((farm) => !networkContext.data.masterchef.excludedFarmIds.includes(farm.id));
         const pools = await prisma.prismaPool.findMany({
             include: { staking: { include: { farm: { include: { rewarders: true } } } } },
         });
         const operations: any[] = [];
 
         for (const farm of filteredFarms) {
-            const isFbeetsFarm = farm.id === networkConfig.fbeets!.farmId;
+            const isFbeetsFarm = farm.id === networkContext.data.fbeets!.farmId;
             const pool = pools.find((pool) =>
-                isFbeetsFarm ? pool.id === networkConfig.fbeets!.poolId : pool.address === farm.pair,
+                isFbeetsFarm ? pool.id === networkContext.data.fbeets!.poolId : pool.address === farm.pair,
             );
 
             if (!pool) {
@@ -48,9 +48,10 @@ export class MasterChefStakingService implements PoolStakingService {
                     prisma.prismaPoolStaking.create({
                         data: {
                             id: farm.id,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                            address: isFbeetsFarm ? networkConfig.fbeets!.address : farm.masterChef.id,
+                            address: isFbeetsFarm ? networkContext.data.fbeets!.address : farm.masterChef.id,
                         },
                     }),
                 );
@@ -58,8 +59,8 @@ export class MasterChefStakingService implements PoolStakingService {
 
             operations.push(
                 prisma.prismaPoolStakingMasterChefFarm.upsert({
-                    where: { id: farmId },
-                    create: { id: farmId, stakingId: farmId, beetsPerBlock },
+                    where: { id_chain: { id: farmId, chain: networkContext.chain } },
+                    create: { id: farmId, chain: networkContext.chain, stakingId: farmId, beetsPerBlock },
                     update: { beetsPerBlock },
                 }),
             );
@@ -75,9 +76,10 @@ export class MasterChefStakingService implements PoolStakingService {
 
                     operations.push(
                         prisma.prismaPoolStakingMasterChefFarmRewarder.upsert({
-                            where: { id },
+                            where: { id_chain: { id, chain: networkContext.chain } },
                             create: {
                                 id,
+                                chain: networkContext.chain,
                                 farmId,
                                 tokenAddress: rewardToken.token,
                                 address: farm.rewarder.id,

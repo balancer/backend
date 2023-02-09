@@ -1,6 +1,6 @@
-import { networkConfig } from '../config/network-config';
 import { CloudwatchMetricsPublisher } from './metrics.client';
+import { networkContext } from '../network/network-context.service';
 
-export const cronsMetricPublisher: CloudwatchMetricsPublisher = new CloudwatchMetricsPublisher(
-    `Backend-${networkConfig.chain.slug}/CronRuns)`,
-);
+export function getCronMetricsPublisher(): CloudwatchMetricsPublisher {
+    return new CloudwatchMetricsPublisher(`Backend-${networkContext.data.chain.slug}/CronRuns)`);
+}

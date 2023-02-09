@@ -5,6 +5,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { PoolStakingService } from '../../../pool-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 export class ReliquaryStakingService implements PoolStakingService {
     constructor(
@@ -47,6 +48,7 @@ export class ReliquaryStakingService implements PoolStakingService {
                     prisma.prismaPoolStaking.create({
                         data: {
                             id: `reliquary-${farm.pid}`,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             type: 'RELIQUARY',
                             address: this.reliquaryAddress,
@@ -67,9 +69,10 @@ export class ReliquaryStakingService implements PoolStakingService {
 
                 levelOperations.push(
                     prisma.prismaPoolStakingReliquaryFarmLevel.upsert({
-                        where: { id: `${farmId}-${level}` },
+                        where: { id_chain: { id: `${farmId}-${level}`, chain: networkContext.chain } },
                         create: {
                             id: `${farmId}-${level}`,
+                            chain: networkContext.chain,
                             farmId,
                             allocationPoints,
                             balance,
@@ -86,9 +89,10 @@ export class ReliquaryStakingService implements PoolStakingService {
             }
             operations.push(
                 prisma.prismaPoolStakingReliquaryFarm.upsert({
-                    where: { id: farmId },
+                    where: { id_chain: { id: farmId, chain: networkContext.chain } },
                     create: {
                         id: farmId,
+                        chain: networkContext.chain,
                         stakingId: `reliquary-${farmId}`,
                         name: farm.name,
                         beetsPerSecond: beetsPerSecond,

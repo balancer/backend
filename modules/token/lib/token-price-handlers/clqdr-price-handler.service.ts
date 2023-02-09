@@ -2,11 +2,11 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
-import { networkConfig } from '../../../config/network-config';
 import { Contract } from '@ethersproject/contracts';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import PriceRateProviderAbi from '../../abi/CLQDRPerpetualEscrowTokenRateProvider.json';
+import { networkContext } from '../../../network/network-context.service';
 
 export class ClqdrPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -25,7 +25,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         const clqdrPriceRateProviderContract = new Contract(
             this.clqdrPriceRateProviderAddress,
             PriceRateProviderAbi,
-            new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl),
+            new ethers.providers.JsonRpcProvider(networkContext.data.rpcUrl),
         );
 
         let clqdrRate = 0;
@@ -55,20 +55,28 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         const clqdrPrice = lqdrPrice.price * clqdrRate;
 
         await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress: this.clqdrAddress },
+            where: { tokenAddress_chain: { tokenAddress: this.clqdrAddress, chain: networkContext.chain } },
             update: { price: clqdrPrice },
             create: {
                 tokenAddress: this.clqdrAddress,
+                chain: networkContext.chain,
                 timestamp,
                 price: clqdrPrice,
             },
         });
 
         await prisma.prismaTokenPrice.upsert({
-            where: { tokenAddress_timestamp: { tokenAddress: this.clqdrAddress, timestamp } },
+            where: {
+                tokenAddress_timestamp_chain: {
+                    tokenAddress: this.clqdrAddress,
+                    timestamp,
+                    chain: networkContext.chain,
+                },
+            },
             update: { price: clqdrPrice, close: clqdrPrice },
             create: {
                 tokenAddress: this.clqdrAddress,
+                chain: networkContext.chain,
                 timestamp,
                 price: clqdrPrice,
                 high: clqdrPrice,

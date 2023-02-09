@@ -10,12 +10,12 @@ import {
 } from '../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { oneDayInMinutes, oneDayInSeconds } from '../../common/time';
-import { time } from 'console';
 import {
     PrismaReliquaryFarmSnapshot,
     PrismaReliquaryLevelSnapshot,
     PrismaReliquaryTokenBalanceSnapshot,
 } from '@prisma/client';
+import { networkContext } from '../../network/network-context.service';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
@@ -170,6 +170,7 @@ export class ReliquarySnapshotService {
                 const uniqueUsers = _.uniq(relicsInFarm.map((relic) => relic.userAddress));
                 const data: PrismaReliquaryFarmSnapshot = {
                     id: snapshot.id,
+                    chain: networkContext.chain,
                     farmId: `${snapshot.farmId}`,
                     timestamp: snapshot.snapshotTimestamp,
                     relicCount: snapshot.relicCount,
@@ -181,7 +182,7 @@ export class ReliquarySnapshotService {
                 };
                 farmOperations.push(
                     prisma.prismaReliquaryFarmSnapshot.upsert({
-                        where: { id: snapshot.id },
+                        where: { id_chain: { id: snapshot.id, chain: networkContext.chain } },
                         create: data,
                         update: data,
                     }),
@@ -190,13 +191,14 @@ export class ReliquarySnapshotService {
                 for (const level of levelsAtBlock.poolLevels) {
                     const data: PrismaReliquaryLevelSnapshot = {
                         id: `${level.id}-${snapshot.id}`,
+                        chain: networkContext.chain,
                         farmSnapshotId: snapshot.id,
                         level: `${level.level}`,
                         balance: level.balance,
                     };
                     farmOperations.push(
                         prisma.prismaReliquaryLevelSnapshot.upsert({
-                            where: { id: `${level.id}-${snapshot.id}` },
+                            where: { id_chain: { id: `${level.id}-${snapshot.id}`, chain: networkContext.chain } },
                             create: data,
                             update: data,
                         }),
@@ -206,6 +208,7 @@ export class ReliquarySnapshotService {
                 for (const token of pool.tokens) {
                     const data: PrismaReliquaryTokenBalanceSnapshot = {
                         id: `${token.id}-${snapshot.id}`,
+                        chain: networkContext.chain,
                         farmSnapshotId: snapshot.id,
                         address: token.address,
                         symbol: token.token.symbol,
@@ -215,7 +218,7 @@ export class ReliquarySnapshotService {
                     };
                     farmOperations.push(
                         prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
-                            where: { id: `${token.id}-${snapshot.id}` },
+                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: networkContext.chain } },
                             create: data,
                             update: data,
                         }),

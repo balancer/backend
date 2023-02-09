@@ -1,18 +1,14 @@
-import { GraphQLClient } from 'graphql-request';
 import {
     GaugeLiquidityGaugesQueryVariables,
     GaugeSharesQueryVariables,
-    GaugeUserGaugesQueryVariables,
     getSdk,
 } from './generated/gauge-subgraph-types';
-import { networkConfig } from '../../config/network-config';
+import { GraphQLClient } from 'graphql-request';
+import { networkContext } from '../../network/network-context.service';
 
 export class GaugeSubgraphService {
-    private readonly client: GraphQLClient;
+    constructor() {}
 
-    constructor() {
-        this.client = new GraphQLClient(networkConfig.subgraphs.gauge ?? '');
-    }
     public async getAllGauges(args: GaugeLiquidityGaugesQueryVariables) {
         const gaugesQuery = await this.sdk.GaugeLiquidityGauges(args);
         return gaugesQuery.liquidityGauges;
@@ -48,7 +44,9 @@ export class GaugeSubgraphService {
     }
 
     public get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.gauge ?? '');
+
+        return getSdk(client);
     }
 }
 

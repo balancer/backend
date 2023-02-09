@@ -1,7 +1,6 @@
 import { prisma } from '../../prisma/prisma-client';
 import { google } from 'googleapis';
 import { env } from '../../app/env';
-import { DeploymentEnv, networkConfig } from '../config/network-config';
 import moment from 'moment-timezone';
 import { JWT } from 'google-auth-library';
 import { SecretsManager, secretsManager } from './secrets-manager';
@@ -11,6 +10,8 @@ import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { oneDayInSeconds, secondsPerDay } from '../common/time';
 import { collectsSwapFee, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
+import { networkContext } from '../network/network-context.service';
+import { DeploymentEnv } from '../network/network-config-types';
 
 export class DatastudioService {
     constructor(
@@ -232,7 +233,7 @@ export class DatastudioService {
                             pool.address,
                             pool.name,
                             'BEETS',
-                            networkConfig.beets.address,
+                            networkContext.data.beets.address,
                             `${beetsPerDay}`,
                             `${beetsValuePerDay}`,
                             this.chainSlug,
@@ -342,10 +343,10 @@ export class DatastudioService {
 export const datastudioService = new DatastudioService(
     secretsManager,
     googleJwtClient,
-    networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName,
-    networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].sheetId,
-    networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName,
-    networkConfig.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName,
-    networkConfig.balancer.swapProtocolFeePercentage,
-    networkConfig.chain.slug,
+    networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName,
+    networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].sheetId,
+    networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName,
+    networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName,
+    networkContext.data.balancer.swapProtocolFeePercentage,
+    networkContext.data.chain.slug,
 );

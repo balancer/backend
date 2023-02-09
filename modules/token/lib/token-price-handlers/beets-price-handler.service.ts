@@ -2,22 +2,21 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
-import { networkConfig } from '../../../config/network-config';
-import _ from 'lodash';
 import { FundManagement, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
-import { bn, fp } from '../../../big-number/big-number';
+import { fp } from '../../../big-number/big-number';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero } from '@ethersproject/constants';
 import VaultAbi from '../../../pool/abi/Vault.json';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
+import { networkContext } from '../../../network/network-context.service';
 
 export class BeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'BeetsPriceHandlerService';
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return [networkConfig.beets.address];
+        return [networkContext.data.beets.address];
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
@@ -50,7 +49,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const vaultContract = new Contract(
             VaultFtmAddress,
             VaultAbi,
-            new ethers.providers.JsonRpcProvider(networkConfig.beetsPriceProviderRpcUrl),
+            new ethers.providers.JsonRpcProvider(networkContext.data.beetsPriceProviderRpcUrl),
         );
         const funds: FundManagement = {
             sender: AddressZero,
@@ -74,20 +73,30 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const beetsPrice = Math.abs(parseFloat(formatFixed(tokenOutAmountScaled, 6)));
 
         await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress: networkConfig.beets.address },
+            where: {
+                tokenAddress_chain: { tokenAddress: networkContext.data.beets.address, chain: networkContext.chain },
+            },
             update: { price: beetsPrice },
             create: {
-                tokenAddress: networkConfig.beets.address,
+                tokenAddress: networkContext.data.beets.address,
+                chain: networkContext.chain,
                 timestamp,
                 price: beetsPrice,
             },
         });
 
         await prisma.prismaTokenPrice.upsert({
-            where: { tokenAddress_timestamp: { tokenAddress: networkConfig.beets.address, timestamp } },
+            where: {
+                tokenAddress_timestamp_chain: {
+                    tokenAddress: networkContext.data.beets.address,
+                    timestamp,
+                    chain: networkContext.chain,
+                },
+            },
             update: { price: beetsPrice, close: beetsPrice },
             create: {
-                tokenAddress: networkConfig.beets.address,
+                tokenAddress: networkContext.data.beets.address,
+                chain: networkContext.chain,
                 timestamp,
                 price: beetsPrice,
                 high: beetsPrice,
@@ -97,6 +106,6 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
-        return [networkConfig.beets.address];
+        return [networkContext.data.beets.address];
     }
 }

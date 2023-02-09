@@ -15,54 +15,63 @@ export const defaultTokens: Record<DefaulToken, Prisma.PrismaTokenCreateInput> =
         symbol: 'USDC',
         name: 'USD Coin',
         decimals: 6,
+        chain: 'FANTOM',
     },
     wftm: {
         address: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
         symbol: 'wFTM',
         name: 'Wrapped Fantom',
         decimals: 18,
+        chain: 'FANTOM',
     },
     wbtc: {
         address: '0x321162cd933e2be498cd2267a90534a804051b11',
         symbol: 'wBTC',
         name: 'Wrapped Bitcoin',
         decimals: 8,
+        chain: 'FANTOM',
     },
     weth: {
         address: '0x74b23882a30290451a17c44f4f05243b6b58c76d',
         symbol: 'wETH',
         name: 'Wrapped Ethereum',
         decimals: 18,
+        chain: 'FANTOM',
     },
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
         symbol: 'BEETS',
         name: 'Beethoven X',
         decimals: 18,
+        chain: 'FANTOM',
     },
     dai: {
         address: '0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e',
         symbol: 'DAI',
         name: 'Dai',
         decimals: 18,
+        chain: 'FANTOM',
     },
     boo: {
         address: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
         symbol: 'BOO',
         name: 'Spookyswap',
         decimals: 18,
+        chain: 'FANTOM',
     },
     fba: {
         address: '0x0e249130b3545a2a287de9f27d805cab95f03db9',
         symbol: 'FBA',
         name: 'Firebird Aggregator',
         decimals: 18,
+        chain: 'FANTOM',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
         symbol: 'FBEETS',
         name: 'Fresh Beets',
         decimals: 18,
+        chain: 'FANTOM',
     },
 };
 
@@ -74,6 +83,7 @@ export async function createTokens(tokens: Prisma.PrismaTokenCreateInput[]) {
 
 const defaultWeightedPool: Prisma.PrismaPoolCreateInput = {
     id: '0xf3a602d30dcb723a74a0198313a7551feaca7dac00010000000000000000005f',
+    chain: 'FANTOM',
     createTime: moment().subtract(10, 'days').unix(),
     address: '0xf3a602d30dcb723a74a0198313a7551feaca7dac',
     symbol: 'BPT-QUARTET',
@@ -158,7 +168,9 @@ export async function createWeightedPoolFromDefault(
 const defaultWeightedPoolSnapshot: Prisma.PrismaPoolSnapshotCreateInput = {
     id: '0xf3a602d30dcb723a74a0198313a7551feaca7dac00010000000000000000005f-1660089600',
     pool: {
-        connect: { id: '0xf3a602d30dcb723a74a0198313a7551feaca7dac00010000000000000000005f' },
+        connect: {
+            id_chain: { id: '0xf3a602d30dcb723a74a0198313a7551feaca7dac00010000000000000000005f', chain: 'FANTOM' },
+        },
     },
     timestamp: 1660089600,
     fees24h: 2515,
@@ -194,7 +206,7 @@ export async function createRandomSnapshotsForPoolForTimestamp(poolId: string, t
             id: `${poolId}-${timestamp}`,
             pool: {
                 connect: {
-                    id: poolId,
+                    id_chain: { id: poolId, chain: 'FANTOM' },
                 },
             },
             timestamp,
@@ -223,7 +235,7 @@ export async function createRandomSnapshotsForPool(poolId: string, tokenCount: n
                 id: `${poolId}-${timestamp}`,
                 pool: {
                     connect: {
-                        id: poolId,
+                        id_chain: { id: poolId, chain: 'FANTOM' },
                     },
                 },
                 timestamp,
@@ -252,7 +264,7 @@ const defaultUserBalanceSnapshot: Omit<Prisma.PrismaUserPoolBalanceSnapshotCreat
         },
     },
     poolToken: '0x001',
-    pool: { connect: { id: '0x001a' } },
+    pool: { connect: { id_chain: { id: '0x001a', chain: 'FANTOM' } } },
     walletBalance: '1',
     farmBalance: '1',
     gaugeBalance: '0',

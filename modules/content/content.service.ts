@@ -1,8 +1,8 @@
-import { sanityClient } from '../sanity/sanity';
-import { env } from '../../app/env';
+import { getSanityClient } from '../sanity/sanity';
 import { ConfigHomeScreen } from './content-types';
 import { Cache } from 'memory-cache';
 import { fiveMinutesInMs } from '../common/time';
+import { networkContext } from '../network/network-context.service';
 
 const HOME_SCREEN_CONFIG_CACHE_KEY = 'content:homeScreen';
 
@@ -16,8 +16,8 @@ export class ContentService {
             return cached;
         }
 
-        const data = await sanityClient.fetch<ConfigHomeScreen | null>(`
-            *[_type == "homeScreen" && chainId == ${env.CHAIN_ID}][0]{
+        const data = await getSanityClient().fetch<ConfigHomeScreen | null>(`
+            *[_type == "homeScreen" && chainId == ${networkContext.chainId}][0]{
                 ...,
                 "featuredPoolGroups": featuredPoolGroups[]{
                     ...,
@@ -35,7 +35,7 @@ export class ContentService {
         `);
 
         if (!data) {
-            throw new Error(`No home screen config found for chain id ${env.CHAIN_ID}`);
+            throw new Error(`No home screen config found for chain id ${networkContext.chainId}`);
         }
 
         this.cache.put(HOME_SCREEN_CONFIG_CACHE_KEY, data, fiveMinutesInMs);

@@ -3,12 +3,12 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
-import { networkConfig } from '../../../../config/network-config';
 import { blocksSubgraphService } from '../../../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { FarmFragment } from '../../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import { masterchefService } from '../../../../subgraphs/masterchef-subgraph/masterchef.service';
 import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
+import { networkContext } from '../../../../network/network-context.service';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -27,8 +27,8 @@ export class MasterchefFarmAprService implements PoolAprService {
 
         for (const pool of pools) {
             const farm = farms.find((farm) => {
-                if (pool.id === networkConfig.fbeets!.poolId) {
-                    return farm.id === networkConfig.fbeets!.farmId;
+                if (pool.id === networkContext.data.fbeets!.poolId) {
+                    return farm.id === networkContext.data.fbeets!.farmId;
                 }
 
                 return farm.pair.toLowerCase() === pool.address.toLowerCase();
@@ -48,7 +48,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             items.forEach((item) => {
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id: item.id },
+                        where: { id_chain: { id: item.id, chain: networkContext.chain } },
                         update: item,
                         create: item,
                     }),
@@ -82,7 +82,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             return [];
         }
 
-        const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkConfig.beets.address);
+        const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address);
         const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
         const farmBeetsPerYear = (parseInt(farm.allocPoint) / parseInt(farm.masterChef.totalAllocPoint)) * beetsPerYear;
@@ -93,6 +93,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         if (beetsApr > 0) {
             items.push({
                 id: `${poolId}-beets-apr`,
+                chain: networkContext.chain,
                 poolId,
                 title: 'BEETS reward APR',
                 apr: beetsApr,
@@ -105,7 +106,10 @@ export class MasterchefFarmAprService implements PoolAprService {
             for (const rewardToken of farm.rewarder?.rewardTokens) {
                 const farmRewarder = await prisma.prismaPoolStakingMasterChefFarmRewarder.findUniqueOrThrow({
                     where: {
-                        id: `${farm.id.toLowerCase()}-${farm.rewarder?.id.toLowerCase()}-${rewardToken.token.toLowerCase()}`,
+                        id_chain: {
+                            id: `${farm.id.toLowerCase()}-${farm.rewarder?.id.toLowerCase()}-${rewardToken.token.toLowerCase()}`,
+                            chain: networkContext.chain,
+                        },
                     },
                 });
                 const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
@@ -115,6 +119,7 @@ export class MasterchefFarmAprService implements PoolAprService {
 
                 items.push({
                     id: `${poolId}-${rewardToken.symbol}-apr`,
+                    chain: networkContext.chain,
                     poolId,
                     title: `${rewardToken.symbol} reward APR`,
                     apr: rewardApr,

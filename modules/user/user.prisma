@@ -9,7 +9,11 @@ model PrismaUser {
 }
 
 model PrismaUserWalletBalance {
-    id                      String              @id
+    @@id([id, chain])
+
+    id                      String
+    chain                   Chain               
+
     balance                 String
     balanceNum              Float
     updatedAt               DateTime            @updatedAt
@@ -18,15 +22,18 @@ model PrismaUserWalletBalance {
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
     poolId                  String?
-    pool                    PrismaPool?         @relation(fields:[poolId], references: [id])
+    pool                    PrismaPool?         @relation(fields:[poolId, chain], references: [id, chain])
 
     tokenAddress            String
-    token                   PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
 }
 
 
 model PrismaUserStakedBalance {
-    id                      String              @id
+    @@id([id, chain])
+
+    id                      String
+    chain                   Chain               
     balance                 String
     balanceNum              Float
     updatedAt               DateTime            @updatedAt
@@ -35,17 +42,20 @@ model PrismaUserStakedBalance {
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
     poolId                  String?
-    pool                    PrismaPool?          @relation(fields:[poolId], references: [id])
+    pool                    PrismaPool?          @relation(fields:[poolId, chain], references: [id, chain])
 
     tokenAddress            String
-    token                   PrismaToken         @relation(fields:[tokenAddress], references: [address])
+    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
 
     stakingId               String
-    staking                 PrismaPoolStaking   @relation(fields:[stakingId], references: [id])
+    staking                 PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain])
 }
 
 model PrismaUserBalanceSyncStatus {
-    type                PrismaUserBalanceType @id
+    @@id([type, chain])
+
+    type                PrismaUserBalanceType
+    chain               Chain                   
     blockNumber         Int
 }
 
@@ -56,15 +66,17 @@ enum PrismaUserBalanceType {
 }
 
 model PrismaUserPoolBalanceSnapshot {
-    id                      String              @id
+    @@id([id, chain])
 
+    id                      String
     userAddress             String
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    chain                   Chain               
     timestamp               Int
 
     poolToken               String
     poolId                  String?
-    pool                    PrismaPool?          @relation(fields:[poolId], references:[id])
+    pool                    PrismaPool?         @relation(fields:[poolId, chain], references:[id, chain])
 
     walletBalance           String
     gaugeBalance            String
@@ -76,15 +88,17 @@ model PrismaUserPoolBalanceSnapshot {
 }
 
 model PrismaUserRelicSnapshot {
-    id                      String              @id
+    @@id([id, chain])
 
+    id                      String
     userAddress             String
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    chain                   Chain               
     timestamp               Int
 
     relicId                 Int
     farmId                  String
-    farm                    PrismaPoolStakingReliquaryFarm @relation(fields:[farmId], references: [id])
+    farm                    PrismaPoolStakingReliquaryFarm @relation(fields:[farmId, chain], references: [id, chain])
     balance                 String
     entryTimestamp          Int
     level                   Int

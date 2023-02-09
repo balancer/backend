@@ -5,10 +5,10 @@ import { tokenService } from '../modules/token/token.service';
 import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
 import { beetsService } from '../modules/beets/beets.service';
-import { jsonRpcProvider } from '../modules/web3/contract';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
 import { protocolService } from '../modules/protocol/protocol.service';
+import { networkContext } from '../modules/network/network-context.service';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -74,7 +74,7 @@ function scheduleJob(
 function addRpcListener(taskName: string, eventType: string, timeout: number, listener: () => Promise<void>) {
     let running = false;
 
-    jsonRpcProvider.on(
+    networkContext.provider.on(
         eventType,
         _.debounce(async () => {
             if (running) {
@@ -271,7 +271,7 @@ export function scheduleLocalWorkerTasks() {
         .cacheBeetsFarmUsers(true)
         .catch((error) => console.log('Error caching initial beets farm users', error));
 */
-    console.log('scheduled cron jobs');
+    console.log('scheduled cron workerJobs');
 
     console.log('start pool sync');
 

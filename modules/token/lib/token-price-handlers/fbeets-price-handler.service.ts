@@ -2,8 +2,8 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
-import { networkConfig } from '../../../config/network-config';
 import _ from 'lodash';
+import { networkContext } from '../../../network/network-context.service';
 
 export class FbeetsPriceHandlerService implements TokenPriceHandler {
     constructor(private readonly fbeetsAddress: string, private readonly fbeetsPoolId: string) {}
@@ -19,7 +19,7 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
         const fbeetsAddress = this.fbeetsAddress;
         const fbeets = await prisma.prismaFbeets.findFirst({});
         const pool = await prisma.prismaPool.findUnique({
-            where: { id: this.fbeetsPoolId },
+            where: { id_chain: { id: this.fbeetsPoolId, chain: networkContext.chain } },
             include: { dynamicData: true, tokens: { include: { dynamicData: true, token: true } } },
         });
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -45,20 +45,24 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
         );
 
         await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress: fbeetsAddress },
+            where: { tokenAddress_chain: { tokenAddress: fbeetsAddress, chain: networkContext.chain } },
             update: { price: fbeetsPrice },
             create: {
                 tokenAddress: fbeetsAddress,
+                chain: networkContext.chain,
                 timestamp,
                 price: fbeetsPrice,
             },
         });
 
         await prisma.prismaTokenPrice.upsert({
-            where: { tokenAddress_timestamp: { tokenAddress: fbeetsAddress, timestamp } },
+            where: {
+                tokenAddress_timestamp_chain: { tokenAddress: fbeetsAddress, timestamp, chain: networkContext.chain },
+            },
             update: { price: fbeetsPrice, close: fbeetsPrice },
             create: {
                 tokenAddress: fbeetsAddress,
+                chain: networkContext.chain,
                 timestamp,
                 price: fbeetsPrice,
                 high: fbeetsPrice,

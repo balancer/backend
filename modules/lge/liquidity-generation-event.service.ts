@@ -1,8 +1,8 @@
-import { env } from '../../app/env';
-import { sanityClient } from '../sanity/sanity';
+import { getSanityClient } from '../sanity/sanity';
 import { copperProxyService, CopperProxyService } from '../copper/copper-proxy.service';
 import { getAddress } from 'ethers/lib/utils';
 import { gnosisSafeService, GnosisSafeService } from '../gnosis/gnosis-safe.service';
+import { networkContext } from '../network/network-context.service';
 
 export type LiquidityGenerationCreateInput = {
     id: string;
@@ -67,7 +67,7 @@ export class LiquidityGenerationEventService {
         const poolOwner = await this.copperProxyService.getLbpPoolOwner(getAddress(input.address));
         const adminIsMultisig = await this.gnosisSafeService.isAddressGnosisSafe(getAddress(poolOwner));
 
-        return sanityClient.create({
+        return getSanityClient().create({
             _type: 'lbp',
             _id: input.id,
             id: input.id,
@@ -94,17 +94,17 @@ export class LiquidityGenerationEventService {
             swapFeePercentage: input.swapFeePercentage,
             adminAddress: poolOwner,
             adminIsMultisig,
-            chainId: env.CHAIN_ID,
+            chainId: networkContext.chainId,
         });
     }
 
     public async getLges(): Promise<LiquidityGenerationEvent[]> {
-        return sanityClient.fetch(`*[_type == "lbp" && chainId == "${env.CHAIN_ID}"]`);
+        return getSanityClient().fetch(`*[_type == "lbp" && chainId == "${networkContext.chainId}"]`);
     }
 
     public async getLiquidityGenerationEvent(id: string): Promise<LiquidityGenerationEvent> {
-        const result = await sanityClient.fetch(
-            `*[_type == "lbp" && chainId == "${env.CHAIN_ID}" && id == "${id}"][0]`,
+        const result = await getSanityClient().fetch(
+            `*[_type == "lbp" && chainId == "${networkContext.chainId}" && id == "${id}"][0]`,
         );
         if (!result) {
             throw new Error(`Liquidity generation event with id ${id} not found`);

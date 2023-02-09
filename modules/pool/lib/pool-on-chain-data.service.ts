@@ -8,7 +8,6 @@ import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
-import WeightedPoolV2Abi from '../abi/WeightedPoolV2.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber } from 'ethers';
@@ -16,9 +15,10 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isWeightedPoolV2, isStablePool } from './pool-utils';
+import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { WeiPerEther } from '@ethersproject/constants';
+import { networkContext } from '../../network/network-context.service';
 
 interface MulticallExecuteResult {
     amp?: string[];
@@ -70,11 +70,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
 ];
 
 export class PoolOnChainDataService {
-    constructor(
-        private readonly multiAddress: string,
-        private readonly vaultAddress: string,
-        private readonly tokenService: TokenService,
-    ) {}
+    constructor(private readonly tokenService: TokenService) {}
 
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
@@ -111,14 +107,14 @@ export class PoolOnChainDataService {
             ),
         );
 
-        const multiPool = new Multicaller(this.multiAddress, provider, abis);
+        const multiPool = new Multicaller(networkContext.data.multicall, provider, abis);
 
         pools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
                 return;
             }
-            multiPool.call(`${pool.id}.poolTokens`, this.vaultAddress, 'getPoolTokens', [pool.id]);
+            multiPool.call(`${pool.id}.poolTokens`, networkContext.data.balancer.vault, 'getPoolTokens', [pool.id]);
 
             // TO DO - Make this part of class to make more flexible?
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
@@ -212,8 +208,8 @@ export class PoolOnChainDataService {
                     //only update if amp has changed
                     if (!pool.stableDynamicData || pool.stableDynamicData.amp !== amp) {
                         await prisma.prismaPoolStableDynamicData.upsert({
-                            where: { id: pool.id },
-                            create: { id: pool.id, poolId: pool.id, amp, blockNumber },
+                            where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                            create: { id: pool.id, chain: networkContext.chain, poolId: pool.id, amp, blockNumber },
                             update: { amp, blockNumber },
                         });
                     }
@@ -233,8 +229,15 @@ export class PoolOnChainDataService {
                             pool.linearDynamicData.upperTarget !== upperTarget
                         ) {
                             await prisma.prismaPoolLinearDynamicData.upsert({
-                                where: { id: pool.id },
-                                create: { id: pool.id, poolId: pool.id, upperTarget, lowerTarget, blockNumber },
+                                where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                                create: {
+                                    id: pool.id,
+                                    chain: networkContext.chain,
+                                    poolId: pool.id,
+                                    upperTarget,
+                                    lowerTarget,
+                                    blockNumber,
+                                },
                                 update: { upperTarget, lowerTarget, blockNumber },
                             });
                         }
@@ -278,7 +281,7 @@ export class PoolOnChainDataService {
                         pool.dynamicData.swapEnabled !== swapEnabled)
                 ) {
                     await prisma.prismaPoolDynamicData.update({
-                        where: { id: pool.id },
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: {
                             swapFee,
                             totalShares,
@@ -313,9 +316,10 @@ export class PoolOnChainDataService {
                         poolToken.dynamicData.weight !== weight
                     ) {
                         await prisma.prismaPoolTokenDynamicData.upsert({
-                            where: { id: poolToken.id },
+                            where: { id_chain: { id: poolToken.id, chain: networkContext.chain } },
                             create: {
                                 id: poolToken.id,
+                                chain: networkContext.chain,
                                 poolTokenId: poolToken.id,
                                 blockNumber,
                                 priceRate,

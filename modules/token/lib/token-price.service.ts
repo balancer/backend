@@ -2,22 +2,25 @@ import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
-import { PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
-import { networkConfig } from '../../config/network-config';
 import { GqlTokenChartDataRange } from '../../../schema';
-import { TokenHistoricalPrices } from '../../../legacy/token-price/token-price-types';
 import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
+import { networkContext } from '../../network/network-context.service';
+import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
-const TOKEN_PRICES_CACHE_KEY = 'token-prices';
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
 const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
 
-    constructor(private readonly handlers: TokenPriceHandler[]) {}
+    constructor() {}
+
+    private get handlers(): TokenPriceHandler[] {
+        return networkContext.config.tokenPriceHandlers;
+    }
 
     public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -30,12 +33,14 @@ export class TokenPriceService {
             },
         });
 
-        const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === networkConfig.weth.address);
+        const wethPrice = tokenPrices.find(
+            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
+        );
 
         if (wethPrice) {
             tokenPrices.push({
                 ...wethPrice,
-                tokenAddress: networkConfig.eth.address,
+                tokenAddress: networkContext.data.eth.address,
             });
         }
 
@@ -48,12 +53,14 @@ export class TokenPriceService {
             distinct: ['tokenAddress'],
         });
 
-        const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === networkConfig.weth.address);
+        const wethPrice = tokenPrices.find(
+            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
+        );
 
         if (wethPrice) {
             tokenPrices.push({
                 ...wethPrice,
-                tokenAddress: networkConfig.eth.address,
+                tokenAddress: networkContext.data.eth.address,
             });
         }
 
@@ -68,12 +75,14 @@ export class TokenPriceService {
             where: { timestamp: { lte: oneDayAgo } },
         });
 
-        const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === networkConfig.weth.address);
+        const wethPrice = tokenPrices.find(
+            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
+        );
 
         if (wethPrice) {
             tokenPrices.push({
                 ...wethPrice,
-                tokenAddress: networkConfig.eth.address,
+                tokenAddress: networkContext.data.eth.address,
             });
         }
 
@@ -207,7 +216,7 @@ export class TokenPriceService {
         timestamp: number;
     }): Promise<boolean> {
         const response = await prisma.prismaTokenPrice.delete({
-            where: { tokenAddress_timestamp: { tokenAddress, timestamp } },
+            where: { tokenAddress_timestamp_chain: { tokenAddress, timestamp, chain: networkContext.chain } },
         });
 
         return !!response;
@@ -227,7 +236,13 @@ export class TokenPriceService {
         for (const tokenPrice of tokenPrices) {
             operations.push(
                 prisma.prismaTokenPrice.update({
-                    where: { tokenAddress_timestamp: { tokenAddress: tokenPrice.tokenAddress, timestamp } },
+                    where: {
+                        tokenAddress_timestamp_chain: {
+                            tokenAddress: tokenPrice.tokenAddress,
+                            timestamp,
+                            chain: networkContext.chain,
+                        },
+                    },
                     data: {
                         high: Math.max(tokenPrice.high, tokenPrice.price),
                         low: Math.min(tokenPrice.low, tokenPrice.price),

@@ -1,14 +1,16 @@
-import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from 'ethers';
 import { oldBnumFromBnum } from '../../big-number/old-big-number';
 import { prisma } from '../../../prisma/prisma-client';
-import { isFantomNetwork } from '../../config/network-config';
+import { getContractAt } from '../../web3/contract';
+import { networkContext } from '../../network/network-context.service';
+import FreshBeetsAbi from '../abi/FreshBeets.json';
+import ERC20 from '../abi/ERC20.json';
 
 export class FbeetsService {
-    constructor(private readonly fBeetsContract: Contract, private readonly fBeetsPoolContract: Contract) {}
+    constructor() {}
 
     public async getRatio(): Promise<string> {
-        if (!isFantomNetwork()) {
+        if (!networkContext.isFantomNetwork) {
             return '1.0';
         }
 
@@ -21,8 +23,15 @@ export class FbeetsService {
     }
 
     public async syncRatio() {
-        const totalSupply: BigNumber = await this.fBeetsContract.totalSupply();
-        const bptBalance: BigNumber = await this.fBeetsPoolContract.balanceOf(this.fBeetsContract.address);
+        if (!networkContext.data.fbeets) {
+            return;
+        }
+
+        const fBeetsContract = getContractAt(networkContext.data.fbeets.address, FreshBeetsAbi);
+        const fBeetsPoolContract = getContractAt(networkContext.data.fbeets.poolAddress, ERC20);
+
+        const totalSupply: BigNumber = await fBeetsContract.totalSupply();
+        const bptBalance: BigNumber = await fBeetsPoolContract.balanceOf(fBeetsContract.address);
 
         const ratio = oldBnumFromBnum(bptBalance).div(oldBnumFromBnum(totalSupply)).toString();
 
