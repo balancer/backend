@@ -95,13 +95,7 @@ query ReliquaryFarmSnapshots(
         where: $where
         block: $block
     ) {
-        id
-        farmId: poolId
-        snapshotTimestamp
-        totalBalance
-        dailyDeposited
-        dailyWithdrawn
-        relicCount
+        ...ReliquaryFarmSnapshot
     }
 }
 
@@ -207,6 +201,16 @@ fragment ReliquaryRelicSnapshot on DailyRelicSnapshot {
     balance
     entryTimestamp
     level
+}
+
+fragment ReliquaryFarmSnapshot on DailyPoolSnapshot {
+    id
+    farmId: poolId
+    snapshotTimestamp
+    totalBalance
+    dailyDeposited
+    dailyWithdrawn
+    relicCount
 }
 
 query ReliquaryGetMeta {
