@@ -21,6 +21,7 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from './prisma/prisma-client';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
+import { AllNetworkConfigs } from './modules/network/network-config';
 
 async function startServer() {
     const app = createExpressApp();
@@ -112,8 +113,12 @@ async function startServer() {
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 
     if (process.env.NODE_ENV === 'local' && process.env.CRONS === 'true') {
+        const supportedNetworks = process.env.SUPPORTED_NETWORKS?.split(',') ?? Object.keys(AllNetworkConfigs);
+
         try {
-            scheduleLocalWorkerTasks();
+            for (const chainId of supportedNetworks) {
+                scheduleLocalWorkerTasks(chainId);
+            }
         } catch (e) {
             console.log(`Fatal error happened during cron scheduling.`, e);
         }

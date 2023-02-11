@@ -9,6 +9,11 @@ import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
 import { protocolService } from '../modules/protocol/protocol.service';
 import { networkContext } from '../modules/network/network-context.service';
+import {
+    getRequestScopeContextValue,
+    initRequestScopedContext,
+    setRequestScopedContextValue,
+} from '../modules/context/request-scoped-context';
 
 const ONE_MINUTE_IN_MS = 60000;
 const TWO_MINUTES_IN_MS = 120000;
@@ -103,7 +108,10 @@ function addRpcListener(taskName: string, eventType: string, timeout: number, li
     );
 }
 
-export function scheduleLocalWorkerTasks() {
+export function scheduleLocalWorkerTasks(chainId: string) {
+    initRequestScopedContext();
+    setRequestScopedContextValue('chainId', chainId);
+
     //every 20 seconds
     scheduleJob('*/20 * * * * *', 'loadTokenPrices', ONE_MINUTE_IN_MS, async () => {
         await tokenService.loadTokenPrices();
