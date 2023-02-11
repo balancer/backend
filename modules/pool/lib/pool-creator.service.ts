@@ -107,7 +107,7 @@ export class PoolCreatorService {
 
         //clear any existing
         await prisma.prismaPoolExpandedTokens.updateMany({
-            where: {},
+            where: { chain: networkContext.chain },
             data: { nestedPoolId: null },
         });
 

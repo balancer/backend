@@ -274,7 +274,7 @@ export class PoolSwapService {
         const groupedByTxAndUser = _.groupBy(swaps, (swap) => `${swap.tx}${swap.userAddress}`);
         let operations: any[] = [
             prisma.prismaPoolSwap.updateMany({
-                where: { tx: { in: txs } },
+                where: { tx: { in: txs }, chain: networkContext.chain },
                 data: { batchSwapId: null, batchSwapIdx: null },
             }),
             prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: networkContext.chain } }),
