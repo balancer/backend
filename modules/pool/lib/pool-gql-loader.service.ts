@@ -210,6 +210,10 @@ export class PoolGqlLoaderService {
                     gt: 0.000000000001,
                 },
             },
+            chain: {
+                in: where?.chainIn || undefined,
+                notIn: where?.chainNotIn || undefined,
+            },
             type: {
                 in: where?.poolTypeIn || undefined,
                 notIn: where?.poolTypeNotIn || undefined,

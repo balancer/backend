@@ -1,2 +1,10 @@
 type Query
 type Mutation
+
+enum Chain {
+    MAINNET
+    POLYGON
+    ARBITRUM
+    FANTOM
+    OPTIMISM
+}
