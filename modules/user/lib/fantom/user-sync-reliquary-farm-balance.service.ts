@@ -157,7 +157,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         console.log('initStakedReliquaryBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
-            chain: networkContext.chain,
+            where: { chain: networkContext.chain },
         });
         console.log('initStakedReliquaryBalances: finished loading pools...');
         // we have to group all relics for the same pool
