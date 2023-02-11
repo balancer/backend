@@ -368,6 +368,10 @@ export class PoolCreatorService {
                 return 'INVESTMENT';
         }
 
+        if (poolType.includes('Linear')) {
+            return 'LINEAR';
+        }
+
         return 'UNKNOWN';
     }
 }
