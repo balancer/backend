@@ -43,6 +43,7 @@ export class GaugeStakingService implements PoolStakingService {
                 id: gaugeStreamer.gaugeAddress,
                 stakingId: gaugeStreamer.gaugeAddress,
                 gaugeAddress: gaugeStreamer.gaugeAddress,
+                chain: networkContext.chain,
             });
             for (let rewardToken of gaugeStreamer.rewardTokens) {
                 const id = `${gaugeStreamer.gaugeAddress}-${rewardToken.address}`;
