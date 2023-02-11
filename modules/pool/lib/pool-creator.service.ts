@@ -368,6 +368,7 @@ export class PoolCreatorService {
                 return 'INVESTMENT';
         }
 
+        // balancer still uses AaveLinear, etc, so we account for that here
         if (poolType.includes('Linear')) {
             return 'LINEAR';
         }
