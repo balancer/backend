@@ -31,11 +31,9 @@ const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
 
 export class BlocksSubgraphService {
     private cache: CacheClass<string, any>;
-    private readonly client: GraphQLClient;
 
     constructor() {
         this.cache = new Cache<string, any>();
-        this.client = new GraphQLClient(networkContext.data.subgraphs.blocks);
     }
 
     public async getAverageBlockTime(): Promise<number> {
@@ -243,7 +241,9 @@ export class BlocksSubgraphService {
     }
 
     public get sdk() {
-        return getSdk(this.client);
+        const client = new GraphQLClient(networkContext.data.subgraphs.blocks);
+
+        return getSdk(client);
     }
 }
 
