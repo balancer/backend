@@ -2,8 +2,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 const requestScopedContext: AsyncLocalStorage<Map<string, any>> = new AsyncLocalStorage();
 
-export function createRequestScopedContext(callback: () => void) {
-    requestScopedContext.run(new Map(), callback);
+export function initRequestScopedContext() {
+    requestScopedContext.enterWith(new Map());
 }
 
 export function setRequestScopedContextValue(key: string, value: any) {

@@ -13,7 +13,6 @@ export class NetworkContextService {
     }
 
     public get config(): NetworkConfig {
-        //TODO: need to verify this works within the context of a getter
         const chainId = getRequestScopeContextValue<string>('chainId');
 
         if (chainId) {

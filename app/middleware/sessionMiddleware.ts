@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import { Hub } from '@sentry/node';
 import { NextFunction, Request, Response } from 'express';
 import { networkContext } from '../../modules/network/network-context.service';
-import { createRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
+import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 
 declare global {
     namespace Express {
@@ -32,11 +32,10 @@ export async function sessionMiddleware(req: Request, res: Response, next: NextF
     Sentry.setUser({ id: accountAddress?.toLowerCase() });
 
     if (chainId && networkContext.isValidChainId(chainId)) {
-        createRequestScopedContext(() => {
-            setRequestScopedContextValue('chainId', chainId);
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', chainId);
 
-            next();
-        });
+        next();
     } else {
         next();
     }
