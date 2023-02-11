@@ -65,6 +65,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             where: {
                 type: 'NATIVE_REWARD',
                 pool: { address: { in: poolsWithNoAllocPoints } },
+                chain: networkContext.chain,
             },
         });
 

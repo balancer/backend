@@ -17,11 +17,12 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         const tokensUpdated: string[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
-            where: { type: 'LINEAR' },
+            where: { type: 'LINEAR', chain: networkContext.chain },
             include: { linearData: true, tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } } },
         });
         const mainTokenPrices = await prisma.prismaTokenPrice.findMany({
             where: {
+                chain: networkContext.chain,
                 tokenAddress: { in: pools.map((pool) => pool.tokens[pool.linearData?.mainIndex || 0].address) },
                 timestamp,
             },

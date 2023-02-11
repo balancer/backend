@@ -13,7 +13,7 @@ export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
 
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
-        const existingPools = await prisma.prismaPool.findMany({});
+        const existingPools = await prisma.prismaPool.findMany({ where: { chain: networkContext.chain } });
         const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 
@@ -36,7 +36,7 @@ export class PoolCreatorService {
     }
 
     public async syncNewPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
-        const existingPools = await prisma.prismaPool.findMany();
+        const existingPools = await prisma.prismaPool.findMany({ where: { chain: networkContext.chain } });
         const latest = await prisma.prismaPool.findFirst({
             orderBy: { createTime: 'desc' },
             select: { createTime: true },
@@ -100,7 +100,10 @@ export class PoolCreatorService {
 
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
         let operations: any[] = [];
-        const pools = await prisma.prismaPool.findMany({ ...prismaPoolWithExpandedNesting });
+        const pools = await prisma.prismaPool.findMany({
+            ...prismaPoolWithExpandedNesting,
+            where: { chain: networkContext.chain },
+        });
 
         //clear any existing
         await prisma.prismaPoolExpandedTokens.updateMany({

@@ -23,7 +23,7 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             include: { dynamicData: true, tokens: { include: { dynamicData: true, token: true } } },
         });
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-            where: { tokenAddress: { in: pool?.tokens.map((token) => token.address) } },
+            where: { tokenAddress: { in: pool?.tokens.map((token) => token.address) }, chain: networkContext.chain },
         });
 
         if (!fbeets || !pool || tokenPrices.length !== pool.tokens.length) {

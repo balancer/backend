@@ -161,7 +161,7 @@ const balancerResolvers: Resolvers = {
         poolSyncTotalShares: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            const items = await prisma.prismaPoolDynamicData.findMany({});
+            const items = await prisma.prismaPoolDynamicData.findMany({ where: { chain: networkContext.chain } });
 
             for (const item of items) {
                 await prisma.prismaPoolDynamicData.update({

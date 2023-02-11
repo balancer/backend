@@ -31,7 +31,12 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         }
 
         const pools = await prisma.prismaPool.findMany({
-            where: { OR: [{ staking: { type: 'FRESH_BEETS' } }, { staking: { type: 'MASTER_CHEF' } }] },
+            where: {
+                OR: [
+                    { staking: { type: 'FRESH_BEETS' }, chain: networkContext.chain },
+                    { staking: { type: 'MASTER_CHEF' }, chain: networkContext.chain },
+                ],
+            },
             include: { staking: true },
         });
         const latestBlock = await networkContext.provider.getBlockNumber();
@@ -103,7 +108,10 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const farmUsers = await this.loadAllSubgraphUsers();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
-        const pools = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true, address: true },
+            where: { chain: networkContext.chain },
+        });
         console.log('initStakedBalances: finished loading pools...');
         const userAddresses = _.uniq(farmUsers.map((farmUser) => farmUser.address));
 
@@ -115,8 +123,12 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'MASTER_CHEF' } } }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'FRESH_BEETS' } } }),
+                prisma.prismaUserStakedBalance.deleteMany({
+                    where: { staking: { type: 'MASTER_CHEF' }, chain: networkContext.chain },
+                }),
+                prisma.prismaUserStakedBalance.deleteMany({
+                    where: { staking: { type: 'FRESH_BEETS' }, chain: networkContext.chain },
+                }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: farmUsers
                         .filter(

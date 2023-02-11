@@ -78,7 +78,7 @@ export class PoolOnChainDataService {
         const tokenPrices = await this.tokenService.getTokenPrices();
 
         const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: poolIds } },
+            where: { id: { in: poolIds }, chain: networkContext.chain },
             include: {
                 tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true, token: true } },
                 stableDynamicData: true,

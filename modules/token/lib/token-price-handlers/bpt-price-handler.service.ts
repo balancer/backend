@@ -17,7 +17,7 @@ export class BptPriceHandlerService implements TokenPriceHandler {
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
-            where: { dynamicData: { totalLiquidity: { gt: 0.1 } } },
+            where: { dynamicData: { totalLiquidity: { gt: 0.1 } }, chain: networkContext.chain },
             include: { dynamicData: true },
         });
         let updated: string[] = [];

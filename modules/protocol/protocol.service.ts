@@ -51,10 +51,13 @@ export class ProtocolService {
                         gt: 0.000000000001,
                     },
                 },
+                chain: networkContext.chain,
             },
             include: { dynamicData: true },
         });
-        const swaps = await prisma.prismaPoolSwap.findMany({ where: { timestamp: { gte: oneDayAgo } } });
+        const swaps = await prisma.prismaPoolSwap.findMany({
+            where: { timestamp: { gte: oneDayAgo }, chain: networkContext.chain },
+        });
         const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));

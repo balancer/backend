@@ -14,7 +14,10 @@ export class PoolAprUpdaterService {
     }
 
     public async updatePoolAprs() {
-        const pools = await prisma.prismaPool.findMany(prismaPoolWithExpandedNesting);
+        const pools = await prisma.prismaPool.findMany({
+            ...prismaPoolWithExpandedNesting,
+            where: { chain: networkContext.chain },
+        });
 
         const failedAprServices = [];
         for (const aprService of this.aprServices) {
@@ -28,6 +31,7 @@ export class PoolAprUpdaterService {
         }
 
         const aprItems = await prisma.prismaPoolAprItem.findMany({
+            where: { chain: networkContext.chain },
             select: { poolId: true, apr: true },
         });
 
@@ -51,7 +55,7 @@ export class PoolAprUpdaterService {
     }
 
     public async realodAllPoolAprs() {
-        await prisma.prismaPoolAprItem.deleteMany({});
+        await prisma.prismaPoolAprItem.deleteMany({ where: { chain: networkContext.chain } });
         await this.updatePoolAprs();
     }
 }

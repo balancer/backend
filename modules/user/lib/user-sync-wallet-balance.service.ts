@@ -28,7 +28,7 @@ export class UserSyncWalletBalanceService {
 
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
-            where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } } },
+            where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } }, chain: networkContext.chain },
         });
         const poolIdsToInit = pools.map((pool) => pool.id);
         const chunks = _.chunk(poolIdsToInit, 100);
@@ -56,7 +56,7 @@ export class UserSyncWalletBalanceService {
         }
 
         let operations: any[] = [];
-        operations.push(prisma.prismaUserWalletBalance.deleteMany());
+        operations.push(prisma.prismaUserWalletBalance.deleteMany({ where: { chain: networkContext.chain } }));
 
         for (const pool of pools) {
             const poolShares = shares.filter((share) => share.poolAddress.toLowerCase() === pool.address);
@@ -98,7 +98,10 @@ export class UserSyncWalletBalanceService {
         const syncStatus = await prisma.prismaUserBalanceSyncStatus.findUnique({
             where: { type_chain: { type: 'WALLET', chain: networkContext.chain } },
         });
-        const response = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
+        const response = await prisma.prismaPool.findMany({
+            select: { id: true, address: true },
+            where: { chain: networkContext.chain },
+        });
         const poolAddresses = response.map((item) => item.address);
 
         if (!syncStatus) {

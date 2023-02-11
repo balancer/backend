@@ -11,6 +11,7 @@ export class GaugeStakingService implements PoolStakingService {
         const gaugeStreamers = await this.gaugeService.getStreamers();
 
         const pools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
             include: {
                 staking: { include: { gauge: { include: { rewards: true } } } },
             },
@@ -69,10 +70,12 @@ export class GaugeStakingService implements PoolStakingService {
     }
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (stakingTypes.includes('GAUGE')) {
-            await prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'GAUGE' } } });
-            await prisma.prismaPoolStakingGaugeReward.deleteMany({});
-            await prisma.prismaPoolStakingGauge.deleteMany({});
-            await prisma.prismaPoolStaking.deleteMany({});
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: { staking: { type: 'GAUGE', chain: networkContext.chain } },
+            });
+            await prisma.prismaPoolStakingGaugeReward.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStakingGauge.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStaking.deleteMany({ where: { chain: networkContext.chain } });
             await this.syncStakingForPools();
         }
     }

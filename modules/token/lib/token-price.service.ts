@@ -27,6 +27,7 @@ export class TokenPriceService {
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
             where: {
+                chain: networkContext.chain,
                 token: {
                     types: { some: { type: 'WHITE_LISTED' } },
                 },
@@ -49,6 +50,7 @@ export class TokenPriceService {
 
     public async getCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
+            where: { chain: networkContext.chain },
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
         });
@@ -72,7 +74,7 @@ export class TokenPriceService {
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
-            where: { timestamp: { lte: oneDayAgo } },
+            where: { timestamp: { lte: oneDayAgo }, chain: networkContext.chain },
         });
 
         const wethPrice = tokenPrices.find(
@@ -122,6 +124,7 @@ export class TokenPriceService {
 
     public async updateTokenPrices(): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
+            where: { chain: networkContext.chain },
             include: {
                 types: true,
                 //fetch the last price stored
@@ -169,7 +172,7 @@ export class TokenPriceService {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         return prisma.prismaTokenPrice.findMany({
-            where: { tokenAddress, timestamp: { gt: startTimestamp } },
+            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: networkContext.chain },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -183,6 +186,7 @@ export class TokenPriceService {
 
         const data = await prisma.prismaTokenPrice.findMany({
             where: {
+                chain: networkContext.chain,
                 tokenAddress: { in: [tokenIn, tokenOut] },
                 timestamp: { gt: startTimestamp },
             },
@@ -230,7 +234,9 @@ export class TokenPriceService {
 
     private async updateCandleStickData() {
         const timestamp = timestampRoundedUpToNearestHour();
-        const tokenPrices = await prisma.prismaTokenPrice.findMany({ where: { timestamp } });
+        const tokenPrices = await prisma.prismaTokenPrice.findMany({
+            where: { timestamp, chain: networkContext.chain },
+        });
         let operations: any[] = [];
 
         for (const tokenPrice of tokenPrices) {

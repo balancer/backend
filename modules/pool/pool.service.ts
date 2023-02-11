@@ -77,7 +77,7 @@ export class PoolService {
     }
 
     public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
-        return prisma.prismaPoolFilter.findMany({});
+        return prisma.prismaPoolFilter.findMany({ where: { chain: networkContext.chain } });
     }
 
     public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
@@ -145,7 +145,10 @@ export class PoolService {
     }
 
     public async syncPoolAllTokensRelationship(): Promise<void> {
-        const pools = await prisma.prismaPool.findMany({ select: { id: true } });
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true },
+            where: { chain: networkContext.chain },
+        });
 
         for (const pool of pools) {
             await this.poolCreatorService.createAllTokensRelationshipForPool(pool.id);
@@ -173,6 +176,7 @@ export class PoolService {
                 categories: {
                     none: { category: 'BLACK_LISTED' },
                 },
+                chain: networkContext.chain,
             },
         });
         const poolIds = result.map((item) => item.id);
@@ -248,7 +252,7 @@ export class PoolService {
     }
 
     public async loadSnapshotsForAllPools() {
-        await prisma.prismaPoolSnapshot.deleteMany({});
+        await prisma.prismaPoolSnapshot.deleteMany({ where: { chain: networkContext.chain } });
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
             where: {
@@ -257,6 +261,7 @@ export class PoolService {
                         gt: 0.000000000001,
                     },
                 },
+                chain: networkContext.chain,
             },
         });
         const chunks = _.chunk(pools, 10);
@@ -276,10 +281,10 @@ export class PoolService {
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({});
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({});
-        await prisma.prismaReliquaryFarmSnapshot.deleteMany({});
-        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({});
+        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: networkContext.chain } });
         const farmIds = farms.map((farm) => parseFloat(farm.id));
         for (const farmId of farmIds) {
             await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);

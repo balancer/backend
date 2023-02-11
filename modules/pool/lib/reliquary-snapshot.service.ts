@@ -19,7 +19,7 @@ export class ReliquarySnapshotService {
     public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
         return prisma.prismaReliquaryFarmSnapshot.findMany({
-            where: { farmId: `${farmId}`, timestamp: { gte: timestamp } },
+            where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: networkContext.chain },
             include: { levelBalances: true, tokenBalances: true },
             orderBy: { timestamp: 'asc' },
         });

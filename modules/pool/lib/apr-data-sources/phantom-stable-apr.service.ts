@@ -18,7 +18,7 @@ export class PhantomStableAprService implements PoolAprService {
             const linearPoolTokens = pool.tokens.filter((token) => token.nestedPool?.type === 'LINEAR');
             const linearPoolIds = linearPoolTokens.map((token) => token.nestedPool?.id || '');
             const aprItems = await prisma.prismaPoolAprItem.findMany({
-                where: { poolId: { in: linearPoolIds }, type: 'LINEAR_BOOSTED' },
+                where: { poolId: { in: linearPoolIds }, type: 'LINEAR_BOOSTED', chain: networkContext.chain },
             });
 
             for (const token of linearPoolTokens) {

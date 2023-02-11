@@ -31,7 +31,7 @@ export class PoolSnapshotService {
         const timestamp = this.getTimestampForRange(range);
 
         return prisma.prismaPoolSnapshot.findMany({
-            where: { poolId, timestamp: { gte: timestamp } },
+            where: { poolId, timestamp: { gte: timestamp }, chain: networkContext.chain },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -54,6 +54,7 @@ export class PoolSnapshotService {
                 pool: {
                     categories: { none: { category: 'BLACK_LISTED' } },
                 },
+                chain: networkContext.chain,
             },
             orderBy: { timestamp: 'asc' },
         });
@@ -81,6 +82,7 @@ export class PoolSnapshotService {
         const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
             where: {
                 timestamp: moment().utc().startOf('day').subtract(daysToSync, 'days').unix(),
+                chain: networkContext.chain,
             },
         });
 
@@ -114,7 +116,12 @@ export class PoolSnapshotService {
         await prismaBulkExecuteOperations(operations, true);
 
         const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
-            where: { OR: [{ type: 'PHANTOM_STABLE' }, { tokens: { some: { nestedPoolId: { not: null } } } }] },
+            where: {
+                OR: [
+                    { type: 'PHANTOM_STABLE', chain: networkContext.chain },
+                    { tokens: { some: { nestedPoolId: { not: null } } }, chain: networkContext.chain },
+                ],
+            },
             include: { tokens: true },
         });
 
@@ -175,7 +182,9 @@ export class PoolSnapshotService {
             }
 
             if (token.nestedPoolId && token.nestedPool) {
-                const snapshots = await prisma.prismaPoolSnapshot.findMany({ where: { poolId: token.nestedPoolId } });
+                const snapshots = await prisma.prismaPoolSnapshot.findMany({
+                    where: { poolId: token.nestedPoolId, chain: networkContext.chain },
+                });
 
                 tokenPriceMap[token.address] = snapshots.map((snapshot) => ({
                     timestamp: snapshot.timestamp,
@@ -195,7 +204,11 @@ export class PoolSnapshotService {
                         error.message,
                     );
                     tokenPriceMap[token.address] = await prisma.prismaTokenPrice.findMany({
-                        where: { tokenAddress: token.address, timestamp: { gte: startTimestamp } },
+                        where: {
+                            tokenAddress: token.address,
+                            timestamp: { gte: startTimestamp },
+                            chain: networkContext.chain,
+                        },
                     });
                 }
             }

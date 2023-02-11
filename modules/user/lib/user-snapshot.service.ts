@@ -28,7 +28,7 @@ export class UserSnapshotService {
 
         const firstTimestamp = this.getTimestampForRange(range);
         const allSnapshots = await prisma.prismaUserRelicSnapshot.findMany({
-            where: { userAddress: userAddress, farmId: farmId },
+            where: { userAddress: userAddress, farmId: farmId, chain: networkContext.chain },
             orderBy: { timestamp: 'asc' },
         });
 
@@ -173,6 +173,7 @@ export class UserSnapshotService {
             select: {
                 userAddress: true,
             },
+            where: { chain: networkContext.chain },
         });
 
         for (const user of users) {
@@ -190,7 +191,7 @@ export class UserSnapshotService {
 
             // get the latest snapshot for each unique user/pool pair
             const latestStoredPoolSnapshotsOfUser = await prisma.prismaUserPoolBalanceSnapshot.findMany({
-                where: { userAddress: userAddress },
+                where: { userAddress: userAddress, chain: networkContext.chain },
                 orderBy: { timestamp: 'desc' },
                 distinct: ['userAddress', 'poolId'],
             });
@@ -683,6 +684,7 @@ export class UserSnapshotService {
                     gte: oldestRequestedSnapshotTimestamp,
                 },
                 poolId: poolId,
+                chain: networkContext.chain,
             },
             orderBy: { timestamp: 'asc' },
         });

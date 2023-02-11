@@ -84,6 +84,7 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
+                chain: networkContext.chain,
             },
             orderBy: { timestamp: 'desc' },
         });
@@ -142,6 +143,7 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
+                chain: networkContext.chain,
             },
             orderBy: { timestamp: 'desc' },
             include: {
@@ -256,22 +258,26 @@ export class PoolSwapService {
             }
         }
 
-        await prisma.prismaPoolSwap.deleteMany({ where: { timestamp: { lt: twoDaysAgo } } });
-        await prisma.prismaPoolBatchSwap.deleteMany({ where: { timestamp: { lt: twoDaysAgo } } });
+        await prisma.prismaPoolSwap.deleteMany({
+            where: { timestamp: { lt: twoDaysAgo }, chain: networkContext.chain },
+        });
+        await prisma.prismaPoolBatchSwap.deleteMany({
+            where: { timestamp: { lt: twoDaysAgo }, chain: networkContext.chain },
+        });
 
         return Array.from(poolIds);
     }
 
     private async createBatchSwaps(txs: string[]) {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs } } });
+        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs }, chain: networkContext.chain } });
         const groupedByTxAndUser = _.groupBy(swaps, (swap) => `${swap.tx}${swap.userAddress}`);
         let operations: any[] = [
             prisma.prismaPoolSwap.updateMany({
                 where: { tx: { in: txs } },
                 data: { batchSwapId: null, batchSwapIdx: null },
             }),
-            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs } } }),
+            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: networkContext.chain } }),
         ];
 
         for (const group of Object.values(groupedByTxAndUser)) {

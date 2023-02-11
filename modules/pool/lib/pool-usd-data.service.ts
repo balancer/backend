@@ -36,6 +36,7 @@ export class PoolUsdDataService {
                         },
                     ],
                 },
+                chain: networkContext.chain,
             },
         });
 
@@ -121,7 +122,7 @@ export class PoolUsdDataService {
         const yesterday = moment().subtract(1, 'day').unix();
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
-            where: poolIds ? { id: { in: poolIds } } : undefined,
+            where: poolIds ? { id: { in: poolIds }, chain: networkContext.chain } : { chain: networkContext.chain },
             include: {
                 swaps: { where: { timestamp: { gte: twoDaysAgo } } },
                 dynamicData: true,
@@ -183,7 +184,9 @@ export class PoolUsdDataService {
                 }),
             );
 
-            const snapshots = await prisma.prismaPoolSnapshot.findMany({ where: { poolId: pool.id } });
+            const snapshots = await prisma.prismaPoolSnapshot.findMany({
+                where: { poolId: pool.id, chain: networkContext.chain },
+            });
 
             if (snapshots.length > 0) {
                 const sharePriceAth = _.orderBy(snapshots, 'sharePrice', 'desc')[0];

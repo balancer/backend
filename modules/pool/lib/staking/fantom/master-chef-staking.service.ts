@@ -19,6 +19,7 @@ export class MasterChefStakingService implements PoolStakingService {
         const farms = await this.masterChefSubgraphService.getAllFarms({});
         const filteredFarms = farms.filter((farm) => !networkContext.data.masterchef.excludedFarmIds.includes(farm.id));
         const pools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
             include: { staking: { include: { farm: { include: { rewarders: true } } } } },
         });
         const operations: any[] = [];
@@ -98,11 +99,16 @@ export class MasterChefStakingService implements PoolStakingService {
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]) {
         if (stakingTypes.includes('MASTER_CHEF')) {
             await prisma.prismaUserStakedBalance.deleteMany({
-                where: { OR: [{ staking: { type: 'MASTER_CHEF' } }, { staking: { type: 'FRESH_BEETS' } }] },
+                where: {
+                    OR: [
+                        { staking: { type: 'MASTER_CHEF' }, chain: networkContext.chain },
+                        { staking: { type: 'FRESH_BEETS' }, chain: networkContext.chain },
+                    ],
+                },
             });
-            await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({});
-            await prisma.prismaPoolStakingMasterChefFarm.deleteMany({});
-            await prisma.prismaPoolStaking.deleteMany({ where: { type: 'MASTER_CHEF' } });
+            await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStakingMasterChefFarm.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStaking.deleteMany({ where: { type: 'MASTER_CHEF', chain: networkContext.chain } });
             await this.syncStakingForPools();
         }
     }

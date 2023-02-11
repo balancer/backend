@@ -27,6 +27,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
         const tokenAddresses = tokens.map((token) => token.address);
         const swaps = await prisma.prismaPoolSwap.findMany({
             where: {
+                chain: networkContext.chain,
                 timestamp: { gt: moment().unix() - 900 }, //only search for the last 15 minutes
                 OR: [{ tokenIn: { in: tokenAddresses } }, { tokenOut: { in: tokenAddresses } }],
             },
@@ -37,7 +38,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             ...swaps.filter((swap) => !tokenAddresses.includes(swap.tokenOut)).map((swap) => swap.tokenOut),
         ];
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
-            where: { timestamp, tokenAddress: { in: otherTokenAddresses } },
+            where: { chain: networkContext.chain, timestamp, tokenAddress: { in: otherTokenAddresses } },
         });
 
         for (const token of tokens) {

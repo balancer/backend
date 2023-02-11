@@ -72,6 +72,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 staking: {
                     type: 'RELIQUARY',
                 },
+                chain: networkContext.chain,
             },
             include: { staking: true },
         });
@@ -154,7 +155,10 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
         console.log('initStakedReliquaryBalances: loading pools...');
-        const pools = await prisma.prismaPool.findMany({ select: { id: true, address: true } });
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true, address: true },
+            chain: networkContext.chain,
+        });
         console.log('initStakedReliquaryBalances: finished loading pools...');
         // we have to group all relics for the same pool
         const userRelicsByPoolId = _.groupBy(relics, (relic) => relic.userAddress + relic.pid);
@@ -170,7 +174,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'RELIQUARY' } } }),
+                prisma.prismaUserStakedBalance.deleteMany({
+                    where: { staking: { type: 'RELIQUARY' }, chain: networkContext.chain },
+                }),
 
                 prisma.prismaUserStakedBalance.createMany({
                     data: Object.values(userRelicsByPoolId).map((relics) => {

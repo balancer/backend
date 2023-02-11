@@ -27,7 +27,7 @@ export class PoolSanityDataLoaderService {
             poolFilters: response?.poolFilters ?? [],
         };
 
-        const categories = await prisma.prismaPoolCategory.findMany({});
+        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: networkContext.chain } });
         const incentivized = categories.filter((item) => item.category === 'INCENTIVIZED').map((item) => item.poolId);
         const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
 
@@ -35,8 +35,8 @@ export class PoolSanityDataLoaderService {
         await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED');
 
         await prisma.$transaction([
-            prisma.prismaPoolFilterMap.deleteMany({}),
-            prisma.prismaPoolFilter.deleteMany({}),
+            prisma.prismaPoolFilterMap.deleteMany({ where: { chain: networkContext.chain } }),
+            prisma.prismaPoolFilter.deleteMany({ where: { chain: networkContext.chain } }),
             prisma.prismaPoolFilter.createMany({
                 data: config.poolFilters.map((item) => ({
                     id: item.id,
@@ -66,7 +66,10 @@ export class PoolSanityDataLoaderService {
         const itemsToRemove = currentPoolIds.filter((poolId) => !newPoolIds.includes(poolId));
 
         // make sure the pools really exist to prevent sanity mistakes from breaking the system
-        const pools = await prisma.prismaPool.findMany({ where: { id: { in: itemsToAdd } }, select: { id: true } });
+        const pools = await prisma.prismaPool.findMany({
+            where: { id: { in: itemsToAdd }, chain: networkContext.chain },
+            select: { id: true },
+        });
         const poolIds = pools.map((pool) => pool.id);
         const existingItemsToAdd = itemsToAdd.filter((poolId) => poolIds.includes(poolId));
 
@@ -81,7 +84,7 @@ export class PoolSanityDataLoaderService {
                 skipDuplicates: true,
             }),
             prisma.prismaPoolCategory.deleteMany({
-                where: { poolId: { in: itemsToRemove }, category },
+                where: { poolId: { in: itemsToRemove }, category, chain: networkContext.chain },
             }),
         ]);
     }

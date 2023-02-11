@@ -11,7 +11,7 @@ export class CoingeckoDataService {
 
     public async syncTokenDynamicDataFromCoingecko() {
         const tokensWithIds = await prisma.prismaToken.findMany({
-            where: { coingeckoTokenId: { not: null } },
+            where: { coingeckoTokenId: { not: null }, chain: networkContext.chain },
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
 
@@ -104,7 +104,7 @@ export class CoingeckoDataService {
             return [hour[0], thirty[1], Math.max(thirty[2], hour[2]), Math.min(thirty[3], hour[3]), hour[4]];
         });
 
-        operations.push(prisma.prismaTokenPrice.deleteMany({ where: { tokenAddress } }));
+        operations.push(prisma.prismaTokenPrice.deleteMany({ where: { tokenAddress, chain: networkContext.chain } }));
 
         operations.push(
             prisma.prismaTokenPrice.createMany({

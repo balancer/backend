@@ -42,7 +42,7 @@ export class TokenService {
     public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
         let tokens: PrismaToken[] | null = this.cache.get(ALL_TOKENS_CACHE_KEY);
         if (!tokens) {
-            tokens = await prisma.prismaToken.findMany({});
+            tokens = await prisma.prismaToken.findMany({ where: { chain: networkContext.chain } });
             this.cache.put(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60 * 1000);
         }
         if (addresses) {
@@ -53,7 +53,7 @@ export class TokenService {
 
     public async getTokenDefinitions(): Promise<TokenDefinition[]> {
         const tokens = await prisma.prismaToken.findMany({
-            where: { types: { some: { type: 'WHITE_LISTED' } } },
+            where: { types: { some: { type: 'WHITE_LISTED' } }, chain: networkContext.chain },
             include: { types: true },
             orderBy: { priority: 'desc' },
         });
@@ -128,7 +128,10 @@ export class TokenService {
 
     public async getTokensDynamicData(tokenAddresses: string[]): Promise<PrismaTokenDynamicData[]> {
         return prisma.prismaTokenDynamicData.findMany({
-            where: { tokenAddress: { in: tokenAddresses.map((address) => address.toLowerCase()) } },
+            where: {
+                tokenAddress: { in: tokenAddresses.map((address) => address.toLowerCase()) },
+                chain: networkContext.chain,
+            },
         });
     }
 

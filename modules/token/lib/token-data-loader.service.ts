@@ -102,6 +102,7 @@ export class TokenDataLoaderService {
         const whiteListedTokens = await prisma.prismaTokenType.findMany({
             where: {
                 type: 'WHITE_LISTED',
+                chain: networkContext.chain,
             },
         });
 
@@ -124,7 +125,7 @@ export class TokenDataLoaderService {
         });
 
         await prisma.prismaTokenType.deleteMany({
-            where: { id: { in: removeFromWhitelist.map((token) => token.id) } },
+            where: { id: { in: removeFromWhitelist.map((token) => token.id) }, chain: networkContext.chain },
         });
 
         await this.syncTokenTypes();
@@ -132,7 +133,10 @@ export class TokenDataLoaderService {
 
     public async syncTokenTypes() {
         const pools = await this.loadPoolData();
-        const tokens = await prisma.prismaToken.findMany({ include: { types: true } });
+        const tokens = await prisma.prismaToken.findMany({
+            include: { types: true },
+            where: { chain: networkContext.chain },
+        });
         const types: Prisma.PrismaTokenTypeCreateManyInput[] = [];
 
         for (const token of tokens) {
@@ -176,6 +180,7 @@ export class TokenDataLoaderService {
 
     private async loadPoolData() {
         return prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
             select: {
                 address: true,
                 symbol: true,

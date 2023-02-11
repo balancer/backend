@@ -20,6 +20,7 @@ export class ReliquaryStakingService implements PoolStakingService {
         }
         const farms = await this.reliquarySubgraphService.getAllFarms({});
         const pools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
             include: { staking: { include: { farm: { include: { rewarders: true } } } } },
         });
         const operations: any[] = [];
@@ -115,10 +116,12 @@ export class ReliquaryStakingService implements PoolStakingService {
 
     public async reloadStakingForAllPools(reloadStakingTypes: PrismaPoolStakingType[]) {
         if (reloadStakingTypes.includes('RELIQUARY')) {
-            await prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'RELIQUARY' } } });
-            await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({});
-            await prisma.prismaPoolStakingReliquaryFarm.deleteMany({});
-            await prisma.prismaPoolStaking.deleteMany({ where: { type: 'RELIQUARY' } });
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: { staking: { type: 'RELIQUARY' }, chain: networkContext.chain },
+            });
+            await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStakingReliquaryFarm.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaPoolStaking.deleteMany({ where: { type: 'RELIQUARY', chain: networkContext.chain } });
             await this.syncStakingForPools();
         }
     }

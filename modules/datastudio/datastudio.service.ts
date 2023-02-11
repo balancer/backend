@@ -90,6 +90,7 @@ export class DatastudioService {
                 dynamicData: {
                     totalLiquidity: { gte: 5000 },
                 },
+                chain: networkContext.chain,
             },
             include: {
                 dynamicData: true,

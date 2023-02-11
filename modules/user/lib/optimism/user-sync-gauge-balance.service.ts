@@ -23,7 +23,10 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const gaugeShares = await this.loadAllSubgraphUsers();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
-        const pools = await prisma.prismaPool.findMany({ select: { id: true } });
+        const pools = await prisma.prismaPool.findMany({
+            select: { id: true },
+            where: { chain: networkContext.chain },
+        });
         console.log('initStakedBalances: finished loading pools...');
         const userAddresses = _.uniq(gaugeShares.map((share) => share.user.id));
 
@@ -35,7 +38,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({}),
+                prisma.prismaUserStakedBalance.deleteMany({ where: { chain: networkContext.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: gaugeShares.map((share) => {
                         const pool = pools.find((pool) => pool.id === share.gauge.poolId);
@@ -74,7 +77,10 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             throw new Error('UserSyncGaugeBalanceService: syncStakedBalances called before initStakedBalances');
         }
 
-        const pools = await prisma.prismaPool.findMany({ include: { staking: true } });
+        const pools = await prisma.prismaPool.findMany({
+            include: { staking: true },
+            where: { chain: networkContext.chain },
+        });
         const latestBlock = await networkContext.provider.getBlockNumber();
         const gaugeAddresses = await gaugeSerivce.getAllGaugeAddresses();
 
