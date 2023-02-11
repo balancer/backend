@@ -44,6 +44,7 @@ export class PoolSyncService {
             create: {
                 category: PrismaLastBlockSyncedCategory.POOLS,
                 blockNumber: endBlock,
+                chain: networkContext.chain,
             },
         });
     }
