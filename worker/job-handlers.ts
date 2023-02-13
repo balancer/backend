@@ -16,33 +16,35 @@ const defaultSamplingRate = 0.001;
 
 async function runIfNotAlreadyRunning(
     id: string,
+    chainId: string,
     fn: () => any,
     samplingRate: number,
     res: any,
     next: NextFunction,
 ): Promise<void> {
-    if (runningJobs.has(id)) {
-        console.log('Skipping job', id);
+    const jobId = `${id}-${chainId}`;
+    if (runningJobs.has(jobId)) {
+        console.log('Skipping job', jobId);
         res.sendStatus(200);
         return;
     }
     try {
         const cronsMetricPublisher = getCronMetricsPublisher();
-        runningJobs.add(id);
-        const transaction = Sentry.startTransaction({ name: id }, { samplingRate: samplingRate.toString() });
+        runningJobs.add(jobId);
+        const transaction = Sentry.startTransaction({ name: jobId }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
             scope.setSpan(transaction);
-            scope.setTransactionName(`POST /${id}`);
+            scope.setTransactionName(`POST /${jobId}`);
         });
         transaction.sampled = true;
-        console.time(id);
-        console.log(`Start job ${id}`);
+        console.time(jobId);
+        console.log(`Start job ${jobId}`);
         await fn();
-        cronsMetricPublisher.publish(`${id}-done`);
+        cronsMetricPublisher.publish(`${jobId}-done`);
         if (Math.random() > samplingRate) {
             transaction.sampled = false;
         }
-        console.log(`Finished job ${id}`);
+        console.log(`Finished job ${jobId}`);
         res.sendStatus(200);
     } catch (error) {
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
@@ -50,13 +52,13 @@ async function runIfNotAlreadyRunning(
             transaction.sampled = true;
         }
         Sentry.configureScope((scope) => {
-            scope.setTag('error', id);
+            scope.setTag('error', jobId);
         });
-        console.log(`Error job ${id}`);
+        console.log(`Error job ${jobId}`);
         next(error);
     } finally {
-        runningJobs.delete(id);
-        console.timeEnd(id);
+        runningJobs.delete(jobId);
+        console.timeEnd(jobId);
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
         if (transaction) {
             transaction.finish();
@@ -73,6 +75,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-changed-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncChangedPools(),
                     defaultSamplingRate,
                     res,
@@ -82,6 +85,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => userService.syncChangedWalletBalancesForAllPools(),
                     defaultSamplingRate,
                     res,
@@ -91,6 +95,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'user-sync-staked-balances':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => userService.syncChangedStakedBalances(),
                     defaultSamplingRate,
                     res,
@@ -100,6 +105,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'load-token-prices':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => tokenService.loadTokenPrices(),
                     defaultSamplingRate,
                     res,
@@ -109,6 +115,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'update-liquidity-for-active-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.updateLiquidityValuesForPools(),
                     defaultSamplingRate,
                     res,
@@ -118,6 +125,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'update-liquidity-for-inactive-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.updateLiquidityValuesForPools(0, 0.00000000001),
                     defaultSamplingRate,
                     res,
@@ -127,6 +135,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'update-pool-apr':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.updatePoolAprs(),
                     defaultSamplingRate,
                     res,
@@ -136,6 +145,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'load-on-chain-data-for-pools-with-active-updates':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
                     defaultSamplingRate,
                     res,
@@ -145,6 +155,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-new-pools-from-subgraph':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncNewPoolsFromSubgraph(),
                     defaultSamplingRate,
                     res,
@@ -154,6 +165,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncSanityPoolData(),
                     defaultSamplingRate,
                     res,
@@ -163,6 +175,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-tokens-from-pool-tokens':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => tokenService.syncSanityData(),
                     defaultSamplingRate,
                     res,
@@ -172,6 +185,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'update-liquidity-24h-ago-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.updateLiquidity24hAgoForAllPools(),
                     defaultSamplingRate,
                     res,
@@ -181,6 +195,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-fbeets-ratio':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => beetsService.syncFbeetsRatio(),
                     defaultSamplingRate,
                     res,
@@ -190,6 +205,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'cache-average-block-time':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => blocksSubgraphService.cacheAverageBlockTime(),
                     0.001,
                     res,
@@ -199,6 +215,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-token-dynamic-data':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => tokenService.syncTokenDynamicData(),
                     defaultSamplingRate,
                     res,
@@ -208,6 +225,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-staking-for-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncStakingForPools(),
                     defaultSamplingRate,
                     res,
@@ -217,6 +235,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'cache-protocol-data':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => protocolService.cacheProtocolMetrics(),
                     defaultSamplingRate,
                     res,
@@ -226,6 +245,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-latest-snapshots-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncLatestSnapshotsForAllPools(),
                     0.01,
                     res,
@@ -235,6 +255,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'update-lifetime-values-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.updateLifetimeValuesForAllPools(),
                     defaultSamplingRate,
                     res,
@@ -242,14 +263,29 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-user-snapshots':
-                await runIfNotAlreadyRunning(job.name, () => userService.syncUserBalanceSnapshots(), 0.01, res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    job.chainId,
+                    () => userService.syncUserBalanceSnapshots(),
+                    0.01,
+                    res,
+                    next,
+                );
                 break;
             case 'feed-data-to-datastudio':
-                await runIfNotAlreadyRunning(job.name, () => datastudioService.feedPoolData(), 0.0, res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    job.chainId,
+                    () => datastudioService.feedPoolData(),
+                    0.0,
+                    res,
+                    next,
+                );
                 break;
             case 'sync-latest-reliquary-snapshots':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => poolService.syncLatestReliquarySnapshotsForAllFarms(),
                     0.01,
                     res,
@@ -259,6 +295,7 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-latest-relic-snapshots':
                 await runIfNotAlreadyRunning(
                     job.name,
+                    job.chainId,
                     () => userService.asyncSyncUserRelicSnapshots(),
                     0.01,
                     res,

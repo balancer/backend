@@ -49,7 +49,7 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
         }
 
         //make sure metric is available for alarm
-        cronsMetricPublisher.publish(`${cronJob.name}-done`);
+        cronsMetricPublisher.publish(`${cronJob.name}-${chainId}-done`);
 
         const putAlarmCommand = new PutMetricAlarmCommand({
             AlarmName: alarmName,
