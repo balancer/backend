@@ -20,7 +20,7 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
     for (const cronJob of jobs) {
-        const alarmName = `AUTO CRON ALARM MULTICHAIN: ${cronJob.name} - chainId - ${env.DEPLOYMENT_ENV}`;
+        const alarmName = `AUTO CRON ALARM MULTICHAIN: ${cronJob.name} - ${chainId} - ${env.DEPLOYMENT_ENV}`;
 
         // alert if cron has not run once in the double interval (or once in a minute for short intervals)
         const threshold = 1;
