@@ -5,12 +5,11 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 export type WorkerJob = {
     name: string;
     interval: number;
-    chainId: string;
 };
 
 async function scheduleJobWithInterval(chainId: string, jobs: WorkerJob[]): Promise<void> {
     for (const job of jobs) {
-        await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chainId: job.chainId }), job.interval);
+        await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chainId: chainId }), job.interval);
     }
 }
 
