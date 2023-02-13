@@ -27,7 +27,7 @@ export class ReliquarySnapshotService {
 
     public async getSnapshotForFarm(farmId: number, timestamp: number) {
         return prisma.prismaReliquaryFarmSnapshot.findFirst({
-            where: { farmId: `${farmId}`, timestamp: timestamp },
+            where: { farmId: `${farmId}`, timestamp: timestamp, chain: networkContext.chain },
             include: { levelBalances: true },
         });
     }
@@ -75,12 +75,12 @@ export class ReliquarySnapshotService {
                         : moment().utc().unix() - 600;
 
                 const pool = await prisma.prismaPool.findFirstOrThrow({
-                    where: { staking: { reliquary: { id: `${farmId}` } } },
+                    where: { staking: { reliquary: { id: `${farmId}` } }, chain: networkContext.chain },
                     include: { tokens: { include: { token: true } } },
                 });
 
                 const mostRecentPoolSnapshot = await prisma.prismaPoolSnapshot.findFirstOrThrow({
-                    where: { poolId: pool.id, timestamp: { lte: timestampForSnapshot } },
+                    where: { poolId: pool.id, timestamp: { lte: timestampForSnapshot }, chain: networkContext.chain },
                     orderBy: { timestamp: 'desc' },
                 });
 

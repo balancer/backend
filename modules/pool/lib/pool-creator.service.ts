@@ -40,6 +40,7 @@ export class PoolCreatorService {
         const latest = await prisma.prismaPool.findFirst({
             orderBy: { createTime: 'desc' },
             select: { createTime: true },
+            where: { chain: networkContext.chain },
         });
 
         const subgraphPools = await balancerSubgraphService.getAllPools(

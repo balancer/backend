@@ -179,7 +179,10 @@ export class PoolSwapService {
      */
     public async syncSwapsForLast48Hours(): Promise<string[]> {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const lastSwap = await prisma.prismaPoolSwap.findFirst({ orderBy: { timestamp: 'desc' } });
+        const lastSwap = await prisma.prismaPoolSwap.findFirst({
+            orderBy: { timestamp: 'desc' },
+            where: { chain: networkContext.chain },
+        });
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         //ensure we only sync the last 48 hours worth of swaps
         let timestamp = lastSwap && lastSwap.timestamp > twoDaysAgo ? lastSwap.timestamp : twoDaysAgo;

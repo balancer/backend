@@ -43,7 +43,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
 
         const lqdrPrice = await prisma.prismaTokenCurrentPrice.findFirst({
             orderBy: { timestamp: 'desc' },
-            where: { tokenAddress: this.lqdrAddress },
+            where: { tokenAddress: this.lqdrAddress, chain: networkContext.chain },
         });
 
         if (!lqdrPrice) {

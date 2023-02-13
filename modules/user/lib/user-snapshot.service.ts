@@ -49,7 +49,7 @@ export class UserSnapshotService {
             */
             if (!firstSnapshot || firstSnapshot.timestamp > firstTimestamp) {
                 const snapshotBeforeFirstTimestamp = await prisma.prismaUserRelicSnapshot.findFirst({
-                    where: { relicId: relicId, timestamp: { lt: firstTimestamp } },
+                    where: { relicId: relicId, timestamp: { lt: firstTimestamp }, chain: networkContext.chain },
                     orderBy: { timestamp: 'desc' },
                 });
                 if (snapshotBeforeFirstTimestamp) {
@@ -458,6 +458,7 @@ export class UserSnapshotService {
                         lt: oldestRequestedSnapshotTimestamp,
                     },
                     poolId: poolId,
+                    chain: networkContext.chain,
                 },
                 orderBy: { timestamp: 'desc' },
             });
