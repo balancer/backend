@@ -29,7 +29,7 @@ async function startServer() {
     Sentry.init({
         dsn: env.SENTRY_DSN,
         tracesSampleRate: 0.005,
-        environment: `${env.DEPLOYMENT_ENV}`,
+        environment: `multichain-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Apollo(),

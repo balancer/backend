@@ -8,6 +8,7 @@ import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
+import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 
 const runningJobs: Set<string> = new Set();
 
@@ -64,9 +65,10 @@ async function runIfNotAlreadyRunning(
 }
 
 export function configureWorkerRoutes(app: Express) {
-    // all manual triggered (e.g. fast running) workerJobs will be handled here
     app.post('/', async (req, res, next) => {
-        const job = req.body as { name: string };
+        const job = req.body as { name: string; chainId: string };
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', job.chainId);
         switch (job.name) {
             case 'sync-changed-pools':
                 await runIfNotAlreadyRunning(

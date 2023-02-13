@@ -1,22 +1,23 @@
 import { createAlertsIfNotExist } from './create-alerts';
 import { workerQueue } from './queue';
-import { networkContext } from '../modules/network/network-context.service';
+import { AllNetworkConfigs } from '../modules/network/network-config';
 
 export type WorkerJob = {
     name: string;
     interval: number;
+    chainId: string;
 };
 
-async function scheduleJobWithInterval(jobs: WorkerJob[]): Promise<void> {
+async function scheduleJobWithInterval(chainId: string, jobs: WorkerJob[]): Promise<void> {
     for (const job of jobs) {
-        await workerQueue.sendWithInterval(JSON.stringify({ name: job.name }), job.interval);
+        await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chainId: job.chainId }), job.interval);
     }
 }
 
-export async function scheduleJobs(): Promise<void> {
-    await scheduleJobWithInterval(networkContext.config.workerJobs);
+export async function scheduleJobs(chainId: string): Promise<void> {
+    await scheduleJobWithInterval(chainId, AllNetworkConfigs[chainId].workerJobs);
 }
 
-export async function createAlerts(): Promise<void> {
-    await createAlertsIfNotExist(networkContext.config.workerJobs);
+export async function createAlerts(chainId: string): Promise<void> {
+    await createAlertsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
 }
