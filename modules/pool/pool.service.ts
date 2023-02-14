@@ -39,7 +39,7 @@ import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
 
-const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups:${networkContext.chain}`;
+const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
 
 export class PoolService {
     private cache = new Cache<string, any>();
@@ -107,7 +107,9 @@ export class PoolService {
     }
 
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(FEATURED_POOL_GROUPS_CACHE_KEY);
+        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+        );
 
         if (cached) {
             return cached;
@@ -115,7 +117,11 @@ export class PoolService {
 
         const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
 
-        this.cache.put(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5 * 1000);
+        this.cache.put(
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+            featuredPoolGroups,
+            60 * 5 * 1000,
+        );
 
         return featuredPoolGroups;
     }

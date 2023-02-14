@@ -17,7 +17,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
 
-const ALL_FARM_USERS_CACHE_KEY = `masterchef-all-farm-users:${networkContext.chain}`;
+const ALL_FARM_USERS_CACHE_KEY = `masterchef-all-farm-users`;
 
 export class MasterchefSubgraphService {
     private readonly cache: CacheClass<string, any>;
@@ -56,7 +56,9 @@ export class MasterchefSubgraphService {
     }
 
     public async getFarmUsersAtBlock(address: string, block: number): Promise<FarmUserFragment[]> {
-        const cachedUsers = this.cache.get(`${ALL_FARM_USERS_CACHE_KEY}:${block}`) as FarmUserFragment[] | null;
+        const cachedUsers = this.cache.get(`${ALL_FARM_USERS_CACHE_KEY}:${networkContext.chainId}:${block}`) as
+            | FarmUserFragment[]
+            | null;
 
         if (cachedUsers) {
             return cachedUsers.filter((user) => user.address === address) || null;
@@ -64,7 +66,7 @@ export class MasterchefSubgraphService {
 
         const users = await this.getAllFarmUsers({ block: { number: block } });
 
-        this.cache.put(`${ALL_FARM_USERS_CACHE_KEY}:${block}`, users, twentyFourHoursInMs);
+        this.cache.put(`${ALL_FARM_USERS_CACHE_KEY}:${networkContext.chainId}:${block}`, users, twentyFourHoursInMs);
 
         return users.filter((user) => user.id === address);
     }

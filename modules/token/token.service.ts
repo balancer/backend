@@ -10,9 +10,9 @@ import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDele
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
 
-const TOKEN_PRICES_CACHE_KEY = `token:prices:current:${networkContext.chain}`;
-const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago:${networkContext.chain}`;
-const ALL_TOKENS_CACHE_KEY = `tokens:all:${networkContext.chain}`;
+const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
+const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
+const ALL_TOKENS_CACHE_KEY = `tokens:all`;
 
 export class TokenService {
     cache: CacheClass<string, any>;
@@ -40,10 +40,10 @@ export class TokenService {
     }
 
     public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
-        let tokens: PrismaToken[] | null = this.cache.get(ALL_TOKENS_CACHE_KEY);
+        let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chainId}`);
         if (!tokens) {
             tokens = await prisma.prismaToken.findMany({ where: { chain: networkContext.chain } });
-            this.cache.put(ALL_TOKENS_CACHE_KEY, tokens, 5 * 60 * 1000);
+            this.cache.put(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chainId}`, tokens, 5 * 60 * 1000);
         }
         if (addresses) {
             return tokens.filter((token) => addresses.includes(token.address));
@@ -84,10 +84,10 @@ export class TokenService {
     }
 
     public async getTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices = this.cache.get(TOKEN_PRICES_CACHE_KEY);
+        let tokenPrices = this.cache.get(`${TOKEN_PRICES_CACHE_KEY}:${networkContext.chainId}`);
         if (!tokenPrices) {
             tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
-            this.cache.put(TOKEN_PRICES_CACHE_KEY, tokenPrices, 30 * 1000);
+            this.cache.put(`${TOKEN_PRICES_CACHE_KEY}:${networkContext.chainId}`, tokenPrices, 30 * 1000);
         }
         return tokenPrices;
     }
@@ -152,10 +152,14 @@ export class TokenService {
     }
 
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices24hAgo = this.cache.get(TOKEN_PRICES_24H_AGO_CACHE_KEY);
+        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`);
         if (!tokenPrices24hAgo) {
             tokenPrices24hAgo = await this.tokenPriceService.getTokenPriceFrom24hAgo();
-            this.cache.put(TOKEN_PRICES_24H_AGO_CACHE_KEY, tokenPrices24hAgo, 60 * 5 * 1000);
+            this.cache.put(
+                `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`,
+                tokenPrices24hAgo,
+                60 * 5 * 1000,
+            );
         }
         return tokenPrices24hAgo;
     }
