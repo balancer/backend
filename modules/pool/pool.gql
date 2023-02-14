@@ -57,6 +57,7 @@ extend type Mutation {
 
 type GqlPoolMinimal {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -86,6 +87,7 @@ enum GqlPoolMinimalType {
 interface GqlPoolBase {
     #fields that never change after creation
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -185,6 +187,7 @@ enum GqlPoolNestingType {
 
 type GqlPoolWeighted implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -205,6 +208,7 @@ type GqlPoolWeighted implements GqlPoolBase {
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -225,6 +229,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
 
 type GqlPoolStable implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -245,6 +250,7 @@ type GqlPoolStable implements GqlPoolBase {
 
 type GqlPoolMetaStable implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -265,6 +271,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
 
 type GqlPoolPhantomStable implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -286,6 +293,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
 
 type GqlPoolElement implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -309,6 +317,7 @@ type GqlPoolElement implements GqlPoolBase {
 
 type GqlPoolLinear implements GqlPoolBase {
     id: ID!
+    chain: GqlChain!
     name: String!
     symbol: String!
     address: Bytes!
@@ -540,8 +549,8 @@ input GqlPoolFilter {
     idNotIn: [String!]
     filterIn: [String!]
     filterNotIn: [String!]
-    chainIn: [Chain!]
-    chainNotIn: [Chain!]
+    chainIn: [GqlChain!]
+    chainNotIn: [GqlChain!]
 }
 
 enum GqlPoolFilterCategory {
