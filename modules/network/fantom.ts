@@ -265,10 +265,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(10, 'seconds'),
         },
         {
-            name: 'feed-data-to-datastudio',
-            interval: every(1, 'minutes'),
-        },
-        {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
         },
