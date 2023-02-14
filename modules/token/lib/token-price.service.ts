@@ -10,8 +10,8 @@ import * as Sentry from '@sentry/node';
 import { networkContext } from '../../network/network-context.service';
 import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
-const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
-const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
+const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
+const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices`;
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
@@ -105,17 +105,27 @@ export class TokenPriceService {
     }
 
     public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
-        const memCached = this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY) as TokenHistoricalPrices | null;
+        const memCached = this.cache.get(
+            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+        ) as TokenHistoricalPrices | null;
 
         if (memCached) {
             return memCached;
         }
 
-        const tokenPrices: TokenHistoricalPrices = await this.cache.get(TOKEN_HISTORICAL_PRICES_CACHE_KEY);
-        const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY);
+        const tokenPrices: TokenHistoricalPrices = await this.cache.get(
+            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+        );
+        const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(
+            `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+        );
 
         if (tokenPrices) {
-            this.cache.put(TOKEN_HISTORICAL_PRICES_CACHE_KEY, { ...tokenPrices, ...nestedBptPrices }, 60000);
+            this.cache.put(
+                `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+                { ...tokenPrices, ...nestedBptPrices },
+                60000,
+            );
         }
 
         //don't try to refetch the cache, it takes way too long

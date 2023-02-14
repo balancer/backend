@@ -21,7 +21,7 @@ export type LatestsSyncedBlocks = {
     poolSyncBlock: string;
 };
 
-export const PROTOCOL_METRICS_CACHE_KEY = 'protocol:metrics';
+export const PROTOCOL_METRICS_CACHE_KEY = `protocol:metrics`;
 
 export class ProtocolService {
     private cache = new Cache<string, ProtocolMetrics>();
@@ -29,7 +29,7 @@ export class ProtocolService {
     constructor(private balancerSubgraphService: BalancerSubgraphService) {}
 
     public async getMetrics(): Promise<ProtocolMetrics> {
-        const cached = this.cache.get(PROTOCOL_METRICS_CACHE_KEY);
+        const cached = this.cache.get(`${PROTOCOL_METRICS_CACHE_KEY}:${networkContext.chainId}`);
 
         if (cached) {
             return cached;
@@ -78,7 +78,7 @@ export class ProtocolService {
             swapFee24h: `${swapFee24h}`,
         };
 
-        this.cache.put(PROTOCOL_METRICS_CACHE_KEY, protocolData, 60 * 30 * 1000);
+        this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${networkContext.chainId}`, protocolData, 60 * 30 * 1000);
 
         return protocolData;
     }

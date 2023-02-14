@@ -71,7 +71,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
                             },
                         },
                         data: {
-                            apr: apr,
+                            apr: apr || 0,
                         },
                     }),
                 );

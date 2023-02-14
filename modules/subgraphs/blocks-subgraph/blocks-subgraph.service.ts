@@ -20,9 +20,9 @@ import moment from 'moment-timezone';
 import { Cache, CacheClass } from 'memory-cache';
 import { networkContext } from '../../network/network-context.service';
 
-const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
-const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
-const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
+const DAILY_BLOCKS_CACHE_KEY = `block-subgraph_daily-blocks`;
+const AVG_BLOCK_TIME_CACHE_PREFIX = `block-subgraph:average-block-time`;
+const BLOCK_24H_AGO = `block-subgraph:block-24h-ago`;
 
 /*const BLOCK_TIME_MAP: { [chainId: string]: number } = {
     '250': 1,
@@ -37,7 +37,7 @@ export class BlocksSubgraphService {
     }
 
     public async getAverageBlockTime(): Promise<number> {
-        const avgBlockTime = await this.cache.get(AVG_BLOCK_TIME_CACHE_PREFIX);
+        const avgBlockTime = await this.cache.get(`${AVG_BLOCK_TIME_CACHE_PREFIX}:${networkContext.chainId}`);
 
         if (avgBlockTime !== null) {
             return parseFloat(avgBlockTime);
@@ -72,7 +72,7 @@ export class BlocksSubgraphService {
         const timeDifference = parseInt(blocks[0].timestamp) - parseInt(blocks[blocks.length - 1].timestamp);
         const averageBlockTime = timeDifference / blocks.length;
 
-        await this.cache.put(AVG_BLOCK_TIME_CACHE_PREFIX, `${averageBlockTime}`);
+        await this.cache.put(`${AVG_BLOCK_TIME_CACHE_PREFIX}:${networkContext.chainId}`, `${averageBlockTime}`);
 
         return averageBlockTime;
     }
@@ -125,7 +125,7 @@ export class BlocksSubgraphService {
     }*/
 
     public async getBlockFrom24HoursAgo(): Promise<BlockFragment> {
-        const cached = this.cache.get(BLOCK_24H_AGO);
+        const cached = this.cache.get(`${BLOCK_24H_AGO}:${networkContext.chainId}`);
 
         if (cached) {
             return cached;
@@ -157,7 +157,7 @@ export class BlocksSubgraphService {
         const allBlocks = await this.getAllBlocks(args);
 
         if (allBlocks.length > 0) {
-            this.cache.put(BLOCK_24H_AGO, allBlocks[0], 15 * 1000);
+            this.cache.put(`${BLOCK_24H_AGO}:${networkContext.chainId}`, allBlocks[0], 15 * 1000);
         }
 
         return allBlocks[0];
@@ -202,7 +202,9 @@ export class BlocksSubgraphService {
             },
         };
 
-        const cacheResult: BlockFragment[] = await this.cache.get(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`);
+        const cacheResult: BlockFragment[] = await this.cache.get(
+            `${DAILY_BLOCKS_CACHE_KEY}:${networkContext.chainId}:${today}:${numDays}`,
+        );
 
         if (cacheResult) {
             return cacheResult;
@@ -223,7 +225,11 @@ export class BlocksSubgraphService {
             }
         }
 
-        await this.cache.put(`${DAILY_BLOCKS_CACHE_KEY}:${today}:${numDays}`, blocks, oneDayInMinutes);
+        await this.cache.put(
+            `${DAILY_BLOCKS_CACHE_KEY}:${networkContext.chainId}:${today}:${numDays}`,
+            blocks,
+            oneDayInMinutes,
+        );
 
         return blocks;
     }

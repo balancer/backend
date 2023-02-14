@@ -1,4 +1,3 @@
-import { Cache, CacheClass } from 'memory-cache';
 import { GraphQLClient } from 'graphql-request';
 import {
     getSdk,
@@ -10,11 +9,7 @@ import {
 import { networkContext } from '../../network/network-context.service';
 
 export class UserSnapshotSubgraphService {
-    private readonly cache: CacheClass<string, any>;
-
-    constructor() {
-        this.cache = new Cache<string, any>();
-    }
+    constructor() {}
 
     public async getMetadata() {
         const { meta } = await this.sdk.UserSnapshotGetMeta();

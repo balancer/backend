@@ -39,7 +39,7 @@ import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
 
-const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
+const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
 
 export class PoolService {
     private cache = new Cache<string, any>();
@@ -107,7 +107,9 @@ export class PoolService {
     }
 
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(FEATURED_POOL_GROUPS_CACHE_KEY);
+        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+        );
 
         if (cached) {
             return cached;
@@ -115,7 +117,11 @@ export class PoolService {
 
         const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
 
-        this.cache.put(FEATURED_POOL_GROUPS_CACHE_KEY, featuredPoolGroups, 60 * 5 * 1000);
+        this.cache.put(
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+            featuredPoolGroups,
+            60 * 5 * 1000,
+        );
 
         return featuredPoolGroups;
     }
@@ -196,13 +202,9 @@ export class PoolService {
     public async loadOnChainDataForPoolsWithActiveUpdates() {
         const blockNumber = await networkContext.provider.getBlockNumber();
         const timestamp = moment().subtract(5, 'minutes').unix();
-        console.time('getPoolsWithActiveUpdates');
         const poolIds = await balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
-        console.timeEnd('getPoolsWithActiveUpdates');
 
-        console.time('updateOnChainData');
         await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
-        console.timeEnd('updateOnChainData');
     }
 
     public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {
@@ -210,17 +212,11 @@ export class PoolService {
     }
 
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
-        console.time('updateVolumeAndFeeValuesForPools');
         await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
-        console.timeEnd('updateVolumeAndFeeValuesForPools');
     }
 
     public async syncSwapsForLast48Hours(): Promise<string[]> {
-        console.time('syncSwapsForLast48Hours');
-        const poolIds = await this.poolSwapService.syncSwapsForLast48Hours();
-        console.timeEnd('syncSwapsForLast48Hours');
-
-        return poolIds;
+        return this.poolSwapService.syncSwapsForLast48Hours();
     }
 
     public async syncSanityPoolData() {

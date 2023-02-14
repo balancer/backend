@@ -45,11 +45,8 @@ import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 import { networkContext } from '../../network/network-context.service';
 
-const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
-const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
-const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
-const PORTFOLIO_POOLS_CACHE_KEY = 'balance-subgraph_portfolio-pools';
-const USER_CACHE_KEY_PREFIX = 'balance-subgraph_user:';
+const ALL_POOLS_CACHE_KEY = `balance-subgraph_all-pools`;
+const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools`;
 
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;
@@ -240,7 +237,9 @@ export class BalancerSubgraphService {
     }
 
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
-        const cached = this.cache.get(PORTFOLIO_POOLS_CACHE_KEY) as BalancerPortfolioPoolsDataQuery | null;
+        const cached = this.cache.get(
+            `${PORTFOLIO_POOLS_CACHE_KEY}:${networkContext.chainId}`,
+        ) as BalancerPortfolioPoolsDataQuery | null;
 
         if (cached) {
             return cached;
@@ -248,13 +247,15 @@ export class BalancerSubgraphService {
 
         const portfolioPools = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
 
-        this.cache.put(PORTFOLIO_POOLS_CACHE_KEY, portfolioPools, fiveMinutesInMs);
+        this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${networkContext.chainId}`, portfolioPools, fiveMinutesInMs);
 
         return portfolioPools;
     }
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
-        const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${block}`) as BalancerPoolFragment[] | null;
+        const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${networkContext.chainId}:${block}`) as
+            | BalancerPoolFragment[]
+            | null;
 
         if (cached) {
             return cached;
@@ -266,7 +267,7 @@ export class BalancerSubgraphService {
             block: { number: block },
         });
 
-        this.cache.put(`${ALL_POOLS_CACHE_KEY}:${block}`, pools, twentyFourHoursInMs);
+        this.cache.put(`${ALL_POOLS_CACHE_KEY}:${networkContext.chainId}:${block}`, pools, twentyFourHoursInMs);
 
         return pools;
     }

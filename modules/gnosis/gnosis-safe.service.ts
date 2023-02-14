@@ -4,7 +4,7 @@ import { getAddress } from 'ethers/lib/utils';
 import { Cache } from 'memory-cache';
 import { networkContext } from '../network/network-context.service';
 
-const CACHE_KEY_PREFIX = 'gnosis-address-is-multisig_';
+const CACHE_KEY_PREFIX = `gnosis-address-is-multisig_`;
 const TIMEOUT = 2592000; //30 days
 
 const contractNetworks: ContractNetworksConfig = {
@@ -19,7 +19,7 @@ export class GnosisSafeService {
     private cache = new Cache<string, boolean>();
 
     public async isAddressGnosisSafe(address: string) {
-        const key = `${CACHE_KEY_PREFIX}${address}`;
+        const key = `${CACHE_KEY_PREFIX}:${networkContext.chainId}:${address}`;
         const cachedValue = this.cache.get(key);
         if (cachedValue != null) {
             return cachedValue;

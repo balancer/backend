@@ -80,7 +80,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const farms = await reliquarySubgraphService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock - startBlock > 10_000 ? startBlock + 10_000 : latestBlock;
+        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             this.reliquaryAddress,
             startBlock,
