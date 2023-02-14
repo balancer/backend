@@ -38,9 +38,8 @@ import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
-import { returnChecksum } from '../web3/contract';
 
-const FEATURED_POOL_GROUPS_CACHE_KEY = 'pool:featuredPoolGroups';
+const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups:${networkContext.chain}`;
 
 export class PoolService {
     private cache = new Cache<string, any>();

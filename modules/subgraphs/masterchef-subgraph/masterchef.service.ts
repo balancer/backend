@@ -17,7 +17,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
 
-const ALL_FARM_USERS_CACHE_KEY = 'masterchef-all-farm-users';
+const ALL_FARM_USERS_CACHE_KEY = `masterchef-all-farm-users:${networkContext.chain}`;
 
 export class MasterchefSubgraphService {
     private readonly cache: CacheClass<string, any>;

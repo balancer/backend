@@ -21,7 +21,7 @@ export type LatestsSyncedBlocks = {
     poolSyncBlock: string;
 };
 
-export const PROTOCOL_METRICS_CACHE_KEY = 'protocol:metrics';
+export const PROTOCOL_METRICS_CACHE_KEY = `protocol:metrics:${networkContext.chain}`;
 
 export class ProtocolService {
     private cache = new Cache<string, ProtocolMetrics>();

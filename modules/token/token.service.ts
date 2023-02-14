@@ -10,9 +10,9 @@ import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDele
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
 
-const TOKEN_PRICES_CACHE_KEY = 'token:prices:current';
-const TOKEN_PRICES_24H_AGO_CACHE_KEY = 'token:prices:24h-ago';
-const ALL_TOKENS_CACHE_KEY = 'tokens:all';
+const TOKEN_PRICES_CACHE_KEY = `token:prices:current:${networkContext.chain}`;
+const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago:${networkContext.chain}`;
+const ALL_TOKENS_CACHE_KEY = `tokens:all:${networkContext.chain}`;
 
 export class TokenService {
     cache: CacheClass<string, any>;

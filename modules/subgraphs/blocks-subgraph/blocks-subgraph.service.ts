@@ -20,9 +20,9 @@ import moment from 'moment-timezone';
 import { Cache, CacheClass } from 'memory-cache';
 import { networkContext } from '../../network/network-context.service';
 
-const DAILY_BLOCKS_CACHE_KEY = 'block-subgraph_daily-blocks';
-const AVG_BLOCK_TIME_CACHE_PREFIX = 'block-subgraph:average-block-time';
-const BLOCK_24H_AGO = 'block-subgraph:block-24h-ago';
+const DAILY_BLOCKS_CACHE_KEY = `block-subgraph_daily-blocks:${networkContext.chain}`;
+const AVG_BLOCK_TIME_CACHE_PREFIX = `block-subgraph:average-block-time:${networkContext.chain}`;
+const BLOCK_24H_AGO = `block-subgraph:block-24h-ago:${networkContext.chain}`;
 
 /*const BLOCK_TIME_MAP: { [chainId: string]: number } = {
     '250': 1,

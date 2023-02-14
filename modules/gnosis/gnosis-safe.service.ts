@@ -4,7 +4,7 @@ import { getAddress } from 'ethers/lib/utils';
 import { Cache } from 'memory-cache';
 import { networkContext } from '../network/network-context.service';
 
-const CACHE_KEY_PREFIX = 'gnosis-address-is-multisig_';
+const CACHE_KEY_PREFIX = `gnosis-address-is-multisig_:${networkContext.chain}`;
 const TIMEOUT = 2592000; //30 days
 
 const contractNetworks: ContractNetworksConfig = {

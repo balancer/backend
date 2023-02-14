@@ -10,8 +10,8 @@ import * as Sentry from '@sentry/node';
 import { networkContext } from '../../network/network-context.service';
 import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
-const TOKEN_HISTORICAL_PRICES_CACHE_KEY = 'token-historical-prices';
-const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = 'nested-bpt-historical-prices';
+const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices:${networkContext.chain}`;
+const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices:${networkContext.chain}`;
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();

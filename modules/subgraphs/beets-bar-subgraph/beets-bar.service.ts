@@ -10,9 +10,9 @@ import { Cache, CacheClass } from 'memory-cache';
 import { twentyFourHoursInMs } from '../../common/time';
 import { networkContext } from '../../network/network-context.service';
 
-const ALL_USERS_CACHE_KEY = 'beets-bar-subgraph_all-users';
-const BEETS_BAR_CACHE_KEY_PREFIX = 'beets-bar:';
-const BEETS_BAR_NOW_CACHE_KEY = 'beets-bar-now';
+const ALL_USERS_CACHE_KEY = `beets-bar-subgraph_all-users:${networkContext.chain}`;
+const BEETS_BAR_CACHE_KEY_PREFIX = `beets-bar:${networkContext.chain}`;
+const BEETS_BAR_NOW_CACHE_KEY = `beets-bar-now:${networkContext.chain}`;
 
 export class BeetsBarSubgraphService {
     cache: CacheClass<string, any>;

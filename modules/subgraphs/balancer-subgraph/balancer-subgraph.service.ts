@@ -45,11 +45,8 @@ import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 import { networkContext } from '../../network/network-context.service';
 
-const ALL_USERS_CACHE_KEY = 'balance-subgraph_all-users';
-const ALL_POOLS_CACHE_KEY = 'balance-subgraph_all-pools';
-const ALL_JOIN_EXITS_CACHE_KEY = 'balance-subgraph_all-join-exits';
-const PORTFOLIO_POOLS_CACHE_KEY = 'balance-subgraph_portfolio-pools';
-const USER_CACHE_KEY_PREFIX = 'balance-subgraph_user:';
+const ALL_POOLS_CACHE_KEY = `balance-subgraph_all-pools:${networkContext.chain}`;
+const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools:${networkContext.chain}`;
 
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;

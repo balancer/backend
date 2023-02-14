@@ -4,7 +4,7 @@ import { Cache } from 'memory-cache';
 import { fiveMinutesInMs } from '../common/time';
 import { networkContext } from '../network/network-context.service';
 
-const HOME_SCREEN_CONFIG_CACHE_KEY = 'content:homeScreen';
+const HOME_SCREEN_CONFIG_CACHE_KEY = `content:homeScreen:${networkContext.chain}`;
 
 export class ContentService {
     private cache = new Cache<string, any>();
