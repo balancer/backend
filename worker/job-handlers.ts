@@ -29,7 +29,7 @@ async function runIfNotAlreadyRunning(
         return;
     }
     try {
-        const cronsMetricPublisher = getCronMetricsPublisher();
+        const cronsMetricPublisher = getCronMetricsPublisher(chainId);
         runningJobs.add(jobId);
         const transaction = Sentry.startTransaction({ name: jobId }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
