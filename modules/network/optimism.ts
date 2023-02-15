@@ -52,6 +52,9 @@ const optimismNetworkData: NetworkData = {
         nativeAssetId: 'ethereum',
         platformId: 'optimistic-ethereum',
     },
+    tokenPrices: {
+        maxHourlyPriceHistoryNumDays: 100,
+    },
     rpcUrl: 'https://rpc.ankr.com/optimism',
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
@@ -261,6 +264,10 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'purge-old-tokenprices',
+            interval: every(1, 'days'),
         },
     ],
 };

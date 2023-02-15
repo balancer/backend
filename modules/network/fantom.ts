@@ -57,6 +57,9 @@ const fantomNetworkData: NetworkData = {
         nativeAssetId: 'fantom',
         platformId: 'fantom',
     },
+    tokenPrices: {
+        maxHourlyPriceHistoryNumDays: 100,
+    },
     rpcUrl: 'https://rpc.ftm.tools',
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
@@ -275,6 +278,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-relic-snapshots',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'purge-old-tokenprices',
+            interval: every(1, 'days'),
         },
     ],
 };

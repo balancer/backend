@@ -1,7 +1,7 @@
 import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { timestampRoundedUpToNearestHour } from '../../common/time';
+import { secondsPerDay, timestampRoundedUpToNearestHour } from '../../common/time';
 import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
@@ -240,6 +240,37 @@ export class TokenPriceService {
         return moment()
             .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
             .unix();
+    }
+
+    public async purgeOldTokenPrices(): Promise<number> {
+        const purgeBeforeTimestamp = moment()
+            .startOf('day')
+            .subtract(networkContext.data.tokenPrices.maxHourlyPriceHistoryNumDays, 'days')
+            .utc()
+            .unix();
+        const oldPrices = await prisma.prismaTokenPrice.findMany({
+            where: {
+                chain: networkContext.chain,
+                timestamp: { lt: purgeBeforeTimestamp },
+            },
+        });
+
+        // returns all non midnight prices
+        const tobeDeleted = oldPrices.filter((tokenPrice) => tokenPrice.timestamp % secondsPerDay !== 0);
+
+        //apparently prisma has a limitation on delete
+        const chunks = _.chunk(tobeDeleted, 1000);
+
+        for (const chunk of chunks) {
+            await prisma.prismaTokenPrice.deleteMany({
+                where: {
+                    chain: networkContext.chain,
+                    timestamp: { in: chunk.map((tokenPrice) => tokenPrice.timestamp) },
+                },
+            });
+        }
+
+        return tobeDeleted.length;
     }
 
     private async updateCandleStickData() {

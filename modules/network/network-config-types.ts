@@ -42,6 +42,9 @@ export interface NetworkData {
         nativeAssetId: string;
         platformId: string;
     };
+    tokenPrices: {
+        maxHourlyPriceHistoryNumDays: number;
+    };
     subgraphs: {
         startDate: string;
         balancer: string;

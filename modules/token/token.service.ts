@@ -1,4 +1,3 @@
-import { env } from '../../app/env';
 import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../../prisma/prisma-client';
 import { TokenDataLoaderService } from './lib/token-data-loader.service';
@@ -166,6 +165,10 @@ export class TokenService {
 
     public async getHistoricalTokenPrices() {
         return this.tokenPriceService.getHistoricalTokenPrices();
+    }
+
+    public async purgeOldTokenPrices(): Promise<number> {
+        return this.tokenPriceService.purgeOldTokenPrices();
     }
 
     public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {
