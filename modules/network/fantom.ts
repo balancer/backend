@@ -36,7 +36,7 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
@@ -56,6 +56,9 @@ const fantomNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'fantom',
         platformId: 'fantom',
+    },
+    tokenPrices: {
+        maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://rpc.ftm.tools',
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
@@ -265,10 +268,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(10, 'seconds'),
         },
         {
-            name: 'feed-data-to-datastudio',
-            interval: every(1, 'minutes'),
-        },
-        {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
         },
@@ -279,6 +278,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-relic-snapshots',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'purge-old-tokenprices',
+            interval: every(1, 'days'),
         },
     ],
 };

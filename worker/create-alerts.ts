@@ -12,7 +12,7 @@ const euAlarmTopic = 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_A
 const caAlarmTopic = 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic';
 
 export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
-    const cronsMetricPublisher = getCronMetricsPublisher();
+    const cronsMetricPublisher = getCronMetricsPublisher(chainId);
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
@@ -58,7 +58,7 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
             ActionsEnabled: true,
             AlarmActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
             OKActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
-            MetricName: `${cronJob.name}-done`,
+            MetricName: `${cronJob.name}-${chainId}-done`,
             Statistic: 'Sum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],
             Period: periodInSeconds,

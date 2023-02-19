@@ -29,7 +29,7 @@ async function runIfNotAlreadyRunning(
         return;
     }
     try {
-        const cronsMetricPublisher = getCronMetricsPublisher();
+        const cronsMetricPublisher = getCronMetricsPublisher(chainId);
         runningJobs.add(jobId);
         const transaction = Sentry.startTransaction({ name: jobId }, { samplingRate: samplingRate.toString() });
         Sentry.configureScope((scope) => {
@@ -297,6 +297,16 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     job.chainId,
                     () => userService.asyncSyncUserRelicSnapshots(),
+                    0.01,
+                    res,
+                    next,
+                );
+                break;
+            case 'purge-old-tokenprices':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    job.chainId,
+                    () => tokenService.purgeOldTokenPrices(),
                     0.01,
                     res,
                     next,
