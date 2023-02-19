@@ -47,6 +47,8 @@ generates:
                 BigInt: string
                 Bytes: string
                 BigDecimal: string
+            namingConvention:
+                enumValues: keep
     modules/subgraphs/reliquary-subgraph/generated/reliquary-subgraph-schema.graphql:
         schema: ${RELIQUARY_SUBGRAPH}
         plugins:

@@ -73,8 +73,8 @@ export class ReliquarySubgraphService {
             const response = await this.sdk.ReliquaryRelics({
                 where: { ...where, relicId_gt: id },
                 block,
-                orderBy: Relic_OrderBy.Id,
-                orderDirection: OrderDirection.Asc,
+                orderBy: Relic_OrderBy.id,
+                orderDirection: OrderDirection.asc,
                 first: limit,
             });
 
@@ -101,8 +101,8 @@ export class ReliquarySubgraphService {
             const result = await this.sdk.ReliquaryRelicSnapshots({
                 where: { id_gt: snapshotId, snapshotTimestamp_gte: timestamp },
                 first: 1000,
-                orderBy: DailyRelicSnapshot_OrderBy.Id,
-                orderDirection: OrderDirection.Desc,
+                orderBy: DailyRelicSnapshot_OrderBy.id,
+                orderDirection: OrderDirection.desc,
             });
             if (result.relicSnapshots.length === 0) {
                 break;
@@ -127,8 +127,8 @@ export class ReliquarySubgraphService {
         while (hasMore) {
             const response = await this.sdk.ReliquaryFarmSnapshots({
                 where: { snapshotTimestamp_gt: timestamp, poolId: farmId },
-                orderBy: DailyPoolSnapshot_OrderBy.SnapshotTimestamp,
-                orderDirection: OrderDirection.Asc,
+                orderBy: DailyPoolSnapshot_OrderBy.snapshotTimestamp,
+                orderDirection: OrderDirection.asc,
                 first: limit,
             });
 
