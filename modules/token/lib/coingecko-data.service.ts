@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import _, { uniqBy } from 'lodash';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
@@ -14,7 +14,7 @@ export class CoingeckoDataService {
             where: { coingeckoTokenId: { not: null } },
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
-        const uniqueTokensWithIds = uniqBy(tokensWithIds, 'coingeckoTokenId');
+        const uniqueTokensWithIds = _.uniqBy(tokensWithIds, 'coingeckoTokenId');
 
         const chunks = _.chunk(uniqueTokensWithIds, 100);
 
