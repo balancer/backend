@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import _ from 'lodash';
+import _, { uniqBy } from 'lodash';
 import moment from 'moment-timezone';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
@@ -11,11 +11,12 @@ export class CoingeckoDataService {
 
     public async syncTokenDynamicDataFromCoingecko() {
         const tokensWithIds = await prisma.prismaToken.findMany({
-            where: { coingeckoTokenId: { not: null }, chain: networkContext.chain },
+            where: { coingeckoTokenId: { not: null } },
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
+        const uniqueTokensWithIds = uniqBy(tokensWithIds, 'coingeckoTokenId');
 
-        const chunks = _.chunk(tokensWithIds, 100);
+        const chunks = _.chunk(uniqueTokensWithIds, 100);
 
         for (const chunk of chunks) {
             const response = await this.conigeckoService.getMarketDataForTokenIds(
@@ -24,41 +25,45 @@ export class CoingeckoDataService {
             let operations: any[] = [];
 
             for (const item of response) {
-                const token = tokensWithIds.find((token) => token.coingeckoTokenId === item.id);
+                const tokens = tokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
 
-                if (!token) {
-                    continue;
-                }
+                for (const token of tokens) {
+                    if (!token) {
+                        continue;
+                    }
 
-                if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
-                    const data = {
-                        price: item.current_price,
-                        ath: item.ath,
-                        atl: item.atl,
-                        marketCap: item.market_cap,
-                        fdv: item.fully_diluted_valuation,
-                        high24h: item.high_24h ?? undefined,
-                        low24h: item.low_24h ?? undefined,
-                        priceChange24h: item.price_change_24h ?? undefined,
-                        priceChangePercent24h: item.price_change_percentage_24h,
-                        priceChangePercent7d: item.price_change_percentage_7d_in_currency,
-                        priceChangePercent14d: item.price_change_percentage_14d_in_currency,
-                        priceChangePercent30d: item.price_change_percentage_30d_in_currency,
-                        updatedAt: item.last_updated,
-                    };
+                    if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
+                        const data = {
+                            price: item.current_price,
+                            ath: item.ath,
+                            atl: item.atl,
+                            marketCap: item.market_cap,
+                            fdv: item.fully_diluted_valuation,
+                            high24h: item.high_24h ?? undefined,
+                            low24h: item.low_24h ?? undefined,
+                            priceChange24h: item.price_change_24h ?? undefined,
+                            priceChangePercent24h: item.price_change_percentage_24h,
+                            priceChangePercent7d: item.price_change_percentage_7d_in_currency,
+                            priceChangePercent14d: item.price_change_percentage_14d_in_currency,
+                            priceChangePercent30d: item.price_change_percentage_30d_in_currency,
+                            updatedAt: item.last_updated,
+                        };
 
-                    operations.push(
-                        prisma.prismaTokenDynamicData.upsert({
-                            where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
-                            update: data,
-                            create: {
-                                coingeckoId: item.id,
-                                chain: networkContext.chain,
-                                tokenAddress: token.address,
-                                ...data,
-                            },
-                        }),
-                    );
+                        operations.push(
+                            prisma.prismaTokenDynamicData.upsert({
+                                where: {
+                                    tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain },
+                                },
+                                update: data,
+                                create: {
+                                    coingeckoId: item.id,
+                                    chain: networkContext.chain,
+                                    tokenAddress: token.address,
+                                    ...data,
+                                },
+                            }),
+                        );
+                    }
                 }
             }
 
