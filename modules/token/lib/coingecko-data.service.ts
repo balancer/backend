@@ -28,10 +28,6 @@ export class CoingeckoDataService {
                 const tokens = tokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
 
                 for (const token of tokens) {
-                    if (!token) {
-                        continue;
-                    }
-
                     if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
                         const data = {
                             price: item.current_price,
