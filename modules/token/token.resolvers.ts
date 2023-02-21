@@ -117,7 +117,7 @@ const resolvers: Resolvers = {
         tokenSyncTokenDynamicData: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenService.syncTokenDynamicData();
+            await tokenService.syncCoingeckoPricesForAllChains();
 
             return 'success';
         },

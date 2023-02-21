@@ -214,11 +214,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-token-dynamic-data':
+            case 'sync-global-coingecko-prices':
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => tokenService.syncTokenDynamicData(),
+                    () => tokenService.syncCoingeckoPricesForAllChains(),
                     defaultSamplingRate,
                     res,
                     next,

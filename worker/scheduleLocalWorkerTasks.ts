@@ -169,7 +169,7 @@ export function scheduleLocalWorkerTasks(chainId: string) {
 
     //every minute
     scheduleJob('*/1 * * * *', 'syncTokenDynamicData', TEN_MINUTES_IN_MS, async () => {
-        await tokenService.syncTokenDynamicData();
+        await tokenService.syncCoingeckoPricesForAllChains();
     });
 
     //every 5 minutes

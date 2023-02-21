@@ -110,7 +110,7 @@ export class TokenService {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
 
-    public async syncTokenDynamicData(): Promise<void> {
+    public async syncCoingeckoPricesForAllChains(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
     }
 

@@ -284,7 +284,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         // The following are multichain jobs and should only run once for all chains.
         {
-            name: 'sync-token-dynamic-data',
+            name: 'sync-global-coingecko-prices',
             interval: every(2, 'minutes'),
         },
     ],
