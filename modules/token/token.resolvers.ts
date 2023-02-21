@@ -2,6 +2,7 @@ import { Resolvers } from '../../schema';
 import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
+import { networkContext } from '../network/network-context.service';
 
 const resolvers: Resolvers = {
     Query: {

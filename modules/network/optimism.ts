@@ -186,7 +186,6 @@ export const optimismNetworkConfig: NetworkConfig = {
     poolStakingServices: [new GaugeStakingService(gaugeSerivce)],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
-        new CoingeckoPriceHandlerService(optimismNetworkData.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -234,10 +233,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-token-dynamic-data',
-            interval: every(2, 'minutes'),
-        },
-        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
         },
@@ -264,6 +259,10 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-coingecko-coinids',
+            interval: every(2, 'hours'),
         },
         {
             name: 'purge-old-tokenprices',
