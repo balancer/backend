@@ -181,6 +181,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new BeetsPriceHandlerService(),
         new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
         new ClqdrPriceHandlerService(),
+        new CoingeckoPriceHandlerService(fantomNetworkData.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

@@ -186,6 +186,7 @@ export const optimismNetworkConfig: NetworkConfig = {
     poolStakingServices: [new GaugeStakingService(gaugeSerivce)],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
+        new CoingeckoPriceHandlerService(optimismNetworkData.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
