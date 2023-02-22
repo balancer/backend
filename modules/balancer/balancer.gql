@@ -1,0 +1,7 @@
+extend type Query {
+    balancerQueryTest: String!
+}
+
+extend type Mutation {
+    balancerMutationTest: String!
+}
