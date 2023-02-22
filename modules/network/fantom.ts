@@ -236,10 +236,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-token-dynamic-data',
-            interval: every(2, 'minutes'),
-        },
-        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
         },
@@ -282,6 +278,15 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'purge-old-tokenprices',
             interval: every(1, 'days'),
+        },
+        {
+            name: 'sync-coingecko-coinids',
+            interval: every(2, 'hours'),
+        },
+        // The following are multichain jobs and should only run once for all chains.
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: every(2, 'minutes'),
         },
     ],
 };

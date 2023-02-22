@@ -110,28 +110,54 @@ export class TokenService {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
 
-    public async syncTokenDynamicData(): Promise<void> {
-        await this.coingeckoDataService.syncTokenDynamicDataFromCoingecko();
+    public async syncCoingeckoPricesForAllChains(): Promise<void> {
+        await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
+    }
+
+    public async syncCoingeckoIds(): Promise<void> {
+        await this.coingeckoDataService.syncCoingeckoIds();
     }
 
     public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {
-        return prisma.prismaTokenDynamicData.findUnique({
+        const token = await prisma.prismaToken.findUnique({
             where: {
-                tokenAddress_chain: {
-                    tokenAddress: tokenAddress.toLowerCase(),
+                address_chain: {
+                    address: tokenAddress.toLowerCase(),
                     chain: networkContext.chain,
                 },
             },
+            include: {
+                dynamicData: true,
+            },
         });
+
+        if (token) {
+            return token.dynamicData;
+        }
+
+        return null;
     }
 
     public async getTokensDynamicData(tokenAddresses: string[]): Promise<PrismaTokenDynamicData[]> {
-        return prisma.prismaTokenDynamicData.findMany({
+        const tokens = await prisma.prismaToken.findMany({
             where: {
-                tokenAddress: { in: tokenAddresses.map((address) => address.toLowerCase()) },
+                address: { in: tokenAddresses.map((address) => address.toLowerCase()) },
                 chain: networkContext.chain,
             },
+            include: {
+                dynamicData: true,
+            },
         });
+
+        // why doesn't this work with map??
+        const dynamicData: PrismaTokenDynamicData[] = [];
+        for (const token of tokens) {
+            if (token.dynamicData) {
+                dynamicData.push(token.dynamicData);
+            }
+        }
+
+        return dynamicData;
     }
 
     public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {

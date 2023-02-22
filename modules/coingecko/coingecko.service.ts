@@ -55,6 +55,13 @@ interface CoingeckoTokenMarketData {
     price_change_percentage_7d_in_currency: number;
 }
 
+interface CoinId {
+    id: string;
+    symbol: string;
+    name: string;
+    platforms: Record<string, string>;
+}
+
 /* coingecko has a rate limit of 10-50req/minute
    https://www.coingecko.com/en/api/pricing:
    Our free API has a rate limit of 10-50 calls per minute,
@@ -206,6 +213,11 @@ export class CoingeckoService {
         const endpoint = `/coins/${tokenId}/ohlc?vs_currency=usd&days=${days}`;
 
         return this.get(endpoint);
+    }
+
+    public async getCoinIdList(): Promise<CoinId[]> {
+        const endpoint = `/coins/list?include_platform=true`;
+        return this.get<CoinId[]>(endpoint);
     }
 
     private async get<T>(endpoint: string): Promise<T> {

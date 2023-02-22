@@ -9,6 +9,8 @@ import { protocolService } from '../modules/protocol/protocol.service';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
+import { coingeckoService } from '../modules/coingecko/coingecko.service';
+import { CoingeckoDataService } from '../modules/token/lib/coingecko-data.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -212,11 +214,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-token-dynamic-data':
+            case 'sync-global-coingecko-prices':
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => tokenService.syncTokenDynamicData(),
+                    () => tokenService.syncCoingeckoPricesForAllChains(),
                     defaultSamplingRate,
                     res,
                     next,
@@ -307,6 +309,16 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     job.chainId,
                     () => tokenService.purgeOldTokenPrices(),
+                    0.01,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-coingecko-coinids':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    job.chainId,
+                    () => tokenService.syncCoingeckoIds(),
                     0.01,
                     res,
                     next,
