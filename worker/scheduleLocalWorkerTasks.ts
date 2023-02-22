@@ -4,7 +4,7 @@ import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/bloc
 import { tokenService } from '../modules/token/token.service';
 import { runWithMinimumInterval } from './scheduling';
 import { poolService } from '../modules/pool/pool.service';
-import { beetsService } from '../modules/beets/beets.service';
+import { beetsService } from '../modules/beets/token/beets-token.service';
 import { userService } from '../modules/user/user.service';
 import _ from 'lodash';
 import { protocolService } from '../modules/protocol/protocol.service';

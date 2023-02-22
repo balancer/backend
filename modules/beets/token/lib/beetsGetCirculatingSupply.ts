@@ -1,7 +1,7 @@
 import { utils } from 'ethers';
 import beetsAbi from '../abi/BeethovenxToken.json';
-import { getContractAt } from '../../web3/contract';
-import { networkContext } from '../../network/network-context.service';
+import { getContractAt } from '../../../web3/contract';
+import { networkContext } from '../../../network/network-context.service';
 
 const NON_CIRCULATING_ADDRESSES = [
     '0xa2503804ec837d1e4699932d58a3bdb767dea505', //team linear vesting

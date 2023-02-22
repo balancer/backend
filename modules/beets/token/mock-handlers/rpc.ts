@@ -1,5 +1,5 @@
 import { rest } from 'msw';
-import { networkContext } from '../../network/network-context.service';
+import { networkContext } from '../../../network/network-context.service';
 
 export const rpcHandlers = [
     //RPC requests

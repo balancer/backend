@@ -13,6 +13,7 @@ export const schema = {
     SENTRY_DSN: String,
     WORKER_QUEUE_URL: String,
     AWS_REGION: String,
+    PROTOCOL: String,
 };
 
 export const env: Env = load(schema, {

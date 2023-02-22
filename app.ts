@@ -11,8 +11,9 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
-import { schema } from './graphql_schema_generated';
-import { resolvers } from './app/gql/resolvers';
+import { beetsSchema } from './graphql_schema_generated_beets';
+import { balancerSchema } from './graphql_schema_generated_balancer';
+import { balancerResolvers, beetsResolvers } from './app/gql/resolvers';
 import { scheduleLocalWorkerTasks } from './worker/scheduleLocalWorkerTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
@@ -99,9 +100,9 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: {
             JSON: GraphQLJSON,
-            ...resolvers,
+            ...(env.PROTOCOL === 'beets' ? beetsResolvers : balancerResolvers),
         },
-        typeDefs: schema,
+        typeDefs: env.PROTOCOL === 'beets' ? beetsSchema : balancerSchema,
         introspection: true,
         plugins,
         context: ({ req }) => req.context,

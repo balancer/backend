@@ -1,8 +1,8 @@
 import { BigNumber } from 'ethers';
-import { oldBnumFromBnum } from '../../big-number/old-big-number';
-import { prisma } from '../../../prisma/prisma-client';
-import { getContractAt } from '../../web3/contract';
-import { networkContext } from '../../network/network-context.service';
+import { oldBnumFromBnum } from '../../../big-number/old-big-number';
+import { prisma } from '../../../../prisma/prisma-client';
+import { getContractAt } from '../../../web3/contract';
+import { networkContext } from '../../../network/network-context.service';
 import FreshBeetsAbi from '../abi/FreshBeets.json';
 import ERC20 from '../abi/ERC20.json';
 

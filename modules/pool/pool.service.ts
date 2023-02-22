@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/providers';
 import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { Cache } from 'memory-cache';
@@ -23,7 +22,6 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
@@ -35,7 +33,6 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
-import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
 
@@ -53,7 +50,6 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolSnapshotService: PoolSnapshotService,
-        private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
     private get poolStakingServices(): PoolStakingService[] {
@@ -132,10 +128,6 @@ export class PoolService {
 
     public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
         return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
-    }
-
-    public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
-        return this.reliquarySnapshotService.getSnapshotsForFarm(id, range);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -272,21 +264,6 @@ export class PoolService {
         await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
     }
 
-    public async syncLatestReliquarySnapshotsForAllFarms() {
-        await this.reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
-    }
-
-    public async loadReliquarySnapshotsForAllFarms() {
-        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: networkContext.chain } });
-        const farmIds = farms.map((farm) => parseFloat(farm.id));
-        for (const farmId of farmIds) {
-            await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
-        }
-    }
-
     public async updateLifetimeValuesForAllPools() {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
@@ -314,5 +291,4 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
     new PoolSnapshotService(balancerSubgraphService, coingeckoService),
-    new ReliquarySnapshotService(reliquarySubgraphService),
 );

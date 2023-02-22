@@ -2,3 +2,107 @@ model PrismaFbeets {
     id                  String              @id
     ratio               String
 }
+
+model PrismaPoolStakingMasterChefFarm {
+    @@id([id, chain])
+    @@unique([stakingId, chain])
+
+    id                  String
+    stakingId           String
+    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain])
+    chain               Chain
+    beetsPerBlock       String
+    rewarders           PrismaPoolStakingMasterChefFarmRewarder[]
+}
+
+model PrismaPoolStakingMasterChefFarmRewarder {
+    @@id([id, chain])
+
+    id                  String
+    farmId              String
+    farm                PrismaPoolStakingMasterChefFarm  @relation(fields:[farmId, chain], references: [id, chain])
+    chain               Chain
+
+    address             String
+    tokenAddress        String
+    rewardPerSecond     String
+}
+
+model PrismaPoolStakingReliquaryFarm {
+    @@id([id, chain])
+    @@unique([stakingId, chain])
+
+    id                      String
+    stakingId               String
+    staking                 PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain])
+    chain                   Chain
+
+    name                    String
+    beetsPerSecond          String
+    totalBalance            String              @default("0")
+    totalWeightedBalance    String              @default("0")
+    levels                  PrismaPoolStakingReliquaryFarmLevel[]
+    snapshots               PrismaReliquaryFarmSnapshot[]
+    relicSnapshots          PrismaUserRelicSnapshot[]
+}
+
+model PrismaPoolStakingReliquaryFarmLevel {
+    @@id([id, chain])
+
+    id                  String
+    farmId              String
+    farm                PrismaPoolStakingReliquaryFarm  @relation(fields:[farmId, chain], references: [id, chain])
+    chain               Chain
+
+    level               Int
+    balance             String
+    requiredMaturity    Int
+    allocationPoints    Int
+    apr                 Float
+}
+
+model PrismaReliquaryFarmSnapshot {
+    @@id([id, chain])
+
+    id                  String
+    farmId              String
+    stakingFarm         PrismaPoolStakingReliquaryFarm  @relation(fields:[farmId, chain], references: [id, chain])
+    chain               Chain
+
+    timestamp           Int
+    relicCount          Int
+    userCount           Int
+    totalBalance        String
+    dailyDeposited      String
+    dailyWithdrawn      String
+    totalLiquidity      String                          @default("0")
+    levelBalances       PrismaReliquaryLevelSnapshot[]
+    tokenBalances       PrismaReliquaryTokenBalanceSnapshot[]
+}
+
+model PrismaReliquaryLevelSnapshot {
+    @@id([id, chain])
+
+    id                  String
+    farmSnapshotId      String
+    farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId, chain], references: [id, chain])
+    chain               Chain
+
+    level               String
+    balance             String
+}
+
+model PrismaReliquaryTokenBalanceSnapshot {
+    @@id([id, chain])
+
+    id                  String
+    farmSnapshotId      String
+    farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId, chain], references: [id, chain])
+    chain               Chain
+
+    address             String
+    symbol              String
+    name                String
+    decimals            Int
+    balance             String
+}

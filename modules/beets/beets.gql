@@ -1,8 +1,97 @@
 extend type Query {
     beetsGetFbeetsRatio: String!
     beetsGetBeetsPrice: String!
+
+    beetsPoolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
 }
 
 extend type Mutation {
     beetsSyncFbeetsRatio: String!
+
+    beetsPoolLoadReliquarySnapshotsForAllFarms: String!
+}
+
+type GqlReliquaryFarmSnapshot {
+    id: ID!
+    farmId: String!
+    timestamp: Int!
+    relicCount: String!
+    userCount: String!
+    totalBalance: String!
+    dailyDeposited: String!
+    dailyWithdrawn: String!
+    totalLiquidity: String!
+    levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
+    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
+}
+
+type GqlReliquaryFarmLevelSnapshot {
+    id: ID!
+    level: String!
+    balance: String!
+}
+
+type GqlReliquaryTokenBalanceSnapshot {
+    id: ID!
+    address: String!
+    balance: String!
+    symbol: String!
+    name: String!
+    decimals: Int!
+}
+
+extend enum GqlPoolStakingType {
+    MASTER_CHEF
+    FRESH_BEETS
+    RELIQUARY
+}
+
+extend type GqlPoolStaking {
+    farm: GqlPoolStakingMasterChefFarm
+    reliquary: GqlPoolStakingReliquaryFarm
+}
+
+type GqlPoolStakingMasterChefFarm {
+    id: ID!
+    beetsPerBlock: String!
+    rewarders: [GqlPoolStakingFarmRewarder!]
+}
+
+type GqlPoolStakingReliquaryFarm {
+    id: ID!
+    beetsPerSecond: String!
+    totalBalance: String!
+    totalWeightedBalance: String!
+    levels: [GqlPoolStakingReliquaryFarmLevel!]
+}
+
+type GqlPoolStakingReliquaryFarmLevel {
+    id: ID!
+    level: Int!
+    balance: BigDecimal!
+    requiredMaturity: Int!
+    allocationPoints: Int!
+    apr: BigDecimal!
+}
+
+type GqlPoolStakingFarmRewarder {
+    id: ID!
+    address: String!
+    tokenAddress: String!
+    rewardPerSecond: String!
+}
+
+type GqlUserRelicSnapshot {
+    timestamp: Int!
+    totalBalance: String!
+    relicCount: Int!
+    relicSnapshots: [GqlRelicSnapshot!]!
+}
+
+type GqlRelicSnapshot {
+    relicId: Int!
+    farmId: String!
+    balance: String!
+    entryTimestamp: Int!
+    level: Int!
 }

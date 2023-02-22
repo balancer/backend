@@ -11,6 +11,8 @@ node_modules/
 
 schema.ts
 graphql_schema_generated.ts
+graphql_schema_generated_balancer.ts
+graphql_schema_generated_beets.ts
 i18n/*
 google-service-account.json
 omni.config.ts
