@@ -15,7 +15,8 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
                 (token) =>
                     !token.types.includes('BPT') &&
                     !token.types.includes('PHANTOM_BPT') &&
-                    !token.types.includes('LINEAR_WRAPPED_TOKEN'),
+                    !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
+                    !token.coingeckoPlatformId,
             )
             .map((token) => token.address);
     }

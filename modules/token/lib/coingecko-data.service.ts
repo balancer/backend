@@ -33,17 +33,17 @@ export class CoingeckoDataService {
                     if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
                         const data = {
                             price: item.current_price,
-                            ath: item.ath,
-                            atl: item.atl,
-                            marketCap: item.market_cap,
-                            fdv: item.fully_diluted_valuation,
+                            ath: item.ath ?? undefined,
+                            atl: item.atl ?? undefined,
+                            marketCap: item.market_cap ?? undefined,
+                            fdv: item.fully_diluted_valuation ?? undefined,
                             high24h: item.high_24h ?? undefined,
                             low24h: item.low_24h ?? undefined,
                             priceChange24h: item.price_change_24h ?? undefined,
-                            priceChangePercent24h: item.price_change_percentage_24h,
-                            priceChangePercent7d: item.price_change_percentage_7d_in_currency,
-                            priceChangePercent14d: item.price_change_percentage_14d_in_currency,
-                            priceChangePercent30d: item.price_change_percentage_30d_in_currency,
+                            priceChangePercent24h: item.price_change_percentage_24h ?? undefined,
+                            priceChangePercent7d: item.price_change_percentage_7d_in_currency ?? undefined,
+                            priceChangePercent14d: item.price_change_percentage_14d_in_currency ?? undefined,
+                            priceChangePercent30d: item.price_change_percentage_30d_in_currency ?? undefined,
                             updatedAt: item.last_updated,
                         };
 
