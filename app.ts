@@ -1,4 +1,4 @@
-import { loadRestRoutes } from './app/loadRestRoutes';
+import { loadRestRoutesBeets } from './modules/beets/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -78,7 +78,9 @@ async function startServer() {
     app.use(sessionMiddleware);
 
     //startWorker(app);
-    loadRestRoutes(app);
+    if (env.PROTOCOL === 'beets') {
+        loadRestRoutesBeets(app);
+    }
 
     const httpServer = http.createServer(app);
 
