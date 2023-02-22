@@ -31,7 +31,7 @@ export class SwapFeeAprService implements PoolAprService {
 
                 // TODO: clean this up
                 if (userApr > MAX_DB_INT) {
-                    userApr = MAX_DB_INT;
+                    userApr = 0;
                 }
 
                 operations.push(
