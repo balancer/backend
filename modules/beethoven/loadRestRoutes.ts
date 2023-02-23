@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { beetsGetCirculatingSupply } from '../token/lib/beetsGetCirculatingSupply';
+import { beetsGetCirculatingSupply } from '../beets/lib/beets';
 import { tokenService } from '../token/token.service';
 
 export function loadRestRoutesBeets(app: Express) {

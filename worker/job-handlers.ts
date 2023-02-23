@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import { Express, NextFunction } from 'express';
 import { tokenService } from '../modules/token/token.service';
 import { poolService } from '../modules/pool/pool.service';
-import { beetsService } from '../modules/token/beets-token.service';
+import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';

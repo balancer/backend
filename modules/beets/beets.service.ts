@@ -1,8 +1,8 @@
 import { FbeetsService } from './lib/fbeets.service';
-import { tokenService } from './token.service';
+import { tokenService } from '../token/token.service';
 import { networkContext } from '../network/network-context.service';
 
-export class BeetsTokenService {
+export class BeetsService {
     constructor(private readonly fBeetsService: FbeetsService) {}
 
     public async getFbeetsRatio(): Promise<string> {
@@ -19,4 +19,4 @@ export class BeetsTokenService {
     }
 }
 
-export const beetsService = new BeetsTokenService(new FbeetsService());
+export const beetsService = new BeetsService(new FbeetsService());

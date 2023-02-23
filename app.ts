@@ -1,4 +1,4 @@
-import { loadRestRoutesBeets } from './modules/beets/loadRestRoutes';
+import { loadRestRoutesBeets } from './modules/beethoven/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';

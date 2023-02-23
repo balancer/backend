@@ -1,5 +1,5 @@
 import { Resolvers } from '../../schema';
-import { beetsService } from '../token/beets-token.service';
+import { beetsService } from '../beets/beets.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { userService } from '../user/user.service';
 import { poolService } from '../pool/pool.service';
