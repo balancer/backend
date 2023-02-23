@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/providers';
 import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { Cache } from 'memory-cache';
@@ -23,7 +22,6 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
@@ -35,9 +33,10 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
-import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
+import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
 

@@ -1,8 +1,8 @@
 import { Express } from 'express';
-import { beetsGetCirculatingSupply } from '../modules/beets/lib/beets';
-import { tokenService } from '../modules/token/token.service';
+import { beetsGetCirculatingSupply } from '../beets/lib/beets';
+import { tokenService } from '../token/token.service';
 
-export function loadRestRoutes(app: Express) {
+export function loadRestRoutesBeethoven(app: Express) {
     app.use('/health', (req, res) => res.sendStatus(200));
     app.use('/circulating_supply', (req, res) => {
         beetsGetCirculatingSupply().then((result) => {

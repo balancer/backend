@@ -25,7 +25,6 @@ extend type Query {
     poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools: [GqlPoolLinear!]!
-    poolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
 }
 
 extend type Mutation {
@@ -52,7 +51,6 @@ extend type Mutation {
     poolSyncPool(poolId: String!): String!
     poolReloadPoolNestedTokens(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
-    poolLoadReliquarySnapshotsForAllFarms: String!
 }
 
 type GqlPoolMinimal {
@@ -643,57 +641,11 @@ type GqlPoolStaking {
     id: ID!
     type: GqlPoolStakingType!
     address: String!
-    farm: GqlPoolStakingMasterChefFarm
     gauge: GqlPoolStakingGauge
-    reliquary: GqlPoolStakingReliquaryFarm
-}
-
-type GqlPoolStakingMasterChefFarm {
-    id: ID!
-    beetsPerBlock: String!
-    rewarders: [GqlPoolStakingFarmRewarder!]
-}
-
-type GqlPoolStakingReliquaryFarm {
-    id: ID!
-    beetsPerSecond: String!
-    totalBalance: String!
-    totalWeightedBalance: String!
-    levels: [GqlPoolStakingReliquarFarmLevel!]
-}
-type GqlPoolStakingReliquarFarmLevel {
-    id: ID!
-    level: Int!
-    balance: BigDecimal!
-    requiredMaturity: Int!
-    allocationPoints: Int!
-    apr: BigDecimal!
-}
-
-type GqlPoolStakingFarmRewarder {
-    id: ID!
-    address: String!
-    tokenAddress: String!
-    rewardPerSecond: String!
-}
-
-type GqlPoolStakingGauge {
-    id: ID!
-    gaugeAddress: String!
-    rewards: [GqlPoolStakingGaugeReward!]!
-}
-
-type GqlPoolStakingGaugeReward {
-    id: ID!
-    tokenAddress: String!
-    rewardPerSecond: String!
 }
 
 enum GqlPoolStakingType {
-    MASTER_CHEF
     GAUGE
-    FRESH_BEETS
-    RELIQUARY
 }
 
 input GqlPoolJoinExitFilter {
@@ -785,35 +737,6 @@ type GqlPoolSnapshot {
     amounts: [String!]!
 }
 
-type GqlReliquaryFarmSnapshot {
-    id: ID!
-    farmId: String!
-    timestamp: Int!
-    relicCount: String!
-    userCount: String!
-    totalBalance: String!
-    dailyDeposited: String!
-    dailyWithdrawn: String!
-    totalLiquidity: String!
-    levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
-    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
-}
-
-type GqlReliquaryFarmLevelSnapshot {
-    id: ID!
-    level: String!
-    balance: String!
-}
-
-type GqlReliquaryTokenBalanceSnapshot {
-    id: ID!
-    address: String!
-    balance: String!
-    symbol: String!
-    name: String!
-    decimals: Int!
-}
-
 type GqlPoolTokenDisplay {
     id: ID!
     address: String!
@@ -821,4 +744,16 @@ type GqlPoolTokenDisplay {
     symbol: String!
     weight: BigDecimal
     nestedTokens: [GqlPoolTokenDisplay!]
+}
+
+type GqlPoolStakingGauge {
+    id: ID!
+    gaugeAddress: String!
+    rewards: [GqlPoolStakingGaugeReward!]!
+}
+
+type GqlPoolStakingGaugeReward {
+    id: ID!
+    tokenAddress: String!
+    rewardPerSecond: String!
 }

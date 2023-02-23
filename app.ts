@@ -1,4 +1,4 @@
-import { loadRestRoutes } from './app/loadRestRoutes';
+import { loadRestRoutesBeethoven } from './modules/beethoven/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -11,8 +11,9 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
-import { schema } from './graphql_schema_generated';
-import { resolvers } from './app/gql/resolvers';
+import { beethovenSchema } from './graphql_schema_generated_beethoven';
+import { balancerSchema } from './graphql_schema_generated_balancer';
+import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
 import { scheduleLocalWorkerTasks } from './worker/scheduleLocalWorkerTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
@@ -77,7 +78,9 @@ async function startServer() {
     app.use(sessionMiddleware);
 
     //startWorker(app);
-    loadRestRoutes(app);
+    if (env.PROTOCOL === 'beethoven') {
+        loadRestRoutesBeethoven(app);
+    }
 
     const httpServer = http.createServer(app);
 
@@ -99,9 +102,9 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: {
             JSON: GraphQLJSON,
-            ...resolvers,
+            ...(env.PROTOCOL === 'beethoven' ? beethovenResolvers : balancerResolvers),
         },
-        typeDefs: schema,
+        typeDefs: env.PROTOCOL === 'beethoven' ? beethovenSchema : balancerSchema,
         introspection: true,
         plugins,
         context: ({ req }) => req.context,

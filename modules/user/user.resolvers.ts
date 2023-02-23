@@ -24,34 +24,10 @@ const resolvers: Resolvers = {
             const accountAddress = getRequiredAccountAddress(context);
             return userService.getUserSwaps(accountAddress, poolId, first, skip);
         },
-        userGetFbeetsBalance: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            const balance = await userService.getUserFbeetsBalance(accountAddress);
-
-            return {
-                id: balance.tokenAddress,
-                ...balance,
-            };
-        },
         userGetStaking: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
             return userService.getUserStaking(accountAddress);
-        },
-        userGetPoolSnapshots: async (parent, { poolId, range }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            return userService.getUserBalanceSnapshotsForPool(
-                accountAddress.toLowerCase(),
-                poolId.toLowerCase(),
-                range,
-            );
-        },
-        userGetRelicSnapshots: async (parent, { farmId, range }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            return userService.getUserRelicSnapshots(accountAddress.toLowerCase(), farmId, range);
         },
     },
     Mutation: {
@@ -103,13 +79,6 @@ const resolvers: Resolvers = {
             const accountAddress = getRequiredAccountAddress(context);
 
             await userService.syncUserBalanceAllPools(accountAddress);
-
-            return 'success';
-        },
-        userLoadAllRelicSnapshots: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await userService.loadAllUserRelicSnapshots();
 
             return 'success';
         },

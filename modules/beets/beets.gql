@@ -1,8 +1,0 @@
-extend type Query {
-    beetsGetFbeetsRatio: String!
-    beetsGetBeetsPrice: String!
-}
-
-extend type Mutation {
-    beetsSyncFbeetsRatio: String!
-}
