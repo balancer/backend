@@ -5,6 +5,7 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { collectsSwapFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
+const MAX_DB_INT = 9223372036854775807;
 export class SwapFeeAprService implements PoolAprService {
     constructor(private readonly swapProtocolFeePercentage: number) {}
 
@@ -26,6 +27,11 @@ export class SwapFeeAprService implements PoolAprService {
 
                 if (!collectsSwapFee(pool)) {
                     userApr = apr;
+                }
+
+                // TODO: clean this up
+                if (userApr > MAX_DB_INT) {
+                    userApr = 0;
                 }
 
                 operations.push(

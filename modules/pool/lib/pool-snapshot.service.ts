@@ -191,25 +191,30 @@ export class PoolSnapshotService {
                     price: snapshot.sharePrice,
                 }));
             } else {
-                try {
-                    tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
-                        token.address,
-                        numDays,
-                    );
-                    await sleep(5000);
-                } catch (error: any) {
-                    // Sentry.captureException(error);
-                    console.error(
-                        `Error getting historical prices form coingecko, falling back to database`,
-                        error.message,
-                    );
-                    tokenPriceMap[token.address] = await prisma.prismaTokenPrice.findMany({
-                        where: {
-                            tokenAddress: token.address,
-                            timestamp: { gte: startTimestamp },
-                            chain: networkContext.chain,
-                        },
-                    });
+                // check DB for correct price first before trying coingecko
+                const priceForDays = await prisma.prismaTokenPrice.findMany({
+                    where: {
+                        tokenAddress: token.address,
+                        timestamp: { gte: startTimestamp },
+                        chain: networkContext.chain,
+                    },
+                });
+                if (priceForDays.length === 0) {
+                    try {
+                        tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
+                            token.address,
+                            numDays,
+                        );
+                        await sleep(5000);
+                    } catch (error: any) {
+                        Sentry.captureException(error);
+                        console.error(
+                            `Error getting historical prices form coingecko, skipping token ${token.address}. Error:`,
+                            error.message,
+                        );
+                    }
+                } else {
+                    tokenPriceMap[token.address] = priceForDays;
                 }
             }
         }

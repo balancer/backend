@@ -29,6 +29,7 @@ const optimismNetworkData: NetworkData = {
         nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
         prismaId: 'OPTIMISM',
+        gqlId: 'OPTIMISM',
     },
     subgraphs: {
         startDate: '2022-01-01',
@@ -234,10 +235,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-token-dynamic-data',
-            interval: every(2, 'minutes'),
-        },
-        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
         },
@@ -264,6 +261,10 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-coingecko-coinids',
+            interval: every(2, 'hours'),
         },
         {
             name: 'purge-old-tokenprices',

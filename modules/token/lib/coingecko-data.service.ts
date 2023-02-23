@@ -9,13 +9,16 @@ import { networkContext } from '../../network/network-context.service';
 export class CoingeckoDataService {
     constructor(private readonly conigeckoService: CoingeckoService) {}
 
-    public async syncTokenDynamicDataFromCoingecko() {
+    public async syncCoingeckoPricesForAllChains() {
+        const timestamp = timestampRoundedUpToNearestHour();
+
         const tokensWithIds = await prisma.prismaToken.findMany({
-            where: { coingeckoTokenId: { not: null }, chain: networkContext.chain },
+            where: { coingeckoTokenId: { not: null } },
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
+        const uniqueTokensWithIds = _.uniqBy(tokensWithIds, 'coingeckoTokenId');
 
-        const chunks = _.chunk(tokensWithIds, 100);
+        const chunks = _.chunk(uniqueTokensWithIds, 100);
 
         for (const chunk of chunks) {
             const response = await this.conigeckoService.getMarketDataForTokenIds(
@@ -24,38 +27,85 @@ export class CoingeckoDataService {
             let operations: any[] = [];
 
             for (const item of response) {
-                const token = tokensWithIds.find((token) => token.coingeckoTokenId === item.id);
+                const tokensToUpdate = tokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
+                for (const tokenToUpdate of tokensToUpdate) {
+                    // why this if? old tokens don't update?
+                    if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
+                        const data = {
+                            price: item.current_price,
+                            ath: item.ath ?? undefined,
+                            atl: item.atl ?? undefined,
+                            marketCap: item.market_cap ?? undefined,
+                            fdv: item.fully_diluted_valuation ?? undefined,
+                            high24h: item.high_24h ?? undefined,
+                            low24h: item.low_24h ?? undefined,
+                            priceChange24h: item.price_change_24h ?? undefined,
+                            priceChangePercent24h: item.price_change_percentage_24h ?? undefined,
+                            priceChangePercent7d: item.price_change_percentage_7d_in_currency ?? undefined,
+                            priceChangePercent14d: item.price_change_percentage_14d_in_currency ?? undefined,
+                            priceChangePercent30d: item.price_change_percentage_30d_in_currency ?? undefined,
+                            updatedAt: item.last_updated,
+                        };
 
-                if (!token) {
-                    continue;
-                }
+                        operations.push(
+                            prisma.prismaTokenDynamicData.upsert({
+                                where: {
+                                    tokenAddress_chain: {
+                                        tokenAddress: tokenToUpdate.address,
+                                        chain: tokenToUpdate.chain,
+                                    },
+                                },
+                                update: data,
+                                create: {
+                                    coingeckoId: item.id,
+                                    tokenAddress: tokenToUpdate.address,
+                                    chain: tokenToUpdate.chain,
+                                    ...data,
+                                },
+                            }),
+                        );
+                    }
 
-                if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
-                    const data = {
-                        price: item.current_price,
-                        ath: item.ath,
-                        atl: item.atl,
-                        marketCap: item.market_cap,
-                        fdv: item.fully_diluted_valuation,
-                        high24h: item.high_24h ?? undefined,
-                        low24h: item.low_24h ?? undefined,
-                        priceChange24h: item.price_change_24h ?? undefined,
-                        priceChangePercent24h: item.price_change_percentage_24h,
-                        priceChangePercent7d: item.price_change_percentage_7d_in_currency,
-                        priceChangePercent14d: item.price_change_percentage_14d_in_currency,
-                        priceChangePercent30d: item.price_change_percentage_30d_in_currency,
-                        updatedAt: item.last_updated,
-                    };
+                    // update current price and price data, for every chain
+                    operations.push(
+                        prisma.prismaTokenPrice.upsert({
+                            where: {
+                                tokenAddress_timestamp_chain: {
+                                    tokenAddress: tokenToUpdate.address,
+                                    timestamp,
+                                    chain: tokenToUpdate.chain,
+                                },
+                            },
+                            update: { price: item.current_price, close: item.current_price },
+                            create: {
+                                tokenAddress: tokenToUpdate.address,
+                                chain: tokenToUpdate.chain,
+                                timestamp,
+                                price: item.current_price,
+                                high: item.current_price,
+                                low: item.current_price,
+                                open: item.current_price,
+                                close: item.current_price,
+                                coingecko: true,
+                            },
+                        }),
+                    );
 
                     operations.push(
-                        prisma.prismaTokenDynamicData.upsert({
-                            where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
-                            update: data,
+                        prisma.prismaTokenCurrentPrice.upsert({
+                            where: {
+                                tokenAddress_chain: {
+                                    tokenAddress: tokenToUpdate.address,
+                                    chain: tokenToUpdate.chain,
+                                },
+                            },
+                            update: { price: item.current_price },
                             create: {
-                                coingeckoId: item.id,
-                                chain: networkContext.chain,
-                                tokenAddress: token.address,
-                                ...data,
+                                tokenAddress: tokenToUpdate.address,
+                                chain: tokenToUpdate.chain,
+                                timestamp,
+                                price: item.current_price,
+                                coingecko: true,
                             },
                         }),
                     );
@@ -63,6 +113,37 @@ export class CoingeckoDataService {
             }
 
             await Promise.all(operations);
+        }
+    }
+
+    public async syncCoingeckoIds() {
+        const tokensWithoutIds = await prisma.prismaToken.findMany({
+            where: { coingeckoTokenId: null },
+        });
+
+        const coinIds = await this.conigeckoService.getCoinIdList();
+
+        for (const tokenWithoutId of tokensWithoutIds) {
+            const coinId = coinIds.find((coinId) => {
+                if (coinId.platforms[networkContext.data.coingecko.platformId]) {
+                    return (
+                        coinId.platforms[networkContext.data.coingecko.platformId].toLowerCase() ===
+                        tokenWithoutId.address
+                    );
+                }
+            });
+
+            if (coinId) {
+                await prisma.prismaToken.update({
+                    where: {
+                        address_chain: { address: tokenWithoutId.address, chain: tokenWithoutId.chain },
+                    },
+                    data: {
+                        coingeckoTokenId: coinId.id,
+                        coingeckoPlatformId: networkContext.data.coingecko.platformId,
+                    },
+                });
+            }
         }
     }
 

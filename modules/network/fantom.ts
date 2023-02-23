@@ -33,6 +33,7 @@ const fantomNetworkData: NetworkData = {
         nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
         prismaId: 'FANTOM',
+        gqlId: 'FANTOM',
     },
     subgraphs: {
         startDate: '2021-10-08',
@@ -236,10 +237,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-token-dynamic-data',
-            interval: every(2, 'minutes'),
-        },
-        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
         },
@@ -282,6 +279,15 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'purge-old-tokenprices',
             interval: every(1, 'days'),
+        },
+        {
+            name: 'sync-coingecko-coinids',
+            interval: every(2, 'hours'),
+        },
+        // The following are multichain jobs and should only run once for all chains.
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: every(2, 'minutes'),
         },
     ],
 };

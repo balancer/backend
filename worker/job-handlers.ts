@@ -213,11 +213,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-token-dynamic-data':
+            case 'sync-global-coingecko-prices':
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => tokenService.syncTokenDynamicData(),
+                    () => tokenService.syncCoingeckoPricesForAllChains(),
                     defaultSamplingRate,
                     res,
                     next,
@@ -308,6 +308,16 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     job.chainId,
                     () => tokenService.purgeOldTokenPrices(),
+                    0.01,
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-coingecko-coinids':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    job.chainId,
+                    () => tokenService.syncCoingeckoIds(),
                     0.01,
                     res,
                     next,
