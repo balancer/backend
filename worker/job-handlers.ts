@@ -2,14 +2,13 @@ import * as Sentry from '@sentry/node';
 import { Express, NextFunction } from 'express';
 import { tokenService } from '../modules/token/token.service';
 import { poolService } from '../modules/pool/pool.service';
-import { beetsService } from '../modules/beets/token/beets-token.service';
+import { beetsService } from '../modules/token/beets-token.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
-import { reliquaryService } from '../modules/beets/reliquary/reliquary.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -287,7 +286,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => reliquaryService.syncLatestReliquarySnapshotsForAllFarms(),
+                    () => poolService.syncLatestReliquarySnapshotsForAllFarms(),
                     0.01,
                     res,
                     next,

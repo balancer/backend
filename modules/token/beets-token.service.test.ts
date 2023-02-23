@@ -1,9 +1,9 @@
-import { prisma } from '../../../prisma/prisma-client';
-import { createIndividualDatabaseSchemaForTest } from '../../tests-helper/setupTestDatabase';
-import { mockServer } from '../../tests-helper/mocks/mockHttpServer';
+import { prisma } from '../../prisma/prisma-client';
+import { createIndividualDatabaseSchemaForTest } from '../tests-helper/setupTestDatabase';
+import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { beetsService } from './beets-token.service';
 import { rpcHandlers } from './mock-handlers/rpc';
-import { networkContext } from '../../network/network-context.service';
+import { networkContext } from '../network/network-context.service';
 
 beforeAll(async () => {
     await createIndividualDatabaseSchemaForTest();

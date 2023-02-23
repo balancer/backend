@@ -1,8 +1,8 @@
 import { Resolvers } from '../../schema';
-import { beetsService } from './token/beets-token.service';
+import { beetsService } from '../token/beets-token.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
-import { reliquaryService } from './reliquary/reliquary.service';
 import { userService } from '../user/user.service';
+import { poolService } from '../pool/pool.service';
 
 const beetsResolvers: Resolvers = {
     Query: {
@@ -13,7 +13,7 @@ const beetsResolvers: Resolvers = {
             return beetsService.getBeetsPrice();
         },
         beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range }, context) => {
-            const snapshots = await reliquaryService.getSnapshotsForReliquaryFarm(parseFloat(id), range);
+            const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range);
 
             return snapshots.map((snapshot) => ({
                 id: snapshot.id,
@@ -65,7 +65,7 @@ const beetsResolvers: Resolvers = {
         beetsPoolLoadReliquarySnapshotsForAllFarms: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await reliquaryService.loadReliquarySnapshotsForAllFarms();
+            await poolService.loadReliquarySnapshotsForAllFarms();
 
             return 'success';
         },

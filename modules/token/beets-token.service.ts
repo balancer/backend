@@ -1,6 +1,6 @@
 import { FbeetsService } from './lib/fbeets.service';
-import { tokenService } from '../../token/token.service';
-import { networkContext } from '../../network/network-context.service';
+import { tokenService } from './token.service';
+import { networkContext } from '../network/network-context.service';
 
 export class BeetsTokenService {
     constructor(private readonly fBeetsService: FbeetsService) {}

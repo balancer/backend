@@ -35,6 +35,8 @@ import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
+import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
 
@@ -50,6 +52,7 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolSnapshotService: PoolSnapshotService,
+        private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
     private get poolStakingServices(): PoolStakingService[] {
@@ -128,6 +131,10 @@ export class PoolService {
 
     public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
         return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
+    }
+
+    public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
+        return this.reliquarySnapshotService.getSnapshotsForFarm(id, range);
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -264,6 +271,21 @@ export class PoolService {
         await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
     }
 
+    public async syncLatestReliquarySnapshotsForAllFarms() {
+        await this.reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+    }
+
+    public async loadReliquarySnapshotsForAllFarms() {
+        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: networkContext.chain } });
+        const farmIds = farms.map((farm) => parseFloat(farm.id));
+        for (const farmId of farmIds) {
+            await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
+        }
+    }
+
     public async updateLifetimeValuesForAllPools() {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
@@ -291,4 +313,5 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),
     new PoolSnapshotService(balancerSubgraphService, coingeckoService),
+    new ReliquarySnapshotService(reliquarySubgraphService),
 );
