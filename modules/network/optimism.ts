@@ -29,6 +29,7 @@ const optimismNetworkData: NetworkData = {
         nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
         prismaId: 'OPTIMISM',
+        gqlId: 'OPTIMISM',
     },
     subgraphs: {
         startDate: '2022-01-01',

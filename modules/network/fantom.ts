@@ -33,6 +33,7 @@ const fantomNetworkData: NetworkData = {
         nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
         prismaId: 'FANTOM',
+        gqlId: 'FANTOM',
     },
     subgraphs: {
         startDate: '2021-10-08',
