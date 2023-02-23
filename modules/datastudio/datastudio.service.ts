@@ -7,7 +7,7 @@ import { SecretsManager, secretsManager } from './secrets-manager';
 import { googleJwtClient, GoogleJwtClient } from './google-jwt-client';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../token/token.service';
-import { beetsService } from '../beets/token/beets-token.service';
+import { beetsService } from '../token/beets-token.service';
 import { oneDayInSeconds, secondsPerDay } from '../common/time';
 import { collectsSwapFee, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 import { networkContext } from '../network/network-context.service';
