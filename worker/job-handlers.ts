@@ -9,8 +9,6 @@ import { protocolService } from '../modules/protocol/protocol.service';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
-import { coingeckoService } from '../modules/coingecko/coingecko.service';
-import { CoingeckoDataService } from '../modules/token/lib/coingecko-data.service';
 
 const runningJobs: Set<string> = new Set();
 
