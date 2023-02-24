@@ -1,9 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
-import { RocketPoolStakedEthAprService } from '../pool/lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 import { tokenService } from '../token/token.service';
 import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
-import { OvernightAprService } from '../pool/lib/apr-data-sources/optimism/overnight-apr.service';
 import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
@@ -11,7 +9,6 @@ import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.ser
 import { GaugeAprService } from '../pool/lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
 import { gaugeSerivce } from '../pool/lib/staking/optimism/gauge-service';
 import { GaugeStakingService } from '../pool/lib/staking/optimism/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
@@ -20,87 +17,97 @@ import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swap
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 
-const optimismNetworkData: NetworkData = {
+const mainnetNetworkData: NetworkData = {
     chain: {
-        slug: 'optimism',
-        id: 10,
-        nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
-        prismaId: 'OPTIMISM',
-        gqlId: 'OPTIMISM',
+        slug: 'ethereum',
+        id: 1,
+        nativeAssetAddress: '0xb5AE3c648709913Ef9739e9F6eDB5a821c6Ab160',
+        wrappedNativeAssetAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        prismaId: 'MAINNET',
+        gqlId: 'MAINNET',
     },
     subgraphs: {
-        startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism',
+        startDate: '2019-04-20',
+        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
+        blocks: 'https://api.thegraph.com/subgraphs/name/decentraland/blocks-ethereum-mainnet',
+        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        userBalances: 'https://',
     },
     eth: {
-        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        address: '0xb5ae3c648709913ef9739e9f6edb5a821c6ab160',
+        addressFormatted: '0xb5AE3c648709913Ef9739e9F6eDB5a821c6Ab160',
         symbol: 'ETH',
         name: 'Ether',
     },
     weth: {
-        address: '0x4200000000000000000000000000000000000006',
-        addressFormatted: '0x4200000000000000000000000000000000000006',
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        addressFormatted: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },
     coingecko: {
         nativeAssetId: 'ethereum',
-        platformId: 'optimistic-ethereum',
+        platformId: 'ethereum',
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ankr.com/optimism',
+    rpcUrl: 'https://mainnet.infura.io/v3/',
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
-        projectId: '1g2ag2hb',
-        dataset: 'production',
+        projectId: '',
+        dataset: '',
     },
     beets: {
-        address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        address: '0x0000000000000000000000000000000000000000',
     },
     bal: {
-        address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
+        address: '0xba100000625a3754423978a60c9317c58a424e3D',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
-        weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
+        composableStablePoolFactories: [
+            '0xf9ac7B9dF2b3454E841110CcE5550bD5AC6f875F',
+            '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
+            '0xdba127fBc23fb20F5929C546af220A991b5C6e01',
+        ],
+        weightedPoolV2Factories: [
+            '0xcC508a455F5b0073973107Db6a878DdBDab957bC',
+            '0x5Dd94Da3644DDD055fcf6B3E1aa310Bb7801EB8b',
+        ],
         poolsInRecoveryMode: [
-            '0x05e7732bf9ae5592e6aa05afe8cd80f7ab0a7bea',
-            '0x359ea8618c405023fc4b98dab1b01f373792a126',
-            '0x3fdb6fb126521a28f06893f9629da12f7b7266eb',
-            '0x435272180a4125f3b47c92826f482fc6cc165958',
-            '0x785f08fb77ec934c01736e30546f87b4daccbe50',
-            '0x899f737750db562b88c1e412ee1902980d3a4844',
-            '0x981fb05b738e981ac532a99e77170ecb4bc27aef',
-            '0xb0de49429fbb80c635432bbad0b3965b28560177',
-            '0xc77e5645dbe48d54afc06655e39d3fe17eb76c1c',
-            '0xe0b50b0635b90f7021d2618f76ab9a31b92d0094',
-            '0xf30db0ca4605e5115df91b56bd299564dca02666',
-            '0x1f131ec1175f023ee1534b16fa8ab237c00e2381',
-            '0x428e1cc3099cf461b87d124957a0d48273f334b1',
-            '0x479a7d1fcdd71ce0c2ed3184bfbe9d23b92e8337',
-            '0x593acbfb1eaf3b6ec86fa60325d816996fdcbc0d',
-            '0x6222ae1d2a9f6894da50aa25cb7b303497f9bebd',
-            '0x62de5ca16a618e22f6dfe5315ebd31acb10c44b6',
-            '0x7d6bff131b359da66d92f215fd4e186003bfaa42',
-            '0x96a78983932b8739d1117b16d30c15607926b0c5',
-            '0x9964b1bd3cc530e5c58ba564e45d45290f677be2',
-            '0xb0f2c34b9cd5c377c5efbba3b31e67114810cbc8',
-            '0xb1c9ac57594e9b1ec0f3787d9f6744ef4cb0a024',
-            '0xde45f101250f2ca1c0f8adfc172576d10c12072d',
-            '0xf572649606db4743d217a2fa6e8b8eb79742c24a',
-            '0x373b347bc87998b151a5e9b6bb6ca692b766648a',
+            '0x0ce45ba1c33e0741957881e05daff3b1e2954a9b000200000000000000000365',
+            '0x0fd5663d4893ae0d579d580584806aadd2dd0b8b000200000000000000000367',
+            '0x173063a30e095313eee39411f07e95a8a806014e0002000000000000000003ab',
+            '0x25accb7943fd73dda5e23ba6329085a3c24bfb6a000200000000000000000387',
+            '0x2ba7aa2213fa2c909cd9e46fed5a0059542b36b00000000000000000000003a3',
+            '0x334c96d792e4b26b841d28f53235281cec1be1f200020000000000000000038a',
+            '0x373b347bc87998b151a5e9b6bb6ca692b766648a0000000000000000000003f8',
+            '0x43bdd55d9c98ae9184dc3a869ab89a83762156d50002000000000000000003f3',
+            '0x496ff26b76b8d23bbc6cf1df1eee4a48795490f7000200000000000000000377',
+            '0x4c8d2e60863e8d7e1033eda2b3d84e92a641802000000000000000000000040f',
+            '0x4ce0bd7debf13434d3ae127430e9bd4291bfb61f00020000000000000000038b',
+            '0x4edcb2b46377530bc18bb4d2c7fe46a992c73e100000000000000000000003ec',
+            '0x5210287a2a440c06d7f3fcc4cc7b119ba8de433900020000000000000000037f',
+            '0x53bc3cba3832ebecbfa002c12023f8ab1aa3a3a0000000000000000000000411',
+            '0x5b3240b6be3e7487d61cd1afdfc7fe4fa1d81e6400000000000000000000037b',
+            '0x6a5ead5433a50472642cd268e584dafa5a394490000200000000000000000366',
+            '0x6a9603e481fb8f2c09804ea9adab49a338855b900000000000000000000003a8',
+            '0x7152a37bbf363262bad269ec4de2269dd0e84ca30002000000000000000003bd',
+            '0x798b112420ad6391a4129ac25ef59663a44c88bb0002000000000000000003f4',
+            '0x81b7f92c7b7d9349b989b4982588761bfa1aa6270000000000000000000003e9',
+            '0x8e85e97ed19c0fa13b2549309965291fbbc0048b0000000000000000000003ba',
+            '0x9fb771d530b0ceba5160f7bfe2dd1e8b8aa1340300000000000000000000040e',
+            '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d',
+            '0xac976bb42cb0c85635644e8c7c74d0e0286aa61c0000000000000000000003cb',
+            '0xb9bd68a77ccf8314c0dfe51bc291c77590c4e9e6000200000000000000000385',
+            '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee0000000000000000000003c6',
+            '0xc9c5ff67bb2fae526ae2467c359609d6bcb4c5320000000000000000000003cc',
+            '0xe340ebfcaa544da8bb1ee9005f1a346d50ec422e000200000000000000000396',
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
-    multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -126,30 +133,24 @@ const optimismNetworkData: NetworkData = {
         vaultsEndpoint: 'https://#/',
     },
     reaper: {
-        linearPoolFactories: [
-            '0x19968d4b7126904fd665ed25417599df9604df83',
-            '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
-        ],
+        linearPoolFactories: ['0x1b986138a4F2aA538E79fdEC222dad93F8d66703'],
         averageAPRAcrossLastNHarvests: 2,
     },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
+        wstEthContract: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
     },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
             databaseTabName: 'Database v2',
             compositionTabName: 'Pool Composition v2',
             emissionDataTabName: 'EmissionData',
         },
         canary: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
             databaseTabName: 'Database v2',
             compositionTabName: 'Pool Composition v2',
             emissionDataTabName: 'EmissionData',
@@ -157,35 +158,32 @@ const optimismNetworkData: NetworkData = {
     },
 };
 
-export const optimismNetworkConfig: NetworkConfig = {
-    data: optimismNetworkData,
-    provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
+export const mainnetNetworkConfig: NetworkConfig = {
+    data: mainnetNetworkData,
+    provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
     poolAprServices: [
-        new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new WstethAprService(
             tokenService,
-            optimismNetworkData.lido!.wstEthAprEndpoint,
-            optimismNetworkData.lido!.wstEthContract,
-            optimismNetworkData.balancer.yieldProtocolFeePercentage,
+            mainnetNetworkData.lido!.wstEthAprEndpoint,
+            mainnetNetworkData.lido!.wstEthContract,
+            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
         ),
-        new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
-            optimismNetworkData.reaper.linearPoolFactories,
-            optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
+            mainnetNetworkData.reaper.linearPoolFactories,
+            mainnetNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
         ),
-        new PhantomStableAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
-        new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
+        new PhantomStableAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
+        new BoostedPoolAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
+        new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSerivce, tokenService, [
-            optimismNetworkData.beets.address,
-            optimismNetworkData.bal.address,
+            mainnetNetworkData.beets.address,
+            mainnetNetworkData.bal.address,
         ]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSerivce)],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
-        new CoingeckoPriceHandlerService(optimismNetworkData.weth.address, coingeckoService),
+        new CoingeckoPriceHandlerService(mainnetNetworkData.weth.address, coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -215,10 +213,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-new-pools-from-subgraph',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-sanity-pool-data',
-            interval: every(3, 'minutes'),
         },
         {
             name: 'sync-tokens-from-pool-tokens',
@@ -267,6 +261,11 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'purge-old-tokenprices',
             interval: every(1, 'days'),
+        },
+        // The following are multichain jobs and should only run once for all chains.
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: every(2, 'minutes'),
         },
     ],
 };
