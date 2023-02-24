@@ -30,7 +30,7 @@ const mainnetNetworkData: NetworkData = {
         startDate: '2019-04-20',
         balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/decentraland/blocks-ethereum-mainnet',
+        blocks: 'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
@@ -51,7 +51,7 @@ const mainnetNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://mainnet.infura.io/v3/',
+    rpcUrl: 'https://cloudflare-eth.com',
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '',
@@ -107,7 +107,7 @@ const mainnetNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
-    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],

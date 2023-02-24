@@ -29,7 +29,7 @@ const polygonNetworkData: NetworkData = {
         startDate: '2021-06-16',
         balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/decentraland/blocks-matic-mainnet',
+        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
         userBalances: 'https://',
     },
@@ -110,7 +110,7 @@ const polygonNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
-    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    multicall: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],

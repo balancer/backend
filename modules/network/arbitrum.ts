@@ -30,7 +30,7 @@ const arbitrumNetworkData: NetworkData = {
         startDate: '2021-08-23',
         balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/iliaazhel/arbitrum-blocks',
+        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-arbitrum',
         userBalances: 'https://',
     },
@@ -87,7 +87,7 @@ const arbitrumNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
-    multicall: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    multicall: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -118,7 +118,7 @@ const arbitrumNetworkData: NetworkData = {
     },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '0x5979D7b546E38E414F7E9822514be443A4800529',
+        wstEthContract: '0x5979d7b546e38e414f7e9822514be443a4800529',
     },
     datastudio: {
         main: {
