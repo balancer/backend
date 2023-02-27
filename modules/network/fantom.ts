@@ -110,6 +110,10 @@ const fantomNetworkData: NetworkData = {
     },
     reliquary: {
         address: '0x1ed6411670c709F4e163854654BD52c74E66D7eC',
+        excludedFarmIds: [
+            '0', // test with dummy token
+            '1', // test with fresh beets pool BPT
+        ],
     },
     avgBlockSpeed: 1,
     sor: {

@@ -91,6 +91,7 @@ export interface NetworkData {
     };
     reliquary?: {
         address: string;
+        excludedFarmIds: string[];
     };
     copper?: {
         proxyAddress: string;
