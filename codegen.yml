@@ -97,6 +97,8 @@ generates:
                 BigInt: string
                 Bytes: string
                 BigDecimal: string
+            namingConvention:
+                enumValues: keep
     modules/subgraphs/gauge-subgraph/generated/gauge-subgraph-schema.graphql:
         schema: ${GAUGE_SUBGRAPH}
         plugins:

@@ -29,9 +29,9 @@ export class GaugeSubgraphService {
         return sharesQuery.gaugeShares;
     }
 
-    public async getStreamers() {
-        const streamersQuery = await this.sdk.GaugeStreamers();
-        return streamersQuery.streamers;
+    public async getGauges() {
+        const gaugesQuery = await this.sdk.GaugeLiquidityGauges();
+        return gaugesQuery.liquidityGauges;
     }
 
     public async getMetadata() {

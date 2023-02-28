@@ -8,7 +8,7 @@ import { networkContext } from '../../../../network/network-context.service';
 export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeService: GaugeSerivce) {}
     public async syncStakingForPools(): Promise<void> {
-        const gaugeStreamers = await this.gaugeService.getStreamers();
+        const gauges = await this.gaugeService.getGauges();
 
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -21,8 +21,8 @@ export class GaugeStakingService implements PoolStakingService {
         const gaugeStakingEntities: any[] = [];
         const gaugeStakingRewardOperations: any[] = [];
 
-        for (const gaugeStreamer of gaugeStreamers) {
-            const pool = pools.find((pool) => pool.id === gaugeStreamer.poolId);
+        for (const gauge of gauges) {
+            const pool = pools.find((pool) => pool.id === gauge.poolId);
             if (!pool) {
                 continue;
             }
@@ -30,30 +30,31 @@ export class GaugeStakingService implements PoolStakingService {
                 operations.push(
                     prisma.prismaPoolStaking.create({
                         data: {
-                            id: gaugeStreamer.gaugeAddress,
+                            id: gauge.address,
                             chain: networkContext.chain,
                             poolId: pool.id,
                             type: 'GAUGE',
-                            address: gaugeStreamer.gaugeAddress,
+                            address: gauge.address,
                         },
                     }),
                 );
             }
             gaugeStakingEntities.push({
-                id: gaugeStreamer.gaugeAddress,
-                stakingId: gaugeStreamer.gaugeAddress,
-                gaugeAddress: gaugeStreamer.gaugeAddress,
+                id: gauge.address,
+                stakingId: gauge.address,
+                gaugeAddress: gauge.address,
                 chain: networkContext.chain,
             });
-            for (let rewardToken of gaugeStreamer.rewardTokens) {
-                const id = `${gaugeStreamer.gaugeAddress}-${rewardToken.address}`;
+            for (let rewardToken of gauge.tokens) {
+                const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+                const id = `${gauge.address}-${tokenAddress}`;
                 gaugeStakingRewardOperations.push(
                     prisma.prismaPoolStakingGaugeReward.upsert({
                         create: {
                             id,
                             chain: networkContext.chain,
-                            gaugeId: gaugeStreamer.gaugeAddress,
-                            tokenAddress: rewardToken.address,
+                            gaugeId: gauge.address,
+                            tokenAddress: tokenAddress,
                             rewardPerSecond: `${rewardToken.rewardsPerSecond}`,
                         },
                         update: {

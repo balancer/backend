@@ -9,22 +9,30 @@ import {
 } from '../../../../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
 import { networkContext } from '../../../../network/network-context.service';
 
-export type GaugeRewardToken = { address: string; name: string; decimals: number; symbol: string };
-export type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
+export type GaugeRewardToken = { id: string; decimals: number; symbol: string; rewardsPerSecond: string };
+// export type GaugeRewardTokenWithEmissions = GaugeRewardToken & { rewardsPerSecond: number };
 
 export type GaugeShare = {
     id: string;
     balance: string;
-    gauge: { id: string; poolId: string; poolAddress: string };
+    gauge: { id: string; poolId?: string; poolAddress: string };
     user: { id: string };
 };
 
-export type GaugeStreamer = {
+// export type GaugeStreamer = {
+//     address: string;
+//     streamerAddress: string;
+//     totalSupply: string;
+//     poolId: string;
+//     rewardTokens: GaugeRewardToken[];
+// };
+
+export type LiquidityGauge = {
     address: string;
-    gaugeAddress: string;
+    streamerAddress: string;
     totalSupply: string;
     poolId: string;
-    rewardTokens: GaugeRewardTokenWithEmissions[];
+    tokens: GaugeRewardToken[];
 };
 
 export type GaugeUserShare = {
@@ -37,46 +45,28 @@ export type GaugeUserShare = {
 export class GaugeSerivce {
     constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
 
-    public async getStreamers(): Promise<GaugeStreamer[]> {
-        const streamers = await this.gaugeSubgraphService.getStreamers();
+    public async getGauges(): Promise<LiquidityGauge[]> {
+        const subgraphLiquidityGauges = await this.gaugeSubgraphService.getGauges();
 
-        const multiCaller = new Multicaller(
-            networkContext.data.multicall,
-            networkContext.provider,
-            ChildChainStreamerAbi,
-        );
-
-        for (let streamer of streamers) {
-            streamer.rewardTokens?.forEach((rewardToken) => {
-                multiCaller.call(streamer.id + rewardToken.address, streamer.id, 'reward_data', [rewardToken.address]);
-            });
-        }
-
-        const rewardDataResult = (await multiCaller.execute()) as Record<
-            string,
-            { rate: string; period_finish: string }
-        >;
-
-        const gaugeStreamers: GaugeStreamer[] = [];
-        for (let streamer of streamers) {
-            const rewardTokens: GaugeRewardTokenWithEmissions[] = [];
-            streamer.rewardTokens?.forEach((rewardToken) => {
-                const rewardData = rewardDataResult[streamer.id + rewardToken.address];
-                const isActive = moment.unix(parseInt(rewardData.period_finish)).isAfter(moment());
-                rewardTokens.push({
+        const gauges: LiquidityGauge[] = [];
+        const tokens: GaugeRewardToken[] = [];
+        for (let gauge of subgraphLiquidityGauges) {
+            gauge.tokens?.forEach((rewardToken) => {
+                const isActive = moment.unix(parseInt(rewardToken.periodFinish || '0')).isAfter(moment());
+                tokens.push({
                     ...rewardToken,
-                    rewardsPerSecond: isActive ? scaleDown(rewardData.rate, rewardToken.decimals).toNumber() : 0,
+                    rewardsPerSecond: isActive ? rewardToken.rate || '0' : '0',
                 });
             });
-            gaugeStreamers.push({
-                address: streamer.id,
-                gaugeAddress: streamer.gauge.id,
-                totalSupply: streamer.gauge.totalSupply,
-                poolId: streamer.gauge.poolId,
-                rewardTokens,
+            gauges.push({
+                address: gauge.id,
+                streamerAddress: gauge.streamer || '',
+                totalSupply: gauge.totalSupply,
+                poolId: gauge.poolId || '',
+                tokens,
             });
         }
-        return gaugeStreamers;
+        return gauges;
     }
 
     public async getAllGaugeAddresses(): Promise<string[]> {
@@ -104,15 +94,29 @@ export class GaugeSerivce {
         return (
             userGauges?.gaugeShares?.map((share) => ({
                 gaugeAddress: share.gauge.id,
-                poolId: share.gauge.poolId,
+                poolId: share.gauge.poolId || '',
                 amount: share.balance,
-                tokens: share.gauge.tokens ?? [],
+                tokens:
+                    share.gauge.tokens?.map((token) => ({
+                        ...token,
+                        rewardsPerSecond: token.rate || '',
+                    })) || [],
             })) ?? []
         );
     }
 
     public async getAllGaugeShares(args: GaugeSharesQueryVariables): Promise<GaugeShare[]> {
-        return await this.gaugeSubgraphService.getAllGaugeShares(args);
+        const allShares = await this.gaugeSubgraphService.getAllGaugeShares(args);
+        return allShares.map(({ id, balance, gauge, user }) => ({
+            id,
+            balance,
+            gauge: {
+                id: gauge.id,
+                poolAddress: gauge.poolAddress,
+                poolId: gauge.poolId || '',
+            },
+            user,
+        }));
     }
 
     public async getMetadata() {

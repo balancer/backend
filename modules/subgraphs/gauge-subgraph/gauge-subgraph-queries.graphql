@@ -11,10 +11,10 @@ query GaugeLiquidityGauges(
         totalSupply
         tokens {
             id
-            name
-            address
             decimals
             symbol
+            rate
+            periodFinish
         }
         shares {
             user {
@@ -22,6 +22,7 @@ query GaugeLiquidityGauges(
             }
             balance
         }
+        streamer
     }
 }
 
@@ -40,10 +41,11 @@ query GaugeUserGauges($userAddress: ID!) {
                 id
                 poolId
                 tokens {
-                    name
-                    address
+                    id
                     decimals
                     symbol
+                    rate
+                    periodFinish
                 }
             }
         }
@@ -66,24 +68,7 @@ query GaugeShares(
             poolAddress
         }
         user {
-           id
-        }
-    }
-}
-
-query GaugeStreamers {
-    streamers {
-        id
-        rewardTokens {
-            name
-            address
-            decimals
-            symbol
-        }
-        gauge {
             id
-            poolId
-            totalSupply
         }
     }
 }

@@ -21,29 +21,26 @@ export class GaugeAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const operations: any[] = [];
-        const gaugeStreamers = await this.gaugeService.getStreamers();
+        const gauges = await this.gaugeService.getGauges();
         const tokenPrices = await this.tokenService.getTokenPrices();
         for (const pool of pools) {
-            const streamer = gaugeStreamers.find(
-                (streamer) => streamer.gaugeAddress === pool.staking?.gauge?.gaugeAddress,
-            );
-            if (!streamer || !pool.dynamicData) {
+            const gauge = gauges.find((gage) => gage.address === pool.staking?.gauge?.gaugeAddress);
+            if (!gauge || !pool.dynamicData) {
                 continue;
             }
             const totalShares = parseFloat(pool.dynamicData.totalShares);
             const gaugeTvl =
-                totalShares > 0
-                    ? (parseFloat(streamer.totalSupply) / totalShares) * pool.dynamicData.totalLiquidity
-                    : 0;
+                totalShares > 0 ? (parseFloat(gauge.totalSupply) / totalShares) * pool.dynamicData.totalLiquidity : 0;
 
             let thirdPartyApr = 0;
-            for (let rewardToken of streamer.rewardTokens) {
-                const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, rewardToken.address) || 0.1;
-                const rewardTokenPerYear = rewardToken.rewardsPerSecond * secondsPerYear;
+            for (let rewardToken of gauge.tokens) {
+                const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+                const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, tokenAddress) || 0.1;
+                const rewardTokenPerYear = parseFloat(rewardToken.rewardsPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                 let rewardApr = gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
-                const isThirdPartyApr = !this.primaryTokens.includes(rewardToken.address);
+                const isThirdPartyApr = !this.primaryTokens.includes(tokenAddress);
                 if (isThirdPartyApr) {
                     thirdPartyApr += rewardApr;
                 }
