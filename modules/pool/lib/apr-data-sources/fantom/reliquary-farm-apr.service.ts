@@ -15,13 +15,16 @@ export class ReliquaryFarmAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const farms = await reliquarySubgraphService.getAllFarms({});
+        const allSubgraphFarms = await reliquarySubgraphService.getAllFarms({});
+        const filteredFarms = allSubgraphFarms.filter(
+            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
+        );
 
         const tokenPrices = await tokenService.getTokenPrices();
         const operations: any[] = [];
 
         for (const pool of pools) {
-            const subgraphFarm = farms.find((farm) => isSameAddress(pool.address, farm.poolTokenAddress));
+            const subgraphFarm = filteredFarms.find((farm) => isSameAddress(pool.address, farm.poolTokenAddress));
             const farm = pool.staking?.reliquary;
 
             if (!subgraphFarm || !pool.dynamicData || !farm || subgraphFarm.totalBalance === '0') {
