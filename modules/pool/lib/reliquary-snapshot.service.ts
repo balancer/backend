@@ -36,17 +36,23 @@ export class ReliquarySnapshotService {
         const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
         // this returns the last two snapshot per farm, if there are any
-        const { farmSnapshots: latestFarmSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
+        const { farmSnapshots: allSnapshots } = await this.reliquarySubgraphService.getFarmSnapshots({
             where: { snapshotTimestamp_gte: yesterdayMorning },
         });
-        const farmIdsInSubgraphSnapshots = _.uniq(latestFarmSnapshots.map((snapshot) => snapshot.farmId));
+        const filteredSnapshots = allSnapshots.filter(
+            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
+        );
+        const farmIdsInSubgraphSnapshots = _.uniq(filteredSnapshots.map((snapshot) => snapshot.farmId));
 
-        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, latestFarmSnapshots);
+        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots);
     }
 
     public async loadAllSnapshotsForFarm(farmId: number) {
         const farmSnapshots = await this.reliquarySubgraphService.getAllFarmSnapshotsForFarm(farmId);
-        await this.upsertFarmSnapshots([farmId], farmSnapshots);
+        const filteredSnapshots = farmSnapshots.filter(
+            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
+        );
+        await this.upsertFarmSnapshots([farmId], filteredSnapshots);
     }
 
     private async upsertFarmSnapshots(
