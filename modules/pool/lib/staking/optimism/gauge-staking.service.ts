@@ -9,6 +9,7 @@ export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeService: GaugeSerivce) {}
     public async syncStakingForPools(): Promise<void> {
         const gauges = await this.gaugeService.getGauges();
+        const filteredGauges = gauges.filter((gauge) => gauge.isPreferentialGauge);
 
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -21,7 +22,7 @@ export class GaugeStakingService implements PoolStakingService {
         const gaugeStakingEntities: any[] = [];
         const gaugeStakingRewardOperations: any[] = [];
 
-        for (const gauge of gauges) {
+        for (const gauge of filteredGauges) {
             const pool = pools.find((pool) => pool.id === gauge.poolId);
             if (!pool) {
                 continue;

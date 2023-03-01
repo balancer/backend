@@ -33,6 +33,7 @@ export type LiquidityGauge = {
     totalSupply: string;
     poolId: string;
     tokens: GaugeRewardToken[];
+    isPreferentialGauge: boolean;
 };
 
 export type GaugeUserShare = {
@@ -64,6 +65,7 @@ export class GaugeSerivce {
                 totalSupply: gauge.totalSupply,
                 poolId: gauge.poolId || '',
                 tokens,
+                isPreferentialGauge: gauge.isPreferentialGauge,
             });
         }
         return gauges;
