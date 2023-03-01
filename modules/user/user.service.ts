@@ -123,7 +123,7 @@ export class UserService {
         await this.userSnapshotService.syncUserPoolBalanceSnapshots();
     }
 
-    public async asyncSyncUserRelicSnapshots() {
+    public async syncUserRelicSnapshots() {
         await this.userSnapshotService.syncLatestUserRelicSnapshots();
     }
 

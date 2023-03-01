@@ -296,7 +296,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => userService.asyncSyncUserRelicSnapshots(),
+                    () => userService.syncUserRelicSnapshots(),
                     0.01,
                     res,
                     next,
