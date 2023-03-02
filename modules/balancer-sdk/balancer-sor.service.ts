@@ -16,7 +16,7 @@ import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';
 import * as Sentry from '@sentry/node';
 import _ from 'lodash';
-import { Logger } from 'ethers/lib/utils';
+import { Logger } from '@ethersproject/logger';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -40,6 +40,7 @@ export class BalancerSorService {
         tokenOut = replaceEthWithZeroAddress(tokenOut);
 
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
+
         let swapAmountScaled = BigNumber.from(`0`);
         try {
             swapAmountScaled = parseFixed(swapAmount, tokenDecimals);
@@ -48,23 +49,40 @@ export class BalancerSorService {
             throw new Error('SOR: invalid swap amount input');
         }
 
-        const { data } = await axios.post<{ swapInfo: SwapInfo }>(
-            networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
-            {
+        let swapInfo = await this.querySor(swapType, tokenIn, tokenOut, swapAmountScaled, swapOptions);
+        // no swaps found, return 0
+        if (swapInfo.swaps.length === 0) {
+            return {
+                ...swapInfo,
+                tokenIn: replaceZeroAddressWithEth(swapInfo.tokenIn),
+                tokenOut: replaceZeroAddressWithEth(swapInfo.tokenOut),
                 swapType,
-                tokenIn,
-                tokenOut,
-                swapAmountScaled,
-                swapOptions: {
-                    maxPools:
-                        swapOptions.maxPools || networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
-                    forceRefresh:
-                        swapOptions.forceRefresh ||
-                        networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
-                },
-            },
-        );
-        const swapInfo = data.swapInfo;
+                tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : BigNumber.from('0').toString(),
+                tokenOutAmount: swapType === 'EXACT_IN' ? BigNumber.from('0').toString() : swapAmount,
+                swapAmount: swapType === 'EXACT_IN' ? BigNumber.from('0').toString() : swapAmount,
+                swapAmountScaled: BigNumber.from('0').toString(),
+                swapAmountForSwaps: swapInfo.swapAmountForSwaps
+                    ? BigNumber.from(swapInfo.swapAmountForSwaps).toString()
+                    : undefined,
+                returnAmount: BigNumber.from('0').toString(),
+                returnAmountScaled: BigNumber.from('0').toString(),
+                returnAmountConsideringFees: BigNumber.from(swapInfo.returnAmountConsideringFees).toString(),
+                returnAmountFromSwaps: swapInfo.returnAmountFromSwaps
+                    ? BigNumber.from(swapInfo.returnAmountFromSwaps).toString()
+                    : undefined,
+                routes: swapInfo.routes.map((route) => ({
+                    ...route,
+                    hops: route.hops.map((hop) => ({
+                        ...hop,
+                        pool: pools.find((pool) => pool.id === hop.poolId)!,
+                    })),
+                })),
+                effectivePrice: BigNumber.from('0').toString(),
+                effectivePriceReversed: BigNumber.from('0').toString(),
+                priceImpact: BigNumber.from('0').toString(),
+            };
+        }
+
         let deltas: string[] = [];
 
         try {
@@ -115,10 +133,7 @@ export class BalancerSorService {
         }
 
         const pools = await poolService.getGqlPools({
-            where: {
-                idIn: swapInfo.routes.map((route) => route.hops.map((hop) => hop.poolId)).flat(),
-                chainIn: [networkContext.data.chain.gqlId],
-            },
+            where: { idIn: swapInfo.routes.map((route) => route.hops.map((hop) => hop.poolId)).flat() },
         });
 
         const tokenInAmount = BigNumber.from(deltas[swapInfo.tokenAddresses.indexOf(tokenIn)]);
@@ -184,6 +199,33 @@ export class BalancerSorService {
             effectivePriceReversed: effectivePriceReversed.toString(),
             priceImpact: priceImpact.toString(),
         };
+    }
+
+    private async querySor(
+        swapType: string,
+        tokenIn: string,
+        tokenOut: string,
+        swapAmountScaled: BigNumber,
+        swapOptions: GqlSorSwapOptionsInput,
+    ) {
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(
+            networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
+            {
+                swapType,
+                tokenIn,
+                tokenOut,
+                swapAmountScaled,
+                swapOptions: {
+                    maxPools:
+                        swapOptions.maxPools || networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
+                    forceRefresh:
+                        swapOptions.forceRefresh ||
+                        networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
+                },
+            },
+        );
+        const swapInfo = data.swapInfo;
+        return swapInfo;
     }
 
     public async getBatchSwapForTokensIn({
