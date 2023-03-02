@@ -79,7 +79,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const latestBlock = await networkContext.provider.getBlockNumber();
         const farms = await reliquarySubgraphService.getAllFarms({});
         const filteredFarms = farms.filter(
-            (farm) => !networkConfig.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
+            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
 
         const startBlock = status.blockNumber + 1;
