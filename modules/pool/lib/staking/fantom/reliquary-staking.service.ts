@@ -19,7 +19,7 @@ export class ReliquaryStakingService implements PoolStakingService {
             throw new Error(`Reliquary with id ${this.reliquaryAddress} not found in subgraph`);
         }
         const farms = await this.reliquarySubgraphService.getAllFarms({});
-        const filteredFarms = farms.filter((farm) => !networkConfig.reliquary!.excludedFarmIds.includes(farm.id));
+        const filteredFarms = farms.filter((farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.id));
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
             include: { staking: { include: { farm: { include: { rewarders: true } } } } },
