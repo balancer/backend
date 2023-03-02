@@ -31,23 +31,10 @@ export class UserSyncWalletBalanceService {
             where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } }, chain: networkContext.chain },
         });
         const poolIdsToInit = pools.map((pool) => pool.id);
-        const chunks = _.chunk(poolIdsToInit, 100);
-        let shares: BalancerUserPoolShare[] = [];
-
-        console.log('initBalancesForPools: loading pool shares...');
-        for (const chunk of chunks) {
-            shares = [
-                ...shares,
-                ...(await balancerSubgraphService.getAllPoolShares({
-                    where: {
-                        poolId_in: chunk,
-                        userAddress_not_in: [AddressZero, networkContext.data.balancer.vault],
-                        balance_not: '0',
-                    },
-                })),
-            ];
-        }
-        console.log('initBalancesForPools: finished loading pool shares...');
+        const shares = await balancerSubgraphService.getAllPoolSharesWithBalance(poolIdsToInit, [
+            AddressZero,
+            networkContext.data.balancer.vault,
+        ]);
 
         let fbeetsHolders: BeetsBarUserFragment[] = [];
 
@@ -194,9 +181,8 @@ export class UserSyncWalletBalanceService {
 
     public async initBalancesForPool(poolId: string) {
         const { block } = await balancerSubgraphService.getMetadata();
-        const shares = await balancerSubgraphService.getAllPoolShares({
-            where: { poolId, userAddress_not: AddressZero, balance_not: '0' },
-        });
+
+        const shares = await balancerSubgraphService.getAllPoolSharesWithBalance([poolId], [AddressZero]);
 
         await prismaBulkExecuteOperations(
             [

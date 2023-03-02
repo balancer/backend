@@ -37,6 +37,7 @@ import {
     BalancerUsersQueryVariables,
     getSdk,
     OrderDirection,
+    PoolShare_OrderBy,
     Swap_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { subgraphLoadAll } from '../subgraph-util';
@@ -189,14 +190,40 @@ export class BalancerSubgraphService {
         }));
     }
 
-    public async getAllPoolShares(args: BalancerPoolSharesQueryVariables): Promise<BalancerUserPoolShare[]> {
-        const poolShares = await subgraphLoadAll<BalancerPoolShareFragment>(
-            this.sdk.BalancerPoolShares,
-            'poolShares',
-            args,
-        );
+    public async getAllPoolSharesWithBalance(
+        poolIds: string[],
+        excludedAddresses: string[],
+    ): Promise<BalancerUserPoolShare[]> {
+        const allPoolShares: BalancerPoolShareFragment[] = [];
+        let hasMore = true;
+        let id = `0`;
+        const pageSize = 1000;
 
-        return poolShares.map((shares) => ({
+        while (hasMore) {
+            const shares = await this.sdk.BalancerPoolShares({
+                where: {
+                    id_gt: id,
+                    poolId_in: poolIds,
+                    userAddress_not_in: excludedAddresses,
+                },
+                orderBy: PoolShare_OrderBy.Id,
+                orderDirection: OrderDirection.Asc,
+                first: pageSize,
+            });
+
+            if (shares.poolShares.length === 0) {
+                break;
+            }
+
+            if (shares.poolShares.length < pageSize) {
+                hasMore = false;
+            }
+
+            allPoolShares.push(...shares.poolShares);
+            id = shares.poolShares[shares.poolShares.length - 1].id;
+        }
+
+        return allPoolShares.map((shares) => ({
             ...shares,
             //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
             balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
