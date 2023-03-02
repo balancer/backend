@@ -8,11 +8,6 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { bn } from '../../../big-number/big-number';
 import { AmountHumanReadable } from '../../../common/global-types';
-import {
-    OrderDirection,
-    Relic_OrderBy,
-    ReliquaryRelicFragment,
-} from '../../../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 import { reliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
 import ReliquaryAbi from '../../../web3/abi/Reliquary.json';
 import { getContractAt } from '../../../web3/contract';
@@ -91,7 +86,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         );
 
         const filteredAmountUpdates = amountUpdates.filter(
-            (update) => !networkConfig.reliquary!.excludedFarmIds.includes(update.farmId.toString()),
+            (update) => !networkContext.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()),
         );
 
         const userAddresses = _.uniq(filteredAmountUpdates.map((update) => update.userAddress.toLowerCase()));
