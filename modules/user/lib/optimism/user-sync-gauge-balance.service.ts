@@ -9,11 +9,8 @@ import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants'
 import { Multicaller } from '../../../web3/multicaller';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
-import { OrderDirection } from '../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../../network/network-context.service';
-import { GaugeShare_OrderBy } from '../../../gauge-subgraph/generated/gauge-subgraph-types';
-import { gaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
