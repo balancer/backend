@@ -52,7 +52,7 @@ const mainnetNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://cloudflare-eth.com',
-    rpcMaxBlockRange: 800,
+    rpcMaxBlockRange: 700,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '',
