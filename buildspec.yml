@@ -9,7 +9,7 @@ env:
         YEARN_VAULTS_ENDPOINT: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all'
         SUBGRAPH_ORIG: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'
         CHANGELOG_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/changelog'
-        GAUGE_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/balancer-gauges-optimism'
+        GAUGE_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism'
         USER_SNAPSHOT_SUBGRPAH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom'
 phases:
     install:
