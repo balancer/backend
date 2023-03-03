@@ -1,4 +1,5 @@
 import { loadRestRoutesBeethoven } from './modules/beethoven/loadRestRoutes';
+import { loadRestRoutesBalancer } from './modules/balancer/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -81,7 +82,7 @@ async function startServer() {
     if (env.PROTOCOL === 'beethoven') {
         loadRestRoutesBeethoven(app);
     } else if (env.PROTOCOL === 'balancer') {
-        loadTestRoutesBalancer(app);
+        loadRestRoutesBalancer(app);
     }
 
     const httpServer = http.createServer(app);
@@ -134,7 +135,4 @@ if (process.env.WORKER === 'true') {
     startWorker();
 } else {
     startServer();
-}
-function loadTestRoutesBalancer(app: unknown) {
-    throw new Error('Function not implemented.');
 }
