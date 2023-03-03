@@ -91,7 +91,7 @@ async function startServer() {
         }),
         sentryPlugin,
     ];
-    if (env.NODE_ENV === 'production') {
+    if (process.env.APOLLO_SCHEMA_REPORTING && process.env.APOLLO_SCHEMA_REPORTING === 'true') {
         plugins.push(
             ApolloServerPluginUsageReporting({
                 sendVariableValues: { all: true },

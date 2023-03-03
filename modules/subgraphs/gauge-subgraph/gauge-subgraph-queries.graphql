@@ -60,8 +60,16 @@ query GaugeShares(
     $orderBy: GaugeShare_orderBy
     $orderDirection: OrderDirection
     $skip: Int = 0
+    $where: GaugeShare_filter
 ) {
-    gaugeShares(block: $block, first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+    gaugeShares(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
         id
         balance
         gauge {
