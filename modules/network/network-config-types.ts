@@ -39,6 +39,7 @@ export interface NetworkData {
         addressFormatted: string;
     };
     rpcUrl: string;
+    rpcMaxBlockRange: number;
     beetsPriceProviderRpcUrl: string;
     coingecko: {
         nativeAssetId: string;

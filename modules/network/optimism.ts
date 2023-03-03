@@ -55,6 +55,7 @@ const optimismNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://rpc.ankr.com/optimism',
+    rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '1g2ag2hb',

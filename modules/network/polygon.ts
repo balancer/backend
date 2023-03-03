@@ -51,6 +51,7 @@ const polygonNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://polygon-rpc.com',
+    rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '',

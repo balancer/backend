@@ -52,6 +52,7 @@ const arbitrumNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '',

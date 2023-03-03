@@ -62,6 +62,7 @@ const fantomNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl: 'https://rpc.ftm.tools',
+    rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '1g2ag2hb',

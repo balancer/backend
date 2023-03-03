@@ -78,7 +78,10 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         );
 
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
+        const endBlock =
+            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
+                ? startBlock + networkContext.data.rpcMaxBlockRange
+                : latestBlock;
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             this.reliquaryAddress,
             startBlock,

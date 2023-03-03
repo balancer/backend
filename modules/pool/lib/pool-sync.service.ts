@@ -15,7 +15,10 @@ export class PoolSyncService {
         const latestBlock = await networkContext.provider.getBlockNumber();
 
         const startBlock = lastSyncBlock + 1;
-        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
+        const endBlock =
+            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
+                ? startBlock + networkContext.data.rpcMaxBlockRange
+                : latestBlock;
 
         const contract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
 

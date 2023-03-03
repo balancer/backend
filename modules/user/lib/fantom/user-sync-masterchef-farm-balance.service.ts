@@ -43,7 +43,10 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const farms = await masterchefService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock - startBlock > 2_000 ? startBlock + 2_000 : latestBlock;
+        const endBlock =
+            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
+                ? startBlock + networkContext.data.rpcMaxBlockRange
+                : latestBlock;
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             networkContext.data.masterchef.address,
             startBlock,
