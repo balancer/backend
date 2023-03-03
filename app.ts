@@ -80,6 +80,8 @@ async function startServer() {
     //startWorker(app);
     if (env.PROTOCOL === 'beethoven') {
         loadRestRoutesBeethoven(app);
+    } else if (env.PROTOCOL === 'balancer') {
+        loadTestRoutesBalancer(app);
     }
 
     const httpServer = http.createServer(app);
@@ -132,4 +134,7 @@ if (process.env.WORKER === 'true') {
     startWorker();
 } else {
     startServer();
+}
+function loadTestRoutesBalancer(app: unknown) {
+    throw new Error('Function not implemented.');
 }
