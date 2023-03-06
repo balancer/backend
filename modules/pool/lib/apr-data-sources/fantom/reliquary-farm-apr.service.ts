@@ -25,7 +25,10 @@ export class ReliquaryFarmAprService implements PoolAprService {
 
         for (const pool of pools) {
             const subgraphFarm = filteredFarms.find((farm) => isSameAddress(pool.address, farm.poolTokenAddress));
-            const farm = pool.staking?.reliquary;
+            let farm;
+            for (const stake of pool.staking) {
+                farm = stake.reliquary;
+            }
 
             if (!subgraphFarm || !pool.dynamicData || !farm || subgraphFarm.totalBalance === '0') {
                 continue;

@@ -65,7 +65,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const pools = await prisma.prismaPool.findMany({
             where: {
                 staking: {
-                    type: 'RELIQUARY',
+                    some: {
+                        type: 'RELIQUARY',
+                    },
                 },
                 chain: networkContext.chain,
             },
@@ -116,7 +118,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 }),
                 ...filteredAmountUpdates.map((update) => {
                     const userAddress = update.userAddress.toLowerCase();
-                    const pool = pools.find((pool) => pool.staking?.id === `reliquary-${update.farmId}`);
+                    const pool = pools.find((pool) =>
+                        pool.staking.some((stake) => stake.id === `reliquary-${update.farmId}`),
+                    );
                     const farm = filteredFarms.find((farm) => farm.pid.toString() === update.farmId);
 
                     return prisma.prismaUserStakedBalance.upsert({

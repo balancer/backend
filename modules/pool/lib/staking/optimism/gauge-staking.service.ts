@@ -8,8 +8,7 @@ import { networkContext } from '../../../../network/network-context.service';
 export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeService: GaugeSerivce) {}
     public async syncStakingForPools(): Promise<void> {
-        const gauges = await this.gaugeService.getGauges();
-        const filteredGauges = gauges.filter((gauge) => gauge.isPreferentialGauge);
+        const gauges = await this.gaugeService.getAllGauges();
 
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -19,37 +18,45 @@ export class GaugeStakingService implements PoolStakingService {
         });
         const operations: any[] = [];
 
-        const gaugeStakingEntities: any[] = [];
-        const gaugeStakingRewardOperations: any[] = [];
-
-        for (const gauge of filteredGauges) {
+        for (const gauge of gauges) {
             const pool = pools.find((pool) => pool.id === gauge.poolId);
             if (!pool) {
                 continue;
             }
-            if (!pool.staking) {
-                operations.push(
-                    prisma.prismaPoolStaking.create({
-                        data: {
-                            id: gauge.address,
-                            chain: networkContext.chain,
-                            poolId: pool.id,
-                            type: 'GAUGE',
-                            address: gauge.address,
-                        },
-                    }),
-                );
-            }
-            gaugeStakingEntities.push({
-                id: gauge.address,
-                stakingId: gauge.address,
-                gaugeAddress: gauge.address,
-                chain: networkContext.chain,
-            });
+            operations.push(
+                prisma.prismaPoolStaking.upsert({
+                    where: { id_chain: { id: gauge.address, chain: networkContext.chain } },
+                    create: {
+                        id: gauge.address,
+                        chain: networkContext.chain,
+                        poolId: pool.id,
+                        type: 'GAUGE',
+                        address: gauge.address,
+                    },
+                    update: {},
+                }),
+            );
+
+            operations.push(
+                prisma.prismaPoolStakingGauge.upsert({
+                    where: { id_chain: { id: gauge.address, chain: networkContext.chain } },
+                    create: {
+                        id: gauge.address,
+                        stakingId: gauge.address,
+                        gaugeAddress: gauge.address,
+                        chain: networkContext.chain,
+                        status: gauge.status,
+                    },
+                    update: {
+                        status: gauge.status,
+                    },
+                }),
+            );
+
             for (let rewardToken of gauge.tokens) {
                 const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
                 const id = `${gauge.address}-${tokenAddress}`;
-                gaugeStakingRewardOperations.push(
+                operations.push(
                     prisma.prismaPoolStakingGaugeReward.upsert({
                         create: {
                             id,
@@ -66,8 +73,8 @@ export class GaugeStakingService implements PoolStakingService {
                 );
             }
         }
-        operations.push(prisma.prismaPoolStakingGauge.createMany({ data: gaugeStakingEntities, skipDuplicates: true }));
-        operations.push(...gaugeStakingRewardOperations);
+        // operations.push(prisma.prismaPoolStakingGauge.createMany({ data: gaugeStakingEntities, skipDuplicates: true }));
+        // operations.push(...gaugeStakingRewardOperations);
 
         await prismaBulkExecuteOperations(operations, true, undefined);
     }

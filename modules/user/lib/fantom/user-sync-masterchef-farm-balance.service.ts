@@ -33,8 +33,8 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const pools = await prisma.prismaPool.findMany({
             where: {
                 OR: [
-                    { staking: { type: 'FRESH_BEETS' }, chain: networkContext.chain },
-                    { staking: { type: 'MASTER_CHEF' }, chain: networkContext.chain },
+                    { staking: { some: { type: 'FRESH_BEETS' } }, chain: networkContext.chain },
+                    { staking: { some: { type: 'MASTER_CHEF' } }, chain: networkContext.chain },
                 ],
             },
             include: { staking: true },
@@ -70,7 +70,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                     skipDuplicates: true,
                 }),
                 ...amountUpdates.map((update) => {
-                    const pool = pools.find((pool) => pool.staking?.id === update.farmId);
+                    const pool = pools.find((pool) => pool.staking.some((stake) => stake.id === update.farmId));
                     const farm = farms.find((farm) => farm.id === update.farmId);
 
                     return prisma.prismaUserStakedBalance.upsert({

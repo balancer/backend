@@ -33,8 +33,10 @@ export type LiquidityGauge = {
     totalSupply: string;
     poolId: string;
     tokens: GaugeRewardToken[];
-    isPreferentialGauge: boolean;
+    status: LiquidityGaugeStatus;
 };
+
+export type LiquidityGaugeStatus = 'KILLED' | 'ACTIVE' | 'PREFERRED';
 
 export type GaugeUserShare = {
     gaugeAddress: string;
@@ -46,26 +48,38 @@ export type GaugeUserShare = {
 export class GaugeSerivce {
     constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
 
-    public async getGauges(): Promise<LiquidityGauge[]> {
+    public async getAllGauges(): Promise<LiquidityGauge[]> {
         const subgraphLiquidityGauges = await this.gaugeSubgraphService.getGauges();
 
         const gauges: LiquidityGauge[] = [];
         const tokens: GaugeRewardToken[] = [];
-        for (let gauge of subgraphLiquidityGauges) {
-            gauge.tokens?.forEach((rewardToken) => {
+        for (let liquidityGauge of subgraphLiquidityGauges) {
+            liquidityGauge.tokens?.forEach((rewardToken) => {
                 const isActive = moment.unix(parseInt(rewardToken.periodFinish || '0')).isAfter(moment());
                 tokens.push({
                     ...rewardToken,
                     rewardsPerSecond: isActive ? rewardToken.rate || '0' : '0',
                 });
             });
+
+            const gaugesForSamePool = subgraphLiquidityGauges.filter(
+                (gauge) => gauge.poolId === liquidityGauge.poolId && gauge.id !== liquidityGauge.id,
+            );
+            let gaugeStatus: LiquidityGaugeStatus = 'PREFERRED';
+
+            if (liquidityGauge.isKilled) {
+                gaugeStatus = 'KILLED';
+            } else if (gaugesForSamePool.length > 0 && !liquidityGauge.isPreferentialGauge) {
+                gaugeStatus = 'ACTIVE';
+            }
+
             gauges.push({
-                address: gauge.id,
-                streamerAddress: gauge.streamer || '',
-                totalSupply: gauge.totalSupply,
-                poolId: gauge.poolId || '',
+                address: liquidityGauge.id,
+                streamerAddress: liquidityGauge.streamer || '',
+                totalSupply: liquidityGauge.totalSupply,
+                poolId: liquidityGauge.poolId || '',
                 tokens,
-                isPreferentialGauge: gauge.isPreferentialGauge,
+                status: gaugeStatus,
             });
         }
         return gauges;
@@ -75,22 +89,6 @@ export class GaugeSerivce {
         return await this.gaugeSubgraphService.getAllGaugeAddresses();
     }
 
-    public async getAllGauges(args: GaugeLiquidityGaugesQueryVariables) {
-        const gauges = await this.gaugeSubgraphService.getAllGauges(args);
-
-        return gauges.map(({ id, poolId, totalSupply, shares, tokens }) => ({
-            id,
-            address: id,
-            poolId,
-            totalSupply,
-            shares:
-                shares?.map((share) => ({
-                    userAddress: share.user.id,
-                    amount: share.balance,
-                })) ?? [],
-            tokens: tokens,
-        }));
-    }
     public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
         const userGauges = await this.gaugeSubgraphService.getUserGauges(userAddress);
         return (

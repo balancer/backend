@@ -131,7 +131,11 @@ export async function createWeightedPoolFromDefault(
     }
 
     if (defaultWeightedPool.staking?.create) {
-        defaultWeightedPool.staking.create.id = `${pool.id}-stake`;
+        defaultWeightedPool.staking.create = {
+            id: `${pool.id}-stake`,
+            address: '0x8166994d9ebbe5829ec86bd81258149b87facfd3',
+            type: 'MASTER_CHEF',
+        };
     }
 
     const mergedPoolPartial = _.merge(defaultWeightedPool, pool);

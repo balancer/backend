@@ -24,6 +24,7 @@ query GaugeLiquidityGauges(
         }
         streamer
         isPreferentialGauge
+        isKilled
     }
 }
 
@@ -49,6 +50,7 @@ query GaugeUserGauges($userAddress: ID!) {
                     periodFinish
                 }
                 isPreferentialGauge
+                isKilled
             }
         }
     }
@@ -77,6 +79,7 @@ query GaugeShares(
             poolId
             poolAddress
             isPreferentialGauge
+            isKilled
         }
         user {
             id
