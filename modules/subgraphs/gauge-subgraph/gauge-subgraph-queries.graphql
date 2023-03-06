@@ -6,26 +6,30 @@ query GaugeLiquidityGauges(
     $where: LiquidityGauge_filter
 ) {
     liquidityGauges(skip: $skip, first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
-        id
-        poolId
-        totalSupply
-        tokens {
-            id
-            decimals
-            symbol
-            rate
-            periodFinish
-        }
-        shares {
-            user {
-                id
-            }
-            balance
-        }
-        streamer
-        isPreferentialGauge
-        isKilled
+        ...Gauge
     }
+}
+
+fragment Gauge on LiquidityGauge {
+    id
+    poolId
+    totalSupply
+    tokens {
+        id
+        decimals
+        symbol
+        rate
+        periodFinish
+    }
+    shares {
+        user {
+            id
+        }
+        balance
+    }
+    streamer
+    isPreferentialGauge
+    isKilled
 }
 
 query GaugeLiquidityGaugeAddresses {
@@ -72,18 +76,22 @@ query GaugeShares(
         orderDirection: $orderDirection
         where: $where
     ) {
+        ...GaugeShare
+    }
+}
+
+fragment GaugeShare on GaugeShare {
+    id
+    balance
+    gauge {
         id
-        balance
-        gauge {
-            id
-            poolId
-            poolAddress
-            isPreferentialGauge
-            isKilled
-        }
-        user {
-            id
-        }
+        poolId
+        poolAddress
+        isPreferentialGauge
+        isKilled
+    }
+    user {
+        id
     }
 }
 

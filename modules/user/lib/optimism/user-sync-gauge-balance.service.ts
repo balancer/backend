@@ -19,7 +19,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         }
         const { block } = await gaugeSerivce.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
-        const gaugeShares = await this.loadAllSubgraphUsers();
+        const gaugeShares = await gaugeSerivce.getAllGaugeShares();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
@@ -231,31 +231,5 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 stakingId: staking.address,
             },
         });
-    }
-
-    private async loadAllSubgraphUsers(): Promise<GaugeShare[]> {
-        const pageSize = 1000;
-        const MAX_SKIP = 5000;
-        let shares: GaugeShare[] = [];
-        let hasMore = true;
-        let skip = 0;
-
-        while (hasMore) {
-            const gaugeShares = await gaugeSerivce.getAllGaugeShares({
-                first: pageSize,
-                skip,
-            });
-
-            shares.push(...gaugeShares);
-            hasMore = gaugeShares.length >= pageSize;
-
-            skip += pageSize;
-
-            if (skip > MAX_SKIP) {
-                hasMore = false;
-            }
-        }
-
-        return _.uniqBy(shares, (user) => user.id);
     }
 }

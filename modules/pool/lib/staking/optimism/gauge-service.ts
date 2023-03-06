@@ -49,7 +49,7 @@ export class GaugeSerivce {
     constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
 
     public async getAllGauges(): Promise<LiquidityGauge[]> {
-        const subgraphLiquidityGauges = await this.gaugeSubgraphService.getGauges();
+        const subgraphLiquidityGauges = await this.gaugeSubgraphService.getAllGauges();
 
         const gauges: LiquidityGauge[] = [];
         const tokens: GaugeRewardToken[] = [];
@@ -86,7 +86,8 @@ export class GaugeSerivce {
     }
 
     public async getAllGaugeAddresses(): Promise<string[]> {
-        return await this.gaugeSubgraphService.getAllGaugeAddresses();
+        const allGauges = await this.getAllGauges();
+        return allGauges.map((gauge) => gauge.address);
     }
 
     public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
@@ -105,8 +106,22 @@ export class GaugeSerivce {
         );
     }
 
-    public async getAllGaugeShares(args: GaugeSharesQueryVariables): Promise<GaugeShare[]> {
-        const allShares = await this.gaugeSubgraphService.getAllGaugeShares(args);
+    public async getAllGaugeShares(): Promise<GaugeShare[]> {
+        const allShares = await this.gaugeSubgraphService.getAllGaugeShares();
+        return allShares.map(({ id, balance, gauge, user }) => ({
+            id,
+            balance,
+            gauge: {
+                id: gauge.id,
+                poolAddress: gauge.poolAddress,
+                poolId: gauge.poolId || '',
+            },
+            user,
+        }));
+    }
+
+    public async getGaugeShares(args: GaugeSharesQueryVariables): Promise<GaugeShare[]> {
+        const allShares = await this.gaugeSubgraphService.getGaugeShares(args);
         return allShares.map(({ id, balance, gauge, user }) => ({
             id,
             balance,
