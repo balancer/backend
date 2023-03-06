@@ -157,6 +157,14 @@ const mainnetNetworkData: NetworkData = {
             emissionDataTabName: 'EmissionData',
         },
     },
+    monitoring: {
+        main: {
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
+        },
+        canary: {
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
+        },
+    },
 };
 
 export const mainnetNetworkConfig: NetworkConfig = {

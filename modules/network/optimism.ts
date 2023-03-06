@@ -156,6 +156,14 @@ const optimismNetworkData: NetworkData = {
             emissionDataTabName: 'EmissionData',
         },
     },
+    monitoring: {
+        main: {
+            alarmTopicArn: 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
+        },
+        canary: {
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
+        },
+    },
 };
 
 export const optimismNetworkConfig: NetworkConfig = {

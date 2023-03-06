@@ -6,10 +6,9 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../app/env';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
+import { DeploymentEnv } from '../modules/network/network-config-types';
+import { networkContext } from '../modules/network/network-context.service';
 import { WorkerJob } from './manual-jobs';
-
-const euAlarmTopic = 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_Alarms_Topic';
-const caAlarmTopic = 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic';
 
 export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
     const cronsMetricPublisher = getCronMetricsPublisher(chainId);
@@ -56,8 +55,8 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
             AlarmDescription: `The cron job ${cronJob.name} should run every ${cronJob.interval / 1000} seconds. 
             Trigger alarm if the cron ran less than once in ${periodInSeconds} seconds.`,
             ActionsEnabled: true,
-            AlarmActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
-            OKActions: [env.AWS_REGION === 'eu-central-1' ? euAlarmTopic : caAlarmTopic],
+            AlarmActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
+            OKActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
             MetricName: `${cronJob.name}-${chainId}-done`,
             Statistic: 'Sum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],

@@ -74,11 +74,8 @@ const fantomNetworkData: NetworkData = {
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
         farmId: '22',
-        reliquaryFarmPid: 1,
         poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
-        poolIdV2: '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec',
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
-        poolAddressV2: '0x9e4341acef4147196e99d648c5e43b3fc9d02678',
     },
     bal: {
         address: '',
@@ -157,6 +154,14 @@ const fantomNetworkData: NetworkData = {
             databaseTabName: 'Database v2',
             compositionTabName: 'Pool Composition v2',
             emissionDataTabName: 'EmissionData',
+        },
+    },
+    monitoring: {
+        main: {
+            alarmTopicArn: 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
+        },
+        canary: {
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
         },
     },
 };

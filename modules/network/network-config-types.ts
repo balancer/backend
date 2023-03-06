@@ -68,11 +68,8 @@ export interface NetworkData {
     fbeets?: {
         address: string;
         farmId: string;
-        reliquaryFarmPid: number;
         poolId: string;
-        poolIdV2: string;
         poolAddress: string;
-        poolAddressV2: string;
     };
     bal: {
         address: string;
@@ -128,6 +125,11 @@ export interface NetworkData {
             compositionTabName: string;
             databaseTabName: string;
             emissionDataTabName: string;
+        };
+    };
+    monitoring: {
+        [key in DeploymentEnv]: {
+            alarmTopicArn: string;
         };
     };
 }
