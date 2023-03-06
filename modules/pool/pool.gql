@@ -66,7 +66,7 @@ type GqlPoolMinimal {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     dynamicData: GqlPoolDynamicData!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
     type: GqlPoolMinimalType!
 }
 
@@ -100,7 +100,7 @@ interface GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
 
     dynamicData: GqlPoolDynamicData!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolDynamicData {
@@ -201,7 +201,7 @@ type GqlPoolWeighted implements GqlPoolBase {
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -222,7 +222,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -243,7 +243,7 @@ type GqlPoolStable implements GqlPoolBase {
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -264,7 +264,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -285,7 +285,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
     bptPriceRate: BigDecimal!
 }
 
@@ -310,7 +310,7 @@ type GqlPoolElement implements GqlPoolBase {
     unitSeconds: BigInt!
     principalToken: Bytes!
     baseToken: Bytes!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -335,7 +335,7 @@ type GqlPoolLinear implements GqlPoolBase {
     wrappedIndex: Int!
     upperTarget: BigInt!
     lowerTarget: BigInt!
-    staking: GqlPoolStaking
+    staking: [GqlPoolStaking!]!
     bptPriceRate: BigDecimal!
 }
 
@@ -648,6 +648,12 @@ enum GqlPoolStakingType {
     GAUGE
 }
 
+enum GqlPoolStakingGaugeStatus {
+    KILLED
+    ACTIVE
+    PREFERRED
+}
+
 input GqlPoolJoinExitFilter {
     poolIdIn: [String!]
 }
@@ -750,6 +756,7 @@ type GqlPoolStakingGauge {
     id: ID!
     gaugeAddress: String!
     rewards: [GqlPoolStakingGaugeReward!]!
+    status: GqlPoolStakingGaugeStatus!
 }
 
 type GqlPoolStakingGaugeReward {

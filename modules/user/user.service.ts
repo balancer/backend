@@ -105,14 +105,14 @@ export class UserService {
 
         await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
 
-        if (pool.staking) {
+        for (const stake of pool.staking) {
             await Promise.all(
                 this.stakedSyncServices.map((service) =>
                     service.syncUserBalance({
                         userAddress,
                         poolId: pool.id,
                         poolAddress: pool.address,
-                        staking: pool.staking!,
+                        staking: stake,
                     }),
                 ),
             );

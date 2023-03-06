@@ -6,7 +6,7 @@ import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/optimism/ve-bal-guage-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
 import { gaugeSerivce } from '../pool/lib/staking/optimism/gauge-service';
 import { GaugeStakingService } from '../pool/lib/staking/optimism/gauge-staking.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
@@ -113,7 +113,7 @@ const mainnetNetworkData: NetworkData = {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
     },
-    avgBlockSpeed: 1,
+    avgBlockSpeed: 10,
     sor: {
         main: {
             url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',

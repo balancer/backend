@@ -81,7 +81,7 @@ export class ReliquarySnapshotService {
                         : moment().utc().unix() - 600;
 
                 const pool = await prisma.prismaPool.findFirstOrThrow({
-                    where: { staking: { reliquary: { id: `${farmId}` } }, chain: networkContext.chain },
+                    where: { staking: { some: { reliquary: { id: `${farmId}` } } }, chain: networkContext.chain },
                     include: { tokens: { include: { token: true } } },
                 });
 

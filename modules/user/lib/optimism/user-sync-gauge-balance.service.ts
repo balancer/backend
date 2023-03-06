@@ -170,7 +170,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     skipDuplicates: true,
                 }),
                 ...userGaugeBalanceUpdates.map((update) => {
-                    const pool = pools.find((pool) => pool.staking?.id === update.gaugeAddress);
+                    const pool = pools.find((pool) => pool.staking.some((stake) => stake.id === update.gaugeAddress));
 
                     return prisma.prismaUserStakedBalance.upsert({
                         where: {

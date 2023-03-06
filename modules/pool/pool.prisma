@@ -32,7 +32,7 @@ model PrismaPool {
     allTokens           PrismaPoolExpandedTokens[]
     allTokensNested     PrismaPoolExpandedTokens[] @relation(name: "NestedPoolForAllToken")
     filters             PrismaPoolFilterMap[]
-    staking             PrismaPoolStaking?
+    staking             PrismaPoolStaking[]
 
     userWalletBalances  PrismaUserWalletBalance[]
     userStakedBalances  PrismaUserStakedBalance[]
@@ -329,7 +329,6 @@ model PrismaPoolFilterMap {
 
 model PrismaPoolStaking {
     @@id([id, chain])
-    @@unique([poolId, chain])
 
     id                  String
     poolId              String
@@ -388,7 +387,15 @@ model PrismaPoolStakingGauge {
 
     gaugeAddress        String
     rewards             PrismaPoolStakingGaugeReward[]
+    status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
 }
+
+enum PrismaPoolStakingGaugeStatus {
+    KILLED
+    ACTIVE
+    PREFERRED
+}
+
 
 model PrismaPoolStakingGaugeReward{
     @@id([id, chain])

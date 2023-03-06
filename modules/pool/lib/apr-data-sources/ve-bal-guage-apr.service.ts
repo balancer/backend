@@ -1,12 +1,12 @@
-import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
-import { PoolAprService } from '../../../pool-types';
-import { GaugeSerivce } from '../../staking/optimism/gauge-service';
-import { TokenService } from '../../../../token/token.service';
-import { secondsPerYear } from '../../../../common/time';
+import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
+import { PoolAprService } from '../../pool-types';
+import { GaugeSerivce } from '../staking/optimism/gauge-service';
+import { TokenService } from '../../../token/token.service';
+import { secondsPerYear } from '../../../common/time';
 import { PrismaPoolAprItem } from '@prisma/client';
-import { prisma } from '../../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
-import { networkContext } from '../../../../network/network-context.service';
+import { prisma } from '../../../../prisma/prisma-client';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { networkContext } from '../../../network/network-context.service';
 
 export class GaugeAprService implements PoolAprService {
     constructor(
@@ -21,10 +21,15 @@ export class GaugeAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const operations: any[] = [];
-        const gauges = await this.gaugeService.getGauges();
+        const gauges = await this.gaugeService.getAllGauges();
         const tokenPrices = await this.tokenService.getTokenPrices();
         for (const pool of pools) {
-            const gauge = gauges.find((gage) => gage.address === pool.staking?.gauge?.gaugeAddress);
+            let gauge;
+            for (const stake of pool.staking) {
+                gauge = gauges.find(
+                    (gage) => gage.address === stake.gauge?.gaugeAddress && stake.gauge?.status === 'PREFERRED',
+                );
+            }
             if (!gauge || !pool.dynamicData) {
                 continue;
             }

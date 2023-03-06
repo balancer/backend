@@ -353,8 +353,11 @@ export class UserSnapshotService {
                         return snapshot;
                     }
 
-                    if (pool.staking) {
-                        if (snapshot.farms.includes(pool.staking.id) || snapshot.gauges.includes(pool.staking.id))
+                    if (pool.staking.length > 0) {
+                        if (
+                            pool.staking.some((stake) => snapshot.farms.includes(stake.id)) ||
+                            pool.staking.some((stake) => snapshot.gauges.includes(stake.id))
+                        )
                             return snapshot;
                     }
                 })
@@ -609,7 +612,7 @@ export class UserSnapshotService {
 
     private createUserPoolSnapshotData(
         poolSnapshot: PrismaPoolSnapshot | undefined | null,
-        pool: PrismaPool & { staking: PrismaPoolStaking | null },
+        pool: PrismaPool & { staking: PrismaPoolStaking[] },
         subgraphSnapshot: UserBalanceSnapshotFragment,
         totalBalance: number,
         walletBalance: string,
@@ -653,14 +656,22 @@ export class UserSnapshotService {
     */
     private extractBalancesFromSnapshot(
         userSnapshot: UserBalanceSnapshotFragment,
-        pool: PrismaPool & { staking: PrismaPoolStaking | null },
+        pool: PrismaPool & { staking: PrismaPoolStaking[] },
     ) {
         const walletIdx = userSnapshot.walletTokens.indexOf(pool.address);
         let walletBalance = walletIdx !== -1 ? userSnapshot.walletBalances[walletIdx] : '0';
-        const gaugeIdx = userSnapshot.gauges.indexOf(pool.staking?.id || '');
-        const gaugeBalance = gaugeIdx !== -1 ? userSnapshot.gaugeBalances[gaugeIdx] : '0';
-        const farmIdx = userSnapshot.farms.indexOf(pool.staking?.id || '');
-        let farmBalance = farmIdx !== -1 ? userSnapshot.farmBalances[farmIdx] : '0';
+        let gaugeBalance = '0';
+        let farmBalance = '0';
+        for (const stake of pool.staking) {
+            const gaugeIdx = userSnapshot.gauges.indexOf(stake.id || '');
+            gaugeBalance =
+                gaugeIdx !== -1
+                    ? `${parseFloat(userSnapshot.gaugeBalances[gaugeIdx]) + parseFloat(gaugeBalance)}`
+                    : gaugeBalance;
+            const farmIdx = userSnapshot.farms.indexOf(stake.id || '');
+            farmBalance =
+                farmIdx !== -1 ? `${parseFloat(userSnapshot.farmBalances[farmIdx]) + parseFloat(farmBalance)}` : '0';
+        }
 
         // if the pool is fbeets (fidelio duetto), we need to also add fbeets wallet balance (multiplied by bpt ratio) to the bpt wallet balance
         // we also need to multiply the staked amount by the fbeets->bpt ratio
