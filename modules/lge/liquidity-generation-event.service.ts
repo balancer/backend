@@ -1,8 +1,8 @@
-import { getSanityClient } from '../sanity/sanity';
 import { copperProxyService, CopperProxyService } from '../copper/copper-proxy.service';
 import { getAddress } from 'ethers/lib/utils';
 import { gnosisSafeService, GnosisSafeService } from '../gnosis/gnosis-safe.service';
 import { networkContext } from '../network/network-context.service';
+import { getSanityClient } from '../content/sanity-content.service';
 
 export type LiquidityGenerationCreateInput = {
     id: string;

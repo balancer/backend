@@ -6,9 +6,11 @@ import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
 import { WorkerJob } from '../../worker/manual-jobs';
 import { GqlChain } from '../../schema';
+import { ContentService } from '../content/content-types';
 
 export interface NetworkConfig {
     data: NetworkData;
+    contentService: ContentService;
     poolStakingServices: PoolStakingService[];
     poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];

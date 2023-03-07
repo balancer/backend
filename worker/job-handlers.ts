@@ -166,7 +166,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => poolService.syncSanityPoolData(),
+                    () => poolService.syncPoolContentData(),
                     defaultSamplingRate,
                     res,
                     next,
@@ -176,7 +176,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     job.chainId,
-                    () => tokenService.syncSanityData(),
+                    () => tokenService.syncTokenContentData(),
                     defaultSamplingRate,
                     res,
                     next,

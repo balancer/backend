@@ -1,10 +1,9 @@
 export interface ConfigHomeScreen {
-    chainId: number;
     featuredPoolGroups: HomeScreenFeaturedPoolGroup[];
     newsItems: HomeScreenNewsItem[];
 }
 
-interface HomeScreenFeaturedPoolGroup {
+export interface HomeScreenFeaturedPoolGroup {
     _key: string;
     _type: string;
     icon: string;
@@ -28,11 +27,18 @@ interface HomeScreenFeaturedPoolGroupItemExternalLink {
     image: string;
 }
 
-interface HomeScreenNewsItem {
+export interface HomeScreenNewsItem {
     id: string;
     timestamp: string;
     source: 'twitter' | 'medium' | 'discord';
     url: string;
     text: string;
     image?: string;
+}
+
+export interface ContentService {
+    syncTokenContentData(): Promise<void>;
+    syncPoolContentData(): Promise<void>;
+    getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]>;
+    getNewsItems(): Promise<HomeScreenNewsItem[]>;
 }

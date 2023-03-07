@@ -43,4 +43,4 @@ export class NetworkContextService {
     }
 }
 
-export const networkContext = new NetworkContextService(env.CHAIN_ID);
+export const networkContext = new NetworkContextService(env.DEFAULT_CHAIN_ID);

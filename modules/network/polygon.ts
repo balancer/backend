@@ -15,6 +15,7 @@ import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
+import { GithubContentService } from '../content/github-content.service';
 
 const polygonNetworkData: NetworkData = {
     chain: {
@@ -168,6 +169,7 @@ const polygonNetworkData: NetworkData = {
 
 export const polygonNetworkConfig: NetworkConfig = {
     data: polygonNetworkData,
+    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(polygonNetworkData.rpcUrl),
     poolAprServices: [
         new PhantomStableAprService(polygonNetworkData.balancer.yieldProtocolFeePercentage),

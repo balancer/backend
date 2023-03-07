@@ -16,6 +16,7 @@ import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
+import { GithubContentService } from '../content/github-content.service';
 
 const arbitrumNetworkData: NetworkData = {
     chain: {
@@ -149,6 +150,7 @@ const arbitrumNetworkData: NetworkData = {
 
 export const arbitrumNetworkConfig: NetworkConfig = {
     data: arbitrumNetworkData,
+    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(arbitrumNetworkData.rpcUrl),
     poolAprServices: [
         new WstethAprService(

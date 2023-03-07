@@ -116,7 +116,7 @@ const balancerResolvers: Resolvers = {
         poolSyncSanityPoolData: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.syncSanityPoolData();
+            await poolService.syncPoolContentData();
 
             return 'success';
         },

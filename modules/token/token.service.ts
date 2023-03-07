@@ -1,6 +1,5 @@
 import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../../prisma/prisma-client';
-import { TokenDataLoaderService } from './lib/token-data-loader.service';
 import { TokenPriceService } from './lib/token-price.service';
 import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
@@ -16,15 +15,14 @@ const ALL_TOKENS_CACHE_KEY = `tokens:all`;
 export class TokenService {
     cache: CacheClass<string, any>;
     constructor(
-        private readonly tokenDataLoaderService: TokenDataLoaderService,
         private readonly tokenPriceService: TokenPriceService,
         private readonly coingeckoDataService: CoingeckoDataService,
     ) {
         this.cache = new Cache<string, any>();
     }
 
-    public async syncSanityData() {
-        await this.tokenDataLoaderService.syncSanityTokenData();
+    public async syncTokenContentData() {
+        await networkContext.config.contentService.syncTokenContentData();
     }
 
     public async getToken(address: string): Promise<PrismaToken | null> {
@@ -214,8 +212,4 @@ export class TokenService {
     }
 }
 
-export const tokenService = new TokenService(
-    new TokenDataLoaderService(),
-    new TokenPriceService(),
-    new CoingeckoDataService(coingeckoService),
-);
+export const tokenService = new TokenService(new TokenPriceService(), new CoingeckoDataService(coingeckoService));

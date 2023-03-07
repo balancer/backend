@@ -19,7 +19,6 @@ import {
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { configService } from '../content/content.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../token/token.service';
@@ -28,7 +27,6 @@ import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolCreatorService } from './lib/pool-creator.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService } from './lib/pool-on-chain-data.service';
-import { PoolSanityDataLoaderService } from './lib/pool-sanity-data-loader.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
@@ -37,6 +35,7 @@ import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
+import { ContentService } from '../content/content-types';
 
 const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
 
@@ -47,7 +46,6 @@ export class PoolService {
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
-        private readonly poolSanityDataLoaderService: PoolSanityDataLoaderService,
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
@@ -57,6 +55,10 @@ export class PoolService {
 
     private get poolStakingServices(): PoolStakingService[] {
         return networkContext.config.poolStakingServices;
+    }
+
+    private get contentService(): ContentService {
+        return networkContext.config.contentService;
     }
 
     public async getGqlPool(id: string): Promise<GqlPoolUnion> {
@@ -218,8 +220,8 @@ export class PoolService {
         return this.poolSwapService.syncSwapsForLast48Hours();
     }
 
-    public async syncSanityPoolData() {
-        await this.poolSanityDataLoaderService.syncPoolSanityData();
+    public async syncPoolContentData() {
+        await this.contentService.syncPoolContentData();
     }
 
     public async syncStakingForPools() {
@@ -307,8 +309,7 @@ export const poolService = new PoolService(
     new PoolCreatorService(userService),
     new PoolOnChainDataService(tokenService),
     new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
-    new PoolGqlLoaderService(configService),
-    new PoolSanityDataLoaderService(),
+    new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
     new PoolSyncService(),
     new PoolSwapService(tokenService, balancerSubgraphService),

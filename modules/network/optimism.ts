@@ -19,6 +19,7 @@ import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
+import { SanityContentService } from '../content/sanity-content.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -168,6 +169,7 @@ const optimismNetworkData: NetworkData = {
 
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
     poolAprServices: [
         new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.balancer.yieldProtocolFeePercentage),

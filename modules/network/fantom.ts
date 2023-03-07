@@ -25,6 +25,7 @@ import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swap
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/fantom/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/fantom/user-sync-reliquary-farm-balance.service';
 import { every } from '../../worker/intervals';
+import { SanityContentService } from '../content/sanity-content.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -168,6 +169,7 @@ const fantomNetworkData: NetworkData = {
 
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
         new SpookySwapAprService(tokenService),

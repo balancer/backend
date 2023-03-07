@@ -110,7 +110,7 @@ const resolvers: Resolvers = {
         tokenSyncTokenDefinitions: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenService.syncSanityData();
+            await tokenService.syncTokenContentData();
 
             return 'success';
         },

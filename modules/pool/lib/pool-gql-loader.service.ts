@@ -31,14 +31,11 @@ import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
-import { ContentService } from '../../content/content.service';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 
 export class PoolGqlLoaderService {
-    constructor(private readonly configService: ContentService) {}
-
     public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id, chain: networkContext.chain } },
@@ -90,7 +87,7 @@ export class PoolGqlLoaderService {
     }
 
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const { featuredPoolGroups } = await this.configService.getHomeScreenConfig();
+        const featuredPoolGroups = await networkContext.config.contentService.getFeaturedPoolGroups();
         const poolIds = featuredPoolGroups
             .map((group) =>
                 group.items

@@ -135,12 +135,12 @@ export function scheduleLocalWorkerTasks(chainId: string) {
 
     //every 3 minutes
     scheduleJob('*/3 * * * *', 'poolSyncSanityPoolData', FIVE_MINUTES_IN_MS, async () => {
-        await poolService.syncSanityPoolData();
+        await poolService.syncPoolContentData();
     });
 
     //every 5 minutes
     scheduleJob('*/5 * * * *', 'syncTokensFromPoolTokens', TEN_MINUTES_IN_MS, async () => {
-        await tokenService.syncSanityData();
+        await tokenService.syncTokenContentData();
     });
 
     //every 5 minutes
