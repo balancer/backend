@@ -7,8 +7,7 @@ import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-st
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
-import { gaugeSerivce } from '../pool/lib/staking/optimism/gauge-service';
-import { GaugeStakingService } from '../pool/lib/staking/optimism/gauge-staking.service';
+import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
@@ -17,6 +16,7 @@ import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swap
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
+import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 const arbitrumNetworkData: NetworkData = {
     chain: {
@@ -167,12 +167,12 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(arbitrumNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSerivce, tokenService, [
+        new GaugeAprService(gaugeSubgraphService, tokenService, [
             arbitrumNetworkData.beets.address,
             arbitrumNetworkData.bal.address,
         ]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSerivce)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(arbitrumNetworkData.weth.address, coingeckoService),
         new BptPriceHandlerService(),

@@ -1,16 +1,16 @@
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
-import { GaugeSerivce } from '../staking/optimism/gauge-service';
 import { TokenService } from '../../../token/token.service';
 import { secondsPerYear } from '../../../common/time';
 import { PrismaPoolAprItem } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { networkContext } from '../../../network/network-context.service';
+import { GaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class GaugeAprService implements PoolAprService {
     constructor(
-        private readonly gaugeService: GaugeSerivce,
+        private readonly gaugeSubgraphService: GaugeSubgraphService,
         private readonly tokenService: TokenService,
         private readonly primaryTokens: string[],
     ) {}
@@ -21,13 +21,14 @@ export class GaugeAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const operations: any[] = [];
-        const gauges = await this.gaugeService.getAllGauges();
+        const gauges = await this.gaugeSubgraphService.getAllGaugesWithStatus();
         const tokenPrices = await this.tokenService.getTokenPrices();
         for (const pool of pools) {
             let gauge;
             for (const stake of pool.staking) {
                 gauge = gauges.find(
-                    (gage) => gage.address === stake.gauge?.gaugeAddress && stake.gauge?.status === 'PREFERRED',
+                    (subgraphGauge) =>
+                        subgraphGauge.address === stake.gauge?.gaugeAddress && stake.gauge?.status === 'PREFERRED',
                 );
             }
             if (!gauge || !pool.dynamicData) {

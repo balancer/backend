@@ -1,17 +1,36 @@
 import {
-    Gauge,
     GaugeFragment,
     GaugeLiquidityGaugesQueryVariables,
     GaugeShareFragment,
     GaugeSharesQueryVariables,
     GaugeShare_OrderBy,
     getSdk,
-    LiquidityGauge,
     LiquidityGauge_OrderBy,
     OrderDirection,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
+import moment from 'moment';
+
+export type GaugeRewardToken = { id: string; decimals: number; symbol: string; rewardsPerSecond: string };
+
+export type LiquidityGaugeWithStatus = {
+    address: string;
+    streamerAddress: string;
+    totalSupply: string;
+    poolId: string;
+    tokens: GaugeRewardToken[];
+    status: LiquidityGaugeStatus;
+};
+
+export type LiquidityGaugeStatus = 'KILLED' | 'ACTIVE' | 'PREFERRED';
+
+export type GaugeUserShare = {
+    gaugeAddress: string;
+    poolId: string;
+    amount: string;
+    tokens: GaugeRewardToken[];
+};
 
 export class GaugeSubgraphService {
     constructor() {}
@@ -19,11 +38,6 @@ export class GaugeSubgraphService {
     public async getGauges(args: GaugeLiquidityGaugesQueryVariables) {
         const gaugesQuery = await this.sdk.GaugeLiquidityGauges(args);
         return gaugesQuery.liquidityGauges;
-    }
-
-    public async getAllGaugeAddresses(): Promise<string[]> {
-        const addressesQuery = await this.sdk.GaugeLiquidityGaugeAddresses();
-        return addressesQuery.liquidityGauges.map((gauge) => gauge.id);
     }
 
     public async getUserGauges(userAddress: string) {
@@ -64,6 +78,64 @@ export class GaugeSubgraphService {
             id = gauges.gaugeShares[gauges.gaugeShares.length - 1].id;
         }
         return allGaugeShares;
+    }
+
+    public async getAllGaugesWithStatus(): Promise<LiquidityGaugeWithStatus[]> {
+        const subgraphLiquidityGauges = await this.getAllGauges();
+
+        const gauges: LiquidityGaugeWithStatus[] = [];
+        const tokens: GaugeRewardToken[] = [];
+        for (let liquidityGauge of subgraphLiquidityGauges) {
+            liquidityGauge.tokens?.forEach((rewardToken) => {
+                const isActive = moment.unix(parseInt(rewardToken.periodFinish || '0')).isAfter(moment());
+                tokens.push({
+                    ...rewardToken,
+                    rewardsPerSecond: isActive ? rewardToken.rate || '0' : '0',
+                });
+            });
+
+            const gaugesForSamePool = subgraphLiquidityGauges.filter(
+                (gauge) => gauge.poolId === liquidityGauge.poolId && gauge.id !== liquidityGauge.id,
+            );
+            let gaugeStatus: LiquidityGaugeStatus = 'PREFERRED';
+
+            if (liquidityGauge.isKilled) {
+                gaugeStatus = 'KILLED';
+            } else if (gaugesForSamePool.length > 0 && !liquidityGauge.isPreferentialGauge) {
+                gaugeStatus = 'ACTIVE';
+            }
+
+            gauges.push({
+                address: liquidityGauge.id,
+                streamerAddress: liquidityGauge.streamer || '',
+                totalSupply: liquidityGauge.totalSupply,
+                poolId: liquidityGauge.poolId || '',
+                tokens,
+                status: gaugeStatus,
+            });
+        }
+        return gauges;
+    }
+
+    public async getAllGaugeAddresses(): Promise<string[]> {
+        const allGauges = await this.getAllGauges();
+        return allGauges.map((gauge) => gauge.id);
+    }
+
+    public async getAllUserShares(userAddress: string): Promise<GaugeUserShare[]> {
+        const userGauges = await this.getUserGauges(userAddress);
+        return (
+            userGauges?.gaugeShares?.map((share) => ({
+                gaugeAddress: share.gauge.id,
+                poolId: share.gauge.poolId || '',
+                amount: share.balance,
+                tokens:
+                    share.gauge.tokens?.map((token) => ({
+                        ...token,
+                        rewardsPerSecond: token.rate || '',
+                    })) || [],
+            })) ?? []
+        );
     }
 
     public async getAllGauges(): Promise<GaugeFragment[]> {

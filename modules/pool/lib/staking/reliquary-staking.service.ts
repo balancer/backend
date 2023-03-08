@@ -1,11 +1,11 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { PrismaPoolStakingType } from '@prisma/client';
 import _ from 'lodash';
-import { prisma } from '../../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
-import { ReliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
-import { PoolStakingService } from '../../../pool-types';
-import { networkContext } from '../../../../network/network-context.service';
+import { prisma } from '../../../../prisma/prisma-client';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
+import { PoolStakingService } from '../../pool-types';
+import { networkContext } from '../../../network/network-context.service';
 
 export class ReliquaryStakingService implements PoolStakingService {
     constructor(

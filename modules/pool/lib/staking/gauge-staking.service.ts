@@ -1,14 +1,14 @@
-import { PoolStakingService } from '../../../pool-types';
-import { GaugeSerivce } from './gauge-service';
-import { prisma } from '../../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
+import { PoolStakingService } from '../../pool-types';
+import { prisma } from '../../../../prisma/prisma-client';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { PrismaPoolStakingType } from '@prisma/client';
-import { networkContext } from '../../../../network/network-context.service';
+import { networkContext } from '../../../network/network-context.service';
+import { GaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class GaugeStakingService implements PoolStakingService {
-    constructor(private readonly gaugeService: GaugeSerivce) {}
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
     public async syncStakingForPools(): Promise<void> {
-        const gauges = await this.gaugeService.getAllGauges();
+        const gauges = await this.gaugeSubgraphService.getAllGaugesWithStatus();
 
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },

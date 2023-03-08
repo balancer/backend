@@ -9,8 +9,7 @@ import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-st
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
-import { gaugeSerivce } from '../pool/lib/staking/optimism/gauge-service';
-import { GaugeStakingService } from '../pool/lib/staking/optimism/gauge-staking.service';
+import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
@@ -20,6 +19,7 @@ import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swap
 import { UserSyncGaugeBalanceService } from '../user/lib/optimism/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
+import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -188,12 +188,12 @@ export const optimismNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSerivce, tokenService, [
+        new GaugeAprService(gaugeSubgraphService, tokenService, [
             optimismNetworkData.beets.address,
             optimismNetworkData.bal.address,
         ]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSerivce)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
         new CoingeckoPriceHandlerService(optimismNetworkData.weth.address, coingeckoService),

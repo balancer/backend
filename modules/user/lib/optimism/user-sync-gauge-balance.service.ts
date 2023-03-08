@@ -3,7 +3,6 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { getContractAt } from '../../../web3/contract';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { gaugeSerivce, GaugeShare } from '../../../pool/lib/staking/optimism/gauge-service';
 import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
 import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
 import { Multicaller } from '../../../web3/multicaller';
@@ -11,23 +10,31 @@ import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../../network/network-context.service';
+import { gaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (!stakingTypes.includes('GAUGE')) {
             return;
         }
-        const { block } = await gaugeSerivce.getMetadata();
+        const { block } = await gaugeSubgraphService.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
-        const gaugeShares = await gaugeSerivce.getAllGaugeShares();
+        const gaugeShares = await gaugeSubgraphService.getAllGaugeShares();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
             where: { chain: networkContext.chain },
         });
+
+        const filteredGaugeShares = gaugeShares.filter((share) => {
+            const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+            if (pool) {
+                return true;
+            }
+        });
         console.log('initStakedBalances: finished loading pools...');
-        const userAddresses = _.uniq(gaugeShares.map((share) => share.user.id));
+        const userAddresses = _.uniq(filteredGaugeShares.map((share) => share.user.id));
 
         console.log('initStakedBalances: performing db operations...');
 
@@ -39,7 +46,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 }),
                 prisma.prismaUserStakedBalance.deleteMany({ where: { chain: networkContext.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
-                    data: gaugeShares.map((share) => {
+                    data: filteredGaugeShares.map((share) => {
                         const pool = pools.find((pool) => pool.id === share.gauge.poolId);
 
                         return {
@@ -81,7 +88,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             where: { chain: networkContext.chain },
         });
         const latestBlock = await networkContext.provider.getBlockNumber();
-        const gaugeAddresses = await gaugeSerivce.getAllGaugeAddresses();
+        const gaugeAddresses = await gaugeSubgraphService.getAllGaugeAddresses();
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
