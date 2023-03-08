@@ -268,25 +268,29 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const contract: Reliquary = getContractAt(reliquaryAddress, ReliquaryAbi);
 
         const events = await contract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
-        const balanceChangedEvents = events.filter((event) =>
-            [
-                //deposit topic
-                '0x9a2a1e97e6d641080089aafc36750cfdef4c79f8b3ace6fa4c384fa2f0476959',
-                //withdraw topic
-                '0x191a58d19a6a9b76e2e91bdc04ecbe7553dc094a5ad7af78175a0d9f884e264a',
-                //emergency withdraw topic
-                '0x6aaee64d11e8979fa392cd6388058c820f43709933f6a297e6e1005dddca62d6',
-            ].includes(event.event!),
+        const balanceChangedEvents = events.filter(
+            (event) =>
+                event.topics.length > 0 &&
+                [
+                    //deposit topic
+                    '0x9a2a1e97e6d641080089aafc36750cfdef4c79f8b3ace6fa4c384fa2f0476959',
+                    //withdraw topic
+                    '0x191a58d19a6a9b76e2e91bdc04ecbe7553dc094a5ad7af78175a0d9f884e264a',
+                    //emergency withdraw topic
+                    '0x6aaee64d11e8979fa392cd6388058c820f43709933f6a297e6e1005dddca62d6',
+                ].includes(event.topics[0]),
         ) as BalanceChangedEvent[];
-        const relicManagementEvents = events.filter((event) =>
-            [
-                //split topic
-                '0xcf0974dfd867840133a0d4b02f1672f24017796fb8892d1e0d587692e4da90ab',
-                //shift topic
-                '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
-                //merge topic
-                '0x285dbc28e663286c77e3cd79d1cf1525744b4dfe015f41295fe5ae2858880bdf',
-            ].includes(event.event!),
+        const relicManagementEvents = events.filter(
+            (event) =>
+                event.topics.length > 0 &&
+                [
+                    //split topic
+                    '0xcf0974dfd867840133a0d4b02f1672f24017796fb8892d1e0d587692e4da90ab',
+                    //shift topic
+                    '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
+                    //merge topic
+                    '0x285dbc28e663286c77e3cd79d1cf1525744b4dfe015f41295fe5ae2858880bdf',
+                ].includes(event.event!),
         ) as RelicManagementEvent[];
         const transferEvents = events.filter((event) => event.event === 'Transfer') as TransferEvent[];
 
@@ -296,8 +300,8 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         let affectedUsers = transferEvents.flatMap((event) => [event.args.from, event.args.to]);
         // for the other events, we need to find the owners of the affected relicIds
         const affectedRelicIds = [
-            ...balanceChangedEvents.map((event) => event.args.relicId),
-            ...relicManagementEvents.flatMap((event) => [event.args.fromId, event.args.toId]),
+            ...balanceChangedEvents.map((event) => parseInt(event.topics[3], 16)),
+            ...relicManagementEvents.flatMap((event) => [parseInt(event.topics[1], 16), parseInt(event.topics[2], 16)]),
         ];
 
         affectedRelicIds.forEach((relicId, index) => {
