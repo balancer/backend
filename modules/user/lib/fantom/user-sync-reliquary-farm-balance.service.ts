@@ -269,10 +269,24 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
         const events = await contract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
         const balanceChangedEvents = events.filter((event) =>
-            ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),
+            [
+                //deposit topic
+                '0x9a2a1e97e6d641080089aafc36750cfdef4c79f8b3ace6fa4c384fa2f0476959',
+                //withdraw topic
+                '0x191a58d19a6a9b76e2e91bdc04ecbe7553dc094a5ad7af78175a0d9f884e264a',
+                //emergency withdraw topic
+                '0x6aaee64d11e8979fa392cd6388058c820f43709933f6a297e6e1005dddca62d6',
+            ].includes(event.event!),
         ) as BalanceChangedEvent[];
         const relicManagementEvents = events.filter((event) =>
-            ['Split', 'Shift'].includes(event.event!),
+            [
+                //split topic
+                '0xcf0974dfd867840133a0d4b02f1672f24017796fb8892d1e0d587692e4da90ab',
+                //shift topic
+                '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
+                //merge topic
+                '0x285dbc28e663286c77e3cd79d1cf1525744b4dfe015f41295fe5ae2858880bdf',
+            ].includes(event.event!),
         ) as RelicManagementEvent[];
         const transferEvents = events.filter((event) => event.event === 'Transfer') as TransferEvent[];
 
