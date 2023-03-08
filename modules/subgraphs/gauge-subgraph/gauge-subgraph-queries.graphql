@@ -38,8 +38,8 @@ query GaugeLiquidityGaugeAddresses {
     }
 }
 
-query GaugeUserGauges($userAddress: ID!, $first: Int = 1000) {
-    user(id: $userAddress, first: $first) {
+query GaugeUserGauges($userAddress: ID!) {
+    user(id: $userAddress) {
         id
         gaugeShares {
             balance
