@@ -20,6 +20,11 @@ export class PoolSyncService {
                 ? startBlock + networkContext.data.rpcMaxBlockRange
                 : latestBlock;
 
+        // no new blocks have been minted, needed for slow networks
+        if (startBlock > endBlock) {
+            return;
+        }
+
         const contract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
 
         const events = await contract.queryFilter(

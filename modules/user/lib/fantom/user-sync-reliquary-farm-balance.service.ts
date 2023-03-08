@@ -90,6 +90,11 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             endBlock,
         );
 
+        // no new blocks have been minted, needed for slow networks
+        if (startBlock > endBlock) {
+            return;
+        }
+
         const filteredAmountUpdates = amountUpdates.filter(
             (update) => !networkContext.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()),
         );

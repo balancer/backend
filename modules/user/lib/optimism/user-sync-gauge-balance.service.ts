@@ -97,6 +97,11 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 ? startBlock + networkContext.data.rpcMaxBlockRange
                 : latestBlock;
 
+        // no new blocks have been minted, needed for slow networks
+        if (startBlock > endBlock) {
+            return;
+        }
+
         const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, RewardsOnlyGaugeAbi);
 
         // the multicall response will be merged into this object

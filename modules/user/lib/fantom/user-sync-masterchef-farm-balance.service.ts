@@ -47,6 +47,12 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
                 ? startBlock + networkContext.data.rpcMaxBlockRange
                 : latestBlock;
+
+        // no new blocks have been minted, needed for slow networks
+        if (startBlock > endBlock) {
+            return;
+        }
+
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             networkContext.data.masterchef.address,
             startBlock,

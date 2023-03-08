@@ -98,6 +98,11 @@ export class UserSyncWalletBalanceService {
         const fromBlock = syncStatus.blockNumber + 1;
         const toBlock = latestBlock - fromBlock > 500 ? fromBlock + 500 : latestBlock;
 
+        // no new blocks have been minted, needed for slow networks
+        if (fromBlock >= toBlock) {
+            return;
+        }
+
         //fetch all transfer events for the block range
         const events = await networkContext.provider.getLogs({
             //ERC20 Transfer topic
