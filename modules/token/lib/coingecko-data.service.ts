@@ -29,8 +29,8 @@ export class CoingeckoDataService {
             for (const item of response) {
                 const tokensToUpdate = tokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
                 for (const tokenToUpdate of tokensToUpdate) {
-                    // why this if? old tokens don't update?
-                    if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes'))) {
+                    // only update if we have a new price and if we have a price at all
+                    if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes')) && item.current_price) {
                         const data = {
                             price: item.current_price,
                             ath: item.ath ?? undefined,
@@ -64,51 +64,51 @@ export class CoingeckoDataService {
                                 },
                             }),
                         );
-                    }
 
-                    // update current price and price data, for every chain
-                    operations.push(
-                        prisma.prismaTokenPrice.upsert({
-                            where: {
-                                tokenAddress_timestamp_chain: {
+                        // update current price and price data, for every chain
+                        operations.push(
+                            prisma.prismaTokenPrice.upsert({
+                                where: {
+                                    tokenAddress_timestamp_chain: {
+                                        tokenAddress: tokenToUpdate.address,
+                                        timestamp,
+                                        chain: tokenToUpdate.chain,
+                                    },
+                                },
+                                update: { price: item.current_price, close: item.current_price },
+                                create: {
                                     tokenAddress: tokenToUpdate.address,
+                                    chain: tokenToUpdate.chain,
                                     timestamp,
-                                    chain: tokenToUpdate.chain,
+                                    price: item.current_price,
+                                    high: item.current_price,
+                                    low: item.current_price,
+                                    open: item.current_price,
+                                    close: item.current_price,
+                                    coingecko: true,
                                 },
-                            },
-                            update: { price: item.current_price, close: item.current_price },
-                            create: {
-                                tokenAddress: tokenToUpdate.address,
-                                chain: tokenToUpdate.chain,
-                                timestamp,
-                                price: item.current_price,
-                                high: item.current_price,
-                                low: item.current_price,
-                                open: item.current_price,
-                                close: item.current_price,
-                                coingecko: true,
-                            },
-                        }),
-                    );
+                            }),
+                        );
 
-                    operations.push(
-                        prisma.prismaTokenCurrentPrice.upsert({
-                            where: {
-                                tokenAddress_chain: {
+                        operations.push(
+                            prisma.prismaTokenCurrentPrice.upsert({
+                                where: {
+                                    tokenAddress_chain: {
+                                        tokenAddress: tokenToUpdate.address,
+                                        chain: tokenToUpdate.chain,
+                                    },
+                                },
+                                update: { price: item.current_price },
+                                create: {
                                     tokenAddress: tokenToUpdate.address,
                                     chain: tokenToUpdate.chain,
+                                    timestamp,
+                                    price: item.current_price,
+                                    coingecko: true,
                                 },
-                            },
-                            update: { price: item.current_price },
-                            create: {
-                                tokenAddress: tokenToUpdate.address,
-                                chain: tokenToUpdate.chain,
-                                timestamp,
-                                price: item.current_price,
-                                coingecko: true,
-                            },
-                        }),
-                    );
+                            }),
+                        );
+                    }
                 }
             }
 
