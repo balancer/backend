@@ -6,6 +6,6 @@ services:
         ports:
             - '5431:5432'
         environment:
-            POSTGRES_USER: beetx
+            POSTGRES_USER: backend
             POSTGRES_PASSWORD: let-me-in
             POSTGRES_DB: beetx
