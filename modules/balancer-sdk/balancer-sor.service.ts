@@ -39,6 +39,9 @@ export class BalancerSorService {
         tokenIn = replaceEthWithZeroAddress(tokenIn);
         tokenOut = replaceEthWithZeroAddress(tokenOut);
 
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
+
         const tokenDecimals = this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenIn : tokenOut, tokens);
 
         let swapAmountScaled = BigNumber.from(`0`);
