@@ -201,7 +201,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.farmId),
-        new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
+        // new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     workerJobs: [
         {
