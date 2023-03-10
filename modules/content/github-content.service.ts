@@ -85,7 +85,7 @@ const TOKEN_LIST_MAP: TokenListMapByNetwork = {
 export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
         const { data: githubTokenList } = await axios.get<WhitelistedTokenList>(
-            TOKEN_LIST_MAP[networkContext.chainId].Balancer.Default,
+            TOKEN_LIST_MAP[networkContext.chainId].Balancer.Vetted,
         );
 
         for (const githubToken of githubTokenList.tokens) {
