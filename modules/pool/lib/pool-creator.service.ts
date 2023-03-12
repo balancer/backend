@@ -188,7 +188,7 @@ export class PoolCreatorService {
                 factory: pool.factory,
                 tokens: {
                     createMany: {
-                        data: poolTokens.map((token, index) => {
+                        data: poolTokens.map((token) => {
                             const nestedPool = allPools.find((nestedPool) => {
                                 const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
 
@@ -202,7 +202,7 @@ export class PoolCreatorService {
                                 id: token.id,
                                 address: token.address,
                                 nestedPoolId: nestedPool?.id,
-                                index,
+                                index: token.index || pool.tokensList.findIndex((address) => address === token.address),
                             };
                         }),
                     },
@@ -319,6 +319,27 @@ export class PoolCreatorService {
                 nestedPoolId: token.nestedPoolId || null,
             })),
         });
+    }
+
+    public async reloadPoolTokenIndexes(poolId: string): Promise<void> {
+        const { pool: subgraphPool } = await balancerSubgraphService.getPool({ id: poolId });
+
+        if (!subgraphPool) {
+            throw new Error('Pool with id does not exist');
+        }
+
+        const poolTokens = subgraphPool.tokens || [];
+
+        for (let i = 0; i < poolTokens.length; i++) {
+            const token = poolTokens[i];
+
+            await prisma.prismaPoolToken.update({
+                where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                data: {
+                    index: token.index || subgraphPool.tokensList.findIndex((address) => address === token.address),
+                },
+            });
+        }
     }
 
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
