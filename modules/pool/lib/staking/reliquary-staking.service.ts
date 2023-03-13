@@ -1,6 +1,6 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { PrismaPoolStakingType } from '@prisma/client';
-import _ from 'lodash';
+import _, { create } from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
@@ -39,6 +39,7 @@ export class ReliquaryStakingService implements PoolStakingService {
             }
 
             const farmId = `${farm.pid}`;
+            const stakingId = `reliquary-${farm.pid}`;
             const farmAllocationPoints = farm.allocPoint;
             const reliquaryTotalAllocationPoints = reliquary.totalAllocPoint;
 
@@ -47,19 +48,19 @@ export class ReliquaryStakingService implements PoolStakingService {
                 (farmAllocationPoints / reliquaryTotalAllocationPoints)
             ).toString();
 
-            if (!pool.staking) {
-                operations.push(
-                    prisma.prismaPoolStaking.create({
-                        data: {
-                            id: `reliquary-${farm.pid}`,
-                            chain: networkContext.chain,
-                            poolId: pool.id,
-                            type: 'RELIQUARY',
-                            address: this.reliquaryAddress,
-                        },
-                    }),
-                );
-            }
+            operations.push(
+                prisma.prismaPoolStaking.upsert({
+                    where: { id_chain: { id: stakingId, chain: networkContext.chain } },
+                    create: {
+                        id: stakingId,
+                        chain: networkContext.chain,
+                        poolId: pool.id,
+                        type: 'RELIQUARY',
+                        address: this.reliquaryAddress,
+                    },
+                    update: {},
+                }),
+            );
 
             let totalBalance = `0`;
             let totalWeightedBalance = `0`;
@@ -97,7 +98,7 @@ export class ReliquaryStakingService implements PoolStakingService {
                     create: {
                         id: farmId,
                         chain: networkContext.chain,
-                        stakingId: `reliquary-${farmId}`,
+                        stakingId: stakingId,
                         name: farm.name,
                         beetsPerSecond: beetsPerSecond,
                         totalBalance: totalBalance.toString(),

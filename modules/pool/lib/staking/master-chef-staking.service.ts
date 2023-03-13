@@ -44,19 +44,19 @@ export class MasterChefStakingService implements PoolStakingService {
                 18,
             );
 
-            if (!pool.staking) {
-                operations.push(
-                    prisma.prismaPoolStaking.create({
-                        data: {
-                            id: farm.id,
-                            chain: networkContext.chain,
-                            poolId: pool.id,
-                            type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                            address: isFbeetsFarm ? networkContext.data.fbeets!.address : farm.masterChef.id,
-                        },
-                    }),
-                );
-            }
+            operations.push(
+                prisma.prismaPoolStaking.upsert({
+                    where: { id_chain: { id: farmId, chain: networkContext.chain } },
+                    create: {
+                        id: farmId,
+                        chain: networkContext.chain,
+                        poolId: pool.id,
+                        type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
+                        address: isFbeetsFarm ? networkContext.data.fbeets!.address : farm.masterChef.id,
+                    },
+                    update: {},
+                }),
+            );
 
             operations.push(
                 prisma.prismaPoolStakingMasterChefFarm.upsert({
