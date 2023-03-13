@@ -184,11 +184,11 @@ export const fantomNetworkConfig: NetworkConfig = {
         new BoostedPoolAprService(fantomNetworkData.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
         new MasterchefFarmAprService(),
-        // new ReliquaryFarmAprService(),
+        new ReliquaryFarmAprService(),
     ],
     poolStakingServices: [
         new MasterChefStakingService(masterchefService),
-        // new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
+        new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
     ],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
@@ -201,7 +201,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.farmId),
-        // new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
+        new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     workerJobs: [
         {
@@ -280,14 +280,14 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-user-snapshots',
             interval: every(1, 'hours'),
         },
-        // {
-        //     name: 'sync-latest-reliquary-snapshots',
-        //     interval: every(1, 'hours'),
-        // },
-        // {
-        //     name: 'sync-latest-relic-snapshots',
-        //     interval: every(1, 'hours'),
-        // },
+        {
+            name: 'sync-latest-reliquary-snapshots',
+            interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-latest-relic-snapshots',
+            interval: every(1, 'hours'),
+        },
         {
             name: 'purge-old-tokenprices',
             interval: every(1, 'days'),
