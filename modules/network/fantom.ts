@@ -296,10 +296,5 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
         },
-        // The following are multichain jobs and should only run once for all chains.
-        {
-            name: 'sync-global-coingecko-prices',
-            interval: every(2, 'minutes'),
-        },
     ],
 };
