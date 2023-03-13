@@ -128,6 +128,7 @@ export class ReliquaryStakingService implements PoolStakingService {
             await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaUserRelicSnapshot.deleteMany({});
 
             await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStakingReliquaryFarm.deleteMany({ where: { chain: networkContext.chain } });
