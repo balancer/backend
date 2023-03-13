@@ -122,6 +122,12 @@ export class ReliquaryStakingService implements PoolStakingService {
             await prisma.prismaUserStakedBalance.deleteMany({
                 where: { staking: { type: 'RELIQUARY' }, chain: networkContext.chain },
             });
+            // need to remove snapshots as well as they have a FK in reliquary staking
+            await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+            await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+
             await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStakingReliquaryFarm.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStaking.deleteMany({ where: { type: 'RELIQUARY', chain: networkContext.chain } });
