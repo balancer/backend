@@ -194,6 +194,7 @@ fragment BalancerPoolToken on PoolToken {
     balance
     weight
     priceRate
+    index
 }
 
 query BalancerPools(

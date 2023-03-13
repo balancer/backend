@@ -233,6 +233,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolReloadPoolTokenIndexes: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.reloadPoolTokenIndexes(poolId);
+
+            return 'success';
+        },
     },
 };
 
