@@ -168,6 +168,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const { block } = await reliquarySubgraphService.getMetadata();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
         const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
+        const filteredRelics = relics.filter(
+            (relic) => !networkContext.data.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
+        );
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
         console.log('initStakedReliquaryBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
@@ -176,10 +179,10 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         });
         console.log('initStakedReliquaryBalances: finished loading pools...');
         // we have to group all relics for the same pool
-        const userRelicsByPoolId = _.groupBy(relics, (relic) => relic.userAddress + relic.pid);
+        const userRelicsByPoolId = _.groupBy(filteredRelics, (relic) => relic.userAddress + relic.pid);
 
         // we need to make sure all users exist
-        const userAddresses = _.uniq(relics.map((relic) => relic.userAddress.toLowerCase()));
+        const userAddresses = _.uniq(filteredRelics.map((relic) => relic.userAddress.toLowerCase()));
 
         console.log('initStakedReliquaryBalances: performing db operations...');
 
