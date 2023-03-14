@@ -93,7 +93,7 @@ const fantomNetworkData: NetworkData = {
             '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
             '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
         ],
-        poolsInRecoveryMode: [''],
+        poolsInRecoveryMode: ['0x9e4341acef4147196e99d648c5e43b3fc9d02678'],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
     },
