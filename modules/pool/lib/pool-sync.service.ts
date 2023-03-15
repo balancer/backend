@@ -70,24 +70,24 @@ export class PoolSyncService {
             },
         });
 
-        await prismaBulkExecuteOperations(
-            [
-                prisma.prismaPoolCategory.deleteMany({
-                    where: {
-                        category: 'INCENTIVIZED',
-                        chain: networkContext.chain,
-                    },
-                }),
-                prisma.prismaPoolCategory.createMany({
-                    data: poolsWithGauges.map((pool) => ({
-                        id: `${pool.id}-INCENTIVIZED`,
-                        poolId: pool.id,
-                        category: 'INCENTIVIZED' as const,
-                        chain: networkContext.chain,
-                    })),
-                }),
-            ],
-            true,
-        );
+        await prisma.prismaPoolCategory.createMany({
+            data: poolsWithGauges.map((pool) => ({
+                id: `${networkContext.chain}-${pool.id}-INCENTIVIZED`,
+                poolId: pool.id,
+                category: 'INCENTIVIZED' as const,
+                chain: networkContext.chain,
+            })),
+            skipDuplicates: true,
+        });
+
+        await prisma.prismaPoolCategory.deleteMany({
+            where: {
+                category: 'INCENTIVIZED',
+                chain: networkContext.chain,
+                poolId: {
+                    notIn: poolsWithGauges.map((pool) => pool.id),
+                },
+            },
+        });
     }
 }
