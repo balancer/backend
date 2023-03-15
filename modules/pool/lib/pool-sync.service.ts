@@ -70,8 +70,6 @@ export class PoolSyncService {
             },
         });
 
-        const poolIds = poolsWithGauges.map((pool) => pool.id);
-
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaPoolCategory.deleteMany({
@@ -91,7 +89,5 @@ export class PoolSyncService {
             ],
             true,
         );
-
-        await prisma.prismaPoolCategory.updateMany({ where: { poolId: { in: poolIds } }, data: {} });
     }
 }
