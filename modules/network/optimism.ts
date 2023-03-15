@@ -62,6 +62,7 @@ const optimismNetworkData: NetworkData = {
         projectId: '1g2ag2hb',
         dataset: 'production',
     },
+    protocolToken: 'beets',
     beets: {
         address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
     },

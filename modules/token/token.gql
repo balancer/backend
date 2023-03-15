@@ -13,6 +13,7 @@ extend type Query {
     tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
     tokenGetTokenData(address: String!): GqlTokenData
     tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
+    tokenGetProtocolTokenPrice: AmountHumanReadable!
 }
 
 extend type Mutation {

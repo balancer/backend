@@ -1,6 +1,5 @@
 extend type Query {
     beetsGetFbeetsRatio: String!
-    beetsGetBeetsPrice: String!
 
     beetsPoolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
 

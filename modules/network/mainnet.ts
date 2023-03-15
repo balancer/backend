@@ -59,6 +59,7 @@ const mainnetNetworkData: NetworkData = {
         projectId: '',
         dataset: '',
     },
+    protocolToken: 'bal',
     beets: {
         address: '0x0000000000000000000000000000000000000000',
     },

@@ -69,6 +69,7 @@ const fantomNetworkData: NetworkData = {
         projectId: '1g2ag2hb',
         dataset: 'production',
     },
+    protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
     },

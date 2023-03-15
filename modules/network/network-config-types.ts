@@ -64,6 +64,7 @@ export interface NetworkData {
         projectId: string;
         dataset: string;
     };
+    protocolToken: 'beets' | 'bal';
     beets: {
         address: string;
     };

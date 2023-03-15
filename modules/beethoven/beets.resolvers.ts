@@ -9,9 +9,6 @@ const beetsResolvers: Resolvers = {
         beetsGetFbeetsRatio: async (parent, {}, context) => {
             return beetsService.getFbeetsRatio();
         },
-        beetsGetBeetsPrice: async (parent, {}, context) => {
-            return beetsService.getBeetsPrice();
-        },
         beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range }, context) => {
             const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range);
 

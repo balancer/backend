@@ -2,7 +2,6 @@ import { Resolvers } from '../../schema';
 import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
-import { networkContext } from '../network/network-context.service';
 
 const resolvers: Resolvers = {
     Query: {
@@ -97,6 +96,9 @@ const resolvers: Resolvers = {
         tokenGetTokensData: async (parent, { addresses }, context) => {
             const tokens = await tokenService.getTokens(addresses);
             return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
+        },
+        tokenGetProtocolTokenPrice: async (parent, {}, context) => {
+            return tokenService.getProtocolTokenPrice();
         },
     },
     Mutation: {

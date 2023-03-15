@@ -104,6 +104,16 @@ export class TokenService {
         return this.tokenPriceService.getWhiteListedCurrentTokenPrices();
     }
 
+    public async getProtocolTokenPrice(): Promise<string> {
+        const tokenPrices = await tokenService.getTokenPrices();
+
+        if (networkContext.data.protocolToken === 'bal') {
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.bal.address).toString();
+        } else {
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address).toString();
+        }
+    }
+
     public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
     }
