@@ -13,9 +13,11 @@ export class UserBalanceService {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
-                walletBalances: { where: { poolId: { not: null }, balanceNum: { gt: 0 } } },
+                walletBalances: {
+                    where: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
+                },
                 stakedBalances: {
-                    where: { poolId: { not: null }, balanceNum: { gt: 0 } },
+                    where: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
                 },
             },
         });
@@ -51,8 +53,8 @@ export class UserBalanceService {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
-                walletBalances: { where: { tokenAddress: fbeetsAddress } },
-                stakedBalances: { where: { tokenAddress: fbeetsAddress } },
+                walletBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
+                stakedBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
             },
         });
 
@@ -74,7 +76,7 @@ export class UserBalanceService {
             where: { address },
             include: {
                 stakedBalances: {
-                    where: { balanceNum: { gt: 0 } },
+                    where: { chain: networkContext.chain, balanceNum: { gt: 0 } },
                     include: {
                         staking: {
                             include: {
