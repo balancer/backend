@@ -240,6 +240,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolSetPoolsWithPreferredGaugesAsIncentivized: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.setPoolsWithPreferredGaugesAsIncentivized();
+
+            return 'success';
+        },
     },
 };
 

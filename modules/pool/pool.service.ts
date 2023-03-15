@@ -311,6 +311,10 @@ export class PoolService {
     public async reloadPoolTokenIndexes(poolId: string) {
         await this.poolCreatorService.reloadPoolTokenIndexes(poolId);
     }
+
+    public async setPoolsWithPreferredGaugesAsIncentivized() {
+        await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
+    }
 }
 
 export const poolService = new PoolService(

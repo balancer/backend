@@ -5,6 +5,7 @@ import { poolService } from '../pool.service';
 import { getContractAt } from '../../web3/contract';
 import VaultAbi from '../abi/Vault.json';
 import { networkContext } from '../../network/network-context.service';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export class PoolSyncService {
     public async syncChangedPools() {
@@ -55,5 +56,42 @@ export class PoolSyncService {
                 chain: networkContext.chain,
             },
         });
+    }
+
+    public async setPoolsWithPreferredGaugesAsIncentivized() {
+        const poolsWithGauges = await prisma.prismaPool.findMany({
+            include: { staking: true },
+            where: {
+                staking: {
+                    some: {
+                        gauge: { status: 'PREFERRED' },
+                    },
+                },
+            },
+        });
+
+        const poolIds = poolsWithGauges.map((pool) => pool.id);
+
+        await prismaBulkExecuteOperations(
+            [
+                prisma.prismaPoolCategory.deleteMany({
+                    where: {
+                        category: 'INCENTIVIZED',
+                        chain: networkContext.chain,
+                    },
+                }),
+                prisma.prismaPoolCategory.createMany({
+                    data: poolsWithGauges.map((pool) => ({
+                        id: `${pool.id}-INCENTIVIZED`,
+                        poolId: pool.id,
+                        category: 'INCENTIVIZED' as const,
+                        chain: networkContext.chain,
+                    })),
+                }),
+            ],
+            true,
+        );
+
+        await prisma.prismaPoolCategory.updateMany({ where: { poolId: { in: poolIds } }, data: {} });
     }
 }
