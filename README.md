@@ -53,7 +53,7 @@ Run `docker-compose up -d` to start the database via docker compose.
 
 Retrieve the docker container ID through `docker ps`.
 
-Run `docker exec -i <container-ID> /bin/bash -c "PGPASSWORD=let-me-on psql --username backend beetx" < /path/on/your/machine/dump`
+Run `docker exec -i <container-ID> /bin/bash -c "PGPASSWORD=let-me-in psql --username backend beetx" < /path/on/your/machine/dump`
 with the container-ID from the step before.
 
 ## Run locally
