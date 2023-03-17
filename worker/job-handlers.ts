@@ -40,7 +40,7 @@ async function runIfNotAlreadyRunning(
         console.time(jobId);
         console.log(`Start job ${jobId}`);
         await fn();
-        cronsMetricPublisher.publish(`${jobId}-done`);
+        await cronsMetricPublisher.publish(`${jobId}-done`);
         if (Math.random() > samplingRate) {
             transaction.sampled = false;
         }

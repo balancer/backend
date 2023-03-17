@@ -41,14 +41,14 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
         const foundAlarm = currentAlarms.MetricAlarms?.find((alarm) => alarm.AlarmName === alarmName);
         if (foundAlarm) {
             if (foundAlarm.Period != periodInSeconds) {
-                cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: [alarmName] }));
+                await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: [alarmName] }));
             } else {
                 continue;
             }
         }
 
         //make sure metric is available for alarm
-        cronsMetricPublisher.publish(`${cronJob.name}-${chainId}-done`);
+        await cronsMetricPublisher.publish(`${cronJob.name}-${chainId}-done`);
 
         const putAlarmCommand = new PutMetricAlarmCommand({
             AlarmName: alarmName,
