@@ -86,7 +86,7 @@ export class UserService {
     public async syncUserBalanceAllPools(userAddress: string) {
         const allBalances = await this.userBalanceService.getUserPoolBalances(userAddress);
         for (const userPoolBalance of allBalances) {
-            this.syncUserBalance(userAddress, userPoolBalance.poolId);
+            await this.syncUserBalance(userAddress, userPoolBalance.poolId);
         }
     }
 
