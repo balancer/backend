@@ -46,14 +46,14 @@ userInitStakedBalances
 
 ### Setup database & Prisma from backup
 
-Retrieve the current pg_dump file under `https://api-db-dump.s3.eu-central-1.amazonaws.com/canary/api-dump.20230309`.
-Dumps are kept for the previous 7 days, adjust the date in the URL (YYYYMMDD format) to receive the desired dump.
+Retrieve the current pg_dump file under `https://api-db-dump.s3.eu-central-1.amazonaws.com/canary/api-dump.YYYYMMDD`.
+Database dumps are kept for the previous 7 days, replace YYYYMMDD in the URL above (ie: 20230317)  to download a db dump.
 
 Run `docker-compose up -d` to start the database via docker compose.
 
 Retrieve the docker container ID through `docker ps`.
 
-Run `docker exec -i <container-ID> /bin/bash -c "PGPASSWORD=let-me-in psql --username backend beetx" < /path/on/your/machine/dump`
+Run `docker exec -i <container-ID> /bin/bash -c "PGPASSWORD=let-me-in psql --username backend database" < /path/on/your/machine/dump`
 with the container-ID from the step before.
 
 ## Run locally

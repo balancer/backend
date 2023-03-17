@@ -8,4 +8,4 @@ services:
         environment:
             POSTGRES_USER: backend
             POSTGRES_PASSWORD: let-me-in
-            POSTGRES_DB: beetx
+            POSTGRES_DB: database
