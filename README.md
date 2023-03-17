@@ -19,7 +19,7 @@ Run `yarn generate` to generate all gql types
 
 ### Setup empty database & Prisma
 
-#### Start docker container (or manually set up your database)
+#### Start docker container and manually set up your database (For setup from backup, read below)
 
 First we need to spin up the database, there is a `docker-compose` file with a postgres
 database configured. Spin it up by running `docker-compose up -d`.
@@ -55,6 +55,8 @@ Retrieve the docker container ID through `docker ps`.
 
 Run `docker exec -i <container-ID> /bin/bash -c "PGPASSWORD=let-me-in psql --username backend beetx" < /path/on/your/machine/dump`
 with the container-ID from the step before.
+
+The output at the very end saying `ERROR: role "rdsadmin" does not exist` is normal and can be ignored.
 
 ## Run locally
 
