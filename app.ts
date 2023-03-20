@@ -117,18 +117,6 @@ async function startServer() {
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
-
-    if (process.env.NODE_ENV === 'local' && process.env.CRONS === 'true') {
-        const supportedNetworks = process.env.SUPPORTED_NETWORKS?.split(',') ?? Object.keys(AllNetworkConfigs);
-
-        try {
-            for (const chainId of supportedNetworks) {
-                scheduleLocalWorkerTasks(chainId);
-            }
-        } catch (e) {
-            console.log(`Fatal error happened during cron scheduling.`, e);
-        }
-    }
 }
 
 if (process.env.WORKER === 'true') {

@@ -3,9 +3,9 @@ import * as Sentry from '@sentry/node';
 import { env } from '../app/env';
 import * as Tracing from '@sentry/tracing';
 import { prisma } from '../prisma/prisma-client';
-import { configureWorkerRoutes } from './job-handlers';
-import { createAlerts, scheduleJobs as scheduleJobs } from './manual-jobs';
 import { AllNetworkConfigs } from '../modules/network/network-config';
+import { createAlerts } from './create-alerts';
+import { scheduleJobs } from './job-handlers';
 
 export function startWorker() {
     const app = express();
@@ -23,11 +23,8 @@ export function startWorker() {
     });
 
     app.use(Sentry.Handlers.requestHandler());
-    // starting a manual transaction in the job-handler, no need for this
-    // app.use(Sentry.Handlers.tracingHandler());
     app.use(express.json());
 
-    configureWorkerRoutes(app);
     app.use(
         Sentry.Handlers.errorHandler({
             shouldHandleError(): boolean {
@@ -36,20 +33,16 @@ export function startWorker() {
         }),
     );
 
-    if (env.NODE_ENV !== 'local') {
-        const supportedNetworks = process.env.SUPPORTED_NETWORKS?.split(',') ?? Object.keys(AllNetworkConfigs);
+    const supportedNetworks = process.env.SUPPORTED_NETWORKS?.split(',') ?? Object.keys(AllNetworkConfigs);
 
-        try {
-            for (const chainId of supportedNetworks) {
-                scheduleJobs(chainId);
+    try {
+        for (const chainId of supportedNetworks) {
+            scheduleJobs(chainId);
+            if (process.env.AWS_ALERTS === 'true') {
                 createAlerts(chainId);
             }
-        } catch (e) {
-            console.log(`Fatal error happened during cron scheduling.`, e);
         }
+    } catch (e) {
+        console.log(`Fatal error happened during cron scheduling.`, e);
     }
-
-    app.listen(env.PORT, () => {
-        console.log(`Worker listening on port ${env.PORT}`);
-    });
 }

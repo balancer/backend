@@ -6,11 +6,16 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../app/env';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
+import { AllNetworkConfigs } from '../modules/network/network-config';
 import { DeploymentEnv } from '../modules/network/network-config-types';
 import { networkContext } from '../modules/network/network-context.service';
-import { WorkerJob } from './manual-jobs';
+import { WorkerJob } from './job-handlers';
 
-export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
+export async function createAlerts(chainId: string): Promise<void> {
+    await createAlertsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
+}
+
+async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
     const cronsMetricPublisher = getCronMetricsPublisher(chainId);
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
@@ -21,11 +26,11 @@ export async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[])
     for (const cronJob of jobs) {
         const alarmName = `AUTO CRON ALARM MULTICHAIN: ${cronJob.name} - ${chainId} - ${env.DEPLOYMENT_ENV}`;
 
-        // alert if cron has not run once in the double interval (or once in a minute for short intervals)
+        // alert if cron has not run once in the tripple interval (or once in two minutes for short intervals)
         const threshold = 1;
-        let periodInSeconds = (cronJob.interval / 1000) * 2;
-        if (periodInSeconds < 60) {
-            periodInSeconds = 60;
+        let periodInSeconds = (cronJob.interval / 1000) * 3;
+        if (periodInSeconds < 120) {
+            periodInSeconds = 120;
         }
 
         // AWS: Metrics cannot be checked across more than a day (EvaluationPeriods * Period must be <= 86400)
