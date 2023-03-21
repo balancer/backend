@@ -4,9 +4,9 @@ import { PoolAprService, PoolStakingService } from '../pool/pool-types';
 import { UserStakedBalanceService } from '../user/user-types';
 import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
-import { WorkerJob } from '../../worker/manual-jobs';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
+import { WorkerJob } from '../../worker/job-handlers';
 
 export interface NetworkConfig {
     data: NetworkData;
