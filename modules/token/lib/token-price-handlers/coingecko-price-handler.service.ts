@@ -9,7 +9,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
     public readonly id = 'CoingeckoPriceHandlerService';
 
-    constructor(private readonly weth: string, private readonly coingeckoService: CoingeckoService) {}
+    constructor(private readonly coingeckoService: CoingeckoService) {}
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         return tokens

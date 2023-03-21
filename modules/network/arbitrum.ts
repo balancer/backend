@@ -175,7 +175,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
-        new CoingeckoPriceHandlerService(arbitrumNetworkData.weth.address, coingeckoService),
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -183,7 +183,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     workerJobs: [
         {
-            name: 'load-token-prices',
+            name: 'update-token-prices',
             interval: every(2, 'minutes'),
         },
         {

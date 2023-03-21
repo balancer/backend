@@ -18,7 +18,7 @@ export class CoingeckoDataService {
         });
         const uniqueTokensWithIds = _.uniqBy(tokensWithIds, 'coingeckoTokenId');
 
-        const chunks = _.chunk(uniqueTokensWithIds, 100);
+        const chunks = _.chunk(uniqueTokensWithIds, 250); //max page size is 250
 
         for (const chunk of chunks) {
             const response = await this.conigeckoService.getMarketDataForTokenIds(
@@ -117,26 +117,21 @@ export class CoingeckoDataService {
     }
 
     public async syncCoingeckoIds() {
-        const tokensWithoutIds = await prisma.prismaToken.findMany({
-            where: { coingeckoTokenId: null },
-        });
+        const allTokens = await prisma.prismaToken.findMany({});
 
         const coinIds = await this.conigeckoService.getCoinIdList();
 
-        for (const tokenWithoutId of tokensWithoutIds) {
+        for (const token of allTokens) {
             const coinId = coinIds.find((coinId) => {
                 if (coinId.platforms[networkContext.data.coingecko.platformId]) {
-                    return (
-                        coinId.platforms[networkContext.data.coingecko.platformId].toLowerCase() ===
-                        tokenWithoutId.address
-                    );
+                    return coinId.platforms[networkContext.data.coingecko.platformId].toLowerCase() === token.address;
                 }
             });
 
-            if (coinId) {
+            if (coinId && token.coingeckoTokenId !== coinId.id) {
                 await prisma.prismaToken.update({
                     where: {
-                        address_chain: { address: tokenWithoutId.address, chain: tokenWithoutId.chain },
+                        address_chain: { address: token.address, chain: token.chain },
                     },
                     data: {
                         coingeckoTokenId: coinId.id,

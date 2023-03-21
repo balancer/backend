@@ -184,7 +184,7 @@ export const polygonNetworkConfig: NetworkConfig = {
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
-        new CoingeckoPriceHandlerService(polygonNetworkData.weth.address, coingeckoService),
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -192,7 +192,7 @@ export const polygonNetworkConfig: NetworkConfig = {
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     workerJobs: [
         {
-            name: 'load-token-prices',
+            name: 'update-token-prices',
             interval: every(2, 'minutes'),
         },
         {

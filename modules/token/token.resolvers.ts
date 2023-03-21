@@ -105,7 +105,7 @@ const resolvers: Resolvers = {
         tokenReloadTokenPrices: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await tokenService.loadTokenPrices();
+            await tokenService.updateTokenPrices();
 
             return true;
         },

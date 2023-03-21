@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { twentyFourHoursInSecs } from '../common/time';
 import _ from 'lodash';
 import moment from 'moment-timezone';
@@ -96,7 +96,9 @@ export class CoingeckoService {
     /**
      *  Rate limit for the CoinGecko API is 10 calls each second per IP address.
      */
-    public async getTokenPrices(addresses: string[], addressesPerRequest = 100): Promise<TokenPrices> {
+    public async getTokenPrices(addresses: string[]): Promise<TokenPrices> {
+        //max 180 addresses per request because of URI size limit
+        const addressesPerRequest = 180;
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('Too many requests for rate limit.');
 
@@ -196,7 +198,7 @@ export class CoingeckoService {
     }
 
     public async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
-        const endpoint = `/coins/markets?vs_currency=${this.fiatParam}&ids=${tokenIds}&per_page=100&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
+        const endpoint = `/coins/markets?vs_currency=${this.fiatParam}&ids=${tokenIds}&per_page=250&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
 
         return this.get<CoingeckoTokenMarketData[]>(endpoint);
     }
@@ -218,8 +220,18 @@ export class CoingeckoService {
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
         console.log('Remaining coingecko requests', remainingRequests);
-        const { data } = await axios.get(this.baseUrl + endpoint);
-        return data;
+        let response;
+        try {
+            response = await axios.get(this.baseUrl + endpoint);
+        } catch (err: any | AxiosError) {
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 429) {
+                    throw Error('Coingecko ratelimit');
+                }
+            }
+            throw err;
+        }
+        return response.data;
     }
 }
 

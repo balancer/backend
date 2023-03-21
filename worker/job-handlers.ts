@@ -115,8 +115,13 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
                 defaultSamplingRate,
             );
             break;
-        case 'load-token-prices':
-            await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.loadTokenPrices(), defaultSamplingRate);
+        case 'update-token-prices':
+            await runIfNotAlreadyRunning(
+                job.name,
+                chainId,
+                () => tokenService.updateTokenPrices(),
+                defaultSamplingRate,
+            );
             break;
         case 'update-liquidity-for-active-pools':
             await runIfNotAlreadyRunning(

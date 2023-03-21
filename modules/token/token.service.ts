@@ -76,7 +76,7 @@ export class TokenService {
         }));
     }
 
-    public async loadTokenPrices(): Promise<void> {
+    public async updateTokenPrices(): Promise<void> {
         return this.tokenPriceService.updateTokenPrices();
     }
 

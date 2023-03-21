@@ -195,7 +195,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new BeetsPriceHandlerService(),
         new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
         new ClqdrPriceHandlerService(),
-        new CoingeckoPriceHandlerService(fantomNetworkData.weth.address, coingeckoService),
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -206,7 +206,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     ],
     workerJobs: [
         {
-            name: 'load-token-prices',
+            name: 'update-token-prices',
             interval: every(2, 'minutes'),
         },
         {
