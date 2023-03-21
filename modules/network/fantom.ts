@@ -160,10 +160,10 @@ const fantomNetworkData: NetworkData = {
     },
     monitoring: {
         main: {
-            alarmTopicArn: 'arn:aws:sns:ca-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
         canary: {
-            alarmTopicArn: 'arn:aws:sns:eu-central-1:837533371577:Default_CloudWatch_Alarms_Topic',
+            alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
 };
