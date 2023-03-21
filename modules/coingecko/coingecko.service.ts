@@ -98,7 +98,7 @@ export class CoingeckoService {
      */
     public async getTokenPrices(addresses: string[], addressesPerRequest = 100): Promise<TokenPrices> {
         try {
-            if (addresses.length / addressesPerRequest > 10) throw new Error('To many requests for rate limit.');
+            if (addresses.length / addressesPerRequest > 10) throw new Error('Too many requests for rate limit.');
 
             const tokenDefinitions = await tokenService.getTokenDefinitions();
             const mapped = addresses.map((address) => this.getMappedTokenDetails(address, tokenDefinitions));
@@ -124,11 +124,6 @@ export class CoingeckoService {
 
             const paginatedResults = await Promise.all(requests);
             const results = this.parsePaginatedTokens(paginatedResults, mapped);
-
-            // Inject native asset price if included in requested addresses
-            if (addresses.includes(networkContext.data.chain.nativeAssetAddress)) {
-                results[networkContext.data.chain.nativeAssetAddress] = await this.getNativeAssetPrice();
-            }
 
             return results;
         } catch (error: any) {

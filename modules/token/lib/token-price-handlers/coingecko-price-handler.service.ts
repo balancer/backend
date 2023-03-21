@@ -25,40 +25,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         const timestamp = timestampRoundedUpToNearestHour();
-        const nativeAsset = tokens.find((token) => token.address === this.weth);
         const tokensUpdated: string[] = [];
-
-        if (nativeAsset) {
-            const price = await this.coingeckoService.getNativeAssetPrice();
-            const usdPrice = price.usd;
-
-            if (typeof usdPrice === 'undefined') {
-                throw new Error('failed to load native asset price');
-            }
-
-            await prisma.prismaTokenPrice.upsert({
-                where: {
-                    tokenAddress_timestamp_chain: {
-                        tokenAddress: this.weth,
-                        timestamp,
-                        chain: networkContext.chain,
-                    },
-                },
-                update: { price: usdPrice, close: usdPrice },
-                create: {
-                    tokenAddress: this.weth,
-                    chain: networkContext.chain,
-                    timestamp,
-                    price: usdPrice,
-                    high: usdPrice,
-                    low: usdPrice,
-                    open: usdPrice,
-                    close: usdPrice,
-                },
-            });
-
-            tokensUpdated.push(this.weth);
-        }
 
         const tokenAddresses = tokens.map((item) => item.address);
 
