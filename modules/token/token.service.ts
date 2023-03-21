@@ -5,8 +5,9 @@ import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTok
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
-import { coingeckoService } from '../coingecko/coingecko.service';
+import { CoingeckoService, coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
+import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -120,6 +121,18 @@ export class TokenService {
 
     public async syncCoingeckoPricesForAllChains(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
+        const tokensWithoutCoingeckoId = await prisma.prismaToken.findMany({
+            where: { coingeckoTokenId: null, types: { some: { type: 'WHITE_LISTED' } } },
+            include: { types: true },
+        });
+        let tokensWithTypes = tokensWithoutCoingeckoId.map((token) => ({
+            ...token,
+            types: token.types.map((type) => type.type),
+        }));
+        const coingeckoService = new CoingeckoPriceHandlerService(new CoingeckoService());
+        const accepted = await coingeckoService.getAcceptedTokens(tokensWithTypes);
+        const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
+        await coingeckoService.updatePricesForTokens(acceptedTokens);
     }
 
     public async syncCoingeckoIds(): Promise<void> {
