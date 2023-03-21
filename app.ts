@@ -15,7 +15,6 @@ import {
 import { beethovenSchema } from './graphql_schema_generated_beethoven';
 import { balancerSchema } from './graphql_schema_generated_balancer';
 import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
-import { scheduleLocalWorkerTasks } from './worker/scheduleLocalWorkerTasks';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
@@ -23,7 +22,6 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from './prisma/prisma-client';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
-import { AllNetworkConfigs } from './modules/network/network-config';
 
 async function startServer() {
     const app = createExpressApp();
