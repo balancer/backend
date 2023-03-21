@@ -37,7 +37,7 @@ export async function startWorker() {
 
     try {
         for (const chainId of supportedNetworks) {
-            await scheduleJobs(chainId);
+            scheduleJobs(chainId);
             if (process.env.AWS_ALERTS === 'true') {
                 await createAlerts(chainId);
             }
