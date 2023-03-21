@@ -268,9 +268,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         startBlock: number,
         endBlock: number,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
-        const contract: Reliquary = getContractAt(reliquaryAddress, ReliquaryAbi);
+        const reliquaryContract: Reliquary = getContractAt(reliquaryAddress, ReliquaryAbi);
 
-        const events = await contract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
+        const events = await reliquaryContract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
         const balanceChangedEvents = events.filter(
             (event) =>
                 event.topics.length > 0 &&
@@ -307,17 +307,23 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             ...balanceChangedEvents.map((event) => parseInt(event.topics[3], 16)),
             ...relicManagementEvents.flatMap((event) => [parseInt(event.topics[1], 16), parseInt(event.topics[2], 16)]), //from relicId and to relicId
         ];
-        //need to filter burned relics, otherwise the ownerOf call fails
+        //can already filter out relics we know that got burned
         const burnedRelics = transferEvents
             .filter((event) => event.args.to === ZERO_ADDRESS)
             .map((event) => event.args.tokenId.toString());
         const filteredAffectedRelicIds = affectedRelicIds.filter((relicId) => !burnedRelics.includes(`${relicId}`));
 
-        filteredAffectedRelicIds.forEach((relicId, index) => {
-            multicall.call(`users[${index}]`, reliquaryAddress, 'ownerOf', [relicId]);
-        });
-        let ownerResult: { users: string[] } = await multicall.execute();
-        affectedUsers = _.uniq([...affectedUsers, ...(ownerResult.users ?? [])]).filter(
+        // can't use multicall since relics could be burned in the meantime and ownerOf call reverts for burned relics
+        const relicOwners: string[] = [];
+        for (const relicId of filteredAffectedRelicIds) {
+            try {
+                const owner = await reliquaryContract.ownerOf(relicId);
+                relicOwners.push(owner);
+            } catch (e) {
+                console.log(`Could not get owner of relic. Skipping.`);
+            }
+        }
+        affectedUsers = _.uniq([...affectedUsers, ...relicOwners]).filter(
             (address) => !isSameAddress(ZERO_ADDRESS, address),
         );
 
