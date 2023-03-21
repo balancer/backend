@@ -26,6 +26,7 @@ import { UserSyncMasterchefFarmBalanceService } from '../user/lib/fantom/user-sy
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/fantom/user-sync-reliquary-farm-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
+import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-ftm-apr.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -176,6 +177,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new SpookySwapAprService(tokenService),
         new YearnVaultAprService(tokenService),
         new StaderStakedFtmAprService(tokenService),
+        new AnkrStakedFtmAprService(tokenService),
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
