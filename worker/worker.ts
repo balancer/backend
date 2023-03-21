@@ -7,7 +7,7 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 import { createAlerts } from './create-alerts';
 import { scheduleJobs } from './job-handlers';
 
-export function startWorker() {
+export async function startWorker() {
     const app = express();
 
     Sentry.init({
@@ -37,9 +37,9 @@ export function startWorker() {
 
     try {
         for (const chainId of supportedNetworks) {
-            scheduleJobs(chainId);
+            await scheduleJobs(chainId);
             if (process.env.AWS_ALERTS === 'true') {
-                createAlerts(chainId);
+                await createAlerts(chainId);
             }
         }
     } catch (e) {
