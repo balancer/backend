@@ -1,16 +1,16 @@
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../../user-types';
-import { prisma } from '../../../../prisma/prisma-client';
-import { getContractAt } from '../../../web3/contract';
+import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
+import { prisma } from '../../../prisma/prisma-client';
+import { getContractAt } from '../../web3/contract';
 import _ from 'lodash';
-import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
 import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
-import { Multicaller } from '../../../web3/multicaller';
+import { Multicaller } from '../../web3/multicaller';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
-import { networkContext } from '../../../network/network-context.service';
-import { gaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { networkContext } from '../../network/network-context.service';
+import { gaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {

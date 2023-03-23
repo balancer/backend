@@ -1,22 +1,22 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber } from 'ethers';
 import _ from 'lodash';
-import { prisma } from '../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { AmountHumanReadable } from '../../../common/global-types';
+import { prisma } from '../../../prisma/prisma-client';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { AmountHumanReadable } from '../../common/global-types';
 import {
     FarmUserFragment,
     OrderDirection,
     User_OrderBy,
-} from '../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
-import { masterchefService } from '../../../subgraphs/masterchef-subgraph/masterchef.service';
-import { getContractAt } from '../../../web3/contract';
-import { Multicaller } from '../../../web3/multicaller';
-import { BeethovenxMasterChef } from '../../../web3/types/BeethovenxMasterChef';
-import MasterChefAbi from '../../../web3/abi/MasterChef.json';
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../../user-types';
+} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
+import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
+import { getContractAt } from '../../web3/contract';
+import { Multicaller } from '../../web3/multicaller';
+import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
+import MasterChefAbi from '../../web3/abi/MasterChef.json';
+import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
-import { networkContext } from '../../../network/network-context.service';
+import { networkContext } from '../../network/network-context.service';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     constructor(private readonly fbeetsAddress: string, private readonly fbeetsFarmId: string) {}
