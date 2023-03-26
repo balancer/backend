@@ -126,7 +126,7 @@ const fantomNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
         canary: {
-            url: 'https://22nltjhtfsyhecuudusuv2m5i40zeafa.lambda-url.eu-central-1.on.aws/',
+            url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),

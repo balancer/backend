@@ -118,7 +118,7 @@ const optimismNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
         canary: {
-            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
+            url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
