@@ -39,6 +39,8 @@ export async function startWorker() {
         for (const chainId of supportedNetworks) {
             scheduleJobs(chainId);
             if (process.env.AWS_ALERTS === 'true') {
+                //need to await these because otherwise we run into AWS ratelimits
+                //start up time will be a bit slower
                 await createAlerts(chainId);
             }
         }

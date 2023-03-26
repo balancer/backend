@@ -232,14 +232,20 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'sync-changed-pools',
             interval: every(15, 'seconds'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
             interval: every(10, 'seconds'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'user-sync-staked-balances',
             interval: every(10, 'seconds'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'sync-user-snapshots',

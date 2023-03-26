@@ -14,6 +14,8 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 export type WorkerJob = {
     name: string;
     interval: number;
+    alarmEvaluationPeriod?: number;
+    alarmDatapointsToAlarm?: number;
 };
 
 const runningJobs: Set<string> = new Set();
@@ -22,7 +24,7 @@ const defaultSamplingRate = 0.001;
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
-        await sendWithInterval(job, chainId);
+        await scheduleWithInterval(job, chainId);
     }
 }
 
@@ -79,7 +81,7 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
     }
 }
 
-export async function sendWithInterval(job: WorkerJob, chainId: string): Promise<void> {
+export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
         await scheduleJob(job, chainId);
     } catch (error) {
@@ -87,7 +89,7 @@ export async function sendWithInterval(job: WorkerJob, chainId: string): Promise
         Sentry.captureException(error);
     } finally {
         setTimeout(() => {
-            sendWithInterval(job, chainId);
+            scheduleWithInterval(job, chainId);
         }, job.interval);
     }
 }
