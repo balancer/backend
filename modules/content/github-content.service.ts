@@ -5,17 +5,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 
-interface TokenListMapByNetwork {
-    [networkKey: string]: TokenListMap;
-}
-
-interface TokenListMap {
-    Balancer: {
-        Default: string;
-        Vetted: string;
-    };
-    External: string[];
-}
+const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
 interface WhitelistedTokenList {
     name: string;
@@ -24,71 +14,24 @@ interface WhitelistedTokenList {
 }
 
 interface WhitelistedToken {
-    address: string;
     chainId: number;
+    address: string;
     name: string;
     symbol: string;
     decimals: number;
     logoURI: string;
 }
 
-const TOKEN_LIST_MAP: TokenListMapByNetwork = {
-    '1': {
-        Balancer: {
-            Default: 'https://raw.githubusercontent.com/balancer/assets/master/generated/listed.tokenlist.json',
-            Vetted: 'https://raw.githubusercontent.com/balancer/assets/master/generated/vetted.tokenlist.json',
-        },
-        External: ['ipns://tokens.uniswap.org', 'https://www.gemini.com/uniswap/manifest.json'],
-    },
-    '5': {
-        Balancer: {
-            Default:
-                'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/goerli.listed.tokenlist.json',
-            Vetted: 'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/goerli.vetted.tokenlist.json',
-        },
-        External: [],
-    },
-    '10': {
-        Balancer: {
-            Default: '',
-            Vetted: '',
-        },
-        External: [],
-    },
-    '137': {
-        Balancer: {
-            Default:
-                'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/polygon.listed.tokenlist.json',
-            Vetted: 'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/polygon.vetted.tokenlist.json',
-        },
-        External: ['https://unpkg.com/quickswap-default-token-list@1.0.67/build/quickswap-default.tokenlist.json'],
-    },
-    '42161': {
-        Balancer: {
-            Default:
-                'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/arbitrum.listed.tokenlist.json',
-            Vetted: 'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/arbitrum.vetted.tokenlist.json',
-        },
-        External: [],
-    },
-    '100': {
-        Balancer: {
-            Default:
-                'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/gnosis.listed.tokenlist.json',
-            Vetted: 'https://raw.githubusercontent.com/balancer/assets/refactor-for-multichain/generated/gnosis.vetted.tokenlist.json',
-        },
-        External: ['https://unpkg.com/@1hive/default-token-list@latest/build/honeyswap-default.tokenlist.json'],
-    },
-};
-
 //TODO implement other content functions
 export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
-        const { data: githubTokenList } = await axios.get<WhitelistedTokenList>(
-            TOKEN_LIST_MAP[networkContext.chainId].Balancer.Vetted,
+        const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
+
+        const filteredTokenList = githubAllTokenList.tokens.filter(
+            (token) => `${token.chainId}` === networkContext.chainId,
         );
 
-        for (const githubToken of githubTokenList.tokens) {
+        for (const githubToken of filteredTokenList) {
             const tokenAddress = githubToken.address.toLowerCase();
 
             await prisma.prismaToken.upsert({
@@ -126,14 +69,12 @@ export class GithubContentService implements ContentService {
             },
         });
 
-        const addToWhitelist = githubTokenList.tokens.filter((githubToken) => {
+        const addToWhitelist = filteredTokenList.filter((githubToken) => {
             return !whiteListedTokens.some((dbToken) => isSameAddress(githubToken.address, dbToken.tokenAddress));
         });
 
         const removeFromWhitelist = whiteListedTokens.filter((dbToken) => {
-            return !githubTokenList.tokens.some((githubToken) =>
-                isSameAddress(dbToken.tokenAddress, githubToken.address),
-            );
+            return !filteredTokenList.some((githubToken) => isSameAddress(dbToken.tokenAddress, githubToken.address));
         });
 
         await prisma.prismaTokenType.createMany({
