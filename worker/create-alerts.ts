@@ -11,6 +11,7 @@ import { DeploymentEnv } from '../modules/network/network-config-types';
 import { networkContext } from '../modules/network/network-context.service';
 import { WorkerJob } from './job-handlers';
 import * as Sentry from '@sentry/node';
+import { secondsPerDay } from '../modules/common/time';
 
 const ALARM_PREFIX = `AUTO CRON ALARM MULTICHAIN:`;
 
@@ -47,10 +48,12 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
             periodInSeconds = 60;
         }
 
+        let evaluationPeriods = cronJob.alarmEvaluationPeriod ? cronJob.alarmEvaluationPeriod : 3;
+        let datapointsToAlarm = cronJob.alarmDatapointsToAlarm ? cronJob.alarmDatapointsToAlarm : 3;
+
         // AWS Metrics cannot be checked across more than a day (EvaluationPeriods * Period must be <= 86400)
-        // We have one Job that runs once a day, create alert for once a day
-        if (periodInSeconds > 86400) {
-            periodInSeconds = cronJob.interval / 1000;
+        if (evaluationPeriods * periodInSeconds > secondsPerDay) {
+            // if the crons runs in bigger intervalls that once a day, we can't create an alarm
             if (periodInSeconds > 86400) {
                 console.log(`Cant create alert for ${cronJob.name} because interval is too big: ${cronJob.interval}ms`);
                 Sentry.captureException(
@@ -58,13 +61,13 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
                 );
                 continue;
             }
+            // if the crons runs once a day or more often, we can set the evaluatioPeriod and dataPointsToAlarm to the highest number possible (2 or 1)
+            evaluationPeriods = Math.floor(secondsPerDay / periodInSeconds);
+            datapointsToAlarm = Math.floor(secondsPerDay / periodInSeconds);
         }
 
         //make sure metric is available for alarm
         await cronsMetricPublisher.publish(`${cronJob.name}-${chainId}-done`);
-
-        const evaluationPeriods = cronJob.alarmEvaluationPeriod ? cronJob.alarmEvaluationPeriod : 3;
-        const datapointsToAlarm = cronJob.alarmDatapointsToAlarm ? cronJob.alarmDatapointsToAlarm : 3;
 
         const putAlarmCommand = new PutMetricAlarmCommand({
             AlarmName: alarmName,
