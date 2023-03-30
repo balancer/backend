@@ -180,6 +180,13 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    /*
+    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
+
+    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
+    */
     workerJobs: [
         {
             name: 'update-token-prices',
@@ -188,6 +195,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-liquidity-for-active-pools',
@@ -258,6 +267,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'purge-old-tokenprices',
             interval: every(1, 'days'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
     ],
 };
