@@ -12,6 +12,7 @@ import { networkContext } from '../modules/network/network-context.service';
 import { WorkerJob } from './job-handlers';
 import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
+import { sleep } from '../modules/common/promise';
 
 const ALARM_PREFIX = `AUTO CRON ALARM MULTICHAIN:`;
 
@@ -92,5 +93,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         });
 
         await cloudWatchClient.send(putAlarmCommand);
+        // rate limits on the AWS API: 3 requests / second
+        await sleep(500);
     }
 }
