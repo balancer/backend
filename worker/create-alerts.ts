@@ -37,7 +37,9 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
                 alarmNames.push(alarm.AlarmName);
             }
         }
-        await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: alarmNames }));
+        if (alarmNames.length > 0) {
+            await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: alarmNames }));
+        }
     }
 
     for (const cronJob of jobs) {
