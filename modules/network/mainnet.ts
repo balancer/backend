@@ -161,7 +161,7 @@ const mainnetNetworkData: NetworkData = {
     },
     monitoring: {
         main: {
-            alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
+            alarmTopicArn: 'arn:aws:sns:ca-central-1:118697801881:api_alarms',
         },
         canary: {
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
