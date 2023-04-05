@@ -30,7 +30,9 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
     // delete all alarms
     if (currentAlarms.MetricAlarms) {
-        const cronAlarms = currentAlarms.MetricAlarms.filter((alarm) => alarm.AlarmName?.includes(ALARM_PREFIX));
+        const cronAlarms = currentAlarms.MetricAlarms.filter(
+            (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(chainId),
+        );
         const alarmNames: string[] = [];
         for (const alarm of cronAlarms) {
             if (alarm.AlarmName) {
