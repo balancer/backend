@@ -504,25 +504,23 @@ type GqlPoolLinearPoolWrappedToken {
 }
 
 type GqlPoolApr {
-    total: BigDecimal!
-    min: BigDecimal
-    max: BigDecimal
-    swapApr: BigDecimal!
-    nativeRewardApr: BigDecimal!
-    thirdPartyApr: BigDecimal!
+    apr: GqlPoolAprValue!
+    swapApr: BigDecimal! # we make the assumption swap apr will never have a range
+    nativeRewardApr: GqlPoolAprValue!
+    thirdPartyApr: GqlPoolAprValue!
     items: [GqlBalancePoolAprItem!]!
     hasRewardApr: Boolean!
 }
 
-type GqlPoolAprItem {
-    title: String!
-    apr: BigDecimal!
-    subItems: [GqlBalancePoolAprSubItem!]
+union GqlPoolAprValue = GqlPoolAprRange | GqlPoolAprTotal
+
+type GqlPoolAprRange {
+    min: BigDecimal!
+    max: BigDecimal!
 }
 
-type GqlPoolAprSubItem {
-    title: String!
-    apr: BigDecimal!
+type GqlPoolAprTotal {
+    total: BigDecimal!
 }
 
 enum GqlPoolOrderBy {
@@ -684,14 +682,14 @@ type GqlPoolJoinExitAmount {
 type GqlBalancePoolAprItem {
     id: ID!
     title: String!
-    apr: BigDecimal!
+    apr: GqlPoolAprValue!
     subItems: [GqlBalancePoolAprSubItem!]
 }
 
 type GqlBalancePoolAprSubItem {
     id: ID!
     title: String!
-    apr: BigDecimal!
+    apr: GqlPoolAprValue!
 }
 
 input GqlUserSwapVolumeFilter {

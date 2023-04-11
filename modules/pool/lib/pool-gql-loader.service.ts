@@ -9,6 +9,8 @@ import {
     PrismaPoolWithExpandedNesting,
 } from '../../../prisma/prisma-types';
 import {
+    GqlBalancePoolAprItem,
+    GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
@@ -581,26 +583,25 @@ export class PoolGqlLoaderService {
             volume24hAthTimestamp,
             volume24hAtlTimestamp,
             apr: {
-                total: totalApr,
-                min: minApr,
-                max: maxApr,
+                apr:
+                    typeof minApr !== 'undefined' && typeof maxApr !== 'undefined'
+                        ? { min: minApr, max: maxApr }
+                        : { total: totalApr },
                 swapApr,
-                nativeRewardApr,
-                thirdPartyApr,
+                nativeRewardApr: { total: nativeRewardApr },
+                thirdPartyApr: { total: thirdPartyApr },
                 items: [
-                    ...aprItemsWithNoGroup.flatMap((item) => {
+                    ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
                         if (item.range) {
                             return [
                                 {
-                                    id: `${item.id}-min`,
-                                    apr: item.range.min.toString(),
-                                    title: `Min ${item.title}`,
-                                    subItems: [],
-                                },
-                                {
-                                    id: `${item.id}-max`,
-                                    apr: item.range.max.toString(),
-                                    title: `Max ${item.title}`,
+                                    id: item.id,
+                                    apr: {
+                                        __typename: 'GqlPoolAprRange',
+                                        min: item.range.min.toString(),
+                                        max: item.range.max.toString(),
+                                    },
+                                    title: item.title,
                                     subItems: [],
                                 },
                             ];
@@ -608,15 +609,20 @@ export class PoolGqlLoaderService {
                             return [
                                 {
                                     ...item,
-                                    apr: `${item.apr}`,
+                                    apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
                                     subItems: [],
                                 },
                             ];
                         }
                     }),
-                    ..._.map(grouped, (items, group) => {
-                        const subItems = items.map((item) => ({ ...item, apr: `${item.apr}` }));
+                    ..._.map(grouped, (items, group): GqlBalancePoolAprItem => {
                         // todo: might need to support apr ranges as well at some point
+                        const subItems = items.map(
+                            (item): GqlBalancePoolAprSubItem => ({
+                                ...item,
+                                apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
+                            }),
+                        );
                         const apr = _.sumBy(items, 'apr');
                         let title = '';
 
@@ -634,7 +640,7 @@ export class PoolGqlLoaderService {
                         return {
                             id: `${pool.id}-${group}`,
                             title,
-                            apr: `${apr}`,
+                            apr: { __typename: 'GqlPoolAprTotal', total: `${apr}` },
                             subItems,
                         };
                     }),
