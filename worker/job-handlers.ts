@@ -69,7 +69,7 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
             scope.setTag('error', jobId);
         });
 
-        console.log(`Error job ${jobId}`);
+        console.log(`Error job ${jobId}`, error);
     } finally {
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
