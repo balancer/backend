@@ -501,7 +501,7 @@ export class PoolGqlLoaderService {
 
         let hasRewardApr = false;
 
-        // It is likely that if either native or third pary APR has a range, that both of them have a range
+        // It is likely that if either native or third party APR has a range, that both of them have a range
         // therefore if there is a least one item with a range, we show both rewards in a range, although min and max might be identical
         if (hasAprRange) {
             let swapFeeApr = 0;
