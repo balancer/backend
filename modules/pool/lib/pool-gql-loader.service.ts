@@ -485,26 +485,37 @@ export class PoolGqlLoaderService {
         const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
-        let totalApr: string;
-        let minApr: string | undefined;
-        let maxApr: string | undefined;
-        let swapApr: string;
-        let nativeRewardApr: string;
-        let thirdPartyApr: string;
+        let aprTotal = `0`;
+        let swapAprTotal = `0`;
+        let nativeRewardAprTotal = `0`;
+        let thirdPartyAprTotal = `0`;
+
+        let aprRangeMin: string | undefined;
+        let aprRangeMax: string | undefined;
+
+        let nativeAprRangeMin: string | undefined;
+        let nativeAprRangeMax: string | undefined;
+
+        let thirdPartyAprRangeMin: string | undefined;
+        let thirdPartyAprRangeMax: string | undefined;
 
         let hasRewardApr = false;
 
+        // It is likely that if either native or third pary APR has a range, that both of them have a range
+        // therefore if there is a least one item with a range, we show both rewards in a range, although min and max might be identical
         if (hasAprRange) {
             let swapFeeApr = 0;
-            let minTotalApr = 0;
-            let maxTotalApr = 0;
-            let minNativeRewardApr = 0;
-            let maxNativeRewardApr = 0;
-            let minThirdPartyApr = 0;
-            let maxThirdPartyApr = 0;
+            let currentAprRangeMinTotal = 0;
+            let currentAprRangeMaxTotal = 0;
+            let currentNativeAprRangeMin = 0;
+            let currentNativeAprRangeMax = 0;
+            let currentThirdPartyAprRangeMin = 0;
+            let currentThirdPartyAprRangeMax = 0;
+
             for (let aprItem of aprItems) {
                 let minApr: number;
                 let maxApr: number;
+
                 if (aprItem.range) {
                     minApr = aprItem.range.min;
                     maxApr = aprItem.range.max;
@@ -512,18 +523,19 @@ export class PoolGqlLoaderService {
                     minApr = aprItem.apr;
                     maxApr = aprItem.apr;
                 }
-                minTotalApr += minApr;
-                maxTotalApr += maxApr;
+
+                currentAprRangeMinTotal += minApr;
+                currentAprRangeMaxTotal += maxApr;
 
                 switch (aprItem.type) {
                     case 'NATIVE_REWARD': {
-                        minNativeRewardApr += minApr;
-                        maxNativeRewardApr += maxApr;
+                        currentNativeAprRangeMin += minApr;
+                        currentNativeAprRangeMax += maxApr;
                         break;
                     }
                     case 'THIRD_PARTY_REWARD': {
-                        minThirdPartyApr += minApr;
-                        maxThirdPartyApr += maxApr;
+                        currentThirdPartyAprRangeMin += minApr;
+                        currentThirdPartyAprRangeMax += maxApr;
                     }
                     case 'SWAP_FEE': {
                         swapFeeApr += maxApr;
@@ -531,20 +543,21 @@ export class PoolGqlLoaderService {
                     }
                 }
             }
-            swapApr = `${swapFeeApr}`;
-            totalApr = `${maxTotalApr}`;
-            minApr = `${minTotalApr}`;
-            maxApr = `${maxTotalApr}`;
-            nativeRewardApr = `${maxNativeRewardApr}`;
-            thirdPartyApr = `${maxThirdPartyApr}`;
-            hasRewardApr = maxNativeRewardApr > 0 || maxThirdPartyApr > 0;
+            swapAprTotal = `${swapFeeApr}`;
+            aprRangeMin = `${currentAprRangeMinTotal}`;
+            aprRangeMax = `${currentAprRangeMaxTotal}`;
+            nativeAprRangeMin = `${currentNativeAprRangeMin}`;
+            nativeAprRangeMax = `${currentNativeAprRangeMax}`;
+            thirdPartyAprRangeMin = `${currentThirdPartyAprRangeMin}`;
+            thirdPartyAprRangeMax = `${currentThirdPartyAprRangeMax}`;
+            hasRewardApr = currentNativeAprRangeMax > 0 || currentThirdPartyAprRangeMax > 0;
         } else {
             const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
             const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-            totalApr = `${_.sumBy(aprItems, 'apr')}`;
-            swapApr = `${_.sumBy(swapAprItems, 'apr')}`;
-            nativeRewardApr = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
-            thirdPartyApr = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
+            aprTotal = `${_.sumBy(aprItems, 'apr')}`;
+            swapAprTotal = `${_.sumBy(swapAprItems, 'apr')}`;
+            nativeRewardAprTotal = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
+            thirdPartyAprTotal = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
             hasRewardApr = nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0;
         }
 
@@ -584,12 +597,18 @@ export class PoolGqlLoaderService {
             volume24hAtlTimestamp,
             apr: {
                 apr:
-                    typeof minApr !== 'undefined' && typeof maxApr !== 'undefined'
-                        ? { min: minApr, max: maxApr }
-                        : { total: totalApr },
-                swapApr,
-                nativeRewardApr: { total: nativeRewardApr },
-                thirdPartyApr: { total: thirdPartyApr },
+                    typeof aprRangeMin !== 'undefined' && typeof aprRangeMax !== 'undefined'
+                        ? { min: aprRangeMin, max: aprRangeMax }
+                        : { total: aprTotal },
+                swapApr: swapAprTotal,
+                nativeRewardApr:
+                    typeof nativeAprRangeMin !== 'undefined' && typeof nativeAprRangeMax !== 'undefined'
+                        ? { min: nativeAprRangeMin, max: nativeAprRangeMax }
+                        : { total: nativeRewardAprTotal },
+                thirdPartyApr:
+                    typeof thirdPartyAprRangeMin !== 'undefined' && typeof thirdPartyAprRangeMax !== 'undefined'
+                        ? { min: thirdPartyAprRangeMin, max: thirdPartyAprRangeMax }
+                        : { total: thirdPartyAprTotal },
                 items: [
                     ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
                         if (item.range) {
