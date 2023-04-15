@@ -598,17 +598,29 @@ export class PoolGqlLoaderService {
             apr: {
                 apr:
                     typeof aprRangeMin !== 'undefined' && typeof aprRangeMax !== 'undefined'
-                        ? { min: aprRangeMin, max: aprRangeMax }
-                        : { total: aprTotal },
+                        ? {
+                              __typename: 'GqlPoolAprRange',
+                              min: aprRangeMin,
+                              max: aprRangeMax,
+                          }
+                        : { __typename: 'GqlPoolAprTotal', total: aprTotal },
                 swapApr: swapAprTotal,
                 nativeRewardApr:
                     typeof nativeAprRangeMin !== 'undefined' && typeof nativeAprRangeMax !== 'undefined'
-                        ? { min: nativeAprRangeMin, max: nativeAprRangeMax }
-                        : { total: nativeRewardAprTotal },
+                        ? {
+                              __typename: 'GqlPoolAprRange',
+                              min: nativeAprRangeMin,
+                              max: nativeAprRangeMax,
+                          }
+                        : { __typename: 'GqlPoolAprTotal', total: nativeRewardAprTotal },
                 thirdPartyApr:
                     typeof thirdPartyAprRangeMin !== 'undefined' && typeof thirdPartyAprRangeMax !== 'undefined'
-                        ? { min: thirdPartyAprRangeMin, max: thirdPartyAprRangeMax }
-                        : { total: thirdPartyAprTotal },
+                        ? {
+                              __typename: 'GqlPoolAprRange',
+                              min: thirdPartyAprRangeMin,
+                              max: thirdPartyAprRangeMax,
+                          }
+                        : { __typename: 'GqlPoolAprTotal', total: thirdPartyAprTotal },
                 items: [
                     ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
                         if (item.range) {
