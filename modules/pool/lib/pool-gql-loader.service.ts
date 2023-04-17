@@ -20,6 +20,8 @@ import {
     GqlPoolMinimal,
     GqlPoolNestingType,
     GqlPoolPhantomStableNested,
+    GqlPoolStaking,
+    GqlPoolStakingReliquaryFarmLevel,
     GqlPoolToken,
     GqlPoolTokenDisplay,
     GqlPoolTokenExpanded,
@@ -36,6 +38,7 @@ import { Prisma } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
+import { GqlPoolStakingReliquaryFarm } from '../../../schema';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string): Promise<GqlPoolUnion> {
@@ -306,6 +309,7 @@ export class PoolGqlLoaderService {
         const mappedData = {
             ...pool,
             decimals: 18,
+            staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
             investConfig: this.getPoolInvestConfig(pool),
             withdrawConfig: this.getPoolWithdrawConfig(pool),
@@ -446,6 +450,34 @@ export class PoolGqlLoaderService {
                     weight: poolToken?.dynamicData?.weight,
                 };
             });
+    }
+
+    // This is needed to cast type APR type of the reliquary level from prisma (float) to the type of GQL (bigdecimal/string)
+    private getStakingData(pool: PrismaPoolWithExpandedNesting): GqlPoolStaking[] {
+        const poolStakings: GqlPoolStaking[] = [];
+
+        pool.staking.forEach((staking) => {
+            let reliquaryStaking: GqlPoolStakingReliquaryFarm | null = null;
+            if (staking.reliquary) {
+                const levelsStringApr = staking.reliquary.levels.map((level) => {
+                    return {
+                        ...level,
+                        apr: `${level.apr}`,
+                    };
+                });
+                reliquaryStaking = {
+                    ...staking.reliquary,
+                    levels: levelsStringApr,
+                };
+            }
+
+            poolStakings.push({
+                ...staking,
+                reliquary: reliquaryStaking,
+            });
+        });
+
+        return poolStakings;
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
