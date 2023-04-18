@@ -8,8 +8,6 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
