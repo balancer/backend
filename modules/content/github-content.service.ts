@@ -28,7 +28,14 @@ export class GithubContentService implements ContentService {
         const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
 
         const filteredTokenList = githubAllTokenList.tokens.filter(
-            (token) => `${token.chainId}` === networkContext.chainId,
+            (token) =>  {
+                if (`${token.chainId}` !== networkContext.chainId) {
+                    return false;
+                }
+
+                const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals']
+                return requiredKeys.every((key) => token?.[key as keyof WhitelistedToken] != null)
+            }
         );
 
         for (const githubToken of filteredTokenList) {
@@ -135,7 +142,7 @@ export class GithubContentService implements ContentService {
             }
 
             const linearPool = pools.find(
-                (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex].address === token.address,
+                (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex]?.address === token.address,
             );
 
             if (linearPool && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
