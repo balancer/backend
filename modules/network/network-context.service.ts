@@ -1,4 +1,4 @@
-import { AllNetworkConfigs } from './network-config';
+import { AllNetworkConfigs, BalancerChainIds, BeethovenChainIds } from './network-config';
 import { env } from '../../app/env';
 import { Chain } from '@prisma/client';
 import { NetworkConfig, NetworkData } from './network-config-types';
@@ -40,6 +40,18 @@ export class NetworkContextService {
 
     public get isFantomNetwork() {
         return this.data.chain.id === 250;
+    }
+
+    public get isBalancerChain(): boolean {
+        return BalancerChainIds.includes(this.chainId);
+    }
+
+    public get isBeethovenChain(): boolean {
+        return BeethovenChainIds.includes(this.chainId);
+    }
+
+    public get protocolSupportedChainIds(): string[] {
+        return this.isBalancerChain ? BalancerChainIds : BeethovenChainIds;
     }
 }
 
