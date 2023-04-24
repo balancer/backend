@@ -10,6 +10,7 @@ import { datastudioService } from '../modules/datastudio/datastudio.service';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { AllNetworkConfigs } from '../modules/network/network-config';
+import { networkContext } from '../modules/network/network-context.service';
 
 export type WorkerJob = {
     name: string;
@@ -210,7 +211,7 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
             await runIfNotAlreadyRunning(
                 job.name,
                 chainId,
-                () => protocolService.cacheProtocolMetrics(),
+                () => protocolService.cacheProtocolMetrics(networkContext.chainId, networkContext.chain),
                 defaultSamplingRate,
             );
             break;
