@@ -16,6 +16,7 @@ interface ProtocolMetrics {
     totalLiquidity: string;
     totalSwapFee: string;
     totalSwapVolume: string;
+    numLiquidityProviders: string;
 }
 
 interface LatestSyncedBlocks {
@@ -52,6 +53,7 @@ export class ProtocolService {
         const swapFee24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee24h));
         const swapVolume7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume7d));
         const swapFee7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee7d));
+        const numLiquidityProviders = _.sumBy(chainMetrics, (metrics) => parseInt(metrics.numLiquidityProviders));
 
         return {
             totalLiquidity: `${totalLiquidity}`,
@@ -62,6 +64,7 @@ export class ProtocolService {
             swapFee24h: `${swapFee24h}`,
             swapVolume7d: `${swapVolume7d}`,
             swapFee7d: `${swapFee7d}`,
+            numLiquidityProviders: `${numLiquidityProviders}`,
         };
     }
 
@@ -94,12 +97,24 @@ export class ProtocolService {
             },
             include: { dynamicData: true },
         });
+
         const swaps = await prisma.prismaPoolSwap.findMany({
             select: { poolId: true, valueUSD: true, timestamp: true },
             where: { timestamp: { gte: sevenDaysAgo }, chain },
         });
         const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
         const filteredSwaps24h = filteredSwaps.filter((swap) => swap.timestamp >= oneDayAgo);
+
+        const numLiquidityProviders = await prisma.prismaUser.count({
+            where: {
+                walletBalances: {
+                    some: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
+                },
+                stakedBalances: {
+                    some: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
+                },
+            },
+        });
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
 
@@ -126,6 +141,7 @@ export class ProtocolService {
             swapFee24h: `${swapFee24h}`,
             swapVolume7d: `${swapVolume7d}`,
             swapFee7d: `${swapFee7d}`,
+            numLiquidityProviders: `${numLiquidityProviders}`,
         };
 
         this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chainId}`, protocolData, 60 * 30 * 1000);

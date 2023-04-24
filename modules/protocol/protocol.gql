@@ -17,6 +17,7 @@ type GqlProtocolMetrics {
     swapVolume24h: BigDecimal!
     swapFee7d: BigDecimal!
     swapVolume7d: BigDecimal!
+    numLiquidityProviders: BigInt!
 }
 
 type GqlLatestSyncedBlocks {
