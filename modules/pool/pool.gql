@@ -53,6 +53,8 @@ extend type Mutation {
     poolReloadAllTokenNestedPoolIds: String!
     poolReloadPoolTokenIndexes(poolId: String!): String!
     poolSetPoolsWithPreferredGaugesAsIncentivized: String!
+    poolBlackListAddPool(poolId: String!): String!
+    poolBlackListRemovePool(poolId: String!): String!
 }
 
 type GqlPoolMinimal {

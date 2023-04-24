@@ -315,6 +315,35 @@ export class PoolService {
     public async setPoolsWithPreferredGaugesAsIncentivized() {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
+
+    public async addToBlackList(poolId: string) {
+        const category = await prisma.prismaPoolCategory.findFirst({
+            where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
+        });
+
+        if (category) {
+            throw new Error('Pool with id is already blacklisted');
+        }
+
+        await prisma.prismaPoolCategory.create({
+            data: {
+                id: `${networkContext.chain}-${poolId}-BLACK_LISTED`,
+                category: 'BLACK_LISTED',
+                chain: networkContext.chain,
+                poolId,
+            },
+        });
+    }
+
+    public async removeFromBlackList(poolId: string) {
+        await prisma.prismaPoolCategory.deleteMany({
+            where: {
+                category: 'BLACK_LISTED',
+                chain: networkContext.chain,
+                poolId,
+            },
+        });
+    }
 }
 
 export const poolService = new PoolService(

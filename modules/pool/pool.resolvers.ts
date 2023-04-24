@@ -247,6 +247,20 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolBlackListAddPool: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.addToBlackList(poolId);
+
+            return 'success';
+        },
+        poolBlackListRemovePool: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.removeFromBlackList(poolId);
+
+            return 'success';
+        },
     },
 };
 
