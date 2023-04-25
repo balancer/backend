@@ -28,6 +28,7 @@ export class WstethAprService implements PoolAprService {
 
             const wstethToken = pool.tokens.find((token) => token.address === this.wstethContractAddress.toLowerCase());
             const wstethTokenBalance = wstethToken?.dynamicData?.balance;
+
             if (wstethTokenBalance && pool.dynamicData) {
                 if (!wstethBaseApr) {
                     const { data } = await axios.get<{
@@ -35,10 +36,14 @@ export class WstethAprService implements PoolAprService {
                     }>(this.wstethAprEndpoint);
                     wstethBaseApr = data.data.smaApr / 100;
                 }
+
                 const wstethPercentage =
                     (parseFloat(wstethTokenBalance) * wstethPrice) / pool.dynamicData.totalLiquidity;
                 const wstethApr = pool.dynamicData.totalLiquidity > 0 ? wstethBaseApr * wstethPercentage : 0;
-                const userApr = wstethApr * (1 - this.yieldProtocolFeePercentage);
+                const userApr =
+                    pool.type === 'META_STABLE'
+                        ? wstethApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                        : wstethApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
 
                 await prisma.prismaPoolAprItem.upsert({
                     where: { id_chain: { id: itemId, chain: networkContext.chain } },

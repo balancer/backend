@@ -37,7 +37,11 @@ export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
     );
 }
 
-export function collectsSwapFee(pool: PoolWithTypeAndFactory) {
+export function capturesYield(pool: PoolWithTypeAndFactory) {
+    return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
+}
+
+export function collectsFee(pool: PoolWithTypeAndFactory) {
     return (
         !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address) &&
         pool.type !== 'LIQUIDITY_BOOTSTRAPPING'

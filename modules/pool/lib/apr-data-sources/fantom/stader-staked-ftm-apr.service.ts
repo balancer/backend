@@ -3,6 +3,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { networkContext } from '../../../../network/network-context.service';
+import { collectsYieldFee } from '../../pool-utils';
 
 export class StaderStakedFtmAprService implements PoolAprService {
     private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
@@ -18,21 +19,29 @@ export class StaderStakedFtmAprService implements PoolAprService {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const sftmxPrice = this.tokenService.getPriceForToken(tokenPrices, this.SFTMX_ADDRESS);
         let operations: any[] = [];
+
         for (const pool of pools) {
             const sftmxToken = pool.tokens.find((token) => token.address === this.SFTMX_ADDRESS);
             const sftmxTokenBalance = sftmxToken?.dynamicData?.balance;
+
             if (sftmxTokenBalance && pool.dynamicData) {
                 const sftmxPercentage = (parseFloat(sftmxTokenBalance) * sftmxPrice) / pool.dynamicData.totalLiquidity;
                 const sftmxApr = pool.dynamicData.totalLiquidity > 0 ? this.SFTMX_APR * sftmxPercentage : 0;
+
+                const userApr =
+                    pool.type === 'META_STABLE'
+                        ? sftmxApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                        : sftmxApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
                         where: { id_chain: { id: `${pool.id}-sftmx-apr`, chain: networkContext.chain } },
-                        update: { apr: sftmxApr },
+                        update: { apr: collectsYieldFee(pool) ? userApr : sftmxApr },
                         create: {
                             id: `${pool.id}-sftmx-apr`,
                             chain: networkContext.chain,
                             poolId: pool.id,
-                            apr: sftmxApr,
+                            apr: collectsYieldFee(pool) ? userApr : sftmxApr,
                             title: 'sFTMx APR',
                             type: 'IB_YIELD',
                         },

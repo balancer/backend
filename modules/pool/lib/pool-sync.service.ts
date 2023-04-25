@@ -5,7 +5,6 @@ import { poolService } from '../pool.service';
 import { getContractAt } from '../../web3/contract';
 import VaultAbi from '../abi/Vault.json';
 import { networkContext } from '../../network/network-context.service';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export class PoolSyncService {
     public async syncChangedPools() {

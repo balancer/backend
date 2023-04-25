@@ -201,7 +201,11 @@ export class PoolService {
     }
 
     public async updateOnChainDataForPools(poolIds: string[], blockNumber: number) {
-        await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
+        const chunks = _.chunk(poolIds, 100);
+
+        for (const chunk of chunks) {
+            await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);
+        }
     }
 
     public async loadOnChainDataForPoolsWithActiveUpdates() {
@@ -218,6 +222,10 @@ export class PoolService {
 
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
         await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
+    }
+
+    public async updateYieldCaptureForAllPools() {
+        await this.poolUsdDataService.updateYieldCaptureForAllPools();
     }
 
     public async syncSwapsForLast48Hours(): Promise<string[]> {

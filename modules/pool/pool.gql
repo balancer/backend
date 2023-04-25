@@ -119,12 +119,14 @@ type GqlPoolDynamicData {
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    yieldCapture24h: BigDecimal!
     apr: GqlPoolApr!
 
     totalLiquidity24hAgo: BigDecimal!
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+    yieldCapture48h: BigDecimal!
 
     lifetimeVolume: BigDecimal!
     lifetimeSwapFees: BigDecimal!

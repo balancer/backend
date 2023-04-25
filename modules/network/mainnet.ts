@@ -70,10 +70,12 @@ const mainnetNetworkData: NetworkData = {
             '0xf9ac7B9dF2b3454E841110CcE5550bD5AC6f875F',
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0xdba127fBc23fb20F5929C546af220A991b5C6e01',
+            '0xfADa0f4547AB2de89D1304A668C39B3E09Aa7c76',
         ],
         weightedPoolV2Factories: [
             '0xcC508a455F5b0073973107Db6a878DdBDab957bC',
             '0x5Dd94Da3644DDD055fcf6B3E1aa310Bb7801EB8b',
+            '0x897888115Ada5773E02aA29F775430BFB5F34c51',
         ],
         poolsInRecoveryMode: [
             '0x0ce45ba1c33e0741957881e05daff3b1e2954a9b000200000000000000000365',
@@ -107,6 +109,7 @@ const mainnetNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
+        poolDataQueryContract: '0x548e2f8114DDf1c796C37e83D26db9b1cf215a62',
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     masterchef: {
@@ -287,6 +290,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
+        },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
         },
         // The following are multichain jobs and should only run once for all chains.
         {

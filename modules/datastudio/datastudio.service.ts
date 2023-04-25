@@ -9,7 +9,7 @@ import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgr
 import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { oneDayInSeconds, secondsPerDay } from '../common/time';
-import { collectsSwapFee, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
+import { collectsFee, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';
 
@@ -34,7 +34,7 @@ export class DatastudioService {
         const timestampRange = `${this.databaseTabName}!B:B`;
         const poolAddressRange = `${this.databaseTabName}!D:D`;
         const totalSwapRange = `${this.databaseTabName}!J:J`;
-        const chainRange = `${this.databaseTabName}!V:V`;
+        const chainRange = `${this.databaseTabName}!Y:Y`;
         let currentSheetValues;
         currentSheetValues = await sheets.spreadsheets.values.batchGet({
             auth: jwtClient,
@@ -123,6 +123,8 @@ export class DatastudioService {
             let lpSwapFee = `0`;
             let protocolSwapFee = `0`;
             let dailySwaps = `0`;
+            let lpYieldCapture = `0`;
+            let protocolYieldCapture = `0`;
 
             let yesterdaySwapsCount = `0`;
             //find last entry of pool in currentSheet for the correct chain and get total swaps. If no previous value present, set previous value to 0
@@ -144,9 +146,31 @@ export class DatastudioService {
                 tvlChange = `${pool.dynamicData.totalLiquidity - pool.dynamicData.totalLiquidity24hAgo}`;
                 lpSwapFee = `${pool.dynamicData.fees24h * (1 - this.swapProtocolFeePercentage)}`;
                 protocolSwapFee = `${pool.dynamicData.fees24h * this.swapProtocolFeePercentage}`;
-                if (!collectsSwapFee(pool)) {
+
+                lpYieldCapture =
+                    pool.type === 'META_STABLE'
+                        ? `${
+                              pool.dynamicData.yieldCapture24h *
+                              (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                          }`
+                        : `${
+                              pool.dynamicData.yieldCapture24h *
+                              (1 - networkContext.data.balancer.yieldProtocolFeePercentage)
+                          }`;
+
+                protocolYieldCapture =
+                    pool.type === 'META_STABLE'
+                        ? `${pool.dynamicData.yieldCapture24h * networkContext.data.balancer.swapProtocolFeePercentage}`
+                        : `${
+                              pool.dynamicData.yieldCapture24h * networkContext.data.balancer.yieldProtocolFeePercentage
+                          }`;
+
+                if (!collectsFee(pool)) {
                     lpSwapFee = `${pool.dynamicData.fees24h}`;
                     protocolSwapFee = `0`;
+
+                    lpYieldCapture = `${pool.dynamicData.yieldCapture24h}`;
+                    protocolYieldCapture = `0`;
                 }
 
                 dailySwaps = `${pool.dynamicData.swapsCount - parseFloat(yesterdaySwapsCount)}`;
@@ -185,6 +209,9 @@ export class DatastudioService {
                 pool.dynamicData?.fees24h ? `${pool.dynamicData.fees24h}` : `0`,
                 lpSwapFee,
                 protocolSwapFee,
+                pool.dynamicData?.yieldCapture24h ? `${pool.dynamicData.yieldCapture24h}` : `0`,
+                lpYieldCapture,
+                protocolYieldCapture,
                 blacklisted ? 'yes' : 'no',
                 this.chainSlug,
                 `1`,
@@ -296,7 +323,7 @@ export class DatastudioService {
 
         console.log(`Appending ${allPoolDataRows.length} rows to ${this.databaseTabName}.`);
 
-        this.appendDataInSheet(this.databaseTabName, 'A1:W1', allPoolDataRows, jwtClient);
+        this.appendDataInSheet(this.databaseTabName, 'A1:Z1', allPoolDataRows, jwtClient);
 
         console.log(`Appending ${allPoolCompositionRows.length} rows to ${this.compositionTabName}.`);
 

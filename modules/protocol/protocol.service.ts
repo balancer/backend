@@ -11,6 +11,7 @@ interface ProtocolMetrics {
     poolCount: string;
     swapFee24h: string;
     swapVolume24h: string;
+    yieldCapture24h: string;
     swapFee7d: string;
     swapVolume7d: string;
     totalLiquidity: string;
@@ -51,6 +52,7 @@ export class ProtocolService {
         const poolCount = _.sumBy(chainMetrics, (metrics) => parseInt(metrics.poolCount));
         const swapVolume24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume24h));
         const swapFee24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee24h));
+        const yieldCapture24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.yieldCapture24h));
         const swapVolume7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume7d));
         const swapFee7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee7d));
         const numLiquidityProviders = _.sumBy(chainMetrics, (metrics) => parseInt(metrics.numLiquidityProviders));
@@ -62,6 +64,7 @@ export class ProtocolService {
             poolCount: `${poolCount}`,
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
+            yieldCapture24h: `${yieldCapture24h}`,
             swapVolume7d: `${swapVolume7d}`,
             swapFee7d: `${swapFee7d}`,
             numLiquidityProviders: `${numLiquidityProviders}`,
@@ -125,6 +128,8 @@ export class ProtocolService {
             return parseFloat(pool?.dynamicData?.swapFee || '0') * swap.valueUSD;
         });
 
+        const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
+
         const swapVolume7d = _.sumBy(filteredSwaps, (swap) => swap.valueUSD);
         const swapFee7d = _.sumBy(filteredSwaps, (swap) => {
             const pool = pools.find((pool) => pool.id === swap.poolId);
@@ -139,6 +144,7 @@ export class ProtocolService {
             poolCount: `${poolCount}`,
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
+            yieldCapture24h: `${yieldCapture24h}`,
             swapVolume7d: `${swapVolume7d}`,
             swapFee7d: `${swapFee7d}`,
             numLiquidityProviders: `${numLiquidityProviders}`,

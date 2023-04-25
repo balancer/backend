@@ -6,6 +6,7 @@ import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
+import { capturesYield, collectsFee } from './pool-utils';
 
 export class PoolUsdDataService {
     constructor(
@@ -153,6 +154,72 @@ export class PoolUsdDataService {
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: { volume24h, fees24h, volume48h, fees48h },
+                    }),
+                );
+            }
+        }
+
+        await prismaBulkExecuteOperations(operations);
+    }
+
+    /*
+        We approximate the yield fee capture of the last 24h by taking the current total yield APR and apply it to the average totalLiquidity from now and 24 hours ago.
+        We approximate the yield fee capture of the last 48h by taking the current total yield APR and apply it to the totalLiquidity from 24 hours ago.
+    */
+    public async updateYieldCaptureForAllPools() {
+        const pools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
+            include: {
+                dynamicData: true,
+                aprItems: true,
+            },
+        });
+        const operations: any[] = [];
+
+        for (const pool of pools) {
+            if (pool.dynamicData?.totalLiquidity && capturesYield(pool)) {
+                const totalLiquidity = pool.dynamicData.totalLiquidity;
+                const totalLiquidity24hAgo = pool.dynamicData.totalLiquidity24hAgo;
+                let userYieldApr = 0;
+
+                // we approximate total APR by summing it up, as APRs are usually small, this is good enough
+                // we need IB yield APR (such as sFTMx) as well as phantom stable APR, which is set for phantom stable pools
+                // we need any phantom stable pool or weighted pool that has either a phantom stable or a linear nested, which has no apr type set (done by boosted-pool-apr.service.ts)
+                pool.aprItems.forEach((aprItem) => {
+                    if (
+                        aprItem.type === 'IB_YIELD' ||
+                        aprItem.type === 'PHANTOM_STABLE_BOOSTED' ||
+                        aprItem.type === null
+                    ) {
+                        userYieldApr += aprItem.apr;
+                    }
+                });
+
+                const liquidityAverage24h = (totalLiquidity + totalLiquidity24hAgo) / 2;
+                const yieldForUser48h = ((totalLiquidity24hAgo * userYieldApr) / 365) * 2;
+                const yieldForUser24h = (liquidityAverage24h * userYieldApr) / 365;
+
+                let yieldCapture24h =
+                    pool.type === 'META_STABLE'
+                        ? yieldForUser24h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                        : yieldForUser24h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+
+                let yieldCapture48h =
+                    pool.type === 'META_STABLE'
+                        ? yieldForUser48h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                        : yieldForUser48h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+
+                // if the pool is in recovery mode, the protocol does not take any fee and therefore the user takes all yield captured
+                // since this is already reflected in the aprItems of the pool, we need to set that as the totalYieldCapture
+                if (!collectsFee(pool)) {
+                    yieldCapture24h = yieldForUser24h;
+                    yieldCapture48h = yieldForUser48h;
+                }
+
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        data: { yieldCapture24h, yieldCapture48h },
                     }),
                 );
             }
