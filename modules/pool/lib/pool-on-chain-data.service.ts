@@ -19,6 +19,8 @@ import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-u
 import { TokenService } from '../../token/token.service';
 import { networkContext } from '../../network/network-context.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
+import { isSupportedInt } from '../../../prisma/prisma-util';
+import * as Sentry from '@sentry/node';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -371,6 +373,25 @@ export class PoolOnChainDataService {
                         poolToken.dynamicData.priceRate !== priceRate ||
                         poolToken.dynamicData.weight !== weight
                     ) {
+                        const balanceUSD =
+                            poolToken.address === pool.address
+                                ? 0
+                                : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
+                                  parseFloat(balance);
+
+                        if (!isSupportedInt(balanceUSD)) {
+                            Sentry.captureException(
+                                `Skipping unsupported int size for prismaPoolTokenDynamicData.balanceUSD: ${balanceUSD}`,
+                                {
+                                    tags: {
+                                        poolId: pool.id,
+                                        poolName: pool.name,
+                                    },
+                                },
+                            );
+                            continue;
+                        }
+
                         await prisma.prismaPoolTokenDynamicData.upsert({
                             where: { id_chain: { id: poolToken.id, chain: networkContext.chain } },
                             create: {
@@ -381,22 +402,14 @@ export class PoolOnChainDataService {
                                 priceRate,
                                 weight,
                                 balance,
-                                balanceUSD:
-                                    poolToken.address === pool.address
-                                        ? 0
-                                        : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                          parseFloat(balance),
+                                balanceUSD,
                             },
                             update: {
                                 blockNumber,
                                 priceRate,
                                 weight,
                                 balance,
-                                balanceUSD:
-                                    poolToken.address === pool.address
-                                        ? 0
-                                        : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                          parseFloat(balance),
+                                balanceUSD,
                             },
                         });
                     }
