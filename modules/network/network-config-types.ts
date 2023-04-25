@@ -84,6 +84,7 @@ export interface NetworkData {
         poolsInRecoveryMode: string[];
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
+        poolDataQueryContract: string;
     };
     multicall: string;
     masterchef: {

@@ -109,6 +109,7 @@ const mainnetNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
+        poolDataQueryContract: '0x548e2f8114DDf1c796C37e83D26db9b1cf215a62',
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     masterchef: {
