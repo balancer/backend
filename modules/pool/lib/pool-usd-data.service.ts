@@ -1,12 +1,13 @@
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
 import { capturesYield, collectsFee } from './pool-utils';
+import * as Sentry from '@sentry/node';
 
 export class PoolUsdDataService {
     constructor(
@@ -55,12 +56,36 @@ export class PoolUsdDataService {
             const totalLiquidity = _.sumBy(balanceUSDs, (item) => item.balanceUSD);
 
             for (const item of balanceUSDs) {
+                if (!isSupportedInt(item.balanceUSD)) {
+                    Sentry.captureException(
+                        `Skipping unsupported int size for prismaPoolTokenDynamicData.balanceUSD: ${item.balanceUSD}`,
+                        {
+                            tags: {
+                                poolId: pool.id,
+                                poolName: pool.name,
+                            },
+                        },
+                    );
+                    continue;
+                }
                 updates.push(
                     prisma.prismaPoolTokenDynamicData.update({
                         where: { id_chain: { id: item.id, chain: networkContext.chain } },
                         data: { balanceUSD: item.balanceUSD },
                     }),
                 );
+            }
+            if (!isSupportedInt(totalLiquidity)) {
+                Sentry.captureException(
+                    `Skipping unsupported int size for prismaPoolDynamicData.totalLiquidity: ${totalLiquidity} `,
+                    {
+                        tags: {
+                            poolId: pool.id,
+                            poolName: pool.name,
+                        },
+                    },
+                );
+                continue;
             }
 
             updates.push(
