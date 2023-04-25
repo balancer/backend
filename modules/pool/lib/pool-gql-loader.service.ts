@@ -21,7 +21,6 @@ import {
     GqlPoolNestingType,
     GqlPoolPhantomStableNested,
     GqlPoolStaking,
-    GqlPoolStakingReliquaryFarmLevel,
     GqlPoolToken,
     GqlPoolTokenDisplay,
     GqlPoolTokenExpanded,

@@ -6,7 +6,7 @@ import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
-import { capturesYield, collectsYieldFee } from './pool-utils';
+import { capturesYield, collectsFee } from './pool-utils';
 
 export class PoolUsdDataService {
     constructor(
@@ -211,7 +211,7 @@ export class PoolUsdDataService {
 
                 // if the pool is in recovery mode, the protocol does not take any fee and therefore the user takes all yield captured
                 // since this is already reflected in the aprItems of the pool, we need to set that as the totalYieldCapture
-                if (networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address)) {
+                if (!collectsFee(pool)) {
                     yieldCapture24h = yieldForUser24h;
                     yieldCapture48h = yieldForUser48h;
                 }

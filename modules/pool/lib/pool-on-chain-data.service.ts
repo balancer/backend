@@ -17,7 +17,6 @@ import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
-import { WeiPerEther } from '@ethersproject/constants';
 import { networkContext } from '../../network/network-context.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 
