@@ -220,6 +220,10 @@ export class PoolService {
         await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
     }
 
+    public async updateYieldCaptureForAllPools() {
+        await this.poolUsdDataService.updateYieldCaptureForAllPools();
+    }
+
     public async syncSwapsForLast48Hours(): Promise<string[]> {
         return this.poolSwapService.syncSwapsForLast48Hours();
     }

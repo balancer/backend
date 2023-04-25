@@ -294,5 +294,9 @@ export const optimismNetworkConfig: NetworkConfig = {
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
+        },
     ],
 };

@@ -288,6 +288,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
+        },
         // The following are multichain jobs and should only run once for all chains.
         {
             name: 'sync-global-coingecko-prices',

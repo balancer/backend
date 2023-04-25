@@ -313,5 +313,9 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
         },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
+        },
     ],
 };

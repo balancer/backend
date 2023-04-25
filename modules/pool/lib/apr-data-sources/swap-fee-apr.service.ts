@@ -2,7 +2,7 @@ import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { collectsSwapFee } from '../pool-utils';
+import { collectsFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
 const MAX_DB_INT = 9223372036854775807;
@@ -25,7 +25,7 @@ export class SwapFeeAprService implements PoolAprService {
 
                 let userApr = apr * (1 - this.swapProtocolFeePercentage);
 
-                if (!collectsSwapFee(pool)) {
+                if (!collectsFee(pool)) {
                     userApr = apr;
                 }
 

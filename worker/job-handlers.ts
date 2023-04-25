@@ -249,6 +249,9 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'sync-coingecko-coinids':
             await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), 0.01);
             break;
+        case 'update-yield-capture':
+            await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateYieldCaptureForAllPools(), 0.01);
+            break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
     }
