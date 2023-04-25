@@ -17,9 +17,10 @@ import {
 } from '../../../schema';
 import { PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
 import { networkContext } from '../../network/network-context.service';
+import * as Sentry from '@sentry/node';
 
 export class PoolSwapService {
     constructor(
@@ -227,6 +228,22 @@ export class PoolSwapService {
 
                     poolIds.add(swap.poolId.id);
                     txs.add(swap.tx);
+                    if (!isSupportedInt(valueUSD)) {
+                        Sentry.captureException(
+                            `Sett unsupported int size for prismaPoolSwap.valueUSD: ${valueUSD} to 0`,
+                            {
+                                tags: {
+                                    tokenIn: swap.tokenIn,
+                                    tokenInAmount: swap.tokenAmountIn,
+                                    tokenInPrice: tokenInPrice,
+                                    tokenOut: swap.tokenOut,
+                                    tokenOutAmount: swap.tokenAmountOut,
+                                    tokenOutPrice: tokenOutPrice,
+                                },
+                            },
+                        );
+                        valueUSD = 0;
+                    }
 
                     return {
                         id: swap.id,

@@ -8,8 +8,6 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
@@ -72,10 +70,12 @@ const arbitrumNetworkData: NetworkData = {
             '0xaEb406b0E430BF5Ea2Dc0B9Fe62E4E53f74B3a33',
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0x1c99324EDC771c82A0DCCB780CC7DDA0045E50e7',
+            '0x2498A2B0d6462d2260EAC50aE1C3e03F4829BA95',
         ],
         weightedPoolV2Factories: [
             '0x8df6EfEc5547e31B0eb7d1291B511FF8a2bf987c',
             '0xf1665E19bc105BE4EDD3739F88315cC699cc5b65',
+            '0xc7E5ED1054A24Ef31D827E6F86caA58B3Bc168d7',
         ],
         poolsInRecoveryMode: [
             '0x13f2f70a951fb99d48ede6e25b0bdf06914db33f00020000000000000000016b',
@@ -89,6 +89,7 @@ const arbitrumNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
+        poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
     },
     multicall: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
     masterchef: {
@@ -269,6 +270,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
+        },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
         },
     ],
 };

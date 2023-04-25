@@ -1,4 +1,5 @@
 extend type Query {
+    chainMetrics: GqlProtocolMetrics!
     protocolMetrics: GqlProtocolMetrics!
     latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
@@ -14,6 +15,10 @@ type GqlProtocolMetrics {
     poolCount: BigInt!
     swapFee24h: BigDecimal!
     swapVolume24h: BigDecimal!
+    yieldCapture24h: BigDecimal!
+    swapFee7d: BigDecimal!
+    swapVolume7d: BigDecimal!
+    numLiquidityProviders: BigInt!
 }
 
 type GqlLatestSyncedBlocks {

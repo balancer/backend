@@ -121,14 +121,18 @@ export class TokenService {
 
     public async syncCoingeckoPricesForAllChains(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
+
         const tokensWithoutCoingeckoId = await prisma.prismaToken.findMany({
             where: { coingeckoTokenId: null, types: { some: { type: 'WHITE_LISTED' } } },
             include: { types: true },
         });
+
         let tokensWithTypes = tokensWithoutCoingeckoId.map((token) => ({
             ...token,
             types: token.types.map((type) => type.type),
         }));
+
+        // Also update any tokens that don't have a coingecko ID by using their contract address
         const coingeckoService = new CoingeckoPriceHandlerService(new CoingeckoService());
         const accepted = await coingeckoService.getAcceptedTokens(tokensWithTypes);
         const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));

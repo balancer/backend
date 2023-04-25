@@ -4,6 +4,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { networkContext } from '../../../../network/network-context.service';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
+import { collectsYieldFee } from '../../pool-utils';
 
 export class AnkrStakedFtmAprService implements PoolAprService {
     private readonly ankrFTM_ADDRESS = '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179';
@@ -30,19 +31,26 @@ export class AnkrStakedFtmAprService implements PoolAprService {
         for (const pool of pools) {
             const ankrFtmToken = pool.tokens.find((token) => token.address === this.ankrFTM_ADDRESS);
             const ankrFtmTokenBalance = ankrFtmToken?.dynamicData?.balance;
+
             if (ankrFtmTokenBalance && pool.dynamicData) {
                 const ankrFtmPercentage =
                     (parseFloat(ankrFtmTokenBalance) * ankrFtmPrice) / pool.dynamicData.totalLiquidity;
                 const poolAnkrFtmApr = pool.dynamicData.totalLiquidity > 0 ? totalAnkrFTMApr * ankrFtmPercentage : 0;
+
+                const userApr =
+                    pool.type === 'META_STABLE'
+                        ? poolAnkrFtmApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
+                        : poolAnkrFtmApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
                         where: { id_chain: { id: `${pool.id}-ankrftm-apr`, chain: networkContext.chain } },
-                        update: { apr: poolAnkrFtmApr },
+                        update: { apr: collectsYieldFee(pool) ? userApr : poolAnkrFtmApr },
                         create: {
                             id: `${pool.id}-ankrftm-apr`,
                             chain: networkContext.chain,
                             poolId: pool.id,
-                            apr: poolAnkrFtmApr,
+                            apr: collectsYieldFee(pool) ? userApr : poolAnkrFtmApr,
                             title: 'ankrFTM APR',
                             type: 'IB_YIELD',
                         },

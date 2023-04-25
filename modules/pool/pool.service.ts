@@ -201,7 +201,11 @@ export class PoolService {
     }
 
     public async updateOnChainDataForPools(poolIds: string[], blockNumber: number) {
-        await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
+        const chunks = _.chunk(poolIds, 100);
+
+        for (const chunk of chunks) {
+            await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);
+        }
     }
 
     public async loadOnChainDataForPoolsWithActiveUpdates() {
@@ -218,6 +222,10 @@ export class PoolService {
 
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
         await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
+    }
+
+    public async updateYieldCaptureForAllPools() {
+        await this.poolUsdDataService.updateYieldCaptureForAllPools();
     }
 
     public async syncSwapsForLast48Hours(): Promise<string[]> {
@@ -314,6 +322,35 @@ export class PoolService {
 
     public async setPoolsWithPreferredGaugesAsIncentivized() {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
+    }
+
+    public async addToBlackList(poolId: string) {
+        const category = await prisma.prismaPoolCategory.findFirst({
+            where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
+        });
+
+        if (category) {
+            throw new Error('Pool with id is already blacklisted');
+        }
+
+        await prisma.prismaPoolCategory.create({
+            data: {
+                id: `${networkContext.chain}-${poolId}-BLACK_LISTED`,
+                category: 'BLACK_LISTED',
+                chain: networkContext.chain,
+                poolId,
+            },
+        });
+    }
+
+    public async removeFromBlackList(poolId: string) {
+        await prisma.prismaPoolCategory.deleteMany({
+            where: {
+                category: 'BLACK_LISTED',
+                chain: networkContext.chain,
+                poolId,
+            },
+        });
     }
 }
 

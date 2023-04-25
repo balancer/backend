@@ -11,8 +11,6 @@ import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.ser
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
@@ -71,8 +69,16 @@ const optimismNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: ['0xf145caFB67081895EE80eB7c04A30Cf87f07b745'],
-        weightedPoolV2Factories: ['0xad901309d9e9DbC5Df19c84f729f429F0189a633'],
+        composableStablePoolFactories: [
+            '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
+            '0xe2E901AB09f37884BA31622dF3Ca7FC19AA443Be',
+            '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
+        ],
+        weightedPoolV2Factories: [
+            '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
+            '0xA0DAbEBAAd1b243BBb243f933013d560819eB66f',
+            '0x230a59F4d9ADc147480f03B0D3fFfeCd56c3289a',
+        ],
         poolsInRecoveryMode: [
             '0x05e7732bf9ae5592e6aa05afe8cd80f7ab0a7bea',
             '0x359ea8618c405023fc4b98dab1b01f373792a126',
@@ -102,6 +108,7 @@ const optimismNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
+        poolDataQueryContract: '0xB79C16EfD530e46b7A1499c1854f13f4Bd10f4DF',
     },
     multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
     masterchef: {
@@ -295,6 +302,10 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
+        },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
         },
     ],
 };

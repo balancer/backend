@@ -17,3 +17,7 @@ export async function prismaBulkExecuteOperations(
         }
     }
 }
+
+export function isSupportedInt(int: number) {
+    return int < 9223372036854775296;
+}

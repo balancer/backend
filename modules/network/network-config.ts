@@ -12,3 +12,6 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '42161': arbitrumNetworkConfig,
     '137': polygonNetworkConfig,
 };
+
+export const BalancerChainIds = ['1', '137', '42161'];
+export const BeethovenChainIds = ['250', '10'];

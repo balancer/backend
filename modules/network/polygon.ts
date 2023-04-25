@@ -7,8 +7,6 @@ import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.ser
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
@@ -71,10 +69,12 @@ const polygonNetworkData: NetworkData = {
             '0x136FD06Fa01eCF624C7F2B3CB15742c1339dC2c4',
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0x7bc6C0E73EDAa66eF3F6E2f27b0EE8661834c6C9',
+            '0x6Ab5549bBd766A43aFb687776ad8466F8b42f777',
         ],
         weightedPoolV2Factories: [
             '0x0e39C3D9b2ec765eFd9c5c70BB290B1fCD8536E3',
             '0x82e4cFaef85b1B6299935340c964C942280327f4',
+            '0xFc8a407Bba312ac761D8BFe04CE1201904842B76',
         ],
         poolsInRecoveryMode: [
             '0x02d2e2d7a89d6c5cb3681cfcb6f7dac02a55eda400000000000000000000088f',
@@ -112,6 +112,7 @@ const polygonNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
+        poolDataQueryContract: '0x60467cb225092cE0c989361934311175f437Cf53',
     },
     multicall: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
     masterchef: {
@@ -278,6 +279,10 @@ export const polygonNetworkConfig: NetworkConfig = {
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
+        },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
         },
     ],
 };

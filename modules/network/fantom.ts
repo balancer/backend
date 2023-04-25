@@ -17,8 +17,6 @@ import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliqu
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { FbeetsPriceHandlerService } from '../token/lib/token-price-handlers/fbeets-price-handler.service';
 import { ClqdrPriceHandlerService } from '../token/lib/token-price-handlers/clqdr-price-handler.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
@@ -89,15 +87,20 @@ const fantomNetworkData: NetworkData = {
             '0x5AdAF6509BCEc3219455348AC45d6D3261b1A990',
             '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
             '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
+            '0x911566c808bF00acB200B418564440A2Af177548',
+            '0x5c3094982cF3c97A06b7d62A6f7669F14a199B19',
         ],
         weightedPoolV2Factories: [
             '0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb',
             '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
             '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
+            '0xd678b6Acd834Cc969Bb19Ce82727f2a541fb7941',
+            '0xb841Df73861E65E6D61a80F503F095a91ce75e15',
         ],
         poolsInRecoveryMode: ['0x9e4341acef4147196e99d648c5e43b3fc9d02678'],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
+        poolDataQueryContract: '0x3e898A1A3aEFB543DA20232994aeDaD2ce7Fa856',
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     masterchef: {
@@ -314,6 +317,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
+        },
+        {
+            name: 'update-yield-capture',
+            interval: every(1, 'hours'),
         },
     ],
 };

@@ -1,4 +1,4 @@
-import { Prisma, PrismaToken, PrismaTokenTypeOption } from '@prisma/client';
+import { Prisma, PrismaToken, PrismaTokenPrice, PrismaTokenTypeOption } from '@prisma/client';
 
 const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: { tokens: true },
@@ -200,7 +200,14 @@ export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayloa
     typeof prismaPoolTokenWithExpandedNesting
 >;
 
-export type PrismaTokenWithTypes = PrismaToken & { types: PrismaTokenTypeOption[] };
+export type PrismaTokenWithTypes = PrismaToken & {
+    types: PrismaTokenTypeOption[];
+};
+
+export type PrismaTokenWithTypesAndPrices = PrismaToken & {
+    types: PrismaTokenTypeOption[];
+    prices: PrismaTokenPrice[];
+};
 
 export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
