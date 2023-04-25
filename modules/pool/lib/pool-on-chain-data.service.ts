@@ -99,8 +99,12 @@ export class PoolOnChainDataService {
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
 
-        const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: poolIds }, chain: networkContext.chain },
+        const filteredPools = await prisma.prismaPool.findMany({
+            where: {
+                id: { in: poolIds },
+                chain: networkContext.chain,
+                type: { in: SUPPORTED_POOL_TYPES },
+            },
             include: {
                 tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true, token: true } },
                 stableDynamicData: true,
@@ -110,12 +114,12 @@ export class PoolOnChainDataService {
             },
         });
 
-        const poolIdsFromDb = pools.map((pool) => pool.id);
+        const poolIdsFromDb = filteredPools.map((pool) => pool.id);
 
         const weightedPoolIndexes: number[] = [];
         const linearPoolIdexes: number[] = [];
         const stablePoolIdexes: number[] = [];
-        for (const pool of pools) {
+        for (const pool of filteredPools) {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 weightedPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
@@ -135,7 +139,7 @@ export class PoolOnChainDataService {
                 loadAmps: stablePoolIdexes.length > 0,
                 ampPoolIdxs: stablePoolIdexes,
                 loadSwapFees: true,
-                swapFeeTypes: pools.map((pool) => {
+                swapFeeTypes: filteredPools.map((pool) => {
                     if (
                         pool.type === 'WEIGHTED' ||
                         pool.type === 'LIQUIDITY_BOOTSTRAPPING' ||
@@ -150,7 +154,7 @@ export class PoolOnChainDataService {
                     }
                 }),
                 loadTotalSupply: true,
-                totalSupplyTypes: pools.map((pool) => {
+                totalSupplyTypes: filteredPools.map((pool) => {
                     if (isComposableStablePool(pool) || isWeightedPoolV2(pool) || pool.type === 'PHANTOM_STABLE') {
                         return PoolQueriesTotalSupplyType.ACTUAL_SUPPLY;
                     } else if (pool.type === 'LINEAR') {
@@ -206,7 +210,7 @@ export class PoolOnChainDataService {
 
         const multiPool = new Multicaller(networkContext.data.multicall, provider, abis);
 
-        pools.forEach((pool) => {
+        filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
                 return;
@@ -252,7 +256,7 @@ export class PoolOnChainDataService {
 
         for (let index = 0; index < poolsOnChainDataArray.length; index++) {
             const [poolId, onchainData] = poolsOnChainDataArray[index];
-            const pool = pools.find((pool) => pool.id === poolId)!;
+            const pool = filteredPools.find((pool) => pool.id === poolId)!;
             const poolDataQueryResult = poolDataPerPool.find((poolData) => poolData.id === pool.id);
             if (!poolDataQueryResult) {
                 throw Error(`Did not receive poolDataQuery result for pool id ${poolId}`);
