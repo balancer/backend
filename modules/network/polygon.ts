@@ -69,10 +69,12 @@ const polygonNetworkData: NetworkData = {
             '0x136FD06Fa01eCF624C7F2B3CB15742c1339dC2c4',
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0x7bc6C0E73EDAa66eF3F6E2f27b0EE8661834c6C9',
+            '0x6Ab5549bBd766A43aFb687776ad8466F8b42f777',
         ],
         weightedPoolV2Factories: [
             '0x0e39C3D9b2ec765eFd9c5c70BB290B1fCD8536E3',
             '0x82e4cFaef85b1B6299935340c964C942280327f4',
+            '0xFc8a407Bba312ac761D8BFe04CE1201904842B76',
         ],
         poolsInRecoveryMode: [
             '0x02d2e2d7a89d6c5cb3681cfcb6f7dac02a55eda400000000000000000000088f',
