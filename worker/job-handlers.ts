@@ -25,7 +25,7 @@ const defaultSamplingRate = 0.001;
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
-        await scheduleWithInterval(job, chainId);
+        scheduleWithInterval(job, chainId);
     }
 }
 
