@@ -226,7 +226,7 @@ export class CoingeckoService {
         } catch (err: any | AxiosError) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 429) {
-                    throw Error('Coingecko ratelimit');
+                    throw Error(`Coingecko ratelimit: ${err}`);
                 }
             }
             throw err;
