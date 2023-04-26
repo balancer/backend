@@ -1,0 +1,18 @@
+name: Checks
+
+on:
+  - pull_request
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: Install deps
+        run: yarn 
+      - name: Run build
+        run: yarn build
