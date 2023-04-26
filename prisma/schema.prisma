@@ -14,11 +14,12 @@ datasource db {
 }
 
 enum Chain {
-    MAINNET
-    POLYGON
     ARBITRUM
     FANTOM
+    GNOSIS
+    MAINNET
     OPTIMISM
+    POLYGON
 }
 
 model PrismaLastBlockSynced {

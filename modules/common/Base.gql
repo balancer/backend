@@ -2,9 +2,10 @@ type Query
 type Mutation
 
 enum GqlChain {
-    MAINNET
-    POLYGON
     ARBITRUM
     FANTOM
+    GNOSIS
+    MAINNET
     OPTIMISM
+    POLYGON
 }
