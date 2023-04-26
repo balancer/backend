@@ -21,10 +21,10 @@ export class ProtocolService {
 
     constructor(private balancerSubgraphService: BalancerSubgraphService) {}
 
-    public async getGlobalMetrics(): Promise<GqlProtocolMetricsAggregated> {
+    public async getAggregatedMetrics(chainIds: string[]): Promise<GqlProtocolMetricsAggregated> {
         const chainMetrics: GqlProtocolMetricsChain[] = [];
 
-        for (const chainId of networkContext.protocolSupportedChainIds) {
+        for (const chainId of chainIds) {
             // this should resolve quickly if all chains are cached, possible to get slammed by an unlucky query though
             const metrics = await this.getMetrics(chainId);
 
