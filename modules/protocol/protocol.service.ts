@@ -6,19 +6,7 @@ import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@pr
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
 import { AllNetworkConfigs } from '../network/network-config';
-
-interface ProtocolMetrics {
-    poolCount: string;
-    swapFee24h: string;
-    swapVolume24h: string;
-    yieldCapture24h: string;
-    swapFee7d: string;
-    swapVolume7d: string;
-    totalLiquidity: string;
-    totalSwapFee: string;
-    totalSwapVolume: string;
-    numLiquidityProviders: string;
-}
+import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -29,21 +17,18 @@ interface LatestSyncedBlocks {
 export const PROTOCOL_METRICS_CACHE_KEY = `protocol:metrics`;
 
 export class ProtocolService {
-    private cache = new Cache<string, ProtocolMetrics>();
+    private cache = new Cache<string, GqlProtocolMetricsChain>();
 
     constructor(private balancerSubgraphService: BalancerSubgraphService) {}
 
-    public async getGlobalMetrics(): Promise<ProtocolMetrics> {
-        const chainMetrics: (ProtocolMetrics & { chainId: string })[] = [];
+    public async getGlobalMetrics(): Promise<GqlProtocolMetricsAggregated> {
+        const chainMetrics: GqlProtocolMetricsChain[] = [];
 
         for (const chainId of networkContext.protocolSupportedChainIds) {
             // this should resolve quickly if all chains are cached, possible to get slammed by an unlucky query though
             const metrics = await this.getMetrics(chainId);
 
-            chainMetrics.push({
-                chainId,
-                ...metrics,
-            });
+            chainMetrics.push(metrics);
         }
 
         const totalLiquidity = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.totalLiquidity));
@@ -68,10 +53,11 @@ export class ProtocolService {
             swapVolume7d: `${swapVolume7d}`,
             swapFee7d: `${swapFee7d}`,
             numLiquidityProviders: `${numLiquidityProviders}`,
+            chains: chainMetrics,
         };
     }
 
-    public async getMetrics(chainId: string): Promise<ProtocolMetrics> {
+    public async getMetrics(chainId: string): Promise<GqlProtocolMetricsChain> {
         const cached = this.cache.get(`${PROTOCOL_METRICS_CACHE_KEY}:${chainId}`);
 
         if (cached) {
@@ -81,11 +67,12 @@ export class ProtocolService {
         return this.cacheProtocolMetrics(chainId, AllNetworkConfigs[chainId].data.chain.prismaId);
     }
 
-    public async cacheProtocolMetrics(chainId: string, chain: Chain): Promise<ProtocolMetrics> {
-        const { totalSwapFee, totalSwapVolume, poolCount } = await this.balancerSubgraphService.getProtocolData({});
-
+    public async cacheProtocolMetrics(chainId: string, chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
-        const sevenDaysAgo = moment().subtract(168, 'hours').unix();
+        const startOfDay = moment().startOf('day').unix();
+        const sevenDayRange = moment().startOf('day').subtract(7, 'days').unix();
+
+        const { totalSwapFee, totalSwapVolume, poolCount } = await this.balancerSubgraphService.getProtocolData({});
 
         const pools = await prisma.prismaPool.findMany({
             where: {
@@ -103,26 +90,18 @@ export class ProtocolService {
 
         const swaps = await prisma.prismaPoolSwap.findMany({
             select: { poolId: true, valueUSD: true, timestamp: true },
-            where: { timestamp: { gte: sevenDaysAgo }, chain },
+            where: { timestamp: { gte: oneDayAgo }, chain },
         });
         const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
-        const filteredSwaps24h = filteredSwaps.filter((swap) => swap.timestamp >= oneDayAgo);
 
-        const numLiquidityProviders = await prisma.prismaUser.count({
-            where: {
-                walletBalances: {
-                    some: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
-                },
-                stakedBalances: {
-                    some: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
-                },
-            },
+        const holdersQueryResponse = await prisma.prismaPoolDynamicData.aggregate({
+            _sum: { holdersCount: true },
+            where: { chain },
         });
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
-
-        const swapVolume24h = _.sumBy(filteredSwaps24h, (swap) => swap.valueUSD);
-        const swapFee24h = _.sumBy(filteredSwaps24h, (swap) => {
+        const swapVolume24h = _.sumBy(filteredSwaps, (swap) => swap.valueUSD);
+        const swapFee24h = _.sumBy(filteredSwaps, (swap) => {
             const pool = pools.find((pool) => pool.id === swap.poolId);
 
             return parseFloat(pool?.dynamicData?.swapFee || '0') * swap.valueUSD;
@@ -130,14 +109,17 @@ export class ProtocolService {
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
 
-        const swapVolume7d = _.sumBy(filteredSwaps, (swap) => swap.valueUSD);
-        const swapFee7d = _.sumBy(filteredSwaps, (swap) => {
-            const pool = pools.find((pool) => pool.id === swap.poolId);
-
-            return parseFloat(pool?.dynamicData?.swapFee || '0') * swap.valueUSD;
+        //we take the aggregate of the last 7 days previous to today, since today's values grow throughout the day
+        const snapshotQueryResponse = await prisma.prismaPoolSnapshot.aggregate({
+            _sum: { fees24h: true, volume24h: true },
+            where: {
+                chain,
+                timestamp: { gte: sevenDayRange, lt: startOfDay },
+            },
         });
 
-        const protocolData: ProtocolMetrics = {
+        const protocolData = {
+            chainId,
             totalLiquidity: `${totalLiquidity}`,
             totalSwapFee,
             totalSwapVolume,
@@ -145,9 +127,9 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
-            swapVolume7d: `${swapVolume7d}`,
-            swapFee7d: `${swapFee7d}`,
-            numLiquidityProviders: `${numLiquidityProviders}`,
+            swapVolume7d: `${snapshotQueryResponse._sum.volume24h}`,
+            swapFee7d: `${snapshotQueryResponse._sum.fees24h}`,
+            numLiquidityProviders: `${holdersQueryResponse._sum.holdersCount || '0'}`,
         };
 
         this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chainId}`, protocolData, 60 * 30 * 1000);

@@ -1,6 +1,6 @@
 extend type Query {
-    chainMetrics: GqlProtocolMetrics!
-    protocolMetrics: GqlProtocolMetrics!
+    protocolMetricsChain: GqlProtocolMetricsChain!
+    protocolMetricsAggregated(chainIds: [String!]!): GqlProtocolMetricsAggregated!
     latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
 
@@ -8,7 +8,22 @@ extend type Mutation {
     protocolCacheMetrics: String!
 }
 
-type GqlProtocolMetrics {
+type GqlProtocolMetricsAggregated {
+    totalLiquidity: BigDecimal!
+    totalSwapVolume: BigDecimal!
+    totalSwapFee: BigDecimal!
+    poolCount: BigInt!
+    swapFee24h: BigDecimal!
+    swapVolume24h: BigDecimal!
+    yieldCapture24h: BigDecimal!
+    swapFee7d: BigDecimal!
+    swapVolume7d: BigDecimal!
+    numLiquidityProviders: BigInt!
+    chains: [GqlProtocolMetricsChain!]!
+}
+
+type GqlProtocolMetricsChain {
+    chainId: String!
     totalLiquidity: BigDecimal!
     totalSwapVolume: BigDecimal!
     totalSwapFee: BigDecimal!
