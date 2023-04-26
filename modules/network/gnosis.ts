@@ -29,7 +29,7 @@ const gnosisNetworkData: NetworkData = {
         startDate: '2021-08-23',
         balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
         beetsBar: 'https://',
-        blocks: '',
+        blocks: 'https://api.thegraph.com/subgraphs/name/rebase-agency/gnosis-chain-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-gnosis-chain-b',
         userBalances: 'https://',
     },
