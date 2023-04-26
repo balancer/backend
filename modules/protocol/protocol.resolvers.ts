@@ -1,14 +1,14 @@
-import { GqlLatestSyncedBlocks, GqlProtocolMetrics, Resolvers } from '../../schema';
+import { GqlLatestSyncedBlocks, Resolvers } from '../../schema';
 import { protocolService } from './protocol.service';
 import { networkContext } from '../network/network-context.service';
 
 const protocolResolvers: Resolvers = {
     Query: {
-        protocolMetrics: async (): Promise<GqlProtocolMetrics> => {
-            return protocolService.getGlobalMetrics();
-        },
-        chainMetrics: async (): Promise<GqlProtocolMetrics> => {
+        protocolMetricsChain: async (parent, args, context) => {
             return protocolService.getMetrics(networkContext.chainId);
+        },
+        protocolMetricsAggregated: async (parent, { chainIds }, context) => {
+            return protocolService.getAggregatedMetrics(chainIds);
         },
         latestSyncedBlocks: async (): Promise<GqlLatestSyncedBlocks> => {
             return protocolService.getLatestSyncedBlocks();
