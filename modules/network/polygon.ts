@@ -184,7 +184,6 @@ export const polygonNetworkConfig: NetworkConfig = {
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

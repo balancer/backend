@@ -11,10 +11,6 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
     public readonly id = 'SwapsPriceHandlerService';
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypesAndPrices[]): Promise<string[]> {
-        if (tokens.length === 0) {
-            return [];
-        }
-
         // also update any tokens with a coingecko ID that haven't been updated for three hours. This is a fall back to coingecko pricing.
         const threeHoursAgo = moment().subtract(3, 'hours').utc().unix();
 
@@ -27,7 +23,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
                     !token.types.includes('BPT') &&
                     !token.types.includes('PHANTOM_BPT') &&
                     !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    (!token.coingeckoPlatformId || token.prices[0].timestamp < threeHoursAgo),
+                    (!token.coingeckoPlatformId || !token.prices.length || token.prices[0].timestamp < threeHoursAgo),
             )
             .map((token) => token.address);
     }
