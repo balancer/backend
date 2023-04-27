@@ -71,12 +71,13 @@ interface CoinId {
    that happen.
 
 */
+const tokensPerInterval = env.COINGECKO_API_KEY ? 10 : 3;
+const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
     private readonly fiatParam: string;
     private readonly apiKeyParam: string;
-    private readonly requestRateLimiter: RateLimiter;
 
     constructor() {
         this.baseUrl = env.COINGECKO_API_KEY
@@ -84,8 +85,6 @@ export class CoingeckoService {
             : 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
         this.apiKeyParam = env.COINGECKO_API_KEY ? `&x_cg_pro_api_key=${env.COINGECKO_API_KEY}` : '';
-        const tokensPerInterval = env.COINGECKO_API_KEY ? 10 : 3;
-        this.requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
@@ -225,7 +224,7 @@ export class CoingeckoService {
     }
 
     private async get<T>(endpoint: string): Promise<T> {
-        const remainingRequests = await this.requestRateLimiter.removeTokens(1);
+        const remainingRequests = await requestRateLimiter.removeTokens(1);
         console.log('Remaining coingecko requests', remainingRequests);
         let response;
         try {
