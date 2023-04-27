@@ -15,6 +15,8 @@ import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
+import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 
 const mainnetNetworkData: NetworkData = {
     chain: {
@@ -196,6 +198,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

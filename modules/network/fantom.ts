@@ -25,6 +25,8 @@ import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliq
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-ftm-apr.service';
+import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -200,6 +202,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new BeetsPriceHandlerService(),
         new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
         new ClqdrPriceHandlerService(),
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

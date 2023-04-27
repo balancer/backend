@@ -15,6 +15,8 @@ import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
+import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 
 const gnosisNetworkData: NetworkData = {
     chain: {
@@ -66,16 +68,12 @@ const gnosisNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: [
-            '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
-        ],
-        weightedPoolV2Factories: [
-            '0x6CaD2ea22BFA7F4C14Aae92E47F510Cd5C509bc7',
-        ],
+        composableStablePoolFactories: ['0xf23b4DB826DbA14c0e857029dfF076b1c0264843'],
+        weightedPoolV2Factories: ['0x6CaD2ea22BFA7F4C14Aae92E47F510Cd5C509bc7'],
         poolsInRecoveryMode: [],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8'
+        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     masterchef: {
@@ -151,6 +149,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

@@ -158,7 +158,9 @@ export class TokenPriceService {
             try {
                 updated = await handler.updatePricesForTokens(acceptedTokens);
             } catch (e) {
-                console.error(`Chain: ${networkContext.chain}, Error: ${e}`);
+                console.error(
+                    `TokenPriceHanlder failed. Chain: ${networkContext.chain}, ID: ${handler.id}, Error: ${e}`,
+                );
                 Sentry.captureException(e, (scope) => {
                     scope.setTag('handler.exitIfFails', handler.exitIfFails);
                     return scope;
