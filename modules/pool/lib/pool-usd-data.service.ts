@@ -259,6 +259,7 @@ export class PoolUsdDataService {
         const stakedUsers = await prisma.prismaUserStakedBalance.groupBy({
             by: ['poolId'],
             _count: { userAddress: true },
+            where: { chain: networkContext.chain, balanceNum: { gt: 0 } },
         });
 
         for (const pool of subgraphPools) {
