@@ -14,6 +14,7 @@ import {
     Price,
     TokenPrices,
 } from './coingecko-types';
+import { env } from '../../app/env';
 
 interface MappedToken {
     platform: string;
@@ -75,10 +76,12 @@ const requestRateLimiter = new RateLimiter({ tokensPerInterval: 3, interval: 'mi
 export class CoingeckoService {
     private readonly baseUrl: string;
     private readonly fiatParam: string;
+    private readonly apiKeyParam: string;
 
     constructor() {
         this.baseUrl = 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
+        this.apiKeyParam = env.COINGECKO_API_KEY ? `&x_cg_pro_api_key=${env.COINGECKO_API_KEY}` : '';
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
@@ -222,7 +225,7 @@ export class CoingeckoService {
         console.log('Remaining coingecko requests', remainingRequests);
         let response;
         try {
-            response = await axios.get(this.baseUrl + endpoint);
+            response = await axios.get(this.baseUrl + endpoint + this.apiKeyParam);
         } catch (err: any | AxiosError) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 429) {
