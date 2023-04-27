@@ -14,6 +14,7 @@ import {
     Price,
     TokenPrices,
 } from './coingecko-types';
+import { env } from '../../app/env';
 
 interface MappedToken {
     platform: string;
@@ -70,15 +71,20 @@ interface CoinId {
    that happen.
 
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 3, interval: 'minute' });
+const tokensPerInterval = env.COINGECKO_API_KEY ? 10 : 3;
+const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
     private readonly fiatParam: string;
+    private readonly apiKeyParam: string;
 
     constructor() {
-        this.baseUrl = 'https://api.coingecko.com/api/v3';
+        this.baseUrl = env.COINGECKO_API_KEY
+            ? 'https://pro-api.coingecko.com/api/v3'
+            : 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
+        this.apiKeyParam = env.COINGECKO_API_KEY ? `&x_cg_pro_api_key=${env.COINGECKO_API_KEY}` : '';
     }
 
     public async getNativeAssetPrice(): Promise<Price> {
@@ -222,7 +228,7 @@ export class CoingeckoService {
         console.log('Remaining coingecko requests', remainingRequests);
         let response;
         try {
-            response = await axios.get(this.baseUrl + endpoint);
+            response = await axios.get(this.baseUrl + endpoint + this.apiKeyParam);
         } catch (err: any | AxiosError) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 429) {
