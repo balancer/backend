@@ -79,7 +79,9 @@ export class CoingeckoService {
     private readonly apiKeyParam: string;
 
     constructor() {
-        this.baseUrl = 'https://api.coingecko.com/api/v3';
+        this.baseUrl = process.env.COINGECKO_API_KEY
+            ? 'https://pro-api.coingecko.com/api/v3'
+            : 'https://api.coingecko.com/api/v3';
         this.fiatParam = 'usd';
         this.apiKeyParam = env.COINGECKO_API_KEY ? `&x_cg_pro_api_key=${env.COINGECKO_API_KEY}` : '';
     }
