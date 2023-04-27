@@ -13,6 +13,10 @@ export const schema = {
     SENTRY_DSN: String,
     AWS_REGION: String,
     PROTOCOL: String,
+    COINGECKO_API_KEY: {
+        optional: true,
+        type: String,
+    },
 };
 
 export const env: Env = load(schema, {

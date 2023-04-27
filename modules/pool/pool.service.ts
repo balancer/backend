@@ -256,7 +256,13 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidity24hAgoForAllPools();
     }
 
-    public async loadSnapshotsForPools(poolIds: string[]) {
+    public async loadSnapshotsForPools(poolIds: string[], reload: boolean) {
+        if (reload) {
+            await prisma.prismaPoolSnapshot.deleteMany({
+                where: { chain: networkContext.chain, poolId: { in: poolIds } },
+            });
+        }
+
         await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
     }
 
