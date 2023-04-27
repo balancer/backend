@@ -70,7 +70,7 @@ interface CoinId {
    that happen.
 
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 4, interval: 'minute' });
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: 3, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
@@ -226,7 +226,7 @@ export class CoingeckoService {
         } catch (err: any | AxiosError) {
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 429) {
-                    throw Error(`Coingecko ratelimit: ${err.response} | ${err}`);
+                    throw Error(`Coingecko ratelimit: ${err}`);
                 }
             }
             throw err;
