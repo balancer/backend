@@ -81,9 +81,11 @@ export class PoolSnapshotService {
 
         const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
             where: {
-                timestamp: moment().utc().startOf('day').subtract(daysToSync, 'days').unix(),
+                // there is no guarantee that a pool receives a swap per day, so we get the last day with a swap
+                timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
                 chain: networkContext.chain,
             },
+            distinct: 'poolId',
         });
 
         const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
