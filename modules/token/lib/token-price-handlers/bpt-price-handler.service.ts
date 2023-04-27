@@ -26,13 +26,17 @@ export class BptPriceHandlerService implements TokenPriceHandler {
         for (const token of tokens) {
             const pool = pools.find((pool) => pool.address === token.address);
 
-            if (pool?.dynamicData && pool.dynamicData.totalLiquidity !== 0 && pool.dynamicData.totalShares !== '0') {
+            if (
+                pool?.dynamicData &&
+                pool.dynamicData.totalLiquidity !== 0 &&
+                parseFloat(pool.dynamicData.totalShares) !== 0
+            ) {
                 const price = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
 
                 updated.push(token.address);
 
                 operations.push(
-                    prisma.prismaTokenPrice.upsert({
+                    await prisma.prismaTokenPrice.upsert({
                         where: {
                             tokenAddress_timestamp_chain: {
                                 tokenAddress: token.address,

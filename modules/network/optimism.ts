@@ -18,6 +18,8 @@ import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
+import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -204,6 +206,7 @@ export const optimismNetworkConfig: NetworkConfig = {
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
         new BeetsPriceHandlerService(),
+        new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

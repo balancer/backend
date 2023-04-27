@@ -70,7 +70,7 @@ interface CoinId {
    that happen.
 
 */
-const requestRateLimiter = new RateLimiter({ tokensPerInterval: 3, interval: 'minute' });
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: 4, interval: 'minute' });
 
 export class CoingeckoService {
     private readonly baseUrl: string;
