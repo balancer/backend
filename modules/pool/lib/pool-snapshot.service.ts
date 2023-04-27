@@ -85,6 +85,7 @@ export class PoolSnapshotService {
                 timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
                 chain: networkContext.chain,
             },
+            orderBy: { timestamp: 'desc' },
             distinct: 'poolId',
         });
 
