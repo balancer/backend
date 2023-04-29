@@ -9,6 +9,7 @@ import { AllNetworkConfigs } from '../network/network-config';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import axios from 'axios';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -124,9 +125,11 @@ export class ProtocolService {
             },
         });
 
+        const balancerV1Tvl = await this.getBalancerV1Tvl(chainId);
+
         const protocolData = {
             chainId,
-            totalLiquidity: `${totalLiquidity}`,
+            totalLiquidity: `${totalLiquidity + balancerV1Tvl}`,
             totalSwapFee,
             totalSwapVolume,
             poolCount: `${poolCount}`,
@@ -161,6 +164,16 @@ export class ProtocolService {
             userStakeSyncBlock: `${userStakeSyncBlock?.blockNumber}`,
             poolSyncBlock: `${poolSyncBlock?.blockNumber}`,
         };
+    }
+
+    private async getBalancerV1Tvl(chainId: string): Promise<number> {
+        if (chainId !== '1') {
+            return 0;
+        }
+
+        const { data } = await axios.get<number>('https://api.llama.fi/tvl/balancer-v1');
+
+        return data;
     }
 }
 
