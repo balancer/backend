@@ -317,9 +317,10 @@ enum PrismaPoolAprType {
 }
 
 enum PrismaPoolAprItemGroup {
-    YEARN
-    REAPER
+    BEEFY
     OVERNIGHT
+    REAPER
+    YEARN
 }
 
 model PrismaPoolCategory {

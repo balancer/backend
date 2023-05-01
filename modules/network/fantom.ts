@@ -148,6 +148,9 @@ const fantomNetworkData: NetworkData = {
         linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
         averageAPRAcrossLastNHarvests: 5,
     },
+    beefy: {
+        linearPools: [''],
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',

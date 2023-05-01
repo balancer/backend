@@ -145,6 +145,9 @@ const polygonNetworkData: NetworkData = {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
     },
+    beefy: {
+        linearPools: [''],
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
