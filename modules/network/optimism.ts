@@ -20,6 +20,7 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
+import { BeefyVaultAprService } from '../pool/lib/apr-data-sources/beefy-vault-apr.service copy';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -144,6 +145,12 @@ const optimismNetworkData: NetworkData = {
         ],
         averageAPRAcrossLastNHarvests: 2,
     },
+    beefy: {
+        linearPools: [
+            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
+            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
+        ],
+    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
@@ -195,6 +202,7 @@ export const optimismNetworkConfig: NetworkConfig = {
             optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
         ),
+        new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
         new PhantomStableAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),

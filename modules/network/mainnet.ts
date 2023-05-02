@@ -142,6 +142,9 @@ const mainnetNetworkData: NetworkData = {
         linearPoolFactories: ['0x1b986138a4F2aA538E79fdEC222dad93F8d66703'],
         averageAPRAcrossLastNHarvests: 2,
     },
+    beefy: {
+        linearPools: [''],
+    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',

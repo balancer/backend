@@ -122,6 +122,9 @@ const arbitrumNetworkData: NetworkData = {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
         averageAPRAcrossLastNHarvests: 2,
     },
+    beefy: {
+        linearPools: [''],
+    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x5979d7b546e38e414f7e9822514be443a4800529',

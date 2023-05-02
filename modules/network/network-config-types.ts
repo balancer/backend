@@ -102,6 +102,9 @@ export interface NetworkData {
         linearPoolFactories: string[];
         averageAPRAcrossLastNHarvests: number;
     };
+    beefy: {
+        linearPools: string[];
+    };
     yearn: {
         vaultsEndpoint: string;
     };

@@ -66,7 +66,7 @@ export class PoolSnapshotService {
     */
     public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
         let operations: any[] = [];
-        const oneDayAgoStartOfDay = moment()
+        const daysAgoStartOfDay = moment()
             .utc()
             .startOf('day')
             .subtract(daysToSync - 1, 'days')
@@ -74,7 +74,7 @@ export class PoolSnapshotService {
 
         // per default (daysToSync=2) returns snapshots from yesterday and today
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
-            where: { timestamp_gte: oneDayAgoStartOfDay },
+            where: { timestamp_gte: daysAgoStartOfDay },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
@@ -90,10 +90,19 @@ export class PoolSnapshotService {
         });
 
         const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
+        const pools = await prisma.prismaPool.findMany({ where: { id: { in: poolIds }, chain: networkContext.chain } });
 
-        for (const poolId of poolIds) {
-            const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === poolId);
-            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === poolId);
+        for (const pool of pools) {
+            const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === pool.id);
+            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === pool.id);
+
+            if (!latestSyncedSnapshot && pool.createTime < daysAgoStartOfDay) {
+                // in this instance, this pool should already have snapshots stored.
+                // since that's not the case, we reload from the subgraph and bail.
+                await this.loadAllSnapshotsForPools([pool.id]);
+                continue;
+            }
+
             const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
             const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
 

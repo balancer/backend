@@ -84,8 +84,8 @@ export class GaugeSubgraphService {
         const subgraphLiquidityGauges = await this.getAllGauges();
 
         const gauges: LiquidityGaugeWithStatus[] = [];
-        const tokens: GaugeRewardToken[] = [];
         for (let liquidityGauge of subgraphLiquidityGauges) {
+            const tokens: GaugeRewardToken[] = [];
             liquidityGauge.tokens?.forEach((rewardToken) => {
                 const isActive = moment.unix(parseInt(rewardToken.periodFinish || '0')).isAfter(moment());
                 tokens.push({
