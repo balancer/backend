@@ -21,7 +21,7 @@ const polygonNetworkData: NetworkData = {
     chain: {
         slug: 'polygon',
         id: 137,
-        nativeAssetAddress: '0x0000000000000000000000000000000000001010',
+        nativeAssetAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         wrappedNativeAssetAddress: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         prismaId: 'POLYGON',
         gqlId: 'POLYGON',
@@ -35,8 +35,8 @@ const polygonNetworkData: NetworkData = {
         userBalances: 'https://',
     },
     eth: {
-        address: '0x0000000000000000000000000000000000001010',
-        addressFormatted: '0x0000000000000000000000000000000000001010',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         symbol: 'MATIC',
         name: 'Matic',
     },
