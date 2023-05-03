@@ -22,7 +22,7 @@ const arbitrumNetworkData: NetworkData = {
     chain: {
         slug: 'arbitrum',
         id: 42161,
-        nativeAssetAddress: '0xb5AE3c648709913Ef9739e9F6eDB5a821c6Ab160',
+        nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         prismaId: 'ARBITRUM',
         gqlId: 'ARBITRUM',
@@ -36,8 +36,8 @@ const arbitrumNetworkData: NetworkData = {
         userBalances: 'https://',
     },
     eth: {
-        address: '0xb5ae3c648709913ef9739e9f6edb5a821c6ab160',
-        addressFormatted: '0xb5AE3c648709913Ef9739e9F6eDB5a821c6Ab160',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         symbol: 'ETH',
         name: 'Ether',
     },
