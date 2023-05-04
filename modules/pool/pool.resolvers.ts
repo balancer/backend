@@ -261,6 +261,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolDeletePool: async (parent, { poolId }, context) => {
+            isAdminRoute(context);
+
+            await poolService.deletePool(poolId);
+
+            return 'success';
+        },
     },
 };
 

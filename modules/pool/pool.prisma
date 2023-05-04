@@ -50,6 +50,7 @@ enum PrismaPoolType {
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
+    GYRO
 }
 
 model PrismaPoolLinearData {

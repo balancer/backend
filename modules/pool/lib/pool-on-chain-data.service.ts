@@ -88,6 +88,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'LINEAR',
     'LIQUIDITY_BOOTSTRAPPING',
     'ELEMENT',
+    'GYRO',
 ];
 
 export interface poolIdWithType {
@@ -121,6 +122,7 @@ export class PoolOnChainDataService {
         const weightedPoolIndexes: number[] = [];
         const linearPoolIdexes: number[] = [];
         const stablePoolIdexes: number[] = [];
+        const gyroPoolIdexes: number[] = [];
         for (const pool of filteredPools) {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 weightedPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
@@ -131,7 +133,12 @@ export class PoolOnChainDataService {
             if (isStablePool(pool.type)) {
                 stablePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
+            if (pool.type === 'GYRO') {
+                gyroPoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
+            }
         }
+
+        const ratePoolsIndexes = [...linearPoolIdexes, ...gyroPoolIdexes];
 
         const queryPoolDataResult = await this.queryPoolData({
             poolIds: poolIdsFromDb,
@@ -147,8 +154,9 @@ export class PoolOnChainDataService {
                         pool.type === 'LIQUIDITY_BOOTSTRAPPING' ||
                         pool.type === 'INVESTMENT' ||
                         pool.type === 'LINEAR' ||
-                        isStablePool(pool.type)
                         // MetaStable & StablePhantom is the same as Stable for swapfee purposes
+                        isStablePool(pool.type) ||
+                        pool.type === 'GYRO'
                     ) {
                         return PoolQuerySwapFeeType.SWAP_FEE_PERCENTAGE;
                     } else {
@@ -169,8 +177,8 @@ export class PoolOnChainDataService {
                 weightedPoolIdxs: weightedPoolIndexes,
                 loadLinearWrappedTokenRates: linearPoolIdexes.length > 0,
                 linearPoolIdxs: linearPoolIdexes,
-                loadRates: linearPoolIdexes.length > 0,
-                ratePoolIdxs: linearPoolIdexes,
+                loadRates: ratePoolsIndexes.length > 0,
+                ratePoolIdxs: ratePoolsIndexes,
             },
         });
 
