@@ -55,6 +55,7 @@ extend type Mutation {
     poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
+    poolDeletePool(poolId: String!): String!
 }
 
 type GqlPoolMinimal {
@@ -84,6 +85,7 @@ enum GqlPoolMinimalType {
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
+    GYRO
 }
 
 interface GqlPoolBase {
