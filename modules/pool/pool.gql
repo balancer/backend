@@ -765,7 +765,7 @@ type GqlPoolStakingGauge {
     status: GqlPoolStakingGaugeStatus!
     # There can be more than one gauge per pool, but only one preferred. For simplicity of handling, we focus on
     # the primary gauge.
-    allGauges: [GqlPoolStakingOtherGauge!]
+    otherGauges: [GqlPoolStakingOtherGauge!]
 }
 
 type GqlPoolStakingGaugeReward {
