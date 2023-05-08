@@ -37,7 +37,6 @@ import { Prisma } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
-import { GqlPoolStakingReliquaryFarm } from '../../../schema';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string): Promise<GqlPoolUnion> {
@@ -83,6 +82,7 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
+            staking: this.getStakingData(pool), //TODO: fix
         };
     }
 
@@ -451,32 +451,53 @@ export class PoolGqlLoaderService {
             });
     }
 
-    // This is needed to cast type APR type of the reliquary level from prisma (float) to the type of GQL (bigdecimal/string)
-    private getStakingData(pool: PrismaPoolWithExpandedNesting): GqlPoolStaking[] {
-        const poolStakings: GqlPoolStaking[] = [];
+    private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {
+        if (pool.staking.length === 0) {
+            return null;
+        }
 
-        pool.staking.forEach((staking) => {
-            let reliquaryStaking: GqlPoolStakingReliquaryFarm | null = null;
+        for (const staking of pool.staking) {
+            // This is needed to cast type APR type of the reliquary level from prisma (float) to the type of GQL (bigdecimal/string)
             if (staking.reliquary) {
-                const levelsStringApr = staking.reliquary.levels.map((level) => {
-                    return {
-                        ...level,
-                        apr: `${level.apr}`,
-                    };
-                });
-                reliquaryStaking = {
-                    ...staking.reliquary,
-                    levels: levelsStringApr,
+                return {
+                    ...staking,
+                    reliquary: {
+                        ...staking.reliquary,
+                        levels: staking.reliquary.levels.map((level) => ({
+                            ...level,
+                            apr: `${level.apr}`,
+                        })),
+                    },
                 };
+            } else if (staking.farm) {
+                return staking;
+            }
+        }
+
+        const sorted = _.sortBy(pool.staking, (staking) => {
+            if (staking.gauge) {
+                switch (staking.gauge.status) {
+                    case 'PREFERRED':
+                        return 0;
+                    case 'ACTIVE':
+                        return 1;
+                    case 'KILLED':
+                        return 2;
+                }
             }
 
-            poolStakings.push({
-                ...staking,
-                reliquary: reliquaryStaking,
-            });
-        });
+            return 100;
+        }).filter((staking) => staking.gauge);
 
-        return poolStakings;
+        return {
+            ...sorted[0],
+            gauge: {
+                ...sorted[0].gauge!,
+                otherGauges: sorted.slice(1).map((item) => item.gauge!),
+            },
+            farm: null,
+            reliquary: null,
+        };
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
