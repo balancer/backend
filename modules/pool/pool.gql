@@ -212,6 +212,27 @@ type GqlPoolWeighted implements GqlPoolBase {
     staking: GqlPoolStaking
 }
 
+type GqlPoolGyro implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig!
+    withdrawConfig: GqlPoolWithdrawConfig!
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]!
+    allTokens: [GqlPoolTokenExpanded!]!
+
+    tokens: [GqlPoolTokenUnion!]!
+    nestingType: GqlPoolNestingType!
+    staking: GqlPoolStaking
+}
+
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -394,6 +415,7 @@ union GqlPoolUnion =
     | GqlPoolPhantomStable
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
+    | GqlPoolGyro
 union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolPhantomStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenPhantomStable | GqlPoolTokenLinear
