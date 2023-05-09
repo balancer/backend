@@ -165,9 +165,9 @@ export class PoolOnChainDataService {
                 }),
                 loadTotalSupply: true,
                 totalSupplyTypes: filteredPools.map((pool) => {
-                    if (isComposableStablePool(pool) || isWeightedPoolV2(pool) || pool.type === 'PHANTOM_STABLE') {
+                    if (isComposableStablePool(pool) || isWeightedPoolV2(pool)) {
                         return PoolQueriesTotalSupplyType.ACTUAL_SUPPLY;
-                    } else if (pool.type === 'LINEAR') {
+                    } else if (pool.type === 'LINEAR' || pool.type === 'PHANTOM_STABLE') {
                         return PoolQueriesTotalSupplyType.VIRTUAL_SUPPLY;
                     } else {
                         return PoolQueriesTotalSupplyType.TOTAL_SUPPLY;
