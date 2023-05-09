@@ -368,6 +368,11 @@ export class PoolGqlLoaderService {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...mappedData,
                 };
+            case 'GYRO':
+                return {
+                    __typename: 'GqlPoolGyro',
+                    ...mappedData,
+                };
         }
 
         return {
@@ -470,7 +475,11 @@ export class PoolGqlLoaderService {
                     },
                 };
             } else if (staking.farm) {
-                return staking;
+                return {
+                    ...staking,
+                    gauge: null,
+                    reliquary: null,
+                };
             }
         }
 

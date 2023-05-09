@@ -76,6 +76,7 @@ interface MulticallExecuteResult {
         tokens: string[];
         balances: string[];
     };
+    tokenRates?: BigNumber[];
     swapEnabled?: boolean;
     metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
 }
@@ -165,9 +166,9 @@ export class PoolOnChainDataService {
                 }),
                 loadTotalSupply: true,
                 totalSupplyTypes: filteredPools.map((pool) => {
-                    if (isComposableStablePool(pool) || isWeightedPoolV2(pool) || pool.type === 'PHANTOM_STABLE') {
+                    if (isComposableStablePool(pool) || isWeightedPoolV2(pool)) {
                         return PoolQueriesTotalSupplyType.ACTUAL_SUPPLY;
-                    } else if (pool.type === 'LINEAR') {
+                    } else if (pool.type === 'LINEAR' || pool.type === 'PHANTOM_STABLE') {
                         return PoolQueriesTotalSupplyType.VIRTUAL_SUPPLY;
                     } else {
                         return PoolQueriesTotalSupplyType.TOTAL_SUPPLY;
@@ -373,6 +374,11 @@ export class PoolOnChainDataService {
 
                     if (onchainData.metaPriceRateCache && onchainData.metaPriceRateCache[i][0].gt('0')) {
                         priceRate = formatFixed(onchainData.metaPriceRateCache[i][0], 18);
+                    }
+
+                    // set the rate of tokens in the PhantomStables or ComposableStables
+                    if (pool.type === 'PHANTOM_STABLE' && onchainData.tokenRates && onchainData.tokenRates[i]) {
+                        priceRate = formatFixed(onchainData.tokenRates[i], 18);
                     }
 
                     if (
