@@ -369,7 +369,7 @@ export class PoolService {
         });
 
         const poolTokenIds = poolTokens.map((poolToken) => poolToken.id);
-        const poolTokenAddress = poolTokens.map((poolToken) => poolToken.address);
+        const poolTokenAddresses = poolTokens.map((poolToken) => poolToken.address);
 
         await prisma.prismaPoolSnapshot.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
@@ -388,7 +388,7 @@ export class PoolService {
         });
 
         await prisma.prismaTokenDynamicData.deleteMany({
-            where: { chain: networkContext.chain, tokenAddress: { in: poolTokenAddress } },
+            where: { chain: networkContext.chain, tokenAddress: { in: poolTokenAddresses } },
         });
 
         await prisma.prismaPoolToken.deleteMany({

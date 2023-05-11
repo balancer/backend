@@ -82,7 +82,7 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            staking: this.getStakingData(pool), //TODO: fix
+            staking: this.getStakingData(pool),
         };
     }
 
