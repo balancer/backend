@@ -259,6 +259,13 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                         rewards: true,
                     },
                 },
+                reliquary: {
+                    include: {
+                        levels: {
+                            orderBy: { level: 'asc' },
+                        },
+                    },
+                },
             },
         },
     },

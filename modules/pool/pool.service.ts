@@ -1,5 +1,5 @@
 import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
-import _ from 'lodash';
+import _, { chain, includes } from 'lodash';
 import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
@@ -356,6 +356,75 @@ export class PoolService {
                 chain: networkContext.chain,
                 poolId,
             },
+        });
+    }
+
+    public async deletePool(poolId: string) {
+        const pool = await prisma.prismaPool.findUniqueOrThrow({
+            where: { id_chain: { id: poolId, chain: networkContext.chain } },
+        });
+
+        const poolTokens = await prisma.prismaPoolToken.findMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        const poolTokenIds = poolTokens.map((poolToken) => poolToken.id);
+        const poolTokenAddresses = poolTokens.map((poolToken) => poolToken.address);
+
+        await prisma.prismaPoolSnapshot.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaTokenType.deleteMany({
+            where: { chain: networkContext.chain, tokenAddress: pool.address },
+        });
+
+        await prisma.prismaUserWalletBalance.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolTokenDynamicData.deleteMany({
+            where: { chain: networkContext.chain, poolTokenId: { in: poolTokenIds } },
+        });
+
+        await prisma.prismaTokenDynamicData.deleteMany({
+            where: { chain: networkContext.chain, tokenAddress: { in: poolTokenAddresses } },
+        });
+
+        await prisma.prismaPoolToken.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolDynamicData.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolToken.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolLinearData.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolExpandedTokens.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolLinearDynamicData.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolAprItem.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolSwap.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPool.delete({
+            where: { id_chain: { id: poolId, chain: networkContext.chain } },
         });
     }
 }

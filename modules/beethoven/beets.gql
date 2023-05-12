@@ -65,21 +65,6 @@ type GqlUserFbeetsBalance {
     stakedBalance: AmountHumanReadable!
 }
 
-type GqlUserRelicSnapshot {
-    timestamp: Int!
-    totalBalance: String!
-    relicCount: Int!
-    relicSnapshots: [GqlRelicSnapshot!]!
-}
-
-type GqlRelicSnapshot {
-    relicId: Int!
-    farmId: String!
-    balance: String!
-    entryTimestamp: Int!
-    level: Int!
-}
-
 type GqlReliquaryFarmSnapshot {
     id: ID!
     farmId: String!
