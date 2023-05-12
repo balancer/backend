@@ -353,7 +353,7 @@ export class PoolOnChainDataService {
                         poolToken.dynamicData.weight !== weight
                     ) {
                         await prisma.prismaPoolTokenDynamicData.upsert({
-                            where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                            where: { id_chain: { id: poolToken.id, chain: networkContext.chain } },
                             create: {
                                 id: poolToken.id,
                                 chain: networkContext.chain,
