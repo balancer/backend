@@ -391,7 +391,11 @@ export class PoolCreatorService {
                 return 'ELEMENT';
             case 'Investment':
                 return 'INVESTMENT';
-            case 'Gyro':
+            case 'Gyro2':
+                return 'GYRO';
+            case 'Gyro3':
+                return 'GYRO';
+            case 'GyroE':
                 return 'GYRO';
         }
 
