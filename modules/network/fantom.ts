@@ -124,7 +124,7 @@ const fantomNetworkData: NetworkData = {
     avgBlockSpeed: 1,
     sor: {
         main: {
-            url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/ ',
+            url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),

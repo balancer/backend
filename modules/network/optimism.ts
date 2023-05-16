@@ -121,7 +121,7 @@ const optimismNetworkData: NetworkData = {
     avgBlockSpeed: 1,
     sor: {
         main: {
-            url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/ ',
+            url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
