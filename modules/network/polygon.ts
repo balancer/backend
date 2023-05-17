@@ -117,6 +117,7 @@ const polygonNetworkData: NetworkData = {
         poolDataQueryContract: '0x60467cb225092cE0c989361934311175f437Cf53',
     },
     multicall: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],

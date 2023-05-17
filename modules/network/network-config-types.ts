@@ -87,6 +87,7 @@ export interface NetworkData {
         poolDataQueryContract: string;
     };
     multicall: string;
+    multicall3: string;
     masterchef: {
         address: string;
         excludedFarmIds: string[];

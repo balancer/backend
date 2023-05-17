@@ -114,6 +114,7 @@ const optimismNetworkData: NetworkData = {
         poolDataQueryContract: '0xB79C16EfD530e46b7A1499c1854f13f4Bd10f4DF',
     },
     multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],

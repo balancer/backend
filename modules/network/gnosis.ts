@@ -76,6 +76,7 @@ const gnosisNetworkData: NetworkData = {
         poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
