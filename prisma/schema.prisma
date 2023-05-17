@@ -435,6 +435,7 @@ model PrismaPoolStakingGauge {
     gaugeAddress        String
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
+    version             Int                             @default(1)
 }
 
 enum PrismaPoolStakingGaugeStatus {
