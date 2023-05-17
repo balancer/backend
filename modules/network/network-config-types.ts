@@ -77,6 +77,9 @@ export interface NetworkData {
     bal: {
         address: string;
     };
+    lockedVeBal?: {
+        address: string;
+    };
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];

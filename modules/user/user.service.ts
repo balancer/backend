@@ -5,6 +5,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service'
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
@@ -75,6 +76,10 @@ export class UserService {
         await this.walletSyncService.syncChangedBalancesForAllPools();
     }
 
+    public async syncLockedVeBalBalances() {
+        await this.walletSyncService.syncLockedVeBalBalances();
+    }
+
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]) {
         await Promise.all(this.stakedSyncServices.map((service) => service.initStakedBalances(stakingTypes)));
     }
@@ -134,7 +139,7 @@ export class UserService {
 
 export const userService = new UserService(
     new UserBalanceService(),
-    new UserSyncWalletBalanceService(),
+    new UserSyncWalletBalanceService(gaugeSubgraphService),
     new PoolSwapService(tokenService, balancerSubgraphService),
     new UserSnapshotService(
         userSnapshotSubgraphService,

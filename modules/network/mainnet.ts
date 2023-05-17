@@ -66,6 +66,9 @@ const mainnetNetworkData: NetworkData = {
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3D',
     },
+    lockedVeBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+    },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: [

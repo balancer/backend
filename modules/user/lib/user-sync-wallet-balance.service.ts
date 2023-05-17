@@ -7,6 +7,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
 import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
@@ -14,7 +15,7 @@ import ERC20Abi from '../../web3/abi/ERC20.json';
 import { networkContext } from '../../network/network-context.service';
 
 export class UserSyncWalletBalanceService {
-    constructor() {}
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) { }
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
         const { block } = await balancerSubgraphService.getMetadata();
@@ -77,6 +78,41 @@ export class UserSyncWalletBalanceService {
             true,
         );
         console.log('initBalancesForPools: finished performing db operations...');
+    }
+
+    async syncLockedVeBalBalances() {
+        // Return if not on Mainnet
+        if (networkContext.chainId !== '1') {
+            return;
+        }
+
+        // Get all locked veBal holders
+        const holders = await this.gaugeSubgraphService.getAllLockedVeBalHolders();
+
+        // Cleanup old balances for this token
+        // TODO: I'm trying to delete old balances, but this is not working
+        // Throws with "Foreign key constraint failed on the field: `PrismaUserWalletBalance_tokenAddress_chain_fkey (index)`"
+        let operations: any[] = []
+        operations.push(prisma.prismaUserWalletBalance.deleteMany({
+            where: { id: { contains: 'lockedVeBal' } }
+        }));
+
+        for (const { user, balance } of holders) {
+            operations.push(prisma.prismaUserWalletBalance.upsert({
+                where: { id_chain: { id: `lockedVeBal-${user}`, chain: networkContext.chain } },
+                create: {
+                    id: `lockedVeBal-${user}`,
+                    chain: networkContext.chain,
+                    userAddress: user,
+                    tokenAddress: networkContext.data.lockedVeBal!.address,
+                    balance,
+                    balanceNum: parseFloat(balance),
+                },
+                update: { balance: balance, balanceNum: parseFloat(balance) },
+            }));
+        }
+
+        await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
     public async syncChangedBalancesForAllPools() {

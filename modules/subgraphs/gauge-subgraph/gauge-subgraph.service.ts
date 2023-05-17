@@ -7,6 +7,7 @@ import {
     getSdk,
     LiquidityGauge_OrderBy,
     OrderDirection,
+    VotingEscrowLock_OrderBy,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
@@ -136,6 +137,39 @@ export class GaugeSubgraphService {
                     })) || [],
             })) ?? []
         );
+    }
+
+    async getAllLockedVeBalHolders(): Promise<{ user: string, balance: string }[]> {
+        let skip = 0;
+        const timestamp = String(Math.round(Date.now() / 1000));
+
+        let locks: { user: string, balance: string }[] = [];
+
+        // There is more than 1000 locks, so we need to paginate
+        do {
+            const locksQuery = await this.sdk.VotingEscrowLocks({
+                first: 1000,
+                skip,
+                orderBy: VotingEscrowLock_OrderBy.id,
+                orderDirection: OrderDirection.asc,
+                where: {
+                    unlockTime_gt: timestamp,
+                }
+            });
+
+            locks = locks.concat(locksQuery.votingEscrowLocks.map((lock) => ({
+                user: lock.user.id,
+                balance: lock.lockedBalance,
+            })));
+
+            if (locksQuery.votingEscrowLocks.length < 1000) {
+                break;
+            }
+
+            skip += 1000;
+        } while (1===1);
+
+        return locks;
     }
 
     public async getAllGauges(): Promise<GaugeFragment[]> {
