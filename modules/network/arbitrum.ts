@@ -122,6 +122,7 @@ const arbitrumNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
         averageAPRAcrossLastNHarvests: 2,
+        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],

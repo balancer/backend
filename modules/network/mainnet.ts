@@ -145,6 +145,7 @@ const mainnetNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: ['0x1b986138a4F2aA538E79fdEC222dad93F8d66703'],
         averageAPRAcrossLastNHarvests: 2,
+        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],

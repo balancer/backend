@@ -104,6 +104,7 @@ export interface NetworkData {
     };
     reaper: {
         linearPoolFactories: string[];
+        multiStratLinearPoolIds: string[];
         averageAPRAcrossLastNHarvests: number;
     };
     beefy: {
