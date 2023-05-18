@@ -3,9 +3,9 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../../network/network-context.service';
-import { GaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { GaugeSubgraphService, LiquidityGaugeStatus } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { Interface, formatEther } from 'ethers/lib/utils';
-import { getContractAt } from '../../../web3/contract'
+import { getContractAt } from '../../../web3/contract';
 import childChainGaugeAbi from './abi/ChildChainGauge.json';
 import multicall3Abi from './abi/Multicall3.json';
 
@@ -19,92 +19,115 @@ interface ChildChainInfo {
 export class GaugeStakingService implements PoolStakingService {
     constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
     public async syncStakingForPools(): Promise<void> {
-        const gauges = await this.gaugeSubgraphService.getAllGaugesWithStatus();
-
-        // Get information about child chain gauges
-        const childChainInfo = await this.getChildChainInfo(gauges.map(gauge => gauge.address));
-
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
-            include: {
-                staking: { include: { gauge: { include: { rewards: true } } } },
-            },
         });
+        const poolIds = pools.map((pool) => pool.id);
+
+        const { pools: subgraphPoolsWithGauges } = await this.gaugeSubgraphService.getPoolsWithGauges(poolIds);
+
         const operations: any[] = [];
 
-        for (const gauge of gauges) {
-            const pool = pools.find((pool) => pool.id === gauge.poolId);
+        const allGaugeAddresses = subgraphPoolsWithGauges.map((pool) => pool.gaugesList).flat();
+
+        const childChainGaugeInfo = await this.getChildChainGaugeInfo(allGaugeAddresses);
+
+        for (const gaugePool of subgraphPoolsWithGauges) {
+            const pool = pools.find((pool) => pool.id === gaugePool.poolId);
             if (!pool) {
                 continue;
             }
-            operations.push(
-                prisma.prismaPoolStaking.upsert({
-                    where: { id_chain: { id: gauge.address, chain: networkContext.chain } },
-                    create: {
-                        id: gauge.address,
-                        chain: networkContext.chain,
-                        poolId: pool.id,
-                        type: 'GAUGE',
-                        address: gauge.address,
-                    },
-                    update: {},
-                }),
-            );
+            if (gaugePool.gauges) {
+                for (const gauge of gaugePool.gauges) {
+                    // we need to set the status based on the preferentialGauge entity on the gaugePool. If it's set there, it's preferential, otherwise it's active (or killed)
+                    let gaugeStatus: LiquidityGaugeStatus = 'PREFERRED';
+                    if (gauge.isKilled) {
+                        gaugeStatus = 'KILLED';
+                    } else if (gaugePool.preferentialGauge?.id !== gauge.id) {
+                        gaugeStatus = 'ACTIVE';
+                    }
 
-            operations.push(
-                prisma.prismaPoolStakingGauge.upsert({
-                    where: { id_chain: { id: gauge.address, chain: networkContext.chain } },
-                    create: {
-                        id: gauge.address,
-                        stakingId: gauge.address,
-                        gaugeAddress: gauge.address,
-                        chain: networkContext.chain,
-                        status: gauge.status,
-                        version: childChainInfo[gauge.address] ? childChainInfo[gauge.address].version : 1,
-                    },
-                    update: {
-                        status: gauge.status,
-                    },
-                }),
-            );
+                    operations.push(
+                        prisma.prismaPoolStaking.upsert({
+                            where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                            create: {
+                                id: gauge.id,
+                                chain: networkContext.chain,
+                                poolId: pool.id,
+                                type: 'GAUGE',
+                                address: gauge.id,
+                            },
+                            update: {},
+                        }),
+                    );
 
-            // Add BAL as a reward token
-            if (childChainInfo[gauge.address]) {
-                gauge.tokens.push({
-                    id: `${networkContext.data.bal.address}-0`,
-                    decimals: 18,
-                    symbol: 'BAL',
-                    rewardsPerSecond: childChainInfo[gauge.address].rate,
-                });
-            }
+                    operations.push(
+                        prisma.prismaPoolStakingGauge.upsert({
+                            where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                            create: {
+                                id: gauge.id,
+                                stakingId: gauge.id,
+                                gaugeAddress: gauge.id,
+                                chain: networkContext.chain,
+                                status: gaugeStatus,
+                                version: childChainGaugeInfo[gauge.id] ? childChainGaugeInfo[gauge.id].version : 1,
+                            },
+                            update: {
+                                status: gaugeStatus,
+                            },
+                        }),
+                    );
 
-            for (let rewardToken of gauge.tokens) {
-                const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
-                const id = `${gauge.address}-${tokenAddress}`;
-                operations.push(
-                    prisma.prismaPoolStakingGaugeReward.upsert({
-                        create: {
-                            id,
-                            chain: networkContext.chain,
-                            gaugeId: gauge.address,
-                            tokenAddress: tokenAddress,
-                            rewardPerSecond: `${rewardToken.rewardsPerSecond}`,
-                        },
-                        update: {
-                            rewardPerSecond: `${rewardToken.rewardsPerSecond}`,
-                        },
-                        where: { id_chain: { id, chain: networkContext.chain } },
-                    }),
-                );
+                    // Add BAL as a reward token
+                    // need to add '-0' to the ID because it get's split by that further down.
+                    if (childChainGaugeInfo[gauge.id]) {
+                        if (gauge.tokens) {
+                            gauge.tokens.push({
+                                id: `${networkContext.data.bal.address}-0`,
+                                decimals: 18,
+                                symbol: 'BAL',
+                                rate: childChainGaugeInfo[gauge.id].rate,
+                            });
+                        } else {
+                            gauge.tokens = [
+                                {
+                                    id: `${networkContext.data.bal.address}-0`,
+                                    decimals: 18,
+                                    symbol: 'BAL',
+                                    rate: childChainGaugeInfo[gauge.id].rate,
+                                },
+                            ];
+                        }
+                    }
+                    if (gauge.tokens) {
+                        for (let rewardToken of gauge.tokens) {
+                            const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+                            const id = `${gauge.id}-${tokenAddress}`;
+                            operations.push(
+                                prisma.prismaPoolStakingGaugeReward.upsert({
+                                    create: {
+                                        id,
+                                        chain: networkContext.chain,
+                                        gaugeId: gauge.id,
+                                        tokenAddress: tokenAddress,
+                                        rewardPerSecond: `${rewardToken.rate}`,
+                                    },
+                                    update: {
+                                        rewardPerSecond: `${rewardToken.rate}`,
+                                    },
+                                    where: { id_chain: { id, chain: networkContext.chain } },
+                                }),
+                            );
+                        }
+                    }
+                }
             }
         }
-        // operations.push(prisma.prismaPoolStakingGauge.createMany({ data: gaugeStakingEntities, skipDuplicates: true }));
-        // operations.push(...gaugeStakingRewardOperations);
 
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
-    async getChildChainInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
+    async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
         const iChildChainGauge = new Interface(childChainGaugeAbi);
         const multicall = getContractAt(networkContext.data.multicall3, multicall3Abi);
 
@@ -117,10 +140,13 @@ export class GaugeStakingService implements PoolStakingService {
         const results = await multicall.callStatic.aggregate3(calls);
 
         // Transforms results into an array of gauges addresses with corresponding version and the inflation rate as float
-        const mappedResults = results.map(([status, data]: [boolean, string], idx: number) => ([gaugeAddresses[idx], {
-            version: status && 1 || 2,
-            rate: status && formatEther(iChildChainGauge.decodeFunctionResult('inflation_rate', data)[0])
-        }]))
+        const mappedResults = results.map(([status, data]: [boolean, string], idx: number) => [
+            gaugeAddresses[idx],
+            {
+                version: (status && 1) || 2,
+                rate: status && formatEther(iChildChainGauge.decodeFunctionResult('inflation_rate', data)[0]),
+            },
+        ]);
 
         return Object.fromEntries(mappedResults);
     }
