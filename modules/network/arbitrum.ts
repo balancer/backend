@@ -292,5 +292,9 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-balances',
             interval: every(1, 'minutes'),
         },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
+        },
     ],
 };

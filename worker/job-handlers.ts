@@ -255,6 +255,9 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'sync-vebal-balances':
             await runIfNotAlreadyRunning(job.name, chainId, () => userService.syncVeBalBalances(), 0.01);
             break;
+        case 'sync-vebal-totalSupply':
+            await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncVeBalTotalSupply(), 0.01);
+            break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
     }
