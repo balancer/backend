@@ -32,6 +32,7 @@ const polygonNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -64,6 +65,10 @@ const polygonNetworkData: NetworkData = {
     },
     bal: {
         address: '0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',

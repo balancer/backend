@@ -58,6 +58,7 @@ export interface NetworkData {
         reliquary?: string;
         beetsBar?: string;
         gauge?: string;
+        veBalLocks?: string;
         userBalances: string;
     };
     sanity: {
@@ -77,8 +78,9 @@ export interface NetworkData {
     bal: {
         address: string;
     };
-    lockedVeBal?: {
+    veBal?: {
         address: string;
+        delegationProxy: string;
     };
     balancer: {
         vault: string;

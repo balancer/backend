@@ -33,6 +33,7 @@ const arbitrumNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-arbitrum',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -65,6 +66,10 @@ const arbitrumNetworkData: NetworkData = {
     },
     bal: {
         address: '0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',

@@ -145,7 +145,7 @@ export class GaugeSubgraphService {
     }
 
     // TODO needs proper paging, currently <3000 locks so it works
-    async getAllLockedVeBalHolders(): Promise<{ user: string; balance: string }[]> {
+    async getAllveBalHolders(): Promise<{ user: string; balance: string }[]> {
         let skip = 0;
         const timestamp = String(Math.round(Date.now() / 1000));
 
