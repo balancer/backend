@@ -5,9 +5,13 @@ import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTok
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
-import { CoingeckoService, coingeckoService } from '../coingecko/coingecko.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
-import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
+import { getContractAt } from '../web3/contract';
+import ERC20Abi from '../web3/abi/ERC20.json';
+import { BigNumber } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
+import { add } from 'lodash';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -121,28 +125,63 @@ export class TokenService {
 
     public async syncCoingeckoPricesForAllChains(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
-
-        // const tokensWithoutCoingeckoId = await prisma.prismaToken.findMany({
-        //     where: { coingeckoTokenId: null, types: { some: { type: 'WHITE_LISTED' } } },
-        //     include: { types: true },
-        // });
-
-        // let tokensWithTypes = tokensWithoutCoingeckoId.map((token) => ({
-        //     ...token,
-        //     types: token.types.map((type) => type.type),
-        // }));
-
-        // // Also update any tokens that don't have a coingecko ID by using their contract address
-        // const coingeckoService = new CoingeckoPriceHandlerService(new CoingeckoService());
-
-        // const accepted = await coingeckoService.getAcceptedTokens(tokensWithTypes);
-        // const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
-
-        // await coingeckoService.updatePricesForTokens(acceptedTokens);
     }
 
     public async syncCoingeckoIds(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoIds();
+    }
+
+    public async getVeBalTotalSupply(): Promise<string> {
+        if (networkContext.data.veBal) {
+            let address = '';
+            if (networkContext.isMainnet) {
+                address = networkContext.data.veBal.address;
+            } else {
+                address = networkContext.data.veBal.delegationProxy;
+            }
+            const veBalToken = await prisma.prismaToken.findFirstOrThrow({
+                where: { chain: networkContext.chain, address: address },
+            });
+            if (veBalToken.totalSupply) {
+                return veBalToken.totalSupply;
+            }
+            return '0';
+        }
+        return '0';
+    }
+
+    public async syncVeBalTotalSupply(): Promise<void> {
+        if (networkContext.data.veBal) {
+            let veBalAddress = '';
+            let veBalName = '';
+            if (networkContext.isMainnet) {
+                veBalAddress = networkContext.data.veBal.address;
+                veBalName = 'Vote Escrowed Balancer BPT';
+            } else {
+                veBalAddress = networkContext.data.veBal.delegationProxy;
+                veBalName = 'veBal L2 (delegation proxy)';
+            }
+            const veBal = getContractAt(networkContext.data.veBal!.delegationProxy, ERC20Abi);
+            const totalSupply: BigNumber = await veBal.totalSupply();
+
+            await prisma.prismaToken.upsert({
+                where: {
+                    address_chain: {
+                        address: networkContext.data.veBal!.delegationProxy,
+                        chain: networkContext.chain,
+                    },
+                },
+                create: {
+                    address: veBalAddress,
+                    chain: networkContext.chain,
+                    decimals: 18,
+                    name: veBalName,
+                    symbol: `veBal`,
+                    totalSupply: formatFixed(totalSupply, 18),
+                },
+                update: { totalSupply: formatFixed(totalSupply, 18) },
+            });
+        }
     }
 
     public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {

@@ -592,6 +592,8 @@ model PrismaToken {
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
+
+    totalSupply         String?
 }
 
 
