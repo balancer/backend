@@ -252,6 +252,9 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'update-yield-capture':
             await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateYieldCaptureForAllPools(), 0.01);
             break;
+        case 'sync-vebal-balances':
+            await runIfNotAlreadyRunning(job.name, chainId, () => userService.syncVeBalBalances(), 0.01);
+            break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
     }

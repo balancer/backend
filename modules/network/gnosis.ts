@@ -259,5 +259,9 @@ export const gnosisNetworkConfig: NetworkConfig = {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
     ],
 };

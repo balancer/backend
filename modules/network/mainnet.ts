@@ -308,6 +308,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
         // The following are multichain jobs and should only run once for all chains.
         {
             name: 'sync-global-coingecko-prices',
