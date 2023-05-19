@@ -145,7 +145,6 @@ export class TokenService {
             if (veBalToken.totalSupply) {
                 return veBalToken.totalSupply;
             }
-            return '0';
         }
         return '0';
     }
@@ -154,6 +153,7 @@ export class TokenService {
         if (networkContext.data.veBal) {
             let veBalAddress = '';
             let veBalName = '';
+
             if (networkContext.isMainnet) {
                 veBalAddress = networkContext.data.veBal.address;
                 veBalName = 'Vote Escrowed Balancer BPT';
@@ -161,13 +161,14 @@ export class TokenService {
                 veBalAddress = networkContext.data.veBal.delegationProxy;
                 veBalName = 'veBal L2 (delegation proxy)';
             }
-            const veBal = getContractAt(networkContext.data.veBal!.delegationProxy, ERC20Abi);
+
+            const veBal = getContractAt(veBalAddress, ERC20Abi);
             const totalSupply: BigNumber = await veBal.totalSupply();
 
             await prisma.prismaToken.upsert({
                 where: {
                     address_chain: {
-                        address: networkContext.data.veBal!.delegationProxy,
+                        address: veBalAddress,
                         chain: networkContext.chain,
                     },
                 },
