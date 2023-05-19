@@ -114,26 +114,6 @@ export class UserSyncWalletBalanceService {
                     });
                 }
             }
-
-            // make sure the token exists
-            operations.push(
-                prisma.prismaToken.upsert({
-                    where: {
-                        address_chain: {
-                            address: networkContext.data.veBal!.address,
-                            chain: networkContext.chain,
-                        },
-                    },
-                    create: {
-                        address: networkContext.data.veBal!.address,
-                        chain: networkContext.chain,
-                        decimals: 18,
-                        name: `Vote Escrowed Balancer BPT`,
-                        symbol: `veBal`,
-                    },
-                    update: {},
-                }),
-            );
         } else {
             //for L2, we get the vebal balance from the delegation proxy
             const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeDelegationAbi);
@@ -161,25 +141,6 @@ export class UserSyncWalletBalanceService {
                     });
                 }
             }
-            // make sure the token exists, we use the delegationProxy as this is where we call the BalanceOf
-            operations.push(
-                prisma.prismaToken.upsert({
-                    where: {
-                        address_chain: {
-                            address: networkContext.data.veBal!.delegationProxy,
-                            chain: networkContext.chain,
-                        },
-                    },
-                    create: {
-                        address: networkContext.data.veBal!.delegationProxy,
-                        chain: networkContext.chain,
-                        decimals: 18,
-                        name: `veBal L2 (delegation proxy)`,
-                        symbol: `veBal`,
-                    },
-                    update: {},
-                }),
-            );
         }
 
         // make sure all users exist
