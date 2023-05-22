@@ -76,10 +76,6 @@ export class UserService {
         await this.walletSyncService.syncChangedBalancesForAllPools();
     }
 
-    public async syncVeBalBalances() {
-        await this.walletSyncService.syncVeBalBalances();
-    }
-
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]) {
         await Promise.all(this.stakedSyncServices.map((service) => service.initStakedBalances(stakingTypes)));
     }

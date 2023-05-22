@@ -6,7 +6,11 @@ model PrismaUser {
 
     walletBalances          PrismaUserWalletBalance[]
     stakedBalances          PrismaUserStakedBalance[]
+    
+    veBalBalance            PrismaVeBalUserBalance[]
 }
+
+
 
 model PrismaUserWalletBalance {
     @@id([id, chain])

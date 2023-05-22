@@ -14,7 +14,6 @@ extend type Query {
     tokenGetTokenData(address: String!): GqlTokenData
     tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
     tokenGetProtocolTokenPrice: AmountHumanReadable!
-    tokenGetVeBalTotalSupply: AmountHumanReadable!
 }
 
 extend type Mutation {

@@ -1,7 +1,7 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { formatFixed } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -12,8 +12,6 @@ import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generat
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { networkContext } from '../../network/network-context.service';
-import { veBalLocksSubgraphService } from '../../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
-import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
 
 export class UserSyncWalletBalanceService {
     constructor() {}
@@ -78,98 +76,7 @@ export class UserSyncWalletBalanceService {
             ],
             true,
         );
-        await this.syncVeBalBalances();
         console.log('initBalancesForPools: finished performing db operations...');
-    }
-
-    async syncVeBalBalances() {
-        const holders = await veBalLocksSubgraphService.getAllveBalHolders();
-
-        const nonZeroBalancesHolders: { address: string; balance: string }[] = [];
-        let operations: any[] = [];
-        let response = {} as Record<string, BigNumber>;
-
-        // for mainnet, we get the vebal balance form the vebal contract
-        if (networkContext.isMainnet) {
-            const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, ERC20Abi);
-
-            for (const holder of holders) {
-                multicall.call(holder.user, networkContext.data.veBal!.address, 'balanceOf', [holder.user]);
-
-                // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall.numCalls >= 100) {
-                    response = _.merge(response, await multicall.execute());
-                }
-            }
-
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
-            }
-
-            for (const veBalHolder in response) {
-                if (response[veBalHolder].gt(0)) {
-                    nonZeroBalancesHolders.push({
-                        address: veBalHolder.toLowerCase(),
-                        balance: formatFixed(response[veBalHolder], 18),
-                    });
-                }
-            }
-        } else {
-            //for L2, we get the vebal balance from the delegation proxy
-            const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeDelegationAbi);
-
-            for (const holder of holders) {
-                multicall.call(holder.user, networkContext.data.veBal!.delegationProxy, 'adjustedBalanceOf', [
-                    holder.user,
-                ]);
-
-                // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall.numCalls >= 100) {
-                    response = _.merge(response, await multicall.execute());
-                }
-            }
-
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
-            }
-
-            for (const veBalHolder in response) {
-                if (response[veBalHolder].gt(0)) {
-                    nonZeroBalancesHolders.push({
-                        address: veBalHolder.toLowerCase(),
-                        balance: formatFixed(response[veBalHolder], 18),
-                    });
-                }
-            }
-        }
-
-        // make sure all users exist
-        operations.push(
-            prisma.prismaUser.createMany({
-                data: nonZeroBalancesHolders.map((user) => ({ address: user.address })),
-                skipDuplicates: true,
-            }),
-        );
-
-        for (const veBalHolder of nonZeroBalancesHolders) {
-            operations.push(
-                prisma.prismaUserWalletBalance.upsert({
-                    where: { id_chain: { id: `veBal-${veBalHolder.address}`, chain: networkContext.chain } },
-                    create: {
-                        id: `veBal-${veBalHolder.address}`,
-                        chain: networkContext.chain,
-                        userAddress: veBalHolder.address,
-                        tokenAddress: networkContext.isMainnet
-                            ? networkContext.data.veBal!.address
-                            : networkContext.data.veBal!.delegationProxy,
-                        balance: veBalHolder.balance,
-                        balanceNum: parseFloat(veBalHolder.balance),
-                    },
-                    update: { balance: veBalHolder.balance, balanceNum: parseFloat(veBalHolder.balance) },
-                }),
-            );
-        }
-        await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
     public async syncChangedBalancesForAllPools() {

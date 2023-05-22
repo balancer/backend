@@ -100,9 +100,6 @@ const resolvers: Resolvers = {
         tokenGetProtocolTokenPrice: async (parent, {}, context) => {
             return tokenService.getProtocolTokenPrice();
         },
-        tokenGetVeBalTotalSupply: async (parent, {}, context) => {
-            return tokenService.getVeBalTotalSupply();
-        },
     },
     Mutation: {
         tokenReloadTokenPrices: async (parent, {}, context) => {

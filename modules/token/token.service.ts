@@ -131,60 +131,6 @@ export class TokenService {
         await this.coingeckoDataService.syncCoingeckoIds();
     }
 
-    public async getVeBalTotalSupply(): Promise<string> {
-        if (networkContext.data.veBal) {
-            let address = '';
-            if (networkContext.isMainnet) {
-                address = networkContext.data.veBal.address;
-            } else {
-                address = networkContext.data.veBal.delegationProxy;
-            }
-            const veBalToken = await prisma.prismaToken.findFirstOrThrow({
-                where: { chain: networkContext.chain, address: address },
-            });
-            if (veBalToken.totalSupply) {
-                return veBalToken.totalSupply;
-            }
-        }
-        return '0';
-    }
-
-    public async syncVeBalTotalSupply(): Promise<void> {
-        if (networkContext.data.veBal) {
-            let veBalAddress = '';
-            let veBalName = '';
-
-            if (networkContext.isMainnet) {
-                veBalAddress = networkContext.data.veBal.address;
-                veBalName = 'Vote Escrowed Balancer BPT';
-            } else {
-                veBalAddress = networkContext.data.veBal.delegationProxy;
-                veBalName = 'veBal L2 (delegation proxy)';
-            }
-
-            const veBal = getContractAt(veBalAddress, ERC20Abi);
-            const totalSupply: BigNumber = await veBal.totalSupply();
-
-            await prisma.prismaToken.upsert({
-                where: {
-                    address_chain: {
-                        address: veBalAddress,
-                        chain: networkContext.chain,
-                    },
-                },
-                create: {
-                    address: veBalAddress,
-                    chain: networkContext.chain,
-                    decimals: 18,
-                    name: veBalName,
-                    symbol: `veBal`,
-                    totalSupply: formatFixed(totalSupply, 18),
-                },
-                update: { totalSupply: formatFixed(totalSupply, 18) },
-            });
-        }
-    }
-
     public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {
         const token = await prisma.prismaToken.findUnique({
             where: {
