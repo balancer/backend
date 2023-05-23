@@ -79,9 +79,9 @@ export class GaugeStakingService implements PoolStakingService {
                         }),
                     );
 
-                    // Add BAL as a reward token
+                    // Add BAL as a reward token for the v2 gauge
                     // need to add '-0' to the ID because it get's split by that further down.
-                    if (childChainGaugeInfo[gauge.id]) {
+                    if (childChainGaugeInfo[gauge.id].version === 2) {
                         if (gauge.tokens) {
                             gauge.tokens.push({
                                 id: `${networkContext.data.bal.address}-0`,
@@ -89,6 +89,15 @@ export class GaugeStakingService implements PoolStakingService {
                                 symbol: 'BAL',
                                 rate: childChainGaugeInfo[gauge.id].rate,
                             });
+                        } else {
+                            gauge.tokens = [
+                                {
+                                    id: `${networkContext.data.bal.address}-0`,
+                                    decimals: 18,
+                                    symbol: 'BAL',
+                                    rate: childChainGaugeInfo[gauge.id].rate,
+                                },
+                            ];
                         }
                     }
                     if (gauge.tokens) {
