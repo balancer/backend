@@ -96,7 +96,7 @@ export class UserSyncWalletBalanceService {
         }
 
         const fromBlock = syncStatus.blockNumber + 1;
-        const toBlock = latestBlock - fromBlock > 500 ? fromBlock + 500 : latestBlock;
+        const toBlock = latestBlock - fromBlock > 200 ? fromBlock + 200 : latestBlock;
 
         // no new blocks have been minted, needed for slow networks
         if (fromBlock > toBlock) {
