@@ -462,8 +462,8 @@ export class PoolService {
             }
         }
 
-        await prisma.prismaPoolStakingGauge.deleteMany({
-            where: { chain: networkContext.chain },
+        await prisma.prismaUserStakedBalance.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolStaking.deleteMany({

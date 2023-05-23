@@ -4,7 +4,7 @@ import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
