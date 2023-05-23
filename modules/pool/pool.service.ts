@@ -423,6 +423,53 @@ export class PoolService {
             where: { chain: networkContext.chain, poolId: poolId },
         });
 
+        const poolStaking = await prisma.prismaPoolStaking.findMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        for (const staking of poolStaking) {
+            switch (staking.type) {
+                case 'GAUGE':
+                    await prisma.prismaPoolStakingGaugeReward.deleteMany({
+                        where: { chain: networkContext.chain, gaugeId: staking.id },
+                    });
+
+                    await prisma.prismaPoolStakingGauge.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+
+                case 'MASTER_CHEF':
+                    await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({
+                        where: { chain: networkContext.chain, farmId: staking.id },
+                    });
+
+                    await prisma.prismaPoolStakingMasterChefFarm.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+                case 'RELIQUARY':
+                    await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({
+                        where: { chain: networkContext.chain, farmId: staking.id.split('-')[1] },
+                    });
+
+                    await prisma.prismaPoolStakingReliquaryFarm.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        await prisma.prismaPoolStakingGauge.deleteMany({
+            where: { chain: networkContext.chain },
+        });
+
+        await prisma.prismaPoolStaking.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
         await prisma.prismaPool.delete({
             where: { id_chain: { id: poolId, chain: networkContext.chain } },
         });

@@ -197,6 +197,8 @@ export const mainnetNetworkConfig: NetworkConfig = {
             mainnetNetworkData.reaper.linearPoolFactories,
             mainnetNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            mainnetNetworkData.stader ? mainnetNetworkData.stader.sFtmxContract : undefined,
+            mainnetNetworkData.lido ? mainnetNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),

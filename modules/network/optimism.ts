@@ -209,6 +209,8 @@ export const optimismNetworkConfig: NetworkConfig = {
             optimismNetworkData.reaper.linearPoolFactories,
             optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
+            optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
         ),
         new ReaperMultistratAprService(optimismNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),

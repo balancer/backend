@@ -177,6 +177,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             arbitrumNetworkData.reaper.linearPoolFactories,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
+            arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
