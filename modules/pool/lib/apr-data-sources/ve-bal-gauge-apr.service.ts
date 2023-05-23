@@ -46,9 +46,15 @@ export class GaugeAprService implements PoolAprService {
 
             for (let rewardToken of preferredStaking.gauge.rewards) {
                 const tokenAddress = rewardToken.tokenAddress;
-                const rewardTokenDefinition = await prisma.prismaToken.findUniqueOrThrow({
-                    where: { address_chain: { address: tokenAddress, chain: networkContext.chain } },
-                });
+                let rewardTokenDefinition;
+                try {
+                    rewardTokenDefinition = await prisma.prismaToken.findUniqueOrThrow({
+                        where: { address_chain: { address: tokenAddress, chain: networkContext.chain } },
+                    });
+                } catch (e) {
+                    //we don't have the reward token added as a token, only happens for testing tokens
+                    continue;
+                }
                 const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, tokenAddress) || 0.1;
                 const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
