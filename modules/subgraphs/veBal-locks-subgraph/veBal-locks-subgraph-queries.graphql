@@ -1,0 +1,23 @@
+query VotingEscrowLocks(
+    $block: Block_height
+    $first: Int = 1000
+    $orderBy: VotingEscrowLock_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: VotingEscrowLock_filter
+) {
+    votingEscrowLocks(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
+        id
+        lockedBalance
+        user {
+            id
+        }
+    }
+}

@@ -1,0 +1,9 @@
+extend type Query {
+    veBalGetUserBalance: AmountHumanReadable!
+    veBalGetTotalSupply: AmountHumanReadable!
+}
+
+extend type Mutation {
+    veBalSyncAllUserBalances: String!
+    veBalSyncTotalSupply: String!
+}

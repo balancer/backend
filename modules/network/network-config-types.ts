@@ -58,6 +58,7 @@ export interface NetworkData {
         reliquary?: string;
         beetsBar?: string;
         gauge?: string;
+        veBalLocks?: string;
         userBalances: string;
     };
     sanity: {
@@ -77,6 +78,10 @@ export interface NetworkData {
     bal: {
         address: string;
     };
+    veBal?: {
+        address: string;
+        delegationProxy: string;
+    };
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];
@@ -87,6 +92,7 @@ export interface NetworkData {
         poolDataQueryContract: string;
     };
     multicall: string;
+    multicall3: string;
     masterchef: {
         address: string;
         excludedFarmIds: string[];

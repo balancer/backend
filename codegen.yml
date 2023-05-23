@@ -103,6 +103,24 @@ generates:
         schema: ${GAUGE_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-types.ts:
+        schema: ${VEBALLOCKS_SUBGRAPH}
+        documents: 'modules/subgraphs/veBal-locks-subgraph/veBal-locks-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+            namingConvention:
+                enumValues: keep
+    modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-schema.graphql:
+        schema: ${VEBALLOCKS_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types.ts:
         schema: ${USER_SNAPSHOT_SUBGRPAH}
         documents: 'modules/subgraphs/user-snapshot-subgraph/user-snapshot-subgraph-queries.graphql'
