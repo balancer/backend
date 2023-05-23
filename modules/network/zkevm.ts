@@ -29,7 +29,7 @@ const zkevmNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zkevm-v2/v0.0.1',
+        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zkevm-v2/v0.0.2',
         beetsBar: 'https://',
         blocks: '',
         gauge: '',
@@ -107,6 +107,7 @@ const zkevmNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
+        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
@@ -149,19 +150,15 @@ export const zkevmNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            zkevmNetworkData.beets.address,
-            zkevmNetworkData.bal.address,
-        ]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [],
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -255,6 +252,10 @@ export const zkevmNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: every(2, 'minutes'),
         },
     ],
 };
