@@ -88,15 +88,6 @@ export class GaugeStakingService implements PoolStakingService {
                                 symbol: 'BAL',
                                 rate: childChainGaugeInfo[gauge.id].rate,
                             });
-                        } else {
-                            gauge.tokens = [
-                                {
-                                    id: `${networkContext.data.bal.address}-0`,
-                                    decimals: 18,
-                                    symbol: 'BAL',
-                                    rate: childChainGaugeInfo[gauge.id].rate,
-                                },
-                            ];
                         }
                     }
                     if (gauge.tokens) {
