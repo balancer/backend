@@ -253,9 +253,5 @@ export const zkevmNetworkConfig: NetworkConfig = {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
         },
-        {
-            name: 'sync-global-coingecko-prices',
-            interval: every(2, 'minutes'),
-        },
     ],
 };
