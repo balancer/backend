@@ -8,4 +8,5 @@ enum GqlChain {
     MAINNET
     OPTIMISM
     POLYGON
+    ZKEVM
 }
