@@ -8,6 +8,7 @@ import { Interface, formatEther } from 'ethers/lib/utils';
 import { getContractAt } from '../../../web3/contract';
 import childChainGaugeAbi from './abi/ChildChainGauge.json';
 import multicall3Abi from './abi/Multicall3.json';
+import moment from 'moment';
 
 interface ChildChainInfo {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -94,6 +95,14 @@ export class GaugeStakingService implements PoolStakingService {
                         for (let rewardToken of gauge.tokens) {
                             const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
                             const id = `${gauge.id}-${tokenAddress}`;
+
+                            // the rate of the token is still set although period is finished, we reset it here
+                            if (rewardToken.periodFinish) {
+                                if (parseFloat(rewardToken.periodFinish) < moment().unix()) {
+                                    rewardToken.rate = '0';
+                                }
+                            }
+
                             operations.push(
                                 prisma.prismaPoolStakingGaugeReward.upsert({
                                     create: {
@@ -131,11 +140,11 @@ export class GaugeStakingService implements PoolStakingService {
         const results = await multicall.callStatic.aggregate3(calls);
 
         // Transforms results into an array of gauges addresses with corresponding version and the inflation rate as float
-        const mappedResults = results.map(([status, data]: [boolean, string], idx: number) => [
+        const mappedResults = results.map(([success, data]: [boolean, string], idx: number) => [
             gaugeAddresses[idx],
             {
-                version: (status && 1) || 2,
-                rate: status && formatEther(iChildChainGauge.decodeFunctionResult('inflation_rate', data)[0]),
+                version: success ? 2 : 1,
+                rate: success ? formatEther(iChildChainGauge.decodeFunctionResult('inflation_rate', data)[0]) : '0',
             },
         ]);
 
