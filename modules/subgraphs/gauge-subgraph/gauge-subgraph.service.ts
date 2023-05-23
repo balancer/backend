@@ -7,10 +7,14 @@ import {
     getSdk,
     LiquidityGauge_OrderBy,
     OrderDirection,
+    VotingEscrowLock_OrderBy,
+    PoolsQueryVariables,
+    PoolsQuery,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
 import moment from 'moment';
+import _ from 'lodash';
 
 export type GaugeRewardToken = { id: string; decimals: number; symbol: string; rewardsPerSecond: string };
 
@@ -105,6 +109,8 @@ export class GaugeSubgraphService {
                 gaugeStatus = 'ACTIVE';
             }
 
+            // when there are new v2 gauges added to the pool but are not active yet, we end up with multiple gauges for the same pool but none is marked as preferential
+
             gauges.push({
                 address: liquidityGauge.id,
                 streamerAddress: liquidityGauge.streamer || '',
@@ -136,6 +142,60 @@ export class GaugeSubgraphService {
                     })) || [],
             })) ?? []
         );
+    }
+
+    // TODO needs proper paging, currently <3000 locks so it works
+    async getAllveBalHolders(): Promise<{ user: string; balance: string }[]> {
+        let skip = 0;
+        const timestamp = String(Math.round(Date.now() / 1000));
+
+        let locks: { user: string; balance: string }[] = [];
+
+        // There is more than 1000 locks, so we need to paginate
+        do {
+            const locksQuery = await this.sdk.VotingEscrowLocks({
+                first: 1000,
+                skip,
+                orderBy: VotingEscrowLock_OrderBy.id,
+                orderDirection: OrderDirection.asc,
+                where: {
+                    unlockTime_gt: timestamp,
+                },
+            });
+
+            locks = locks.concat(
+                locksQuery.votingEscrowLocks.map((lock) => ({
+                    user: lock.user.id,
+                    balance: lock.lockedBalance,
+                })),
+            );
+
+            if (locksQuery.votingEscrowLocks.length < 1000) {
+                break;
+            }
+
+            skip += 1000;
+        } while (1 === 1);
+
+        return locks;
+    }
+
+    public async getPoolsWithGauges(poolIds: string[]): Promise<PoolsQuery> {
+        const chunks = _.chunk(poolIds, 1000);
+        const allPoolsWithGauges: PoolsQuery = { pools: [] };
+
+        for (const chunk of chunks) {
+            const poolsWithGauges = await this.sdk.Pools({
+                where: {
+                    poolId_in: chunk,
+                },
+                first: 1000,
+            });
+
+            allPoolsWithGauges.pools.push(...poolsWithGauges.pools);
+        }
+
+        return allPoolsWithGauges;
     }
 
     public async getAllGauges(): Promise<GaugeFragment[]> {

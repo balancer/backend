@@ -435,6 +435,7 @@ model PrismaPoolStakingGauge {
     gaugeAddress        String
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
+    version             Int                             @default(1)
 }
 
 enum PrismaPoolStakingGaugeStatus {
@@ -674,7 +675,11 @@ model PrismaUser {
 
     walletBalances          PrismaUserWalletBalance[]
     stakedBalances          PrismaUserStakedBalance[]
+    
+    veBalBalance            PrismaVeBalUserBalance[]
 }
+
+
 
 model PrismaUserWalletBalance {
     @@id([id, chain])
@@ -770,4 +775,28 @@ model PrismaUserRelicSnapshot {
     balance                 String
     entryTimestamp          Int
     level                   Int
+}
+
+
+model PrismaVeBalUserBalance {
+    @@id([id, chain])
+
+    id                  String
+    chain               Chain
+
+    balance             String
+
+    userAddress         String
+    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+
+}
+
+
+model PrismaVeBalTotalSupply {
+    @@id([address, chain])
+
+    address             String
+    chain               Chain
+
+    totalSupply         String
 }

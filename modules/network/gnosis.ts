@@ -33,6 +33,7 @@ const gnosisNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/rebase-agency/gnosis-chain-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-gnosis-chain-b',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -66,6 +67,10 @@ const gnosisNetworkData: NetworkData = {
     bal: {
         address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
     },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05',
+    },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: ['0xf23b4DB826DbA14c0e857029dfF076b1c0264843'],
@@ -76,6 +81,7 @@ const gnosisNetworkData: NetworkData = {
         poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -252,6 +258,14 @@ export const gnosisNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
     ],
 };

@@ -39,6 +39,7 @@ const optimismNetworkData: NetworkData = {
         blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -70,6 +71,10 @@ const optimismNetworkData: NetworkData = {
     },
     bal: {
         address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -115,6 +120,7 @@ const optimismNetworkData: NetworkData = {
         poolDataQueryContract: '0xB79C16EfD530e46b7A1499c1854f13f4Bd10f4DF',
     },
     multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -320,6 +326,14 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
     ],
 };

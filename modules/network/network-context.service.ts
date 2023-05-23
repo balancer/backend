@@ -42,6 +42,10 @@ export class NetworkContextService {
         return this.data.chain.id === 250;
     }
 
+    public get isMainnet() {
+        return this.data.chain.id === 1;
+    }
+
     public get isBalancerChain(): boolean {
         return BalancerChainIds.includes(this.chainId);
     }

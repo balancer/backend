@@ -106,6 +106,7 @@ const fantomNetworkData: NetworkData = {
         poolDataQueryContract: '0x3e898A1A3aEFB543DA20232994aeDaD2ce7Fa856',
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
         excludedFarmIds: [

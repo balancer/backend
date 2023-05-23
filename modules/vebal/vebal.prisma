@@ -1,0 +1,22 @@
+model PrismaVeBalUserBalance {
+    @@id([id, chain])
+
+    id                  String
+    chain               Chain
+
+    balance             String
+
+    userAddress         String
+    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+
+}
+
+
+model PrismaVeBalTotalSupply {
+    @@id([address, chain])
+
+    address             String
+    chain               Chain
+
+    totalSupply         String
+}
