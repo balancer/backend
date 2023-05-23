@@ -8,17 +8,17 @@ import { PoolAprService } from '../../pool-types';
 import ReaperCryptAbi from './abi/ReaperCrypt.json';
 import ReaperCryptStrategyAbi from './abi/ReaperCryptStrategy.json';
 import { networkContext } from '../../../network/network-context.service';
+import { liquidStakedBaseAprService } from './liquid-staked-base-apr.service';
 
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
-
-    private readonly SFTMX_ADDRESS = '0xd7028092c830b5c8fce061af2e593413ebbc1fc1';
-    private readonly SFTMX_APR = 0.046;
 
     constructor(
         private readonly linearPoolFactories: string[],
         private readonly averageAPRAcrossLastNHarvests: number,
         private readonly tokenService: TokenService,
+        private readonly sFtmXAddress: string | undefined,
+        private readonly wstEthAddress: string | undefined,
     ) {}
 
     public getAprServiceName(): string {
@@ -82,22 +82,52 @@ export class ReaperCryptAprService implements PoolAprService {
             // if we have sftmx as the main token in this linear pool, we want to take the linear APR top level and
             // we also need to adapt the APR since the vault APR is denominated in sFTMx, so we need to apply the growth rate
             // and add the sftmx base apr to the unwrapped portion
-            if (isSameAddress(mainToken.address, this.SFTMX_ADDRESS)) {
-                const vaultApr =
-                    totalLiquidity > 0
-                        ? ((1 + avgAprAcrossXHarvests) * (1 + this.SFTMX_APR) - 1) *
-                          (poolWrappedLiquidity / totalLiquidity)
-                        : 0;
-                const sFtmXApr =
-                    totalLiquidity > 0
-                        ? (this.SFTMX_APR * (totalLiquidity - poolWrappedLiquidity)) / totalLiquidity
-                        : 0;
-                apr = vaultApr + sFtmXApr;
-                await prisma.prismaPoolAprItem.update({
-                    where: { id_chain: { id: itemId, chain: networkContext.chain } },
-                    data: { group: null, apr: apr, title: 'Boosted sFTMx APR' },
-                });
+            if (this.sFtmXAddress && isSameAddress(mainToken.address, this.sFtmXAddress)) {
+                const baseApr = await liquidStakedBaseAprService.getSftmxBaseApr();
+                if (baseApr > 0) {
+                    const boostedVaultApr = this.getBoostedVaultApr(
+                        totalLiquidity,
+                        avgAprAcrossXHarvests,
+                        baseApr,
+                        poolWrappedLiquidity,
+                    );
+
+                    await prisma.prismaPoolAprItem.update({
+                        where: { id_chain: { id: itemId, chain: networkContext.chain } },
+                        data: {
+                            apr: boostedVaultApr,
+                        },
+                    });
+                }
+            }
+
+            if (this.wstEthAddress && isSameAddress(mainToken.address, this.wstEthAddress)) {
+                const baseApr = await liquidStakedBaseAprService.getWstEthBaseApr();
+                if (baseApr > 0) {
+                    const boostedVaultApr = this.getBoostedVaultApr(
+                        totalLiquidity,
+                        avgAprAcrossXHarvests,
+                        baseApr,
+                        poolWrappedLiquidity,
+                    );
+
+                    await prisma.prismaPoolAprItem.update({
+                        where: { id_chain: { id: itemId, chain: networkContext.chain } },
+                        data: { apr: boostedVaultApr },
+                    });
+                }
             }
         }
+    }
+
+    private getBoostedVaultApr(
+        totalLiquidity: number,
+        vaultHarvestApr: number,
+        IbBaseApr: number,
+        poolWrappedLiquidity: number,
+    ) {
+        return totalLiquidity > 0
+            ? ((1 + vaultHarvestApr) * (1 + IbBaseApr) - 1) * (poolWrappedLiquidity / totalLiquidity)
+            : 0;
     }
 }

@@ -119,6 +119,9 @@ export interface NetworkData {
         wstEthContract: string;
         wstEthAprEndpoint: string;
     };
+    stader?: {
+        sFtmxContract: string;
+    };
     overnight?: {
         aprEndpoint: string;
     };

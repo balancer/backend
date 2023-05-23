@@ -200,6 +200,8 @@ export const fantomNetworkConfig: NetworkConfig = {
             fantomNetworkData.reaper.linearPoolFactories,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
+            fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
         ),
         new ReaperMultistratAprService(fantomNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new PhantomStableAprService(fantomNetworkData.balancer.yieldProtocolFeePercentage),
