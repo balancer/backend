@@ -51,6 +51,8 @@ enum PrismaPoolType {
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
     GYRO
+    GYRO3
+    GYROE
 }
 
 model PrismaPoolLinearData {

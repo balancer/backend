@@ -75,6 +75,8 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'LIQUIDITY_BOOTSTRAPPING',
     'ELEMENT',
     'GYRO',
+    'GYRO3',
+    'GYROE',
 ];
 
 export interface poolIdWithType {
@@ -121,7 +123,7 @@ export class PoolOnChainDataService {
             if (isStablePool(pool.type)) {
                 stablePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
-            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'GYRO') {
+            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type.includes('GYRO')) {
                 ratePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
             if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE') {
@@ -147,7 +149,7 @@ export class PoolOnChainDataService {
                         pool.type === 'LINEAR' ||
                         // MetaStable & StablePhantom is the same as Stable for swapfee purposes
                         isStablePool(pool.type) ||
-                        pool.type === 'GYRO'
+                        pool.type.includes('GYRO')
                     ) {
                         return PoolQuerySwapFeeType.SWAP_FEE_PERCENTAGE;
                     } else {
