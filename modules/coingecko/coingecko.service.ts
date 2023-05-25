@@ -15,6 +15,7 @@ import {
     TokenPrices,
 } from './coingecko-types';
 import { env } from '../../app/env';
+import { DeploymentEnv } from '../network/network-config-types';
 
 interface MappedToken {
     platform: string;
@@ -71,7 +72,7 @@ interface CoinId {
    that happen.
 
 */
-const tokensPerInterval = env.COINGECKO_API_KEY ? 10 : 3;
+const tokensPerInterval = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 10 : 6) : 3;
 const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
 
 export class CoingeckoService {
