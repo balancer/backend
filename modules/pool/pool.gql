@@ -67,6 +67,7 @@ type GqlPoolMinimal {
     decimals: Int!
     owner: Bytes
     factory: Bytes
+    version: Int!
     createTime: Int!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!

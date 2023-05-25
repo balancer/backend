@@ -192,6 +192,7 @@ export class PoolCreatorService {
                 name: pool.name || '',
                 decimals: 18,
                 type: poolType,
+                version: pool.poolTypeVersion ? pool.poolTypeVersion : 1,
                 owner: pool.owner || ZERO_ADDRESS,
                 factory: pool.factory,
                 tokens: {
