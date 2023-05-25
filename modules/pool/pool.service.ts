@@ -330,6 +330,18 @@ export class PoolService {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
+    public async syncPoolVersionForAllPools() {
+        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            await prisma.prismaPool.update({
+                where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                data: {
+                    version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
+                },
+            });
+        }
+    }
+
     public async addToBlackList(poolId: string) {
         const category = await prisma.prismaPoolCategory.findFirst({
             where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
