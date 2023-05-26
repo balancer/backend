@@ -155,6 +155,7 @@ fragment BalancerPool on Pool {
     id
     address
     poolType
+    poolTypeVersion
     symbol
     name
     swapFee
