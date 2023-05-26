@@ -187,12 +187,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
     poolAprServices: [
-        new WstethAprService(
-            tokenService,
-            mainnetNetworkData.lido!.wstEthAprEndpoint,
-            mainnetNetworkData.lido!.wstEthContract,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new WstethAprService(tokenService, mainnetNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             mainnetNetworkData.reaper.linearPoolFactories,
             mainnetNetworkData.reaper.averageAPRAcrossLastNHarvests,

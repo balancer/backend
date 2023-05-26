@@ -28,6 +28,7 @@ import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ank
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { ReaperMultistratAprService } from '../pool/lib/apr-data-sources/reaper-multistrat-apr.service';
+import { AnkrStakedEthAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-eth-apr.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -161,6 +162,16 @@ const fantomNetworkData: NetworkData = {
     beefy: {
         linearPools: [''],
     },
+    spooky: {
+        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
+    },
+    stader: {
+        sFtmxContract: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+    },
+    ankr: {
+        ankrFtmContract: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
+        ankrEthContract: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
@@ -192,10 +203,11 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
-        new SpookySwapAprService(tokenService),
+        new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService),
-        new StaderStakedFtmAprService(tokenService),
-        new AnkrStakedFtmAprService(tokenService),
+        new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
+        new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
+        new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,

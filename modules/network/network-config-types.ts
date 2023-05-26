@@ -122,6 +122,16 @@ export interface NetworkData {
     stader?: {
         sFtmxContract: string;
     };
+    rocket?: {
+        rEthContract: string;
+    };
+    spooky?: {
+        xBooContract: string;
+    };
+    ankr?: {
+        ankrFtmContract: string;
+        ankrEthContract: string;
+    };
     overnight?: {
         aprEndpoint: string;
     };
