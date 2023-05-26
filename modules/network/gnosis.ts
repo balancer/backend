@@ -53,7 +53,7 @@ const gnosisNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d',
+    rpcUrl: 'https://rpc.ankr.com/gnosis',
     rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: '',
     sanity: {
