@@ -163,6 +163,9 @@ const optimismNetworkData: NetworkData = {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
     },
+    rocket: {
+        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
+    },
     overnight: {
         aprEndpoint: 'https://api.overnight.fi/optimism',
     },
@@ -197,13 +200,8 @@ export const optimismNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
     poolAprServices: [
-        new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.balancer.yieldProtocolFeePercentage),
-        new WstethAprService(
-            tokenService,
-            optimismNetworkData.lido!.wstEthAprEndpoint,
-            optimismNetworkData.lido!.wstEthContract,
-            optimismNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.rocket!.rEthContract),
+        new WstethAprService(tokenService, optimismNetworkData.lido!.wstEthContract),
         new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
             optimismNetworkData.reaper.linearPoolFactories,

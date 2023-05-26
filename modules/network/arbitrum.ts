@@ -167,12 +167,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(arbitrumNetworkData.rpcUrl),
     poolAprServices: [
-        new WstethAprService(
-            tokenService,
-            arbitrumNetworkData.lido!.wstEthAprEndpoint,
-            arbitrumNetworkData.lido!.wstEthContract,
-            arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             arbitrumNetworkData.reaper.linearPoolFactories,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
