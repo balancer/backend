@@ -9,9 +9,10 @@ import { Multicaller } from '../web3/multicaller';
 import ERC20Abi from '../web3/abi/ERC20.json';
 import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
 import { getContractAt } from '../web3/contract';
+import { AmountHumanReadable } from '../common/global-types';
 
 export class VeBalService {
-    public async getVeBalUserBalance(userAddress: string): Promise<string> {
+    public async getVeBalUserBalance(userAddress: string): Promise<AmountHumanReadable> {
         if (networkContext.data.veBal) {
             const veBalUser = await prisma.prismaVeBalUserBalance.findFirst({
                 where: { chain: networkContext.chain, userAddress: userAddress.toLowerCase() },
@@ -20,10 +21,10 @@ export class VeBalService {
                 return veBalUser.balance;
             }
         }
-        return '0';
+        return '0.0';
     }
 
-    public async getVeBalTotalSupply(): Promise<string> {
+    public async getVeBalTotalSupply(): Promise<AmountHumanReadable> {
         if (networkContext.data.veBal) {
             const veBal = await prisma.prismaVeBalTotalSupply.findFirst({
                 where: { chain: networkContext.chain },
@@ -32,7 +33,7 @@ export class VeBalService {
                 return veBal.totalSupply;
             }
         }
-        return '0';
+        return '0.0';
     }
 
     async syncVeBalBalances() {
