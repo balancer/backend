@@ -16,7 +16,7 @@ export class VeBalService {
             const veBalUser = await prisma.prismaVeBalUserBalance.findFirst({
                 where: { chain: networkContext.chain, userAddress: userAddress.toLowerCase() },
             });
-            if (veBalUser) {
+            if (veBalUser?.balance) {
                 return veBalUser.balance;
             }
         }
@@ -28,7 +28,7 @@ export class VeBalService {
             const veBal = await prisma.prismaVeBalTotalSupply.findFirst({
                 where: { chain: networkContext.chain },
             });
-            if (veBal) {
+            if (veBal?.totalSupply) {
                 return veBal.totalSupply;
             }
         }
