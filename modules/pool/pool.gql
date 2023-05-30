@@ -56,6 +56,7 @@ extend type Mutation {
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
+    poolSyncAllPoolVersions: String!
 }
 
 type GqlPoolMinimal {
@@ -67,6 +68,7 @@ type GqlPoolMinimal {
     decimals: Int!
     owner: Bytes
     factory: Bytes
+    version: Int!
     createTime: Int!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -86,6 +88,8 @@ enum GqlPoolMinimalType {
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
     GYRO
+    GYRO3
+    GYROE
 }
 
 interface GqlPoolBase {

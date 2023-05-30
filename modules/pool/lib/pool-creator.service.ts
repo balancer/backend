@@ -192,6 +192,7 @@ export class PoolCreatorService {
                 name: pool.name || '',
                 decimals: 18,
                 type: poolType,
+                version: pool.poolTypeVersion ? pool.poolTypeVersion : 1,
                 owner: pool.owner || ZERO_ADDRESS,
                 factory: pool.factory,
                 tokens: {
@@ -394,9 +395,9 @@ export class PoolCreatorService {
             case 'Gyro2':
                 return 'GYRO';
             case 'Gyro3':
-                return 'GYRO';
+                return 'GYRO3';
             case 'GyroE':
-                return 'GYRO';
+                return 'GYROE';
         }
 
         // balancer still uses AaveLinear, etc, so we account for that here

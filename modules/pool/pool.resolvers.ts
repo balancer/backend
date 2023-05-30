@@ -268,6 +268,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolSyncAllPoolVersions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncPoolVersionForAllPools();
+
+            return 'success';
+        },
     },
 };
 
