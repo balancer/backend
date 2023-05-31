@@ -90,6 +90,10 @@ export class PoolOnChainDataService {
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
 
+        poolIds = poolIds.filter(
+            (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
+        );
+
         const filteredPools = await prisma.prismaPool.findMany({
             where: {
                 id: { in: poolIds },
