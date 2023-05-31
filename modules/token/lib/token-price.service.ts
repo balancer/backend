@@ -70,12 +70,12 @@ export class TokenPriceService {
     }
 
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
-        const oneDayAgo = moment().subtract(24, 'hours').unix();
-        const twoDaysAgo = moment().subtract(48, 'hours').unix();
+        const twentyThreeHoursAgo = moment().subtract(23, 'hours').unix();
+        const twentyFiveHoursAgo = moment().subtract(25, 'hours').unix();
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
-            where: { timestamp: { lte: oneDayAgo, gte: twoDaysAgo }, chain: networkContext.chain },
+            where: { timestamp: { lte: twentyThreeHoursAgo, gte: twentyFiveHoursAgo }, chain: networkContext.chain },
         });
 
         const wethPrice = tokenPrices.find(
