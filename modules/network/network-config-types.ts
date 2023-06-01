@@ -90,6 +90,7 @@ export interface NetworkData {
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
         poolDataQueryContract: string;
+        excludedPoolDataQueryPoolIds?: string[];
     };
     multicall: string;
     multicall3: string;

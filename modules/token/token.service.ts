@@ -196,7 +196,7 @@ export class TokenService {
             this.cache.put(
                 `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`,
                 tokenPrices24hAgo,
-                60 * 5 * 1000,
+                60 * 15 * 1000,
             );
         }
         return tokenPrices24hAgo;

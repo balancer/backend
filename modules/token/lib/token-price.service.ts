@@ -72,24 +72,30 @@ export class TokenPriceService {
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
         const twoDaysAgo = moment().subtract(48, 'hours').unix();
+        console.time(`TokenPrice load 24hrs ago - ${networkContext.chain}`);
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             orderBy: { timestamp: 'desc' },
-            distinct: ['tokenAddress'],
             where: { timestamp: { lte: oneDayAgo, gte: twoDaysAgo }, chain: networkContext.chain },
         });
 
-        const wethPrice = tokenPrices.find(
+        const distinctTokenPrices = tokenPrices.filter(
+            (price, i, self) => self.findIndex((t) => t.tokenAddress === price.tokenAddress) === i,
+        );
+
+        console.timeEnd(`TokenPrice load 24hrs ago - ${networkContext.chain}`);
+
+        const wethPrice = distinctTokenPrices.find(
             (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
         );
 
         if (wethPrice) {
-            tokenPrices.push({
+            distinctTokenPrices.push({
                 ...wethPrice,
                 tokenAddress: networkContext.data.eth.address,
             });
         }
 
-        return tokenPrices
+        return distinctTokenPrices
             .filter((tokenPrice) => tokenPrice.price > 0.000000001)
             .map((tokenPrice) => ({
                 id: `${tokenPrice.tokenAddress}-${tokenPrice.timestamp}`,
