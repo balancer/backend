@@ -206,10 +206,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-staking-for-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
             name: 'sync-latest-snapshots-for-all-pools',
             interval: every(1, 'hours'),
         },
@@ -225,12 +221,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(10, 'seconds'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'user-sync-staked-balances',
             interval: every(10, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
