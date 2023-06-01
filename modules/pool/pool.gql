@@ -598,6 +598,9 @@ enum GqlPoolFilterType {
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
+    GYRO
+    GYRO3
+    GYROE
 }
 
 type GqlPoolTokenExpanded {
