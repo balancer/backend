@@ -220,6 +220,7 @@ type GqlPoolGyro implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
     name: String!
+    type: String!
     symbol: String!
     address: Bytes!
     decimals: Int!
