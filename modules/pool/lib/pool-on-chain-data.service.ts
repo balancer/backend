@@ -61,9 +61,11 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     ampPoolIdxs: [],
     ratePoolIdxs: [],
 };
+
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
+    pausedState?: [boolean, string, string]
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -224,6 +226,10 @@ export class PoolOnChainDataService {
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
             }
+
+            if (pool.type === 'LINEAR' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE' || pool.type === 'STABLE' || pool.type === 'WEIGHTED') {
+                multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
+            }
         });
 
         let poolsOnChainData = {} as Record<string, MulticallExecuteResult>;
@@ -303,10 +309,13 @@ export class PoolOnChainDataService {
 
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
-                const swapEnabled =
-                    typeof multicallResult?.swapEnabled !== 'undefined'
-                        ? multicallResult.swapEnabled
-                        : pool.dynamicData?.swapEnabled;
+                let swapEnabled: boolean | undefined;
+                if(typeof multicallResult?.swapEnabled !== 'undefined')
+                    swapEnabled =  multicallResult.swapEnabled;
+                else if(typeof multicallResult?.pausedState !== 'undefined')
+                    swapEnabled = !multicallResult.pausedState[0];
+                else
+                    swapEnabled = pool.dynamicData?.swapEnabled;
 
                 if (
                     pool.dynamicData &&
