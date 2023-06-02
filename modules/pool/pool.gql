@@ -220,6 +220,7 @@ type GqlPoolGyro implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
     name: String!
+    type: String!
     symbol: String!
     address: Bytes!
     decimals: Int!
@@ -598,6 +599,9 @@ enum GqlPoolFilterType {
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
+    GYRO
+    GYRO3
+    GYROE
 }
 
 type GqlPoolTokenExpanded {

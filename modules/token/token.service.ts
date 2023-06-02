@@ -225,6 +225,12 @@ export class TokenService {
             },
         });
     }
+    public async reloadAllTokenTypes() {
+        await prisma.prismaTokenType.deleteMany({
+            where: { chain: networkContext.chain },
+        });
+        await networkContext.config.contentService.syncTokenContentData();
+    }
 }
 
 export const tokenService = new TokenService(new TokenPriceService(), new CoingeckoDataService(coingeckoService));
