@@ -10,6 +10,7 @@ model PrismaPool {
     symbol              String
     name                String
     type                PrismaPoolType
+    version             Int                 @default(1)
     decimals            Int                 @default(18)
     owner               String
     factory             String?
@@ -51,6 +52,8 @@ enum PrismaPoolType {
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
     GYRO
+    GYRO3
+    GYROE
 }
 
 model PrismaPoolLinearData {
@@ -392,6 +395,7 @@ model PrismaPoolStakingGauge {
     gaugeAddress        String
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
+    version             Int                             @default(1)
 }
 
 enum PrismaPoolStakingGaugeStatus {

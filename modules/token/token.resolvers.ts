@@ -142,6 +142,13 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
+        tokenReloadAllTokenTypes: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await tokenService.reloadAllTokenTypes();
+
+            return 'success';
+        },
     },
 };
 

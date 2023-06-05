@@ -28,6 +28,7 @@ import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ank
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { ReaperMultistratAprService } from '../pool/lib/apr-data-sources/reaper-multistrat-apr.service';
+import { AnkrStakedEthAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-eth-apr.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -106,6 +107,7 @@ const fantomNetworkData: NetworkData = {
         poolDataQueryContract: '0x3e898A1A3aEFB543DA20232994aeDaD2ce7Fa856',
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
         excludedFarmIds: [
@@ -160,6 +162,16 @@ const fantomNetworkData: NetworkData = {
     beefy: {
         linearPools: [''],
     },
+    spooky: {
+        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
+    },
+    stader: {
+        sFtmxContract: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+    },
+    ankr: {
+        ankrFtmContract: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
+        ankrEthContract: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
@@ -191,14 +203,17 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
-        new SpookySwapAprService(tokenService),
+        new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService),
-        new StaderStakedFtmAprService(tokenService),
-        new AnkrStakedFtmAprService(tokenService),
+        new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
+        new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
+        new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
+            fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
         ),
         new ReaperMultistratAprService(fantomNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new PhantomStableAprService(fantomNetworkData.balancer.yieldProtocolFeePercentage),

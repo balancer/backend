@@ -5,9 +5,13 @@ import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTok
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
-import { CoingeckoService, coingeckoService } from '../coingecko/coingecko.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
-import { CoingeckoPriceHandlerService } from './lib/token-price-handlers/coingecko-price-handler.service';
+import { getContractAt } from '../web3/contract';
+import ERC20Abi from '../web3/abi/ERC20.json';
+import { BigNumber } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
+import { add } from 'lodash';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -121,24 +125,6 @@ export class TokenService {
 
     public async syncCoingeckoPricesForAllChains(): Promise<void> {
         await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
-
-        // const tokensWithoutCoingeckoId = await prisma.prismaToken.findMany({
-        //     where: { coingeckoTokenId: null, types: { some: { type: 'WHITE_LISTED' } } },
-        //     include: { types: true },
-        // });
-
-        // let tokensWithTypes = tokensWithoutCoingeckoId.map((token) => ({
-        //     ...token,
-        //     types: token.types.map((type) => type.type),
-        // }));
-
-        // // Also update any tokens that don't have a coingecko ID by using their contract address
-        // const coingeckoService = new CoingeckoPriceHandlerService(new CoingeckoService());
-
-        // const accepted = await coingeckoService.getAcceptedTokens(tokensWithTypes);
-        // const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
-
-        // await coingeckoService.updatePricesForTokens(acceptedTokens);
     }
 
     public async syncCoingeckoIds(): Promise<void> {
@@ -210,7 +196,7 @@ export class TokenService {
             this.cache.put(
                 `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`,
                 tokenPrices24hAgo,
-                60 * 5 * 1000,
+                60 * 15 * 1000,
             );
         }
         return tokenPrices24hAgo;
@@ -238,6 +224,12 @@ export class TokenService {
                 },
             },
         });
+    }
+    public async reloadAllTokenTypes() {
+        await prisma.prismaTokenType.deleteMany({
+            where: { chain: networkContext.chain },
+        });
+        await networkContext.config.contentService.syncTokenContentData();
     }
 }
 

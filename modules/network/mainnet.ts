@@ -6,7 +6,7 @@ import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
@@ -33,6 +33,7 @@ const mainnetNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -65,6 +66,10 @@ const mainnetNetworkData: NetworkData = {
     },
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3D',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x0000000000000000000000000000000000000000',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -112,8 +117,10 @@ const mainnetNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
         poolDataQueryContract: '0x548e2f8114DDf1c796C37e83D26db9b1cf215a62',
+        excludedPoolDataQueryPoolIds: ['0xf71d0774b214c4cf51e33eb3d30ef98132e4dbaa00000000000000000000046e'],
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -181,16 +188,13 @@ export const mainnetNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
     poolAprServices: [
-        new WstethAprService(
-            tokenService,
-            mainnetNetworkData.lido!.wstEthAprEndpoint,
-            mainnetNetworkData.lido!.wstEthContract,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new WstethAprService(tokenService, mainnetNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             mainnetNetworkData.reaper.linearPoolFactories,
             mainnetNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            mainnetNetworkData.stader ? mainnetNetworkData.stader.sFtmxContract : undefined,
+            mainnetNetworkData.lido ? mainnetNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
@@ -301,6 +305,14 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
         // The following are multichain jobs and should only run once for all chains.
         {

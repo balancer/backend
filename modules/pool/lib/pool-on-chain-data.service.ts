@@ -61,9 +61,11 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     ampPoolIdxs: [],
     ratePoolIdxs: [],
 };
+
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
+    pausedState?: [boolean, string, string]
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -75,6 +77,8 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'LIQUIDITY_BOOTSTRAPPING',
     'ELEMENT',
     'GYRO',
+    'GYRO3',
+    'GYROE',
 ];
 
 export interface poolIdWithType {
@@ -87,6 +91,10 @@ export class PoolOnChainDataService {
 
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
+
+        poolIds = poolIds.filter(
+            (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
+        );
 
         const filteredPools = await prisma.prismaPool.findMany({
             where: {
@@ -121,7 +129,7 @@ export class PoolOnChainDataService {
             if (isStablePool(pool.type)) {
                 stablePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
-            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'GYRO') {
+            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type.includes('GYRO')) {
                 ratePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
             if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE') {
@@ -147,7 +155,7 @@ export class PoolOnChainDataService {
                         pool.type === 'LINEAR' ||
                         // MetaStable & StablePhantom is the same as Stable for swapfee purposes
                         isStablePool(pool.type) ||
-                        pool.type === 'GYRO'
+                        pool.type.includes('GYRO')
                     ) {
                         return PoolQuerySwapFeeType.SWAP_FEE_PERCENTAGE;
                     } else {
@@ -217,6 +225,10 @@ export class PoolOnChainDataService {
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
+            }
+
+            if (pool.type === 'LINEAR' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE' || pool.type === 'STABLE' || pool.type === 'WEIGHTED') {
+                multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
             }
         });
 
@@ -297,10 +309,13 @@ export class PoolOnChainDataService {
 
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
-                const swapEnabled =
-                    typeof multicallResult?.swapEnabled !== 'undefined'
-                        ? multicallResult.swapEnabled
-                        : pool.dynamicData?.swapEnabled;
+                let swapEnabled: boolean | undefined;
+                if(typeof multicallResult?.swapEnabled !== 'undefined')
+                    swapEnabled =  multicallResult.swapEnabled;
+                else if(typeof multicallResult?.pausedState !== 'undefined')
+                    swapEnabled = !multicallResult.pausedState[0];
+                else
+                    swapEnabled = pool.dynamicData?.swapEnabled;
 
                 if (
                     pool.dynamicData &&

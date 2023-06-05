@@ -330,6 +330,18 @@ export class PoolService {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
+    public async syncPoolVersionForAllPools() {
+        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            await prisma.prismaPool.update({
+                where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                data: {
+                    version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
+                },
+            });
+        }
+    }
+
     public async addToBlackList(poolId: string) {
         const category = await prisma.prismaPoolCategory.findFirst({
             where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
@@ -420,6 +432,53 @@ export class PoolService {
         });
 
         await prisma.prismaPoolSwap.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        const poolStaking = await prisma.prismaPoolStaking.findMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        for (const staking of poolStaking) {
+            switch (staking.type) {
+                case 'GAUGE':
+                    await prisma.prismaPoolStakingGaugeReward.deleteMany({
+                        where: { chain: networkContext.chain, gaugeId: staking.id },
+                    });
+
+                    await prisma.prismaPoolStakingGauge.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+
+                case 'MASTER_CHEF':
+                    await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({
+                        where: { chain: networkContext.chain, farmId: staking.id },
+                    });
+
+                    await prisma.prismaPoolStakingMasterChefFarm.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+                case 'RELIQUARY':
+                    await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({
+                        where: { chain: networkContext.chain, farmId: staking.id.split('-')[1] },
+                    });
+
+                    await prisma.prismaPoolStakingReliquaryFarm.deleteMany({
+                        where: { chain: networkContext.chain, stakingId: staking.id },
+                    });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        await prisma.prismaUserStakedBalance.deleteMany({
+            where: { chain: networkContext.chain, poolId: poolId },
+        });
+
+        await prisma.prismaPoolStaking.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
         });
 

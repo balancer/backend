@@ -38,7 +38,7 @@ export class BoostedPoolAprService implements PoolAprService {
             const aprItems = await prisma.prismaPoolAprItem.findMany({
                 where: {
                     poolId: { in: poolIds },
-                    type: { in: ['LINEAR_BOOSTED', 'PHANTOM_STABLE_BOOSTED'] },
+                    type: { in: ['LINEAR_BOOSTED', 'PHANTOM_STABLE_BOOSTED', 'IB_YIELD'] },
                     chain: networkContext.chain,
                 },
             });

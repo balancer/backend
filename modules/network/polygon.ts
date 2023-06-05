@@ -4,7 +4,7 @@ import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
@@ -32,6 +32,7 @@ const polygonNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -64,6 +65,10 @@ const polygonNetworkData: NetworkData = {
     },
     bal: {
         address: '0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -117,6 +122,7 @@ const polygonNetworkData: NetworkData = {
         poolDataQueryContract: '0x60467cb225092cE0c989361934311175f437Cf53',
     },
     multicall: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -289,6 +295,14 @@ export const polygonNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
     ],
 };

@@ -4,12 +4,10 @@ import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { collectsYieldFee, isComposableStablePool, isWeightedPoolV2 } from '../../pool-utils';
 import { networkContext } from '../../../../network/network-context.service';
+import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 
 export class RocketPoolStakedEthAprService implements PoolAprService {
-    private readonly RETH_ADDRESS = '0x9bcef72be871e61ed4fbbc7630889bee758eb81d';
-    private readonly RETH_APR = 0.0425;
-
-    constructor(private readonly tokenService: TokenService, private readonly yieldProtocolFeePercentage: number) {}
+    constructor(private readonly tokenService: TokenService, private readonly rethAddress: string) {}
 
     public getAprServiceName(): string {
         return 'RocketPoolStakedEthAprService';
@@ -17,14 +15,16 @@ export class RocketPoolStakedEthAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const rethPrice = this.tokenService.getPriceForToken(tokenPrices, this.RETH_ADDRESS);
+        const rethPrice = this.tokenService.getPriceForToken(tokenPrices, this.rethAddress);
+        const rethBaseApr = await liquidStakedBaseAprService.getREthBaseApr();
+
         let operations: any[] = [];
         for (const pool of pools) {
-            const rethToken = pool.tokens.find((token) => token.address === this.RETH_ADDRESS);
+            const rethToken = pool.tokens.find((token) => token.address === this.rethAddress);
             const rethTokenBalance = rethToken?.dynamicData?.balance;
             if (rethTokenBalance && pool.dynamicData) {
                 const rethPercentage = (parseFloat(rethTokenBalance) * rethPrice) / pool.dynamicData.totalLiquidity;
-                const rethApr = pool.dynamicData.totalLiquidity > 0 ? this.RETH_APR * rethPercentage : 0;
+                const rethApr = pool.dynamicData.totalLiquidity > 0 ? rethBaseApr * rethPercentage : 0;
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? rethApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)

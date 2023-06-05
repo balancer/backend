@@ -32,6 +32,33 @@ fragment Gauge on LiquidityGauge {
     isKilled
 }
 
+query Pools(
+    $block: Block_height
+    $first: Int = 100
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: Pool_filter
+) {
+    pools(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
+        poolId
+        preferentialGauge {
+            id
+        }
+        gauges {
+            ...Gauge
+        }
+        gaugesList
+    }
+}
+
 query GaugeLiquidityGaugeAddresses {
     liquidityGauges {
         id
@@ -102,5 +129,29 @@ query GaugeGetMeta {
         }
         deployment
         hasIndexingErrors
+    }
+}
+
+query VotingEscrowLocks(
+    $block: Block_height
+    $first: Int = 100
+    $orderBy: VotingEscrowLock_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: VotingEscrowLock_filter
+) {
+    votingEscrowLocks(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
+        id
+        lockedBalance
+        user {
+            id
+        }
     }
 }

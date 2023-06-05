@@ -58,6 +58,7 @@ export interface NetworkData {
         reliquary?: string;
         beetsBar?: string;
         gauge?: string;
+        veBalLocks?: string;
         userBalances: string;
     };
     sanity: {
@@ -77,6 +78,10 @@ export interface NetworkData {
     bal: {
         address: string;
     };
+    veBal?: {
+        address: string;
+        delegationProxy: string;
+    };
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];
@@ -85,8 +90,10 @@ export interface NetworkData {
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
         poolDataQueryContract: string;
+        excludedPoolDataQueryPoolIds?: string[];
     };
     multicall: string;
+    multicall3: string;
     masterchef: {
         address: string;
         excludedFarmIds: string[];
@@ -112,6 +119,19 @@ export interface NetworkData {
     lido?: {
         wstEthContract: string;
         wstEthAprEndpoint: string;
+    };
+    stader?: {
+        sFtmxContract: string;
+    };
+    rocket?: {
+        rEthContract: string;
+    };
+    spooky?: {
+        xBooContract: string;
+    };
+    ankr?: {
+        ankrFtmContract: string;
+        ankrEthContract: string;
     };
     overnight?: {
         aprEndpoint: string;

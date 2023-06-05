@@ -96,7 +96,8 @@ export class UserSyncWalletBalanceService {
         }
 
         const fromBlock = syncStatus.blockNumber + 1;
-        const toBlock = latestBlock - fromBlock > 500 ? fromBlock + 500 : latestBlock;
+        // as we use the erc20 transfer topic, we use a smaller block range than defined in the network context
+        const toBlock = latestBlock - fromBlock > 200 ? fromBlock + 200 : latestBlock;
 
         // no new blocks have been minted, needed for slow networks
         if (fromBlock > toBlock) {

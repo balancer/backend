@@ -25,13 +25,17 @@ export class GaugeAprService implements PoolAprService {
         const tokenPrices = await this.tokenService.getTokenPrices();
         for (const pool of pools) {
             let gauge;
+            let preferredStaking;
             for (const stake of pool.staking) {
-                gauge = gauges.find(
-                    (subgraphGauge) =>
-                        subgraphGauge.address === stake.gauge?.gaugeAddress && stake.gauge?.status === 'PREFERRED',
-                );
+                if (stake.gauge?.status === 'PREFERRED') {
+                    preferredStaking = stake;
+                    gauge = gauges.find(
+                        (subgraphGauge) =>
+                            subgraphGauge.address === stake.gauge?.gaugeAddress && stake.gauge?.status === 'PREFERRED',
+                    );
+                }
             }
-            if (!gauge || !pool.dynamicData) {
+            if (!gauge || !pool.dynamicData || !preferredStaking?.gauge) {
                 continue;
             }
             const totalShares = parseFloat(pool.dynamicData.totalShares);
@@ -39,10 +43,20 @@ export class GaugeAprService implements PoolAprService {
                 totalShares > 0 ? (parseFloat(gauge.totalSupply) / totalShares) * pool.dynamicData.totalLiquidity : 0;
 
             let thirdPartyApr = 0;
-            for (let rewardToken of gauge.tokens) {
-                const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+
+            for (let rewardToken of preferredStaking.gauge.rewards) {
+                const tokenAddress = rewardToken.tokenAddress;
+                let rewardTokenDefinition;
+                try {
+                    rewardTokenDefinition = await prisma.prismaToken.findUniqueOrThrow({
+                        where: { address_chain: { address: tokenAddress, chain: networkContext.chain } },
+                    });
+                } catch (e) {
+                    //we don't have the reward token added as a token, only happens for testing tokens
+                    continue;
+                }
                 const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, tokenAddress) || 0.1;
-                const rewardTokenPerYear = parseFloat(rewardToken.rewardsPerSecond) * secondsPerYear;
+                const rewardTokenPerYear = parseFloat(rewardToken.rewardPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                 let rewardApr = gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
@@ -52,10 +66,10 @@ export class GaugeAprService implements PoolAprService {
                 }
 
                 const item: PrismaPoolAprItem = {
-                    id: `${pool.id}-${rewardToken.symbol}-apr`,
+                    id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
                     chain: networkContext.chain,
                     poolId: pool.id,
-                    title: `${rewardToken.symbol} reward APR`,
+                    title: `${rewardTokenDefinition.symbol} reward APR`,
                     apr: rewardApr,
                     type: isThirdPartyApr ? 'THIRD_PARTY_REWARD' : 'NATIVE_REWARD',
                     group: null,

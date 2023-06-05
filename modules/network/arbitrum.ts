@@ -6,7 +6,7 @@ import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-guage-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
@@ -33,6 +33,7 @@ const arbitrumNetworkData: NetworkData = {
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-arbitrum',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -66,6 +67,10 @@ const arbitrumNetworkData: NetworkData = {
     bal: {
         address: '0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8',
     },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
+    },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: [
@@ -94,6 +99,7 @@ const arbitrumNetworkData: NetworkData = {
         poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
     },
     multicall: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
+    multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
@@ -161,16 +167,13 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(arbitrumNetworkData.rpcUrl),
     poolAprServices: [
-        new WstethAprService(
-            tokenService,
-            arbitrumNetworkData.lido!.wstEthAprEndpoint,
-            arbitrumNetworkData.lido!.wstEthContract,
-            arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             arbitrumNetworkData.reaper.linearPoolFactories,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
             tokenService,
+            arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
+            arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
@@ -281,6 +284,14 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
     ],
 };
