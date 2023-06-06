@@ -104,7 +104,7 @@ const fantomNetworkData: NetworkData = {
         poolsInRecoveryMode: ['0x9e4341acef4147196e99d648c5e43b3fc9d02678'],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        poolDataQueryContract: '0x3e898A1A3aEFB543DA20232994aeDaD2ce7Fa856',
+        poolDataQueryContract: '0xC1AFF8373840dB41275aAd5c41EC171D10872F5B',
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

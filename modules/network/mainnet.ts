@@ -116,7 +116,7 @@ const mainnetNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x548e2f8114DDf1c796C37e83D26db9b1cf215a62',
+        poolDataQueryContract: '0x9Fa8A5977EF1d852602AE1960971D7ac0f0aaa1a',
         excludedPoolDataQueryPoolIds: ['0xf71d0774b214c4cf51e33eb3d30ef98132e4dbaa00000000000000000000046e'],
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',

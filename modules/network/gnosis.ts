@@ -78,7 +78,7 @@ const gnosisNetworkData: NetworkData = {
         poolsInRecoveryMode: [],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
+        poolDataQueryContract: '0x80dD2B80FbcFB06505A301d732322e987380EcD6',
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
