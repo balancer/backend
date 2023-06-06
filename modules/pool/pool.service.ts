@@ -196,7 +196,16 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 100);
 
         for (const chunk of chunks) {
+            await this.poolOnChainDataService.updateOnChainStatus(chunk);
             await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);
+        }
+    }
+
+    public async updateOnChainStatusForPools(poolIds: string[]) {
+        const chunks = _.chunk(poolIds, 100);
+
+        for (const chunk of chunks) {
+            await this.poolOnChainDataService.updateOnChainStatus(chunk);
         }
     }
 

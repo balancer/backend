@@ -6,6 +6,7 @@ type PoolWithTypeAndFactory = {
     address: string;
     type: PrismaPoolType;
     factory?: string | null;
+    dynamicData?: PrismaPoolDynamicData | null;
 };
 
 export function isStablePool(poolType: PrismaPoolType) {
@@ -32,7 +33,7 @@ export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
     return (
-        !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address) &&
+        !pool.dynamicData?.isInRecoveryMode &&
         (isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE')
     );
 }

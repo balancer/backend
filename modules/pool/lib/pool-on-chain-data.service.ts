@@ -95,6 +95,46 @@ export interface poolIdWithType {
 export class PoolOnChainDataService {
     constructor(private readonly tokenService: TokenService) {}
 
+    public async updateOnChainStatus(poolIds: string[]): Promise<void> {
+        if (poolIds.length === 0) return;
+
+        const filteredPools = await prisma.prismaPool.findMany({
+            where: {
+                id: { in: poolIds },
+                chain: networkContext.chain,
+                type: { in: SUPPORTED_POOL_TYPES },
+            },
+        });
+
+        const poolIdsFromDb = filteredPools.map((pool) => pool.id);
+        const poolsWithStatus: string[] = [];
+
+        filteredPools.forEach((pool) => {
+            if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
+                console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
+                return;
+            }
+
+            if (pool.type !== 'LIQUIDITY_BOOTSTRAPPING' && pool.type !== 'INVESTMENT') {
+                poolsWithStatus.push(pool.id);
+            }
+        });
+
+        const poolStatusResults = await this.queryPoolStatus(poolsWithStatus);
+
+        for (const poolId of poolIdsFromDb) {
+            if (poolStatusResults[poolId]) {
+                await prisma.prismaPoolDynamicData.update({
+                    where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                    data: {
+                        isPaused: !poolStatusResults[poolId].isPaused,
+                        isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
+                    },
+                });
+            }
+        }
+    }
+
     public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
         if (poolIds.length === 0) return;
 
@@ -219,8 +259,6 @@ export class PoolOnChainDataService {
 
         const multiPool = new Multicaller(networkContext.data.multicall, provider, abis);
 
-        const poolsSwapEnabled: string[] = [];
-
         filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
@@ -233,7 +271,6 @@ export class PoolOnChainDataService {
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
-                poolsSwapEnabled.push(pool.id);
             }
         });
 
@@ -248,20 +285,7 @@ export class PoolOnChainDataService {
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
 
-        const poolsWithStatus = poolIdsFromDb.filter((id) => !poolsSwapEnabled.includes(id));
-        const poolStatusResults = await this.queryPoolStatus(poolsWithStatus);
-
         for (const poolData of poolDataPerPool) {
-            if (poolStatusResults[poolData.id]) {
-                await prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: poolData.id, chain: networkContext.chain } },
-                    data: {
-                        swapEnabled: !poolStatusResults[poolData.id].isPaused,
-                        isInRecoveryMode: poolStatusResults[poolData.id].inRecoveryMode,
-                        blockNumber,
-                    },
-                });
-            }
             if (poolData.ignored) {
                 console.log(`Pool query return with error, skipping: ${poolData.id}`);
                 continue;

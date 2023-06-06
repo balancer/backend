@@ -139,7 +139,8 @@ model PrismaPoolDynamicData {
 
     swapFee                 String
     swapEnabled             Boolean
-    isInRecoveryMode         Boolean             @default(false)
+    isPaused                Boolean             @default(false)
+    isInRecoveryMode        Boolean             @default(false)
     totalShares             String
     totalSharesNum          Float               @default(0)
     totalLiquidity          Float

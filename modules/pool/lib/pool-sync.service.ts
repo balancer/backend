@@ -33,7 +33,11 @@ export class PoolSyncService {
             endBlock,
         );
 
-        //TODO needs a trigger for recovery mode and is paused
+        const allPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
+        });
+
+        await poolService.updateOnChainStatusForPools(allPools.map((pool) => pool.id));
 
         const filteredEvents = events.filter((event) =>
             ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
