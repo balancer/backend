@@ -15,6 +15,7 @@ datasource db {
 
 enum Chain {
     ARBITRUM
+    AVALANCHE
     FANTOM
     GNOSIS
     MAINNET
