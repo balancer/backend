@@ -32,6 +32,9 @@ export class PoolSyncService {
             startBlock,
             endBlock,
         );
+
+        //TODO needs a trigger for recovery mode and is paused
+
         const filteredEvents = events.filter((event) =>
             ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
         );

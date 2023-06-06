@@ -257,6 +257,7 @@ export class PoolOnChainDataService {
                     where: { id_chain: { id: poolData.id, chain: networkContext.chain } },
                     data: {
                         swapEnabled: !poolStatusResults[poolData.id].isPaused,
+                        isInRecoveryMode: poolStatusResults[poolData.id].inRecoveryMode,
                         blockNumber,
                     },
                 });

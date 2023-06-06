@@ -2,7 +2,6 @@ import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { collectsFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
 const MAX_DB_INT = 9223372036854775807;
@@ -25,7 +24,8 @@ export class SwapFeeAprService implements PoolAprService {
 
                 let userApr = apr * (1 - this.swapProtocolFeePercentage);
 
-                if (!collectsFee(pool)) {
+                if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
+                    // pool does not collect any protocol fees
                     userApr = apr;
                 }
 
