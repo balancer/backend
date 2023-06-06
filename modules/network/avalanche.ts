@@ -51,7 +51,7 @@ const avalancheNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://avalanche-mainnet.infura.io',
+    rpcUrl: 'https://avalanche.public-rpc.com',
     rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: '',
     sanity: {
