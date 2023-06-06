@@ -43,6 +43,13 @@ interface PoolDataQueryConfig {
     ratePoolIdxs: number[];
 }
 
+interface PoolStatusResult {
+    [key: string]: {
+        isPaused: boolean;
+        inRecoveryMode: boolean;
+    };
+}
+
 const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     loadTokenBalanceUpdatesAfterBlock: false,
     loadTotalSupply: false,
@@ -213,6 +220,8 @@ export class PoolOnChainDataService {
 
         const multiPool = new Multicaller(networkContext.data.multicall, provider, abis);
 
+        const poolsSwapEnabled: string[] = [];
+
         filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
@@ -225,9 +234,16 @@ export class PoolOnChainDataService {
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
+                poolsSwapEnabled.push(pool.id);
             }
 
-            if (pool.type === 'LINEAR' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE' || pool.type === 'STABLE' || pool.type === 'WEIGHTED') {
+            if (
+                pool.type === 'LINEAR' ||
+                pool.type === 'META_STABLE' ||
+                pool.type === 'PHANTOM_STABLE' ||
+                pool.type === 'STABLE' ||
+                pool.type === 'WEIGHTED'
+            ) {
                 multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
             }
         });
@@ -243,7 +259,19 @@ export class PoolOnChainDataService {
 
         const poolsOnChainDataArray = Object.entries(poolsOnChainData);
 
+        const poolsWithStatus = poolIdsFromDb.filter(id => !poolsSwapEnabled.includes(id));
+        const poolStatusResults = await this.queryPoolStatus(poolsWithStatus);
+
         for (const poolData of poolDataPerPool) {
+            if (poolStatusResults[poolData.id]) {
+                await prisma.prismaPoolDynamicData.update({
+                    where: { id_chain: { id: poolData.id, chain: networkContext.chain } },
+                    data: {
+                        swapEnabled: !poolStatusResults[poolData.id].isPaused,
+                        blockNumber,
+                    },
+                });
+            }
             if (poolData.ignored) {
                 console.log(`Pool query return with error, skipping: ${poolData.id}`);
                 continue;
@@ -310,12 +338,10 @@ export class PoolOnChainDataService {
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
                 let swapEnabled: boolean | undefined;
-                if(typeof multicallResult?.swapEnabled !== 'undefined')
-                    swapEnabled =  multicallResult.swapEnabled;
-                else if(typeof multicallResult?.pausedState !== 'undefined')
+                if (typeof multicallResult?.swapEnabled !== 'undefined') swapEnabled = multicallResult.swapEnabled;
+                else if (typeof multicallResult?.pausedState !== 'undefined')
                     swapEnabled = !multicallResult.pausedState[0];
-                else
-                    swapEnabled = pool.dynamicData?.swapEnabled;
+                else swapEnabled = pool.dynamicData?.swapEnabled;
 
                 if (
                     pool.dynamicData &&
@@ -442,5 +468,25 @@ export class PoolOnChainDataService {
             rates: response[7],
             ignoreIdxs: response[8],
         };
+    }
+
+    public async queryPoolStatus(poolIds: string[]): Promise<PoolStatusResult> {
+        const contract = new Contract(
+            networkContext.data.balancer.poolDataQueryContract,
+            BalancerPoolDataQueryAbi,
+            networkContext.provider,
+        );
+
+        const response = await contract.getPoolStatus(poolIds, { loadInRecoveryMode: true, loadIsPaused: true });
+
+        const result = poolIds.reduce((acc, id, i) => {
+            acc[id] = {
+                isPaused: response[0][i],
+                inRecoveryMode: response[1][i],
+            };
+            return acc;
+        }, {} as PoolStatusResult);
+
+        return result;
     }
 }
