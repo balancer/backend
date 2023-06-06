@@ -2,6 +2,7 @@ import { Provider } from '@ethersproject/providers';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
+import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -12,6 +13,7 @@ import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-u
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
+import { createRandomSnapshotsForPoolForTimestamp } from '../../tests-helper/poolTestdataHelpers';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -65,7 +67,8 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
-    pausedState?: [boolean, string, string]
+    pausedState?: [boolean, string, string];
+    protocolFeePercentageCache?: number;
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -207,7 +210,9 @@ export class PoolOnChainDataService {
         const abis: any = Object.values(
             // Remove duplicate entries using their names
             Object.fromEntries(
-                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi].map((row) => [row.name, row]),
+                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi, ...ComposableStablePoolAbi].map(
+                    (row) => [row.name, row],
+                ),
             ),
         );
 
@@ -219,6 +224,17 @@ export class PoolOnChainDataService {
                 return;
             }
 
+            // get per pool yield protocol fee (type 2)
+            if (
+                networkContext.data.balancer.factoriesWithpoolSpecificProtocolFeePercentagesProvider?.includes(
+                    pool.factory || '',
+                )
+            ) {
+                multiPool.call(`${pool.id}.protocolFeePercentageCache`, pool.address, 'getProtocolFeePercentageCache', [
+                    2,
+                ]);
+            }
+
             if (pool.type === 'LINEAR') {
                 multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
             }
@@ -227,7 +243,13 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
             }
 
-            if (pool.type === 'LINEAR' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE' || pool.type === 'STABLE' || pool.type === 'WEIGHTED') {
+            if (
+                pool.type === 'LINEAR' ||
+                pool.type === 'META_STABLE' ||
+                pool.type === 'PHANTOM_STABLE' ||
+                pool.type === 'STABLE' ||
+                pool.type === 'WEIGHTED'
+            ) {
                 multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
             }
         });
@@ -254,6 +276,19 @@ export class PoolOnChainDataService {
             for (const [id, data] of poolsOnChainDataArray) {
                 if (id === poolId) {
                     multicallResult = data;
+                }
+            }
+
+            if (pool.dynamicData && multicallResult?.protocolFeePercentageCache) {
+                const poolProtocolYiledFeePercentage = formatFixed(multicallResult.protocolFeePercentageCache, 18);
+
+                if (pool.dynamicData.protocolYieldFee !== poolProtocolYiledFeePercentage) {
+                    await prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        data: {
+                            protocolYieldFee: poolProtocolYiledFeePercentage,
+                        },
+                    });
                 }
             }
 
@@ -310,12 +345,10 @@ export class PoolOnChainDataService {
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
                 let swapEnabled: boolean | undefined;
-                if(typeof multicallResult?.swapEnabled !== 'undefined')
-                    swapEnabled =  multicallResult.swapEnabled;
-                else if(typeof multicallResult?.pausedState !== 'undefined')
+                if (typeof multicallResult?.swapEnabled !== 'undefined') swapEnabled = multicallResult.swapEnabled;
+                else if (typeof multicallResult?.pausedState !== 'undefined')
                     swapEnabled = !multicallResult.pausedState[0];
-                else
-                    swapEnabled = pool.dynamicData?.swapEnabled;
+                else swapEnabled = pool.dynamicData?.swapEnabled;
 
                 if (
                     pool.dynamicData &&

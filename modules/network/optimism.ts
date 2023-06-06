@@ -212,8 +212,8 @@ export const optimismNetworkConfig: NetworkConfig = {
         ),
         new ReaperMultistratAprService(optimismNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
-        new PhantomStableAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(optimismNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             optimismNetworkData.beets.address,

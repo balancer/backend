@@ -193,7 +193,7 @@ export class PoolService {
         const poolIds = result.map((item) => item.id);
         const blockNumber = await networkContext.provider.getBlockNumber();
 
-        const chunks = _.chunk(poolIds, 100);
+        const chunks = _.chunk(poolIds, 1);
 
         for (const chunk of chunks) {
             await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);

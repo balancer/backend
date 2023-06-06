@@ -175,8 +175,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
             arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,
         ),
-        new PhantomStableAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(arbitrumNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             arbitrumNetworkData.beets.address,

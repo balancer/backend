@@ -186,8 +186,8 @@ export const polygonNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(polygonNetworkData.rpcUrl),
     poolAprServices: [
-        new PhantomStableAprService(polygonNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(polygonNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(polygonNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             polygonNetworkData.beets.address,

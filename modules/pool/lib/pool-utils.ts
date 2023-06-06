@@ -1,6 +1,7 @@
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { networkContext } from '../../network/network-context.service';
+import { prisma } from '../../../prisma/prisma-client';
 
 type PoolWithTypeAndFactory = {
     address: string;
@@ -39,6 +40,17 @@ export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
 
 export function capturesYield(pool: PoolWithTypeAndFactory) {
     return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
+}
+
+export async function getProtocolYieldFeePercentage(pool: PoolWithTypeAndFactory): Promise<number> {
+    const foundPool = await prisma.prismaPool.findFirstOrThrow({
+        where: { chain: networkContext.chain, address: pool.address },
+        include: { dynamicData: true },
+    });
+    if (foundPool.dynamicData?.protocolYieldFee) {
+        return parseFloat(foundPool.dynamicData.protocolYieldFee);
+    }
+    return networkContext.data.balancer.yieldProtocolFeePercentage;
 }
 
 export function collectsFee(pool: PoolWithTypeAndFactory) {

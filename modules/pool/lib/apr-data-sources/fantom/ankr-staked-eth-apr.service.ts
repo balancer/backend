@@ -3,7 +3,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
-import { collectsYieldFee } from '../../pool-utils';
+import { collectsYieldFee, getProtocolYieldFeePercentage } from '../../pool-utils';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 import { networkContext } from '../../../../network/network-context.service';
 
@@ -22,6 +22,7 @@ export class AnkrStakedEthAprService implements PoolAprService {
 
         let operations: any[] = [];
         for (const pool of pools) {
+            const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
             const ankrEthToken = pool.tokens.find((token) => token.address === this.ankrEthAddress);
             const ankrEthTokenBalance = ankrEthToken?.dynamicData?.balance;
             if (ankrEthTokenBalance && pool.dynamicData) {
@@ -31,7 +32,7 @@ export class AnkrStakedEthAprService implements PoolAprService {
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? poolAnkrEthApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : poolAnkrEthApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : poolAnkrEthApr * (1 - protocolYieldFeePercentage);
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
                         where: { id_chain: { id: `${pool.id}-ankreth-apr`, chain: networkContext.chain } },

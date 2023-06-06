@@ -149,8 +149,8 @@ export const gnosisNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(gnosisNetworkData.rpcUrl),
     poolAprServices: [
-        new PhantomStableAprService(gnosisNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(gnosisNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(gnosisNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             gnosisNetworkData.beets.address,

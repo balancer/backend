@@ -3,7 +3,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { networkContext } from '../../../../network/network-context.service';
-import { collectsYieldFee } from '../../pool-utils';
+import { collectsYieldFee, getProtocolYieldFeePercentage } from '../../pool-utils';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 
 export class StaderStakedFtmAprService implements PoolAprService {
@@ -21,6 +21,7 @@ export class StaderStakedFtmAprService implements PoolAprService {
         let operations: any[] = [];
 
         for (const pool of pools) {
+            const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
             const sftmxToken = pool.tokens.find((token) => token.address === this.sftmxAddress);
             const sftmxTokenBalance = sftmxToken?.dynamicData?.balance;
 
@@ -31,7 +32,7 @@ export class StaderStakedFtmAprService implements PoolAprService {
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? sftmxApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : sftmxApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : sftmxApr * (1 - protocolYieldFeePercentage);
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
