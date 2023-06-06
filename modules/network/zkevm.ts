@@ -52,7 +52,7 @@ const zkevmNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://polygonzkevm-mainnet.g.alchemy.com/v2/sS2YBmpI1_a0U4NOSEEPYQOIQ-zwiLWs',
+    rpcUrl: 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: '',
     sanity: {
