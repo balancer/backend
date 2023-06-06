@@ -80,7 +80,7 @@ const avalancheNetworkData: NetworkData = {
         poolsInRecoveryMode: [],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '',
+        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
