@@ -87,3 +87,7 @@ We follow the model of [gitflow](https://www.atlassian.com/git/tutorials/compari
 -   hotfix: hf/\*
 
 To contribute, branch from `v2-canary` (which is our development branch) and open a PR against `v2-canary` once the feature is complete. It will be reviewed and eventually merged into v2-canary.
+
+### Database Updates
+
+If you make any changes to the database schema be sure to run `yarn prisma migrate dev --name <change_name>` which will create a new file in `prisma/migrations` that contains all the database changes you've made as an SQL update script. 
