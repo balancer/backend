@@ -13,7 +13,7 @@ import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-u
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
-import { createRandomSnapshotsForPoolForTimestamp } from '../../tests-helper/poolTestdataHelpers';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -45,6 +45,13 @@ interface PoolDataQueryConfig {
     ratePoolIdxs: number[];
 }
 
+interface PoolStatusResult {
+    [key: string]: {
+        isPaused: boolean;
+        inRecoveryMode: boolean;
+    };
+}
+
 const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     loadTokenBalanceUpdatesAfterBlock: false,
     loadTotalSupply: false,
@@ -67,7 +74,6 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
-    pausedState?: [boolean, string, string];
     protocolFeePercentageCache?: number;
 }
 
@@ -92,8 +98,50 @@ export interface poolIdWithType {
 export class PoolOnChainDataService {
     constructor(private readonly tokenService: TokenService) {}
 
-    public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
+    public async updateOnChainStatus(poolIds: string[]): Promise<void> {
         if (poolIds.length === 0) return;
+
+        const filteredPools = await prisma.prismaPool.findMany({
+            where: {
+                id: { in: poolIds },
+                chain: networkContext.chain,
+                type: { in: SUPPORTED_POOL_TYPES },
+            },
+        });
+
+        const poolIdsFromDb = filteredPools.map((pool) => pool.id);
+
+        const poolStatusResults = await this.queryPoolStatus(poolIdsFromDb);
+
+        const operations = [];
+
+        for (const poolId of poolIdsFromDb) {
+            if (poolStatusResults[poolId]) {
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                        data: {
+                            isPaused: poolStatusResults[poolId].isPaused,
+                            isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
+                        },
+                    }),
+                );
+            }
+        }
+        prismaBulkExecuteOperations(operations, false);
+    }
+
+    public async updateOnChainData(
+        poolIds: string[],
+        provider: Provider,
+        blockNumber: number,
+    ): Promise<{ failed: string[]; success: string[] }> {
+        const success: string[] = [];
+        const failed: string[] = [];
+
+        if (poolIds.length === 0) {
+            return { failed, success };
+        }
 
         poolIds = poolIds.filter(
             (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
@@ -267,7 +315,7 @@ export class PoolOnChainDataService {
 
         for (const poolData of poolDataPerPool) {
             if (poolData.ignored) {
-                console.log(`Pool query return with error, skipping: ${poolData.id}`);
+                failed.push(poolData.id);
                 continue;
             }
             const poolId = poolData.id;
@@ -431,9 +479,16 @@ export class PoolOnChainDataService {
                     }
                 }
             } catch (e) {
+                failed.push(poolData.id);
                 console.log('error syncing on chain data', e);
             }
+            success.push(poolData.id);
+
+            // console.log(
+            //     `Successful updates: ${success.length}, failed updates: ${failed.length}. Failed pool Ids: ${failed}`,
+            // );
         }
+        return { failed, success };
     }
 
     public async queryPoolData({
@@ -475,5 +530,25 @@ export class PoolOnChainDataService {
             rates: response[7],
             ignoreIdxs: response[8],
         };
+    }
+
+    public async queryPoolStatus(poolIds: string[]): Promise<PoolStatusResult> {
+        const contract = new Contract(
+            networkContext.data.balancer.poolDataQueryContract,
+            BalancerPoolDataQueryAbi,
+            networkContext.provider,
+        );
+
+        const response = await contract.getPoolStatus(poolIds, { loadInRecoveryMode: true, loadIsPaused: true });
+
+        const result = poolIds.reduce((acc, id, i) => {
+            acc[id] = {
+                isPaused: response[0][i],
+                inRecoveryMode: response[1][i],
+            };
+            return acc;
+        }, {} as PoolStatusResult);
+
+        return result;
     }
 }

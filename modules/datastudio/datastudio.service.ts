@@ -9,12 +9,7 @@ import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgr
 import { tokenService } from '../token/token.service';
 import { beetsService } from '../beets/beets.service';
 import { oneDayInSeconds, secondsPerDay } from '../common/time';
-import {
-    collectsFee,
-    getProtocolYieldFeePercentage,
-    isComposableStablePool,
-    isWeightedPoolV2,
-} from '../pool/lib/pool-utils';
+import { getProtocolYieldFeePercentage, isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';
 
@@ -166,7 +161,8 @@ export class DatastudioService {
                         ? `${pool.dynamicData.yieldCapture24h * networkContext.data.balancer.swapProtocolFeePercentage}`
                         : `${pool.dynamicData.yieldCapture24h * protocolYieldFeePercentage}`;
 
-                if (!collectsFee(pool)) {
+                if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
+                    //pool does not collect any protocol fees
                     lpSwapFee = `${pool.dynamicData.fees24h}`;
                     protocolSwapFee = `0`;
 

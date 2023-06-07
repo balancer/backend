@@ -6,7 +6,7 @@ import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
-import { capturesYield, collectsFee, getProtocolYieldFeePercentage } from './pool-utils';
+import { capturesYield, getProtocolYieldFeePercentage } from './pool-utils';
 import * as Sentry from '@sentry/node';
 
 export class PoolUsdDataService {
@@ -238,7 +238,7 @@ export class PoolUsdDataService {
 
                 // if the pool is in recovery mode, the protocol does not take any fee and therefore the user takes all yield captured
                 // since this is already reflected in the aprItems of the pool, we need to set that as the totalYieldCapture
-                if (!collectsFee(pool)) {
+                if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
                     yieldCapture24h = yieldForUser24h;
                     yieldCapture48h = yieldForUser48h;
                 }

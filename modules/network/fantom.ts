@@ -101,10 +101,9 @@ const fantomNetworkData: NetworkData = {
             '0xd678b6Acd834Cc969Bb19Ce82727f2a541fb7941',
             '0xb841Df73861E65E6D61a80F503F095a91ce75e15',
         ],
-        poolsInRecoveryMode: ['0x9e4341acef4147196e99d648c5e43b3fc9d02678'],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        poolDataQueryContract: '0x3e898A1A3aEFB543DA20232994aeDaD2ce7Fa856',
+        poolDataQueryContract: '0xC1AFF8373840dB41275aAd5c41EC171D10872F5B',
         factoriesWithpoolSpecificProtocolFeePercentagesProvider: [
             '0xb841df73861e65e6d61a80f503f095a91ce75e15',
             '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',

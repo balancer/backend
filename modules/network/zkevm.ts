@@ -1,60 +1,53 @@
 import { BigNumber, ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
-import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
-import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
-import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
-const polygonNetworkData: NetworkData = {
+const zkevmNetworkData: NetworkData = {
     chain: {
-        slug: 'polygon',
-        id: 137,
-        nativeAssetAddress: '0x0000000000000000000000000000000000001010',
-        wrappedNativeAssetAddress: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-        prismaId: 'POLYGON',
-        gqlId: 'POLYGON',
+        slug: 'zkevm',
+        id: 1101,
+        nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        wrappedNativeAssetAddress: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        prismaId: 'ZKEVM',
+        gqlId: 'ZKEVM',
     },
     subgraphs: {
-        startDate: '2021-06-16',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
+        startDate: '2023-05-17',
+        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zkevm-v2/v0.0.2',
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        blocks: '',
+        gauge: '',
         userBalances: 'https://',
     },
     eth: {
-        address: '0x0000000000000000000000000000000000001010',
-        addressFormatted: '0x0000000000000000000000000000000000001010',
-        symbol: 'MATIC',
-        name: 'Matic',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        symbol: 'ETH',
+        name: 'Ether',
     },
     weth: {
-        address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-        addressFormatted: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        address: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+        addressFormatted: '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9',
     },
     coingecko: {
-        nativeAssetId: 'matic',
-        platformId: 'polygon-pos',
+        nativeAssetId: 'ethereum',
+        platformId: 'polygon-zkevm',
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://polygon-rpc.com',
+    rpcUrl: 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+    beetsPriceProviderRpcUrl: '',
     sanity: {
         projectId: '',
         dataset: '',
@@ -64,30 +57,21 @@ const polygonNetworkData: NetworkData = {
         address: '0x0000000000000000000000000000000000000000',
     },
     bal: {
-        address: '0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3',
-    },
-    veBal: {
-        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
-        delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
+        address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: [
-            '0x136FD06Fa01eCF624C7F2B3CB15742c1339dC2c4',
-            '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
-            '0x7bc6C0E73EDAa66eF3F6E2f27b0EE8661834c6C9',
-            '0x6Ab5549bBd766A43aFb687776ad8466F8b42f777',
+            '0x8eA89804145c007e7D226001A96955ad53836087',
         ],
         weightedPoolV2Factories: [
-            '0x0e39C3D9b2ec765eFd9c5c70BB290B1fCD8536E3',
-            '0x82e4cFaef85b1B6299935340c964C942280327f4',
-            '0xFc8a407Bba312ac761D8BFe04CE1201904842B76',
+            '0x03F3Fb107e74F2EAC9358862E91ad3c692712054',
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x70b55Af71B29c5Ca7e67bD1995250364C4bE5554',
+        poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
     },
-    multicall: '0x275617327c958bD06b5D6b871E7f491D76113dd8',
+    multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
@@ -121,6 +105,10 @@ const polygonNetworkData: NetworkData = {
     beefy: {
         linearPools: [''],
     },
+    lido: {
+        wstEthAprEndpoint: '',
+        wstEthContract: '',
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
@@ -147,27 +135,23 @@ const polygonNetworkData: NetworkData = {
     },
 };
 
-export const polygonNetworkConfig: NetworkConfig = {
-    data: polygonNetworkData,
+export const zkevmNetworkConfig: NetworkConfig = {
+    data: zkevmNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(polygonNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider(zkevmNetworkData.rpcUrl),
     poolAprServices: [
-        new PhantomStableAprService(),
-        new BoostedPoolAprService(),
-        new SwapFeeAprService(polygonNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            polygonNetworkData.beets.address,
-            polygonNetworkData.bal.address,
-        ]),
+        new PhantomStableAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
+        new BoostedPoolAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
+        new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [],
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -207,22 +191,6 @@ export const polygonNetworkConfig: NetworkConfig = {
             interval: every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-staking-for-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
-        },
-        {
             name: 'update-lifetime-values-for-all-pools',
             interval: every(30, 'minutes'),
         },
@@ -234,12 +202,6 @@ export const polygonNetworkConfig: NetworkConfig = {
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(10, 'seconds'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'user-sync-staked-balances',
             interval: every(10, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
@@ -261,14 +223,6 @@ export const polygonNetworkConfig: NetworkConfig = {
         {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-vebal-balances',
-            interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-vebal-totalSupply',
-            interval: every(5, 'minutes'),
         },
     ],
 };

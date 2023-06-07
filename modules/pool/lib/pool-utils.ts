@@ -1,4 +1,4 @@
-import { PrismaPoolType } from '@prisma/client';
+import { PrismaPoolDynamicData, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { networkContext } from '../../network/network-context.service';
 import { prisma } from '../../../prisma/prisma-client';
@@ -7,6 +7,7 @@ type PoolWithTypeAndFactory = {
     address: string;
     type: PrismaPoolType;
     factory?: string | null;
+    dynamicData?: PrismaPoolDynamicData | null;
 };
 
 export function isStablePool(poolType: PrismaPoolType) {
@@ -33,7 +34,7 @@ export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
     return (
-        !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address) &&
+        !pool.dynamicData?.isInRecoveryMode &&
         (isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE')
     );
 }
@@ -51,11 +52,4 @@ export async function getProtocolYieldFeePercentage(pool: PoolWithTypeAndFactory
         return parseFloat(foundPool.dynamicData.protocolYieldFee);
     }
     return networkContext.data.balancer.yieldProtocolFeePercentage;
-}
-
-export function collectsFee(pool: PoolWithTypeAndFactory) {
-    return (
-        !networkContext.data.balancer.poolsInRecoveryMode.includes(pool.address) &&
-        pool.type !== 'LIQUIDITY_BOOTSTRAPPING'
-    );
 }
