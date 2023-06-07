@@ -119,7 +119,7 @@ export class PoolOnChainDataService {
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: poolId, chain: networkContext.chain } },
                         data: {
-                            isPaused: !poolStatusResults[poolId].isPaused,
+                            isPaused: poolStatusResults[poolId].isPaused,
                             isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
                         },
                     }),
