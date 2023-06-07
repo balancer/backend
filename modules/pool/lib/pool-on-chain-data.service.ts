@@ -12,6 +12,7 @@ import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-u
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -110,21 +111,35 @@ export class PoolOnChainDataService {
 
         const poolStatusResults = await this.queryPoolStatus(poolIdsFromDb);
 
+        const operations = [];
+
         for (const poolId of poolIdsFromDb) {
             if (poolStatusResults[poolId]) {
-                await prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: poolId, chain: networkContext.chain } },
-                    data: {
-                        isPaused: !poolStatusResults[poolId].isPaused,
-                        isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
-                    },
-                });
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                        data: {
+                            isPaused: !poolStatusResults[poolId].isPaused,
+                            isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
+                        },
+                    }),
+                );
             }
         }
+        prismaBulkExecuteOperations(operations, false);
     }
 
-    public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
-        if (poolIds.length === 0) return;
+    public async updateOnChainData(
+        poolIds: string[],
+        provider: Provider,
+        blockNumber: number,
+    ): Promise<{ failed: string[]; success: string[] }> {
+        const success: string[] = [];
+        const failed: string[] = [];
+
+        if (poolIds.length === 0) {
+            return { failed, success };
+        }
 
         poolIds = poolIds.filter(
             (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
@@ -275,7 +290,7 @@ export class PoolOnChainDataService {
 
         for (const poolData of poolDataPerPool) {
             if (poolData.ignored) {
-                console.log(`Pool query return with error, skipping: ${poolData.id}`);
+                failed.push(poolData.id);
                 continue;
             }
             const poolId = poolData.id;
@@ -425,9 +440,16 @@ export class PoolOnChainDataService {
                     }
                 }
             } catch (e) {
+                failed.push(poolData.id);
                 console.log('error syncing on chain data', e);
             }
+            success.push(poolData.id);
+
+            // console.log(
+            //     `Successful updates: ${success.length}, failed updates: ${failed.length}. Failed pool Ids: ${failed}`,
+            // );
         }
+        return { failed, success };
     }
 
     public async queryPoolData({
