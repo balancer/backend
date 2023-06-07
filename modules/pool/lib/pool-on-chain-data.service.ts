@@ -107,20 +107,8 @@ export class PoolOnChainDataService {
         });
 
         const poolIdsFromDb = filteredPools.map((pool) => pool.id);
-        const poolsWithStatus: string[] = [];
 
-        filteredPools.forEach((pool) => {
-            if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
-                console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
-                return;
-            }
-
-            if (pool.type !== 'LIQUIDITY_BOOTSTRAPPING' && pool.type !== 'INVESTMENT') {
-                poolsWithStatus.push(pool.id);
-            }
-        });
-
-        const poolStatusResults = await this.queryPoolStatus(poolsWithStatus);
+        const poolStatusResults = await this.queryPoolStatus(poolIdsFromDb);
 
         for (const poolId of poolIdsFromDb) {
             if (poolStatusResults[poolId]) {
