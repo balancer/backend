@@ -1,20 +1,13 @@
 import { BigNumber, ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
-import { tokenService } from '../token/token.service';
-import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
-import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
-import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
-import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 
@@ -74,10 +67,9 @@ const zkevmNetworkData: NetworkData = {
         weightedPoolV2Factories: [
             '0x03F3Fb107e74F2EAC9358862E91ad3c692712054',
         ],
-        poolsInRecoveryMode: [],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
+        poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -197,18 +189,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
         {
             name: 'sync-tokens-from-pool-tokens',
             interval: every(5, 'minutes'),
-        },
-        {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
