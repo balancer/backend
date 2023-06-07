@@ -1,7 +1,7 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { collectsYieldFee, getProtocolYieldFeePercentage } from '../pool-utils';
+import { collectsYieldFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
 export class BoostedPoolAprService implements PoolAprService {
@@ -17,7 +17,9 @@ export class BoostedPoolAprService implements PoolAprService {
         );
 
         for (const pool of boostedPools) {
-            const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const tokens = pool.tokens.filter((token) => {
                 if (token.address === pool.address) {
                     return false;

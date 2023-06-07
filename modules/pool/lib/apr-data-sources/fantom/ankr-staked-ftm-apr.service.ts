@@ -4,7 +4,7 @@ import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-type
 import { networkContext } from '../../../../network/network-context.service';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
-import { collectsYieldFee, getProtocolYieldFeePercentage } from '../../pool-utils';
+import { collectsYieldFee } from '../../pool-utils';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 
 export class AnkrStakedFtmAprService implements PoolAprService {
@@ -22,7 +22,9 @@ export class AnkrStakedFtmAprService implements PoolAprService {
 
         let operations: any[] = [];
         for (const pool of pools) {
-            const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const ankrFtmToken = pool.tokens.find((token) => token.address === this.ankrFtmAddress);
             const ankrFtmTokenBalance = ankrFtmToken?.dynamicData?.balance;
 

@@ -290,16 +290,6 @@ export class PoolOnChainDataService {
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
             }
-
-            if (
-                pool.type === 'LINEAR' ||
-                pool.type === 'META_STABLE' ||
-                pool.type === 'PHANTOM_STABLE' ||
-                pool.type === 'STABLE' ||
-                pool.type === 'WEIGHTED'
-            ) {
-                multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
-            }
         });
 
         let poolsOnChainData = {} as Record<string, MulticallExecuteResult>;
@@ -324,19 +314,6 @@ export class PoolOnChainDataService {
             for (const [id, data] of poolsOnChainDataArray) {
                 if (id === poolId) {
                     multicallResult = data;
-                }
-            }
-
-            if (pool.dynamicData && multicallResult?.protocolFeePercentageCache) {
-                const poolProtocolYiledFeePercentage = formatFixed(multicallResult.protocolFeePercentageCache, 18);
-
-                if (pool.dynamicData.protocolYieldFee !== poolProtocolYiledFeePercentage) {
-                    await prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
-                        data: {
-                            protocolYieldFee: poolProtocolYiledFeePercentage,
-                        },
-                    });
                 }
             }
 
@@ -392,17 +369,22 @@ export class PoolOnChainDataService {
 
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
-                let swapEnabled: boolean | undefined;
-                if (typeof multicallResult?.swapEnabled !== 'undefined') swapEnabled = multicallResult.swapEnabled;
-                else if (typeof multicallResult?.pausedState !== 'undefined')
-                    swapEnabled = !multicallResult.pausedState[0];
-                else swapEnabled = pool.dynamicData?.swapEnabled;
+                const swapEnabled =
+                    typeof multicallResult?.swapEnabled !== 'undefined'
+                        ? multicallResult.swapEnabled
+                        : pool.dynamicData?.swapEnabled;
+
+                const yieldProtocolFeePercentage =
+                    typeof multicallResult?.protocolFeePercentageCache !== 'undefined'
+                        ? formatFixed(multicallResult.protocolFeePercentageCache, 18)
+                        : `${networkContext.data.balancer.yieldProtocolFeePercentage}`;
 
                 if (
                     pool.dynamicData &&
                     (pool.dynamicData.swapFee !== swapFee ||
                         pool.dynamicData.totalShares !== totalShares ||
-                        pool.dynamicData.swapEnabled !== swapEnabled)
+                        pool.dynamicData.swapEnabled !== swapEnabled ||
+                        pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage)
                 ) {
                     await prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
@@ -411,6 +393,7 @@ export class PoolOnChainDataService {
                             totalShares,
                             totalSharesNum: parseFloat(totalShares),
                             swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
+                            protocolYieldFee: yieldProtocolFeePercentage,
                             blockNumber,
                         },
                     });

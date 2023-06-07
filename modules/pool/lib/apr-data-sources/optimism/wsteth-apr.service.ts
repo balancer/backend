@@ -3,7 +3,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
-import { collectsYieldFee, getProtocolYieldFeePercentage } from '../../pool-utils';
+import { collectsYieldFee } from '../../pool-utils';
 import { networkContext } from '../../../../network/network-context.service';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 
@@ -20,7 +20,9 @@ export class WstethAprService implements PoolAprService {
 
         let wstethBaseApr: number | undefined;
         for (const pool of pools) {
-            const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const itemId = `${pool.id}-lido-wsteth`;
 
             const wstethToken = pool.tokens.find((token) => token.address === this.wstethContractAddress.toLowerCase());

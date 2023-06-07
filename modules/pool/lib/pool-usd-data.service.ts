@@ -6,7 +6,7 @@ import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
-import { capturesYield, getProtocolYieldFeePercentage } from './pool-utils';
+import { capturesYield } from './pool-utils';
 import * as Sentry from '@sentry/node';
 
 export class PoolUsdDataService {
@@ -224,7 +224,9 @@ export class PoolUsdDataService {
                 const yieldForUser48h = ((totalLiquidity24hAgo * userYieldApr) / 365) * 2;
                 const yieldForUser24h = (liquidityAverage24h * userYieldApr) / 365;
 
-                const protocolYieldFeePercentage = await getProtocolYieldFeePercentage(pool);
+                const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                    ? parseFloat(pool.dynamicData.protocolYieldFee)
+                    : networkContext.data.balancer.yieldProtocolFeePercentage;
 
                 let yieldCapture24h =
                     pool.type === 'META_STABLE'
