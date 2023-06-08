@@ -20,6 +20,9 @@ export class WstethAprService implements PoolAprService {
 
         let wstethBaseApr: number | undefined;
         for (const pool of pools) {
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const itemId = `${pool.id}-lido-wsteth`;
 
             const wstethToken = pool.tokens.find((token) => token.address === this.wstethContractAddress.toLowerCase());
@@ -36,7 +39,7 @@ export class WstethAprService implements PoolAprService {
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? wstethApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : wstethApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : wstethApr * (1 - protocolYieldFeePercentage);
 
                 await prisma.prismaPoolAprItem.upsert({
                     where: { id_chain: { id: itemId, chain: networkContext.chain } },

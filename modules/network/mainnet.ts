@@ -166,8 +166,8 @@ export const mainnetNetworkConfig: NetworkConfig = {
             mainnetNetworkData.stader ? mainnetNetworkData.stader.sFtmxContract : undefined,
             mainnetNetworkData.lido ? mainnetNetworkData.lido.wstEthContract : undefined,
         ),
-        new PhantomStableAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(mainnetNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             mainnetNetworkData.beets.address,

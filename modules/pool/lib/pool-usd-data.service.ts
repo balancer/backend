@@ -224,15 +224,19 @@ export class PoolUsdDataService {
                 const yieldForUser48h = ((totalLiquidity24hAgo * userYieldApr) / 365) * 2;
                 const yieldForUser24h = (liquidityAverage24h * userYieldApr) / 365;
 
+                const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                    ? parseFloat(pool.dynamicData.protocolYieldFee)
+                    : networkContext.data.balancer.yieldProtocolFeePercentage;
+
                 let yieldCapture24h =
                     pool.type === 'META_STABLE'
                         ? yieldForUser24h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : yieldForUser24h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : yieldForUser24h / (1 - protocolYieldFeePercentage);
 
                 let yieldCapture48h =
                     pool.type === 'META_STABLE'
                         ? yieldForUser48h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : yieldForUser48h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : yieldForUser48h / (1 - protocolYieldFeePercentage);
 
                 // if the pool is in recovery mode, the protocol does not take any fee and therefore the user takes all yield captured
                 // since this is already reflected in the aprItems of the pool, we need to set that as the totalYieldCapture

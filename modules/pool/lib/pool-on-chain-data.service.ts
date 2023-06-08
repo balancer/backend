@@ -2,6 +2,7 @@ import { Provider } from '@ethersproject/providers';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
+import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -73,6 +74,7 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
+    protocolFeePercentageCache?: number;
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -256,7 +258,9 @@ export class PoolOnChainDataService {
         const abis: any = Object.values(
             // Remove duplicate entries using their names
             Object.fromEntries(
-                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi].map((row) => [row.name, row]),
+                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi, ...ComposableStablePoolAbi].map(
+                    (row) => [row.name, row],
+                ),
             ),
         );
 
@@ -266,6 +270,17 @@ export class PoolOnChainDataService {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
                 console.error(`Unknown pool type: ${pool.type} ${pool.id}`);
                 return;
+            }
+
+            // get per pool yield protocol fee (type 2)
+            if (
+                networkContext.data.balancer.factoriesWithpoolSpecificProtocolFeePercentagesProvider?.includes(
+                    pool.factory || '',
+                )
+            ) {
+                multiPool.call(`${pool.id}.protocolFeePercentageCache`, pool.address, 'getProtocolFeePercentageCache', [
+                    2,
+                ]);
             }
 
             if (pool.type === 'LINEAR') {
@@ -359,11 +374,17 @@ export class PoolOnChainDataService {
                         ? multicallResult.swapEnabled
                         : pool.dynamicData?.swapEnabled;
 
+                const yieldProtocolFeePercentage =
+                    typeof multicallResult?.protocolFeePercentageCache !== 'undefined'
+                        ? formatFixed(multicallResult.protocolFeePercentageCache, 18)
+                        : `${networkContext.data.balancer.yieldProtocolFeePercentage}`;
+
                 if (
                     pool.dynamicData &&
                     (pool.dynamicData.swapFee !== swapFee ||
                         pool.dynamicData.totalShares !== totalShares ||
-                        pool.dynamicData.swapEnabled !== swapEnabled)
+                        pool.dynamicData.swapEnabled !== swapEnabled ||
+                        pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage)
                 ) {
                     await prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
@@ -372,6 +393,7 @@ export class PoolOnChainDataService {
                             totalShares,
                             totalSharesNum: parseFloat(totalShares),
                             swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
+                            protocolYieldFee: yieldProtocolFeePercentage,
                             blockNumber,
                         },
                     });

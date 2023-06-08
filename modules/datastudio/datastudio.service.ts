@@ -140,6 +140,9 @@ export class DatastudioService {
             }
 
             if (pool.dynamicData) {
+                const protocolYieldFeePercentage = pool.dynamicData.protocolYieldFee
+                    ? parseFloat(pool.dynamicData.protocolYieldFee)
+                    : networkContext.data.balancer.yieldProtocolFeePercentage;
                 sharesChange = `${
                     parseFloat(pool.dynamicData.totalShares) - parseFloat(pool.dynamicData.totalShares24hAgo)
                 }`;
@@ -153,17 +156,12 @@ export class DatastudioService {
                               pool.dynamicData.yieldCapture24h *
                               (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                           }`
-                        : `${
-                              pool.dynamicData.yieldCapture24h *
-                              (1 - networkContext.data.balancer.yieldProtocolFeePercentage)
-                          }`;
+                        : `${pool.dynamicData.yieldCapture24h * (1 - protocolYieldFeePercentage)}`;
 
                 protocolYieldCapture =
                     pool.type === 'META_STABLE'
                         ? `${pool.dynamicData.yieldCapture24h * networkContext.data.balancer.swapProtocolFeePercentage}`
-                        : `${
-                              pool.dynamicData.yieldCapture24h * networkContext.data.balancer.yieldProtocolFeePercentage
-                          }`;
+                        : `${pool.dynamicData.yieldCapture24h * protocolYieldFeePercentage}`;
 
                 if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
                     //pool does not collect any protocol fees

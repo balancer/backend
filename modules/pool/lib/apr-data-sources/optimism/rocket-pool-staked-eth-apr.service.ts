@@ -2,7 +2,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
 import { TokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
-import { collectsYieldFee, isComposableStablePool, isWeightedPoolV2 } from '../../pool-utils';
+import { collectsYieldFee } from '../../pool-utils';
 import { networkContext } from '../../../../network/network-context.service';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
 
@@ -20,6 +20,9 @@ export class RocketPoolStakedEthAprService implements PoolAprService {
 
         let operations: any[] = [];
         for (const pool of pools) {
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const rethToken = pool.tokens.find((token) => token.address === this.rethAddress);
             const rethTokenBalance = rethToken?.dynamicData?.balance;
             if (rethTokenBalance && pool.dynamicData) {
@@ -28,7 +31,7 @@ export class RocketPoolStakedEthAprService implements PoolAprService {
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? rethApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : rethApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : rethApr * (1 - protocolYieldFeePercentage);
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({

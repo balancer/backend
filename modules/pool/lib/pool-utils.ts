@@ -1,6 +1,7 @@
 import { PrismaPoolDynamicData, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { networkContext } from '../../network/network-context.service';
+import { prisma } from '../../../prisma/prisma-client';
 
 type PoolWithTypeAndFactory = {
     address: string;
