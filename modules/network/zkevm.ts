@@ -61,12 +61,8 @@ const zkevmNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: [
-            '0x8eA89804145c007e7D226001A96955ad53836087',
-        ],
-        weightedPoolV2Factories: [
-            '0x03F3Fb107e74F2EAC9358862E91ad3c692712054',
-        ],
+        composableStablePoolFactories: ['0x8eA89804145c007e7D226001A96955ad53836087'],
+        weightedPoolV2Factories: ['0x03F3Fb107e74F2EAC9358862E91ad3c692712054'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
         poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
@@ -140,8 +136,8 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(zkevmNetworkData.rpcUrl),
     poolAprServices: [
-        new PhantomStableAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(zkevmNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
     ],
     poolStakingServices: [],
