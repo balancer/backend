@@ -32,6 +32,13 @@ export class PoolSyncService {
             startBlock,
             endBlock,
         );
+
+        const allPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
+        });
+
+        await poolService.updateOnChainStatusForPools(allPools.map((pool) => pool.id));
+
         const filteredEvents = events.filter((event) =>
             ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
         );
