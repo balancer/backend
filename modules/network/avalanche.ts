@@ -77,7 +77,6 @@ const avalancheNetworkData: NetworkData = {
         weightedPoolV2Factories: [
             '0x230a59F4d9ADc147480f03B0D3fFfeCd56c3289a',
         ],
-        poolsInRecoveryMode: [],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
         poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
