@@ -61,8 +61,10 @@ export class PoolUsdDataService {
                         `Skipping unsupported int size for prismaPoolTokenDynamicData.balanceUSD: ${item.balanceUSD}`,
                         {
                             tags: {
+                                tokenId: item.id,
                                 poolId: pool.id,
                                 poolName: pool.name,
+                                chain: networkContext.chain,
                             },
                         },
                     );
@@ -82,6 +84,7 @@ export class PoolUsdDataService {
                         tags: {
                             poolId: pool.id,
                             poolName: pool.name,
+                            chain: networkContext.chain,
                         },
                     },
                 );
