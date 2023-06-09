@@ -243,6 +243,15 @@ export class PoolCreatorService {
                               },
                           }
                         : undefined,
+                gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(poolType)
+                    ? {
+                          create: {
+                              id: pool.id,
+                              alpha: pool.alpha || '',
+                              beta: pool.beta || '',
+                          },
+                      }
+                    : undefined,
                 stableDynamicData:
                     poolType === 'STABLE' || poolType === 'PHANTOM_STABLE' || poolType === 'META_STABLE'
                         ? {
