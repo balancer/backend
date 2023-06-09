@@ -17,6 +17,7 @@ model PrismaPool {
 
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
+    gyroData            PrismaPoolGyroData?
 
     tokens              PrismaPoolToken[]
 
@@ -81,6 +82,19 @@ model PrismaPoolElementData {
     unitSeconds         String
     principalToken      String
     baseToken           String
+}
+
+model PrismaPoolGyroData{
+    @@id([id, chain])
+    @@unique([poolId, chain])
+
+    id                  String
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    chain               Chain               
+
+    alpha               String
+    beta                String
 }
 
 model PrismaPoolDynamicData {
