@@ -146,8 +146,8 @@ export const avalancheNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(avalancheNetworkData.rpcUrl),
     poolAprServices: [
-        new PhantomStableAprService(avalancheNetworkData.balancer.yieldProtocolFeePercentage),
-        new BoostedPoolAprService(avalancheNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
+        new BoostedPoolAprService(),
         new SwapFeeAprService(avalancheNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
             avalancheNetworkData.beets.address,
