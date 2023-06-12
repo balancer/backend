@@ -373,18 +373,24 @@ export class PoolGqlLoaderService {
                     __typename: 'GqlPoolGyro',
                     ...mappedData,
                     type: mappedData.type,
+                    alpha: pool.gyroData?.alpha || '',
+                    beta: pool.gyroData?.beta || '',
                 };
             case 'GYRO3':
                 return {
                     __typename: 'GqlPoolGyro',
                     ...mappedData,
                     type: mappedData.type,
+                    alpha: pool.gyroData?.alpha || '',
+                    beta: pool.gyroData?.beta || '',
                 };
             case 'GYROE':
                 return {
                     __typename: 'GqlPoolGyro',
                     ...mappedData,
                     type: mappedData.type,
+                    alpha: pool.gyroData?.alpha || '',
+                    beta: pool.gyroData?.beta || '',
                 };
         }
 

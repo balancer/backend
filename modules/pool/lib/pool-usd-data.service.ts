@@ -6,7 +6,7 @@ import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
-import { capturesYield, collectsFee } from './pool-utils';
+import { capturesYield } from './pool-utils';
 import * as Sentry from '@sentry/node';
 
 export class PoolUsdDataService {
@@ -61,8 +61,10 @@ export class PoolUsdDataService {
                         `Skipping unsupported int size for prismaPoolTokenDynamicData.balanceUSD: ${item.balanceUSD}`,
                         {
                             tags: {
+                                tokenId: item.id,
                                 poolId: pool.id,
                                 poolName: pool.name,
+                                chain: networkContext.chain,
                             },
                         },
                     );
@@ -82,6 +84,7 @@ export class PoolUsdDataService {
                         tags: {
                             poolId: pool.id,
                             poolName: pool.name,
+                            chain: networkContext.chain,
                         },
                     },
                 );
@@ -224,19 +227,23 @@ export class PoolUsdDataService {
                 const yieldForUser48h = ((totalLiquidity24hAgo * userYieldApr) / 365) * 2;
                 const yieldForUser24h = (liquidityAverage24h * userYieldApr) / 365;
 
+                const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                    ? parseFloat(pool.dynamicData.protocolYieldFee)
+                    : networkContext.data.balancer.yieldProtocolFeePercentage;
+
                 let yieldCapture24h =
                     pool.type === 'META_STABLE'
                         ? yieldForUser24h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : yieldForUser24h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : yieldForUser24h / (1 - protocolYieldFeePercentage);
 
                 let yieldCapture48h =
                     pool.type === 'META_STABLE'
                         ? yieldForUser48h / (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : yieldForUser48h / (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : yieldForUser48h / (1 - protocolYieldFeePercentage);
 
                 // if the pool is in recovery mode, the protocol does not take any fee and therefore the user takes all yield captured
                 // since this is already reflected in the aprItems of the pool, we need to set that as the totalYieldCapture
-                if (!collectsFee(pool)) {
+                if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
                     yieldCapture24h = yieldForUser24h;
                     yieldCapture48h = yieldForUser48h;
                 }

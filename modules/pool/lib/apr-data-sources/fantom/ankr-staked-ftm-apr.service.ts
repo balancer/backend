@@ -22,6 +22,9 @@ export class AnkrStakedFtmAprService implements PoolAprService {
 
         let operations: any[] = [];
         for (const pool of pools) {
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const ankrFtmToken = pool.tokens.find((token) => token.address === this.ankrFtmAddress);
             const ankrFtmTokenBalance = ankrFtmToken?.dynamicData?.balance;
 
@@ -33,7 +36,7 @@ export class AnkrStakedFtmAprService implements PoolAprService {
                 const userApr =
                     pool.type === 'META_STABLE'
                         ? poolAnkrFtmApr * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                        : poolAnkrFtmApr * (1 - networkContext.data.balancer.yieldProtocolFeePercentage);
+                        : poolAnkrFtmApr * (1 - protocolYieldFeePercentage);
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({

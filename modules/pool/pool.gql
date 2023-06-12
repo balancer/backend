@@ -233,6 +233,9 @@ type GqlPoolGyro implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
+    alpha: String!
+    beta: String!
+
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking

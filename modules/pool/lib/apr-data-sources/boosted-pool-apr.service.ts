@@ -5,8 +5,6 @@ import { collectsYieldFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
 export class BoostedPoolAprService implements PoolAprService {
-    constructor(private readonly yieldProtocolFeePercentage: number) {}
-
     public getAprServiceName(): string {
         return 'BoostedPoolAprService';
     }
@@ -19,6 +17,9 @@ export class BoostedPoolAprService implements PoolAprService {
         );
 
         for (const pool of boostedPools) {
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const tokens = pool.tokens.filter((token) => {
                 if (token.address === pool.address) {
                     return false;
@@ -68,7 +69,7 @@ export class BoostedPoolAprService implements PoolAprService {
                         //nested phantom stables already have the yield fee removed
                         token.nestedPool.type !== 'PHANTOM_STABLE'
                     ) {
-                        userApr = apr * (1 - this.yieldProtocolFeePercentage);
+                        userApr = apr * (1 - protocolYieldFeePercentage);
                     }
 
                     await prisma.prismaPoolAprItem.upsert({

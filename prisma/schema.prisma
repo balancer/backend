@@ -20,6 +20,7 @@ enum Chain {
     MAINNET
     OPTIMISM
     POLYGON
+    ZKEVM
 }
 
 model PrismaLastBlockSynced {
@@ -60,6 +61,7 @@ model PrismaPool {
 
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
+    gyroData            PrismaPoolGyroData?
 
     tokens              PrismaPoolToken[]
 
@@ -126,6 +128,19 @@ model PrismaPoolElementData {
     baseToken           String
 }
 
+model PrismaPoolGyroData{
+    @@id([id, chain])
+    @@unique([poolId, chain])
+
+    id                  String
+    poolId              String
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    chain               Chain               
+
+    alpha               String
+    beta                String
+}
+
 model PrismaPoolDynamicData {
     @@id([id, chain])
     @@unique([poolId, chain])
@@ -137,8 +152,11 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
+    protocolYieldFee        String?
     swapFee                 String
     swapEnabled             Boolean
+    isPaused                Boolean             @default(false)
+    isInRecoveryMode        Boolean             @default(false)
     totalShares             String
     totalSharesNum          Float               @default(0)
     totalLiquidity          Float

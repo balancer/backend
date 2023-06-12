@@ -2,6 +2,7 @@ import { Provider } from '@ethersproject/providers';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
+import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -12,6 +13,7 @@ import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-u
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -43,6 +45,13 @@ interface PoolDataQueryConfig {
     ratePoolIdxs: number[];
 }
 
+interface PoolStatusResult {
+    [key: string]: {
+        isPaused: boolean;
+        inRecoveryMode: boolean;
+    };
+}
+
 const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     loadTokenBalanceUpdatesAfterBlock: false,
     loadTotalSupply: false,
@@ -65,7 +74,7 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 interface MulticallExecuteResult {
     targets?: string[];
     swapEnabled?: boolean;
-    pausedState?: [boolean, string, string]
+    protocolFeePercentageCache?: number;
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -89,8 +98,50 @@ export interface poolIdWithType {
 export class PoolOnChainDataService {
     constructor(private readonly tokenService: TokenService) {}
 
-    public async updateOnChainData(poolIds: string[], provider: Provider, blockNumber: number): Promise<void> {
+    public async updateOnChainStatus(poolIds: string[]): Promise<void> {
         if (poolIds.length === 0) return;
+
+        const filteredPools = await prisma.prismaPool.findMany({
+            where: {
+                id: { in: poolIds },
+                chain: networkContext.chain,
+                type: { in: SUPPORTED_POOL_TYPES },
+            },
+        });
+
+        const poolIdsFromDb = filteredPools.map((pool) => pool.id);
+
+        const poolStatusResults = await this.queryPoolStatus(poolIdsFromDb);
+
+        const operations = [];
+
+        for (const poolId of poolIdsFromDb) {
+            if (poolStatusResults[poolId]) {
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                        data: {
+                            isPaused: poolStatusResults[poolId].isPaused,
+                            isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
+                        },
+                    }),
+                );
+            }
+        }
+        prismaBulkExecuteOperations(operations, false);
+    }
+
+    public async updateOnChainData(
+        poolIds: string[],
+        provider: Provider,
+        blockNumber: number,
+    ): Promise<{ failed: string[]; success: string[] }> {
+        const success: string[] = [];
+        const failed: string[] = [];
+
+        if (poolIds.length === 0) {
+            return { failed, success };
+        }
 
         poolIds = poolIds.filter(
             (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
@@ -207,7 +258,9 @@ export class PoolOnChainDataService {
         const abis: any = Object.values(
             // Remove duplicate entries using their names
             Object.fromEntries(
-                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi].map((row) => [row.name, row]),
+                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi, ...ComposableStablePoolAbi].map(
+                    (row) => [row.name, row],
+                ),
             ),
         );
 
@@ -219,16 +272,23 @@ export class PoolOnChainDataService {
                 return;
             }
 
+            // get per pool yield protocol fee (type 2)
+            if (
+                networkContext.data.balancer.factoriesWithpoolSpecificProtocolFeePercentagesProvider?.includes(
+                    pool.factory || '',
+                )
+            ) {
+                multiPool.call(`${pool.id}.protocolFeePercentageCache`, pool.address, 'getProtocolFeePercentageCache', [
+                    2,
+                ]);
+            }
+
             if (pool.type === 'LINEAR') {
                 multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
             }
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
-            }
-
-            if (pool.type === 'LINEAR' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE' || pool.type === 'STABLE' || pool.type === 'WEIGHTED') {
-                multiPool.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
             }
         });
 
@@ -245,7 +305,7 @@ export class PoolOnChainDataService {
 
         for (const poolData of poolDataPerPool) {
             if (poolData.ignored) {
-                console.log(`Pool query return with error, skipping: ${poolData.id}`);
+                failed.push(poolData.id);
                 continue;
             }
             const poolId = poolData.id;
@@ -309,19 +369,22 @@ export class PoolOnChainDataService {
 
                 const swapFee = formatFixed(poolData.swapFee, 18);
                 const totalShares = formatFixed(poolData.totalSupply, 18);
-                let swapEnabled: boolean | undefined;
-                if(typeof multicallResult?.swapEnabled !== 'undefined')
-                    swapEnabled =  multicallResult.swapEnabled;
-                else if(typeof multicallResult?.pausedState !== 'undefined')
-                    swapEnabled = !multicallResult.pausedState[0];
-                else
-                    swapEnabled = pool.dynamicData?.swapEnabled;
+                const swapEnabled =
+                    typeof multicallResult?.swapEnabled !== 'undefined'
+                        ? multicallResult.swapEnabled
+                        : pool.dynamicData?.swapEnabled;
+
+                const yieldProtocolFeePercentage =
+                    typeof multicallResult?.protocolFeePercentageCache !== 'undefined'
+                        ? formatFixed(multicallResult.protocolFeePercentageCache, 18)
+                        : `${networkContext.data.balancer.yieldProtocolFeePercentage}`;
 
                 if (
                     pool.dynamicData &&
                     (pool.dynamicData.swapFee !== swapFee ||
                         pool.dynamicData.totalShares !== totalShares ||
-                        pool.dynamicData.swapEnabled !== swapEnabled)
+                        pool.dynamicData.swapEnabled !== swapEnabled ||
+                        pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage)
                 ) {
                     await prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
@@ -330,6 +393,7 @@ export class PoolOnChainDataService {
                             totalShares,
                             totalSharesNum: parseFloat(totalShares),
                             swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
+                            protocolYieldFee: yieldProtocolFeePercentage,
                             blockNumber,
                         },
                     });
@@ -398,9 +462,16 @@ export class PoolOnChainDataService {
                     }
                 }
             } catch (e) {
+                failed.push(poolData.id);
                 console.log('error syncing on chain data', e);
             }
+            success.push(poolData.id);
+
+            // console.log(
+            //     `Successful updates: ${success.length}, failed updates: ${failed.length}. Failed pool Ids: ${failed}`,
+            // );
         }
+        return { failed, success };
     }
 
     public async queryPoolData({
@@ -442,5 +513,25 @@ export class PoolOnChainDataService {
             rates: response[7],
             ignoreIdxs: response[8],
         };
+    }
+
+    public async queryPoolStatus(poolIds: string[]): Promise<PoolStatusResult> {
+        const contract = new Contract(
+            networkContext.data.balancer.poolDataQueryContract,
+            BalancerPoolDataQueryAbi,
+            networkContext.provider,
+        );
+
+        const response = await contract.getPoolStatus(poolIds, { loadInRecoveryMode: true, loadIsPaused: true });
+
+        const result = poolIds.reduce((acc, id, i) => {
+            acc[id] = {
+                isPaused: response[0][i],
+                inRecoveryMode: response[1][i],
+            };
+            return acc;
+        }, {} as PoolStatusResult);
+
+        return result;
     }
 }

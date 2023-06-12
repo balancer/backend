@@ -5,8 +5,6 @@ import { collectsYieldFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
 
 export class PhantomStableAprService implements PoolAprService {
-    constructor(private readonly yieldProtocolFeePercentage: number) {}
-
     public getAprServiceName(): string {
         return 'PhantomStableAprService';
     }
@@ -15,6 +13,9 @@ export class PhantomStableAprService implements PoolAprService {
         const phantomStablePools = pools.filter((pool) => pool.type === 'PHANTOM_STABLE');
 
         for (const pool of phantomStablePools) {
+            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
+                ? parseFloat(pool.dynamicData.protocolYieldFee)
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const linearPoolTokens = pool.tokens.filter((token) => token.nestedPool?.type === 'LINEAR');
             const linearPoolIds = linearPoolTokens.map((token) => token.nestedPool?.id || '');
             const aprItems = await prisma.prismaPoolAprItem.findMany({
@@ -27,7 +28,7 @@ export class PhantomStableAprService implements PoolAprService {
                 if (aprItem && token.dynamicData && pool.dynamicData && token.dynamicData.balanceUSD > 0) {
                     const itemId = `${pool.id}-${token.token.address}-${token.index}`;
                     const apr = aprItem.apr * (token.dynamicData.balanceUSD / pool.dynamicData.totalLiquidity);
-                    const userApr = collectsYieldFee(pool) ? apr * (1 - this.yieldProtocolFeePercentage) : apr;
+                    const userApr = collectsYieldFee(pool) ? apr * (1 - protocolYieldFeePercentage) : apr;
 
                     await prisma.prismaPoolAprItem.upsert({
                         where: { id_chain: { id: itemId, chain: networkContext.chain } },

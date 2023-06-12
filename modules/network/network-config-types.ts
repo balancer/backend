@@ -86,11 +86,11 @@ export interface NetworkData {
         vault: string;
         weightedPoolV2Factories: string[];
         composableStablePoolFactories: string[];
-        poolsInRecoveryMode: string[];
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
         poolDataQueryContract: string;
         excludedPoolDataQueryPoolIds?: string[];
+        factoriesWithpoolSpecificProtocolFeePercentagesProvider?: string[];
     };
     multicall: string;
     multicall3: string;
