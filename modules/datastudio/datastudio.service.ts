@@ -17,7 +17,7 @@ export class DatastudioService {
     constructor(private readonly secretsManager: SecretsManager, private readonly jwtClientHelper: GoogleJwtClient) {}
 
     public async feedPoolData() {
-        const privateKey = await this.secretsManager.getSecret('backend-v2-datafeed-privatekey');
+        const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
         const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
 
         const databaseTabName = networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName;
