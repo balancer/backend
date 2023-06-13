@@ -308,5 +308,9 @@ export const optimismNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: every(5, 'minutes'),
         },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: every(1, 'minutes'),
+        },
     ],
 };
