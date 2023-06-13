@@ -356,5 +356,9 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'update-yield-capture',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: every(1, 'minutes'),
+        },
     ],
 };
