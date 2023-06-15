@@ -58,8 +58,6 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         if (Math.random() > samplingRate) {
             transaction.sampled = false;
         }
-
-        console.log(`Finished job ${jobId}`);
     } catch (error) {
         const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
         if (transaction) {
