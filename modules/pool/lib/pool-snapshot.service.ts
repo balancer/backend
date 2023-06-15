@@ -219,7 +219,6 @@ export class PoolSnapshotService {
                         );
                         await sleep(5000);
                     } catch (error: any) {
-                        Sentry.captureException(error);
                         console.error(
                             `Error getting historical prices form coingecko, skipping token ${token.address}. Error:`,
                             error.message,
