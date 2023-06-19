@@ -8,13 +8,15 @@ import {
     LiquidityGauge_OrderBy,
     OrderDirection,
     VotingEscrowLock_OrderBy,
-    PoolsQueryVariables,
     PoolsQuery,
+    GaugesInfoQuery,
+    Chain,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
 import moment from 'moment';
 import _ from 'lodash';
+import { getRequestScopeContextValue, setRequestScopedContextValue } from '../../context/request-scoped-context';
 
 export type GaugeRewardToken = { id: string; decimals: number; symbol: string; rewardsPerSecond: string };
 
@@ -35,6 +37,8 @@ export type GaugeUserShare = {
     amount: string;
     tokens: GaugeRewardToken[];
 };
+
+export type GaugesInfo = Omit<GaugesInfoQuery['liquidityGauges'][number], '__typename'>[];
 
 export class GaugeSubgraphService {
     constructor() {}
@@ -236,6 +240,29 @@ export class GaugeSubgraphService {
             throw new Error('Missing meta data');
         }
         return meta;
+    }
+
+    public async getGaugesInfo(poolIds: string[]): Promise<GaugesInfo> {
+        const { liquidityGauges } = await this.sdk.GaugesInfo({ poolIds });
+        return liquidityGauges;
+    }
+
+    public async getGaugesStreamers(poolIds: string[]) {
+        const { liquidityGauges } = await this.sdk.GaugeStreamers({ poolIds });
+        return liquidityGauges;
+    }
+
+    public async getRootGaugesInfo(recipients: string[], chain: Chain): Promise<GaugesInfo> {
+        const currentChainId = getRequestScopeContextValue('chainId');
+        // Run query in MAINNET subgraph
+        // Can we do it in a cleaner way?
+        setRequestScopedContextValue('chainId', '1');
+
+        const { rootGauges } = await this.sdk.RootGaugesInfo({ recipients, chain });
+
+        setRequestScopedContextValue('chainId', currentChainId);
+
+        return rootGauges;
     }
 
     public get sdk() {
