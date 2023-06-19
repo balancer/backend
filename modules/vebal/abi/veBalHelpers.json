@@ -1,0 +1,21 @@
+[
+    {
+        "inputs": [{ "internalType": "address", "name": "gaugeController", "type": "address" }],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "GAUGE_CONTROLLER",
+        "outputs": [{ "internalType": "contract IGaugeController", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "gauge", "type": "address" }],
+        "name": "gauge_relative_weight",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
