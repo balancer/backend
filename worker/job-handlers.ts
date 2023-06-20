@@ -35,6 +35,7 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         console.log('Skipping job', jobId);
         return;
     }
+    let sentryCheckInId = '';
     try {
         runningJobs.add(jobId);
 
@@ -48,7 +49,18 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         console.time(jobId);
         console.log(`Start job ${jobId}`);
 
+        sentryCheckInId = Sentry.captureCheckIn({
+            monitorSlug: `${jobId}`,
+            status: 'in_progress',
+        });
+
         await fn();
+
+        Sentry.captureCheckIn({
+            checkInId: sentryCheckInId,
+            monitorSlug: `${jobId}`,
+            status: 'ok',
+        });
 
         if (process.env.AWS_ALERTS === 'true') {
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
@@ -66,6 +78,12 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
         Sentry.configureScope((scope) => {
             scope.setTag('error', jobId);
+        });
+
+        Sentry.captureCheckIn({
+            checkInId: sentryCheckInId,
+            monitorSlug: `${jobId}`,
+            status: 'error',
         });
 
         console.log(`Error job ${jobId}`, error);
