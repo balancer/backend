@@ -191,6 +191,7 @@ query RootGaugesInfo($recipients: [Bytes!], $chain: Chain!) {
         first: 1000
     ) {
         id
+        recipient
         isKilled
         relativeWeightCap
         gauge {

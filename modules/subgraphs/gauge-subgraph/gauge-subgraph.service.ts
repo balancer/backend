@@ -11,6 +11,7 @@ import {
     PoolsQuery,
     GaugesInfoQuery,
     Chain,
+    RootGaugesInfoQuery,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
@@ -39,6 +40,7 @@ export type GaugeUserShare = {
 };
 
 export type GaugesInfo = Omit<GaugesInfoQuery['liquidityGauges'][number], '__typename'>[];
+export type RootGaugesInfo = Omit<RootGaugesInfoQuery['rootGauges'][number], '__typename'>[];
 
 export class GaugeSubgraphService {
     constructor() {}
@@ -252,7 +254,7 @@ export class GaugeSubgraphService {
         return liquidityGauges;
     }
 
-    public async getRootGaugesInfo(recipients: string[], chain: Chain): Promise<GaugesInfo> {
+    public async getRootGaugesInfo(recipients: string[], chain: Chain): Promise<RootGaugesInfo> {
         const currentChainId = getRequestScopeContextValue('chainId');
         // Run query in MAINNET subgraph
         // Can we do it in a cleaner way?

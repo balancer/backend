@@ -25,7 +25,8 @@ export async function generate() {
 
     console.log('Total valid gauges', validGauges.length);
 
-    console.log('First gauge record: ', validGauges[0]);
+    // console.log('First gauge record: ', validGauges[0]);
+    return validGauges;
 }
 
 async function fetchGaugesInfo(network: NetworkConfig): Promise<GaugesInfo> {
@@ -46,22 +47,32 @@ async function fetchMainnetGaugesInfo(poolIds: string[]): Promise<GaugesInfo> {
     return gaugesInfo;
 }
 
-async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Promise<any> {
-    const recipients = (await gaugeSubgraphService.getGaugesStreamers(poolIds))
-        .map((gauge) => {
-            return {
-                address: gauge.id,
-                streamer: gauge.streamer,
-            };
-        })
-        .map((gauge) => (gauge.streamer ? gauge.streamer : gauge.address));
+async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Promise<GaugesInfo> {
+    const streamers = (await gaugeSubgraphService.getGaugesStreamers(poolIds)).map((gauge) => {
+        return {
+            address: gauge.id,
+            streamer: gauge.streamer,
+            poolId: gauge.poolId as string,
+        };
+    });
+
+    const poolIdsByRecipient = streamers.reduce((acc: Record<string, string>, streamer) => {
+        const recipient = streamer.streamer ? streamer.streamer : streamer.address;
+        acc[recipient] = streamer.poolId;
+        return acc;
+    }, {});
 
     // TODO: improve TS check
     const chainName: Chain = capitalize(network.data.chain.slug) as Chain;
 
-    const rootGauges = await gaugeSubgraphService.getRootGaugesInfo(recipients, chainName);
+    const recipients = Object.keys(poolIdsByRecipient);
+    let rootGauges = await gaugeSubgraphService.getRootGaugesInfo(recipients, chainName);
     console.log(`⬇️  Fetched ${rootGauges.length} gauge info records for ${chainName}`);
-    return rootGauges;
+
+    return rootGauges.map((rootGauge) => {
+        // Manually add poolId as we cannot get it in the RootGauges query above
+        return { ...rootGauge, poolId: poolIdsByRecipient[rootGauge.recipient] };
+    });
 }
 
 /**
