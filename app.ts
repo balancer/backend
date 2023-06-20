@@ -28,19 +28,21 @@ async function startServer() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
+        debug: true,
         tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
-        enabled: env.NODE_ENV === 'production',
+        // enabled: env.NODE_ENV === 'production',
+        enabled: true,
         integrations: [
-            new Tracing.Integrations.Apollo(),
+            // new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
-            new Tracing.Integrations.Prisma({ client: prisma }),
+            // new Tracing.Integrations.Prisma({ client: prisma }),
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
         beforeSend(event, hint) {
-            const error = hint.originalException;
-            if (error?.toString().includes('Unknown token:')) {
+            const error = hint.originalException as string;
+            if (error?.includes('Unknown token:')) {
                 console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
@@ -114,6 +116,7 @@ async function startServer() {
     server.applyMiddleware({ app });
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
+    Sentry.captureException(new Error('Unkown token: asd'));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 
