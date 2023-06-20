@@ -11,6 +11,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../modul
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
+import { votingListService } from '../modules/vebal/voting-list.service';
 
 export type WorkerJob = {
     name: string;
@@ -255,6 +256,12 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
             break;
         case 'sync-vebal-totalSupply':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalTotalSupply(), 0.01);
+            break;
+        case 'sync-vebal-voting-list':
+            //QUESTION: does it make sense to split it by chainId??
+            // TODO: define a proper sampling rate
+            const samplingRate = 0.01;
+            await runIfNotAlreadyRunning(job.name, chainId, () => votingListService.syncVotingList(), samplingRate);
             break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
