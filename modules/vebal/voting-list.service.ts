@@ -13,8 +13,6 @@ import { prisma } from '../../prisma/prisma-client';
 
 export class VotingListService {
     async syncVotingList() {
-        initRequestScopedContext();
-
         const promises = Object.values(AllNetworkConfigs).map(async (network) => fetchGaugesInfo(network));
         const gaugeInfoForAllNetworks = await Promise.all(promises);
         const gaugesInfo = flatten(gaugeInfoForAllNetworks);
