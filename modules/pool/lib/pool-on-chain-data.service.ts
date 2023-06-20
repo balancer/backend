@@ -169,7 +169,6 @@ export class PoolOnChainDataService {
         const stablePoolIdexes: number[] = [];
         const ratePoolIdexes: number[] = [];
         const scalingFactorPoolIndexes: number[] = [];
-        const gyroPoolIdexes: number[] = [];
         for (const pool of filteredPools) {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 weightedPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
@@ -187,8 +186,6 @@ export class PoolOnChainDataService {
                 scalingFactorPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
         }
-
-        const ratePoolsIndexes = [...linearPoolIdexes, ...gyroPoolIdexes];
 
         const queryPoolDataResult = await this.queryPoolData({
             poolIds: poolIdsFromDb,
@@ -227,8 +224,8 @@ export class PoolOnChainDataService {
                 weightedPoolIdxs: weightedPoolIndexes,
                 loadLinearWrappedTokenRates: linearPoolIdexes.length > 0,
                 linearPoolIdxs: linearPoolIdexes,
-                loadRates: ratePoolsIndexes.length > 0,
-                ratePoolIdxs: ratePoolsIndexes,
+                loadRates: ratePoolIdexes.length > 0,
+                ratePoolIdxs: ratePoolIdexes,
                 loadScalingFactors: scalingFactorPoolIndexes.length > 0,
                 scalingFactorPoolIdxs: scalingFactorPoolIndexes,
             },
