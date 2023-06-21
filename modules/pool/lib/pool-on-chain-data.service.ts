@@ -9,7 +9,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-utils';
+import { isComposableStablePool, isGyroEV2, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
@@ -169,7 +169,6 @@ export class PoolOnChainDataService {
         const stablePoolIdexes: number[] = [];
         const ratePoolIdexes: number[] = [];
         const scalingFactorPoolIndexes: number[] = [];
-        const gyroPoolIdexes: number[] = [];
         for (const pool of filteredPools) {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 weightedPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
@@ -183,12 +182,10 @@ export class PoolOnChainDataService {
             if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type.includes('GYRO')) {
                 ratePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
-            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE') {
+            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE' || isGyroEV2(pool)) {
                 scalingFactorPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
         }
-
-        const ratePoolsIndexes = [...linearPoolIdexes, ...gyroPoolIdexes];
 
         const queryPoolDataResult = await this.queryPoolData({
             poolIds: poolIdsFromDb,
@@ -227,8 +224,8 @@ export class PoolOnChainDataService {
                 weightedPoolIdxs: weightedPoolIndexes,
                 loadLinearWrappedTokenRates: linearPoolIdexes.length > 0,
                 linearPoolIdxs: linearPoolIdexes,
-                loadRates: ratePoolsIndexes.length > 0,
-                ratePoolIdxs: ratePoolsIndexes,
+                loadRates: ratePoolIdexes.length > 0,
+                ratePoolIdxs: ratePoolIdexes,
                 loadScalingFactors: scalingFactorPoolIndexes.length > 0,
                 scalingFactorPoolIdxs: scalingFactorPoolIndexes,
             },
