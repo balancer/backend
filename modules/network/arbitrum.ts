@@ -86,7 +86,7 @@ const arbitrumNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x40f7218fa50ead995c4343eB0bB46dD414F9da7A',
+        poolDataQueryContract: '0x7Ba29fE8E83dd6097A7298075C4AFfdBda3121cC',
     },
     multicall: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

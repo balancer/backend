@@ -77,7 +77,7 @@ const gnosisNetworkData: NetworkData = {
         weightedPoolV2Factories: ['0x6CaD2ea22BFA7F4C14Aae92E47F510Cd5C509bc7'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x80dD2B80FbcFB06505A301d732322e987380EcD6',
+        poolDataQueryContract: '0x3f170631ed9821Ca51A59D996aB095162438DC10',
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
