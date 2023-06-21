@@ -107,12 +107,12 @@ async function createMonitorsIfNotExist(chainId: string, jobs: WorkerJob[]): Pro
 
     for (const activeMonitor of currentMonitors) {
         let keepMonitor = false;
+        if (!activeMonitor.name.endsWith(chainId)) {
+            // ignore monitors that belong to a different chain
+            continue;
+        }
         for (const cronJob of jobs) {
             const monitorName = `${cronJob.name}-${chainId}`;
-            if (!activeMonitor.name.endsWith(chainId)) {
-                // monitor is from a different chain, don't delete
-                keepMonitor = true;
-            }
             if (activeMonitor.name === monitorName) {
                 keepMonitor = true;
             }
