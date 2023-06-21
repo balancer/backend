@@ -1,0 +1,19 @@
+model PrismaVotingList {
+    @@id([address, chain])
+
+    address             String
+    chain               Chain
+
+    isKilled            Boolean
+    createdAt           DateTime    @updatedAt
+    relativeWeightCap   String?
+
+    /// relations with PoolToken
+    ///pool {
+    ///  id String
+    ///  address String
+    ///  poolType String
+    ///  symbol String
+    ///  tokens: <token-association>
+    ///  }
+}

@@ -39,7 +39,7 @@ export type GaugeUserShare = {
     tokens: GaugeRewardToken[];
 };
 
-export type GaugesInfo = Omit<GaugesInfoQuery['liquidityGauges'][number], '__typename'>[];
+export type LiquidityGaugesInfo = Omit<GaugesInfoQuery['liquidityGauges'][number], '__typename'>[];
 export type RootGaugesInfo = Omit<RootGaugesInfoQuery['rootGauges'][number], '__typename'>[];
 
 export class GaugeSubgraphService {
@@ -244,7 +244,7 @@ export class GaugeSubgraphService {
         return meta;
     }
 
-    public async getGaugesInfo(poolIds: string[]): Promise<GaugesInfo> {
+    public async getGaugesInfo(poolIds: string[]): Promise<LiquidityGaugesInfo> {
         const { liquidityGauges } = await this.sdk.GaugesInfo({ poolIds });
         return liquidityGauges;
     }

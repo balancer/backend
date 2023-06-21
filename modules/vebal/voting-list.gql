@@ -1,0 +1,11 @@
+type VotingGauge {
+    address: String!
+    chain: String!
+    isKilled: Boolean!
+    createdAt: Date!
+    relativeWeightCap: String
+}
+
+extend type Query {
+    veBalVotingList: [VotingGauge]!
+}

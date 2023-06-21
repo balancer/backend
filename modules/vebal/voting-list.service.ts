@@ -1,15 +1,26 @@
 import { Interface, getAddress } from 'ethers/lib/utils';
-import { capitalize, flatten } from 'lodash';
-import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
+import { capitalize, flatten, chain } from 'lodash';
+import { setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { networkContext } from '../../modules/network/network-context.service';
 import multicall3Abi from '../../modules/pool/lib/staking/abi/Multicall3.json';
-import { GaugesInfo, gaugeSubgraphService } from '../../modules/subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { Chain } from '../../modules/subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
+import {
+    LiquidityGaugesInfo,
+    RootGaugesInfo,
+    gaugeSubgraphService,
+} from '../../modules/subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { getContractAt } from '../../modules/web3/contract';
 import { NetworkConfig } from '../network/network-config-types';
 import veBalHelpersAbi from './abi/veBalHelpers.json';
 import { prisma } from '../../prisma/prisma-client';
+import { Chain as PrismaChain, PrismaVotingList } from '@prisma/client';
+import { Chain as SubgraphChain } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
+
+type LiquidityGaugeInfo = LiquidityGaugesInfo[number];
+interface GaugeInfo extends LiquidityGaugeInfo {
+    chain: PrismaChain;
+}
+type GaugesInfo = GaugeInfo[];
 
 export class VotingListService {
     async syncVotingList() {
@@ -25,6 +36,26 @@ export class VotingListService {
 
         // console.log('First gauge record: ', validGauges[0]);
         return validGauges;
+    }
+
+    async reloadVotingList(newGauges: GaugesInfo) {
+        console.log('Inserting', newGauges);
+
+        await prisma.prismaVotingList.deleteMany();
+
+        await prisma.prismaVotingList.createMany({
+            data: newGauges.map((gauge) => ({
+                address: getAddress(gauge.id),
+                chain: gauge.chain,
+                isKilled: gauge.isKilled,
+                relativeWeightCap: gauge.relativeWeightCap,
+                // poolId: gauge.poolId,
+            })),
+        });
+    }
+
+    async getList(): Promise<PrismaVotingList[]> {
+        return await prisma.prismaVotingList.findMany();
     }
 
     /**
@@ -72,9 +103,11 @@ export const votingListService = new VotingListService();
 async function fetchGaugesInfo(network: NetworkConfig): Promise<GaugesInfo> {
     const chainId = network.data.chain.id;
     setRequestScopedContextValue('chainId', chainId.toString());
+
     const isMainnet = chainId === 1;
     //TODO: We only have poolsWithGauges for mainnet and arbitrum for testing purposes
     if (![1, 42161].includes(chainId)) return [];
+    // if (![42161].includes(chainId)) return [];
     const poolIds = network.poolsWithGauges as string[];
 
     if (isMainnet) return fetchMainnetGaugesInfo(poolIds);
@@ -84,7 +117,9 @@ async function fetchGaugesInfo(network: NetworkConfig): Promise<GaugesInfo> {
 async function fetchMainnetGaugesInfo(poolIds: string[]): Promise<GaugesInfo> {
     const gaugesInfo = await gaugeSubgraphService.getGaugesInfo(poolIds);
     console.log(`⬇️  Fetched ${gaugesInfo.length} gauge info records for Mainnet`);
-    return gaugesInfo;
+    return gaugesInfo.map((rootGauge) => {
+        return { ...rootGauge, chain: 'MAINNET' };
+    });
 }
 
 async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Promise<GaugesInfo> {
@@ -103,7 +138,7 @@ async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Pro
     }, {});
 
     // TODO: improve TS check
-    const chainName: Chain = capitalize(network.data.chain.slug) as Chain;
+    const chainName: SubgraphChain = capitalize(network.data.chain.slug) as SubgraphChain;
 
     const recipients = Object.keys(poolIdsByRecipient);
     let rootGauges = await gaugeSubgraphService.getRootGaugesInfo(recipients, chainName);
@@ -111,7 +146,7 @@ async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Pro
 
     return rootGauges.map((rootGauge) => {
         // Manually add poolId as we cannot get it in the RootGauges query above
-        return { ...rootGauge, poolId: poolIdsByRecipient[rootGauge.recipient] };
+        return { ...rootGauge, poolId: poolIdsByRecipient[rootGauge.recipient], chain: network.data.chain.prismaId };
     });
 }
 
