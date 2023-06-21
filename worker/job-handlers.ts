@@ -43,6 +43,9 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         Sentry.configureScope((scope) => {
             scope.setSpan(transaction);
             scope.setTransactionName(`${jobId}`);
+            scope.setContext('monitor', {
+                slug: jobId,
+            });
         });
         transaction.sampled = true;
 
