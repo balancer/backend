@@ -28,17 +28,15 @@ async function startServer() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        debug: true,
-        tracesSampleRate: 0.005,
+        // tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
-        // enabled: env.NODE_ENV === 'production',
-        enabled: true,
+        enabled: env.NODE_ENV === 'production',
         integrations: [
             // new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
             // new Tracing.Integrations.Prisma({ client: prisma }),
             // new Tracing.Integrations.Express({ app }),
-            new Sentry.Integrations.Http({ tracing: true }),
+            // new Sentry.Integrations.Http({ tracing: true }),
         ],
         beforeSend(event, hint) {
             const error = hint.originalException as string;
