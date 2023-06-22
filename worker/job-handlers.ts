@@ -109,11 +109,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
+        console.log(`Schedule job ${job.name}-${chainId}`)
         await scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
+        console.log(`Reschedule job ${job.name}-${chainId}`)
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
