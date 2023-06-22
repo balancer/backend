@@ -360,5 +360,9 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'feed-data-to-datastudio',
             interval: every(1, 'minutes'),
         },
+        {
+            name: 'sync-lge-price-data',
+            interval: every(10, 'seconds'),
+        },
     ],
 };

@@ -11,6 +11,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../modul
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
+import { liquidityGenerationEventService } from '../modules/lge/liquidity-generation-event.service';
 
 export type WorkerJob = {
     name: string;
@@ -109,13 +110,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
-        console.log(`Schedule job ${job.name}-${chainId}`)
+        console.log(`Schedule job ${job.name}-${chainId}`);
         await scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
-        console.log(`Reschedule job ${job.name}-${chainId}`)
+        console.log(`Reschedule job ${job.name}-${chainId}`);
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
@@ -284,6 +285,14 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
             break;
         case 'sync-vebal-totalSupply':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalTotalSupply(), 0.01);
+            break;
+        case 'sync-lge-price-data':
+            await runIfNotAlreadyRunning(
+                job.name,
+                chainId,
+                () => liquidityGenerationEventService.syncLgeRealPriceData(),
+                0.01,
+            );
             break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
