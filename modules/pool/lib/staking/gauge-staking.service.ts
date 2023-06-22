@@ -74,6 +74,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 id: gauge.id,
                                 stakingId: gauge.id,
                                 gaugeAddress: gauge.id,
+                                relativeWeightCap: gauge.relativeWeightCap,
                                 chain: networkContext.chain,
                                 status: gaugeStatus,
                                 version: gaugeVersion,

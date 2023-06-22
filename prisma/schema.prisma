@@ -455,6 +455,7 @@ model PrismaPoolStakingGauge {
     chain               Chain
 
     gaugeAddress        String
+    relativeWeightCap   String?
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)
@@ -821,25 +822,4 @@ model PrismaVeBalTotalSupply {
     chain               Chain
 
     totalSupply         String
-}
-
-// QUESTION How do I add this automatically
-model PrismaVotingList {
-    @@id([address, chain])
-
-    address             String
-    chain               Chain
-
-    isKilled            Boolean
-    createdAt           DateTime    @updatedAt
-    relativeWeightCap   String?
-
-    /// relations with PoolToken
-    ///pool {
-    ///  id String
-    ///  address String
-    ///  poolType String
-    ///  symbol String
-    ///  tokens: <token-association>
-    ///  }
 }

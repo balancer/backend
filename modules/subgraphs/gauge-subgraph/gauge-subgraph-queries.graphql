@@ -30,6 +30,7 @@ fragment Gauge on LiquidityGauge {
     streamer
     isPreferentialGauge
     isKilled
+    relativeWeightCap
 }
 
 query Pools(
