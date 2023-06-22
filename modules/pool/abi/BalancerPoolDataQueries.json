@@ -75,6 +75,25 @@
 				"type": "address[]"
 			}
 		],
+		"name": "getLinearTargetsForPools",
+		"outputs": [
+			{
+				"internalType": "uint256[][]",
+				"name": "",
+				"type": "uint256[][]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "poolAddresses",
+				"type": "address[]"
+			}
+		],
 		"name": "getNormalizedWeightsForPools",
 		"outputs": [
 			{
@@ -113,6 +132,11 @@
 					{
 						"internalType": "bool",
 						"name": "loadLinearWrappedTokenRates",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "loadLinearTargets",
 						"type": "bool"
 					},
 					{
@@ -202,6 +226,11 @@
 				"internalType": "uint256[]",
 				"name": "linearWrappedTokenRates",
 				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[][]",
+				"name": "linearTargets",
+				"type": "uint256[][]"
 			},
 			{
 				"internalType": "uint256[][]",

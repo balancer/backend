@@ -11,6 +11,7 @@ export const schema = {
     ADMIN_API_KEY: String,
     SANITY_API_TOKEN: String,
     SENTRY_DSN: String,
+    SENTRY_AUTH_TOKEN: String,
     AWS_REGION: String,
     PROTOCOL: String,
     COINGECKO_API_KEY: {

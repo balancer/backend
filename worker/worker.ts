@@ -6,6 +6,7 @@ import { prisma } from '../prisma/prisma-client';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { createAlerts } from './create-alerts';
 import { scheduleJobs } from './job-handlers';
+import { createMonitors } from './create-monitors';
 
 export async function startWorker() {
     const app = express();
@@ -43,6 +44,7 @@ export async function startWorker() {
                 //start up time will be a bit slower
                 await createAlerts(chainId);
             }
+            await createMonitors(chainId);
         }
     } catch (e) {
         console.log(`Fatal error happened during cron scheduling.`, e);

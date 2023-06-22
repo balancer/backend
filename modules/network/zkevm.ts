@@ -65,7 +65,7 @@ const zkevmNetworkData: NetworkData = {
         weightedPoolV2Factories: ['0x03F3Fb107e74F2EAC9358862E91ad3c692712054'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0xC1Ff645400DD37989e77802326665cCf4fFDB352',
+        poolDataQueryContract: '0xF24917fB88261a37Cc57F686eBC831a5c0B9fD39',
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

@@ -21,7 +21,7 @@ export type WorkerJob = {
 
 const runningJobs: Set<string> = new Set();
 
-const defaultSamplingRate = 0.001;
+const defaultSamplingRate = 0;
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
@@ -30,11 +30,18 @@ export async function scheduleJobs(chainId: string): Promise<void> {
 }
 
 async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any, samplingRate: number): Promise<void> {
+    samplingRate = 0;
     const jobId = `${id}-${chainId}`;
+    let monitorSlug = jobId;
+    if (jobId.length > 50) {
+        //slug has 50 chars max length
+        monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
+    }
     if (runningJobs.has(jobId)) {
         console.log('Skipping job', jobId);
         return;
     }
+    let sentryCheckInId = '';
     try {
         runningJobs.add(jobId);
 
@@ -42,13 +49,27 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         Sentry.configureScope((scope) => {
             scope.setSpan(transaction);
             scope.setTransactionName(`${jobId}`);
+            scope.setContext('monitor', {
+                slug: monitorSlug,
+            });
         });
-        transaction.sampled = true;
+        transaction.sampled = false;
 
         console.time(jobId);
         console.log(`Start job ${jobId}`);
 
+        sentryCheckInId = Sentry.captureCheckIn({
+            monitorSlug: `${monitorSlug}`,
+            status: 'in_progress',
+        });
+
         await fn();
+
+        Sentry.captureCheckIn({
+            checkInId: sentryCheckInId,
+            monitorSlug: `${monitorSlug}`,
+            status: 'ok',
+        });
 
         if (process.env.AWS_ALERTS === 'true') {
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
@@ -68,6 +89,12 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
             scope.setTag('error', jobId);
         });
 
+        Sentry.captureCheckIn({
+            checkInId: sentryCheckInId,
+            monitorSlug: `${monitorSlug}`,
+            status: 'error',
+        });
+
         console.log(`Error job ${jobId}`, error);
     } finally {
         runningJobs.delete(jobId);
@@ -82,11 +109,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
+        console.log(`Schedule job ${job.name}-${chainId}`)
         await scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
+        console.log(`Reschedule job ${job.name}-${chainId}`)
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
