@@ -1,17 +1,14 @@
-import { Interface, formatUnits, getAddress } from 'ethers/lib/utils';
+import { formatUnits, getAddress } from 'ethers/lib/utils';
 import { capitalize, flatten, chain, times, chunk, zipObject } from 'lodash';
 import { setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { networkContext } from '../../modules/network/network-context.service';
-import multicall3Abi from '../../modules/pool/lib/staking/abi/Multicall3.json';
 import {
     LiquidityGaugesInfo,
-    RootGaugesInfo,
     gaugeSubgraphService,
 } from '../../modules/subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { getContractAt } from '../../modules/web3/contract';
 import { NetworkConfig } from '../network/network-config-types';
-import veBalHelpersAbi from './abi/veBalHelpers.json';
 import { prisma } from '../../prisma/prisma-client';
 import { Chain as PrismaChain, PrismaPoolStakingGauge } from '@prisma/client';
 import { Chain as SubgraphChain } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
@@ -145,32 +142,6 @@ async function filterValidGauges(gauges: GaugesInfo): Promise<GaugesInfo> {
 
     const validGauges = gauges.filter(({ id, isKilled }) => !isKilled || relativeWeights[getAddress(id)] !== '0.0');
     return validGauges;
-}
-
-export async function getGauges(): Promise<number> {
-    const gaugeControllerAddress = '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD';
-    const gaugeControllerContract = getContractAt(gaugeControllerAddress, gaugeControllerAbi);
-
-    const totalGauges = Number(formatFixed(await gaugeControllerContract.n_gauges()));
-
-    const iGaugeController = new Interface(gaugeControllerAbi);
-    const allowFailures = false;
-    const buildCallToGetGaugeByNumber = (gaugeNumber: number) => [
-        gaugeControllerAddress,
-        allowFailures,
-        iGaugeController.encodeFunctionData('gauges', [gaugeNumber]),
-    ];
-    const calls = generateNCalls(totalGauges, buildCallToGetGaugeByNumber);
-
-    const multicall = getContractAt(networkContext.data.multicall3, multicall3Abi);
-    const results = await multicall.callStatic.aggregate3(calls);
-    console.log(results);
-
-    return totalGauges;
-}
-
-function generateNCalls(totalCalls: number, buildCall: Function) {
-    return [...Array(totalCalls)].map((_, index) => buildCall(index));
 }
 
 /**
