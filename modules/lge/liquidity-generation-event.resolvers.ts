@@ -15,7 +15,7 @@ const liquidityGenerationEventResolvers: Resolvers = {
     },
     Mutation: {
         lgeCreate: async (parent, { lge }) => {
-            return liquidityGenerationEventService.createLiquidityGenerationEvent(lge);
+            return liquidityGenerationEventService.upsertLiquidityGenerationEvent(lge);
         },
     },
 };

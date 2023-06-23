@@ -81,12 +81,13 @@ model PrismaLge {
 }
 
 model PrismaLgePriceData {
-    @@id([id, chain])
+    @@id([id, chain, swapTransaction])
     id                      String
     chain                   Chain               
 
     lge                 PrismaLge           @relation(fields:[id,chain], references: [id,chain])
 
+    swapTransaction     String
     timestamp           Int
     blockNumber         Int
     launchTokenPrice    Float

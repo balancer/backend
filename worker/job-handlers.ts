@@ -290,7 +290,7 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
             await runIfNotAlreadyRunning(
                 job.name,
                 chainId,
-                () => liquidityGenerationEventService.syncLgeRealPriceData(),
+                () => liquidityGenerationEventService.syncRunningLgeRealPriceData(),
                 0.01,
             );
             break;
