@@ -43,7 +43,7 @@ export class VotingListService {
             return pool;
         });
         // console.log('pools!', pools);
-        return Promise.resolve(pools);
+        return pools;
     }
 }
 
