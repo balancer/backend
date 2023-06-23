@@ -103,7 +103,7 @@ const fantomNetworkData: NetworkData = {
         ],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        poolDataQueryContract: '0xC1AFF8373840dB41275aAd5c41EC171D10872F5B',
+        poolDataQueryContract: '0x9642Dbba0753B1518022d7617Be079f0d7EFD165',
         factoriesWithpoolSpecificProtocolFeePercentagesProvider: [
             '0xb841df73861e65e6d61a80f503f095a91ce75e15',
             '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',

@@ -8,6 +8,7 @@ type PoolWithTypeAndFactory = {
     type: PrismaPoolType;
     factory?: string | null;
     dynamicData?: PrismaPoolDynamicData | null;
+    version: number;
 };
 
 export function isStablePool(poolType: PrismaPoolType) {
@@ -41,4 +42,8 @@ export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
 
 export function capturesYield(pool: PoolWithTypeAndFactory) {
     return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
+}
+
+export function isGyroEV2(pool: PoolWithTypeAndFactory) {
+    return pool.type === 'GYROE' && pool.version === 2;
 }

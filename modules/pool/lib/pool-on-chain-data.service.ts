@@ -9,7 +9,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isStablePool, isWeightedPoolV2 } from './pool-utils';
+import { isComposableStablePool, isGyroEV2, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
@@ -31,6 +31,7 @@ interface PoolDataQueryConfig {
     loadTotalSupply: boolean;
     loadSwapFees: boolean;
     loadLinearWrappedTokenRates: boolean;
+    loadLinearTargets: boolean;
     loadNormalizedWeights: boolean;
     loadScalingFactors: boolean;
     loadAmps: boolean;
@@ -57,6 +58,7 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     loadTotalSupply: false,
     loadSwapFees: false,
     loadLinearWrappedTokenRates: false,
+    loadLinearTargets: false,
     loadNormalizedWeights: false,
     loadScalingFactors: false,
     loadAmps: false,
@@ -72,7 +74,6 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 };
 
 interface MulticallExecuteResult {
-    targets?: string[];
     swapEnabled?: boolean;
     protocolFeePercentageCache?: number;
 }
@@ -169,7 +170,6 @@ export class PoolOnChainDataService {
         const stablePoolIdexes: number[] = [];
         const ratePoolIdexes: number[] = [];
         const scalingFactorPoolIndexes: number[] = [];
-        const gyroPoolIdexes: number[] = [];
         for (const pool of filteredPools) {
             if (pool.type === 'WEIGHTED' || pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 weightedPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
@@ -183,12 +183,15 @@ export class PoolOnChainDataService {
             if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type.includes('GYRO')) {
                 ratePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
-            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE') {
+            if (
+                pool.type === 'LINEAR' ||
+                isComposableStablePool(pool) ||
+                pool.type === 'META_STABLE' ||
+                isGyroEV2(pool)
+            ) {
                 scalingFactorPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
         }
-
-        const ratePoolsIndexes = [...linearPoolIdexes, ...gyroPoolIdexes];
 
         const queryPoolDataResult = await this.queryPoolData({
             poolIds: poolIdsFromDb,
@@ -226,9 +229,10 @@ export class PoolOnChainDataService {
                 loadNormalizedWeights: weightedPoolIndexes.length > 0,
                 weightedPoolIdxs: weightedPoolIndexes,
                 loadLinearWrappedTokenRates: linearPoolIdexes.length > 0,
+                loadLinearTargets: linearPoolIdexes.length > 0,
                 linearPoolIdxs: linearPoolIdexes,
-                loadRates: ratePoolsIndexes.length > 0,
-                ratePoolIdxs: ratePoolsIndexes,
+                loadRates: ratePoolIdexes.length > 0,
+                ratePoolIdxs: ratePoolIdexes,
                 loadScalingFactors: scalingFactorPoolIndexes.length > 0,
                 scalingFactorPoolIdxs: scalingFactorPoolIndexes,
             },
@@ -244,6 +248,9 @@ export class PoolOnChainDataService {
             amp: stablePoolIdexes.includes(i) ? queryPoolDataResult.amps[stablePoolIdexes.indexOf(i)] : undefined,
             wrappedTokenRate: linearPoolIdexes.includes(i)
                 ? queryPoolDataResult.linearWrappedTokenRates[linearPoolIdexes.indexOf(i)]
+                : undefined,
+            linearTargets: linearPoolIdexes.includes(i)
+                ? queryPoolDataResult.linearTargets[linearPoolIdexes.indexOf(i)]
                 : undefined,
             swapFee: queryPoolDataResult.swapFees[i],
             rate: linearPoolIdexes.includes(i) ? queryPoolDataResult.rates[linearPoolIdexes.indexOf(i)] : undefined,
@@ -281,10 +288,6 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.protocolFeePercentageCache`, pool.address, 'getProtocolFeePercentageCache', [
                     2,
                 ]);
-            }
-
-            if (pool.type === 'LINEAR') {
-                multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
             }
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
@@ -339,12 +342,12 @@ export class PoolOnChainDataService {
                 }
 
                 if (pool.type === 'LINEAR') {
-                    if (!multicallResult?.targets) {
+                    if (!poolData.linearTargets) {
                         console.error(`Linear Pool Missing Targets: ${poolId}`);
                         continue;
                     } else {
-                        const lowerTarget = formatFixed(multicallResult.targets[0], 18);
-                        const upperTarget = formatFixed(multicallResult.targets[1], 18);
+                        const lowerTarget = formatFixed(poolData.linearTargets[0], 18);
+                        const upperTarget = formatFixed(poolData.linearTargets[1], 18);
 
                         if (
                             !pool.linearDynamicData ||
@@ -485,6 +488,7 @@ export class PoolOnChainDataService {
         totalSupplies: BigNumber[];
         swapFees: BigNumber[];
         linearWrappedTokenRates: BigNumber[];
+        linearTargets: BigNumber[][];
         weights: BigNumber[][];
         scalingFactors: BigNumber[][];
         amps: BigNumber[];
@@ -507,11 +511,12 @@ export class PoolOnChainDataService {
             totalSupplies: response[1],
             swapFees: response[2],
             linearWrappedTokenRates: response[3],
-            weights: response[4],
-            scalingFactors: response[5],
-            amps: response[6],
-            rates: response[7],
-            ignoreIdxs: response[8],
+            linearTargets: response[4],
+            weights: response[5],
+            scalingFactors: response[6],
+            amps: response[7],
+            rates: response[8],
+            ignoreIdxs: response[9],
         };
     }
 
