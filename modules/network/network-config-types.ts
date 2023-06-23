@@ -17,10 +17,10 @@ export interface NetworkConfig {
     tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
-    poolsWithGauges?: string[];
 }
 
 export type DeploymentEnv = 'canary' | 'main';
+
 export interface NetworkData {
     chain: {
         slug: string;
