@@ -1,5 +1,5 @@
-import { Interface, getAddress } from 'ethers/lib/utils';
-import { capitalize, flatten, chain } from 'lodash';
+import { Interface, formatUnits, getAddress } from 'ethers/lib/utils';
+import { capitalize, flatten, chain, times, chunk, zipObject } from 'lodash';
 import { setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { networkContext } from '../../modules/network/network-context.service';
@@ -13,8 +13,11 @@ import { getContractAt } from '../../modules/web3/contract';
 import { NetworkConfig } from '../network/network-config-types';
 import veBalHelpersAbi from './abi/veBalHelpers.json';
 import { prisma } from '../../prisma/prisma-client';
-import { Chain as PrismaChain, PrismaVotingList } from '@prisma/client';
+import { Chain as PrismaChain, PrismaPoolStakingGauge } from '@prisma/client';
 import { Chain as SubgraphChain } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
+import { Multicaller } from '../web3/multicaller';
+import gaugeControllerAbi from './abi/gaugeController.json';
+import { formatFixed } from '@ethersproject/bignumber';
 
 type LiquidityGaugeInfo = LiquidityGaugesInfo[number];
 interface GaugeInfo extends LiquidityGaugeInfo {
@@ -38,24 +41,8 @@ export class VotingListService {
         return validGauges;
     }
 
-    async reloadVotingList(newGauges: GaugesInfo) {
-        console.log('Inserting', newGauges);
-
-        await prisma.prismaVotingList.deleteMany();
-
-        await prisma.prismaVotingList.createMany({
-            data: newGauges.map((gauge) => ({
-                address: getAddress(gauge.id),
-                chain: gauge.chain,
-                isKilled: gauge.isKilled,
-                relativeWeightCap: gauge.relativeWeightCap,
-                // poolId: gauge.poolId,
-            })),
-        });
-    }
-
-    async getList(): Promise<PrismaVotingList[]> {
-        return await prisma.prismaVotingList.findMany();
+    async getList(): Promise<PrismaPoolStakingGauge[]> {
+        return await prisma.prismaPoolStakingGauge.findMany();
     }
 
     /**
@@ -154,35 +141,89 @@ async function fetchL2GaugesInfo(poolIds: string[], network: NetworkConfig): Pro
  * Excludes killed gauges with zero weight
  */
 async function filterValidGauges(gauges: GaugesInfo): Promise<GaugesInfo> {
-    const killedGaugesList = gauges.filter(({ isKilled }) => isKilled).map(({ id }) => getAddress(id));
+    const relativeWeights = await fetchGaugeRelativeWeights();
 
-    const killedGaugesWeight = await getGaugeRelativeWeight(killedGaugesList);
-
-    const validGauges = gauges.filter(({ id, isKilled }) => !isKilled || killedGaugesWeight[getAddress(id)] !== '0.0');
+    const validGauges = gauges.filter(({ id, isKilled }) => !isKilled || relativeWeights[getAddress(id)] !== '0.0');
     return validGauges;
 }
 
-export async function getGaugeRelativeWeight(gaugeAddresses: string[]): Promise<Record<string, string>> {
-    //TODO: Include this address in network config
-    const veBALHelperAddress = '0x8e5698dc4897dc12243c8642e77b4f21349db97c';
+export async function getGauges(): Promise<number> {
+    const gaugeControllerAddress = '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD';
+    const gaugeControllerContract = getContractAt(gaugeControllerAddress, gaugeControllerAbi);
+
+    const totalGauges = Number(formatFixed(await gaugeControllerContract.n_gauges()));
+
+    const iGaugeController = new Interface(gaugeControllerAbi);
+    const allowFailures = false;
+    const buildCallToGetGaugeByNumber = (gaugeNumber: number) => [
+        gaugeControllerAddress,
+        allowFailures,
+        iGaugeController.encodeFunctionData('gauges', [gaugeNumber]),
+    ];
+    const calls = generateNCalls(totalGauges, buildCallToGetGaugeByNumber);
+
     const multicall = getContractAt(networkContext.data.multicall3, multicall3Abi);
+    const results = await multicall.callStatic.aggregate3(calls);
+    console.log(results);
 
-    const veBalHelpers = new Interface(veBalHelpersAbi);
+    return totalGauges;
+}
 
-    const calls = gaugeAddresses.map((address) => [
-        veBALHelperAddress,
-        false, // do not allow failures
-        veBalHelpers.encodeFunctionData('gauge_relative_weight', [address]),
-    ]);
-    // const result = await multicall.callStatic.aggregate3(calls);
-    // const weights = mapValues(result, weight => formatUnits(weight, 18));
+function generateNCalls(totalCalls: number, buildCall: Function) {
+    return [...Array(totalCalls)].map((_, index) => buildCall(index));
+}
 
-    //DEBUG: Return fake results until multicall is tested
-    return gaugeAddresses.reduce((acc: Record<string, string>, address: string) => {
-        acc[address] = '-0.1';
-        //DEBUG: explicit exclude 2 addresses
-        acc['0xB0de49429fBb80c635432bbAD0B3965b28560177'] = '0.0';
-        acc['0xF0ea3559Cf098455921d74173dA83fF2f6979495'] = '0.0';
-        return acc;
-    }, {});
+/**
+ * Fetches the relative weight of all gauges using the GaugeController Contract following this steps:
+ * 1) onchain call to know the total number of gauges
+ * 2) multicall (in chunks of 100) to get the list of gauge addresses
+ * 3) multicall (in chunks of 100) to get the gauge_relative_weight for each gauge address
+ */
+export async function fetchGaugeRelativeWeights(): Promise<Record<string, string>> {
+    const gaugeControllerAddress = '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD';
+    const gaugeControllerContract = getContractAt(gaugeControllerAddress, gaugeControllerAbi);
+    const totalGauges = Number(formatFixed(await gaugeControllerContract.n_gauges()));
+
+    // There are two versions of gauge_relative_weight (argument override)
+    // so we filter the ABI to only include the one that we are using
+    const abi = gaugeControllerAbi.filter((item) => !(item.name === 'gauge_relative_weight' && item.inputs.length > 1));
+    const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, abi);
+
+    const gaugeIndexes = generateGaugeIndexes(totalGauges);
+    const chunkSize = 100;
+    const indexChunks = chunk(gaugeIndexes, chunkSize);
+
+    let gaugeAddresses: string[] = [];
+    for (const gaugeIndexes of indexChunks) {
+        const chunkAddresses = await executeGaugesCalls(gaugeIndexes);
+        gaugeAddresses = [...gaugeAddresses, ...chunkAddresses];
+    }
+
+    const addressChunks = chunk(gaugeAddresses, chunkSize);
+    let relativeWeights: Record<string, string> = {};
+    for (const addressChunk of addressChunks) {
+        const chunkWeights = await executeRelativeWeightCalls(addressChunk);
+        relativeWeights = { ...relativeWeights, ...chunkWeights };
+    }
+
+    return relativeWeights;
+
+    async function executeGaugesCalls(gaugeIndexes: number[]): Promise<string[]> {
+        gaugeIndexes.map((i) => multicall.call(`${i}`, gaugeControllerAddress, 'gauges', [i]));
+        const result = await multicall.execute();
+        return Object.values(result);
+    }
+
+    async function executeRelativeWeightCalls(gaugeAddresses: string[]): Promise<Record<string, string>> {
+        gaugeAddresses.map((address) =>
+            multicall.call(`${address}`, gaugeControllerAddress, 'gauge_relative_weight', [address]),
+        );
+        const weights = await multicall.execute();
+        const formattedWeights = Object.values(weights).map((weight) => formatUnits(weight, 18));
+        return zipObject(gaugeAddresses, formattedWeights);
+    }
+
+    function generateGaugeIndexes(totalGauges: number) {
+        return [...Array(totalGauges)].map((_, index) => index);
+    }
 }
