@@ -116,7 +116,6 @@ const polygonNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
-        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
