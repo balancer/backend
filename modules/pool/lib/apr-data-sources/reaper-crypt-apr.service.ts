@@ -2,13 +2,23 @@ import { isSameAddress } from '@balancer-labs/sdk';
 import * as Sentry from '@sentry/node';
 import { prisma } from '../../../../prisma/prisma-client';
 import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
-import { TokenService } from '../../../token/token.service';
+import { tokenService } from '../../../token/token.service';
 import { getContractAt } from '../../../web3/contract';
 import { PoolAprService } from '../../pool-types';
 import ReaperCryptAbi from './abi/ReaperCrypt.json';
 import ReaperCryptStrategyAbi from './abi/ReaperCryptStrategy.json';
 import { networkContext } from '../../../network/network-context.service';
 import { liquidStakedBaseAprService } from './liquid-staked-base-apr.service';
+import axios from 'axios';
+import { Contract } from 'ethers';
+
+type MultiStratQueryResponse = {
+    data: {
+        vault: {
+            apr: string;
+        };
+    };
+};
 
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
@@ -16,7 +26,6 @@ export class ReaperCryptAprService implements PoolAprService {
     constructor(
         private readonly linearPoolFactories: string[],
         private readonly averageAPRAcrossLastNHarvests: number,
-        private readonly tokenService: TokenService,
         private readonly sFtmXAddress: string | undefined,
         private readonly wstEthAddress: string | undefined,
     ) {}
@@ -26,44 +35,48 @@ export class ReaperCryptAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const tokenPrices = await this.tokenService.getTokenPrices();
+        const tokenPrices = await tokenService.getTokenPrices();
 
         for (const pool of pools) {
             if (!this.linearPoolFactories.includes(pool.factory || '') || !pool.linearData || !pool.dynamicData) {
                 continue;
             }
-
-            const itemId = `${pool.id}-reaper-crypt`;
-
             const linearData = pool.linearData;
             const wrappedToken = pool.tokens[linearData.wrappedIndex];
             const mainToken = pool.tokens[linearData.mainIndex];
 
             const cryptContract = getContractAt(wrappedToken.address, ReaperCryptAbi);
-            const cryptStrategyAddress = await cryptContract.strategy();
-            const strategyContract = getContractAt(cryptStrategyAddress, ReaperCryptStrategyAbi);
-            let avgAprAcrossXHarvests = 0;
-            try {
-                avgAprAcrossXHarvests =
-                    (await strategyContract.averageAPRAcrossLastNHarvests(this.averageAPRAcrossLastNHarvests)) /
-                    this.APR_PERCENT_DIVISOR;
-            } catch (e) {
-                Sentry.captureException(e, {
-                    tags: {
-                        poolId: pool.id,
-                        poolName: pool.name,
-                        strategyContract: cryptStrategyAddress,
-                    },
-                });
-                continue;
+
+            const cryptName = await cryptContract.name();
+
+            let cryptApr = 0;
+            let itemId = '';
+
+            if (cryptName.includes('Multi-Strategy')) {
+                cryptApr = await this.getMultiStrategyAprFromSubgraph(wrappedToken.address);
+                itemId = `${pool.id}-reaper-mutlistrat`;
+            } else {
+                try {
+                    cryptApr = await this.getSingleStrategyCryptApr(cryptContract);
+                    itemId = `${pool.id}-reaper-crypt`;
+                } catch (e) {
+                    Sentry.captureException(e, {
+                        tags: {
+                            poolId: pool.id,
+                            poolName: pool.name,
+                            cryptContract: wrappedToken.address,
+                        },
+                    });
+                    continue;
+                }
             }
 
-            const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, mainToken.address);
+            const tokenPrice = tokenService.getPriceForToken(tokenPrices, mainToken.address);
             const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
-            const totalLiquidity = pool.dynamicData.totalLiquidity;
-            let apr = totalLiquidity > 0 ? avgAprAcrossXHarvests * (poolWrappedLiquidity / totalLiquidity) : 0;
+            const totalLiquidity = pool.dynamicData!.totalLiquidity;
+            let apr = totalLiquidity > 0 ? cryptApr * (poolWrappedLiquidity / totalLiquidity) : 0;
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: itemId, chain: networkContext.chain } },
@@ -87,7 +100,7 @@ export class ReaperCryptAprService implements PoolAprService {
                 if (baseApr > 0) {
                     const boostedVaultApr = this.getBoostedVaultApr(
                         totalLiquidity,
-                        avgAprAcrossXHarvests,
+                        cryptApr,
                         baseApr,
                         poolWrappedLiquidity,
                     );
@@ -106,7 +119,7 @@ export class ReaperCryptAprService implements PoolAprService {
                 if (baseApr > 0) {
                     const boostedVaultApr = this.getBoostedVaultApr(
                         totalLiquidity,
-                        avgAprAcrossXHarvests,
+                        cryptApr,
                         baseApr,
                         poolWrappedLiquidity,
                     );
@@ -118,6 +131,36 @@ export class ReaperCryptAprService implements PoolAprService {
                 }
             }
         }
+    }
+
+    private async getSingleStrategyCryptApr(cryptContract: Contract): Promise<number> {
+        const cryptStrategyAddress = await cryptContract.strategy();
+
+        const strategyContract = getContractAt(cryptStrategyAddress, ReaperCryptStrategyAbi);
+        let avgAprAcrossXHarvests = 0;
+
+        avgAprAcrossXHarvests =
+            (await strategyContract.averageAPRAcrossLastNHarvests(this.averageAPRAcrossLastNHarvests)) /
+            this.APR_PERCENT_DIVISOR;
+
+        return avgAprAcrossXHarvests;
+    }
+
+    private async getMultiStrategyAprFromSubgraph(address: string): Promise<number> {
+        const baseUrl = 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom';
+
+        const { data } = await axios.post<MultiStratQueryResponse>(baseUrl, {
+            query: `query {
+            vault(id: "${address}"){
+              apr
+            }
+          }`,
+        });
+
+        if (data.data.vault && data.data.vault.apr) {
+            return parseFloat(data.data.vault.apr);
+        }
+        return 0;
     }
 
     private getBoostedVaultApr(

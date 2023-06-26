@@ -96,7 +96,6 @@ const zkevmNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
-        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
