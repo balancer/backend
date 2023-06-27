@@ -3,6 +3,7 @@ import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
+import GyroEV2Abi from '../abi/GyroEV2.json';
 import { Multicaller } from '../../web3/multicaller';
 import { BigNumber, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -76,6 +77,7 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
 interface MulticallExecuteResult {
     swapEnabled?: boolean;
     protocolFeePercentageCache?: number;
+    tokenRates?: string[];
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -183,12 +185,7 @@ export class PoolOnChainDataService {
             if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type.includes('GYRO')) {
                 ratePoolIdexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
-            if (
-                pool.type === 'LINEAR' ||
-                isComposableStablePool(pool) ||
-                pool.type === 'META_STABLE' ||
-                isGyroEV2(pool)
-            ) {
+            if (pool.type === 'LINEAR' || isComposableStablePool(pool) || pool.type === 'META_STABLE') {
                 scalingFactorPoolIndexes.push(poolIdsFromDb.findIndex((orderedPoolId) => orderedPoolId === pool.id));
             }
         }
@@ -265,9 +262,13 @@ export class PoolOnChainDataService {
         const abis: any = Object.values(
             // Remove duplicate entries using their names
             Object.fromEntries(
-                [...ElementPoolAbi, ...LinearPoolAbi, ...LiquidityBootstrappingPoolAbi, ...ComposableStablePoolAbi].map(
-                    (row) => [row.name, row],
-                ),
+                [
+                    ...ElementPoolAbi,
+                    ...LinearPoolAbi,
+                    ...LiquidityBootstrappingPoolAbi,
+                    ...ComposableStablePoolAbi,
+                    ...GyroEV2Abi,
+                ].map((row) => [row.name, row]),
             ),
         );
 
@@ -292,6 +293,10 @@ export class PoolOnChainDataService {
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
                 multiPool.call(`${pool.id}.swapEnabled`, pool.address, 'getSwapEnabled');
+            }
+
+            if (isGyroEV2(pool)) {
+                multiPool.call(`${pool.id}.tokenRates`, pool.address, 'getTokenRates');
             }
         });
 
@@ -416,6 +421,11 @@ export class PoolOnChainDataService {
                                 .div(`1000000000000000000`),
                             18,
                         );
+                    }
+
+                    // set GyroE V2 token rates using multicall values
+                    if (isGyroEV2(pool) && multicallResult?.tokenRates !== undefined) {
+                        priceRate = formatFixed(multicallResult?.tokenRates[poolToken.index], 18);
                     }
 
                     // override the rate of the phantom bpt with pool.getRate if present
