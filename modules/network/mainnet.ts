@@ -17,7 +17,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { buildPublicClient } from './viem/clients';
+import { createHttpClient } from './viem/clients';
 
 const mainnetNetworkData: NetworkData = {
     chain: {
@@ -159,7 +159,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
     data: mainnetNetworkData,
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
-    publicClient: buildPublicClient(mainnetNetworkData.rpcUrl),
+    publicClient: createHttpClient(mainnetNetworkData.rpcUrl),
     poolAprServices: [
         new WstethAprService(tokenService, mainnetNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(

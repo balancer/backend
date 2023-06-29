@@ -1,22 +1,27 @@
-import { testPublicClient } from '../network/viem/clients';
+import { createHttpClient } from '../network/viem/clients';
 import { VotingListService } from './voting-list.service';
 
 // anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17569375
 
+// In CI we will use http://127.0.0.1:8555 to use the anvil fork;
+const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';
+console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
+const testHttpClient = createHttpClient('https://cloudflare-eth.com');
+
 it('fetches list of root gauge addresses', async () => {
-    const service = new VotingListService(testPublicClient('https://cloudflare-eth.com'));
+    const service = new VotingListService(testHttpClient);
     const addresses = await service.getRootGaugeAddresses();
     expect(addresses.length).toBe(327);
 }, 10_000);
 
 it('generates root gauge rows given a list of gauge addresses', async () => {
-    const service = new VotingListService(testPublicClient('https://cloudflare-eth.com'));
+    const service = new VotingListService(testHttpClient);
 
     const rootGaugeAddresses = [
         '0x79eF6103A513951a3b25743DB509E267685726B7',
         '0xfb0265841C49A6b19D70055E596b212B0dA3f606',
     ];
-    // Uncomment to test with all addresses
+    // Uncomment to test with all the root gauges
     // const rootGaugeAddresses = await service.getRootGaugeAddresses();
 
     const rows = await service.generateRootGaugeRows(rootGaugeAddresses);
@@ -28,7 +33,7 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
           "isKilled": false,
           "network": "Ethereum",
           "recipient": undefined,
-          "relativeWeight": 71123066693252456,
+          "relativeWeight": 75545423881001780,
           "relativeWeightCap": undefined,
         },
         {
