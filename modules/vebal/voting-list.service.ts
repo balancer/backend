@@ -1,12 +1,23 @@
-import { formatFixed } from '@ethersproject/bignumber';
-import { formatUnits } from 'ethers/lib/utils';
-import { chunk, zipObject } from 'lodash';
-import { networkContext } from '../../modules/network/network-context.service';
-import { getContractAt } from '../../modules/web3/contract';
+import { mapValues, pickBy, zipObject } from 'lodash';
+import { PublicClient, formatUnits } from 'viem';
 import { prisma } from '../../prisma/prisma-client';
-import { Multicaller } from '../web3/multicaller';
-import gaugeControllerAbi from './abi/gaugeController.json';
+
+import { mainnetNetworkConfig } from '../network/mainnet';
+import { gaugeControllerAbi } from './abi/gaugeController.abi';
+import { rootGaugeAbi } from './abi/rootGauge.abi';
+
+const gaugeControllerContract = {
+    // Must be hardcoded to get the type inference
+    // address: mainnetNetworkConfig.data.gaugeControllerAddress!,
+    address: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
+    abi: gaugeControllerAbi,
+} as const;
+
 export class VotingListService {
+    constructor(
+        private publicClient: PublicClient = mainnetNetworkConfig.publicClient!,
+        private readContract = publicClient.readContract,
+    ) {}
     /**
      * This query illustrates the pool related data that we need for each gauge
      * Ideally, we don't want to denormalize but how can we join validGauges with getPoolsForVotingList in an efficient way?
@@ -42,64 +53,136 @@ export class VotingListService {
             pool.tokens = pool.tokens.filter((t) => t.address !== pool?.address);
             return pool;
         });
-        // console.log('pools!', pools);
         return pools;
+    }
+
+    async getRootGaugeAddresses(): Promise<string[]> {
+        const totalGauges = Number(
+            await this.readContract({
+                ...gaugeControllerContract,
+                functionName: 'n_gauges',
+            }),
+        );
+        const gaugeAddresses = (await this.publicClient.multicall({
+            allowFailure: false,
+            contracts: this.gaugeControllerCallsByIndex(totalGauges, 'gauges'),
+        })) as string[];
+
+        return gaugeAddresses;
+    }
+
+    /**
+     *
+     * This is the first proof of concept using viem's multicall
+     * It contains ad-hoc helpers to make the code easier in this concrete scenario but in the future we will try to create a more generic
+     * multicaller implementation to generalize any multicall flow
+     */
+    async generateRootGaugeRows(gaugeAddresses: string[]) {
+        const totalGaugesTypes = Number(
+            await this.readContract({
+                ...gaugeControllerContract,
+                functionName: 'n_gauge_types',
+            }),
+        );
+
+        const typeNames = (await this.publicClient.multicall({
+            allowFailure: false,
+            contracts: this.gaugeControllerCallsByIndex(totalGaugesTypes, 'gauge_type_names'),
+        })) as string[];
+
+        const relativeWeights = (await this.multicallByAddresses(gaugeAddresses, 'gauge_relative_weight')) as Record<
+            string,
+            bigint
+        >;
+        const gaugeTypeIndexes = (await this.multicallByAddresses(gaugeAddresses, 'gauge_types')) as Record<
+            string,
+            bigint
+        >;
+        const gaugeTypes = mapValues(gaugeTypeIndexes, (type) => typeNames[Number(type)]);
+
+        const isKilled = (await this.multicallRootGauges(gaugeAddresses, 'is_killed')) as Record<string, boolean>;
+
+        type ResultWithAllowedFailures = {
+            result?: bigint;
+        };
+        const allowFailure = true;
+        const relativeWeightCapsWithFailures = (await this.multicallRootGauges(
+            gaugeAddresses,
+            'getRelativeWeightCap',
+            allowFailure,
+        )) as Record<string, ResultWithAllowedFailures>;
+        const relativeWeightCaps = mapValues(relativeWeightCapsWithFailures, (r) => r.result);
+
+        // Ethereum root gauges do not have getRecipient
+        const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum'));
+        const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient')) as Record<string, string>;
+
+        type RootGaugeRow = {
+            gaugeAddress: string;
+            network: string;
+            isKilled: boolean;
+            relativeWeight: number;
+            relativeWeightCap?: string;
+            recipient?: string;
+        };
+        let rows: RootGaugeRow[] = [];
+        gaugeAddresses.forEach((gaugeAddress) => {
+            const relativeWeight = relativeWeightCaps[gaugeAddress];
+            rows.push({
+                gaugeAddress,
+                network: gaugeTypes[gaugeAddress],
+                isKilled: isKilled[gaugeAddress],
+                relativeWeight: Number(relativeWeights[gaugeAddress]),
+                relativeWeightCap: relativeWeight ? formatUnits(relativeWeight, 18) : undefined,
+                recipient: recipients[gaugeAddress],
+            });
+        });
+
+        console.log('ROWS: ', rows);
+        return rows;
+    }
+
+    gaugeControllerCallsByIndex(totalCalls: number, functionName: string) {
+        return generateGaugeIndexes(totalCalls).map((index) => ({
+            ...gaugeControllerContract,
+            functionName,
+            args: [index],
+        }));
+    }
+
+    gaugeControllerCallsByAddress(gaugeAddresses: string[], functionName: string) {
+        return gaugeAddresses.map((address) => ({
+            ...gaugeControllerContract,
+            functionName,
+            args: [address],
+        }));
+    }
+
+    async multicallByAddresses(gaugeAddresses: string[], functionName: string): Promise<Record<string, unknown>> {
+        const results = await this.publicClient.multicall({
+            allowFailure: false,
+            contracts: this.gaugeControllerCallsByAddress(gaugeAddresses, functionName),
+        });
+        return zipObject(gaugeAddresses, results);
+    }
+
+    async multicallRootGauges(rootGaugeAddresses: string[], functionName: string, allowFailure = false) {
+        const contracts = rootGaugeAddresses.map((address) => ({
+            address,
+            abi: rootGaugeAbi,
+            functionName,
+        }));
+        const results = await this.publicClient.multicall({
+            allowFailure,
+            //@ts-ignore
+            contracts,
+        });
+        return zipObject(rootGaugeAddresses, results);
     }
 }
 
 export const votingListService = new VotingListService();
 
-/**
- * Fetches the relative weight of all gauges using the GaugeController Contract following this steps:
- * 1) onchain call to know the total number of gauges
- * 2) multicall (in chunks of 100) to get the list of gauge addresses
- * 3) multicall (in chunks of 100) to get the gauge_relative_weight for each gauge address
- */
-export async function fetchGaugeRelativeWeights(): Promise<Record<string, string>> {
-    const gaugeControllerAddress = '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD';
-    const gaugeControllerContract = getContractAt(gaugeControllerAddress, gaugeControllerAbi);
-    const totalGauges = Number(formatFixed(await gaugeControllerContract.n_gauges()));
-
-    // There are two versions of gauge_relative_weight (argument override)
-    // so we filter the ABI to only include the one that we are using
-    const abi = gaugeControllerAbi.filter((item) => !(item.name === 'gauge_relative_weight' && item.inputs.length > 1));
-    const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, abi);
-
-    const gaugeIndexes = generateGaugeIndexes(totalGauges);
-    const chunkSize = 100;
-    const indexChunks = chunk(gaugeIndexes, chunkSize);
-
-    let gaugeAddresses: string[] = [];
-    for (const gaugeIndexes of indexChunks) {
-        const chunkAddresses = await executeGaugesCalls(gaugeIndexes);
-        gaugeAddresses = [...gaugeAddresses, ...chunkAddresses];
-    }
-
-    const addressChunks = chunk(gaugeAddresses, chunkSize);
-    let relativeWeights: Record<string, string> = {};
-    for (const addressChunk of addressChunks) {
-        const chunkWeights = await executeRelativeWeightCalls(addressChunk);
-        relativeWeights = { ...relativeWeights, ...chunkWeights };
-    }
-
-    return relativeWeights;
-
-    async function executeGaugesCalls(gaugeIndexes: number[]): Promise<string[]> {
-        gaugeIndexes.map((i) => multicall.call(`${i}`, gaugeControllerAddress, 'gauges', [i]));
-        const result = await multicall.execute();
-        return Object.values(result);
-    }
-
-    async function executeRelativeWeightCalls(gaugeAddresses: string[]): Promise<Record<string, string>> {
-        gaugeAddresses.map((address) =>
-            multicall.call(`${address}`, gaugeControllerAddress, 'gauge_relative_weight', [address]),
-        );
-        const weights = await multicall.execute();
-        const formattedWeights = Object.values(weights).map((weight) => formatUnits(weight, 18));
-        return zipObject(gaugeAddresses, formattedWeights);
-    }
-
-    function generateGaugeIndexes(totalGauges: number) {
-        return [...Array(totalGauges)].map((_, index) => index);
-    }
+function generateGaugeIndexes(totalGauges: number) {
+    return [...Array(totalGauges)].map((_, index) => index);
 }
