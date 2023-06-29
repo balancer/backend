@@ -122,7 +122,7 @@ generates:
         plugins:
             - schema-ast
     modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types.ts:
-        schema: ${USER_SNAPSHOT_SUBGRPAH}
+        schema: ${USER_SNAPSHOT_SUBGRAPH}
         documents: 'modules/subgraphs/user-snapshot-subgraph/user-snapshot-subgraph-queries.graphql'
         plugins:
             - typescript
@@ -134,7 +134,7 @@ generates:
                 Bytes: string
                 BigDecimal: string
     modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-schema.graphql:
-        schema: ${USER_SNAPSHOT_SUBGRPAH}
+        schema: ${USER_SNAPSHOT_SUBGRAPH}
         plugins:
             - schema-ast
     graphql_schema_generated_balancer.ts:

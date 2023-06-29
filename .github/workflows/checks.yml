@@ -5,6 +5,15 @@ on:
 
 jobs:
   Build:
+    env:
+      BALANCER_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx
+      MASTERCHEF_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2
+      BLOCKS_SUBGRAPH: https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks
+      BEETS_BAR_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar
+      USER_SNAPSHOT_SUBGRAPH: https://api.thegraph.com/subgraphs/name/danielmkm/user-balances-fantom
+      GAUGE_SUBGRAPH: https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism
+      VEBALLOCKS_SUBGRAPH: https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges
+      RELIQUARY_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,5 +25,7 @@ jobs:
         run: yarn 
       - name: Generate Schema
         run: yarn generate
+      - name: Prisma Generate
+        run: yarn prisma generate
       - name: Run build
         run: yarn build
