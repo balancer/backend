@@ -59,18 +59,18 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         console.time(jobId);
         console.log(`Start job ${jobId}`);
 
-        sentryCheckInId = Sentry.captureCheckIn({
-            monitorSlug: `${monitorSlug}`,
-            status: 'in_progress',
-        });
+        // sentryCheckInId = Sentry.captureCheckIn({
+        //     monitorSlug: `${monitorSlug}`,
+        //     status: 'in_progress',
+        // });
 
         await fn();
 
-        Sentry.captureCheckIn({
-            checkInId: sentryCheckInId,
-            monitorSlug: `${monitorSlug}`,
-            status: 'ok',
-        });
+        // Sentry.captureCheckIn({
+        //     checkInId: sentryCheckInId,
+        //     monitorSlug: `${monitorSlug}`,
+        //     status: 'ok',
+        // });
 
         if (process.env.AWS_ALERTS === 'true') {
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
@@ -110,13 +110,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
-        console.log(`Schedule job ${job.name}-${chainId}`)
+        console.log(`Schedule job ${job.name}-${chainId}`);
         await scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
-        console.log(`Reschedule job ${job.name}-${chainId}`)
+        console.log(`Reschedule job ${job.name}-${chainId}`);
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
@@ -286,12 +286,12 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'sync-vebal-totalSupply':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalTotalSupply(), 0.01);
             break;
-        case 'sync-vebal-voting-list':
-            //QUESTION: does it make sense to split it by chainId??
-            // TODO: define a proper sampling rate
-            const samplingRate = 0.01;
-            await runIfNotAlreadyRunning(job.name, chainId, () => votingListService.syncVotingList(), samplingRate);
-            break;
+        // case 'sync-vebal-voting-list':
+        //     //QUESTION: does it make sense to split it by chainId??
+        //     // TODO: define a proper sampling rate
+        //     const samplingRate = 0.01;
+        //     await runIfNotAlreadyRunning(job.name, chainId, () => votingListService.syncVotingList(), samplingRate);
+        //     break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);
     }
