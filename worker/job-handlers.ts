@@ -109,13 +109,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
-        console.log(`Schedule job ${job.name}-${chainId}`)
+        console.log(`Schedule job ${job.name}-${chainId}`);
         await scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
-        console.log(`Reschedule job ${job.name}-${chainId}`)
+        console.log(`Reschedule job ${job.name}-${chainId}`);
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
@@ -276,8 +276,8 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'sync-coingecko-coinids':
             await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), 0.01);
             break;
-        case 'update-yield-capture':
-            await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateYieldCaptureForAllPools(), 0.01);
+        case 'update-fee-volume-yield-all-pools':
+            await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateFeeVolumeYieldForAllPools(), 0.01);
             break;
         case 'sync-vebal-balances':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalBalances(), 0.01);

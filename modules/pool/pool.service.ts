@@ -241,6 +241,13 @@ export class PoolService {
         await this.poolUsdDataService.updateLiquidityValuesForPools(minShares, maxShares);
     }
 
+    // It's needed to update the volume and fee for all pools from time to time to "reset" pools that don't have any changes and therefore aren't updated in the syncChangedPools job.
+    // We also update the yield capture in the same job, as these are very related metrics and have a similar timing requirement.
+    public async updateFeeVolumeYieldForAllPools() {
+        await this.updateVolumeAndFeeValuesForPools();
+        await this.updateYieldCaptureForAllPools();
+    }
+
     public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
         await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
     }
