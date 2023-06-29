@@ -14,5 +14,7 @@ jobs:
           node-version: '16.x'
       - name: Install deps
         run: yarn 
+      - name: Generate Schema
+        run: yarn generate
       - name: Run build
         run: yarn build
