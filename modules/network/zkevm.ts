@@ -151,8 +151,8 @@ export const zkevmNetworkConfig: NetworkConfig = {
         new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
-            arbitrumNetworkData.beets.address,
-            arbitrumNetworkData.bal.address,
+            zkevmNetworkData.beets.address,
+            zkevmNetworkData.bal.address,
         ]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
