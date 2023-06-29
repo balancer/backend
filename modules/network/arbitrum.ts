@@ -117,7 +117,6 @@ const arbitrumNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
         averageAPRAcrossLastNHarvests: 2,
-        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
@@ -161,7 +160,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new ReaperCryptAprService(
             arbitrumNetworkData.reaper.linearPoolFactories,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
-            tokenService,
             arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
             arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,
         ),
@@ -272,7 +270,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: 1,
         },
         {
-            name: 'update-yield-capture',
+            name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
         {

@@ -27,7 +27,6 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-ftm-apr.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { ReaperMultistratAprService } from '../pool/lib/apr-data-sources/reaper-multistrat-apr.service';
 import { AnkrStakedEthAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-eth-apr.service';
 
 const fantomNetworkData: NetworkData = {
@@ -152,14 +151,6 @@ const fantomNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
-        multiStratLinearPoolIds: [
-            '0xa0051ab2c3eb7f17758428b02a07cf72eb0ef1a300000000000000000000071c',
-            '0x3c1420df122ac809b9d1ba77906f833764d6450100000000000000000000071b',
-            '0x685056d3a4e574b163d0fa05a78f1b0b3aa04a8000000000000000000000071a',
-            '0x442988091cdc18acb8912cd3fe062cda9233f9dc00000000000000000000071d',
-            '0xc385e76e575b2d71eb877c27dcc1608f77fada99000000000000000000000719',
-            '0x92502cd8e00f5b8e737b2ba203fdd7cd27b23c8f000000000000000000000718',
-        ],
         averageAPRAcrossLastNHarvests: 5,
     },
     beefy: {
@@ -214,11 +205,9 @@ export const fantomNetworkConfig: NetworkConfig = {
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
-            tokenService,
             fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
             fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
         ),
-        new ReaperMultistratAprService(fantomNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
@@ -353,7 +342,7 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(2, 'hours'),
         },
         {
-            name: 'update-yield-capture',
+            name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
         {

@@ -21,7 +21,6 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { BeefyVaultAprService } from '../pool/lib/apr-data-sources/beefy-vault-apr.service copy';
-import { ReaperMultistratAprService } from '../pool/lib/apr-data-sources/reaper-multistrat-apr.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -123,7 +122,6 @@ const optimismNetworkData: NetworkData = {
             '0x19968d4b7126904fd665ed25417599df9604df83',
             '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
         ],
-        multiStratLinearPoolIds: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {
@@ -179,11 +177,9 @@ export const optimismNetworkConfig: NetworkConfig = {
         new ReaperCryptAprService(
             optimismNetworkData.reaper.linearPoolFactories,
             optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
-            tokenService,
             optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
             optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
         ),
-        new ReaperMultistratAprService(optimismNetworkData.reaper.multiStratLinearPoolIds, tokenService),
         new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
@@ -297,7 +293,7 @@ export const optimismNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: 1,
         },
         {
-            name: 'update-yield-capture',
+            name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
         {
