@@ -31,7 +31,8 @@ const zkevmNetworkData: NetworkData = {
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-polygon-zkevm-blocks/version/latest',
-        gauge: '',
+        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-polygon-zk/version/latest',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -64,6 +65,10 @@ const zkevmNetworkData: NetworkData = {
     },
     bal: {
         address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
