@@ -7,7 +7,7 @@ import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
 import { WorkerJob } from '../../worker/job-handlers';
-import { PublicClient } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -84,7 +84,7 @@ export interface NetworkData {
         address: string;
         delegationProxy: string;
     };
-    gaugeControllerAddress?: string;
+    gaugeControllerAddress?: Address;
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];

@@ -1,5 +1,5 @@
 import { mapValues, pickBy, zipObject } from 'lodash';
-import { PublicClient, formatUnits } from 'viem';
+import { Address, PublicClient, formatUnits } from 'viem';
 import { prisma } from '../../prisma/prisma-client';
 
 import { mainnetNetworkConfig } from '../network/mainnet';
@@ -7,9 +7,7 @@ import { gaugeControllerAbi } from './abi/gaugeController.abi';
 import { rootGaugeAbi } from './abi/rootGauge.abi';
 
 const gaugeControllerContract = {
-    // Must be hardcoded to get the type inference
-    // address: mainnetNetworkConfig.data.gaugeControllerAddress!,
-    address: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
+    address: mainnetNetworkConfig.data.gaugeControllerAddress!,
     abi: gaugeControllerAbi,
 } as const;
 
@@ -56,7 +54,7 @@ export class VotingListService {
         return pools;
     }
 
-    async getRootGaugeAddresses(): Promise<string[]> {
+    async getRootGaugeAddresses(): Promise<Address[]> {
         const totalGauges = Number(
             await this.readContract({
                 ...gaugeControllerContract,
@@ -66,7 +64,7 @@ export class VotingListService {
         const gaugeAddresses = (await this.publicClient.multicall({
             allowFailure: false,
             contracts: this.gaugeControllerCallsByIndex(totalGauges, 'gauges'),
-        })) as string[];
+        })) as Address[];
 
         return gaugeAddresses;
     }
@@ -77,7 +75,7 @@ export class VotingListService {
      * It contains ad-hoc helpers to make the code easier in this concrete scenario but in the future we will try to create a more generic
      * multicaller implementation to generalize any multicall flow
      */
-    async generateRootGaugeRows(gaugeAddresses: string[]) {
+    async generateRootGaugeRows(gaugeAddresses: Address[]) {
         const totalGaugesTypes = Number(
             await this.readContract({
                 ...gaugeControllerContract,
@@ -114,11 +112,11 @@ export class VotingListService {
         const relativeWeightCaps = mapValues(relativeWeightCapsWithFailures, (r) => r.result);
 
         // Ethereum root gauges do not have getRecipient
-        const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum'));
+        const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum')) as Address[];
         const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient')) as Record<string, string>;
 
         type RootGaugeRow = {
-            gaugeAddress: string;
+            gaugeAddress: Address;
             network: string;
             isKilled: boolean;
             relativeWeight: number;
@@ -150,7 +148,7 @@ export class VotingListService {
         }));
     }
 
-    gaugeControllerCallsByAddress(gaugeAddresses: string[], functionName: string) {
+    gaugeControllerCallsByAddress(gaugeAddresses: Address[], functionName: string) {
         return gaugeAddresses.map((address) => ({
             ...gaugeControllerContract,
             functionName,
@@ -158,7 +156,7 @@ export class VotingListService {
         }));
     }
 
-    async multicallByAddresses(gaugeAddresses: string[], functionName: string): Promise<Record<string, unknown>> {
+    async multicallByAddresses(gaugeAddresses: Address[], functionName: string): Promise<Record<Address, unknown>> {
         const results = await this.publicClient.multicall({
             allowFailure: false,
             contracts: this.gaugeControllerCallsByAddress(gaugeAddresses, functionName),
@@ -166,7 +164,7 @@ export class VotingListService {
         return zipObject(gaugeAddresses, results);
     }
 
-    async multicallRootGauges(rootGaugeAddresses: string[], functionName: string, allowFailure = false) {
+    async multicallRootGauges(rootGaugeAddresses: Address[], functionName: string, allowFailure = false) {
         const contracts = rootGaugeAddresses.map((address) => ({
             address,
             abi: rootGaugeAbi,
@@ -174,7 +172,6 @@ export class VotingListService {
         }));
         const results = await this.publicClient.multicall({
             allowFailure,
-            //@ts-ignore
             contracts,
         });
         return zipObject(rootGaugeAddresses, results);
