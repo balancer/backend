@@ -72,7 +72,7 @@ const mainnetNetworkData: NetworkData = {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x0000000000000000000000000000000000000000',
     },
-    gaugeControllerAddress: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD' as const,
+    gaugeControllerAddress: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: [

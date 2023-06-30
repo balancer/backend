@@ -61,12 +61,10 @@ export class VotingListService {
                 functionName: 'n_gauges',
             }),
         );
-        const gaugeAddresses = (await this.publicClient.multicall({
+        return this.publicClient.multicall({
             allowFailure: false,
             contracts: this.gaugeControllerCallsByIndex(totalGauges, 'gauges'),
-        })) as Address[];
-
-        return gaugeAddresses;
+        });
     }
 
     /**
@@ -83,32 +81,22 @@ export class VotingListService {
             }),
         );
 
-        const typeNames = (await this.publicClient.multicall({
+        const typeNames = await this.publicClient.multicall({
             allowFailure: false,
             contracts: this.gaugeControllerCallsByIndex(totalGaugesTypes, 'gauge_type_names'),
-        })) as string[];
+        });
 
-        const relativeWeights = (await this.multicallByAddresses(gaugeAddresses, 'gauge_relative_weight')) as Record<
-            string,
-            bigint
-        >;
-        const gaugeTypeIndexes = (await this.multicallByAddresses(gaugeAddresses, 'gauge_types')) as Record<
-            string,
-            bigint
-        >;
+        const relativeWeights = await this.multicallGaugeController(gaugeAddresses, 'gauge_relative_weight');
+
+        const gaugeTypeIndexes = await this.multicallGaugeController(gaugeAddresses, 'gauge_types');
         const gaugeTypes = mapValues(gaugeTypeIndexes, (type) => typeNames[Number(type)]);
 
-        const isKilled = (await this.multicallRootGauges(gaugeAddresses, 'is_killed')) as Record<string, boolean>;
+        const isKilled = await this.multicallRootGauges(gaugeAddresses, 'is_killed');
 
-        type ResultWithAllowedFailures = {
-            result?: bigint;
-        };
-        const allowFailure = true;
-        const relativeWeightCapsWithFailures = (await this.multicallRootGauges(
+        const relativeWeightCapsWithFailures = await this.multicallRootGaugesAllowingFailures(
             gaugeAddresses,
             'getRelativeWeightCap',
-            allowFailure,
-        )) as Record<string, ResultWithAllowedFailures>;
+        );
         const relativeWeightCaps = mapValues(relativeWeightCapsWithFailures, (r) => r.result);
 
         // Ethereum root gauges do not have getRecipient
@@ -140,41 +128,75 @@ export class VotingListService {
         return rows;
     }
 
-    gaugeControllerCallsByIndex(totalCalls: number, functionName: string) {
-        return generateGaugeIndexes(totalCalls).map((index) => ({
-            ...gaugeControllerContract,
-            functionName,
-            args: [index],
-        }));
+    gaugeControllerCallsByIndex<TFunctionName extends string>(totalCalls: number, functionName: TFunctionName) {
+        return generateGaugeIndexes(totalCalls).map(
+            (index) =>
+                ({
+                    ...gaugeControllerContract,
+                    functionName,
+                    args: [BigInt(index)],
+                } as const),
+        );
     }
 
-    gaugeControllerCallsByAddress(gaugeAddresses: Address[], functionName: string) {
-        return gaugeAddresses.map((address) => ({
-            ...gaugeControllerContract,
-            functionName,
-            args: [address],
-        }));
+    gaugeControllerCallsByAddress<TFunctionName extends string>(
+        gaugeAddresses: Address[],
+        functionName: TFunctionName,
+    ) {
+        return gaugeAddresses.map(
+            (address) =>
+                ({
+                    ...gaugeControllerContract,
+                    functionName,
+                    args: [address],
+                } as const),
+        );
     }
 
-    async multicallByAddresses(gaugeAddresses: Address[], functionName: string): Promise<Record<Address, unknown>> {
+    async multicallGaugeController<TFunctionName extends string>(
+        gaugeAddresses: Address[],
+        functionName: TFunctionName,
+    ) {
         const results = await this.publicClient.multicall({
             allowFailure: false,
+            // @ts-ignore
             contracts: this.gaugeControllerCallsByAddress(gaugeAddresses, functionName),
         });
-        return zipObject(gaugeAddresses, results);
+        return zipObject(gaugeAddresses, results) as Record<Address, typeof results[number]>;
     }
 
-    async multicallRootGauges(rootGaugeAddresses: Address[], functionName: string, allowFailure = false) {
+    async multicallRootGauges<TFunctionName extends string>(
+        rootGaugeAddresses: Address[],
+        functionName: TFunctionName,
+    ) {
         const contracts = rootGaugeAddresses.map((address) => ({
             address,
             abi: rootGaugeAbi,
             functionName,
         }));
         const results = await this.publicClient.multicall({
-            allowFailure,
+            allowFailure: false,
+            // @ts-ignore
             contracts,
         });
-        return zipObject(rootGaugeAddresses, results);
+        return zipObject(rootGaugeAddresses, results) as Record<Address, typeof results[number]>;
+    }
+
+    async multicallRootGaugesAllowingFailures<TFunctionName extends string>(
+        rootGaugeAddresses: Address[],
+        functionName: TFunctionName,
+    ) {
+        const contracts = rootGaugeAddresses.map((address) => ({
+            address,
+            abi: rootGaugeAbi,
+            functionName,
+        }));
+        const results = await this.publicClient.multicall({
+            allowFailure: true,
+            // @ts-ignore
+            contracts,
+        });
+        return zipObject(rootGaugeAddresses, results) as Record<Address, typeof results[number]>;
     }
 }
 
