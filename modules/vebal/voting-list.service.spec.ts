@@ -1,6 +1,7 @@
 import { Address } from 'viem';
 import { createHttpClient } from '../network/viem/clients';
 import { VotingListService } from './voting-list.service';
+import { Chain } from '@prisma/client';
 
 // anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17569375
 
@@ -83,7 +84,7 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
     const rootGauge = {
         gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7' as Address,
         isKilled: false,
-        network: 'MAINNET',
+        network: 'MAINNET' as Chain,
         recipient: undefined,
         relativeWeight: 71123066693252456,
         relativeWeightCap: undefined,

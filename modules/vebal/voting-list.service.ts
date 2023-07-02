@@ -1,7 +1,7 @@
 import { mapValues, pickBy, zipObject } from 'lodash';
 import { Address, PublicClient, formatUnits } from 'viem';
-import { prisma } from '../../prisma/prisma-client';
-import { Chain } from '@prisma/client';
+import { prisma as prismaClient } from '../../prisma/prisma-client';
+import { Chain, PrismaClient } from '@prisma/client';
 
 import { mainnetNetworkConfig } from '../network/mainnet';
 import { gaugeControllerAbi } from './abi/gaugeController.abi';
@@ -31,6 +31,7 @@ export function toPrismaNetwork(onchainNetwork: string): Chain {
 export class VotingListService {
     constructor(
         private publicClient: PublicClient = mainnetNetworkConfig.publicClient!,
+        private prisma: PrismaClient = prismaClient,
         private readContract = publicClient.readContract,
     ) {}
     /**
@@ -38,7 +39,7 @@ export class VotingListService {
      * Ideally, we don't want to denormalize but how can we join validGauges with getPoolsForVotingList in an efficient way?
      */
     public async getPoolsForVotingList(poolIds: string[]): Promise<any> {
-        let pools = await prisma.prismaPool.findMany({
+        let pools = await this.prisma.prismaPool.findMany({
             where: { id: { in: poolIds } },
             select: {
                 id: true,
@@ -78,12 +79,6 @@ export class VotingListService {
         rootGauge.id = await this.findStakingId(rootGauge);
         return rootGauges;
         // });
-
-        /* We keep:
-        - Alive gauges (!killed)
-        - Killed gauges with current relativeWeight (with current votes) so that the user can reallocate the votes in the UI
-        rootGauges.filter(gauge=> !gauge.isKilled || (gauge.isKilled && gauge.relativeWeight > 0)
-        */
     }
 
     // TODO: Explain root gauge VS child gauge in a proper way
@@ -98,7 +93,7 @@ export class VotingListService {
 
     //TODO: Move to repository Staking Gauge Repository?
     async findStakingGaugeId(chain: Chain, gaugeAddress: string) {
-        let gauge = await prisma.prismaPoolStakingGauge.findFirstOrThrow({
+        let gauge = await this.prisma.prismaPoolStakingGauge.findFirstOrThrow({
             where: {
                 chain: { equals: chain },
                 gaugeAddress: { equals: gaugeAddress },
