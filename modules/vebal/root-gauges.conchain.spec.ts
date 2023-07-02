@@ -6,19 +6,22 @@ import { Chain } from '@prisma/client';
 // anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17569375
 
 // In CI we will use http://127.0.0.1:8555 to use the anvil fork;
-const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';
+// const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';
+const httpRpc = 'http://127.0.0.1:8555';
 console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
 const testHttpClient = createHttpClient(httpRpc);
 
 it('maps onchain network format into prisma chain format', async () => {
     expect(toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
     expect(toPrismaNetwork('Optimism')).toBe(Chain.OPTIMISM);
+    expect(toPrismaNetwork('veBAL')).toBe(Chain.MAINNET);
     expect(() => toPrismaNetwork('Unknown')).toThrowError('Network UNKNOWN is not supported');
 });
 
 it('fetches list of root gauge addresses', async () => {
     const service = new OnChainRootGauges(testHttpClient);
     const addresses = await service.getRootGaugeAddresses();
+    console.log('CO', addresses[1]);
     expect(addresses.length).toBe(327);
 }, 10_000);
 
@@ -84,3 +87,26 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
       ]
     `);
 }, 10_000);
+
+it('Excludes Liquidity Mining Committee gauge', async () => {
+    const liquidityMiningAddress = '0x7AA5475b2eA29a9F4a1B9Cf1cB72512D1B4Ab75e';
+    const service = new OnChainRootGauges(testHttpClient);
+    const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
+    expect(rows).toEqual([]);
+});
+
+it('fetches veBAL gauge as MAINNET', async () => {
+    const liquidityMiningAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
+    const service = new OnChainRootGauges(testHttpClient);
+    const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
+    expect(rows).toEqual([
+        {
+            gaugeAddress: '0xe867ad0a48e8f815dc0cda2cdb275e0f163a480b',
+            isKilled: true,
+            network: 'MAINNET',
+            recipient: '0x3c1d00181ff86fbac0c3c52991fbfd11f6491d70',
+            relativeWeight: 0,
+            relativeWeightCap: undefined,
+        },
+    ]);
+});

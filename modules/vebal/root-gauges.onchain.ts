@@ -80,6 +80,7 @@ export class OnChainRootGauges {
         let rootGauges: RootGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
             const relativeWeight = relativeWeightCaps[gaugeAddress];
+            if (gaugeTypes[gaugeAddress] === 'Liquidity Mining Committee') return;
             rootGauges.push({
                 gaugeAddress: gaugeAddress.toLowerCase() as Address, // Should we lowerCase here? (database stores lowercase in other tables so I guess yes)
                 network: toPrismaNetwork(gaugeTypes[gaugeAddress]),
@@ -172,6 +173,7 @@ export class OnChainRootGauges {
 export function toPrismaNetwork(onchainNetwork: string): Chain {
     const network = onchainNetwork.toUpperCase();
     if (network === 'ETHEREUM') return Chain.MAINNET;
+    if (network === 'VEBAL') return Chain.MAINNET;
     if (!Object.keys(Chain).includes(network)) throw Error(`Network ${network} is not supported`);
     return network as Chain;
 }
