@@ -4,12 +4,6 @@ import { prisma as prismaClient } from '../../prisma/prisma-client';
 
 import { RootGauge } from './root-gauges.onchain';
 
-export function toPrismaNetwork(onchainNetwork: string): Chain {
-    const network = onchainNetwork.toUpperCase();
-    if (network === 'ETHEREUM') return Chain.MAINNET;
-    if (!Object.keys(Chain).includes(network)) throw Error(`Network ${network} is not supported`);
-    return network as Chain;
-}
 export class VotingListService {
     constructor(private prisma: PrismaClient = prismaClient) {}
     /**
