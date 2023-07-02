@@ -4,9 +4,8 @@ import { VotingListService } from './voting-list.service';
 import { defaultStakingGaugeId, prismaMock } from './prismaPoolStakingGauge.mock';
 import { RootGauge } from './root-gauges.onchain';
 
-it('saves onchain gauges in database', async () => {
-    const service = new VotingListService(prismaMock);
-    const rootGauge = {
+export function aRootGauge(...options: Partial<RootGauge>[]): RootGauge {
+    const defaultRootGauge: RootGauge = {
         gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7' as Address,
         isKilled: false,
         network: 'MAINNET' as Chain,
@@ -14,31 +13,25 @@ it('saves onchain gauges in database', async () => {
         relativeWeight: 71123066693252456,
         relativeWeightCap: undefined,
     };
+    return Object.assign({}, defaultRootGauge, ...options);
+}
 
+it.only('saves onchain gauges in database', async () => {
+    const service = new VotingListService(prismaMock);
+
+    const rootGauge = aRootGauge({ network: Chain.OPTIMISM });
     const rootGauges = await service.saveRootGauges([rootGauge]);
 
-    expect(rootGauges).toEqual([
-        {
-            gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7',
-            id: defaultStakingGaugeId,
-            isKilled: false,
-            network: 'MAINNET',
-            recipient: undefined,
-            relativeWeight: 71123066693252456,
-            relativeWeightCap: undefined,
-        },
-    ]);
+    expect(rootGauges[0]).toMatchObject(rootGauge);
+    expect(rootGauges[0].id).toBe(defaultStakingGaugeId);
 });
 
 it('throws when root gauge is not found is staking gauges table', async () => {
     prismaMock.prismaPoolStakingGauge.findFirstOrThrow.mockRejectedValue('Gauge not found');
 
     const service = new VotingListService(prismaMock);
-    const rootGauge = {
-        network: 'FOO' as Chain,
-    } as unknown as RootGauge;
 
-    const saveRootGauges = () => service.saveRootGauges([rootGauge]);
+    const saveRootGauges = () => service.saveRootGauges([aRootGauge()]);
 
     expect(saveRootGauges).rejects.toThrowError('Gauge not found');
 });

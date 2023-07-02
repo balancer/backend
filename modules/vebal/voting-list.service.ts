@@ -45,12 +45,13 @@ export class VotingListService {
     }
 
     async saveRootGauges(rootGauges: RootGauge[]) {
-        // console.log(rootGauges);
-        const rootGauge = rootGauges[0];
-        // rootGauges.forEach(async (rootGauge) => {
-        rootGauge.id = await this.findStakingId(rootGauge);
-        return rootGauges;
-        // });
+        const rootGaugesWithStakingId = Promise.all(
+            rootGauges.map(async (rootGauge) => {
+                rootGauge.id = await this.findStakingId(rootGauge);
+                return rootGauge;
+            }),
+        );
+        return rootGaugesWithStakingId;
     }
 
     // TODO: Explain root gauge VS child gauge in a proper way
