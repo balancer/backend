@@ -1,6 +1,7 @@
 import { mapValues, pickBy, zipObject } from 'lodash';
 import { Address, PublicClient, formatUnits } from 'viem';
 import { prisma } from '../../prisma/prisma-client';
+import { Chain } from '@prisma/client';
 
 import { mainnetNetworkConfig } from '../network/mainnet';
 import { gaugeControllerAbi } from './abi/gaugeController.abi';
@@ -11,6 +12,22 @@ const gaugeControllerContract = {
     abi: gaugeControllerAbi,
 } as const;
 
+type RootGauge = {
+    id?: Address;
+    gaugeAddress: Address;
+    network: Chain;
+    isKilled: boolean;
+    relativeWeight: number;
+    relativeWeightCap?: string;
+    recipient?: string;
+};
+
+export function toPrismaNetwork(onchainNetwork: string): Chain {
+    const network = onchainNetwork.toUpperCase();
+    if (network === 'ETHEREUM') return Chain.MAINNET;
+    if (!Object.keys(Chain).includes(network)) throw Error(`Network ${network} is not supported`);
+    return network as Chain;
+}
 export class VotingListService {
     constructor(
         private publicClient: PublicClient = mainnetNetworkConfig.publicClient!,
@@ -54,6 +71,45 @@ export class VotingListService {
         return pools;
     }
 
+    async saveRootGauges(rootGauges: RootGauge[]) {
+        // console.log(rootGauges);
+        const rootGauge = rootGauges[0];
+        // rootGauges.forEach(async (rootGauge) => {
+        rootGauge.id = await this.findStakingId(rootGauge);
+        return rootGauges;
+        // });
+
+        /* We keep:
+        - Alive gauges (!killed)
+        - Killed gauges with current relativeWeight (with current votes) so that the user can reallocate the votes in the UI
+        rootGauges.filter(gauge=> !gauge.isKilled || (gauge.isKilled && gauge.relativeWeight > 0)
+        */
+    }
+
+    // TODO: Explain root gauge VS child gauge in a proper way
+    findStakingId(rootGauge: RootGauge): Promise<Address> {
+        const chain = rootGauge.network as Chain;
+        if (chain !== 'MAINNET') {
+            const recipient = rootGauge.recipient?.toLowerCase();
+            return this.findStakingGaugeId(chain, recipient!);
+        }
+        return this.findStakingGaugeId(chain, rootGauge.gaugeAddress);
+    }
+
+    //TODO: Move to repository Staking Gauge Repository?
+    async findStakingGaugeId(chain: Chain, gaugeAddress: string) {
+        let gauge = await prisma.prismaPoolStakingGauge.findFirstOrThrow({
+            where: {
+                chain: { equals: chain },
+                gaugeAddress: { equals: gaugeAddress },
+            },
+            select: {
+                id: true,
+            },
+        });
+        return gauge.id as Address;
+    }
+
     async getRootGaugeAddresses(): Promise<Address[]> {
         const totalGauges = Number(
             await this.readContract({
@@ -73,7 +129,7 @@ export class VotingListService {
      * It contains ad-hoc helpers to make the code easier in this concrete scenario but in the future we will try to create a more generic
      * multicaller implementation to generalize any multicall flow
      */
-    async generateRootGaugeRows(gaugeAddresses: Address[]) {
+    async fetchOnchainRootGauges(gaugeAddresses: Address[]): Promise<RootGauge[]> {
         const totalGaugesTypes = Number(
             await this.readContract({
                 ...gaugeControllerContract,
@@ -103,29 +159,21 @@ export class VotingListService {
         const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum')) as Address[];
         const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient')) as Record<string, string>;
 
-        type RootGaugeRow = {
-            gaugeAddress: Address;
-            network: string;
-            isKilled: boolean;
-            relativeWeight: number;
-            relativeWeightCap?: string;
-            recipient?: string;
-        };
-        let rows: RootGaugeRow[] = [];
+        let rootGauges: RootGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
             const relativeWeight = relativeWeightCaps[gaugeAddress];
-            rows.push({
-                gaugeAddress,
-                network: gaugeTypes[gaugeAddress],
+            rootGauges.push({
+                gaugeAddress: gaugeAddress.toLowerCase() as Address, // Should we lowerCase here? (database stores lowercase in other tables so I guess yes)
+                network: toPrismaNetwork(gaugeTypes[gaugeAddress]),
                 isKilled: isKilled[gaugeAddress],
                 relativeWeight: Number(relativeWeights[gaugeAddress]),
                 relativeWeightCap: relativeWeight ? formatUnits(relativeWeight, 18) : undefined,
-                recipient: recipients[gaugeAddress],
+                recipient: recipients[gaugeAddress]?.toLowerCase(),
             });
         });
 
-        console.log('ROWS: ', rows);
-        return rows;
+        console.log('ROWS: ', rootGauges);
+        return rootGauges;
     }
 
     gaugeControllerCallsByIndex<TFunctionName extends string>(totalCalls: number, functionName: TFunctionName) {
@@ -159,6 +207,7 @@ export class VotingListService {
     ) {
         const results = await this.publicClient.multicall({
             allowFailure: false,
+            // See https://github.com/wagmi-dev/viem/discussions/821
             // @ts-ignore
             contracts: this.gaugeControllerCallsByAddress(gaugeAddresses, functionName),
         });
@@ -176,6 +225,7 @@ export class VotingListService {
         }));
         const results = await this.publicClient.multicall({
             allowFailure: false,
+            // See https://github.com/wagmi-dev/viem/discussions/821
             // @ts-ignore
             contracts,
         });
@@ -193,6 +243,7 @@ export class VotingListService {
         }));
         const results = await this.publicClient.multicall({
             allowFailure: true,
+            // See https://github.com/wagmi-dev/viem/discussions/821
             // @ts-ignore
             contracts,
         });
