@@ -5,6 +5,7 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         coverage: { reporter: ['text', 'lcov'] }, // lcov reporter is used by IDE coverage extensions
-        include: ['./**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+        // We just run vebal module tests until we define a global testing strategy
+        include: ['./modules/vebal/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     },
 });
