@@ -73,11 +73,11 @@ type GqlLgePriceData {
 extend type Query {
     lges: [GqlLge!]!
     lge(id: ID!): GqlLge!
-    getLgeChartData(id: ID!, steps: Int!): [GqlLgePriceData]!
+    getLgeChartData(id: ID!): [GqlLgePriceData]!
 }
 
 # since the lge is now in the db, think about how to update lge details (website, banner etc)
 extend type Mutation {
-    lgeCreate(lge: GqlLgeCreateInput!, signature: String!): GqlLge!
+    lgeCreate(lge: GqlLgeCreateInput!): GqlLge!
     #LgeUpdate(Lge: GqlLgeUpdateInput!, signature: String!): GqlLge!
 }
