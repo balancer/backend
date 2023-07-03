@@ -74,8 +74,9 @@ export class OnChainRootGauges {
         const relativeWeightCaps = mapValues(relativeWeightCapsWithFailures, (r) => r.result);
 
         // Ethereum root gauges do not have getRecipient
-        const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum')) as Address[];
-        const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient')) as Record<string, string>;
+        // const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum')) as Address[];
+        // const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient'));
+        const recipients = await this.multicallRootGauges(gaugeAddresses, 'getRecipient');
 
         let rootGauges: RootGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
