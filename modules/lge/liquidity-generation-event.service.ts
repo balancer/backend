@@ -187,8 +187,6 @@ export class LiquidityGenerationEventService {
         return [...realPriceData, ...predictedPriceData];
     }
 
-    // TODO: do we need to consider token decimals when calculating and predicting prices from weights?
-
     /*
     For each running LGE, this method persists the real price for the launch token. It uses two methods for this:
     1) If there were no swaps since it was called previously, it will persist one real price using the previous token balances (since they didn't change), 
@@ -253,11 +251,7 @@ export class LiquidityGenerationEventService {
             latestPriceData.push((await prisma.prismaLgePriceData.findFirst())!);
         }
         const lastSyncedBlockNumber = latestPriceData[0].blockNumber;
-        let latestBlockNumber = await networkContext.config.provider.getBlockNumber();
-        latestBlockNumber =
-            latestBlockNumber - lastSyncedBlockNumber > networkContext.data.rpcMaxBlockRange
-                ? lastSyncedBlockNumber + networkContext.data.rpcMaxBlockRange
-                : latestBlockNumber;
+        const latestBlockNumber = await networkContext.config.provider.getBlockNumber();
 
         const vaultContract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
         const filter = vaultContract.filters.Swap(lge.id);
