@@ -35,13 +35,14 @@ CREATE TABLE "PrismaLge" (
 CREATE TABLE "PrismaLgePriceData" (
     "id" TEXT NOT NULL,
     "chain" "Chain" NOT NULL,
+    "swapTransaction" TEXT NOT NULL,
     "timestamp" INTEGER NOT NULL,
     "blockNumber" INTEGER NOT NULL,
     "launchTokenPrice" DOUBLE PRECISION NOT NULL,
     "tokenBalance" TEXT NOT NULL,
     "collateralBalance" TEXT NOT NULL,
 
-    CONSTRAINT "PrismaLgePriceData_pkey" PRIMARY KEY ("id","chain")
+    CONSTRAINT "PrismaLgePriceData_pkey" PRIMARY KEY ("id","chain","swapTransaction")
 );
 
 -- CreateIndex

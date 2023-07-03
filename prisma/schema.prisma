@@ -82,8 +82,8 @@ model PrismaLge {
 
 model PrismaLgePriceData {
     @@id([id, chain, swapTransaction])
-    id                      String
-    chain                   Chain               
+    id                  String
+    chain               Chain               
 
     lge                 PrismaLge           @relation(fields:[id,chain], references: [id,chain])
 

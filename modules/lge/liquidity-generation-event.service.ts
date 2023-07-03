@@ -11,7 +11,6 @@ import ERC20Abi from '../web3/abi/ERC20.json';
 import { networkContext } from '../network/network-context.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { formatFixed } from '@ethersproject/bignumber';
-import { monitorEventLoopDelay } from 'perf_hooks';
 
 export type LiquidityGenerationCreateInput = {
     id: string;
@@ -170,7 +169,7 @@ export class LiquidityGenerationEventService {
         });
     }
 
-    public async getLgeChartData(id: string, steps: number): Promise<PriceData[]> {
+    public async getLgeChartData(id: string): Promise<PriceData[]> {
         const lge = await this.getLiquidityGenerationEvent(id);
         const now = moment().unix();
         const hasEnded = now > lge.endTimestamp;
@@ -253,15 +252,22 @@ export class LiquidityGenerationEventService {
         const lastSyncedBlockNumber = latestPriceData[0].blockNumber;
         const latestBlockNumber = await networkContext.config.provider.getBlockNumber();
 
+        const endBlock =
+            latestBlockNumber > lastSyncedBlockNumber + networkContext.data.rpcMaxBlockRange
+                ? lastSyncedBlockNumber + networkContext.data.rpcMaxBlockRange
+                : latestBlockNumber;
+
         const vaultContract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
         const filter = vaultContract.filters.Swap(lge.id);
 
-        if (lastSyncedBlockNumber === latestBlockNumber) {
+        if (lastSyncedBlockNumber === endBlock) {
             // no new blocks have been minted since last run
             return;
         }
 
-        const swapEvents = await vaultContract.queryFilter(filter, lastSyncedBlockNumber + 1, latestBlockNumber);
+        console.log(`From: ${lastSyncedBlockNumber}, to: ${endBlock}`);
+
+        const swapEvents = await vaultContract.queryFilter(filter, lastSyncedBlockNumber + 1, endBlock);
 
         let previousTokenBalance = latestPriceData[0].tokenBalance;
         let previousCollateralBalance = latestPriceData[0].collateralBalance;
@@ -272,7 +278,7 @@ export class LiquidityGenerationEventService {
         if (swapEvents.length === 0) {
             // create a manual price entry if there where no swaps so we have a data point based on previous price data balances
             const { blocks } = await blocksSubgraphService.getBlocks({
-                where: { number: `${latestBlockNumber}` },
+                where: { number: `${endBlock}` },
             });
             let latestSyncedBlockTimestamp = moment().utc().unix();
             if (blocks[0]) {
@@ -305,7 +311,7 @@ export class LiquidityGenerationEventService {
                     chain: networkContext.chain,
                     timestamp: latestSyncedBlockTimestamp,
                     swapTransaction: `${latestSyncedBlockTimestamp}`,
-                    blockNumber: latestBlockNumber,
+                    blockNumber: endBlock,
                     launchTokenPrice: tokenPrice,
                     tokenBalance: previousTokenBalance,
                     collateralBalance: previousCollateralBalance,
@@ -415,9 +421,9 @@ export class LiquidityGenerationEventService {
             price: this.calculateLbpTokenPrice(
                 tokenWeight,
                 collateralWeight,
-                tokenBalance,
+                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
                 lge.tokenDecimals,
-                collateralBalance,
+                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             ),
@@ -441,9 +447,9 @@ export class LiquidityGenerationEventService {
             const tokenPrice = this.calculateLbpTokenPrice(
                 tokenWeight,
                 collateralWeight,
-                tokenBalance,
+                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
                 lge.tokenDecimals,
-                collateralBalance,
+                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             );
@@ -459,9 +465,9 @@ export class LiquidityGenerationEventService {
             price: this.calculateLbpTokenPrice(
                 lge.tokenEndWeight,
                 lge.collateralEndWeight,
-                tokenBalance,
+                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
                 lge.tokenDecimals,
-                collateralBalance,
+                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             ),
