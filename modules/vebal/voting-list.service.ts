@@ -16,7 +16,7 @@ export class VotingListService {
             select: {
                 id: true,
                 address: true,
-                type: true, // TODO: Types are different than the original subgraph ones cause they are changed in mapSubgraphPoolTypeToPoolType (do we add a new column to prismaPool to store the original type?)
+                type: true,
                 symbol: true,
                 tokens: {
                     select: {
@@ -47,10 +47,11 @@ export class VotingListService {
     async saveRootGauges(rootGauges: RootGauge[]) {
         const rootGaugesWithStakingId = Promise.all(
             rootGauges.map(async (rootGauge) => {
-                rootGauge.id = await this.findStakingId(rootGauge);
+                rootGauge.stakingId = await this.findStakingId(rootGauge);
                 return rootGauge;
             }),
         );
+
         return rootGaugesWithStakingId;
     }
 
@@ -75,6 +76,20 @@ export class VotingListService {
             },
         });
         return gauge.id as Address;
+    }
+
+    async saveRootGauge(rootGauge: RootGauge) {
+        this.prisma.prismaRootStakingGauge.create({
+            data: {
+                id: rootGauge.gaugeAddress.toString(),
+                chain: rootGauge.network,
+                gaugeAddress: rootGauge.gaugeAddress.toString(),
+                relativeWeight: rootGauge.relativeWeight.toString(),
+                relativeWeightCap: rootGauge.relativeWeightCap,
+                stakingId: rootGauge.stakingId!,
+                status: rootGauge.isKilled ? 'ACTIVE' : 'KILLED',
+            },
+        });
     }
 }
 

@@ -12,13 +12,13 @@ const gaugeControllerContract = {
 } as const;
 
 export type RootGauge = {
-    id?: Address;
     gaugeAddress: Address;
     network: Chain;
     isKilled: boolean;
     relativeWeight: number;
     relativeWeightCap?: string;
     recipient?: string;
+    stakingId?: Address;
 };
 
 export class OnChainRootGauges {

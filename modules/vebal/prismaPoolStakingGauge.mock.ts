@@ -10,7 +10,6 @@ export function aPrismaPoolStakingGauge(...options: Partial<PrismaPoolStakingGau
         gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7',
         chain: 'MAINNET' as Chain,
         status: 'ACTIVE',
-        relativeWeightCap: null,
         version: 1,
     };
     return Object.assign({}, defaultGauge, ...options);

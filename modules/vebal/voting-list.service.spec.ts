@@ -16,14 +16,14 @@ export function aRootGauge(...options: Partial<RootGauge>[]): RootGauge {
     return Object.assign({}, defaultRootGauge, ...options);
 }
 
-it.only('saves onchain gauges in database', async () => {
+it('saves onchain gauges in database', async () => {
     const service = new VotingListService(prismaMock);
 
     const rootGauge = aRootGauge({ network: Chain.OPTIMISM });
     const rootGauges = await service.saveRootGauges([rootGauge]);
 
     expect(rootGauges[0]).toMatchObject(rootGauge);
-    expect(rootGauges[0].id).toBe(defaultStakingGaugeId);
+    expect(rootGauges[0].stakingId).toBe(defaultStakingGaugeId);
 });
 
 it('throws when root gauge is not found is staking gauges table', async () => {
