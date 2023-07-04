@@ -1,3 +1,15 @@
+extend type Query {
+    lges: [GqlLge!]!
+    lge(id: ID!): GqlLge!
+    lgeGetChartData(id: ID!): [GqlLgePriceData]!
+}
+
+extend type Mutation {
+    lgeCreate(lge: GqlLgeCreateInput!): GqlLge!
+    # todo: remove after successful migration
+    lgeSyncFromSanity: String!
+}
+
 input GqlLgeCreateInput {
     id: ID!
     address: String!
@@ -70,16 +82,4 @@ type GqlLgePriceData {
     timestamp: Int!
     price: Float!
     type: String!
-}
-
-extend type Query {
-    lges: [GqlLge!]!
-    lge(id: ID!): GqlLge!
-    getLgeChartData(id: ID!): [GqlLgePriceData]!
-}
-
-extend type Mutation {
-    lgeCreate(lge: GqlLgeCreateInput!): GqlLge!
-    # todo: remove after successful migration
-    lgeSyncFromSanity: String!
 }
