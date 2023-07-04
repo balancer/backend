@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { mapValues, pickBy, zipObject } from 'lodash';
+import { mapValues, zipObject } from 'lodash';
 import { Address, PublicClient, formatUnits } from 'viem';
 
 import { mainnetNetworkConfig } from '../network/mainnet';
@@ -19,6 +19,7 @@ export type RootGauge = {
     relativeWeightCap?: string;
     recipient?: string;
     stakingId?: Address;
+    isInSubgraph: boolean;
 };
 
 export class OnChainRootGauges {
@@ -76,7 +77,7 @@ export class OnChainRootGauges {
         // Ethereum root gauges do not have getRecipient
         // const l2Addresses = Object.keys(pickBy(gaugeTypes, (type) => type !== 'Ethereum')) as Address[];
         // const recipients = (await this.multicallRootGauges(l2Addresses, 'getRecipient'));
-        const recipients = await this.multicallRootGauges(gaugeAddresses, 'getRecipient');
+        // const recipients = await this.multicallRootGauges(gaugeAddresses, 'getRecipient');
 
         let rootGauges: RootGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
@@ -88,11 +89,12 @@ export class OnChainRootGauges {
                 isKilled: isKilled[gaugeAddress],
                 relativeWeight: Number(relativeWeights[gaugeAddress]),
                 relativeWeightCap: relativeWeight ? formatUnits(relativeWeight, 18) : undefined,
-                recipient: recipients[gaugeAddress]?.toLowerCase(),
+                isInSubgraph: false,
+                // recipient: recipients[gaugeAddress]?.toLowerCase(),
             });
         });
 
-        console.log('ROWS: ', rootGauges);
+        // console.log('ROWS: ', rootGauges);
         return rootGauges;
     }
 
@@ -181,4 +183,44 @@ export function toPrismaNetwork(onchainNetwork: string): Chain {
 
 function generateGaugeIndexes(totalGauges: number) {
     return [...Array(totalGauges)].map((_, index) => index);
+}
+
+export const hardcodedGauges = [
+    '0x5b79494824bc256cd663648ee1aad251b32693a9', // veUSH
+    '0xb78543e00712c3abba10d0852f6e38fde2aaba4d', // veBAL
+    '0x56124eb16441a1ef12a4ccaeabdd3421281b795a', // veLIT
+    // '0xe867ad0a48e8f815dc0cda2cdb275e0f163a480b', // MAINNET killed without votes * Hardcoded in pinned data in frontend-v2
+    // '0x9fb8312cedfb9b35364ff06311b429a2f4cdf422', // POLYGON killed without votes
+    // '0x3f829a8303455cb36b7bcf3d1bdc18d5f6946aea', // ARBITRUM killed without votes
+
+    // TODO: review why these gauges are not saved
+    // '0xe42382d005a620faaa1b82543c9c04ed79db03ba',
+    // '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c',
+    // '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1',
+];
+
+export function throwIfMissingRootGaugeData(rootGauges: RootGauge[]) {
+    // // addresses of root gauges that exist onchain but not in subgraph
+    // const missingAddresses = difference(onchainRootAddresses, foundAddresses);
+
+    const gaugesWithMissingData = rootGauges
+        .filter((gauge) => !gauge.isInSubgraph)
+        .filter((gauge) => !hardcodedGauges.includes(gauge.gaugeAddress))
+        .filter(isValidForVotingList);
+
+    if (gaugesWithMissingData.length > 0) {
+        const errorMessage =
+            'Detected active root gauge/s with votes (relative weight) that are not in subgraph: ' +
+            JSON.stringify(gaugesWithMissingData);
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
+}
+
+// A gauge should ve included in the voting list when:
+//  - it is alive (not killed)
+//  - it is killed and has valid votes (the users should be able to reallocate votes)
+export function isValidForVotingList(rootGauge: RootGauge) {
+    const isAlive = !rootGauge.isKilled;
+    return isAlive || rootGauge.relativeWeight > 0;
 }

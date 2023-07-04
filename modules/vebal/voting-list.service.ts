@@ -1,8 +1,10 @@
 import { Chain, PrismaClient } from '@prisma/client';
-import { Address } from 'viem';
+import { Address, PublicClient } from 'viem';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 
-import { RootGauge } from './root-gauges.onchain';
+import { OnChainRootGauges, RootGauge, isValidForVotingList, throwIfMissingRootGaugeData } from './root-gauges.onchain';
+import { fetchRootGaugesFromSubgraph, updateOnchainGaugesWithSubgraphData } from './root-gauges.subgraph';
+import { mainnetNetworkConfig } from '../network/mainnet';
 
 export class VotingListService {
     constructor(private prisma: PrismaClient = prismaClient) {}
@@ -44,13 +46,15 @@ export class VotingListService {
         return pools;
     }
 
-    async saveRootGauges(rootGauges: RootGauge[]) {
+    async deleteRootGauges() {
         await this.prisma.prismaRootStakingGauge.deleteMany();
+    }
 
+    async saveRootGauges(rootGauges: RootGauge[]) {
         const rootGaugesWithStakingId = Promise.all(
             rootGauges.map(async (rootGauge) => {
-                rootGauge.stakingId = await this.findStakingId(rootGauge);
-                rootGauge.network = Chain.GNOSIS;
+                const stakingId = await this.findStakingId(rootGauge);
+                rootGauge.stakingId = stakingId;
                 await this.saveRootGauge(rootGauge);
                 return rootGauge;
             }),
@@ -59,60 +63,75 @@ export class VotingListService {
         return rootGaugesWithStakingId;
     }
 
-    // TODO: Explain root gauge VS child gauge in a proper way
-    async findStakingId(rootGauge: RootGauge) {
-        const chain = rootGauge.network as Chain;
-        const recipient = rootGauge.recipient?.toLowerCase();
-        if (chain !== 'MAINNET') {
-            if (!recipient)
-                throw Error(`${chain} root gauge with address ${rootGauge.gaugeAddress} does not have recipient`);
-            return this.findStakingGaugeId(chain, recipient!);
-        }
+    async fetchRootGauges(testHttpClient: PublicClient) {
+        const service = new OnChainRootGauges(testHttpClient);
 
-        try {
-            const address = await this.findStakingGaugeId(chain, rootGauge.gaugeAddress);
-            return address;
-        } catch {
-            // retry with GNOSIS
-            console.log('recipient AMIGO', recipient);
-            if (!recipient)
-                throw Error(`${chain} root gauge with address ${rootGauge.gaugeAddress} does not have recipient`);
-            return this.findStakingGaugeInGnosis(rootGauge.gaugeAddress, recipient!);
-        }
+        const onchainRootAddresses: string[] = (await service.getRootGaugeAddresses()).map((address) =>
+            address.toLowerCase(),
+        );
+
+        const subgraphGauges = await fetchRootGaugesFromSubgraph(onchainRootAddresses);
+
+        const onchainGauges = await service.fetchOnchainRootGauges(onchainRootAddresses as Address[]);
+
+        const rootGauges = updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
+
+        throwIfMissingRootGaugeData(rootGauges);
+
+        return rootGauges;
     }
 
-    async findStakingGaugeId(chain: Chain, gaugeAddress: string) {
-        const hardcodedStakingAddress = findHardcodedStakingAddress(gaugeAddress);
+    async fetchRootGauges2(testHttpClient: PublicClient, onchainRootAddresses: string[]) {
+        const service = new OnChainRootGauges(testHttpClient);
+
+        const subgraphGauges = await fetchRootGaugesFromSubgraph(onchainRootAddresses);
+
+        const onchainGauges = await service.fetchOnchainRootGauges(onchainRootAddresses as Address[]);
+
+        const rootGauges = updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
+
+        throwIfMissingRootGaugeData(rootGauges);
+
+        return rootGauges;
+    }
+
+    async findStakingId(rootGauge: RootGauge) {
+        const chain = rootGauge.network as Chain;
+        let mainnetGaugeAddressOrRecipient: string | undefined;
+        if (chain === 'MAINNET') {
+            mainnetGaugeAddressOrRecipient = rootGauge.gaugeAddress;
+        } else {
+            mainnetGaugeAddressOrRecipient = rootGauge.recipient?.toLowerCase();
+        }
+
+        const hardcodedStakingAddress = findHardcodedStakingAddress(mainnetGaugeAddressOrRecipient);
         if (hardcodedStakingAddress) return hardcodedStakingAddress;
 
         let gauge = await this.prisma.prismaPoolStakingGauge.findFirst({
             where: {
                 chain: { equals: chain },
-                gaugeAddress: { equals: gaugeAddress },
+                gaugeAddress: { equals: mainnetGaugeAddressOrRecipient },
             },
             select: {
                 id: true,
             },
         });
-        if (!gauge)
-            throw Error(
-                `${chain} root gauge with address ${gaugeAddress} not found in PrismaPoolStakingGauge (tried both mainnet and gnosis)`,
-            );
+
+        if (!gauge) {
+            if (isValidForVotingList(rootGauge)) {
+                const errorMessage = `RootGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(rootGauge)}`;
+                console.error(errorMessage);
+                // Only throw when root gauge is valid
+                throw Error(errorMessage);
+            }
+            // Store without staking relation when missing stakingId and invalid for voting
+            return undefined;
+        }
         return gauge.id as Address;
     }
 
-    /** Gnosis root gauges are stored with network "Ethereum" on chain so we need to explicitly change the network to GNOSIS and retry */
-    async findStakingGaugeInGnosis(gaugeAddress: string, recipient: string) {
-        try {
-            const stakingAddress = await this.findStakingGaugeId(Chain.GNOSIS, recipient);
-            return stakingAddress;
-        } catch {
-            throw Error(`Mainnet root gauge with address ${gaugeAddress} not found in PrismaPoolStakingGauge`);
-        }
-    }
-
     async saveRootGauge(rootGauge: RootGauge) {
-        // await this.prisma.prismaRootStakingGauge.deleteMany();
+        await this.prisma.prismaRootStakingGauge.deleteMany();
 
         const result = await this.prisma.prismaRootStakingGauge.create({
             data: {
@@ -125,13 +144,14 @@ export class VotingListService {
                 status: rootGauge.isKilled ? 'KILLED' : 'ACTIVE',
             },
         });
-        console.log('result of saving root gauge: ', result);
+        // console.log('result of saving root gauge: ', result);
     }
 }
 
 export const votingListService = new VotingListService();
 
-function findHardcodedStakingAddress(gaugeAddress: string) {
+function findHardcodedStakingAddress(gaugeAddress: string | undefined) {
+    if (!gaugeAddress) return '';
     //TODO: How do we maintain this address changes in the future??
     // veUSH
     if (gaugeAddress === '0x5b79494824bc256cd663648ee1aad251b32693a9')

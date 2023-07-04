@@ -155,3 +155,17 @@ query VotingEscrowLocks(
         }
     }
 }
+
+query RootGauges($ids: [ID!]) {
+    rootGauges(where: { id_in: $ids }, first: 1000) {
+        id
+        chain
+        recipient
+    }
+}
+
+query LiquidityGauges($ids: [ID!]) {
+    liquidityGauges(where: { id_in: $ids }, first: 1000) {
+        id
+    }
+}
