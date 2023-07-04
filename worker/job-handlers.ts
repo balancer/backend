@@ -11,6 +11,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../modul
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
+import { liquidityGenerationEventService } from '../modules/lge/liquidity-generation-event.service';
 import { votingListService } from '../modules/vebal/voting-list.service';
 
 export type WorkerJob = {
@@ -277,14 +278,22 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
         case 'sync-coingecko-coinids':
             await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), 0.01);
             break;
-        case 'update-yield-capture':
-            await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateYieldCaptureForAllPools(), 0.01);
+        case 'update-fee-volume-yield-all-pools':
+            await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updateFeeVolumeYieldForAllPools(), 0.01);
             break;
         case 'sync-vebal-balances':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalBalances(), 0.01);
             break;
         case 'sync-vebal-totalSupply':
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalTotalSupply(), 0.01);
+            break;
+        case 'sync-lge-price-data':
+            await runIfNotAlreadyRunning(
+                job.name,
+                chainId,
+                () => liquidityGenerationEventService.syncRunningLgeRealPriceData(),
+                0.01,
+            );
             break;
         // case 'sync-vebal-voting-list':
         //     //QUESTION: does it make sense to split it by chainId??

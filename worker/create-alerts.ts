@@ -14,7 +14,7 @@ import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
 import { sleep } from '../modules/common/promise';
 
-const ALARM_PREFIX = `AUTO CRON ALARM MULTICHAIN:`;
+const ALARM_PREFIX = `CRON ALARM:`;
 
 export async function createAlerts(chainId: string): Promise<void> {
     await createAlertsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
@@ -31,7 +31,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
     // delete all alarms
     if (currentAlarms.MetricAlarms) {
         const cronAlarms = currentAlarms.MetricAlarms.filter(
-            (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(chainId),
+            (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
         );
         const alarmNames: string[] = [];
         for (const alarm of cronAlarms) {
@@ -45,7 +45,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
     }
 
     for (const cronJob of jobs) {
-        const alarmName = `${ALARM_PREFIX} ${cronJob.name} - ${chainId} - ${env.DEPLOYMENT_ENV}`;
+        const alarmName = `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`;
 
         // set the evaluation period for the alarm to the job interval. Minimum period is 1 minute.
         let periodInSeconds = cronJob.interval / 1000;

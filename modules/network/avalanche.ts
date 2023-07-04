@@ -71,12 +71,8 @@ const avalancheNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: [
-            '0x3B1eb8EB7b43882b385aB30533D9A2BeF9052a98',
-        ],
-        weightedPoolV2Factories: [
-            '0x230a59F4d9ADc147480f03B0D3fFfeCd56c3289a',
-        ],
+        composableStablePoolFactories: ['0x3B1eb8EB7b43882b385aB30533D9A2BeF9052a98'],
+        weightedPoolV2Factories: ['0x230a59F4d9ADc147480f03B0D3fFfeCd56c3289a'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
         poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
@@ -110,7 +106,6 @@ const avalancheNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
-        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
@@ -253,7 +248,7 @@ export const avalancheNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: 1,
         },
         {
-            name: 'update-yield-capture',
+            name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
     ],

@@ -1,13 +1,19 @@
 import { BigNumber, ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
+import { tokenService } from '../token/token.service';
+import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
+import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
+import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
+import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
+import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 
@@ -22,10 +28,11 @@ const zkevmNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zkevm-v2/v0.0.2',
+        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest',
         beetsBar: 'https://',
-        blocks: '',
-        gauge: '',
+        blocks: 'https://api.studio.thegraph.com/query/48427/bleu-polygon-zkevm-blocks/version/latest',
+        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-polygon-zk/version/latest',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
     },
     eth: {
@@ -58,6 +65,10 @@ const zkevmNetworkData: NetworkData = {
     },
     bal: {
         address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',
+    },
+    veBal: {
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -96,7 +107,6 @@ const zkevmNetworkData: NetworkData = {
     reaper: {
         linearPoolFactories: [],
         averageAPRAcrossLastNHarvests: 2,
-        multiStratLinearPoolIds: [],
     },
     beefy: {
         linearPools: [''],
@@ -136,18 +146,23 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider(zkevmNetworkData.rpcUrl),
     poolAprServices: [
+        new WstethAprService(tokenService, zkevmNetworkData.lido!.wstEthContract),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [
+            zkevmNetworkData.beets.address,
+            zkevmNetworkData.bal.address,
+        ]),
     ],
-    poolStakingServices: [],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
     ],
-    userStakedBalanceServices: [],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -187,6 +202,22 @@ export const zkevmNetworkConfig: NetworkConfig = {
             interval: every(5, 'minutes'),
         },
         {
+            name: 'update-liquidity-24h-ago-for-all-pools',
+            interval: every(5, 'minutes'),
+        },
+        {
+            name: 'cache-average-block-time',
+            interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-staking-for-pools',
+            interval: every(5, 'minutes'),
+        },
+        {
+            name: 'sync-latest-snapshots-for-all-pools',
+            interval: every(1, 'hours'),
+        },
+        {
             name: 'update-lifetime-values-for-all-pools',
             interval: every(30, 'minutes'),
         },
@@ -198,6 +229,12 @@ export const zkevmNetworkConfig: NetworkConfig = {
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
+            interval: every(10, 'seconds'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
+        },
+        {
+            name: 'user-sync-staked-balances',
             interval: every(10, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
@@ -217,8 +254,16 @@ export const zkevmNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: 1,
         },
         {
-            name: 'update-yield-capture',
+            name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-vebal-balances',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-vebal-totalSupply',
+            interval: every(5, 'minutes'),
         },
     ],
 };
