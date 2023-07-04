@@ -11,6 +11,7 @@ import ERC20Abi from '../web3/abi/ERC20.json';
 import { networkContext } from '../network/network-context.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { formatFixed } from '@ethersproject/bignumber';
+import { getSanityClient } from '../content/sanity-content.service';
 
 export type LiquidityGenerationCreateInput = {
     id: string;
@@ -53,11 +54,13 @@ export type LiquidityGenerationEvent = {
     endTimestamp: number;
     tokenAddress: string;
     tokenDecimals: number;
+    tokenSymbol: string;
     tokenAmount: string;
     tokenStartWeight: number;
     tokenEndWeight: number;
     collateralAddress: string;
     collateralDecimals: number;
+    collateralSymbol: string;
     collateralAmount: string;
     collateralStartWeight: number;
     collateralEndWeight: number;
@@ -89,9 +92,11 @@ export class LiquidityGenerationEventService {
 
         const tokenContract = getContractAt(input.tokenAddress, ERC20Abi);
         const tokenDecimals = await tokenContract.decimals();
+        const tokenSymbol = await tokenContract.symbol();
 
         const collateralContract = getContractAt(input.collateralAddress, ERC20Abi);
         const collateralDecimals = await collateralContract.decimals();
+        const collateralSymbol = await collateralContract.symbol();
         await prisma.prismaLge.upsert({
             where: { id_chain: { id: input.id, chain: networkContext.chain } },
             create: {
@@ -111,11 +116,13 @@ export class LiquidityGenerationEventService {
                 endTimestamp: input.endTimestamp,
                 tokenAddress: input.tokenAddress.toLowerCase(),
                 tokenDecimals: tokenDecimals,
+                tokenSymbol: tokenSymbol,
                 tokenAmount: input.tokenAmount,
                 tokenStartWeight: input.tokenStartWeight,
                 tokenEndWeight: input.tokenEndWeight,
                 collateralAddress: input.collateralAddress.toLowerCase(),
                 collateralDecimals: collateralDecimals,
+                collateralSymbol: collateralSymbol,
                 collateralAmount: input.collateralAmount,
                 collateralStartWeight: input.collateralStartWeight,
                 collateralEndWeight: input.collateralEndWeight,
@@ -140,11 +147,13 @@ export class LiquidityGenerationEventService {
                 endTimestamp: input.endTimestamp,
                 tokenAddress: input.tokenAddress.toLowerCase(),
                 tokenDecimals: tokenDecimals,
+                tokenSymbol: tokenSymbol,
                 tokenAmount: input.tokenAmount,
                 tokenStartWeight: input.tokenStartWeight,
                 tokenEndWeight: input.tokenEndWeight,
                 collateralAddress: input.collateralAddress.toLowerCase(),
                 collateralDecimals: collateralDecimals,
+                collateralSymbol: collateralSymbol,
                 collateralAmount: input.collateralAmount,
                 collateralStartWeight: input.collateralStartWeight,
                 collateralEndWeight: input.collateralEndWeight,
@@ -157,6 +166,67 @@ export class LiquidityGenerationEventService {
         return prisma.prismaLge.findUniqueOrThrow({
             where: { id_chain: { id: input.id, chain: networkContext.chain } },
         });
+    }
+
+    // TODO remove after successful migration
+    public async syncLgesFromSanity(): Promise<void> {
+        type LiquidityGenerationEvent = {
+            id: string;
+            address: string;
+            name: string;
+            description: string;
+            tokenContractAddress: string;
+            collateralTokenAddress: string;
+            tokenAmount: string;
+            collateralAmount: string;
+            tokenStartWeight: number;
+            collateralStartWeight: number;
+            tokenEndWeight: number;
+            collateralEndWeight: number;
+            swapFeePercentage: string;
+            websiteUrl: string;
+            tokenIconUrl: string;
+            twitterUrl: string;
+            mediumUrl: string;
+            discordUrl: string;
+            telegramUrl: string;
+            startDate: string;
+            endDate: string;
+            bannerImageUrl: string;
+            adminAddress: string;
+            adminIsMultisig: boolean;
+        };
+
+        const lges: LiquidityGenerationEvent[] = await getSanityClient().fetch(
+            `*[_type == "lbp" && chainId == "${networkContext.chainId}"]`,
+        );
+
+        for (const lge of lges) {
+            await liquidityGenerationEventService.upsertLiquidityGenerationEvent({
+                address: lge.address,
+                bannerImageUrl: lge.bannerImageUrl,
+                collateralAddress: lge.collateralTokenAddress,
+                collateralAmount: lge.collateralAmount,
+                collateralEndWeight: lge.collateralEndWeight,
+                collateralStartWeight: lge.collateralStartWeight,
+                description: lge.description,
+                discordUrl: lge.discordUrl,
+                endTimestamp: moment(lge.endDate).unix(),
+                id: lge.id,
+                mediumUrl: lge.mediumUrl,
+                name: lge.name,
+                startTimestamp: moment(lge.startDate).unix(),
+                swapFee: lge.swapFeePercentage,
+                telegramUrl: lge.telegramUrl,
+                tokenAddress: lge.tokenContractAddress,
+                tokenAmount: lge.tokenAmount,
+                tokenEndWeight: lge.tokenEndWeight,
+                tokenIconUrl: lge.tokenIconUrl,
+                tokenStartWeight: lge.tokenStartWeight,
+                twitterUrl: lge.twitterUrl,
+                websiteUrl: lge.websiteUrl,
+            });
+        }
     }
 
     public async getLges(): Promise<LiquidityGenerationEvent[]> {

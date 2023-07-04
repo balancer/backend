@@ -1,4 +1,5 @@
 import { Resolvers } from '../../schema';
+import { isAdminRoute } from '../auth/auth-context';
 import { liquidityGenerationEventService } from './liquidity-generation-event.service';
 
 const liquidityGenerationEventResolvers: Resolvers = {
@@ -16,6 +17,13 @@ const liquidityGenerationEventResolvers: Resolvers = {
     Mutation: {
         lgeCreate: async (parent, { lge }) => {
             return liquidityGenerationEventService.upsertLiquidityGenerationEvent(lge);
+        },
+        lgeSyncFromSanity: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await liquidityGenerationEventService.syncLgesFromSanity();
+
+            return 'success';
         },
     },
 };

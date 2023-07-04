@@ -20,11 +20,13 @@ model PrismaLge {
     endTimestamp            Int
     tokenAddress            String
     tokenDecimals           Int
+    tokenSymbol             String
     tokenAmount             String
     tokenStartWeight        Float
     tokenEndWeight          Float
     collateralAddress       String
     collateralDecimals      Int
+    collateralSymbol         String
     collateralAmount        String
     collateralStartWeight   Float
     collateralEndWeight     Float
