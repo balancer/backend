@@ -12,6 +12,9 @@ import { networkContext } from '../network/network-context.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { formatFixed } from '@ethersproject/bignumber';
 import { getSanityClient } from '../content/sanity-content.service';
+import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { BigNumber } from 'ethers';
+import { PrismaTokenCurrentPrice } from '@prisma/client';
 
 export type LiquidityGenerationCreateInput = {
     id: string;
@@ -271,7 +274,7 @@ export class LiquidityGenerationEventService {
         const lges = await this.getLges();
         for (const lge of lges) {
             if (now >= lge.startTimestamp && now <= lge.endTimestamp) {
-                this.syncRealPriceDataForLge(lge);
+                await this.syncRealPriceDataForLge(lge);
             } else {
                 const twoDaysAgo = moment().subtract(2, 'day').unix();
                 await prisma.prismaPoolSwap.deleteMany({
@@ -287,39 +290,24 @@ export class LiquidityGenerationEventService {
 
     public async syncRealPriceDataForLge(lge: LiquidityGenerationEvent): Promise<void> {
         const tokenPrices = await tokenService.getTokenPrices();
-        const latestPriceData = await prisma.prismaLgePriceData.findMany({
-            where: { id: lge.id },
+        let latestPriceData = await prisma.prismaLgePriceData.findFirst({
+            where: { id: lge.id, chain: networkContext.chain },
             orderBy: { timestamp: 'desc' },
         });
 
         const collateralTokenPrice = tokenService.getPriceForToken(tokenPrices, lge.collateralAddress);
-        if (latestPriceData.length === 0) {
-            //make sure we have the very first price data in the db as a manual entry
-            const tokenPrice = this.calculateLbpTokenPrice(
-                lge.tokenStartWeight,
-                lge.collateralStartWeight,
-                lge.tokenAmount,
-                lge.tokenDecimals,
-                lge.collateralAmount,
-                lge.collateralDecimals,
-                collateralTokenPrice,
-            );
-            const lgeStartBlockNumber = await blocksSubgraphService.getBlockForTimestamp(lge.startTimestamp);
-            await prisma.prismaLgePriceData.create({
-                data: {
-                    id: lge.id,
-                    chain: networkContext.chain,
-                    timestamp: lge.startTimestamp,
-                    swapTransaction: `${lge.startTimestamp}`,
-                    blockNumber: parseFloat(lgeStartBlockNumber.number),
-                    launchTokenPrice: tokenPrice,
-                    tokenBalance: lge.tokenAmount,
-                    collateralBalance: lge.collateralAmount,
-                },
+
+        // we need the initial price data from the initial token and collateral balances persisted to be able to construct balances after swaps
+        // it will also take care of any swaps that happened before the official startTimestamp
+        if (!latestPriceData) {
+            await this.createInitialPriceData(lge, collateralTokenPrice, tokenPrices);
+            latestPriceData = latestPriceData = await prisma.prismaLgePriceData.findFirst({
+                where: { id: lge.id, chain: networkContext.chain },
+                orderBy: { timestamp: 'desc' },
             });
-            latestPriceData.push((await prisma.prismaLgePriceData.findFirst())!);
         }
-        const lastSyncedBlockNumber = latestPriceData[0].blockNumber;
+
+        const lastSyncedBlockNumber = latestPriceData!.blockNumber;
         const latestBlockNumber = await networkContext.config.provider.getBlockNumber();
 
         const endBlock =
@@ -335,77 +323,91 @@ export class LiquidityGenerationEventService {
             return;
         }
 
-        console.log(`From: ${lastSyncedBlockNumber}, to: ${endBlock}`);
+        console.log(`From: ${lastSyncedBlockNumber + 1}, to: ${endBlock}`);
 
         const swapEvents = await vaultContract.queryFilter(filter, lastSyncedBlockNumber + 1, endBlock);
 
-        let previousTokenBalance = latestPriceData[0].tokenBalance;
-        let previousCollateralBalance = latestPriceData[0].collateralBalance;
+        const previousTokenBalance = latestPriceData!.tokenBalance;
+        const previousCollateralBalance = latestPriceData!.collateralBalance;
 
-        const previousTokenBalanceScaled = parseUnits(previousTokenBalance, lge.tokenDecimals);
-        const previousCollateralBalanceScaled = parseUnits(previousCollateralBalance, lge.collateralDecimals);
+        let previousTokenBalanceScaled = parseUnits(previousTokenBalance, lge.tokenDecimals);
+        let previousCollateralBalanceScaled = parseUnits(previousCollateralBalance, lge.collateralDecimals);
 
         if (swapEvents.length === 0) {
             // create a manual price entry if there where no swaps so we have a data point based on previous price data balances
-            const { blocks } = await blocksSubgraphService.getBlocks({
-                where: { number: `${endBlock}` },
-            });
-            let latestSyncedBlockTimestamp = moment().utc().unix();
-            if (blocks[0]) {
-                latestSyncedBlockTimestamp = parseFloat(blocks[0].timestamp);
-            }
-
-            const { tokenWeight, collateralWeight } = this.getWeightsAtTime(
-                latestSyncedBlockTimestamp,
-                lge.tokenStartWeight,
-                lge.tokenEndWeight,
-                lge.collateralStartWeight,
-                lge.collateralEndWeight,
-                lge.startTimestamp,
-                lge.endTimestamp,
-            );
-
-            const tokenPrice = this.calculateLbpTokenPrice(
-                tokenWeight,
-                collateralWeight,
-                previousTokenBalanceScaled.toString(),
-                lge.tokenDecimals,
-                previousCollateralBalanceScaled.toString(),
-                lge.collateralDecimals,
+            await this.createManualPriceEntryForBlock(
+                endBlock,
+                lge,
+                previousTokenBalanceScaled,
+                previousCollateralBalanceScaled,
                 collateralTokenPrice,
             );
+        } else {
+            const swaps = [];
+            for (const swapEvent of swapEvents) {
+                swaps.push({
+                    timestamp: (await swapEvent.getBlock()).timestamp,
+                    blockNumber: swapEvent.blockNumber,
+                    transactionHash: swapEvent.transactionHash,
+                    tokenIn: swapEvent.args!.tokenIn,
+                    tokenOut: swapEvent.args!.tokenOut,
+                    tokenAmountIn: isSameAddress(swapEvent.args!.tokenIn, lge.tokenAddress)
+                        ? formatFixed(swapEvent.args!.amountIn, lge.tokenDecimals)
+                        : formatFixed(swapEvent.args!.amountIn, lge.collateralDecimals),
+                    tokenAmountOut: isSameAddress(swapEvent.args!.tokenOut, lge.tokenAddress)
+                        ? formatFixed(swapEvent.args!.amountOut, lge.tokenDecimals)
+                        : formatFixed(swapEvent.args!.amountOut, lge.collateralDecimals),
+                });
+            }
 
-            await prisma.prismaLgePriceData.create({
-                data: {
-                    id: lge.id,
-                    chain: networkContext.chain,
-                    timestamp: latestSyncedBlockTimestamp,
-                    swapTransaction: `${latestSyncedBlockTimestamp}`,
-                    blockNumber: endBlock,
-                    launchTokenPrice: tokenPrice,
-                    tokenBalance: previousTokenBalance,
-                    collateralBalance: previousCollateralBalance,
-                },
-            });
-
-            return;
+            await this.createPriceDataFromSwaps(
+                swaps,
+                lge,
+                previousTokenBalanceScaled,
+                previousCollateralBalanceScaled,
+                tokenPrices,
+            );
         }
+    }
 
-        for (const swapEvent of swapEvents) {
-            const swapTimestamp = (await swapEvent.getBlock()).timestamp;
-            const transactionHash = swapEvent.transactionHash;
+    private async createPriceDataFromSwaps(
+        swaps: {
+            timestamp: number;
+            blockNumber: number;
+            transactionHash: string;
+            tokenIn: string;
+            tokenOut: string;
+            tokenAmountIn: string;
+            tokenAmountOut: string;
+        }[],
+        lge: LiquidityGenerationEvent,
+        currentTokenBalanceScaled: BigNumber,
+        currentCollateralBalanceScaled: BigNumber,
+        tokenPrices: PrismaTokenCurrentPrice[],
+    ) {
+        let previousTokenBalanceScaled = currentTokenBalanceScaled;
+        let previousCollateralBalanceScaled = currentCollateralBalanceScaled;
 
-            const tokenBalanceAfterSwap = isSameAddress(swapEvent.args!.tokenIn, lge.tokenAddress)
-                ? previousTokenBalanceScaled.add(swapEvent.args!.amountIn)
-                : previousTokenBalanceScaled.sub(swapEvent.args!.amountOut);
+        for (const swap of swaps) {
+            const tokenAmountInScaled = isSameAddress(swap.tokenIn, lge.tokenAddress)
+                ? parseUnits(swap.tokenAmountIn, lge.tokenDecimals)
+                : parseUnits(swap.tokenAmountIn, lge.collateralDecimals);
 
-            const collateralBalanceAfterSwap = isSameAddress(swapEvent.args!.tokenIn, lge.collateralAddress)
-                ? previousCollateralBalanceScaled.add(swapEvent.args!.amountIn)
-                : previousCollateralBalanceScaled.sub(swapEvent.args!.amountOut);
+            const tokenAmountOutScaled = isSameAddress(swap.tokenOut, lge.tokenAddress)
+                ? parseUnits(swap.tokenAmountOut, lge.tokenDecimals)
+                : parseUnits(swap.tokenAmountOut, lge.collateralDecimals);
+
+            const tokenBalanceAfterSwap = isSameAddress(swap.tokenIn, lge.tokenAddress)
+                ? previousTokenBalanceScaled.add(tokenAmountInScaled)
+                : previousTokenBalanceScaled.sub(tokenAmountOutScaled);
+
+            const collateralBalanceAfterSwap = isSameAddress(swap.tokenIn, lge.collateralAddress)
+                ? previousCollateralBalanceScaled.add(tokenAmountInScaled)
+                : previousCollateralBalanceScaled.sub(tokenAmountOutScaled);
 
             const collateralPrice = tokenService.getPriceForToken(tokenPrices, lge.collateralAddress);
             const { tokenWeight, collateralWeight } = this.getWeightsAtTime(
-                swapTimestamp,
+                swap.timestamp,
                 lge.tokenStartWeight,
                 lge.tokenEndWeight,
                 lge.collateralStartWeight,
@@ -423,22 +425,142 @@ export class LiquidityGenerationEventService {
                 collateralPrice,
             );
 
-            console.log(transactionHash);
             await prisma.prismaLgePriceData.create({
                 data: {
                     id: lge.id,
                     chain: networkContext.chain,
-                    swapTransaction: transactionHash,
-                    timestamp: swapTimestamp,
-                    blockNumber: swapEvent.blockNumber,
+                    swapTransaction: swap.transactionHash,
+                    timestamp: swap.timestamp,
+                    blockNumber: swap.blockNumber,
                     launchTokenPrice: tokenPrice,
                     tokenBalance: formatFixed(tokenBalanceAfterSwap, lge.tokenDecimals),
                     collateralBalance: formatFixed(collateralBalanceAfterSwap, lge.collateralDecimals),
                 },
             });
-            previousTokenBalance = formatFixed(tokenBalanceAfterSwap, lge.tokenDecimals);
-            previousCollateralBalance = formatFixed(collateralBalanceAfterSwap, lge.collateralDecimals);
+            previousCollateralBalanceScaled = collateralBalanceAfterSwap;
+            previousTokenBalanceScaled = tokenBalanceAfterSwap;
         }
+    }
+
+    private async createManualPriceEntryForBlock(
+        block: number,
+        lge: LiquidityGenerationEvent,
+        previousTokenBalanceScaled: BigNumber,
+        previousCollateralBalanceScaled: BigNumber,
+        collateralTokenPrice: number,
+    ) {
+        const { blocks } = await blocksSubgraphService.getBlocks({
+            where: { number: `${block}` },
+        });
+
+        let latestSyncedBlockTimestamp = moment().utc().unix();
+        if (blocks[0]) {
+            latestSyncedBlockTimestamp = parseFloat(blocks[0].timestamp);
+        }
+
+        const { tokenWeight, collateralWeight } = this.getWeightsAtTime(
+            latestSyncedBlockTimestamp,
+            lge.tokenStartWeight,
+            lge.tokenEndWeight,
+            lge.collateralStartWeight,
+            lge.collateralEndWeight,
+            lge.startTimestamp,
+            lge.endTimestamp,
+        );
+
+        const tokenPrice = this.calculateLbpTokenPrice(
+            tokenWeight,
+            collateralWeight,
+            previousTokenBalanceScaled.toString(),
+            lge.tokenDecimals,
+            previousCollateralBalanceScaled.toString(),
+            lge.collateralDecimals,
+            collateralTokenPrice,
+        );
+
+        await prisma.prismaLgePriceData.create({
+            data: {
+                id: lge.id,
+                chain: networkContext.chain,
+                timestamp: latestSyncedBlockTimestamp,
+                swapTransaction: `${latestSyncedBlockTimestamp}`,
+                blockNumber: block,
+                launchTokenPrice: tokenPrice,
+                tokenBalance: formatFixed(previousTokenBalanceScaled, lge.tokenDecimals),
+                collateralBalance: formatFixed(previousCollateralBalanceScaled, lge.collateralDecimals),
+            },
+        });
+    }
+
+    private async createInitialPriceData(
+        lge: LiquidityGenerationEvent,
+        collateralTokenPrice: number,
+        tokenPrices: PrismaTokenCurrentPrice[],
+    ) {
+        const tokenPrice = this.calculateLbpTokenPrice(
+            lge.tokenStartWeight,
+            lge.collateralStartWeight,
+            lge.tokenAmount,
+            lge.tokenDecimals,
+            lge.collateralAmount,
+            lge.collateralDecimals,
+            collateralTokenPrice,
+        );
+
+        // find any swaps that already happened prior to the startTimestamp (pools can enable swap any time)
+        const subgraphSwaps = await balancerSubgraphService.getAllSwapsWithPaging({
+            where: { poolId: lge.id, timestamp_lt: lge.startTimestamp },
+            startTimestamp: 0,
+        });
+
+        let initialSwapTimestamp = lge.startTimestamp;
+        let initialBlockNumber = await blocksSubgraphService.getBlockForTimestamp(lge.startTimestamp);
+
+        // if we already have swaps prior to the official start timestamp, we need to adapt the timestamp of the initial price data prior to the first swap
+        if (subgraphSwaps.length > 0) {
+            initialSwapTimestamp = subgraphSwaps[0].timestamp - 1;
+            initialBlockNumber = await blocksSubgraphService.getBlockForTimestamp(initialSwapTimestamp);
+        }
+
+        // we push the initial price data
+        await prisma.prismaLgePriceData.create({
+            data: {
+                id: lge.id,
+                chain: networkContext.chain,
+                timestamp: initialSwapTimestamp,
+                swapTransaction: `${initialSwapTimestamp}`,
+                blockNumber: parseFloat(initialBlockNumber.number) - 1,
+                launchTokenPrice: tokenPrice,
+                tokenBalance: lge.tokenAmount,
+                collateralBalance: lge.collateralAmount,
+            },
+        });
+
+        // process swaps
+        const currentTokenBalanceScaled = parseUnits(lge.tokenAmount, lge.tokenDecimals);
+        const currentCollateralBalanceScaled = parseUnits(lge.collateralAmount, lge.collateralDecimals);
+
+        const swaps = [];
+        for (const swap of subgraphSwaps) {
+            const block = await blocksSubgraphService.getBlockForTimestamp(swap.timestamp);
+            swaps.push({
+                timestamp: swap.timestamp,
+                blockNumber: parseFloat(block.number),
+                transactionHash: swap.tx,
+                tokenIn: swap.tokenIn,
+                tokenOut: swap.tokenOut,
+                tokenAmountIn: swap.tokenAmountIn,
+                tokenAmountOut: swap.tokenAmountOut,
+            });
+        }
+
+        await this.createPriceDataFromSwaps(
+            swaps,
+            lge,
+            currentTokenBalanceScaled,
+            currentCollateralBalanceScaled,
+            tokenPrices,
+        );
     }
 
     public async getLgeRealPriceData(lge: LiquidityGenerationEvent): Promise<PriceData[]> {
