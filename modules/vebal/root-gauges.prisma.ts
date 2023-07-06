@@ -15,9 +15,6 @@ export class PrismaRootGauges {
             mainnetGaugeAddressOrRecipient = rootGauge.recipient?.toLowerCase();
         }
 
-        const hardcodedStakingAddress = findHardcodedStakingAddress(mainnetGaugeAddressOrRecipient);
-        if (hardcodedStakingAddress) return hardcodedStakingAddress;
-
         let gauge = await this.prisma.prismaPoolStakingGauge.findFirst({
             where: {
                 chain: { equals: chain },
@@ -76,16 +73,4 @@ export class PrismaRootGauges {
             throw error;
         }
     }
-}
-
-function findHardcodedStakingAddress(gaugeAddress: string | undefined) {
-    if (!gaugeAddress) return '';
-    //TODO: How do we maintain this address changes in the future??
-    // veUSH
-    if (gaugeAddress === '0x5b79494824bc256cd663648ee1aad251b32693a9')
-        return '0xc85d90dec1e12edee418c445b381e7168eb380ab';
-    // veBAL
-    if (gaugeAddress === '0xb78543e00712c3abba10d0852f6e38fde2aaba4d')
-        // NO Staking gauge for veBal pool (0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014)
-        return '';
 }
