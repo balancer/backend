@@ -65,6 +65,11 @@ export class OnChainRootGauges {
 
         const relativeWeights = await this.multicallGaugeController(gaugeAddresses, 'gauge_relative_weight');
 
+        /*
+            gauge_types are not reliable because they are manually input by Maxis
+            We will use subgraph chain field instead
+            However, we keep pulling this gauge_types cause they can be useful for debugging (when a root gauge is not found in the subgraph)
+        */
         const gaugeTypeIndexes = await this.multicallGaugeController(gaugeAddresses, 'gauge_types');
         const gaugeTypes = mapValues(gaugeTypeIndexes, (type) => typeNames[Number(type)]);
 
