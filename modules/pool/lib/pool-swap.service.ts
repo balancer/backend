@@ -281,12 +281,14 @@ export class PoolSwapService {
         await prisma.prismaPoolSwap.deleteMany({
             where: {
                 timestamp: { lt: twoDaysAgo },
-                pool: { type: { not: 'LIQUIDITY_BOOTSTRAPPING' } },
                 chain: networkContext.chain,
             },
         });
         await prisma.prismaPoolBatchSwap.deleteMany({
-            where: { timestamp: { lt: twoDaysAgo }, chain: networkContext.chain },
+            where: {
+                timestamp: { lt: twoDaysAgo },
+                chain: networkContext.chain,
+            },
         });
 
         return Array.from(poolIds);
