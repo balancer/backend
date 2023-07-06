@@ -72,35 +72,47 @@ export class GaugeAprService implements PoolAprService {
                     rewardToken.tokenAddress === networkContext.data.bal.address &&
                     preferredStaking.gauge.version === 2
                 ) {
+                    const aprItemId = `${pool.id}-${rewardTokenDefinition.symbol}-apr`;
+                    const aprRangeId = `${pool.id}-bal-apr-range`;
+
+                    // we need to create/update the range item first, as APRs can change from total to range types
+                    // if we try to update apritem and nested range item in the same upsert, range item does not yet exist.
+                    operations.push(
+                        prisma.prismaPoolAprRange.upsert({
+                            where: {
+                                id_chain: { id: aprRangeId, chain: networkContext.chain },
+                            },
+                            update: {
+                                min: rewardApr,
+                                max: rewardApr * this.MAX_VEBAL_BOOST,
+                            },
+                            create: {
+                                id: aprRangeId,
+                                chain: networkContext.chain,
+                                aprItemId: aprItemId,
+                                min: rewardApr,
+                                max: rewardApr,
+                            },
+                        }),
+                    );
+
                     operations.push(
                         prisma.prismaPoolAprItem.upsert({
                             where: {
                                 id_chain: {
-                                    id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
+                                    id: aprItemId,
                                     chain: networkContext.chain,
                                 },
                             },
                             update: {
-                                range: {
-                                    update: {
-                                        min: rewardApr,
-                                        max: rewardApr * this.MAX_VEBAL_BOOST,
-                                    },
-                                },
+                                apr: 0,
                             },
                             create: {
-                                id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
+                                id: aprItemId,
                                 chain: networkContext.chain,
                                 poolId: pool.id,
                                 title: `${rewardTokenDefinition.symbol} reward APR`,
                                 apr: 0,
-                                range: {
-                                    create: {
-                                        id: `${pool.id}-bal-apr-range`,
-                                        min: rewardApr,
-                                        max: rewardApr * this.MAX_VEBAL_BOOST,
-                                    },
-                                },
                                 type: PrismaPoolAprType.NATIVE_REWARD,
                                 group: null,
                             },
