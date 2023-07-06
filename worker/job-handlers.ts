@@ -60,18 +60,18 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         console.time(jobId);
         console.log(`Start job ${jobId}`);
 
-        // sentryCheckInId = Sentry.captureCheckIn({
-        //     monitorSlug: `${monitorSlug}`,
-        //     status: 'in_progress',
-        // });
+        sentryCheckInId = Sentry.captureCheckIn({
+            monitorSlug: `${monitorSlug}`,
+            status: 'in_progress',
+        });
 
         await fn();
 
-        // Sentry.captureCheckIn({
-        //     checkInId: sentryCheckInId,
-        //     monitorSlug: `${monitorSlug}`,
-        //     status: 'ok',
-        // });
+        Sentry.captureCheckIn({
+            checkInId: sentryCheckInId,
+            monitorSlug: `${monitorSlug}`,
+            status: 'ok',
+        });
 
         if (process.env.AWS_ALERTS === 'true') {
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
