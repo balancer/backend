@@ -2,13 +2,15 @@ import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
 import { TokenService } from '../../../token/token.service';
 import { secondsPerYear } from '../../../common/time';
-import { PrismaPoolAprItem } from '@prisma/client';
+import { PrismaPoolAprItem, PrismaPoolAprRange, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { networkContext } from '../../../network/network-context.service';
 import { GaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class GaugeAprService implements PoolAprService {
+    private readonly MAX_VEBAL_BOOST = 2.5;
+
     constructor(
         private readonly gaugeSubgraphService: GaugeSubgraphService,
         private readonly tokenService: TokenService,
@@ -65,23 +67,63 @@ export class GaugeAprService implements PoolAprService {
                     thirdPartyApr += rewardApr;
                 }
 
-                const item: PrismaPoolAprItem = {
-                    id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
-                    chain: networkContext.chain,
-                    poolId: pool.id,
-                    title: `${rewardTokenDefinition.symbol} reward APR`,
-                    apr: rewardApr,
-                    type: isThirdPartyApr ? 'THIRD_PARTY_REWARD' : 'NATIVE_REWARD',
-                    group: null,
-                };
-
-                operations.push(
-                    prisma.prismaPoolAprItem.upsert({
-                        where: { id_chain: { id: item.id, chain: networkContext.chain } },
-                        update: item,
-                        create: item,
-                    }),
-                );
+                // apply vebal boost for BAL rewards on v2 gauges
+                if (
+                    rewardToken.tokenAddress === networkContext.data.bal.address &&
+                    preferredStaking.gauge.version === 2
+                ) {
+                    operations.push(
+                        prisma.prismaPoolAprItem.upsert({
+                            where: {
+                                id_chain: {
+                                    id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
+                                    chain: networkContext.chain,
+                                },
+                            },
+                            update: {
+                                range: {
+                                    update: {
+                                        min: rewardApr,
+                                        max: rewardApr * this.MAX_VEBAL_BOOST,
+                                    },
+                                },
+                            },
+                            create: {
+                                id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
+                                chain: networkContext.chain,
+                                poolId: pool.id,
+                                title: `${rewardTokenDefinition.symbol} reward APR`,
+                                apr: 0,
+                                range: {
+                                    create: {
+                                        id: `${pool.id}-bal-apr-range`,
+                                        min: rewardApr,
+                                        max: rewardApr * this.MAX_VEBAL_BOOST,
+                                    },
+                                },
+                                type: PrismaPoolAprType.NATIVE_REWARD,
+                                group: null,
+                            },
+                        }),
+                    );
+                } else {
+                    const item: PrismaPoolAprItem = {
+                        id: `${pool.id}-${rewardTokenDefinition.symbol}-apr`,
+                        chain: networkContext.chain,
+                        poolId: pool.id,
+                        title: `${rewardTokenDefinition.symbol} reward APR`,
+                        apr: rewardApr,
+                        type: isThirdPartyApr ? PrismaPoolAprType.THIRD_PARTY_REWARD : PrismaPoolAprType.NATIVE_REWARD,
+                        group: null,
+                    };
+                    operations.push(
+                        prisma.prismaPoolAprItem.upsert({
+                            where: { id_chain: { id: item.id, chain: networkContext.chain } },
+                            update: item,
+                            create: item,
+                        }),
+                    );
+                }
             }
         }
         await prismaBulkExecuteOperations(operations);
