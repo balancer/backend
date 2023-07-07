@@ -189,15 +189,12 @@ export const veGauges = [
     // They are not listed in the subgraph but we do have pool and staking info stored
     '0x5b79494824bc256cd663648ee1aad251b32693a9', // veUSH
     '0xb78543e00712c3abba10d0852f6e38fde2aaba4d', // veBAL
-    // We have its pool 0x9232a548dd9e81bac65500b5e0d918f8ba93675c000200000000000000000423 but not staking relation in PrismaPoolStaking
-    // We include it in specialAddresses cause we do not have its pool
     '0x56124eb16441a1ef12a4ccaeabdd3421281b795a', // veLIT
 ];
 
 // TODO: Find a fix for these pools: they fail because they are valid for voting but no PrimaPoolStakingGauge relation was found
 export const specialRootGaugeAddresses = [
-    // veLIT
-    '0x56124eb16441a1ef12a4ccaeabdd3421281b795a',
+    ...veGauges,
 
     // Balancer USDC/WETH/L Gauge Deposit
     // https://etherscan.io/address/0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c#readContract

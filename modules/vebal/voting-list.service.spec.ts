@@ -1,10 +1,10 @@
 import { mainnetNetworkConfig } from '../network/mainnet';
 import { createHttpClient } from '../network/viem/clients';
 import { OnChainRootGauges } from './root-gauges.onchain';
-import { PrismaRootGauges } from './root-gauges.prisma';
+import { PrismaRootGauges } from './root-gauges.db';
 import { VotingListService } from './voting-list.service';
 
-it.skip('Full flow', async () => {
+it('Full flow', async () => {
     const httpRpc = 'http://127.0.0.1:8555';
     // const httpRpc = '';
     console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
