@@ -1,5 +1,7 @@
+import { mainnetNetworkConfig } from '../network/mainnet';
 import { createHttpClient } from '../network/viem/clients';
 import { OnChainRootGauges } from './root-gauges.onchain';
+import { PrismaRootGauges } from './root-gauges.prisma';
 import { VotingListService } from './voting-list.service';
 
 it.skip('Full flow', async () => {
@@ -7,6 +9,7 @@ it.skip('Full flow', async () => {
     // const httpRpc = '';
     console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
     const testHttpClient = createHttpClient(httpRpc);
+    mainnetNetworkConfig.publicClient = testHttpClient;
     const service = new VotingListService();
 
     const onchainRootGauges = new OnChainRootGauges(testHttpClient);
@@ -15,7 +18,8 @@ it.skip('Full flow', async () => {
     console.log('Number of addresses download: ', onchainRootAddresses.length);
 
     // Test full flow with specific addresses
-    onchainRootAddresses = ['0x56124eb16441a1ef12a4ccaeabdd3421281b795a'];
+    // onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
 
+    new PrismaRootGauges().deleteRootGauges();
     await service.sync(onchainRootAddresses);
 }, 1000_000);

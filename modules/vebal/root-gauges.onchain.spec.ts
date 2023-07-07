@@ -75,9 +75,9 @@ it('Excludes Liquidity Mining Committee gauge', async () => {
 });
 
 it('fetches veBAL gauge as MAINNET', async () => {
-    const liquidityMiningAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
+    const vebalAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
     const service = new OnChainRootGauges(testHttpClient);
-    const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
+    const rows = await service.fetchOnchainRootGauges([vebalAddress]);
     expect(rows).toEqual([
         {
             gaugeAddress: '0xe867ad0a48e8f815dc0cda2cdb275e0f163a480b',
