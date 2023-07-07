@@ -1,0 +1,19 @@
+enum PrismaRootStakingGaugeStatus {
+    KILLED
+    ACTIVE
+}
+
+model PrismaRootStakingGauge {
+  @@id([id, chain])
+  @@unique([stakingId, chain])
+
+  id      String
+  chain   Chain
+
+  staking PrismaPoolStakingGauge? @relation(fields: [stakingId, chain], references: [id, chain])
+  status              PrismaRootStakingGaugeStatus @default(ACTIVE)
+  gaugeAddress      String
+  stakingId         String?
+  relativeWeight    String?
+  relativeWeightCap String?
+}
