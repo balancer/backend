@@ -1,0 +1,53 @@
+model PrismaLge {
+    @@id([id, chain])
+    @@unique([address, chain])
+
+    id                      String
+    chain                   Chain               
+
+    
+    address                 String              @unique
+    name                    String
+    websiteUrl              String
+    tokenIconUrl            String
+    bannerImageUrl          String
+    twitterUrl              String
+    mediumUrl               String
+    discordUrl              String
+    telegramUrl             String
+    description             String
+    startTimestamp          Int
+    endTimestamp            Int
+    tokenAddress            String
+    tokenDecimals           Int
+    tokenSymbol             String
+    tokenAmount             String
+    tokenStartWeight        Float
+    tokenEndWeight          Float
+    collateralAddress       String
+    collateralDecimals      Int
+    collateralSymbol         String
+    collateralAmount        String
+    collateralStartWeight   Float
+    collateralEndWeight     Float
+    swapFee                 String
+    adminAddress            String
+    adminIsMultisig         Boolean
+
+    priceData               PrismaLgePriceData[]
+}
+
+model PrismaLgePriceData {
+    @@id([id, chain, swapTransaction])
+    id                  String
+    chain               Chain               
+
+    lge                 PrismaLge           @relation(fields:[id,chain], references: [id,chain])
+
+    swapTransaction     String
+    timestamp           Int
+    blockNumber         Int
+    launchTokenPrice    Float
+    tokenBalance        String
+    collateralBalance   String
+}
