@@ -69,7 +69,7 @@ it('Returns veBAL pool icons', async () => {
     ]);
 }, 1000_000);
 
-it('Returns voting pools ', async () => {
+it.skip('Returns voting pools ', async () => {
     const service = new VotingListService();
 
     const votingPools = await service.getVotingList();

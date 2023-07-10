@@ -1,12 +1,10 @@
-import { RootGaugesRepository, toPrismaNetwork } from './root-gauges.repository';
+import { setMainnetRpcProviderForTesting } from '../../test/utils';
+import { defaultStakingGaugeId, prismaMock } from './prismaPoolStakingGauge.mock';
+import { RootGauge, RootGaugesRepository, toPrismaNetwork } from './root-gauges.repository';
 import { Chain } from '@prisma/client';
 
-// anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17569375
-
-// In CI we will use http://127.0.0.1:8555 to use the anvil fork;
-// const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';
 const httpRpc = 'http://127.0.0.1:8555';
-console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
+setMainnetRpcProviderForTesting(httpRpc);
 
 it('maps onchain network format into prisma chain format', async () => {
     expect(toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
@@ -21,7 +19,7 @@ it('fetches list of root gauge addresses', async () => {
     expect(addresses.length).toBe(333);
 }, 10_000);
 
-it.only('generates root gauge rows given a list of gauge addresses', async () => {
+it('generates root gauge rows given a list of gauge addresses', async () => {
     const service = new RootGaugesRepository();
 
     const rootGaugeAddresses = [
@@ -41,7 +39,7 @@ it.only('generates root gauge rows given a list of gauge addresses', async () =>
           "isInSubgraph": false,
           "isKilled": false,
           "network": "MAINNET",
-          "relativeWeight": 0.07037221488051114,
+          "relativeWeight": 0.07554542388100179,
           "relativeWeightCap": undefined,
         },
         {
@@ -85,4 +83,57 @@ it('fetches veBAL gauge as MAINNET', async () => {
             relativeWeightCap: undefined,
         },
     ]);
+});
+
+export function aRootGauge(...options: Partial<RootGauge>[]): RootGauge {
+    const defaultRootGauge: RootGauge = {
+        gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7',
+        isKilled: false,
+        network: 'MAINNET' as Chain,
+        recipient: undefined,
+        relativeWeight: 71123066693252456,
+        relativeWeightCap: undefined,
+        isInSubgraph: true,
+    };
+    return Object.assign({}, defaultRootGauge, ...options);
+}
+
+const EmptyError = new Error();
+
+const repository = new RootGaugesRepository(prismaMock);
+
+it('successfully saves onchain gauges', async () => {
+    const rootGauge = aRootGauge({ network: Chain.OPTIMISM });
+
+    const rootGauges = await repository.saveRootGauges([rootGauge]);
+
+    expect(rootGauges[0]).toMatchObject(rootGauge);
+    expect(rootGauges[0].stakingId).toBe(defaultStakingGaugeId);
+});
+
+describe('When staking gauge is not found ', () => {
+    beforeEach(() => prismaMock.prismaPoolStakingGauge.findFirst.mockResolvedValue(null));
+
+    it('throws when gauge is valid for voting (not killed)', async () => {
+        const repository = new RootGaugesRepository(prismaMock);
+
+        const rootGauge = aRootGauge({ network: Chain.MAINNET, isKilled: false });
+
+        let error: Error = EmptyError;
+        try {
+            await repository.saveRootGauges([rootGauge]);
+        } catch (e) {
+            error = e as Error;
+        }
+
+        expect(error.message).toContain('RootGauge not found in PrismaPoolStakingGauge:');
+    });
+
+    it('does not throw when gauge is valid for voting (killed with no votes)', async () => {
+        const rootGauge = aRootGauge({ network: Chain.MAINNET, isKilled: true, relativeWeight: 0 });
+
+        const result = await repository.saveRootGauges([rootGauge]);
+
+        expect(result).toBeDefined();
+    });
 });

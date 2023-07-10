@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { prisma as prismaClient } from '../../prisma/prisma-client';
+import { prisma } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
-import { PrismaRootGauges } from './root-gauges.db';
 import {
     RootGauge,
     RootGaugesRepository,
@@ -16,11 +14,7 @@ import { hardCodedPools } from './special-pools/hardcoded-pools';
 export type VotingListPool = Awaited<ReturnType<VotingListService['getVotingList']>>[number];
 
 export class VotingListService {
-    constructor(
-        private prisma: PrismaClient = prismaClient,
-        private rootGauges = new RootGaugesRepository(),
-        private prismaRootGauges = new PrismaRootGauges(),
-    ) {}
+    constructor(private rootGauges = new RootGaugesRepository()) {}
 
     public async getVotingListWithHardcodedPools() {
         return [...(await this.getVotingList()), ...hardCodedPools];
@@ -54,7 +48,7 @@ export class VotingListService {
     }
 
     public async getPoolsForVotingList(poolIds: string[]) {
-        let pools = await this.prisma.prismaPool.findMany({
+        let pools = await prisma.prismaPool.findMany({
             where: {
                 id: { in: poolIds },
             },
@@ -92,7 +86,7 @@ export class VotingListService {
     }
 
     public async getValidVotingRootGauges() {
-        let gaugesWithStaking = await this.prisma.prismaRootStakingGauge.findMany({
+        let gaugesWithStaking = await prisma.prismaRootStakingGauge.findMany({
             where: {
                 stakingId: { not: null },
             },
@@ -121,7 +115,7 @@ export class VotingListService {
     }
 
     async syncRootGauges() {
-        await this.prismaRootGauges.deleteRootGauges();
+        await this.rootGauges.deleteRootGauges();
 
         const onchainRootAddresses = await this.rootGauges.getRootGaugeAddresses();
 
@@ -141,7 +135,7 @@ export class VotingListService {
             const cleanRootGauges = rootGauges.filter(
                 (gauge) => !specialRootGaugeAddresses.includes(gauge.gaugeAddress),
             );
-            await this.prismaRootGauges.saveRootGauges(cleanRootGauges);
+            await this.rootGauges.saveRootGauges(cleanRootGauges);
         }
     }
 
@@ -171,6 +165,7 @@ export function throwIfMissingRootGaugeData(rootGauges: RootGauge[]) {
             'Detected active root gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
             JSON.stringify(gaugesWithMissingData);
         console.error(errorMessage);
+        //TODO: Replace by sentry error
         throw new Error(errorMessage);
     }
 }

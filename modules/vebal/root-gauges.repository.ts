@@ -11,6 +11,8 @@ import gaugeControllerAbi from './abi/gaugeController.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
+import { PrismaClient } from '@prisma/client';
+import { prisma as prismaClient } from '../../prisma/prisma-client';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 
@@ -33,9 +35,11 @@ type SubGraphRootGauge = {
 
 /**
  * Fetches root gauges combining data from onchain contracts and the mainnet subgraph
- * Saves root gauges in the prisma DB
+ * Saves root gauges in prisma DB
  */
 export class RootGaugesRepository {
+    constructor(private prisma: PrismaClient = prismaClient) {}
+
     async getRootGaugeAddresses(): Promise<string[]> {
         const totalGauges = Number(formatFixed(await getGaugeControllerContract().n_gauges()));
         return await fetchGaugeAddresses(totalGauges);
@@ -100,6 +104,75 @@ export class RootGaugesRepository {
         });
 
         return [...l2RootGauges, ...mainnetRootGauges];
+    }
+
+    async deleteRootGauges() {
+        await this.prisma.prismaRootStakingGauge.deleteMany();
+    }
+
+    async saveRootGauges(rootGauges: RootGauge[]) {
+        const rootGaugesWithStakingId = Promise.all(
+            rootGauges.map(async (rootGauge) => {
+                const stakingId = await this.findStakingId(rootGauge);
+                rootGauge.stakingId = stakingId;
+                await this.saveRootGauge(rootGauge);
+                return rootGauge;
+            }),
+        );
+
+        return rootGaugesWithStakingId;
+    }
+
+    async saveRootGauge(rootGauge: RootGauge) {
+        try {
+            await this.prisma.prismaRootStakingGauge.create({
+                data: {
+                    id: rootGauge.gaugeAddress.toString(),
+                    chain: rootGauge.network,
+                    gaugeAddress: rootGauge.gaugeAddress.toString(),
+                    relativeWeight: rootGauge.relativeWeight.toString(),
+                    relativeWeightCap: rootGauge.relativeWeightCap,
+                    stakingId: rootGauge.stakingId!,
+                    status: rootGauge.isKilled ? 'KILLED' : 'ACTIVE',
+                },
+            });
+        } catch (error) {
+            console.error('Error saving root gauge: ', rootGauge);
+            throw error;
+        }
+    }
+
+    async findStakingId(rootGauge: RootGauge) {
+        const chain = rootGauge.network as Chain;
+        let mainnetGaugeAddressOrRecipient: string | undefined;
+        if (chain === 'MAINNET') {
+            mainnetGaugeAddressOrRecipient = rootGauge.gaugeAddress;
+        } else {
+            mainnetGaugeAddressOrRecipient = rootGauge.recipient?.toLowerCase();
+        }
+
+        let gauge = await this.prisma.prismaPoolStakingGauge.findFirst({
+            where: {
+                chain: { equals: chain },
+                gaugeAddress: { equals: mainnetGaugeAddressOrRecipient },
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        if (!gauge) {
+            // Only throw when root gauge is valid
+            if (isValidForVotingList(rootGauge)) {
+                const errorMessage = `RootGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(rootGauge)}`;
+                console.error(errorMessage);
+                // TODO: replace by sentry error
+                throw Error(errorMessage);
+            }
+            // Store without staking relation when missing stakingId and invalid for voting
+            return undefined;
+        }
+        return gauge.id;
     }
 }
 
