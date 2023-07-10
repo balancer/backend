@@ -1,5 +1,4 @@
 import { Chain, PrismaClient } from '@prisma/client';
-import { Address } from 'viem';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { RootGauge, isValidForVotingList } from './root-gauges.onchain';
 
@@ -35,7 +34,7 @@ export class PrismaRootGauges {
             // Store without staking relation when missing stakingId and invalid for voting
             return undefined;
         }
-        return gauge.id as Address;
+        return gauge.id;
     }
 
     async deleteRootGauges() {

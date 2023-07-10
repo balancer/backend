@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { Address, Chain } from 'viem';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
@@ -170,7 +169,7 @@ export class VotingListService {
     async fetchRootGauges(onchainRootAddresses: string[]) {
         const subgraphGauges = await fetchRootGaugesFromSubgraph(onchainRootAddresses);
 
-        const onchainGauges = await this.onchain.fetchOnchainRootGauges(onchainRootAddresses as Address[]);
+        const onchainGauges = await this.onchain.fetchOnchainRootGauges(onchainRootAddresses);
 
         const rootGauges = updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
