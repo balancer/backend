@@ -274,6 +274,7 @@ export class LiquidityGenerationEventService {
         const lges = await this.getLges();
         for (const lge of lges) {
             if (now >= lge.startTimestamp && now <= lge.endTimestamp) {
+                console.log(`syncing ${lge.id}`);
                 await this.syncRealPriceDataForLge(lge);
             } else {
                 const twoDaysAgo = moment().subtract(2, 'day').unix();
@@ -418,9 +419,9 @@ export class LiquidityGenerationEventService {
             const tokenPrice = this.calculateLbpTokenPrice(
                 tokenWeight,
                 collateralWeight,
-                tokenBalanceAfterSwap.toString(),
+                tokenBalanceAfterSwap,
                 lge.tokenDecimals,
-                collateralBalanceAfterSwap.toString(),
+                collateralBalanceAfterSwap,
                 lge.collateralDecimals,
                 collateralPrice,
             );
@@ -471,9 +472,9 @@ export class LiquidityGenerationEventService {
         const tokenPrice = this.calculateLbpTokenPrice(
             tokenWeight,
             collateralWeight,
-            previousTokenBalanceScaled.toString(),
+            previousTokenBalanceScaled,
             lge.tokenDecimals,
-            previousCollateralBalanceScaled.toString(),
+            previousCollateralBalanceScaled,
             lge.collateralDecimals,
             collateralTokenPrice,
         );
@@ -500,9 +501,9 @@ export class LiquidityGenerationEventService {
         const tokenPrice = this.calculateLbpTokenPrice(
             lge.tokenStartWeight,
             lge.collateralStartWeight,
-            lge.tokenAmount,
+            parseUnits(lge.tokenAmount, lge.tokenDecimals),
             lge.tokenDecimals,
-            lge.collateralAmount,
+            parseUnits(lge.collateralAmount, lge.collateralDecimals),
             lge.collateralDecimals,
             collateralTokenPrice,
         );
@@ -613,9 +614,9 @@ export class LiquidityGenerationEventService {
             price: this.calculateLbpTokenPrice(
                 tokenWeight,
                 collateralWeight,
-                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
+                parseUnits(tokenBalance, lge.tokenDecimals),
                 lge.tokenDecimals,
-                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
+                parseUnits(collateralBalance, lge.collateralDecimals),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             ),
@@ -639,9 +640,9 @@ export class LiquidityGenerationEventService {
             const tokenPrice = this.calculateLbpTokenPrice(
                 tokenWeight,
                 collateralWeight,
-                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
+                parseUnits(tokenBalance, lge.tokenDecimals),
                 lge.tokenDecimals,
-                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
+                parseUnits(collateralBalance, lge.collateralDecimals),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             );
@@ -657,9 +658,9 @@ export class LiquidityGenerationEventService {
             price: this.calculateLbpTokenPrice(
                 lge.tokenEndWeight,
                 lge.collateralEndWeight,
-                parseUnits(tokenBalance, lge.tokenDecimals).toString(),
+                parseUnits(tokenBalance, lge.tokenDecimals),
                 lge.tokenDecimals,
-                parseUnits(collateralBalance, lge.collateralDecimals).toString(),
+                parseUnits(collateralBalance, lge.collateralDecimals),
                 lge.collateralDecimals,
                 collateralTokenPrice,
             ),
@@ -714,9 +715,9 @@ export class LiquidityGenerationEventService {
     private calculateLbpTokenPrice(
         tokenWeight: number,
         collateralWeight: number,
-        scaledTokenBalance: string,
+        scaledTokenBalance: BigNumber,
         tokenDecimals: number,
-        scaledCollateralBalance: string,
+        scaledCollateralBalance: BigNumber,
         collateralDecimals: number,
         collateralTokenPrice: number,
     ): number {
