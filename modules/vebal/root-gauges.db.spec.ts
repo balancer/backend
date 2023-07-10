@@ -1,12 +1,11 @@
 import { Chain } from '@prisma/client';
-import { Address } from 'viem';
 import { defaultStakingGaugeId, prismaMock } from './prismaPoolStakingGauge.mock';
-import { RootGauge } from './root-gauges.onchain';
+import { RootGauge } from './root-gauges.repository';
 import { PrismaRootGauges } from './root-gauges.db';
 
 export function aRootGauge(...options: Partial<RootGauge>[]): RootGauge {
     const defaultRootGauge: RootGauge = {
-        gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7' as Address,
+        gaugeAddress: '0x79ef6103a513951a3b25743db509e267685726b7',
         isKilled: false,
         network: 'MAINNET' as Chain,
         recipient: undefined,

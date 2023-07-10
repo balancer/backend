@@ -1,4 +1,4 @@
-import { OnChainRootGauges, toPrismaNetwork } from './root-gauges.onchain';
+import { RootGaugesRepository, toPrismaNetwork } from './root-gauges.repository';
 import { Chain } from '@prisma/client';
 
 // anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17569375
@@ -16,13 +16,13 @@ it('maps onchain network format into prisma chain format', async () => {
 });
 
 it('fetches list of root gauge addresses', async () => {
-    const service = new OnChainRootGauges();
+    const service = new RootGaugesRepository();
     const addresses = await service.getRootGaugeAddresses();
     expect(addresses.length).toBe(333);
 }, 10_000);
 
 it.only('generates root gauge rows given a list of gauge addresses', async () => {
-    const service = new OnChainRootGauges();
+    const service = new RootGaugesRepository();
 
     const rootGaugeAddresses = [
         '0x79eF6103A513951a3b25743DB509E267685726B7',
@@ -66,14 +66,14 @@ it.only('generates root gauge rows given a list of gauge addresses', async () =>
 
 it('Excludes Liquidity Mining Committee gauge', async () => {
     const liquidityMiningAddress = '0x7AA5475b2eA29a9F4a1B9Cf1cB72512D1B4Ab75e';
-    const service = new OnChainRootGauges();
+    const service = new RootGaugesRepository();
     const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
     expect(rows).toEqual([]);
 });
 
 it('fetches veBAL gauge as MAINNET', async () => {
     const vebalAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
-    const service = new OnChainRootGauges();
+    const service = new RootGaugesRepository();
     const rows = await service.fetchOnchainRootGauges([vebalAddress]);
     expect(rows).toEqual([
         {

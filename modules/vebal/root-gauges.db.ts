@@ -1,6 +1,6 @@
 import { Chain, PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
-import { RootGauge, isValidForVotingList } from './root-gauges.onchain';
+import { RootGauge, isValidForVotingList } from './root-gauges.repository';
 
 export class PrismaRootGauges {
     constructor(private prisma: PrismaClient = prismaClient) {}

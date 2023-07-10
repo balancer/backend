@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { mapValues, zipObject } from 'lodash';
+import { keyBy, mapValues, zipObject } from 'lodash';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber, Contract } from 'ethers';
@@ -9,6 +9,8 @@ import multicall3Abi from '../pool/lib/staking/abi/Multicall3.json';
 import { Multicaller } from '../web3/multicaller';
 import gaugeControllerAbi from './abi/gaugeController.json';
 import rootGaugeAbi from './abi/rootGauge.json';
+import { GraphQLClient } from 'graphql-request';
+import { getSdk } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 
@@ -23,7 +25,17 @@ export type RootGauge = {
     isInSubgraph: boolean;
 };
 
-export class OnChainRootGauges {
+type SubGraphRootGauge = {
+    gaugeAddress: string;
+    chain: Chain;
+    recipient?: string;
+};
+
+/**
+ * Fetches root gauges combining data from onchain contracts and the mainnet subgraph
+ * Saves root gauges in the prisma DB
+ */
+export class RootGaugesRepository {
     async getRootGaugeAddresses(): Promise<string[]> {
         const totalGauges = Number(formatFixed(await getGaugeControllerContract().n_gauges()));
         return await fetchGaugeAddresses(totalGauges);
@@ -63,6 +75,47 @@ export class OnChainRootGauges {
 
         return rootGauges;
     }
+
+    async fetchRootGaugesFromSubgraph(onchainRootAddresses: string[]) {
+        // This service only works with the mainnet subgraph
+        const mainnetSubgraph = getSdk(new GraphQLClient(mainnetNetworkConfig.data.subgraphs.gauge!));
+        const rootGauges = (await mainnetSubgraph.RootGauges({ ids: onchainRootAddresses })).rootGauges;
+
+        const l2RootGauges: SubGraphRootGauge[] = rootGauges.map((gauge) => {
+            return {
+                gaugeAddress: gauge.id,
+                chain: gauge.chain.toUpperCase() as Chain,
+                recipient: gauge.recipient,
+            } as SubGraphRootGauge;
+        });
+
+        const liquidityGauges = (await mainnetSubgraph.LiquidityGauges({ ids: onchainRootAddresses })).liquidityGauges;
+
+        const mainnetRootGauges: SubGraphRootGauge[] = liquidityGauges.map((gauge) => {
+            return {
+                gaugeAddress: gauge.id,
+                chain: Chain.MAINNET,
+                recipient: undefined,
+            } as SubGraphRootGauge;
+        });
+
+        return [...l2RootGauges, ...mainnetRootGauges];
+    }
+}
+
+export function updateOnchainGaugesWithSubgraphData(onchainGauges: RootGauge[], subgraphGauges: SubGraphRootGauge[]) {
+    const subgraphGaugesByAddress = keyBy(subgraphGauges, 'gaugeAddress');
+
+    return onchainGauges.map((gauge) => {
+        const rootGauge = gauge;
+        const subGraphGauge = subgraphGaugesByAddress[gauge.gaugeAddress];
+        if (subGraphGauge) {
+            rootGauge.isInSubgraph = true;
+            rootGauge.network = subGraphGauge.chain;
+            rootGauge.recipient = subGraphGauge.recipient;
+        }
+        return rootGauge;
+    });
 }
 
 export function toPrismaNetwork(onchainNetwork: string): Chain {

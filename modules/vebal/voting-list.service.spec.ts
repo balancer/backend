@@ -1,6 +1,6 @@
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { PrismaRootGauges } from './root-gauges.db';
-import { OnChainRootGauges } from './root-gauges.onchain';
+import { RootGaugesRepository } from './root-gauges.repository';
 import { VotingListService } from './voting-list.service';
 
 it('Full flow', async () => {
@@ -8,8 +8,8 @@ it('Full flow', async () => {
     const service = new VotingListService();
     setMainnetRpcProviderForTesting(httpRpc);
 
-    const onchainRootGauges = new OnChainRootGauges();
-    let onchainRootAddresses: string[] = await onchainRootGauges.getRootGaugeAddresses();
+    const repository = new RootGaugesRepository();
+    let onchainRootAddresses: string[] = await repository.getRootGaugeAddresses();
 
     console.log('Number of addresses download: ', onchainRootAddresses.length);
 

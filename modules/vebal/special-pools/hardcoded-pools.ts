@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { VotingListPool } from '../voting-list.service';
 
-const twammRootGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1' as string;
+const twammRootGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
 
 const twammPool: VotingListPool = {
     chain: Chain.MAINNET,

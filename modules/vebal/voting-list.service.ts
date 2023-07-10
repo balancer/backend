@@ -2,20 +2,29 @@ import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
-import { OnChainRootGauges, RootGauge, isValidForVotingList } from './root-gauges.onchain';
 import { PrismaRootGauges } from './root-gauges.db';
-import { fetchRootGaugesFromSubgraph, updateOnchainGaugesWithSubgraphData } from './root-gauges.subgraph';
-import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
+import {
+    RootGauge,
+    RootGaugesRepository,
+    isValidForVotingList,
+    updateOnchainGaugesWithSubgraphData,
+} from './root-gauges.repository';
 import { specialRootGaugeAddresses } from './special-pools/special-root-gauge-addresses';
+import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
+import { hardCodedPools } from './special-pools/hardcoded-pools';
 
 export type VotingListPool = Awaited<ReturnType<VotingListService['getVotingList']>>[number];
 
 export class VotingListService {
     constructor(
         private prisma: PrismaClient = prismaClient,
-        private onchain = new OnChainRootGauges(),
+        private rootGauges = new RootGaugesRepository(),
         private prismaRootGauges = new PrismaRootGauges(),
     ) {}
+
+    public async getVotingListWithHardcodedPools() {
+        return [...(await this.getVotingList()), ...hardCodedPools];
+    }
 
     public async getVotingList() {
         const validGauges = await this.getValidVotingRootGauges();
@@ -114,7 +123,7 @@ export class VotingListService {
     async syncRootGauges() {
         await this.prismaRootGauges.deleteRootGauges();
 
-        const onchainRootAddresses = await this.onchain.getRootGaugeAddresses();
+        const onchainRootAddresses = await this.rootGauges.getRootGaugeAddresses();
 
         this.sync(onchainRootAddresses);
     }
@@ -137,9 +146,9 @@ export class VotingListService {
     }
 
     async fetchRootGauges(onchainRootAddresses: string[]) {
-        const subgraphGauges = await fetchRootGaugesFromSubgraph(onchainRootAddresses);
+        const subgraphGauges = await this.rootGauges.fetchRootGaugesFromSubgraph(onchainRootAddresses);
 
-        const onchainGauges = await this.onchain.fetchOnchainRootGauges(onchainRootAddresses);
+        const onchainGauges = await this.rootGauges.fetchOnchainRootGauges(onchainRootAddresses);
 
         const rootGauges = updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
