@@ -23,21 +23,6 @@ export type RootGauge = {
     isInSubgraph: boolean;
 };
 
-export function getMulticall3Contract() {
-    return new Contract(mainnetNetworkConfig.data.multicall3, multicall3Abi, mainnetNetworkConfig.provider);
-}
-
-export function getGaugeControllerContract() {
-    return new Contract(gaugeControllerAddress, gaugeControllerAbi, mainnetNetworkConfig.provider);
-}
-
-/**
- *
- * This is the first proof of concept using viem's multicall
- * It contains ad-hoc helpers to make the code easier in this concrete scenario but in the future we will try to create a more generic
- * multicaller implementation to generalize any multicall flow
- *
- */
 export class OnChainRootGauges {
     async getRootGaugeAddresses(): Promise<string[]> {
         const totalGauges = Number(formatFixed(await getGaugeControllerContract().n_gauges()));
@@ -91,31 +76,6 @@ export function toPrismaNetwork(onchainNetwork: string): Chain {
 function generateGaugeIndexes(totalGauges: number) {
     return [...Array(totalGauges)].map((_, index) => index);
 }
-
-export const veGauges = [
-    // They are not listed in the subgraph but we do have pool and staking info stored
-    '0x5b79494824bc256cd663648ee1aad251b32693a9', // veUSH
-    '0xb78543e00712c3abba10d0852f6e38fde2aaba4d', // veBAL
-    '0x56124eb16441a1ef12a4ccaeabdd3421281b795a', // veLIT
-];
-
-// TODO: Find a fix for these pools: they fail because they are valid for voting but no PrimaPoolStakingGauge relation was found
-export const specialRootGaugeAddresses = [
-    ...veGauges,
-
-    // Balancer USDC/WETH/L Gauge Deposit
-    // https://etherscan.io/address/0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c#readContract
-    // Valid root gauge without Staking relation (MAINNET??)
-    '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c',
-
-    // TWAMM (Mainnet) Root gauges do exist but poolId 0x6910c4e32d425a834fb61e983c8083a84b0ebd01000200000000000000000532 does not exist in PrismaPool
-    '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1',
-
-    // ARBITRUM Killed root gauge that shares staking with '0xd758454bdf4df7ad85f7538dc9742648ef8e6d0a' (was failing due to unique constraint)
-    '0x3f829a8303455cb36b7bcf3d1bdc18d5f6946aea',
-
-    '0xf0d887c1f5996c91402eb69ab525f028dd5d7578',
-];
 
 // A gauge should be included in the voting list when:
 //  - it is alive (not killed)
@@ -181,7 +141,7 @@ async function fetchIsKilled(gaugeAddresses: string[]) {
 /**
  * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
  */
-async function fetchRelativeWeightCaps(gaugeAddresses: string[]) {
+export async function fetchRelativeWeightCaps(gaugeAddresses: string[]) {
     const iRootGaugeController = new Interface(rootGaugeAbi);
     const allowFailures = true;
 
@@ -202,6 +162,14 @@ async function fetchRelativeWeightCaps(gaugeAddresses: string[]) {
     );
 
     return zipObject(gaugeAddresses, relativeWeightCaps);
+}
+
+export function getMulticall3Contract() {
+    return new Contract(mainnetNetworkConfig.data.multicall3, multicall3Abi, mainnetNetworkConfig.provider);
+}
+
+export function getGaugeControllerContract() {
+    return new Contract(gaugeControllerAddress, gaugeControllerAbi, mainnetNetworkConfig.provider);
 }
 
 function buildGaugeControllerMulticaller() {
