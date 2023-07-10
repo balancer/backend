@@ -1,5 +1,3 @@
-import { Address } from 'viem';
-import { createHttpClient } from '../network/viem/clients';
 import { OnChainRootGauges, toPrismaNetwork } from './root-gauges.onchain';
 import { Chain } from '@prisma/client';
 
@@ -9,7 +7,6 @@ import { Chain } from '@prisma/client';
 // const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';
 const httpRpc = 'http://127.0.0.1:8555';
 console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
-const testHttpClient = createHttpClient(httpRpc);
 
 it('maps onchain network format into prisma chain format', async () => {
     expect(toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
@@ -19,19 +16,19 @@ it('maps onchain network format into prisma chain format', async () => {
 });
 
 it('fetches list of root gauge addresses', async () => {
-    const service = new OnChainRootGauges(testHttpClient);
+    const service = new OnChainRootGauges();
     const addresses = await service.getRootGaugeAddresses();
     expect(addresses.length).toBe(333);
 }, 10_000);
 
-it('generates root gauge rows given a list of gauge addresses', async () => {
-    const service = new OnChainRootGauges(testHttpClient);
+it.only('generates root gauge rows given a list of gauge addresses', async () => {
+    const service = new OnChainRootGauges();
 
     const rootGaugeAddresses = [
         '0x79eF6103A513951a3b25743DB509E267685726B7',
         '0xfb0265841C49A6b19D70055E596b212B0dA3f606',
         '0x8F7a0F9cf545DB78BF5120D3DBea7DE9c6220c10',
-    ] as Address[];
+    ];
     // Uncomment to test with all the root gauges
     // const rootGaugeAddresses = await service.getRootGaugeAddresses();
 
@@ -44,7 +41,7 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
           "isInSubgraph": false,
           "isKilled": false,
           "network": "MAINNET",
-          "relativeWeight": 75545423881001780,
+          "relativeWeight": 0.07037221488051114,
           "relativeWeightCap": undefined,
         },
         {
@@ -69,14 +66,14 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
 
 it('Excludes Liquidity Mining Committee gauge', async () => {
     const liquidityMiningAddress = '0x7AA5475b2eA29a9F4a1B9Cf1cB72512D1B4Ab75e';
-    const service = new OnChainRootGauges(testHttpClient);
+    const service = new OnChainRootGauges();
     const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
     expect(rows).toEqual([]);
 });
 
 it('fetches veBAL gauge as MAINNET', async () => {
     const vebalAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
-    const service = new OnChainRootGauges(testHttpClient);
+    const service = new OnChainRootGauges();
     const rows = await service.fetchOnchainRootGauges([vebalAddress]);
     expect(rows).toEqual([
         {

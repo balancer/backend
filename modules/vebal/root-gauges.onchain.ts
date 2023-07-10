@@ -1,26 +1,35 @@
 import { Chain } from '@prisma/client';
 import { mapValues, zipObject } from 'lodash';
-import { Address, PublicClient, formatUnits } from 'viem';
 
+import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, Contract } from 'ethers';
+import { Interface, formatEther } from 'ethers/lib/utils';
 import { mainnetNetworkConfig } from '../network/mainnet';
-import { gaugeControllerAbi } from './abi/gaugeController.abi';
-import { rootGaugeAbi } from './abi/rootGauge.abi';
+import multicall3Abi from '../pool/lib/staking/abi/Multicall3.json';
+import { Multicaller } from '../web3/multicaller';
+import gaugeControllerAbi from './abi/gaugeController.json';
+import rootGaugeAbi from './abi/rootGauge.json';
 
-const gaugeControllerContract = {
-    address: mainnetNetworkConfig.data.gaugeControllerAddress!,
-    abi: gaugeControllerAbi,
-} as const;
+const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 
 export type RootGauge = {
-    gaugeAddress: Address;
+    gaugeAddress: string;
     network: Chain;
     isKilled: boolean;
     relativeWeight: number;
     relativeWeightCap?: string;
     recipient?: string;
-    stakingId?: Address;
+    stakingId?: string;
     isInSubgraph: boolean;
 };
+
+export function getMulticall3Contract() {
+    return new Contract(mainnetNetworkConfig.data.multicall3, multicall3Abi, mainnetNetworkConfig.provider);
+}
+
+export function getGaugeControllerContract() {
+    return new Contract(gaugeControllerAddress, gaugeControllerAbi, mainnetNetworkConfig.provider);
+}
 
 /**
  *
@@ -30,146 +39,44 @@ export type RootGauge = {
  *
  */
 export class OnChainRootGauges {
-    constructor(
-        private publicClient: PublicClient = mainnetNetworkConfig.publicClient!,
-        private readContract = publicClient.readContract,
-    ) {}
-
     async getRootGaugeAddresses(): Promise<string[]> {
-        const totalGauges = Number(
-            await this.readContract({
-                ...gaugeControllerContract,
-                functionName: 'n_gauges',
-            }),
-        );
-        const addresses = await this.publicClient.multicall({
-            allowFailure: false,
-            contracts: this.gaugeControllerCallsByIndex(totalGauges, 'gauges'),
-        });
-
-        return addresses.map((address) => address.toLowerCase());
+        const totalGauges = Number(formatFixed(await getGaugeControllerContract().n_gauges()));
+        return await fetchGaugeAddresses(totalGauges);
     }
 
-    async fetchOnchainRootGauges(gaugeAddresses: Address[]): Promise<RootGauge[]> {
-        const totalGaugesTypes = Number(
-            await this.readContract({
-                ...gaugeControllerContract,
-                functionName: 'n_gauge_types',
-            }),
-        );
+    async fetchOnchainRootGauges(gaugeAddresses: string[]): Promise<RootGauge[]> {
+        const totalGaugesTypes = Number(formatFixed(await getGaugeControllerContract().n_gauge_types()));
 
-        const typeNames = await this.publicClient.multicall({
-            allowFailure: false,
-            contracts: this.gaugeControllerCallsByIndex(totalGaugesTypes, 'gauge_type_names'),
-        });
+        const typeNames = await fetchTypeNames(totalGaugesTypes);
 
-        const relativeWeights = await this.multicallGaugeController(gaugeAddresses, 'gauge_relative_weight');
+        const relativeWeights = await fetchRelativeWeights(gaugeAddresses);
 
         /*
             gauge_types are not reliable because they are manually input by Maxis
             We will use subgraph chain field instead
             However, we keep pulling this gauge_types cause they can be useful for debugging (when a root gauge is not found in the subgraph)
         */
-        const gaugeTypeIndexes = await this.multicallGaugeController(gaugeAddresses, 'gauge_types');
+        const gaugeTypeIndexes = await fetchGaugeTypes(gaugeAddresses);
         const gaugeTypes = mapValues(gaugeTypeIndexes, (type) => typeNames[Number(type)]);
 
-        const isKilled = await this.multicallRootGauges(gaugeAddresses, 'is_killed');
+        const isKilled = await fetchIsKilled(gaugeAddresses);
 
-        const relativeWeightCapsWithFailures = await this.multicallRootGaugesAllowingFailures(
-            gaugeAddresses,
-            'getRelativeWeightCap',
-        );
-        const relativeWeightCaps = mapValues(relativeWeightCapsWithFailures, (r) => r.result);
+        const relativeWeightCaps = await fetchRelativeWeightCaps(gaugeAddresses);
 
         let rootGauges: RootGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
-            const relativeWeight = relativeWeightCaps[gaugeAddress];
             if (gaugeTypes[gaugeAddress] === 'Liquidity Mining Committee') return;
             rootGauges.push({
-                gaugeAddress: gaugeAddress.toLowerCase() as Address,
+                gaugeAddress: gaugeAddress.toLowerCase(),
                 network: toPrismaNetwork(gaugeTypes[gaugeAddress]),
                 isKilled: isKilled[gaugeAddress],
-                relativeWeight: Number(relativeWeights[gaugeAddress]),
-                relativeWeightCap: relativeWeight ? formatUnits(relativeWeight, 18) : undefined,
+                relativeWeight: relativeWeights[gaugeAddress],
+                relativeWeightCap: relativeWeightCaps[gaugeAddress],
                 isInSubgraph: false,
             });
         });
 
         return rootGauges;
-    }
-
-    gaugeControllerCallsByIndex<TFunctionName extends string>(totalCalls: number, functionName: TFunctionName) {
-        return generateGaugeIndexes(totalCalls).map(
-            (index) =>
-                ({
-                    ...gaugeControllerContract,
-                    functionName,
-                    args: [BigInt(index)],
-                } as const),
-        );
-    }
-
-    gaugeControllerCallsByAddress<TFunctionName extends string>(
-        gaugeAddresses: Address[],
-        functionName: TFunctionName,
-    ) {
-        return gaugeAddresses.map(
-            (address) =>
-                ({
-                    ...gaugeControllerContract,
-                    functionName,
-                    args: [address],
-                } as const),
-        );
-    }
-
-    async multicallGaugeController<TFunctionName extends string>(
-        gaugeAddresses: Address[],
-        functionName: TFunctionName,
-    ) {
-        const results = await this.publicClient.multicall({
-            allowFailure: false,
-            // See https://github.com/wagmi-dev/viem/discussions/821
-            // @ts-ignore
-            contracts: this.gaugeControllerCallsByAddress(gaugeAddresses, functionName),
-        });
-        return zipObject(gaugeAddresses, results) as Record<Address, typeof results[number]>;
-    }
-
-    async multicallRootGauges<TFunctionName extends string>(
-        rootGaugeAddresses: Address[],
-        functionName: TFunctionName,
-    ) {
-        const contracts = rootGaugeAddresses.map((address) => ({
-            address,
-            abi: rootGaugeAbi,
-            functionName,
-        }));
-        const results = await this.publicClient.multicall({
-            allowFailure: false,
-            // See https://github.com/wagmi-dev/viem/discussions/821
-            // @ts-ignore
-            contracts,
-        });
-        return zipObject(rootGaugeAddresses, results) as Record<Address, typeof results[number]>;
-    }
-
-    async multicallRootGaugesAllowingFailures<TFunctionName extends string>(
-        rootGaugeAddresses: Address[],
-        functionName: TFunctionName,
-    ) {
-        const contracts = rootGaugeAddresses.map((address) => ({
-            address,
-            abi: rootGaugeAbi,
-            functionName,
-        }));
-        const results = await this.publicClient.multicall({
-            allowFailure: true,
-            // See https://github.com/wagmi-dev/viem/discussions/821
-            // @ts-ignore
-            contracts,
-        });
-        return zipObject(rootGaugeAddresses, results) as Record<Address, typeof results[number]>;
     }
 }
 
@@ -206,6 +113,8 @@ export const specialRootGaugeAddresses = [
 
     // ARBITRUM Killed root gauge that shares staking with '0xd758454bdf4df7ad85f7538dc9742648ef8e6d0a' (was failing due to unique constraint)
     '0x3f829a8303455cb36b7bcf3d1bdc18d5f6946aea',
+
+    '0xf0d887c1f5996c91402eb69ab525f028dd5d7578',
 ];
 
 // A gauge should be included in the voting list when:
@@ -215,4 +124,98 @@ export const specialRootGaugeAddresses = [
 export function isValidForVotingList(rootGauge: { isKilled: boolean; relativeWeight: number }) {
     const isAlive = !rootGauge.isKilled;
     return isAlive || rootGauge.relativeWeight > 0;
+}
+
+async function fetchGaugeAddresses(totalGauges: number) {
+    const multicaller = buildGaugeControllerMulticaller();
+    generateGaugeIndexes(totalGauges).forEach((index) =>
+        multicaller.call(`${index}`, gaugeControllerAddress, 'gauges', [index]),
+    );
+
+    const response = (await multicaller.execute()) as Record<string, string>;
+    return Object.values(response).map((address) => address.toLowerCase());
+}
+
+async function fetchTypeNames(totalTypes: number) {
+    const multicaller = buildGaugeControllerMulticaller();
+
+    generateGaugeIndexes(totalTypes).forEach((index) =>
+        multicaller.call(`${index}`, gaugeControllerAddress, 'gauge_type_names', [index]),
+    );
+
+    const response = (await multicaller.execute()) as Record<string, string>;
+
+    return Object.values(response);
+}
+
+async function fetchGaugeTypes(gaugeAddresses: string[]) {
+    const multicaller = buildGaugeControllerMulticaller();
+
+    gaugeAddresses.forEach((address) => multicaller.call(address, gaugeControllerAddress, 'gauge_types', [address]));
+
+    return (await multicaller.execute()) as Record<string, string>;
+}
+
+async function fetchRelativeWeights(gaugeAddresses: string[]) {
+    const multicaller = buildGaugeControllerMulticaller();
+    gaugeAddresses.forEach((address) =>
+        multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address]),
+    );
+
+    const response = (await multicaller.execute()) as Record<string, BigNumber>;
+    return mapValues(response, (value) => Number(formatEther(value)));
+}
+
+async function fetchIsKilled(gaugeAddresses: string[]) {
+    const rootGaugeMulticaller = new Multicaller(
+        mainnetNetworkConfig.data.multicall,
+        mainnetNetworkConfig.provider,
+        rootGaugeAbi,
+    );
+
+    gaugeAddresses.forEach((address) => rootGaugeMulticaller.call(address, address, 'is_killed'));
+
+    return (await rootGaugeMulticaller.execute()) as Record<string, boolean>;
+}
+
+/**
+ * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
+ */
+async function fetchRelativeWeightCaps(gaugeAddresses: string[]) {
+    const iRootGaugeController = new Interface(rootGaugeAbi);
+    const allowFailures = true;
+
+    const calls = gaugeAddresses.map((address) => [
+        address,
+        allowFailures,
+        iRootGaugeController.encodeFunctionData('getRelativeWeightCap'),
+    ]);
+
+    const multicall = getMulticall3Contract();
+    type Result = { success: boolean; returnData: string };
+    const results: Result[] = await multicall.callStatic.aggregate3(calls);
+
+    const relativeWeightCaps = results.map((result) =>
+        result.success
+            ? formatEther(iRootGaugeController.decodeFunctionResult('getRelativeWeightCap', result.returnData)[0])
+            : undefined,
+    );
+
+    return zipObject(gaugeAddresses, relativeWeightCaps);
+}
+
+function buildGaugeControllerMulticaller() {
+    /*
+        gauge_relative_weight has 2 overridden instances with different amounts of inputs which causes problems with ethers
+        We apply a filter to exclude the function that we are not using
+    */
+    const filteredGaugeControllerAbi = gaugeControllerAbi.filter((item) => {
+        return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
+    });
+
+    return new Multicaller(
+        mainnetNetworkConfig.data.multicall,
+        mainnetNetworkConfig.provider,
+        filteredGaugeControllerAbi,
+    );
 }

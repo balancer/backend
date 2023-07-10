@@ -1,18 +1,14 @@
-import { mainnetNetworkConfig } from '../network/mainnet';
-import { createHttpClient } from '../network/viem/clients';
-import { OnChainRootGauges } from './root-gauges.onchain';
+import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { PrismaRootGauges } from './root-gauges.db';
+import { OnChainRootGauges } from './root-gauges.onchain';
 import { VotingListService } from './voting-list.service';
 
 it('Full flow', async () => {
     const httpRpc = 'http://127.0.0.1:8555';
-    // const httpRpc = '';
-    console.log(`🤖 Integration tests using ${httpRpc} as rpc url`);
-    const testHttpClient = createHttpClient(httpRpc);
-    mainnetNetworkConfig.publicClient = testHttpClient;
     const service = new VotingListService();
+    setMainnetRpcProviderForTesting(httpRpc);
 
-    const onchainRootGauges = new OnChainRootGauges(testHttpClient);
+    const onchainRootGauges = new OnChainRootGauges();
     let onchainRootAddresses: string[] = await onchainRootGauges.getRootGaugeAddresses();
 
     console.log('Number of addresses download: ', onchainRootAddresses.length);

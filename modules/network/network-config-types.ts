@@ -7,7 +7,6 @@ import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
 import { WorkerJob } from '../../worker/job-handlers';
-import { Address, PublicClient } from 'viem';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -17,7 +16,6 @@ export interface NetworkConfig {
     userStakedBalanceServices: UserStakedBalanceService[];
     tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
-    publicClient?: PublicClient;
     workerJobs: WorkerJob[];
 }
 
