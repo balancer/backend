@@ -10,6 +10,7 @@ import VaultAbi from '../../../pool/abi/Vault.json';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { networkContext } from '../../../network/network-context.service';
+import { time } from 'console';
 
 export class BeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -22,26 +23,17 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         const timestamp = timestampRoundedUpToNearestHour();
         const beetsFtmAddress = '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e';
-        const usdcFtmAddress = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
         const wftmFtmAddress = '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83';
-        const fidelioPoolId = '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019';
-        const fotoPoolId = '0xcdf68a4d525ba2e90fe959c74330430a5a6b8226000200000000000000000008';
+        const freshBeetsPoolId = '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec';
         const VaultFtmAddress = '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce';
 
-        const assets: string[] = [beetsFtmAddress, wftmFtmAddress, usdcFtmAddress];
+        const assets: string[] = [beetsFtmAddress, wftmFtmAddress];
         const swaps: SwapV2[] = [
             {
-                poolId: fidelioPoolId,
+                poolId: freshBeetsPoolId,
                 assetInIndex: 0,
                 assetOutIndex: 1,
                 amount: fp(1).toString(),
-                userData: '0x',
-            },
-            {
-                poolId: fotoPoolId,
-                assetInIndex: 1,
-                assetOutIndex: 2,
-                amount: '0',
                 userData: '0x',
             },
         ];
@@ -61,7 +53,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         let tokenOutAmountScaled = '0';
         try {
             const deltas = await vaultContract.queryBatchSwap(SwapTypes.SwapExactIn, swaps, assets, funds);
-            tokenOutAmountScaled = deltas[assets.indexOf(usdcFtmAddress)] ?? '0';
+            tokenOutAmountScaled = deltas[assets.indexOf(wftmFtmAddress)] ?? '0';
         } catch (err) {
             console.log(`queryBatchSwapTokensIn error: `, err);
         }
@@ -70,7 +62,13 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
             throw new Error('BeetsPriceHandlerService: Could not get beets price from on-chain.');
         }
 
-        const beetsPrice = Math.abs(parseFloat(formatFixed(tokenOutAmountScaled, 6)));
+        const ftmPrice = await prisma.prismaTokenCurrentPrice.findUniqueOrThrow({
+            where: {
+                tokenAddress_chain: { tokenAddress: wftmFtmAddress.toLowerCase(), chain: 'FANTOM' },
+            },
+        });
+
+        const beetsPrice = ftmPrice.price * Math.abs(parseFloat(formatFixed(tokenOutAmountScaled, 18)));
 
         await prisma.prismaTokenCurrentPrice.upsert({
             where: {
