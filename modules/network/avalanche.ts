@@ -63,7 +63,7 @@ const avalancheNetworkData: NetworkData = {
         address: '0x0000000000000000000000000000000000000000',
     },
     bal: {
-        address: '0x8239A6b877804206C7799028232A7188DA487CeC',
+        address: '0xE15bCB9E0EA69e6aB9FA080c4c4A5632896298C3',
     },
     veBal: {
         address: '',
