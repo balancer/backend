@@ -16,7 +16,11 @@ export class CoingeckoDataService {
             where: { coingeckoTokenId: { not: null } },
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
-        const uniqueTokensWithIds = _.uniqBy(tokensWithIds, 'coingeckoTokenId');
+
+        // don't price beets via coingecko for now
+        const filteredTokens = tokensWithIds.filter((token) => token.coingeckoTokenId !== 'beethoven-x');
+
+        const uniqueTokensWithIds = _.uniqBy(filteredTokens, 'coingeckoTokenId');
 
         const chunks = _.chunk(uniqueTokensWithIds, 250); //max page size is 250
 
