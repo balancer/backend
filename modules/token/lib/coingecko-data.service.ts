@@ -18,7 +18,7 @@ export class CoingeckoDataService {
         });
 
         // don't price beets via coingecko for now
-        const filteredTokens = tokensWithIds.filter((token) => token.address !== networkContext.data.beets.address);
+        const filteredTokens = tokensWithIds.filter((token) => token.coingeckoTokenId !== 'beethoven-x');
 
         const uniqueTokensWithIds = _.uniqBy(filteredTokens, 'coingeckoTokenId');
 
