@@ -40,7 +40,7 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
@@ -60,6 +60,13 @@ const fantomNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'fantom',
         platformId: 'fantom',
+        excludedTokenAddresses: [
+            '0x04068da6c83afcfa0e13ba15a6696662335d5b75', // multi usdc
+            '0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e', // multi usdt
+            '0x049d68029688eabf473097a2fc38ef61633a3c7a', // multi dai
+            '0x321162cd933e2be498cd2267a90534a804051b11', // multi wbtc
+            '0x74b23882a30290451a17c44f4f05243b6b58c76d', // mutli weth
+        ],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,

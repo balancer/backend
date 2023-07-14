@@ -31,7 +31,11 @@ export class CoingeckoDataService {
             let operations: any[] = [];
 
             for (const item of response) {
-                const tokensToUpdate = tokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
+                const tokensToUpdate = tokensWithIds.filter(
+                    (token) =>
+                        token.coingeckoTokenId === item.id &&
+                        !networkContext.data.coingecko.excludedTokenAddresses.includes(token.address),
+                );
                 for (const tokenToUpdate of tokensToUpdate) {
                     // only update if we have a new price and if we have a price at all
                     if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes')) && item.current_price) {

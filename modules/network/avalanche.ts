@@ -47,6 +47,7 @@ const avalancheNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'avalanche-2',
         platformId: 'avalanche',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,

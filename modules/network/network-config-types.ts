@@ -46,6 +46,7 @@ export interface NetworkData {
     coingecko: {
         nativeAssetId: string;
         platformId: string;
+        excludedTokenAddresses: string[];
     };
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: number;

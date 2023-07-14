@@ -49,6 +49,7 @@ const mainnetNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
