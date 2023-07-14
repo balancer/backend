@@ -5,6 +5,8 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
 import { CoingeckoService } from '../../coingecko/coingecko.service';
 import { networkContext } from '../../network/network-context.service';
+import { AllNetworkConfigs } from '../../network/network-config';
+import { PrismaToken } from '.prisma/client';
 
 export class CoingeckoDataService {
     constructor(private readonly conigeckoService: CoingeckoService) {}
@@ -17,8 +19,22 @@ export class CoingeckoDataService {
             orderBy: { dynamicData: { updatedAt: 'asc' } },
         });
 
+        // need to filter any excluded tokens from the network configs
+        const allNetworkConfigs = Object.keys(AllNetworkConfigs);
+        const includedTokensWithIds: PrismaToken[] = [];
+        for (const chainId of allNetworkConfigs) {
+            const excludedAddresses = AllNetworkConfigs[chainId].data.coingecko.excludedTokenAddresses;
+            const chain = AllNetworkConfigs[chainId].data.chain;
+
+            includedTokensWithIds.push(
+                ...tokensWithIds.filter(
+                    (token) => token.chain === chain.prismaId && !excludedAddresses.includes(token.address),
+                ),
+            );
+        }
+
         // don't price beets via coingecko for now
-        const filteredTokens = tokensWithIds.filter((token) => token.coingeckoTokenId !== 'beethoven-x');
+        const filteredTokens = includedTokensWithIds.filter((token) => token.coingeckoTokenId !== 'beethoven-x');
 
         const uniqueTokensWithIds = _.uniqBy(filteredTokens, 'coingeckoTokenId');
 
@@ -31,11 +47,7 @@ export class CoingeckoDataService {
             let operations: any[] = [];
 
             for (const item of response) {
-                const tokensToUpdate = tokensWithIds.filter(
-                    (token) =>
-                        token.coingeckoTokenId === item.id &&
-                        !networkContext.data.coingecko.excludedTokenAddresses.includes(token.address),
-                );
+                const tokensToUpdate = includedTokensWithIds.filter((token) => token.coingeckoTokenId === item.id);
                 for (const tokenToUpdate of tokensToUpdate) {
                     // only update if we have a new price and if we have a price at all
                     if (moment(item.last_updated).isAfter(moment().subtract(10, 'minutes')) && item.current_price) {
