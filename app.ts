@@ -40,7 +40,7 @@ async function startServer() {
         ],
         beforeSend(event, hint) {
             const error = hint.originalException as string;
-            if (error?.includes('Unknown token:')) {
+            if (error?.toString().includes('Unknown token:')) {
                 console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
@@ -114,7 +114,6 @@ async function startServer() {
     server.applyMiddleware({ app });
 
     await new Promise<void>((resolve) => httpServer.listen({ port: env.PORT }, resolve));
-    Sentry.captureException(new Error('Unkown token: asd'));
     console.log(`🚀 Server ready at http://localhost:${env.PORT}${server.graphqlPath}`);
 }
 

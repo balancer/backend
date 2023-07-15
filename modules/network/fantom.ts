@@ -204,7 +204,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
-        new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
+        // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService),
         new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
         new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
