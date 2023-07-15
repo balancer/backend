@@ -23,7 +23,10 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
                     !token.types.includes('BPT') &&
                     !token.types.includes('PHANTOM_BPT') &&
                     !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    (!token.coingeckoTokenId || !token.prices.length || token.prices[0].timestamp < threeHoursAgo),
+                    (!token.coingeckoTokenId ||
+                        !token.prices.length ||
+                        token.prices[0].timestamp < threeHoursAgo ||
+                        networkContext.data.coingecko.excludedTokenAddresses.includes(token.address)),
             )
             .map((token) => token.address);
     }

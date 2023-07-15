@@ -48,6 +48,7 @@ const polygonNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'matic',
         platformId: 'polygon-pos',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,

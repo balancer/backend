@@ -47,6 +47,7 @@ const gnosisNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'xdai',
         platformId: 'xdai',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
