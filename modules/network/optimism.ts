@@ -33,7 +33,7 @@ const optimismNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-optimism',
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
