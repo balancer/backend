@@ -66,6 +66,7 @@ const fantomNetworkData: NetworkData = {
             '0x049d68029688eabf473097a2fc38ef61633a3c7a', // multi dai
             '0x321162cd933e2be498cd2267a90534a804051b11', // multi wbtc
             '0x74b23882a30290451a17c44f4f05243b6b58c76d', // mutli weth
+            '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179', // ankrftm
         ],
     },
     tokenPrices: {
@@ -99,6 +100,7 @@ const fantomNetworkData: NetworkData = {
             '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
             '0x911566c808bF00acB200B418564440A2Af177548',
             '0x5c3094982cF3c97A06b7d62A6f7669F14a199B19',
+            '0x23F03a4fb344d8B98833d2ACe093cc305E03474f',
         ],
         weightedPoolV2Factories: [
             '0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb',

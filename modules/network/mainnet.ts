@@ -79,6 +79,7 @@ const mainnetNetworkData: NetworkData = {
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0xdba127fBc23fb20F5929C546af220A991b5C6e01',
             '0xfADa0f4547AB2de89D1304A668C39B3E09Aa7c76',
+            '0xDB8d758BCb971e482B2C45f7F8a7740283A1bd3A',
         ],
         weightedPoolV2Factories: [
             '0xcC508a455F5b0073973107Db6a878DdBDab957bC',

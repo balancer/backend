@@ -78,6 +78,7 @@ const polygonNetworkData: NetworkData = {
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0x7bc6C0E73EDAa66eF3F6E2f27b0EE8661834c6C9',
             '0x6Ab5549bBd766A43aFb687776ad8466F8b42f777',
+            '0xe2fa4e1d17725e72dcdAfe943Ecf45dF4B9E285b',
         ],
         weightedPoolV2Factories: [
             '0x0e39C3D9b2ec765eFd9c5c70BB290B1fCD8536E3',

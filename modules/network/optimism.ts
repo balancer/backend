@@ -82,6 +82,7 @@ const optimismNetworkData: NetworkData = {
             '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
             '0xe2E901AB09f37884BA31622dF3Ca7FC19AA443Be',
             '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
+            '0x043A2daD730d585C44FB79D2614F295D2d625412',
         ],
         weightedPoolV2Factories: [
             '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
