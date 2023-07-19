@@ -59,18 +59,18 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         console.time(jobId);
         console.log(`Start job ${jobId}`);
 
-        sentryCheckInId = Sentry.captureCheckIn({
-            monitorSlug: `${monitorSlug}`,
-            status: 'in_progress',
-        });
+        // sentryCheckInId = Sentry.captureCheckIn({
+        //     monitorSlug: `${monitorSlug}`,
+        //     status: 'in_progress',
+        // });
 
         await fn();
 
-        Sentry.captureCheckIn({
-            checkInId: sentryCheckInId,
-            monitorSlug: `${monitorSlug}`,
-            status: 'ok',
-        });
+        // Sentry.captureCheckIn({
+        //     checkInId: sentryCheckInId,
+        //     monitorSlug: `${monitorSlug}`,
+        //     status: 'ok',
+        // });
 
         if (process.env.AWS_ALERTS === 'true') {
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
@@ -90,11 +90,11 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
             scope.setTag('error', jobId);
         });
 
-        Sentry.captureCheckIn({
-            checkInId: sentryCheckInId,
-            monitorSlug: `${monitorSlug}`,
-            status: 'error',
-        });
+        // Sentry.captureCheckIn({
+        //     checkInId: sentryCheckInId,
+        //     monitorSlug: `${monitorSlug}`,
+        //     status: 'error',
+        // });
 
         console.log(`Error job ${jobId}`, error);
     } finally {
