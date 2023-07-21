@@ -1,26 +1,27 @@
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { defaultStakingGaugeId, prismaMock } from './prismaPoolStakingGauge.mock';
-import { RootGauge, RootGaugesRepository, toPrismaNetwork } from './root-gauges.repository';
+import { RootGauge, RootGaugesRepository } from './root-gauges.repository';
 import { Chain } from '@prisma/client';
 
 const httpRpc = 'http://127.0.0.1:8555';
 setMainnetRpcProviderForTesting(httpRpc);
 
 it('maps onchain network format into prisma chain format', async () => {
-    expect(toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
-    expect(toPrismaNetwork('Optimism')).toBe(Chain.OPTIMISM);
-    expect(toPrismaNetwork('veBAL')).toBe(Chain.MAINNET);
-    expect(() => toPrismaNetwork('Unknown')).toThrowError('Network UNKNOWN is not supported');
+    const repository = new RootGaugesRepository();
+    expect(repository.toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
+    expect(repository.toPrismaNetwork('Optimism')).toBe(Chain.OPTIMISM);
+    expect(repository.toPrismaNetwork('veBAL')).toBe(Chain.MAINNET);
+    expect(() => repository.toPrismaNetwork('Unknown')).toThrowError('Network UNKNOWN is not supported');
 });
 
 it('fetches list of root gauge addresses', async () => {
-    const service = new RootGaugesRepository();
-    const addresses = await service.getRootGaugeAddresses();
+    const repository = new RootGaugesRepository();
+    const addresses = await repository.getRootGaugeAddresses();
     expect(addresses.length).toBe(333);
 }, 10_000);
 
 it('generates root gauge rows given a list of gauge addresses', async () => {
-    const service = new RootGaugesRepository();
+    const repository = new RootGaugesRepository();
 
     const rootGaugeAddresses = [
         '0x79eF6103A513951a3b25743DB509E267685726B7',
@@ -30,7 +31,7 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
     // Uncomment to test with all the root gauges
     // const rootGaugeAddresses = await service.getRootGaugeAddresses();
 
-    const rows = await service.fetchOnchainRootGauges(rootGaugeAddresses);
+    const rows = await repository.fetchOnchainRootGauges(rootGaugeAddresses);
 
     expect(rows).toMatchInlineSnapshot(`
       [
@@ -64,15 +65,15 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
 
 it('Excludes Liquidity Mining Committee gauge', async () => {
     const liquidityMiningAddress = '0x7AA5475b2eA29a9F4a1B9Cf1cB72512D1B4Ab75e';
-    const service = new RootGaugesRepository();
-    const rows = await service.fetchOnchainRootGauges([liquidityMiningAddress]);
+    const repository = new RootGaugesRepository();
+    const rows = await repository.fetchOnchainRootGauges([liquidityMiningAddress]);
     expect(rows).toEqual([]);
 });
 
 it('fetches veBAL gauge as MAINNET', async () => {
     const vebalAddress = '0xE867AD0a48e8f815DC0cda2CDb275e0F163A480b';
-    const service = new RootGaugesRepository();
-    const rows = await service.fetchOnchainRootGauges([vebalAddress]);
+    const repository = new RootGaugesRepository();
+    const rows = await repository.fetchOnchainRootGauges([vebalAddress]);
     expect(rows).toEqual([
         {
             gaugeAddress: '0xe867ad0a48e8f815dc0cda2cdb275e0f163a480b',

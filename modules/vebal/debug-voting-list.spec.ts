@@ -1,6 +1,6 @@
 import { difference, pickBy } from 'lodash';
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
-import { RootGaugesRepository, fetchRelativeWeightCaps } from './root-gauges.repository';
+import { RootGaugesRepository } from './root-gauges.repository';
 import { VotingListService } from './voting-list.service';
 
 const defaultAnvilRpcUrl = 'http://127.0.0.1:8555';
@@ -42,7 +42,7 @@ it('Root gauges without getRelativeWeightCap', async () => {
 
     const rootGaugeAddresses = await onchain.getRootGaugeAddresses();
 
-    const relativeWeightCapsWithFailures = await fetchRelativeWeightCaps(rootGaugeAddresses);
+    const relativeWeightCapsWithFailures = await onchain.fetchRelativeWeightCaps(rootGaugeAddresses);
 
     // console.log(relativeWeightCapsWithFailures);
 
