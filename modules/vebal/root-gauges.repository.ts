@@ -163,7 +163,7 @@ export class RootGaugesRepository {
 
         if (!gauge) {
             // Only throw when root gauge is valid
-            if (isValidForVotingList(rootGauge)) {
+            if (this.isValidForVotingList(rootGauge)) {
                 const errorMessage = `RootGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(rootGauge)}`;
                 console.error(errorMessage);
                 // TODO: replace by sentry error
@@ -305,12 +305,12 @@ export class RootGaugesRepository {
         if (!Object.keys(Chain).includes(network)) throw Error(`Network ${network} is not supported`);
         return network as Chain;
     }
-}
 
-// A gauge should be included in the voting list when:
-//  - it is alive (not killed)
-//  - it is killed and has valid votes (the users should be able to reallocate votes)
-export function isValidForVotingList(rootGauge: { isKilled: boolean; relativeWeight: number }) {
-    const isAlive = !rootGauge.isKilled;
-    return isAlive || rootGauge.relativeWeight > 0;
+    // A gauge should be included in the voting list when:
+    //  - it is alive (not killed)
+    //  - it is killed and has valid votes (the users should be able to reallocate votes)
+    isValidForVotingList(rootGauge: { isKilled: boolean; relativeWeight: number }) {
+        const isAlive = !rootGauge.isKilled;
+        return isAlive || rootGauge.relativeWeight > 0;
+    }
 }

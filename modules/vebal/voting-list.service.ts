@@ -1,7 +1,7 @@
 import { prisma } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
-import { RootGauge, RootGaugesRepository, isValidForVotingList } from './root-gauges.repository';
+import { RootGauge, RootGaugesRepository } from './root-gauges.repository';
 import { specialRootGaugeAddresses } from './special-pools/special-root-gauge-addresses';
 import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
@@ -102,7 +102,7 @@ export class VotingListService {
         });
 
         return gaugesWithStaking.filter((gauge) =>
-            isValidForVotingList({
+            this.rootGauges.isValidForVotingList({
                 isKilled: gauge.status === 'KILLED',
                 relativeWeight: Number(gauge.relativeWeight) || 0,
             }),
@@ -141,26 +141,26 @@ export class VotingListService {
 
         const rootGauges = this.rootGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
-        throwIfMissingRootGaugeData(rootGauges);
+        this.throwIfMissingRootGaugeData(rootGauges);
 
         return rootGauges;
+    }
+
+    throwIfMissingRootGaugeData(rootGauges: RootGauge[]) {
+        const gaugesWithMissingData = rootGauges
+            .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
+            .filter((gauge) => !gauge.isInSubgraph)
+            .filter(this.rootGauges.isValidForVotingList);
+
+        if (gaugesWithMissingData.length > 0) {
+            const errorMessage =
+                'Detected active root gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
+                JSON.stringify(gaugesWithMissingData);
+            console.error(errorMessage);
+            //TODO: Replace by sentry error
+            throw new Error(errorMessage);
+        }
     }
 }
 
 export const votingListService = new VotingListService();
-
-export function throwIfMissingRootGaugeData(rootGauges: RootGauge[]) {
-    const gaugesWithMissingData = rootGauges
-        .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
-        .filter((gauge) => !gauge.isInSubgraph)
-        .filter(isValidForVotingList);
-
-    if (gaugesWithMissingData.length > 0) {
-        const errorMessage =
-            'Detected active root gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
-            JSON.stringify(gaugesWithMissingData);
-        console.error(errorMessage);
-        //TODO: Replace by sentry error
-        throw new Error(errorMessage);
-    }
-}
