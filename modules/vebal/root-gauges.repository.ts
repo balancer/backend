@@ -174,21 +174,21 @@ export class RootGaugesRepository {
         }
         return gauge.id;
     }
-}
 
-export function updateOnchainGaugesWithSubgraphData(onchainGauges: RootGauge[], subgraphGauges: SubGraphRootGauge[]) {
-    const subgraphGaugesByAddress = keyBy(subgraphGauges, 'gaugeAddress');
+    updateOnchainGaugesWithSubgraphData(onchainGauges: RootGauge[], subgraphGauges: SubGraphRootGauge[]) {
+        const subgraphGaugesByAddress = keyBy(subgraphGauges, 'gaugeAddress');
 
-    return onchainGauges.map((gauge) => {
-        const rootGauge = gauge;
-        const subGraphGauge = subgraphGaugesByAddress[gauge.gaugeAddress];
-        if (subGraphGauge) {
-            rootGauge.isInSubgraph = true;
-            rootGauge.network = subGraphGauge.chain;
-            rootGauge.recipient = subGraphGauge.recipient;
-        }
-        return rootGauge;
-    });
+        return onchainGauges.map((gauge) => {
+            const rootGauge = gauge;
+            const subGraphGauge = subgraphGaugesByAddress[gauge.gaugeAddress];
+            if (subGraphGauge) {
+                rootGauge.isInSubgraph = true;
+                rootGauge.network = subGraphGauge.chain;
+                rootGauge.recipient = subGraphGauge.recipient;
+            }
+            return rootGauge;
+        });
+    }
 }
 
 export function toPrismaNetwork(onchainNetwork: string): Chain {

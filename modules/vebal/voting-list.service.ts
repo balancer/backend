@@ -1,12 +1,7 @@
 import { prisma } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
-import {
-    RootGauge,
-    RootGaugesRepository,
-    isValidForVotingList,
-    updateOnchainGaugesWithSubgraphData,
-} from './root-gauges.repository';
+import { RootGauge, RootGaugesRepository, isValidForVotingList } from './root-gauges.repository';
 import { specialRootGaugeAddresses } from './special-pools/special-root-gauge-addresses';
 import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
@@ -144,7 +139,7 @@ export class VotingListService {
 
         const onchainGauges = await this.rootGauges.fetchOnchainRootGauges(onchainRootAddresses);
 
-        const rootGauges = updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
+        const rootGauges = this.rootGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
         throwIfMissingRootGaugeData(rootGauges);
 
