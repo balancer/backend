@@ -118,6 +118,7 @@ const arbitrumNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {
@@ -161,6 +162,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             arbitrumNetworkData.reaper.linearPoolFactories,
+            arbitrumNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
             arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
             arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,

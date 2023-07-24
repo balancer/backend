@@ -110,6 +110,7 @@ const zkevmNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: [],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {

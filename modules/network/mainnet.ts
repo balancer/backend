@@ -118,7 +118,8 @@ const mainnetNetworkData: NetworkData = {
         vaultsEndpoint: 'https://#/',
     },
     reaper: {
-        linearPoolFactories: ['0x1b986138a4F2aA538E79fdEC222dad93F8d66703'],
+        linearPoolFactories: [],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {
@@ -160,12 +161,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
     poolAprServices: [
         new WstethAprService(tokenService, mainnetNetworkData.lido!.wstEthContract),
-        new ReaperCryptAprService(
-            mainnetNetworkData.reaper.linearPoolFactories,
-            mainnetNetworkData.reaper.averageAPRAcrossLastNHarvests,
-            mainnetNetworkData.stader ? mainnetNetworkData.stader.sFtmxContract : undefined,
-            mainnetNetworkData.lido ? mainnetNetworkData.lido.wstEthContract : undefined,
-        ),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),

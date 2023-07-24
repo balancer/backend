@@ -25,6 +25,7 @@ export class ReaperCryptAprService implements PoolAprService {
 
     constructor(
         private readonly linearPoolFactories: string[],
+        private readonly linearPoolsFromErc4626Factory: string[],
         private readonly averageAPRAcrossLastNHarvests: number,
         private readonly sFtmXAddress: string | undefined,
         private readonly wstEthAddress: string | undefined,
@@ -38,7 +39,12 @@ export class ReaperCryptAprService implements PoolAprService {
         const tokenPrices = await tokenService.getTokenPrices();
 
         for (const pool of pools) {
-            if (!this.linearPoolFactories.includes(pool.factory || '') || !pool.linearData || !pool.dynamicData) {
+            if (
+                (!this.linearPoolFactories.includes(pool.factory || '') &&
+                    !this.linearPoolsFromErc4626Factory.includes(pool.id)) ||
+                !pool.linearData ||
+                !pool.dynamicData
+            ) {
                 continue;
             }
             const linearData = pool.linearData;

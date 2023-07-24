@@ -160,6 +160,21 @@ const fantomNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
+        linearPoolIdsFromErc4626Factory: [
+            '0x55e0499d268858a5e804d7864dc2a6b4ef194c630000000000000000000005b1',
+            '0xa9a1f2f7407ce27bcef35d04c47e079e7d6d399e0000000000000000000005b6',
+            '0xa8bcdca345e61bad9bb539933a4009f7a6f4b7ea0000000000000000000006eb',
+            '0x654def39262548cc958d07c82622e23c52411c820000000000000000000006ec',
+            '0xd3f155d7f421414dc4177e54e4308274dfa8b9680000000000000000000006ed',
+            '0xb8b0e5e9f8b740b557e7c26fcbc753523a718a870000000000000000000006ee',
+            '0xdc910e2647caae5f63a760b70a2308e1c90d88860000000000000000000006ef',
+            '0x92502cd8e00f5b8e737b2ba203fdd7cd27b23c8f000000000000000000000718',
+            '0xc385e76e575b2d71eb877c27dcc1608f77fada99000000000000000000000719',
+            '0x685056d3a4e574b163d0fa05a78f1b0b3aa04a8000000000000000000000071a',
+            '0x3c1420df122ac809b9d1ba77906f833764d6450100000000000000000000071b',
+            '0xa0051ab2c3eb7f17758428b02a07cf72eb0ef1a300000000000000000000071c',
+            '0x442988091cdc18acb8912cd3fe062cda9233f9dc00000000000000000000071d',
+        ],
         averageAPRAcrossLastNHarvests: 5,
     },
     beefy: {
@@ -213,6 +228,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
+            fantomNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
             fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
             fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
