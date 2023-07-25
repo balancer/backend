@@ -44,7 +44,7 @@ export async function startWorker() {
                 //start up time will be a bit slower
                 await createAlerts(chainId);
             }
-            await createMonitors(chainId);
+            // await createMonitors(chainId);
         }
     } catch (e) {
         console.log(`Fatal error happened during cron scheduling.`, e);

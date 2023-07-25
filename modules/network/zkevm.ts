@@ -48,6 +48,7 @@ const zkevmNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'polygon-zkevm',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -72,7 +73,10 @@ const zkevmNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: ['0x8eA89804145c007e7D226001A96955ad53836087'],
+        composableStablePoolFactories: [
+            '0x8eA89804145c007e7D226001A96955ad53836087',
+            '0x956CCab09898C0AF2aCa5e6C229c3aD4E93d9288',
+        ],
         weightedPoolV2Factories: ['0x03F3Fb107e74F2EAC9358862E91ad3c692712054'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
@@ -106,6 +110,7 @@ const zkevmNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: [],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {

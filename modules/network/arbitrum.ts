@@ -49,6 +49,7 @@ const arbitrumNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'arbitrum-one',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -78,6 +79,7 @@ const arbitrumNetworkData: NetworkData = {
             '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
             '0x1c99324EDC771c82A0DCCB780CC7DDA0045E50e7',
             '0x2498A2B0d6462d2260EAC50aE1C3e03F4829BA95',
+            '0xA8920455934Da4D853faac1f94Fe7bEf72943eF1',
         ],
         weightedPoolV2Factories: [
             '0x8df6EfEc5547e31B0eb7d1291B511FF8a2bf987c',
@@ -116,6 +118,7 @@ const arbitrumNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
     },
     beefy: {
@@ -159,6 +162,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
             arbitrumNetworkData.reaper.linearPoolFactories,
+            arbitrumNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
             arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
             arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,

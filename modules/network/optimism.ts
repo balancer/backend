@@ -33,7 +33,7 @@ const optimismNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-optimism',
         beetsBar: 'https://',
         blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
@@ -53,6 +53,7 @@ const optimismNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'optimistic-ethereum',
+        excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -81,6 +82,7 @@ const optimismNetworkData: NetworkData = {
             '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
             '0xe2E901AB09f37884BA31622dF3Ca7FC19AA443Be',
             '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
+            '0x043A2daD730d585C44FB79D2614F295D2d625412',
         ],
         weightedPoolV2Factories: [
             '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
@@ -121,6 +123,15 @@ const optimismNetworkData: NetworkData = {
         linearPoolFactories: [
             '0x19968d4b7126904fd665ed25417599df9604df83',
             '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
+        ],
+        linearPoolIdsFromErc4626Factory: [
+            '0x20715545c15c76461861cb0d6ba96929766d05a50000000000000000000000e8',
+            '0xf970659221bb9d01b615321b63a26e857ffc030b0000000000000000000000e9',
+            '0xa5d4802b4ce6b745b0c9e1b4a79c093d197869c80000000000000000000000ea',
+            '0x2e2b8b82123789d895fd79913f6dfa51f5b5a0e60000000000000000000000eb',
+            '0x48ace81c09382bfc08ed102e7eadd37e3b0497520000000000000000000000ec',
+            '0x8025586ac5fb265a23b9492e7414beccc2059ec30000000000000000000000ed',
+            '0x3e9cbffd270ae67abb09d28988e7e785498c73730000000000000000000000ee',
         ],
         averageAPRAcrossLastNHarvests: 2,
     },
@@ -176,6 +187,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
             optimismNetworkData.reaper.linearPoolFactories,
+            optimismNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
             optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
             optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,

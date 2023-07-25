@@ -40,7 +40,7 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
@@ -60,6 +60,14 @@ const fantomNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'fantom',
         platformId: 'fantom',
+        excludedTokenAddresses: [
+            '0x04068da6c83afcfa0e13ba15a6696662335d5b75', // multi usdc
+            '0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e', // multi usdt
+            '0x049d68029688eabf473097a2fc38ef61633a3c7a', // multi dai
+            '0x321162cd933e2be498cd2267a90534a804051b11', // multi wbtc
+            '0x74b23882a30290451a17c44f4f05243b6b58c76d', // mutli weth
+            '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179', // ankrftm
+        ],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -92,6 +100,7 @@ const fantomNetworkData: NetworkData = {
             '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
             '0x911566c808bF00acB200B418564440A2Af177548',
             '0x5c3094982cF3c97A06b7d62A6f7669F14a199B19',
+            '0x23F03a4fb344d8B98833d2ACe093cc305E03474f',
         ],
         weightedPoolV2Factories: [
             '0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb',
@@ -151,6 +160,21 @@ const fantomNetworkData: NetworkData = {
     },
     reaper: {
         linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
+        linearPoolIdsFromErc4626Factory: [
+            '0x55e0499d268858a5e804d7864dc2a6b4ef194c630000000000000000000005b1',
+            '0xa9a1f2f7407ce27bcef35d04c47e079e7d6d399e0000000000000000000005b6',
+            '0xa8bcdca345e61bad9bb539933a4009f7a6f4b7ea0000000000000000000006eb',
+            '0x654def39262548cc958d07c82622e23c52411c820000000000000000000006ec',
+            '0xd3f155d7f421414dc4177e54e4308274dfa8b9680000000000000000000006ed',
+            '0xb8b0e5e9f8b740b557e7c26fcbc753523a718a870000000000000000000006ee',
+            '0xdc910e2647caae5f63a760b70a2308e1c90d88860000000000000000000006ef',
+            '0x92502cd8e00f5b8e737b2ba203fdd7cd27b23c8f000000000000000000000718',
+            '0xc385e76e575b2d71eb877c27dcc1608f77fada99000000000000000000000719',
+            '0x685056d3a4e574b163d0fa05a78f1b0b3aa04a8000000000000000000000071a',
+            '0x3c1420df122ac809b9d1ba77906f833764d6450100000000000000000000071b',
+            '0xa0051ab2c3eb7f17758428b02a07cf72eb0ef1a300000000000000000000071c',
+            '0x442988091cdc18acb8912cd3fe062cda9233f9dc00000000000000000000071d',
+        ],
         averageAPRAcrossLastNHarvests: 5,
     },
     beefy: {
@@ -197,13 +221,14 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
-        new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
+        // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService),
         new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
         new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
         new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
         new ReaperCryptAprService(
             fantomNetworkData.reaper.linearPoolFactories,
+            fantomNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
             fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
             fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
@@ -348,10 +373,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'feed-data-to-datastudio',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-lge-price-data',
-            interval: every(10, 'seconds'),
         },
     ],
 };
