@@ -120,6 +120,7 @@ const arbitrumNetworkData: NetworkData = {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
         linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: '',
     },
     beefy: {
         linearPools: [''],
