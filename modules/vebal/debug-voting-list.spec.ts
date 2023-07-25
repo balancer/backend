@@ -78,7 +78,7 @@ it.skip('Returns voting pools ', async () => {
 
     const firstPool = votingPools[0];
 
-    expect(firstPool.gauge).toMatchInlineSnapshot(`
+    expect(firstPool.rootGauge).toMatchInlineSnapshot(`
       {
         "address": "0x6ba66967b0723718d616ad5f293c2ae6d7b0fcae",
         "isKilled": false,
@@ -108,9 +108,9 @@ it('Returns veBAL voting pool', async () => {
 
     const pools = await service.getVotingList();
 
-    const veBalRootGauge = pools.find((pool) => pool.gauge.address === veBalAddress);
+    const veBalRootGauge = pools.find((pool) => pool.rootGauge.address === veBalAddress);
 
-    expect(veBalRootGauge?.gauge).toMatchInlineSnapshot(`
+    expect(veBalRootGauge?.rootGauge).toMatchInlineSnapshot(`
       {
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
         "isKilled": false,
@@ -126,9 +126,9 @@ it('Returns TWAMM voting pool', async () => {
 
     const pools = await service.getVotingListWithHardcodedPools();
 
-    const twammPool = pools.find((pool) => pool.gauge.address === twammAddress);
+    const twammPool = pools.find((pool) => pool.rootGauge.address === twammAddress);
 
-    expect(twammPool?.gauge).toMatchInlineSnapshot(`
+    expect(twammPool?.rootGauge).toMatchInlineSnapshot(`
       {
         "address": "0xb5bd58c733948e3d65d86ba9604e06e5da276fd1",
         "isKilled": false,

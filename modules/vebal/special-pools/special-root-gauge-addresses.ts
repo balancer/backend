@@ -12,7 +12,7 @@ import { veGauges } from './ve-pools';
 */
 export const specialRootGaugeAddresses = [
     ...veGauges,
-    ...hardCodedPools.map((pool) => pool.gauge.address),
+    ...hardCodedPools.map((pool) => pool.rootGauge.address),
 
     // Balancer USDC/WETH/L Gauge Deposit
     // https://etherscan.io/address/0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c#readContract

@@ -13,6 +13,7 @@ import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
+import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 

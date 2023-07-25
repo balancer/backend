@@ -1,9 +1,75 @@
 extend type Query {
     veBalGetUserBalance: AmountHumanReadable!
     veBalGetTotalSupply: AmountHumanReadable!
+    veBalGetVotingList: [GqlVotingPool]!
 }
 
 extend type Mutation {
     veBalSyncAllUserBalances: String!
     veBalSyncTotalSupply: String!
+}
+
+# type GqlPoolMinimal {
+#     id: ID!
+#     chain: GqlChain!
+#     name: String!
+#     symbol: String!
+#     address: Bytes!
+#     decimals: Int!
+#     owner: Bytes
+#     factory: Bytes
+#     version: Int!
+#     createTime: Int!
+#     displayTokens: [GqlPoolTokenDisplay!]!
+#     allTokens: [GqlPoolTokenExpanded!]!
+#     dynamicData: GqlPoolDynamicData!
+#     staking: GqlPoolStaking
+#     type: GqlPoolMinimalType!
+# }
+
+# type GqlVotingPool implements GqlPoolMinimal {
+#     id: ID!
+#     chain: GqlChain!
+#     name: String!
+#     symbol: String!
+#     address: Bytes!
+#     decimals: Int!
+#     owner: Bytes
+#     factory: Bytes
+#     version: Int!
+#     createTime: Int!
+#     displayTokens: [GqlPoolTokenDisplay!]!
+#     allTokens: [GqlPoolTokenExpanded!]!
+#     dynamicData: GqlPoolDynamicData!
+#     staking: GqlPoolStaking
+#     type: GqlPoolMinimalType!
+
+#     tokens: [GqlPoolTokenUnion!]!
+#     nestingType: GqlPoolNestingType!
+#     rootGauge: GqlRootGauge
+# }
+
+type GqlVotingPool {
+    id: ID!
+    chain: GqlChain!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolMinimalType!
+
+    tokens: [GqlVotingGaugeToken!]!
+
+    rootGauge: GqlRootGauge!
+}
+
+type GqlVotingGaugeToken {
+    address: String!
+    weight: String
+    symbol: String!
+    logoURI: String!
+}
+
+type GqlRootGauge {
+    address: Bytes!
+    relativeWeightCap: String
+    isKilled: Boolean!
 }

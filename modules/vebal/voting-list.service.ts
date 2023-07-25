@@ -5,17 +5,16 @@ import { RootGauge, RootGaugesRepository } from './root-gauges.repository';
 import { specialRootGaugeAddresses } from './special-pools/special-root-gauge-addresses';
 import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
-
-export type VotingListPool = Awaited<ReturnType<VotingListService['getVotingList']>>[number];
+import { GqlVotingPool } from '../../schema';
 
 export class VotingListService {
     constructor(private rootGauges = new RootGaugesRepository()) {}
 
-    public async getVotingListWithHardcodedPools() {
+    public async getVotingListWithHardcodedPools(): Promise<GqlVotingPool[]> {
         return [...(await this.getVotingList()), ...hardCodedPools];
     }
 
-    public async getVotingList() {
+    public async getVotingList(): Promise<GqlVotingPool[]> {
         const validGauges = await this.getValidVotingRootGauges();
         const validRootGaugesByPoolId = keyBy(validGauges, (gauge) => gauge.staking!.staking.poolId);
 
@@ -31,8 +30,18 @@ export class VotingListService {
             const veRootGauge = getHardcodedRootGauge(pool.id);
             const rootGauge = veRootGauge || validRootGaugesByPoolId[pool.id];
             const votingPool = {
-                ...pool,
-                gauge: {
+                id: pool.id,
+                chain: pool.chain,
+                symbol: pool.symbol,
+                address: pool.address,
+                type: pool.type,
+                tokens: pool.tokens.map((token) => ({
+                    address: token.address,
+                    weight: token.dynamicData?.weight,
+                    symbol: token.token.symbol,
+                    logoURI: token.token.logoURI || '',
+                })),
+                rootGauge: {
                     address: rootGauge.id,
                     relativeWeightCap: rootGauge.relativeWeightCap,
                     isKilled: rootGauge.status !== 'ACTIVE',
