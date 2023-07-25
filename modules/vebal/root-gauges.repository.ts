@@ -88,7 +88,7 @@ export class RootGaugesRepository {
         const l2RootGauges: SubGraphRootGauge[] = rootGauges.map((gauge) => {
             return {
                 gaugeAddress: gauge.id,
-                chain: gauge.chain.toUpperCase() as Chain,
+                chain: this.toPrismaNetwork(gauge.chain),
                 recipient: gauge.recipient,
             } as SubGraphRootGauge;
         });
@@ -298,9 +298,10 @@ export class RootGaugesRepository {
         return [...Array(totalGauges)].map((_, index) => index);
     }
 
-    toPrismaNetwork(onchainNetwork: string): Chain {
-        const network = onchainNetwork.toUpperCase();
+    toPrismaNetwork(chainOrSubgraphNetwork: string): Chain {
+        const network = chainOrSubgraphNetwork.toUpperCase();
         if (network === 'ETHEREUM') return Chain.MAINNET;
+        if (network === 'POLYGONZKEVM') return Chain.ZKEVM;
         if (network === 'VEBAL') return Chain.MAINNET;
         if (!Object.keys(Chain).includes(network)) throw Error(`Network ${network} is not supported`);
         return network as Chain;

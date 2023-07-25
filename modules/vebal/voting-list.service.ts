@@ -125,11 +125,11 @@ export class VotingListService {
 
             /*
                 We avoid saving gauges in specialRootGaugeAddresses because they require special handling
-                TODO: handle veLIT, TWAMM...
             */
             const cleanRootGauges = rootGauges.filter(
                 (gauge) => !specialRootGaugeAddresses.includes(gauge.gaugeAddress),
             );
+
             await this.rootGauges.saveRootGauges(cleanRootGauges);
         }
     }

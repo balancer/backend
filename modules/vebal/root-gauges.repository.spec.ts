@@ -11,6 +11,7 @@ it('maps onchain network format into prisma chain format', async () => {
     expect(repository.toPrismaNetwork('Mainnet')).toBe(Chain.MAINNET);
     expect(repository.toPrismaNetwork('Optimism')).toBe(Chain.OPTIMISM);
     expect(repository.toPrismaNetwork('veBAL')).toBe(Chain.MAINNET);
+    expect(repository.toPrismaNetwork('POLYGONZKEVM')).toBe(Chain.ZKEVM);
     expect(() => repository.toPrismaNetwork('Unknown')).toThrowError('Network UNKNOWN is not supported');
 });
 
