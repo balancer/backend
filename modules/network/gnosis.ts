@@ -108,8 +108,10 @@ const gnosisNetworkData: NetworkData = {
         vaultsEndpoint: 'https://#/',
     },
     reaper: {
-        linearPoolFactories: [''],
+        linearPoolFactories: [],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: '',
     },
     lido: {
         wstEthAprEndpoint: '',

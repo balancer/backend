@@ -124,7 +124,17 @@ const optimismNetworkData: NetworkData = {
             '0x19968d4b7126904fd665ed25417599df9604df83',
             '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
         ],
+        linearPoolIdsFromErc4626Factory: [
+            '0x20715545c15c76461861cb0d6ba96929766d05a50000000000000000000000e8',
+            '0xf970659221bb9d01b615321b63a26e857ffc030b0000000000000000000000e9',
+            '0xa5d4802b4ce6b745b0c9e1b4a79c093d197869c80000000000000000000000ea',
+            '0x2e2b8b82123789d895fd79913f6dfa51f5b5a0e60000000000000000000000eb',
+            '0x48ace81c09382bfc08ed102e7eadd37e3b0497520000000000000000000000ec',
+            '0x8025586ac5fb265a23b9492e7414beccc2059ec30000000000000000000000ed',
+            '0x3e9cbffd270ae67abb09d28988e7e785498c73730000000000000000000000ee',
+        ],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',
     },
     beefy: {
         linearPools: [
@@ -178,6 +188,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
             optimismNetworkData.reaper.linearPoolFactories,
+            optimismNetworkData.reaper.linearPoolIdsFromErc4626Factory,
             optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
             optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
             optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
