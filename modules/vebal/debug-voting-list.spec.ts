@@ -1,7 +1,7 @@
 import { difference, pickBy } from 'lodash';
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { RootGaugesRepository } from './root-gauges.repository';
-import { VotingListService } from './voting-list.service';
+import { VeBalVotingListService } from './vebal-voting-list.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 
 const defaultAnvilRpcUrl = 'http://127.0.0.1:8555';
@@ -61,7 +61,7 @@ it('Root gauges without getRelativeWeightCap', async () => {
 }, 1000_000);
 
 it('Returns veBAL pool icons', async () => {
-    const service = new VotingListService();
+    const service = new VeBalVotingListService();
 
     const pools = await service.getPoolsForVotingList([
         '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
@@ -76,7 +76,7 @@ it('Returns veBAL pool icons', async () => {
 }, 1000_000);
 
 it.skip('Returns voting pools ', async () => {
-    const service = new VotingListService();
+    const service = new VeBalVotingListService();
 
     const votingPools = await service.getVotingList();
 
@@ -108,7 +108,7 @@ it.skip('Returns voting pools ', async () => {
 }, 1000_000);
 
 it('Returns veBAL voting pool', async () => {
-    const service = new VotingListService();
+    const service = new VeBalVotingListService();
 
     const veBalAddress = '0xb78543e00712c3abba10d0852f6e38fde2aaba4d';
 
@@ -126,7 +126,7 @@ it('Returns veBAL voting pool', async () => {
 }, 1000_000);
 
 it('Returns TWAMM voting pool', async () => {
-    const service = new VotingListService();
+    const service = new VeBalVotingListService();
 
     const twammAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
 
@@ -144,7 +144,7 @@ it('Returns TWAMM voting pool', async () => {
 }, 1000_000);
 
 it('Full flow', async () => {
-    const service = new VotingListService();
+    const service = new VeBalVotingListService();
 
     const repository = new RootGaugesRepository();
     let onchainRootAddresses: string[] = await repository.getRootGaugeAddresses();

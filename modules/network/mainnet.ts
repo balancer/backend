@@ -280,6 +280,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: every(5, 'minutes'),
         },
+        {
+            name: 'sync-vebal-voting-gauges',
+            interval: every(5, 'minutes'),
+        },
         // The following are multichain jobs and should only run once for all chains.
         {
             name: 'sync-global-coingecko-prices',

@@ -7,7 +7,7 @@ import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-poo
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../schema';
 
-export class VotingListService {
+export class VeBalVotingListService {
     constructor(private rootGauges = new RootGaugesRepository()) {}
 
     public async getVotingListWithHardcodedPools(): Promise<GqlVotingPool[]> {
@@ -172,4 +172,4 @@ export class VotingListService {
     }
 }
 
-export const votingListService = new VotingListService();
+export const veBalVotingListService = new VeBalVotingListService();
