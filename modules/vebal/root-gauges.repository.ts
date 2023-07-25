@@ -9,8 +9,6 @@ import multicall3Abi from '../pool/lib/staking/abi/Multicall3.json';
 import { Multicaller } from '../web3/multicaller';
 import gaugeControllerAbi from './abi/gaugeController.json';
 import rootGaugeAbi from './abi/rootGauge.json';
-import { GraphQLClient } from 'graphql-request';
-import { getSdk } from '../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
@@ -82,9 +80,8 @@ export class RootGaugesRepository {
     }
 
     async fetchRootGaugesFromSubgraph(onchainRootAddresses: string[]) {
-        // This service only works with the mainnet subgraph
-        const mainnetSubgraph = getSdk(new GraphQLClient(mainnetNetworkConfig.data.subgraphs.gauge!));
-        const rootGauges = (await mainnetSubgraph.RootGauges({ ids: onchainRootAddresses })).rootGauges;
+        // This service only works with the mainnet subgraph, will return no root gauges for other chains
+        const rootGauges = await gaugeSubgraphService.getRootGaugesForIds(onchainRootAddresses);
 
         const l2RootGauges: SubGraphRootGauge[] = rootGauges.map((gauge) => {
             return {
@@ -94,7 +91,7 @@ export class RootGaugesRepository {
             } as SubGraphRootGauge;
         });
 
-        const liquidityGauges = (await mainnetSubgraph.LiquidityGauges({ ids: onchainRootAddresses })).liquidityGauges;
+        const liquidityGauges = await gaugeSubgraphService.getLiquidityGaugesForIds(onchainRootAddresses);
 
         const mainnetRootGauges: SubGraphRootGauge[] = liquidityGauges.map((gauge) => {
             return {

@@ -2,9 +2,15 @@ import { difference, pickBy } from 'lodash';
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { RootGaugesRepository } from './root-gauges.repository';
 import { VotingListService } from './voting-list.service';
+import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 
 const defaultAnvilRpcUrl = 'http://127.0.0.1:8555';
 setMainnetRpcProviderForTesting(defaultAnvilRpcUrl);
+
+beforeEach(() => {
+    initRequestScopedContext();
+    setRequestScopedContextValue('chainId', '1');
+});
 
 it('Contract Root gauges that are not in subgraph', async () => {
     // const service = new VotingListService();
