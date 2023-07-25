@@ -18,7 +18,7 @@ it('maps onchain network format into prisma chain format', async () => {
 it('fetches list of root gauge addresses', async () => {
     const repository = new RootGaugesRepository();
     const addresses = await repository.getRootGaugeAddresses();
-    expect(addresses.length).toBe(333);
+    expect(addresses.length).toBe(373);
 }, 10_000);
 
 it('generates root gauge rows given a list of gauge addresses', async () => {
@@ -41,7 +41,7 @@ it('generates root gauge rows given a list of gauge addresses', async () => {
           "isInSubgraph": false,
           "isKilled": false,
           "network": "MAINNET",
-          "relativeWeight": 0.07554542388100179,
+          "relativeWeight": 0.07308250729037725,
           "relativeWeightCap": undefined,
         },
         {
