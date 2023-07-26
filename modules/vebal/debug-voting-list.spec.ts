@@ -155,7 +155,7 @@ it('Full flow', async () => {
     console.log('Number of addresses download: ', onchainRootAddresses.length);
 
     // Test full flow with specific addresses
-    onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
+    // onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
 
     repository.deleteRootGauges();
     await service.sync(onchainRootAddresses);
