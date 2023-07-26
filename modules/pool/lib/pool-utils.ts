@@ -34,14 +34,11 @@ export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
 }
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
-    return (
-        !pool.dynamicData?.isInRecoveryMode &&
-        (isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE')
-    );
+    return !pool.dynamicData?.isInRecoveryMode && capturesYield(pool);
 }
 
 export function capturesYield(pool: PoolWithTypeAndFactory) {
-    return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE';
+    return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE' || isGyroEV2(pool);
 }
 
 export function isGyroEV2(pool: PoolWithTypeAndFactory) {
