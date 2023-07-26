@@ -90,7 +90,7 @@ export class VeBalVotingListService {
     }
 
     public async getValidVotingRootGauges() {
-        let gaugesWithStaking = await prisma.prismaRootStakingGauge.findMany({
+        const gaugesWithStaking = await prisma.prismaRootStakingGauge.findMany({
             where: {
                 stakingId: { not: null },
             },
@@ -109,13 +109,7 @@ export class VeBalVotingListService {
                 },
             },
         });
-
-        return gaugesWithStaking.filter((gauge) =>
-            this.rootGauges.isValidForVotingList({
-                isKilled: gauge.status === 'KILLED',
-                relativeWeight: Number(gauge.relativeWeight) || 0,
-            }),
-        );
+        return gaugesWithStaking;
     }
 
     async syncRootGauges() {

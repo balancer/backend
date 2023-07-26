@@ -122,6 +122,7 @@ export class RootGaugesRepository {
     }
 
     async saveRootGauge(rootGauge: RootGauge) {
+        if (!this.isValidForVotingList(rootGauge)) return;
         try {
             await this.prisma.prismaRootStakingGauge.create({
                 data: {
