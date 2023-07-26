@@ -166,7 +166,6 @@ export class VeBalVotingListService {
                 'Detected active root gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
                 JSON.stringify(gaugesWithMissingData);
             console.error(errorMessage);
-            //TODO: Replace by sentry error
             throw new Error(errorMessage);
         }
     }

@@ -164,7 +164,6 @@ export class RootGaugesRepository {
             if (this.isValidForVotingList(rootGauge)) {
                 const errorMessage = `RootGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(rootGauge)}`;
                 console.error(errorMessage);
-                // TODO: replace by sentry error
                 throw Error(errorMessage);
             }
             // Store without staking relation when missing stakingId and invalid for voting
