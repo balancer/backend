@@ -13,7 +13,7 @@ const resolvers: Resolvers = {
             return veBalService.getVeBalTotalSupply();
         },
         veBalGetVotingList: async (parent, {}, context) => {
-            return veBalVotingListService.getVotingList();
+            return veBalVotingListService.getVotingListWithHardcodedPools();
         },
     },
     Mutation: {
