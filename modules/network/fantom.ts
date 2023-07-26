@@ -176,6 +176,7 @@ const fantomNetworkData: NetworkData = {
             '0x442988091cdc18acb8912cd3fe062cda9233f9dc00000000000000000000071d',
         ],
         averageAPRAcrossLastNHarvests: 5,
+        multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
     },
     beefy: {
         linearPools: [''],

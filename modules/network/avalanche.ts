@@ -111,6 +111,7 @@ const avalancheNetworkData: NetworkData = {
         linearPoolFactories: [],
         linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: '',
     },
     beefy: {
         linearPools: [''],

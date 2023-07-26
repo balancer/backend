@@ -153,7 +153,7 @@ export class ReaperCryptAprService implements PoolAprService {
     }
 
     private async getMultiStrategyAprFromSubgraph(address: string): Promise<number> {
-        const baseUrl = 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom';
+        const baseUrl = networkContext.data.reaper.multistratAprSubgraphUrl;
 
         const { data } = await axios.post<MultiStratQueryResponse>(baseUrl, {
             query: `query {

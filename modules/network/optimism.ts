@@ -134,6 +134,7 @@ const optimismNetworkData: NetworkData = {
             '0x3e9cbffd270ae67abb09d28988e7e785498c73730000000000000000000000ee',
         ],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',
     },
     beefy: {
         linearPools: [

@@ -111,6 +111,7 @@ export interface NetworkData {
         linearPoolFactories: string[];
         linearPoolIdsFromErc4626Factory: string[];
         averageAPRAcrossLastNHarvests: number;
+        multistratAprSubgraphUrl: string;
     };
     beefy: {
         linearPools: string[];
