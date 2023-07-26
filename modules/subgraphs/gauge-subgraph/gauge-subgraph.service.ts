@@ -238,7 +238,10 @@ export class GaugeSubgraphService {
 
         for (const chunk of chunks) {
             const gauges = await this.sdk.RootGauges({
-                ids: chunk,
+                where: {
+                    id_in: chunk,
+                },
+                first: 1000,
             });
 
             allRootGauges.push(...gauges.rootGauges);
