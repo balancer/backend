@@ -18,8 +18,6 @@ beforeEach(() => {
 });
 
 it('Contract Root gauges that are not in subgraph', async () => {
-    // const service = new VotingListService();
-
     const rootGauges = new RootGaugesRepository();
 
     const rootGaugeAddresses = await rootGauges.getRootGaugeAddresses();
@@ -157,8 +155,53 @@ it('Full flow', async () => {
     console.log('Number of addresses download: ', onchainRootAddresses.length);
 
     // Test full flow with specific addresses
-    // onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
+    onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
 
     repository.deleteRootGauges();
     await service.sync(onchainRootAddresses);
 }, 1000_000);
+
+it.only('Confirm invalid gauge addresses', async () => {
+    const invalidAddressesFromOldGaugeList = [
+        '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
+        '0xa02e4b3d18d4e6b8d18ac421fbc3dfff8933c40a',
+        '0x2d344a84bac123660b021eebe4eb6f12ba25fe86',
+        '0x178e029173417b1f9c8bc16dcec6f697bc323746',
+        '0x6a5ead5433a50472642cd268e584dafa5a394490',
+        '0x496ff26b76b8d23bbc6cf1df1eee4a48795490f7',
+        '0xe340ebfcaa544da8bb1ee9005f1a346d50ec422e',
+        '0x4ce0bd7debf13434d3ae127430e9bd4291bfb61f',
+        '0x8e85e97ed19c0fa13b2549309965291fbbc0048b',
+        '0x4fd4687ec38220f805b6363c3c1e52d0df3b5023',
+        '0xa718042e5622099e5f0ace4e7122058ab39e1bbe',
+        '0xb5e3de837f869b0248825e0175da73d4e8c3db6b',
+        '0x483006684f422a9448023b2382615c57c5ecf18f',
+        '0xcaa052584b462198a5a9356c28bce0634d65f65c',
+        '0x03cd191f589d12b0582a99808cf19851e468e6b5',
+        '0xaf5e0b5425de1f5a630a8cb5aa9d97b8141c908d',
+        '0x805ca3ccc61cc231851dee2da6aabff0a7714aa7',
+        '0xdb1db6e248d7bb4175f6e5a382d0a03fe3dcc813',
+        '0xc17636e36398602dd37bb5d1b3a9008c7629005f',
+        '0x8159462d255c1d24915cb51ec361f700174cd994',
+        '0xb20fc01d21a50d2c734c4a1262b4404d41fa7bf0',
+        '0x4a0b73f0d13ff6d43e304a174697e3d5cfd310a4',
+        '0xe22483774bd8611be2ad2f4194078dac9159f4ba',
+        '0xcc65a812ce382ab909a11e434dbf75b34f1cc59d',
+        '0xfb5e6d0c1dfed2ba000fbc040ab8df3615ac329c',
+        '0x178e029173417b1f9c8bc16dcec6f697bc323746',
+        '0x077794c30afeccdf5ad2abc0588e8cee7197b71a',
+    ];
+
+    const rootGauges = new RootGaugesRepository();
+
+    const oldGauges = await rootGauges.fetchRootGaugesFromSubgraph(invalidAddressesFromOldGaugeList);
+
+    const oldGaugeAddresses = oldGauges.map((gauge) => gauge.gaugeAddress);
+
+    const onchainGauges = await rootGauges.fetchOnchainRootGauges(oldGaugeAddresses);
+
+    onchainGauges.forEach((gauge) => {
+        expect(gauge.isKilled).toBe(true);
+        expect(gauge.relativeWeight).toBe(0);
+    });
+});
