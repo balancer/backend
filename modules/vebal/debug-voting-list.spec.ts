@@ -161,7 +161,7 @@ it('Full flow', async () => {
     await service.sync(onchainRootAddresses);
 }, 1000_000);
 
-it.only('Confirm invalid gauge addresses', async () => {
+it('Confirm invalid gauge addresses', async () => {
     const invalidAddressesFromOldGaugeList = [
         '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
         '0xa02e4b3d18d4e6b8d18ac421fbc3dfff8933c40a',
