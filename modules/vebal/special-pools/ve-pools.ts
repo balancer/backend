@@ -22,5 +22,6 @@ export function getHardcodedVotingGauge(poolId: string) {
         relativeWeightCap: null,
         id: veRootGaugeAddress,
         status: 'ACTIVE' as const,
+        addedTimestamp: null,
     };
 }

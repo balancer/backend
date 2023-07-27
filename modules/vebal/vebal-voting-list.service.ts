@@ -45,6 +45,7 @@ export class VeBalVotingListService {
                     address: votingGauge.id,
                     relativeWeightCap: votingGauge.relativeWeightCap,
                     isKilled: votingGauge.status !== 'ACTIVE',
+                    addedTimestamp: votingGauge.addedTimestamp,
                 },
             };
             return votingPool;
@@ -100,6 +101,7 @@ export class VeBalVotingListService {
                 status: true,
                 relativeWeightCap: true,
                 relativeWeight: true,
+                addedTimestamp: true,
                 stakingGauge: {
                     select: {
                         staking: {
