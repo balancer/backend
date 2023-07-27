@@ -124,16 +124,20 @@ export class RootGaugesRepository {
     async saveRootGauge(rootGauge: RootGauge) {
         if (!this.isValidForVotingList(rootGauge)) return;
         try {
-            await this.prisma.prismaRootStakingGauge.create({
-                data: {
-                    id: rootGauge.gaugeAddress.toString(),
-                    chain: rootGauge.network,
-                    gaugeAddress: rootGauge.gaugeAddress.toString(),
-                    relativeWeight: rootGauge.relativeWeight.toString(),
-                    relativeWeightCap: rootGauge.relativeWeightCap,
-                    stakingId: rootGauge.stakingId!,
-                    status: rootGauge.isKilled ? 'KILLED' : 'ACTIVE',
-                },
+            const upsertFields = {
+                id: rootGauge.gaugeAddress,
+                chain: rootGauge.network,
+                gaugeAddress: rootGauge.gaugeAddress,
+                relativeWeight: rootGauge.relativeWeight.toString(),
+                relativeWeightCap: rootGauge.relativeWeightCap,
+                stakingId: rootGauge.stakingId!,
+                status: rootGauge.isKilled ? 'KILLED' : 'ACTIVE',
+            } as const;
+
+            await this.prisma.prismaRootStakingGauge.upsert({
+                where: { id_chain: { id: rootGauge.gaugeAddress, chain: rootGauge.network } },
+                create: upsertFields,
+                update: upsertFields,
             });
         } catch (error) {
             console.error('Error saving root gauge: ', rootGauge);

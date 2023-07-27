@@ -113,8 +113,6 @@ export class VeBalVotingListService {
     }
 
     async syncRootGauges() {
-        await this.rootGauges.deleteRootGauges();
-
         const onchainRootAddresses = await this.rootGauges.getRootGaugeAddresses();
 
         this.sync(onchainRootAddresses);
