@@ -146,6 +146,24 @@ it('Returns TWAMM voting pool', async () => {
     `);
 }, 1000_000);
 
+it('Returns CRON voting pool', async () => {
+    const service = new VeBalVotingListService();
+
+    const cronAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
+
+    const pools = await service.getVotingListWithHardcodedPools();
+
+    const cronPool = pools.find((pool) => pool.rootGauge.address === cronAddress);
+
+    expect(cronPool?.rootGauge).toMatchInlineSnapshot(`
+      {
+        "address": "0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c",
+        "isKilled": false,
+        "relativeWeightCap": "0.02",
+      }
+    `);
+}, 1000_000);
+
 it('Full flow', async () => {
     const service = new VeBalVotingListService();
 
