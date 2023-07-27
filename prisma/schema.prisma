@@ -455,7 +455,7 @@ model PrismaPoolStakingGauge {
     chain               Chain
 
     gaugeAddress        String
-    rootGauge           PrismaRootStakingGauge?
+    votingGauge         PrismaVotingGauge?
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)
@@ -823,22 +823,23 @@ model PrismaVeBalTotalSupply {
     totalSupply         String
 }
 
-enum PrismaRootStakingGaugeStatus {
+enum PrismaVotingGaugeStatus {
     KILLED
     ACTIVE
 }
 
-model PrismaRootStakingGauge {
+model PrismaVotingGauge {
   @@id([id, chain])
-  @@unique([stakingId, chain])
+  @@unique([stakingGaugeId, chain])
 
   id      String
   chain   Chain
 
-  staking           PrismaPoolStakingGauge? @relation(fields: [stakingId, chain], references: [id, chain])
-  status            PrismaRootStakingGaugeStatus @default(ACTIVE)
+  stakingGauge      PrismaPoolStakingGauge? @relation(fields: [stakingGaugeId, chain], references: [id, chain])
+  status            PrismaVotingGaugeStatus @default(ACTIVE)
   gaugeAddress      String
-  stakingId         String?
+  stakingGaugeId    String?
   relativeWeight    String?
   relativeWeightCap String?
+  addedTimestamp    Int?
 }

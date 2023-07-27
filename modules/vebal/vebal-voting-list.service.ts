@@ -1,34 +1,34 @@
 import { prisma } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
-import { RootGauge, RootGaugesRepository } from './root-gauges.repository';
-import { specialRootGaugeAddresses } from './special-pools/special-root-gauge-addresses';
-import { getHardcodedRootGauge, veGauges, vePools } from './special-pools/ve-pools';
+import { VotingGauge, VotingGaugesRepository } from './voting-gauges.repository';
+import { specialVotingGaugeAddresses } from './special-pools/special-voting-gauge-addresses';
+import { getHardcodedVotingGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../schema';
 
 export class VeBalVotingListService {
-    constructor(private rootGauges = new RootGaugesRepository()) {}
+    constructor(private votingGauges = new VotingGaugesRepository()) {}
 
     public async getVotingListWithHardcodedPools(): Promise<GqlVotingPool[]> {
         return [...(await this.getVotingList()), ...hardCodedPools];
     }
 
     public async getVotingList(): Promise<GqlVotingPool[]> {
-        const validGauges = await this.getValidVotingRootGauges();
-        const validRootGaugesByPoolId = keyBy(validGauges, (gauge) => gauge.staking!.staking.poolId);
+        const validGauges = await this.getValidVotingGauges();
+        const validVotingGaugesByPoolId = keyBy(validGauges, (gauge) => gauge.stakingGauge!.staking.poolId);
 
-        let poolIds = Object.keys(validRootGaugesByPoolId);
+        let poolIds = Object.keys(validVotingGaugesByPoolId);
 
         poolIds = [...poolIds, ...Object.keys(vePools)];
 
         const pools = await this.getPoolsForVotingList(poolIds);
 
-        // Adds root gauge info to each pool
+        // Adds voting gauge info to each pool
         return pools.map((pool) => {
-            // Use hardcoded Root gauge data for ve root gauges
-            const veRootGauge = getHardcodedRootGauge(pool.id);
-            const rootGauge = veRootGauge || validRootGaugesByPoolId[pool.id];
+            // Use hardcoded data for ve gauges
+            const veVotingGauge = getHardcodedVotingGauge(pool.id);
+            const votingGauge = veVotingGauge || validVotingGaugesByPoolId[pool.id];
             const votingPool = {
                 id: pool.id,
                 chain: pool.chain,
@@ -41,10 +41,10 @@ export class VeBalVotingListService {
                     symbol: token.token.symbol,
                     logoURI: token.token.logoURI || '',
                 })),
-                rootGauge: {
-                    address: rootGauge.id,
-                    relativeWeightCap: rootGauge.relativeWeightCap,
-                    isKilled: rootGauge.status !== 'ACTIVE',
+                gauge: {
+                    address: votingGauge.id,
+                    relativeWeightCap: votingGauge.relativeWeightCap,
+                    isKilled: votingGauge.status !== 'ACTIVE',
                 },
             };
             return votingPool;
@@ -89,10 +89,10 @@ export class VeBalVotingListService {
         return pools;
     }
 
-    public async getValidVotingRootGauges() {
-        const gaugesWithStaking = await prisma.prismaRootStakingGauge.findMany({
+    public async getValidVotingGauges() {
+        const gaugesWithStaking = await prisma.prismaVotingGauge.findMany({
             where: {
-                stakingId: { not: null },
+                stakingGaugeId: { not: null },
             },
             select: {
                 id: true,
@@ -100,7 +100,7 @@ export class VeBalVotingListService {
                 status: true,
                 relativeWeightCap: true,
                 relativeWeight: true,
-                staking: {
+                stakingGauge: {
                     select: {
                         staking: {
                             select: { poolId: true },
@@ -112,50 +112,50 @@ export class VeBalVotingListService {
         return gaugesWithStaking;
     }
 
-    async syncRootGauges() {
-        const onchainRootAddresses = await this.rootGauges.getRootGaugeAddresses();
+    async syncVotingGauges() {
+        const onchainGaugeAddresses = await this.votingGauges.getVotingGaugeAddresses();
 
-        this.sync(onchainRootAddresses);
+        this.sync(onchainGaugeAddresses);
     }
 
-    async sync(rootGaugeAddresses: string[]) {
-        const chunks = chunk(rootGaugeAddresses, 100);
+    async sync(votingGaugeAddresses: string[]) {
+        const chunks = chunk(votingGaugeAddresses, 100);
 
         for (const addressChunk of chunks) {
-            const rootGauges = await this.fetchRootGauges(addressChunk);
+            const votingGauges = await this.fetchVotingGauges(addressChunk);
 
             /*
-                We avoid saving gauges in specialRootGaugeAddresses because they require special handling
+                We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
             */
-            const cleanRootGauges = rootGauges.filter(
-                (gauge) => !specialRootGaugeAddresses.includes(gauge.gaugeAddress),
+            const cleanVotingGauges = votingGauges.filter(
+                (gauge) => !specialVotingGaugeAddresses.includes(gauge.gaugeAddress),
             );
 
-            await this.rootGauges.saveRootGauges(cleanRootGauges);
+            await this.votingGauges.saveVotingGauges(cleanVotingGauges);
         }
     }
 
-    async fetchRootGauges(onchainRootAddresses: string[]) {
-        const subgraphGauges = await this.rootGauges.fetchRootGaugesFromSubgraph(onchainRootAddresses);
+    async fetchVotingGauges(votingGaugeAddresses: string[]) {
+        const subgraphGauges = await this.votingGauges.fetchVotingGaugesFromSubgraph(votingGaugeAddresses);
 
-        const onchainGauges = await this.rootGauges.fetchOnchainRootGauges(onchainRootAddresses);
+        const onchainGauges = await this.votingGauges.fetchOnchainVotingGauges(votingGaugeAddresses);
 
-        const rootGauges = this.rootGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
+        const votingGauges = this.votingGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
-        this.throwIfMissingRootGaugeData(rootGauges);
+        this.throwIfMissingVotingGaugeData(votingGauges);
 
-        return rootGauges;
+        return votingGauges;
     }
 
-    throwIfMissingRootGaugeData(rootGauges: RootGauge[]) {
-        const gaugesWithMissingData = rootGauges
+    throwIfMissingVotingGaugeData(votingGauges: VotingGauge[]) {
+        const gaugesWithMissingData = votingGauges
             .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
             .filter((gauge) => !gauge.isInSubgraph)
-            .filter(this.rootGauges.isValidForVotingList);
+            .filter(this.votingGauges.isValidForVotingList);
 
         if (gaugesWithMissingData.length > 0) {
             const errorMessage =
-                'Detected active root gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
+                'Detected active voting gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
                 JSON.stringify(gaugesWithMissingData);
             console.error(errorMessage);
             throw new Error(errorMessage);

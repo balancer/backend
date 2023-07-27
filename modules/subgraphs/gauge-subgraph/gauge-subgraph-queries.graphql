@@ -30,6 +30,9 @@ fragment Gauge on LiquidityGauge {
     streamer
     isPreferentialGauge
     isKilled
+    gauge {
+        addedTimestamp
+    }
 }
 
 query Pools(
@@ -180,6 +183,9 @@ fragment RootGauge on RootGauge {
     id
     chain
     recipient
+    gauge {
+        addedTimestamp
+    }
 }
 
 query LiquidityGauges($ids: [ID!]) {

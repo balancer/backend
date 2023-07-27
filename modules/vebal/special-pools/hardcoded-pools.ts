@@ -4,8 +4,8 @@ import { GqlVotingPool } from '../../../schema';
 /* Balancer wstETH/rETH/L and USDC/WETH/L from Cron Finance
    are special pools because Cron Contract is not compliant with BasePool interface so we won't find it the pools from the Subgraph
 */
-const cron1RootGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
-const cron2RootGaugeAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
+const cron1VotingGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
+const cron2VotingGaugeAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
 
 const cronPool1: GqlVotingPool = {
     chain: Chain.MAINNET,
@@ -29,10 +29,11 @@ const cronPool1: GqlVotingPool = {
                 'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xae78736cd615f374d3085123a210448e74fc6393.png',
         },
     ],
-    rootGauge: {
-        address: cron1RootGaugeAddress,
+    gauge: {
+        address: cron1VotingGaugeAddress,
         relativeWeightCap: null,
         isKilled: false,
+        addedTimestamp: 1663017781,
     },
 };
 
@@ -58,10 +59,11 @@ const cronPool2: GqlVotingPool = {
                 'https://raw.githubusercontent.com/balancer/tokenlists/main/src/assets/images/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png',
         },
     ],
-    rootGauge: {
-        address: cron2RootGaugeAddress,
+    gauge: {
+        address: cron2VotingGaugeAddress,
         relativeWeightCap: '0.02',
         isKilled: false,
+        addedTimestamp: 1690387253,
     },
 };
 

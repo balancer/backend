@@ -9,7 +9,7 @@ export const vePools: Record<string, string> = {
 
 export const veGauges = Object.values(vePools).map((v) => v.toLowerCase());
 
-export function getHardcodedRootGauge(poolId: string) {
+export function getHardcodedVotingGauge(poolId: string) {
     // Make sure that root addresses and poolIds are lowercase
     const hardcoded: Record<string, string> = {};
     Object.entries(vePools).forEach(([key, value]) => {

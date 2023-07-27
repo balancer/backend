@@ -287,7 +287,7 @@ export async function scheduleJob(job: WorkerJob, chainId: string) {
             await runIfNotAlreadyRunning(job.name, chainId, () => veBalService.syncVeBalTotalSupply(), 0.01);
             break;
         case 'sync-vebal-voting-gauges':
-            await runIfNotAlreadyRunning(job.name, chainId, () => veBalVotingListService.syncRootGauges(), 0.01);
+            await runIfNotAlreadyRunning(job.name, chainId, () => veBalVotingListService.syncVotingGauges(), 0.01);
             break;
         default:
             throw new Error(`Unhandled job type ${job.name}`);

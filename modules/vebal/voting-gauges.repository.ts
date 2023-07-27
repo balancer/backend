@@ -15,36 +15,38 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 
-export type RootGauge = {
+export type VotingGauge = {
     gaugeAddress: string;
     network: Chain;
     isKilled: boolean;
     relativeWeight: number;
     relativeWeightCap?: string;
     recipient?: string;
-    stakingId?: string;
+    stakingGaugeId?: string;
     isInSubgraph: boolean;
+    addedTimestamp?: number;
 };
 
-type SubGraphRootGauge = {
+type SubGraphGauge = {
     gaugeAddress: string;
     chain: Chain;
     recipient?: string;
+    addedTimestamp?: number;
 };
 
 /**
- * Fetches root gauges combining data from onchain contracts and the mainnet subgraph
- * Saves root gauges in prisma DB
+ * Fetches voting gauges combining data from onchain contracts and the mainnet subgraph
+ * Saves voting gauges in prisma DB
  */
-export class RootGaugesRepository {
+export class VotingGaugesRepository {
     constructor(private prisma: PrismaClient = prismaClient) {}
 
-    async getRootGaugeAddresses(): Promise<string[]> {
+    async getVotingGaugeAddresses(): Promise<string[]> {
         const totalGauges = Number(formatFixed(await this.getGaugeControllerContract().n_gauges()));
         return await this.fetchGaugeAddresses(totalGauges);
     }
 
-    async fetchOnchainRootGauges(gaugeAddresses: string[]): Promise<RootGauge[]> {
+    async fetchOnchainVotingGauges(gaugeAddresses: string[]): Promise<VotingGauge[]> {
         const totalGaugesTypes = Number(formatFixed(await this.getGaugeControllerContract().n_gauge_types()));
 
         const typeNames = await this.fetchTypeNames(totalGaugesTypes);
@@ -63,10 +65,10 @@ export class RootGaugesRepository {
 
         const relativeWeightCaps = await this.fetchRelativeWeightCaps(gaugeAddresses);
 
-        let rootGauges: RootGauge[] = [];
+        let votingGauges: VotingGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
             if (gaugeTypes[gaugeAddress] === 'Liquidity Mining Committee') return;
-            rootGauges.push({
+            votingGauges.push({
                 gaugeAddress: gaugeAddress.toLowerCase(),
                 network: this.toPrismaNetwork(gaugeTypes[gaugeAddress]),
                 isKilled: isKilled[gaugeAddress],
@@ -76,82 +78,85 @@ export class RootGaugesRepository {
             });
         });
 
-        return rootGauges;
+        return votingGauges;
     }
 
-    async fetchRootGaugesFromSubgraph(onchainRootAddresses: string[]) {
-        // This service only works with the mainnet subgraph, will return no root gauges for other chains
-        const rootGauges = await gaugeSubgraphService.getRootGaugesForIds(onchainRootAddresses);
+    async fetchVotingGaugesFromSubgraph(onchainAddresses: string[]) {
+        // This service only works with the mainnet subgraph, will return no voting gauges for other chains
+        const rootGauges = await gaugeSubgraphService.getRootGaugesForIds(onchainAddresses);
 
-        const l2RootGauges: SubGraphRootGauge[] = rootGauges.map((gauge) => {
+        const l2RootGauges: SubGraphGauge[] = rootGauges.map((gauge) => {
             return {
                 gaugeAddress: gauge.id,
                 chain: this.toPrismaNetwork(gauge.chain),
                 recipient: gauge.recipient,
-            } as SubGraphRootGauge;
+                addedTimestamp: gauge.gauge?.addedTimestamp,
+            } as SubGraphGauge;
         });
 
-        const liquidityGauges = await gaugeSubgraphService.getLiquidityGaugesForIds(onchainRootAddresses);
+        const liquidityGauges = await gaugeSubgraphService.getLiquidityGaugesForIds(onchainAddresses);
 
-        const mainnetRootGauges: SubGraphRootGauge[] = liquidityGauges.map((gauge) => {
+        const mainnetLiquidityGauges: SubGraphGauge[] = liquidityGauges.map((gauge) => {
             return {
                 gaugeAddress: gauge.id,
                 chain: Chain.MAINNET,
                 recipient: undefined,
-            } as SubGraphRootGauge;
+                addedTimestamp: gauge.gauge?.addedTimestamp,
+            } as SubGraphGauge;
         });
 
-        return [...l2RootGauges, ...mainnetRootGauges];
+        return [...l2RootGauges, ...mainnetLiquidityGauges];
     }
 
-    async deleteRootGauges() {
-        await this.prisma.prismaRootStakingGauge.deleteMany();
+    async deleteVotingGauges() {
+        await this.prisma.prismaVotingGauge.deleteMany();
     }
 
-    async saveRootGauges(rootGauges: RootGauge[]) {
-        const rootGaugesWithStakingId = Promise.all(
-            rootGauges.map(async (rootGauge) => {
-                const stakingId = await this.findStakingId(rootGauge);
-                rootGauge.stakingId = stakingId;
-                await this.saveRootGauge(rootGauge);
-                return rootGauge;
+    async saveVotingGauges(votingGauges: VotingGauge[]) {
+        const votingGaugesWithStakingGaugeId = Promise.all(
+            votingGauges.map(async (gauge) => {
+                const stakingId = await this.findStakingGaugeId(gauge);
+                gauge.stakingGaugeId = stakingId;
+                await this.saveVotingGauge(gauge);
+                return gauge;
             }),
         );
 
-        return rootGaugesWithStakingId;
+        return votingGaugesWithStakingGaugeId;
     }
 
-    async saveRootGauge(rootGauge: RootGauge) {
-        if (!this.isValidForVotingList(rootGauge)) return;
+    async saveVotingGauge(gauge: VotingGauge) {
+        if (!this.isValidForVotingList(gauge)) return;
         try {
             const upsertFields = {
-                id: rootGauge.gaugeAddress,
-                chain: rootGauge.network,
-                gaugeAddress: rootGauge.gaugeAddress,
-                relativeWeight: rootGauge.relativeWeight.toString(),
-                relativeWeightCap: rootGauge.relativeWeightCap,
-                stakingId: rootGauge.stakingId!,
-                status: rootGauge.isKilled ? 'KILLED' : 'ACTIVE',
+                id: gauge.gaugeAddress,
+                chain: gauge.network,
+                gaugeAddress: gauge.gaugeAddress,
+                relativeWeight: gauge.relativeWeight.toString(),
+                relativeWeightCap: gauge.relativeWeightCap,
+                stakingGaugeId: gauge.stakingGaugeId!,
+                status: gauge.isKilled ? 'KILLED' : 'ACTIVE',
+                addedTimestamp: gauge.addedTimestamp,
             } as const;
 
-            await this.prisma.prismaRootStakingGauge.upsert({
-                where: { id_chain: { id: rootGauge.gaugeAddress, chain: rootGauge.network } },
+            await this.prisma.prismaVotingGauge.upsert({
+                where: { id_chain: { id: gauge.gaugeAddress, chain: gauge.network } },
                 create: upsertFields,
                 update: upsertFields,
             });
         } catch (error) {
-            console.error('Error saving root gauge: ', rootGauge);
+            console.error('Error saving voting gauge: ', gauge, error);
             throw error;
         }
     }
 
-    async findStakingId(rootGauge: RootGauge) {
-        const chain = rootGauge.network as Chain;
+    async findStakingGaugeId(votingGauge: VotingGauge) {
+        const chain = votingGauge.network as Chain;
         let mainnetGaugeAddressOrRecipient: string | undefined;
         if (chain === 'MAINNET') {
-            mainnetGaugeAddressOrRecipient = rootGauge.gaugeAddress;
+            mainnetGaugeAddressOrRecipient = votingGauge.gaugeAddress;
         } else {
-            mainnetGaugeAddressOrRecipient = rootGauge.recipient?.toLowerCase();
+            mainnetGaugeAddressOrRecipient = votingGauge.recipient?.toLowerCase();
         }
 
         let gauge = await this.prisma.prismaPoolStakingGauge.findFirst({
@@ -165,30 +170,31 @@ export class RootGaugesRepository {
         });
 
         if (!gauge) {
-            // Only throw when root gauge is valid
-            if (this.isValidForVotingList(rootGauge)) {
-                const errorMessage = `RootGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(rootGauge)}`;
+            // Only throw when voting gauge is valid
+            if (this.isValidForVotingList(votingGauge)) {
+                const errorMessage = `VotingGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(votingGauge)}`;
                 console.error(errorMessage);
                 throw Error(errorMessage);
             }
-            // Store without staking relation when missing stakingId and invalid for voting
+            // Store without staking relation when missing stakingGaugeId and invalid for voting
             return undefined;
         }
         return gauge.id;
     }
 
-    updateOnchainGaugesWithSubgraphData(onchainGauges: RootGauge[], subgraphGauges: SubGraphRootGauge[]) {
+    updateOnchainGaugesWithSubgraphData(onchainGauges: VotingGauge[], subgraphGauges: SubGraphGauge[]) {
         const subgraphGaugesByAddress = keyBy(subgraphGauges, 'gaugeAddress');
 
         return onchainGauges.map((gauge) => {
-            const rootGauge = gauge;
+            const votingGauge = gauge;
             const subGraphGauge = subgraphGaugesByAddress[gauge.gaugeAddress];
             if (subGraphGauge) {
-                rootGauge.isInSubgraph = true;
-                rootGauge.network = subGraphGauge.chain;
-                rootGauge.recipient = subGraphGauge.recipient;
+                votingGauge.isInSubgraph = true;
+                votingGauge.network = subGraphGauge.chain;
+                votingGauge.recipient = subGraphGauge.recipient;
+                votingGauge.addedTimestamp = subGraphGauge.addedTimestamp;
             }
-            return rootGauge;
+            return votingGauge;
         });
     }
 

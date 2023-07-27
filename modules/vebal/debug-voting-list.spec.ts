@@ -1,6 +1,6 @@
 import { difference, pickBy } from 'lodash';
 import { setMainnetRpcProviderForTesting } from '../../test/utils';
-import { RootGaugesRepository } from './root-gauges.repository';
+import { VotingGaugesRepository } from './voting-gauges.repository';
 import { VeBalVotingListService } from './vebal-voting-list.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { AllNetworkConfigs } from '../network/network-config';
@@ -17,21 +17,17 @@ beforeEach(() => {
     setRequestScopedContextValue('chainId', '1');
 });
 
-it('Contract Root gauges that are not in subgraph', async () => {
-    const rootGauges = new RootGaugesRepository();
+it('Controller Contract gauges that are not in subgraph', async () => {
+    const repository = new VotingGaugesRepository();
 
-    const rootGaugeAddresses = await rootGauges.getRootGaugeAddresses();
+    const votingGaugeAddresses = await repository.getVotingGaugeAddresses();
 
-    // console.log(rootGaugeAddresses);
-
-    const subgraphGauges = await rootGauges.fetchRootGaugesFromSubgraph(rootGaugeAddresses);
+    const subgraphGauges = await repository.fetchVotingGaugesFromSubgraph(votingGaugeAddresses);
 
     const diff = difference(
-        rootGaugeAddresses,
+        votingGaugeAddresses,
         subgraphGauges.map((gauge) => gauge.gaugeAddress),
     );
-
-    // console.log('Contract RootGauges that are not in subgraph: ', diff);
 
     expect(diff.sort()).toEqual(
         [
@@ -46,21 +42,19 @@ it('Contract Root gauges that are not in subgraph', async () => {
     );
 }, 1000_000);
 
-it('Root gauges without getRelativeWeightCap', async () => {
-    const onchain = new RootGaugesRepository();
+it('Voting gauges without getRelativeWeightCap', async () => {
+    const repository = new VotingGaugesRepository();
 
-    const rootGaugeAddresses = await onchain.getRootGaugeAddresses();
+    const votingGaugeAddresses = await repository.getVotingGaugeAddresses();
 
-    const relativeWeightCapsWithFailures = await onchain.fetchRelativeWeightCaps(rootGaugeAddresses);
-
-    // console.log(relativeWeightCapsWithFailures);
+    const relativeWeightCapsWithFailures = await repository.fetchRelativeWeightCaps(votingGaugeAddresses);
 
     var failedOnes = pickBy(relativeWeightCapsWithFailures, (value, key) => {
         return value === undefined;
     });
 
-    console.log('Number of root gauges without getRelativeWeight: ', Object.keys(failedOnes).length);
-    // console.log('Root gauge addresses without getRelativeWeight: ', Object.keys(failedOnes));
+    console.log('Number of voting gauges without getRelativeWeight: ', Object.keys(failedOnes).length);
+    // console.log('Voting gauge addresses without getRelativeWeight: ', Object.keys(failedOnes));
 }, 1000_000);
 
 it('Returns veBAL pool icons', async () => {
@@ -87,7 +81,7 @@ it.skip('Returns voting pools ', async () => {
 
     const firstPool = votingPools[0];
 
-    expect(firstPool.rootGauge).toMatchInlineSnapshot(`
+    expect(firstPool.gauge).toMatchInlineSnapshot(`
       {
         "address": "0x6ba66967b0723718d616ad5f293c2ae6d7b0fcae",
         "isKilled": false,
@@ -117,9 +111,9 @@ it('Returns veBAL voting pool', async () => {
 
     const pools = await service.getVotingList();
 
-    const veBalRootGauge = pools.find((pool) => pool.rootGauge.address === veBalAddress);
+    const veBalVotingGauge = pools.find((pool) => pool.gauge.address === veBalAddress);
 
-    expect(veBalRootGauge?.rootGauge).toMatchInlineSnapshot(`
+    expect(veBalVotingGauge?.gauge).toMatchInlineSnapshot(`
       {
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
         "isKilled": false,
@@ -135,10 +129,11 @@ it('Returns first TWAMM (from CRON finance) voting pool', async () => {
 
     const pools = await service.getVotingListWithHardcodedPools();
 
-    const twammPool = pools.find((pool) => pool.rootGauge.address === twammAddress);
+    const twammPool = pools.find((pool) => pool.gauge.address === twammAddress);
 
-    expect(twammPool?.rootGauge).toMatchInlineSnapshot(`
+    expect(twammPool?.gauge).toMatchInlineSnapshot(`
       {
+        "addedTimestamp": 1663017781,
         "address": "0xb5bd58c733948e3d65d86ba9604e06e5da276fd1",
         "isKilled": false,
         "relativeWeightCap": null,
@@ -153,10 +148,11 @@ it('Returns second TWAMM (from CRON finance) voting pool', async () => {
 
     const pools = await service.getVotingListWithHardcodedPools();
 
-    const twammPool = pools.find((pool) => pool.rootGauge.address === twamm2Address);
+    const twammPool = pools.find((pool) => pool.gauge.address === twamm2Address);
 
-    expect(twammPool?.rootGauge).toMatchInlineSnapshot(`
+    expect(twammPool?.gauge).toMatchInlineSnapshot(`
       {
+        "addedTimestamp": 1690387253,
         "address": "0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c",
         "isKilled": false,
         "relativeWeightCap": "0.02",
@@ -167,15 +163,15 @@ it('Returns second TWAMM (from CRON finance) voting pool', async () => {
 it('Full flow', async () => {
     const service = new VeBalVotingListService();
 
-    const repository = new RootGaugesRepository();
-    let onchainRootAddresses: string[] = await repository.getRootGaugeAddresses();
+    const repository = new VotingGaugesRepository();
+    let onchainRootAddresses: string[] = await repository.getVotingGaugeAddresses();
 
     console.log('Number of addresses download: ', onchainRootAddresses.length);
 
     // Test full flow with specific addresses
     // onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
 
-    repository.deleteRootGauges();
+    repository.deleteVotingGauges();
     await service.sync(onchainRootAddresses);
 }, 1000_000);
 
@@ -210,13 +206,13 @@ it('Confirm invalid gauge addresses', async () => {
         '0x077794c30afeccdf5ad2abc0588e8cee7197b71a',
     ];
 
-    const rootGauges = new RootGaugesRepository();
+    const repository = new VotingGaugesRepository();
 
-    const oldGauges = await rootGauges.fetchRootGaugesFromSubgraph(invalidAddressesFromOldGaugeList);
+    const oldGauges = await repository.fetchVotingGaugesFromSubgraph(invalidAddressesFromOldGaugeList);
 
     const oldGaugeAddresses = oldGauges.map((gauge) => gauge.gaugeAddress);
 
-    const onchainGauges = await rootGauges.fetchOnchainRootGauges(oldGaugeAddresses);
+    const onchainGauges = await repository.fetchOnchainVotingGauges(oldGaugeAddresses);
 
     onchainGauges.forEach((gauge) => {
         expect(gauge.isKilled).toBe(true);
