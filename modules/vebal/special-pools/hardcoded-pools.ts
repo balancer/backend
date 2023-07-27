@@ -1,10 +1,13 @@
 import { Chain } from '@prisma/client';
 import { GqlVotingPool } from '../../../schema';
 
-const twammRootGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
-const cronRootGaugeAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
+/* Balancer wstETH/rETH/L and USDC/WETH/L from Cron Finance
+   are special pools because Cron Contract is not compliant with BasePool interface so we won't find it the pools from the Subgraph
+*/
+const cron1RootGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
+const cron2RootGaugeAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
 
-const twammPool: GqlVotingPool = {
+const cronPool1: GqlVotingPool = {
     chain: Chain.MAINNET,
     symbol: 'wstETH/rETH/L',
     id: '0x6910c4e32d425a834fb61e983c8083a84b0ebd01000200000000000000000532',
@@ -27,17 +30,13 @@ const twammPool: GqlVotingPool = {
         },
     ],
     rootGauge: {
-        address: twammRootGaugeAddress,
+        address: cron1RootGaugeAddress,
         relativeWeightCap: null,
         isKilled: false,
     },
 };
 
-/* Balancer USDC/WETH/L from Cron Finance
-   https://etherscan.io/address/0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c#readContract
-   This is a special pool because Cron Contract is not compliant with BasePool interface so we won't find it the pools from the Subgraph
-*/
-const cronPool: GqlVotingPool = {
+const cronPool2: GqlVotingPool = {
     chain: Chain.MAINNET,
     symbol: 'USDC/WETH/L',
     id: '0x0018c32d85d8aebea2efbe0b0f4a4eb9e4f1c8c900020000000000000000050c',
@@ -60,10 +59,10 @@ const cronPool: GqlVotingPool = {
         },
     ],
     rootGauge: {
-        address: cronRootGaugeAddress,
+        address: cron2RootGaugeAddress,
         relativeWeightCap: '0.02',
         isKilled: false,
     },
 };
 
-export const hardCodedPools: GqlVotingPool[] = [twammPool, cronPool];
+export const hardCodedPools: GqlVotingPool[] = [cronPool1, cronPool2];

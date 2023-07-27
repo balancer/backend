@@ -128,7 +128,7 @@ it('Returns veBAL voting pool', async () => {
     `);
 }, 1000_000);
 
-it('Returns TWAMM voting pool', async () => {
+it('Returns first TWAMM (from CRON finance) voting pool', async () => {
     const service = new VeBalVotingListService();
 
     const twammAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
@@ -146,16 +146,16 @@ it('Returns TWAMM voting pool', async () => {
     `);
 }, 1000_000);
 
-it('Returns CRON voting pool', async () => {
+it('Returns second TWAMM (from CRON finance) voting pool', async () => {
     const service = new VeBalVotingListService();
 
-    const cronAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
+    const twamm2Address = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
 
     const pools = await service.getVotingListWithHardcodedPools();
 
-    const cronPool = pools.find((pool) => pool.rootGauge.address === cronAddress);
+    const twammPool = pools.find((pool) => pool.rootGauge.address === twamm2Address);
 
-    expect(cronPool?.rootGauge).toMatchInlineSnapshot(`
+    expect(twammPool?.rootGauge).toMatchInlineSnapshot(`
       {
         "address": "0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c",
         "isKilled": false,
