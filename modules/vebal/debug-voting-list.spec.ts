@@ -111,15 +111,34 @@ it('Returns veBAL voting pool', async () => {
 
     const pools = await service.getVotingList();
 
-    const veBalVotingGauge = pools.find((pool) => pool.gauge.address === veBalAddress);
+    const veBalVotingPool = pools.find((pool) => pool.gauge.address === veBalAddress);
 
-    expect(veBalVotingGauge?.gauge).toMatchInlineSnapshot(`
+    expect(veBalVotingPool?.gauge).toMatchInlineSnapshot(`
       {
+        "addedTimestamp": null,
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
         "isKilled": false,
         "relativeWeightCap": null,
       }
     `);
+
+    expect(veBalVotingPool?.symbol).toBe('B-80BAL-20WETH');
+}, 1000_000);
+
+it('returns veLIT and veUSH voting pools', async () => {
+    const service = new VeBalVotingListService();
+
+    const pools = await service.getVotingList();
+
+    const veLITAddress = '0x56124eb16441a1ef12a4ccaeabdd3421281b795a';
+    const veLITVotingPool = pools.find((pool) => pool.gauge.address === veLITAddress);
+
+    expect(veLITVotingPool?.symbol).toBe('BAL-20WETH-80LIT');
+
+    const veUSHAddress = '0x5b79494824bc256cd663648ee1aad251b32693a9';
+    const veUSHVotingPool = pools.find((pool) => pool.gauge.address === veUSHAddress);
+
+    expect(veUSHVotingPool?.symbol).toBe('80USH-20unshETH');
 }, 1000_000);
 
 it('Returns first TWAMM (from CRON finance) voting pool', async () => {
