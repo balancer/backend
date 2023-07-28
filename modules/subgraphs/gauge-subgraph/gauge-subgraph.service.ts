@@ -10,6 +10,8 @@ import {
     VotingEscrowLock_OrderBy,
     PoolsQueryVariables,
     PoolsQuery,
+    RootGaugesQuery,
+    RootGaugeFragment,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
 import { networkContext } from '../../network/network-context.service';
@@ -227,6 +229,44 @@ export class GaugeSubgraphService {
         }
 
         return allLiquidityGauges;
+    }
+
+    public async getRootGaugesForIds(gaugeIds: string[]): Promise<RootGaugeFragment[]> {
+        const allRootGauges: RootGaugeFragment[] = [];
+
+        const chunks = _.chunk(gaugeIds, 1000);
+
+        for (const chunk of chunks) {
+            const gauges = await this.sdk.RootGauges({
+                where: {
+                    id_in: chunk,
+                },
+                first: 1000,
+            });
+
+            allRootGauges.push(...gauges.rootGauges);
+        }
+
+        return allRootGauges;
+    }
+
+    public async getLiquidityGaugesForIds(gaugeIds: string[]): Promise<GaugeFragment[]> {
+        const allRootGauges: GaugeFragment[] = [];
+
+        const chunks = _.chunk(gaugeIds, 1000);
+
+        for (const chunk of chunks) {
+            const gauges = await this.sdk.GaugeLiquidityGauges({
+                where: {
+                    id_in: chunk,
+                },
+                first: 1000,
+            });
+
+            allRootGauges.push(...gauges.liquidityGauges);
+        }
+
+        return allRootGauges;
     }
 
     public async getMetadata() {

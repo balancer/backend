@@ -1,9 +1,36 @@
 extend type Query {
     veBalGetUserBalance: AmountHumanReadable!
     veBalGetTotalSupply: AmountHumanReadable!
+    veBalGetVotingList: [GqlVotingPool!]!
 }
 
 extend type Mutation {
     veBalSyncAllUserBalances: String!
     veBalSyncTotalSupply: String!
+}
+
+type GqlVotingPool {
+    id: ID!
+    chain: GqlChain!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolMinimalType!
+
+    tokens: [GqlVotingGaugeToken!]!
+
+    gauge: GqlVotingGauge!
+}
+
+type GqlVotingGaugeToken {
+    address: String!
+    weight: String
+    symbol: String!
+    logoURI: String!
+}
+
+type GqlVotingGauge {
+    address: Bytes!
+    relativeWeightCap: String
+    isKilled: Boolean!
+    addedTimestamp: Int
 }

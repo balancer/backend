@@ -1,6 +1,7 @@
 import { Resolvers } from '../../schema';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { veBalService } from './vebal.service';
+import { veBalVotingListService } from './vebal-voting-list.service';
 
 const resolvers: Resolvers = {
     Query: {
@@ -10,6 +11,9 @@ const resolvers: Resolvers = {
         },
         veBalGetTotalSupply: async (parent, {}, context) => {
             return veBalService.getVeBalTotalSupply();
+        },
+        veBalGetVotingList: async (parent, {}, context) => {
+            return veBalVotingListService.getVotingListWithHardcodedPools();
         },
     },
     Mutation: {

@@ -30,6 +30,9 @@ fragment Gauge on LiquidityGauge {
     streamer
     isPreferentialGauge
     isKilled
+    gauge {
+        addedTimestamp
+    }
 }
 
 query Pools(
@@ -153,5 +156,40 @@ query VotingEscrowLocks(
         user {
             id
         }
+    }
+}
+
+query RootGauges(
+    $block: Block_height
+    $first: Int = 100
+    $orderBy: RootGauge_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: RootGauge_filter
+) {
+    rootGauges(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
+        ...RootGauge
+    }
+}
+
+fragment RootGauge on RootGauge {
+    id
+    chain
+    recipient
+    gauge {
+        addedTimestamp
+    }
+}
+
+query LiquidityGauges($ids: [ID!]) {
+    liquidityGauges(where: { id_in: $ids }, first: 1000) {
+        id
     }
 }

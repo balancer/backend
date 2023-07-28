@@ -11,7 +11,6 @@ model PrismaVeBalUserBalance {
 
 }
 
-
 model PrismaVeBalTotalSupply {
     @@id([address, chain])
 
@@ -19,4 +18,25 @@ model PrismaVeBalTotalSupply {
     chain               Chain
 
     totalSupply         String
+}
+
+enum PrismaVotingGaugeStatus {
+    KILLED
+    ACTIVE
+}
+
+model PrismaVotingGauge {
+  @@id([id, chain])
+  @@unique([stakingGaugeId, chain])
+
+  id      String
+  chain   Chain
+
+  stakingGauge      PrismaPoolStakingGauge? @relation(fields: [stakingGaugeId, chain], references: [id, chain])
+  status            PrismaVotingGaugeStatus @default(ACTIVE)
+  gaugeAddress      String
+  stakingGaugeId    String?
+  relativeWeight    String?
+  relativeWeightCap String?
+  addedTimestamp    Int?
 }
