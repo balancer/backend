@@ -205,6 +205,10 @@ export class PoolUsdDataService {
         const operations: any[] = [];
 
         for (const pool of pools) {
+            if (pool.id === '0x7ca75bdea9dede97f8b13c6641b768650cb837820002000000000000000000d5') {
+                console.log(`dynamic data: ${pool.dynamicData?.totalLiquidity}`);
+                console.log(`capturesYiled: ${capturesYield(pool)}`);
+            }
             if (pool.dynamicData?.totalLiquidity && capturesYield(pool)) {
                 const totalLiquidity = pool.dynamicData.totalLiquidity;
                 const totalLiquidity24hAgo = pool.dynamicData.totalLiquidity24hAgo;
@@ -246,6 +250,14 @@ export class PoolUsdDataService {
                 if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
                     yieldCapture24h = yieldForUser24h;
                     yieldCapture48h = yieldForUser48h;
+                }
+                if (pool.id === '0x7ca75bdea9dede97f8b13c6641b768650cb837820002000000000000000000d5') {
+                    console.log(`liquidityAverage24h: ${pool.dynamicData?.totalLiquidity}`);
+                    console.log(`yieldForUser48h: ${yieldForUser48h}`);
+                    console.log(`yieldForUser24h: ${yieldForUser24h}`);
+                    console.log(`protocolYieldFeePercentage: ${protocolYieldFeePercentage}`);
+                    console.log(`yieldCapture24h: ${yieldCapture24h}`);
+                    console.log(`yieldCapture48h: ${yieldCapture48h}`);
                 }
 
                 operations.push(
