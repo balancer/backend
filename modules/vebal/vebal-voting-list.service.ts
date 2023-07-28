@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { chunk, keyBy } from 'lodash';
 import { VotingGauge, VotingGaugesRepository } from './voting-gauges.repository';
 import { specialVotingGaugeAddresses } from './special-pools/special-voting-gauge-addresses';
-import { getHardcodedVotingGauge, veGauges, vePools } from './special-pools/ve-pools';
+import { getVeVotingGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../schema';
 
@@ -27,7 +27,7 @@ export class VeBalVotingListService {
         // Adds voting gauge info to each pool
         return pools.map((pool) => {
             // Use hardcoded data for ve gauges
-            const veVotingGauge = getHardcodedVotingGauge(pool.id);
+            const veVotingGauge = getVeVotingGauge(pool.id);
             const votingGauge = veVotingGauge || validVotingGaugesByPoolId[pool.id];
             const votingPool = {
                 id: pool.id,

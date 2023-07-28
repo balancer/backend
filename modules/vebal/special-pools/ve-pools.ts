@@ -1,5 +1,5 @@
 /*
-  The following hardcoded pools are missing in the subgraph but we have their pool data so we just need to provide a match between poolId and RootGauge address
+  The following hardcoded pools are missing in the subgraph but we have their pool data so we just need to provide a match between poolId and veVotingGauge address
 */
 export const vePools: Record<string, string> = {
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014': '0xb78543e00712c3abba10d0852f6e38fde2aaba4d', //veBAL
@@ -9,18 +9,18 @@ export const vePools: Record<string, string> = {
 
 export const veGauges = Object.values(vePools).map((v) => v.toLowerCase());
 
-export function getHardcodedVotingGauge(poolId: string) {
-    // Make sure that root addresses and poolIds are lowercase
-    const hardcoded: Record<string, string> = {};
+export function getVeVotingGauge(poolId: string) {
+    // Make sure that gauge addresses and poolIds are lowercase
+    const vePools: Record<string, string> = {};
     Object.entries(vePools).forEach(([key, value]) => {
-        hardcoded[key.toLowerCase()] = value.toLowerCase();
+        vePools[key.toLowerCase()] = value.toLowerCase();
     });
 
-    const veRootGaugeAddress = hardcoded[poolId];
-    if (!veRootGaugeAddress) return;
+    const veVotingGaugeAddress = vePools[poolId];
+    if (!veVotingGaugeAddress) return;
     return {
         relativeWeightCap: null,
-        id: veRootGaugeAddress,
+        id: veVotingGaugeAddress,
         status: 'ACTIVE' as const,
         addedTimestamp: null,
     };
