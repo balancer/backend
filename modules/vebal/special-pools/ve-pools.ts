@@ -11,12 +11,12 @@ export const veGauges = Object.values(vePools).map((v) => v.toLowerCase());
 
 export function getVeVotingGauge(poolId: string) {
     // Make sure that gauge addresses and poolIds are lowercase
-    const vePools: Record<string, string> = {};
+    const vePoolsLowerCase: Record<string, string> = {};
     Object.entries(vePools).forEach(([key, value]) => {
-        vePools[key.toLowerCase()] = value.toLowerCase();
+        vePoolsLowerCase[key.toLowerCase()] = value.toLowerCase();
     });
 
-    const veVotingGaugeAddress = vePools[poolId];
+    const veVotingGaugeAddress = vePoolsLowerCase[poolId];
     if (!veVotingGaugeAddress) return;
     return {
         relativeWeightCap: null,
