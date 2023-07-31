@@ -32,7 +32,7 @@ const baseNetworkData: NetworkData = {
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
         beetsBar: '',
         blocks: '',
-        gauge: '',
+        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
         veBalLocks: '',
         userBalances: '',
     },
