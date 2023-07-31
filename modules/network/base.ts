@@ -33,7 +33,7 @@ const baseNetworkData: NetworkData = {
         beetsBar: '',
         blocks: '',
         gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
-        veBalLocks: '',
+        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: '',
     },
     eth: {
@@ -69,8 +69,8 @@ const baseNetworkData: NetworkData = {
         address: '0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2',
     },
     veBal: {
-        address: '',
-        delegationProxy: '',
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -114,6 +114,7 @@ const baseNetworkData: NetworkData = {
         linearPoolFactories: [],
         linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
+        multistratAprSubgraphUrl: '',
     },
     beefy: {
         linearPools: [''],
@@ -208,20 +209,8 @@ export const baseNetworkConfig: NetworkConfig = {
             interval: every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
-        },
-        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
-        },
-        {
-            name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
