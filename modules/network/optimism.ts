@@ -58,7 +58,7 @@ const optimismNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/XmTfwyK5Tar5RGmyxjyFFL9G2fm_6TuY',
+    rpcUrl: 'https://rpc.optimism.gateway.fm',
     rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
