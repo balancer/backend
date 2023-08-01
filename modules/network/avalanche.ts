@@ -20,7 +20,7 @@ const avalancheNetworkData: NetworkData = {
     chain: {
         slug: 'avalanche',
         id: 43114,
-        nativeAssetAddress: '0x0000000000000000000000000000000000000000',
+        nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
         prismaId: 'AVALANCHE',
         gqlId: 'AVALANCHE',
@@ -35,8 +35,8 @@ const avalancheNetworkData: NetworkData = {
         userBalances: 'https://',
     },
     eth: {
-        address: '0x0000000000000000000000000000000000000000',
-        addressFormatted: '0x0000000000000000000000000000000000000000',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         symbol: 'AVAX',
         name: 'Avax',
     },
