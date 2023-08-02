@@ -54,7 +54,7 @@ const mainnetNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://cloudflare-eth.com',
+    rpcUrl: 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
