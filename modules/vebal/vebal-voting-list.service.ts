@@ -117,7 +117,7 @@ export class VeBalVotingListService {
     async syncVotingGauges() {
         const onchainGaugeAddresses = await this.votingGauges.getVotingGaugeAddresses();
 
-        this.sync(onchainGaugeAddresses);
+        return this.sync(onchainGaugeAddresses);
     }
 
     async sync(votingGaugeAddresses: string[]) {
