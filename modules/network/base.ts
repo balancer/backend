@@ -1,44 +1,40 @@
 import { BigNumber, ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
-import { RocketPoolStakedEthAprService } from '../pool/lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 import { tokenService } from '../token/token.service';
 import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
-import { OvernightAprService } from '../pool/lib/apr-data-sources/optimism/overnight-apr.service';
 import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
 import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
 import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
 import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
-import { SanityContentService } from '../content/sanity-content.service';
+import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { BeefyVaultAprService } from '../pool/lib/apr-data-sources/beefy-vault-apr.service copy';
+import { coingeckoService } from '../coingecko/coingecko.service';
 
-const optimismNetworkData: NetworkData = {
+const baseNetworkData: NetworkData = {
     chain: {
-        slug: 'optimism',
-        id: 10,
+        slug: 'base',
+        id: 8453,
         nativeAssetAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         wrappedNativeAssetAddress: '0x4200000000000000000000000000000000000006',
-        prismaId: 'OPTIMISM',
-        gqlId: 'OPTIMISM',
+        prismaId: 'BASE',
+        gqlId: 'BASE',
     },
     subgraphs: {
-        startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-optimism',
-        beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
+        startDate: '2023-07-10',
+        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
+        beetsBar: '',
+        blocks: 'https://api.studio.thegraph.com/query/48427/bleu-base-blocks/version/latest',
+        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
         veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        userBalances: '',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -52,64 +48,59 @@ const optimismNetworkData: NetworkData = {
     },
     coingecko: {
         nativeAssetId: 'ethereum',
-        platformId: 'optimistic-ethereum',
+        platformId: 'base',
         excludedTokenAddresses: [],
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.optimism.gateway.fm',
+    rpcUrl: 'https://developer-access-mainnet.base.org',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+    beetsPriceProviderRpcUrl: '',
     sanity: {
-        projectId: '1g2ag2hb',
-        dataset: 'production',
+        projectId: '',
+        dataset: '',
     },
-    protocolToken: 'beets',
+    protocolToken: 'bal',
     beets: {
-        address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        address: '0x0000000000000000000000000000000000000000',
     },
     bal: {
-        address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
+        address: '0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
-        delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
+        delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         composableStablePoolFactories: [
-            '0xf145caFB67081895EE80eB7c04A30Cf87f07b745',
-            '0xe2E901AB09f37884BA31622dF3Ca7FC19AA443Be',
-            '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
-            '0x043A2daD730d585C44FB79D2614F295D2d625412',
+            '0x8df317a729fcaA260306d7de28888932cb579b88',
         ],
         weightedPoolV2Factories: [
-            '0xad901309d9e9DbC5Df19c84f729f429F0189a633',
-            '0xA0DAbEBAAd1b243BBb243f933013d560819eB66f',
-            '0x230a59F4d9ADc147480f03B0D3fFfeCd56c3289a',
+            '0x4C32a8a8fDa4E24139B51b456B42290f51d6A1c4',
         ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        poolDataQueryContract: '0x6B5dA774890Db7B7b96C6f44e6a4b0F657399E2e',
+        poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
     },
-    multicall: '0x2DC0E2aa608532Da689e89e237dF582B783E552C',
+    multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
         address: '0x0000000000000000000000000000000000000000',
         excludedFarmIds: [],
     },
-    avgBlockSpeed: 1,
+    avgBlockSpeed: 2,
     sor: {
         main: {
-            url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
+            url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
         },
         canary: {
-            url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
+            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
             maxPools: 8,
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
@@ -120,49 +111,29 @@ const optimismNetworkData: NetworkData = {
         vaultsEndpoint: 'https://#/',
     },
     reaper: {
-        linearPoolFactories: [
-            '0x19968d4b7126904fd665ed25417599df9604df83',
-            '0xe4b88e745dce9084b9fc2439f85a9a4c5cd6f361',
-        ],
-        linearPoolIdsFromErc4626Factory: [
-            '0x20715545c15c76461861cb0d6ba96929766d05a50000000000000000000000e8',
-            '0xf970659221bb9d01b615321b63a26e857ffc030b0000000000000000000000e9',
-            '0xa5d4802b4ce6b745b0c9e1b4a79c093d197869c80000000000000000000000ea',
-            '0x2e2b8b82123789d895fd79913f6dfa51f5b5a0e60000000000000000000000eb',
-            '0x48ace81c09382bfc08ed102e7eadd37e3b0497520000000000000000000000ec',
-            '0x8025586ac5fb265a23b9492e7414beccc2059ec30000000000000000000000ed',
-            '0x3e9cbffd270ae67abb09d28988e7e785498c73730000000000000000000000ee',
-        ],
+        linearPoolFactories: [],
+        linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
-        multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',
+        multistratAprSubgraphUrl: '',
     },
     beefy: {
-        linearPools: [
-            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
-            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
-        ],
+        linearPools: [''],
     },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
-    },
-    rocket: {
-        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
+        wstEthContract: '',
     },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1Ifbfh8njyssWKuLlUvlfXt-r3rnd4gAIP5sSM-lEuBU',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
             databaseTabName: 'Database v2',
             compositionTabName: 'Pool Composition v2',
             emissionDataTabName: 'EmissionData',
         },
         canary: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '17bYDbQAdMwGevfJ7thiwI8mjYeZppVRi8gD8ER6CtSs',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
             databaseTabName: 'Database v2',
             compositionTabName: 'Pool Composition v2',
             emissionDataTabName: 'EmissionData',
@@ -178,33 +149,21 @@ const optimismNetworkData: NetworkData = {
     },
 };
 
-export const optimismNetworkConfig: NetworkConfig = {
-    data: optimismNetworkData,
-    contentService: new SanityContentService(),
-    provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
+export const baseNetworkConfig: NetworkConfig = {
+    data: baseNetworkData,
+    contentService: new GithubContentService(),
+    provider: new ethers.providers.JsonRpcProvider(baseNetworkData.rpcUrl),
     poolAprServices: [
-        new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.rocket!.rEthContract),
-        new WstethAprService(tokenService, optimismNetworkData.lido!.wstEthContract),
-        new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
-        new ReaperCryptAprService(
-            optimismNetworkData.reaper.linearPoolFactories,
-            optimismNetworkData.reaper.linearPoolIdsFromErc4626Factory,
-            optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
-            optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
-            optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
-        ),
-        new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
-        new PhantomStableAprService(),
+        new WstethAprService(tokenService, baseNetworkData.lido!.wstEthContract),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
-            optimismNetworkData.beets.address,
-            optimismNetworkData.bal.address,
+            baseNetworkData.beets.address,
+            baseNetworkData.bal.address,
         ]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
@@ -244,10 +203,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-new-pools-from-subgraph',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-sanity-pool-data',
-            interval: every(3, 'minutes'),
         },
         {
             name: 'sync-tokens-from-pool-tokens',
@@ -316,10 +271,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: every(5, 'minutes'),
-        },
-        {
-            name: 'feed-data-to-datastudio',
-            interval: every(1, 'minutes'),
         },
     ],
 };
