@@ -137,7 +137,7 @@ export class CoingeckoDataService {
     }
 
     public async syncCoingeckoIds() {
-        const allTokens = await prisma.prismaToken.findMany({});
+        const allTokens = await prisma.prismaToken.findMany({ where: { chain: networkContext.chain } });
 
         const coinIds = await this.conigeckoService.getCoinIdList();
 
@@ -151,7 +151,7 @@ export class CoingeckoDataService {
             if (coinId && token.coingeckoTokenId !== coinId.id) {
                 await prisma.prismaToken.update({
                     where: {
-                        address_chain: { address: token.address, chain: token.chain },
+                        address_chain: { address: token.address, chain: networkContext.chain },
                     },
                     data: {
                         coingeckoTokenId: coinId.id,
