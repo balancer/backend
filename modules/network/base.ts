@@ -49,7 +49,7 @@ const baseNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'base',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca'], //usdbc no token price yet
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -74,12 +74,8 @@ const baseNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        composableStablePoolFactories: [
-            '0x8df317a729fcaA260306d7de28888932cb579b88',
-        ],
-        weightedPoolV2Factories: [
-            '0x4C32a8a8fDa4E24139B51b456B42290f51d6A1c4',
-        ],
+        composableStablePoolFactories: ['0x8df317a729fcaA260306d7de28888932cb579b88'],
+        weightedPoolV2Factories: ['0x4C32a8a8fDa4E24139B51b456B42290f51d6A1c4'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
         poolDataQueryContract: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
