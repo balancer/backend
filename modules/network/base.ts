@@ -31,7 +31,7 @@ const baseNetworkData: NetworkData = {
         startDate: '2023-07-10',
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
         beetsBar: '',
-        blocks: '',
+        blocks: 'https://api.studio.thegraph.com/query/48427/bleu-base-blocks/version/latest',
         gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
         veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: '',
@@ -209,8 +209,20 @@ export const baseNetworkConfig: NetworkConfig = {
             interval: every(5, 'minutes'),
         },
         {
+            name: 'update-liquidity-24h-ago-for-all-pools',
+            interval: every(5, 'minutes'),
+        },
+        {
+            name: 'cache-average-block-time',
+            interval: every(1, 'hours'),
+        },
+        {
             name: 'sync-staking-for-pools',
             interval: every(5, 'minutes'),
+        },
+        {
+            name: 'sync-latest-snapshots-for-all-pools',
+            interval: every(1, 'hours'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
