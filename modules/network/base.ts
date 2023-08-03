@@ -54,8 +54,8 @@ const baseNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://mainnet.base.org',
-    rpcMaxBlockRange: 2000,
+    rpcUrl: 'https://base.meowrpc.com',
+    rpcMaxBlockRange: 500,
     beetsPriceProviderRpcUrl: '',
     sanity: {
         projectId: '',
