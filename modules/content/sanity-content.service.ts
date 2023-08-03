@@ -102,6 +102,7 @@ export class SanityContentService implements ContentService {
                     symbol: sanityToken.symbol,
                     //use set to ensure we overwrite the underlying value if it is removed in sanity
                     logoURI: { set: sanityToken.logoURI || null },
+                    decimals: sanityToken.decimals,
                     priority: sanityToken.priority,
                     coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
                     coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
