@@ -54,7 +54,7 @@ const baseNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://base.meowrpc.com',
+    rpcUrl: 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 500,
     beetsPriceProviderRpcUrl: '',
     sanity: {
