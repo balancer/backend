@@ -129,11 +129,7 @@ export class DatastudioService {
             let yesterdaySwapsCount = `0`;
             //find last entry of pool in currentSheet for the correct chain and get total swaps. If no previous value present, set previous value to 0
             for (let i = poolAddressValues.length - 1; i >= 0; i--) {
-                if (
-                    chainValues[i][0] === chainSlug &&
-                    poolAddressValues[i][0] === pool.address &&
-                    timestampValues[i][0] === endOfDayBeforeYesterday
-                ) {
+                if (chainValues[i][0] === chainSlug && poolAddressValues[i][0] === pool.address) {
                     yesterdaySwapsCount = totalSwapValues[i][0];
                     break;
                 }
