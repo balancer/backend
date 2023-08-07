@@ -57,6 +57,7 @@ extend type Mutation {
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
     poolSyncAllPoolVersions: String!
+    poolInitOnChainDataForAllPools: String!
 }
 
 type GqlPoolMinimal {
