@@ -408,7 +408,7 @@ export class PoolOnChainDataService {
                 }
 
                 for (const poolToken of pool.tokens) {
-                    const balance = formatFixed(poolData.balances[poolToken.index], poolToken.token.decimals);
+                    const balance = formatFixed(poolData.balances[poolToken.index] || '0', poolToken.token.decimals);
                     const weight = poolData.weights ? formatFixed(poolData.weights[poolToken.index], 18) : null;
 
                     let priceRate = '1.0';
