@@ -338,6 +338,10 @@ export class PoolService {
         await this.poolUsdDataService.updateLifetimeValuesForAllPools();
     }
 
+    public async initOnChainDataForAllPools() {
+        await this.poolSyncService.initOnChainDataForAllPools();
+    }
+
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string) {
         await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }

@@ -20,6 +20,7 @@ export class UserSyncWalletBalanceService {
         const { block } = await balancerSubgraphService.getMetadata();
 
         let endBlock = block.number;
+        console.log(`Loading balances at block ${endBlock}`);
 
         if (networkContext.isFantomNetwork) {
             const { block: beetsBarBlock } = await beetsBarService.getMetadata();
@@ -35,6 +36,8 @@ export class UserSyncWalletBalanceService {
             AddressZero,
             networkContext.data.balancer.vault,
         ]);
+
+        console.log(`Found ${poolIdsToInit.length} pools to init`);
 
         let fbeetsHolders: BeetsBarUserFragment[] = [];
 
@@ -56,7 +59,7 @@ export class UserSyncWalletBalanceService {
             }
         }
 
-        console.log('initBalancesForPools: performing db operations...');
+        console.log(`initBalancesForPools: performing ${operations.length} db operations...`);
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({

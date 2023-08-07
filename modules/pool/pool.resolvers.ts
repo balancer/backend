@@ -211,6 +211,14 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolInitOnChainDataForAllPools: async (parent, args, context) => {
+            isAdminRoute(context);
+
+            await poolService.initOnChainDataForAllPools();
+
+            return 'success';
+        },
+
         poolSyncPool: async (parent, { poolId }, context) => {
             isAdminRoute(context);
 
