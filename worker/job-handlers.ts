@@ -33,31 +33,25 @@ export async function scheduleJobs(chainId: string): Promise<void> {
 async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any, samplingRate: number): Promise<void> {
     samplingRate = 0;
     const jobId = `${id}-${chainId}`;
-    let monitorSlug = jobId;
-    if (jobId.length > 50) {
-        //slug has 50 chars max length
-        monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
-    }
+    // let monitorSlug = jobId;
+    // if (jobId.length > 50) {
+    //     //slug has 50 chars max length
+    //     monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
+    // }
     if (runningJobs.has(jobId)) {
-        console.log('Skipping job', jobId);
+        console.log(`Skip job ${jobId}-skip`);
+        if (process.env.AWS_ALERTS === 'true') {
+            const cronsMetricPublisher = getCronMetricsPublisher(chainId);
+            await cronsMetricPublisher.publish(`${jobId}-skip`);
+        }
         return;
     }
-    let sentryCheckInId = '';
+    // let sentryCheckInId = '';
     try {
         runningJobs.add(jobId);
 
-        const transaction = Sentry.startTransaction({ name: jobId }, { samplingRate: samplingRate.toString() });
-        Sentry.configureScope((scope) => {
-            scope.setSpan(transaction);
-            scope.setTransactionName(`${jobId}`);
-            scope.setContext('monitor', {
-                slug: monitorSlug,
-            });
-        });
-        transaction.sampled = false;
-
         console.time(jobId);
-        console.log(`Start job ${jobId}`);
+        console.log(`Start job ${jobId}-start`);
 
         // sentryCheckInId = Sentry.captureCheckIn({
         //     monitorSlug: `${monitorSlug}`,
@@ -76,42 +70,30 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
             const cronsMetricPublisher = getCronMetricsPublisher(chainId);
             await cronsMetricPublisher.publish(`${jobId}-done`);
         }
-
-        if (Math.random() > samplingRate) {
-            transaction.sampled = false;
-        }
+        console.log(`Successful job ${jobId}-done`);
     } catch (error) {
-        const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
-        if (transaction) {
-            transaction.sampled = true;
-        }
-
-        Sentry.configureScope((scope) => {
-            scope.setTag('error', jobId);
-        });
-
         // Sentry.captureCheckIn({
         //     checkInId: sentryCheckInId,
         //     monitorSlug: `${monitorSlug}`,
         //     status: 'error',
         // });
 
-        console.log(`Error job ${jobId}`, error);
+        console.log(`Error job ${jobId}-error`, error);
+        if (process.env.AWS_ALERTS === 'true') {
+            const cronsMetricPublisher = getCronMetricsPublisher(chainId);
+            await cronsMetricPublisher.publish(`${jobId}-error`);
+        }
     } finally {
         runningJobs.delete(jobId);
+        console.log(`Finish job ${jobId}-done`);
         console.timeEnd(jobId);
-
-        const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
-        if (transaction) {
-            transaction.finish();
-        }
     }
 }
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
         console.log(`Schedule job ${job.name}-${chainId}`);
-        await scheduleJob(job, chainId);
+        scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
