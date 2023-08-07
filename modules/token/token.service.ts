@@ -113,9 +113,9 @@ export class TokenService {
         const tokenPrices = await tokenService.getTokenPrices();
 
         if (networkContext.data.protocolToken === 'bal') {
-            return tokenService.getPriceForToken(tokenPrices, networkContext.data.bal.address).toString();
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.bal!.address).toString();
         } else {
-            return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address).toString();
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets!.address).toString();
         }
     }
 

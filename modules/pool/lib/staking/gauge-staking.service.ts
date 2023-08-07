@@ -21,7 +21,7 @@ interface ChildChainInfo {
 }
 
 export class GaugeStakingService implements PoolStakingService {
-    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService) {}
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService, private readonly balAddress: string) {}
     public async syncStakingForPools(): Promise<void> {
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -89,7 +89,7 @@ export class GaugeStakingService implements PoolStakingService {
                     if (gaugeVersion === 2) {
                         if (gauge.tokens) {
                             gauge.tokens.push({
-                                id: `${networkContext.data.bal.address}-0`,
+                                id: `${this.balAddress}-0`,
                                 decimals: 18,
                                 symbol: 'BAL',
                                 rate: childChainGaugeInfo[gauge.id].rate,
@@ -97,7 +97,7 @@ export class GaugeStakingService implements PoolStakingService {
                         } else {
                             gauge.tokens = [
                                 {
-                                    id: `${networkContext.data.bal.address}-0`,
+                                    id: `${this.balAddress}-0`,
                                     decimals: 18,
                                     symbol: 'BAL',
                                     rate: childChainGaugeInfo[gauge.id].rate,
@@ -124,7 +124,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 }
                             } else {
                                 // we can't get BAL rate from the reward data but got it from the inflation_rate call which set the rewardToken.rate
-                                if (tokenAddress === networkContext.data.bal.address) {
+                                if (tokenAddress === this.balAddress) {
                                     rewardRate = rewardToken.rate ? rewardToken.rate : '0.0';
                                 } else {
                                     const gaugeV2 = await getContractAt(gauge.id, childChainGaugeV2Abi);

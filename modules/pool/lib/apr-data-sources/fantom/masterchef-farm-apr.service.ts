@@ -13,6 +13,8 @@ import { networkContext } from '../../../../network/network-context.service';
 const FARM_EMISSIONS_PERCENT = 0.872;
 
 export class MasterchefFarmAprService implements PoolAprService {
+    constructor(private readonly beetsAddress: string) {}
+
     public getAprServiceName(): string {
         return 'MasterchefFarmAprService';
     }
@@ -83,7 +85,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             return [];
         }
 
-        const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address);
+        const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress);
         const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
         const farmBeetsPerYear = (parseInt(farm.allocPoint) / parseInt(farm.masterChef.totalAllocPoint)) * beetsPerYear;

@@ -7,7 +7,7 @@ import { DeploymentEnv } from '../network/network-config-types';
 export class GoogleJwtClient {
     public async getAuthorizedSheetsClient(privateKey: string): Promise<JWT> {
         const jwtClient = new google.auth.JWT(
-            networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].user,
+            networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].user,
             undefined,
             privateKey,
             'https://www.googleapis.com/auth/spreadsheets',

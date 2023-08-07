@@ -13,11 +13,14 @@ import { networkContext } from '../../../network/network-context.service';
 const FARM_EMISSIONS_PERCENT = 0.872;
 
 export class MasterChefStakingService implements PoolStakingService {
-    constructor(private readonly masterChefSubgraphService: MasterchefSubgraphService) {}
+    constructor(
+        private readonly masterChefSubgraphService: MasterchefSubgraphService,
+        private readonly excludedFarmIds: string[],
+    ) {}
 
     public async syncStakingForPools(): Promise<void> {
         const farms = await this.masterChefSubgraphService.getAllFarms({});
-        const filteredFarms = farms.filter((farm) => !networkContext.data.masterchef.excludedFarmIds.includes(farm.id));
+        const filteredFarms = farms.filter((farm) => !this.excludedFarmIds.includes(farm.id));
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
             include: { staking: { include: { farm: { include: { rewarders: true } } } } },

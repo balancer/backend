@@ -56,15 +56,12 @@ const baseNetworkData: NetworkData = {
     },
     rpcUrl: 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 500,
-    beetsPriceProviderRpcUrl: '',
+    rpcMaxBlockRangeBalances: 50,
     sanity: {
         projectId: '',
         dataset: '',
     },
     protocolToken: 'bal',
-    beets: {
-        address: '0x0000000000000000000000000000000000000000',
-    },
     bal: {
         address: '0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2',
     },
@@ -82,10 +79,6 @@ const baseNetworkData: NetworkData = {
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
-    masterchef: {
-        address: '0x0000000000000000000000000000000000000000',
-        excludedFarmIds: [],
-    },
     avgBlockSpeed: 2,
     sor: {
         main: {
@@ -103,37 +96,9 @@ const baseNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
-    },
-    reaper: {
-        linearPoolFactories: [],
-        linearPoolIdsFromErc4626Factory: [],
-        averageAPRAcrossLastNHarvests: 2,
-        multistratAprSubgraphUrl: '',
-    },
-    beefy: {
-        linearPools: [''],
-    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '',
-    },
-    datastudio: {
-        main: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-        canary: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
     },
     monitoring: {
         main: {
@@ -153,12 +118,9 @@ export const baseNetworkConfig: NetworkConfig = {
         new WstethAprService(tokenService, baseNetworkData.lido!.wstEthContract),
         new BoostedPoolAprService(),
         new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            baseNetworkData.beets.address,
-            baseNetworkData.bal.address,
-        ]),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [baseNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, baseNetworkData.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),

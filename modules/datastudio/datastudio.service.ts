@@ -20,12 +20,12 @@ export class DatastudioService {
         const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
         const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
 
-        const databaseTabName = networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName;
-        const sheetId = networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].sheetId;
+        const databaseTabName = networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName;
+        const sheetId = networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].sheetId;
         const compositionTabName =
-            networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName;
+            networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName;
         const emissionDataTabName =
-            networkContext.data.datastudio[env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName;
+            networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName;
         const swapProtocolFeePercentage = networkContext.data.balancer.swapProtocolFeePercentage;
         const chainSlug = networkContext.data.chain.slug;
 
@@ -256,7 +256,7 @@ export class DatastudioService {
                             pool.address,
                             pool.name,
                             'BEETS',
-                            networkContext.data.beets.address,
+                            networkContext.data.beets!.address,
                             `${beetsPerDay}`,
                             `${beetsValuePerDay}`,
                             chainSlug,

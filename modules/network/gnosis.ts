@@ -54,15 +54,8 @@ const gnosisNetworkData: NetworkData = {
     },
     rpcUrl: 'https://rpc.ankr.com/gnosis',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: '',
-    sanity: {
-        projectId: '',
-        dataset: '',
-    },
+    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
-    beets: {
-        address: '0x0000000000000000000000000000000000000000',
-    },
     bal: {
         address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
     },
@@ -83,10 +76,6 @@ const gnosisNetworkData: NetworkData = {
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
-    masterchef: {
-        address: '0x0000000000000000000000000000000000000000',
-        excludedFarmIds: [],
-    },
     avgBlockSpeed: 1,
     sor: {
         main: {
@@ -102,35 +91,6 @@ const gnosisNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
-        },
-    },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
-    },
-    reaper: {
-        linearPoolFactories: [],
-        linearPoolIdsFromErc4626Factory: [],
-        averageAPRAcrossLastNHarvests: 2,
-        multistratAprSubgraphUrl: '',
-    },
-    lido: {
-        wstEthAprEndpoint: '',
-        wstEthContract: '',
-    },
-    datastudio: {
-        main: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-        canary: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
         },
     },
     monitoring: {
@@ -154,12 +114,9 @@ export const gnosisNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(gnosisNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            gnosisNetworkData.beets.address,
-            gnosisNetworkData.bal.address,
-        ]),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [gnosisNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, gnosisNetworkData.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),

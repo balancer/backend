@@ -7,14 +7,14 @@ import { YearnVault } from '../apr-types';
 import { networkContext } from '../../../../network/network-context.service';
 
 export class YearnVaultAprService implements PoolAprService {
-    constructor(private readonly tokenService: TokenService) {}
+    constructor(private readonly tokenService: TokenService, private readonly vaultsEndpoint: string) {}
 
     public getAprServiceName(): string {
         return 'YearnVaultAprService';
     }
 
     public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
-        const { data } = await axios.get<YearnVault[]>(networkContext.data.yearn.vaultsEndpoint);
+        const { data } = await axios.get<YearnVault[]>(this.vaultsEndpoint);
         const tokenPrices = await this.tokenService.getTokenPrices();
 
         for (const pool of pools) {

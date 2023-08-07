@@ -74,7 +74,7 @@ const fantomNetworkData: NetworkData = {
     },
     rpcUrl: 'https://rpc.ftm.tools',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+    rpcMaxBlockRangeBalances: 200,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',
@@ -82,15 +82,13 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
         farmId: '22',
         poolId: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837000200000000000000000019',
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
-    },
-    bal: {
-        address: '',
     },
     balancer: {
         vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
@@ -178,9 +176,6 @@ const fantomNetworkData: NetworkData = {
         averageAPRAcrossLastNHarvests: 5,
         multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
     },
-    beefy: {
-        linearPools: [''],
-    },
     spooky: {
         xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
     },
@@ -223,29 +218,33 @@ export const fantomNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
     poolAprServices: [
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new YearnVaultAprService(tokenService),
+        new YearnVaultAprService(tokenService, fantomNetworkData.yearn!.vaultsEndpoint),
         new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
         new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
         new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
         new ReaperCryptAprService(
-            fantomNetworkData.reaper.linearPoolFactories,
-            fantomNetworkData.reaper.linearPoolIdsFromErc4626Factory,
-            fantomNetworkData.reaper.averageAPRAcrossLastNHarvests,
+            fantomNetworkData.reaper!.multistratAprSubgraphUrl,
+            fantomNetworkData.reaper!.linearPoolFactories,
+            fantomNetworkData.reaper!.linearPoolIdsFromErc4626Factory,
+            fantomNetworkData.reaper!.averageAPRAcrossLastNHarvests,
             fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
             fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
-        new MasterchefFarmAprService(),
-        new ReliquaryFarmAprService(),
+        new MasterchefFarmAprService(fantomNetworkData.beets!.address),
+        new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
     ],
     poolStakingServices: [
-        new MasterChefStakingService(masterchefService),
+        new MasterChefStakingService(masterchefService, fantomNetworkData.masterchef!.excludedFarmIds),
         new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
     ],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
+        new BeetsPriceHandlerService(
+            fantomNetworkData.beets!.address,
+            fantomNetworkData.beets!.beetsPriceProviderRpcUrl,
+        ),
         new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
         new ClqdrPriceHandlerService(),
         new CoingeckoPriceHandlerService(coingeckoService),
@@ -254,7 +253,12 @@ export const fantomNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [
-        new UserSyncMasterchefFarmBalanceService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.farmId),
+        new UserSyncMasterchefFarmBalanceService(
+            fantomNetworkData.fbeets!.address,
+            fantomNetworkData.fbeets!.farmId,
+            fantomNetworkData.masterchef!.address,
+            fantomNetworkData.masterchef!.excludedFarmIds,
+        ),
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     /*

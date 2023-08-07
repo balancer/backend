@@ -60,7 +60,7 @@ const optimismNetworkData: NetworkData = {
     },
     rpcUrl: 'https://rpc.ankr.com/optimism',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+    rpcMaxBlockRangeBalances: 200,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',
@@ -68,6 +68,7 @@ const optimismNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
         address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
@@ -115,9 +116,6 @@ const optimismNetworkData: NetworkData = {
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
         },
-    },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
     },
     reaper: {
         linearPoolFactories: [
@@ -187,24 +185,28 @@ export const optimismNetworkConfig: NetworkConfig = {
         new WstethAprService(tokenService, optimismNetworkData.lido!.wstEthContract),
         new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
-            optimismNetworkData.reaper.linearPoolFactories,
-            optimismNetworkData.reaper.linearPoolIdsFromErc4626Factory,
-            optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
+            optimismNetworkData.reaper!.multistratAprSubgraphUrl,
+            optimismNetworkData.reaper!.linearPoolFactories,
+            optimismNetworkData.reaper!.linearPoolIdsFromErc4626Factory,
+            optimismNetworkData.reaper!.averageAPRAcrossLastNHarvests,
             optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
             optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
         ),
-        new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
+        new BeefyVaultAprService(optimismNetworkData.beefy!.linearPools, tokenService),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
-            optimismNetworkData.beets.address,
-            optimismNetworkData.bal.address,
+            optimismNetworkData.beets!.address,
+            optimismNetworkData.bal!.address,
         ]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
+        new BeetsPriceHandlerService(
+            optimismNetworkData.beets!.address,
+            optimismNetworkData.beets!.beetsPriceProviderRpcUrl,
+        ),
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),

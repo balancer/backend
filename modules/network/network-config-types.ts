@@ -42,7 +42,7 @@ export interface NetworkData {
     };
     rpcUrl: string;
     rpcMaxBlockRange: number;
-    beetsPriceProviderRpcUrl: string;
+    rpcMaxBlockRangeBalances: number;
     coingecko: {
         nativeAssetId: string;
         platformId: string;
@@ -62,13 +62,14 @@ export interface NetworkData {
         veBalLocks?: string;
         userBalances: string;
     };
-    sanity: {
+    sanity?: {
         projectId: string;
         dataset: string;
     };
     protocolToken: 'beets' | 'bal';
-    beets: {
+    beets?: {
         address: string;
+        beetsPriceProviderRpcUrl: string;
     };
     fbeets?: {
         address: string;
@@ -76,7 +77,7 @@ export interface NetworkData {
         poolId: string;
         poolAddress: string;
     };
-    bal: {
+    bal?: {
         address: string;
     };
     veBal?: {
@@ -96,7 +97,7 @@ export interface NetworkData {
     };
     multicall: string;
     multicall3: string;
-    masterchef: {
+    masterchef?: {
         address: string;
         excludedFarmIds: string[];
     };
@@ -107,16 +108,16 @@ export interface NetworkData {
     copper?: {
         proxyAddress: string;
     };
-    reaper: {
+    reaper?: {
         linearPoolFactories: string[];
         linearPoolIdsFromErc4626Factory: string[];
         averageAPRAcrossLastNHarvests: number;
         multistratAprSubgraphUrl: string;
     };
-    beefy: {
+    beefy?: {
         linearPools: string[];
     };
-    yearn: {
+    yearn?: {
         vaultsEndpoint: string;
     };
     lido?: {
@@ -149,7 +150,7 @@ export interface NetworkData {
             swapGas: BigNumber;
         };
     };
-    datastudio: {
+    datastudio?: {
         [key in DeploymentEnv]: {
             user: string;
             sheetId: string;

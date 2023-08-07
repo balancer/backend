@@ -55,15 +55,8 @@ const zkevmNetworkData: NetworkData = {
     },
     rpcUrl: 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: '',
-    sanity: {
-        projectId: '',
-        dataset: '',
-    },
+    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
-    beets: {
-        address: '0x0000000000000000000000000000000000000000',
-    },
     bal: {
         address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',
     },
@@ -105,38 +98,6 @@ const zkevmNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
-    },
-    reaper: {
-        linearPoolFactories: [],
-        linearPoolIdsFromErc4626Factory: [],
-        averageAPRAcrossLastNHarvests: 2,
-        multistratAprSubgraphUrl: '',
-    },
-    beefy: {
-        linearPools: [''],
-    },
-    lido: {
-        wstEthAprEndpoint: '',
-        wstEthContract: '',
-    },
-    datastudio: {
-        main: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-        canary: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-    },
     monitoring: {
         main: {
             alarmTopicArn: 'arn:aws:sns:ca-central-1:118697801881:api_alarms',
@@ -156,12 +117,9 @@ export const zkevmNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            zkevmNetworkData.beets.address,
-            zkevmNetworkData.bal.address,
-        ]),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [zkevmNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, zkevmNetworkData.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),

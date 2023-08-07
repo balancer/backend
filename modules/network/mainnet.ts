@@ -56,15 +56,8 @@ const mainnetNetworkData: NetworkData = {
     },
     rpcUrl: 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
-    sanity: {
-        projectId: '',
-        dataset: '',
-    },
+    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
-    beets: {
-        address: '0x0000000000000000000000000000000000000000',
-    },
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3D',
     },
@@ -94,10 +87,6 @@ const mainnetNetworkData: NetworkData = {
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
-    masterchef: {
-        address: '0x0000000000000000000000000000000000000000',
-        excludedFarmIds: [],
-    },
     avgBlockSpeed: 10,
     sor: {
         main: {
@@ -115,37 +104,9 @@ const mainnetNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
-    },
-    reaper: {
-        linearPoolFactories: [],
-        linearPoolIdsFromErc4626Factory: [],
-        averageAPRAcrossLastNHarvests: 2,
-        multistratAprSubgraphUrl: '',
-    },
-    beefy: {
-        linearPools: [''],
-    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
-    },
-    datastudio: {
-        main: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-        canary: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
     },
     monitoring: {
         main: {
@@ -166,12 +127,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            mainnetNetworkData.beets.address,
-            mainnetNetworkData.bal.address,
-        ]),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [mainnetNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, mainnetNetworkData.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),

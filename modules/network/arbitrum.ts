@@ -56,15 +56,8 @@ const arbitrumNetworkData: NetworkData = {
     },
     rpcUrl: 'https://arb1.arbitrum.io/rpc',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
-    sanity: {
-        projectId: '',
-        dataset: '',
-    },
+    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
-    beets: {
-        address: '0x0000000000000000000000000000000000000000',
-    },
     bal: {
         address: '0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8',
     },
@@ -92,10 +85,6 @@ const arbitrumNetworkData: NetworkData = {
     },
     multicall: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
-    masterchef: {
-        address: '0x0000000000000000000000000000000000000000',
-        excludedFarmIds: [],
-    },
     avgBlockSpeed: 1,
     sor: {
         main: {
@@ -113,37 +102,15 @@ const arbitrumNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
-    },
     reaper: {
         linearPoolFactories: ['0xC101dcA301a4011C1F925e9622e749e550a1B667'],
         linearPoolIdsFromErc4626Factory: [],
         averageAPRAcrossLastNHarvests: 2,
         multistratAprSubgraphUrl: '',
     },
-    beefy: {
-        linearPools: [''],
-    },
     lido: {
         wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
         wstEthContract: '0x5979d7b546e38e414f7e9822514be443a4800529',
-    },
-    datastudio: {
-        main: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
-        canary: {
-            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
-            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
-            databaseTabName: 'Database v2',
-            compositionTabName: 'Pool Composition v2',
-            emissionDataTabName: 'EmissionData',
-        },
     },
     monitoring: {
         main: {
@@ -162,21 +129,19 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     poolAprServices: [
         new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(
-            arbitrumNetworkData.reaper.linearPoolFactories,
-            arbitrumNetworkData.reaper.linearPoolIdsFromErc4626Factory,
-            arbitrumNetworkData.reaper.averageAPRAcrossLastNHarvests,
+            arbitrumNetworkData.reaper!.multistratAprSubgraphUrl,
+            arbitrumNetworkData.reaper!.linearPoolFactories,
+            arbitrumNetworkData.reaper!.linearPoolIdsFromErc4626Factory,
+            arbitrumNetworkData.reaper!.averageAPRAcrossLastNHarvests,
             arbitrumNetworkData.stader ? arbitrumNetworkData.stader.sFtmxContract : undefined,
             arbitrumNetworkData.lido ? arbitrumNetworkData.lido.wstEthContract : undefined,
         ),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(arbitrumNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
-            arbitrumNetworkData.beets.address,
-            arbitrumNetworkData.bal.address,
-        ]),
+        new GaugeAprService(gaugeSubgraphService, tokenService, [arbitrumNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, arbitrumNetworkData.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
