@@ -85,7 +85,6 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         }
     } finally {
         runningJobs.delete(jobId);
-        console.log(`Finish job ${jobId}-done`);
         console.timeEnd(jobId);
     }
 }
