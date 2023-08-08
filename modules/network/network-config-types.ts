@@ -84,6 +84,7 @@ export interface NetworkData {
         delegationProxy: string;
     };
     gaugeControllerAddress?: string;
+    gaugeControllerHelperAddress?: string;
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];
