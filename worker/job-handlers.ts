@@ -33,6 +33,7 @@ export async function scheduleJobs(chainId: string): Promise<void> {
 async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any, samplingRate: number): Promise<void> {
     samplingRate = 0;
     const jobId = `${id}-${chainId}`;
+    const cronsMetricPublisher = getCronMetricsPublisher(chainId);
     // let monitorSlug = jobId;
     // if (jobId.length > 50) {
     //     //slug has 50 chars max length
@@ -41,7 +42,6 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
     if (runningJobs.has(jobId)) {
         console.log(`Skip job ${jobId}-skip`);
         if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId);
             await cronsMetricPublisher.publish(`${jobId}-skip`);
         }
         return;
@@ -67,7 +67,6 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         // });
 
         if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId);
             await cronsMetricPublisher.publish(`${jobId}-done`);
         }
         console.log(`Successful job ${jobId}-done`);
@@ -80,7 +79,6 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
         console.log(`Error job ${jobId}-error`, error);
         if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId);
             await cronsMetricPublisher.publish(`${jobId}-error`);
         }
     } finally {
