@@ -8,12 +8,15 @@ import { mainnetNetworkConfig } from '../network/mainnet';
 import multicall3Abi from '../pool/lib/staking/abi/Multicall3.json';
 import { Multicaller } from '../web3/multicaller';
 import gaugeControllerAbi from './abi/gaugeController.json';
+import gaugeControllerHelperAbi from './abi/gaugeControllerHelper.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
+// Helper contract that wraps gaugeControllerAddress contract to allow checkpointing and getting the updated relative weight
+const gaugeControllerHelperAddress = mainnetNetworkConfig.data.gaugeControllerHelperAddress!;
 
 export type VotingGauge = {
     gaugeAddress: string;
@@ -265,12 +268,16 @@ export class VotingGaugesRepository {
     }
 
     async fetchRelativeWeights(gaugeAddresses: string[]) {
-        const multicaller = this.buildGaugeControllerMulticaller();
+        const multicaller = this.buildGaugeControllerHelperMulticaller();
         gaugeAddresses.forEach((address) =>
-            multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address]),
+            multicaller.call(address, gaugeControllerHelperAddress, 'gauge_relative_weight', [address]),
         );
 
+        console.log('Calling multicaller: ');
+
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
+
+        console.log('Pajaritos por aqui: ', response);
         return mapValues(response, (value) => Number(formatEther(value)));
     }
 
@@ -287,18 +294,14 @@ export class VotingGaugesRepository {
     }
 
     buildGaugeControllerMulticaller() {
-        /*
-            gauge_relative_weight has 2 overridden instances with different amounts of inputs which causes problems with ethers
-            We apply a filter to exclude the function that we are not using
-        */
-        const filteredGaugeControllerAbi = gaugeControllerAbi.filter((item) => {
-            return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
-        });
+        return new Multicaller(mainnetNetworkConfig.data.multicall, mainnetNetworkConfig.provider, gaugeControllerAbi);
+    }
 
+    buildGaugeControllerHelperMulticaller() {
         return new Multicaller(
             mainnetNetworkConfig.data.multicall,
             mainnetNetworkConfig.provider,
-            filteredGaugeControllerAbi,
+            gaugeControllerHelperAbi,
         );
     }
 
