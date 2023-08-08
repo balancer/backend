@@ -2,7 +2,7 @@ import { prisma } from '../../prisma/prisma-client';
 
 import { chunk, keyBy } from 'lodash';
 import { VotingGauge, VotingGaugesRepository } from './voting-gauges.repository';
-import { specialVotingGaugeAddresses } from './special-pools/special-voting-gauge-addresses';
+import { oldVeBalAddress, specialVotingGaugeAddresses } from './special-pools/special-voting-gauge-addresses';
 import { getVeVotingGauge, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../schema';
@@ -121,7 +121,7 @@ export class VeBalVotingListService {
     }
 
     async sync(votingGaugeAddresses: string[]) {
-        const chunks = chunk(votingGaugeAddresses, 100);
+        const chunks = chunk(votingGaugeAddresses, 50);
 
         for (const addressChunk of chunks) {
             const votingGauges = await this.fetchVotingGauges(addressChunk);
@@ -153,7 +153,9 @@ export class VeBalVotingListService {
         const gaugesWithMissingData = votingGauges
             .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
             .filter((gauge) => !gauge.isInSubgraph)
-            .filter(this.votingGauges.isValidForVotingList);
+            .filter(this.votingGauges.isValidForVotingList)
+            // Ignore old Vebal gauge address
+            .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
 
         if (gaugesWithMissingData.length > 0) {
             const errorMessage =

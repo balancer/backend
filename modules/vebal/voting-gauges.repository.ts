@@ -273,11 +273,8 @@ export class VotingGaugesRepository {
             multicaller.call(address, gaugeControllerHelperAddress, 'gauge_relative_weight', [address]),
         );
 
-        console.log('Calling multicaller: ');
-
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
 
-        console.log('Pajaritos por aqui: ', response);
         return mapValues(response, (value) => Number(formatEther(value)));
     }
 
