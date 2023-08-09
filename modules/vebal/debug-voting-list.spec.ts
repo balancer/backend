@@ -8,6 +8,7 @@ import { mainnetNetworkConfig } from '../network/mainnet';
 
 const defaultAnvilRpcUrl = 'http://127.0.0.1:8555';
 setMainnetRpcProviderForTesting(defaultAnvilRpcUrl);
+// setMainnetRpcProviderForTesting('https://cloudflare-eth.com');
 
 // TODO: understand why mainnetConfig is undefined in test context
 AllNetworkConfigs['1'] = mainnetNetworkConfig;
@@ -118,7 +119,7 @@ it('Returns veBAL voting pool', async () => {
         "addedTimestamp": null,
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
         "isKilled": false,
-        "relativeWeightCap": null,
+        "relativeWeightCap": "0.1",
       }
     `);
 
@@ -177,6 +178,18 @@ it('Returns second TWAMM (from CRON finance) voting pool', async () => {
         "relativeWeightCap": "0.02",
       }
     `);
+}, 1000_000);
+
+it('Fetches gauge_relative_weight using GaugeControllerHelper', async () => {
+    const repository = new VotingGaugesRepository();
+    let onchainRootAddresses: string[] = await repository.getVotingGaugeAddresses();
+
+    const result = await repository.fetchRelativeWeights(onchainRootAddresses.slice(0, 50));
+
+    console.log('Number of addresses download: ', onchainRootAddresses.length);
+
+    expect(Object.values(result).length).toBe(50);
+    expect(result['0x34f33cdaed8ba0e1ceece80e5f4a73bcf234cfac']).toMatchInlineSnapshot('0.000002246037288695');
 }, 1000_000);
 
 it('Full flow', async () => {
