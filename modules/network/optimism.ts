@@ -58,7 +58,7 @@ const optimismNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ankr.com/optimism',
+    rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/rmOESpm09kexq9IollunUZgzd51dw8b3',
     rpcMaxBlockRange: 2000,
     rpcMaxBlockRangeBalances: 200,
     sanity: {
