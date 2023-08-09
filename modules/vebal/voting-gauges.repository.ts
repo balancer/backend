@@ -5,7 +5,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber, Contract } from 'ethers';
 import { Interface, formatEther } from 'ethers/lib/utils';
 import { mainnetNetworkConfig } from '../network/mainnet';
-import multicall3Abi from '../pool/lib/staking/abi/Multicall3.json';
+import multicall3Abi from '../web3/abi/Multicall3.json';
 import { Multicaller } from '../web3/multicaller';
 import gaugeControllerAbi from './abi/gaugeController.json';
 import rootGaugeAbi from './abi/rootGauge.json';

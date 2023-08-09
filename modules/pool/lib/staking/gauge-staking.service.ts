@@ -8,10 +8,9 @@ import { Interface, formatEther, formatUnits } from 'ethers/lib/utils';
 import { getContractAt } from '../../../web3/contract';
 import childChainGaugeV2Abi from './abi/ChildChainGaugeV2.json';
 import childChainGaugeV1Abi from './abi/ChildChainGaugeV1.json';
-import multicall3Abi from './abi/Multicall3.json';
+import multicall3Abi from '../../../web3/abi/Multicall3.json';
 import moment from 'moment';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BigNumber } from 'ethers';
 
 interface ChildChainInfo {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
