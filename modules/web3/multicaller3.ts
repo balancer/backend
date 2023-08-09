@@ -13,50 +13,56 @@ export interface MulticallUserBalance {
     balance: BigNumber;
 }
 
-export class Multicaller {
-    private multiAddress: string;
+type MulticallResult = { success: boolean; returnData: string };
+
+export class Multicaller3 {
+    private multi3Address: string;
     private interface: Interface;
     private calls: [string, string, any, boolean][] = [];
     private paths: any[] = [];
 
-    constructor(multiAddress: string, abi: string | Array<Fragment | JsonFragment | string>) {
-        this.multiAddress = multiAddress;
+    constructor(multi3Address: string, abi: string | Array<Fragment | JsonFragment | string>) {
+        this.multi3Address = multi3Address;
         this.interface = new Interface(abi);
     }
 
-    call(path: string, address: string, functionName: string, params?: any[], allowFailure = true): Multicaller {
+    call(path: string, address: string, functionName: string, params?: any[], allowFailure = true): Multicaller3 {
         this.calls.push([address, functionName, params, allowFailure]);
         this.paths.push(path);
         return this;
     }
 
-    async execute<T extends Record<string, any>>(from = {}): Promise<T> {
-        const obj = from;
+    async execute<T extends Record<string, any>>(): Promise<T> {
+        const returnObject = {};
         // not print the full exception for now, not polluting the log too much
         try {
-            const results = await this.executeMulticall();
-            results.forEach((result, i) => set(obj, this.paths[i], result.length > 1 ? result : result[0]));
+            const multicallContract = getContractAt(this.multi3Address, multicall3Abi);
+            const results: MulticallResult[] = await multicallContract.aggregate3(
+                this.calls.map(([address, functionName, params, allowFailure]) => [
+                    address,
+                    allowFailure,
+                    this.interface.encodeFunctionData(functionName, params),
+                ]),
+            );
+
+            let i = 0;
+            for (const result of results) {
+                let resultValue: Result | undefined = undefined;
+                if (result.success) {
+                    resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
+                    set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
+                } else {
+                    set(returnObject, this.paths[i], undefined);
+                }
+                i++;
+            }
         } catch (err) {
             console.log('multicall error', err);
             throw `Non-stacktrace multicall error`;
         }
         this.calls = [];
         this.paths = [];
-        return obj as T;
-    }
-
-    private async executeMulticall(): Promise<Result[]> {
-        const multi = getContractAt(this.multiAddress, multicall3Abi);
-
-        const results:{ success: boolean; returnData: string }[] = await multi.aggregate3(
-            this.calls.map(([address, functionName, params, allowFailure]) => [
-                address,
-                allowFailure,
-                this.interface.encodeFunctionData(functionName, params),
-            ]),
-        );
-
-        return res.map((result: any, i: number) => success ? this.interface.decodeFunctionResult(this.calls[i][1], result): );
+        return returnObject as T;
     }
 
     public get numCalls() {
@@ -65,7 +71,6 @@ export class Multicaller {
 
     public static async fetchBalances({
         multicallAddress,
-        provider,
         balancesToFetch,
     }: {
         multicallAddress: string;
@@ -76,7 +81,7 @@ export class Multicaller {
         let data: MulticallUserBalance[] = [];
 
         for (const chunk of chunks) {
-            const multicall = new Multicaller(multicallAddress, provider, ERC20Abi);
+            const multicall = new Multicaller3(multicallAddress, ERC20Abi);
 
             for (const { erc20Address, userAddress } of chunk) {
                 multicall.call(`${erc20Address}.${userAddress}`, erc20Address, 'balanceOf', [userAddress]);
