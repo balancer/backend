@@ -52,7 +52,7 @@ const gnosisNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ankr.com/gnosis',
+    rpcUrl: 'https://rpc.gnosischain.com',
     rpcMaxBlockRange: 2000,
     rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
