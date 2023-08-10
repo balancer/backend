@@ -19,6 +19,7 @@ export const specialVotingGaugeAddresses = [
     oldVeBalAddress,
     // Ignore this old CRON TWAMM gauge instead of hardcoding it
     '0xeeded342aa2cc1b48eccafeb663fdf2c1d166934',
-    // Ignore this killed old gauge (it had a wrong gauge)
+    // Ignore this killed old wrong gauge
+    // https://etherscan.io/address/0x249034a0ea97e76c2b4ab7a1727cbc52548c531c
     '0x249034a0ea97e76c2b4ab7a1727cbc52548c531c',
 ];

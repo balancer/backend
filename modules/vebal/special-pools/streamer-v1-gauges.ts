@@ -1,14 +1,12 @@
 /*
-  The old L2 V1 gauges were using streamer field (instead of recipient) to match the root gauge with a child gauge
-  We are not storing the deprecated streamer field in the PrismaPoolStakingGauge, but simply using this har-coded mapping
-  for the old v1 killed but active gauges (gauge_relative_weight > 0 AKA have votes)
+  The old L2 V1 gauges were using streamer field (instead of recipient) to match the root gauge with a child gauge.
+  We are not storing the deprecated streamer field in the PrismaPoolStakingGauge but using this hardcoded mapping instead.
 
-  So this record has:
-
-  key: rootGaugeAddress
-  value: recipient
-*/
+  This cases apply for old v1 killed but active gauges (gauge_relative_weight > 0 AKA have votes).
+  */
 export const v1RootGaugeRecipients: {
+    // key: rootGaugeAddress
+    // value: recipient (mapped from old streamer relationship)
     [key: string]: string;
 } = {
     '0xcf5938ca6d9f19c73010c7493e19c02acfa8d24d': '0xaa59736b80cf77d1e7d56b7bba5a8050805f5064',
