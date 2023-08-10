@@ -13,7 +13,7 @@ const resolvers: Resolvers = {
             return veBalService.getVeBalTotalSupply();
         },
         /*
-            👀 This endpoint is consumed by some partners 👀
+            This endpoint is consumed by some partners
 
             - Aura (contact: ask solarcurve or alberto)
             - Defilytica (contact: ask Xeonus)
