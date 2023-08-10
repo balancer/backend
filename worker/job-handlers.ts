@@ -26,7 +26,7 @@ const defaultSamplingRate = 0;
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
-        console.log(`Initializing job ${job.name} for chain ${chainId}...`);
+        console.log(`Initializing job ${job.name}-${chainId}-init`);
         await scheduleWithInterval(job, chainId);
     }
 }
@@ -90,13 +90,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
-        console.log(`Schedule job ${job.name}-${chainId}`);
+        console.log(`Schedule job ${job.name}-${chainId}-schedule`);
         scheduleJob(job, chainId);
     } catch (error) {
         console.log(error);
         Sentry.captureException(error);
     } finally {
-        console.log(`Reschedule job ${job.name}-${chainId}`);
+        console.log(`Reschedule job ${job.name}-${chainId}-reschedule`);
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);
