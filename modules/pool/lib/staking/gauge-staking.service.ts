@@ -4,13 +4,14 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../../network/network-context.service';
 import { GaugeSubgraphService, LiquidityGaugeStatus } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { Interface, formatEther, formatUnits } from 'ethers/lib/utils';
+import { formatUnits } from 'ethers/lib/utils';
 import { getContractAt } from '../../../web3/contract';
 import childChainGaugeV2Abi from './abi/ChildChainGaugeV2.json';
 import childChainGaugeV1Abi from './abi/ChildChainGaugeV1.json';
-import multicall3Abi from '../../../web3/abi/Multicall3.json';
 import moment from 'moment';
 import { formatFixed } from '@ethersproject/bignumber';
+import { Multicaller3 } from '../../../web3/multicaller3';
+import _ from 'lodash';
 
 interface ChildChainInfo {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -162,27 +163,32 @@ export class GaugeStakingService implements PoolStakingService {
     }
 
     async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
-        const iChildChainGauge = new Interface(childChainGaugeV2Abi);
-        const multicall = getContractAt(networkContext.data.multicall3, multicall3Abi);
-
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        const calls = gaugeAddresses.map((address) => [
-            address,
-            true, // allow failures
-            iChildChainGauge.encodeFunctionData('inflation_rate', [currentWeek]),
-        ]);
-        const results = await multicall.callStatic.aggregate3(calls);
+        const multicall = new Multicaller3(networkContext.data.multicall3, childChainGaugeV2Abi);
 
-        // Transforms results into an array of gauges addresses with corresponding version and the inflation rate as float
-        const mappedResults = results.map(([success, data]: [boolean, string], idx: number) => [
-            gaugeAddresses[idx],
-            {
-                version: success ? 2 : 1,
-                rate: success ? formatEther(iChildChainGauge.decodeFunctionResult('inflation_rate', data)[0]) : '0',
-            },
-        ]);
+        let response: { [gaugeAddress: string]: ChildChainInfo } = {};
 
-        return Object.fromEntries(mappedResults);
+        gaugeAddresses.forEach((address) => {
+            multicall.call(address, address, 'inflation_rate', [currentWeek], true);
+        });
+
+        const childChainData = (await multicall.execute()) as Record<string, string | undefined>;
+
+        for (const childChainGauge in childChainData) {
+            if (childChainData[childChainGauge]) {
+                response[childChainGauge] = {
+                    version: 2,
+                    rate: formatUnits(childChainData[childChainGauge]!, 18),
+                };
+            } else {
+                response[childChainGauge] = {
+                    version: 1,
+                    rate: '0.0',
+                };
+            }
+        }
+
+        return response;
     }
 
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
