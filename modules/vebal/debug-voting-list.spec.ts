@@ -8,7 +8,6 @@ import { mainnetNetworkConfig } from '../network/mainnet';
 
 const defaultAnvilRpcUrl = 'http://127.0.0.1:8555';
 setMainnetRpcProviderForTesting(defaultAnvilRpcUrl);
-// setMainnetRpcProviderForTesting('https://cloudflare-eth.com');
 
 // TODO: understand why mainnetConfig is undefined in test context
 AllNetworkConfigs['1'] = mainnetNetworkConfig;
