@@ -20,10 +20,12 @@ export class Multicaller3 {
     private interface: Interface;
     private calls: [string, string, any, boolean][] = [];
     private paths: any[] = [];
+    private batchSize: number;
 
-    constructor(multi3Address: string, abi: string | Array<Fragment | JsonFragment | string>) {
+    constructor(multi3Address: string, abi: string | Array<Fragment | JsonFragment | string>, batchSize = 100) {
         this.multi3Address = multi3Address;
         this.interface = new Interface(abi);
+        this.batchSize = batchSize;
     }
 
     call(path: string, address: string, functionName: string, params?: any[], allowFailure = true): Multicaller3 {
@@ -37,13 +39,18 @@ export class Multicaller3 {
         // not print the full exception for now, not polluting the log too much
         try {
             const multicallContract = getContractAt(this.multi3Address, multicall3Abi);
-            const results: MulticallResult[] = await multicallContract.aggregate3(
-                this.calls.map(([address, functionName, params, allowFailure]) => [
-                    address,
-                    allowFailure,
-                    this.interface.encodeFunctionData(functionName, params),
-                ]),
-            );
+            const chunks = _.chunk(this.calls, this.batchSize);
+            const results: MulticallResult[] = [];
+            for (const chunk of chunks) {
+                const res = (await multicallContract.callStatic.aggregate3(
+                    chunk.map(([address, functionName, params, allowFailure]) => [
+                        address,
+                        allowFailure,
+                        this.interface.encodeFunctionData(functionName, params),
+                    ]),
+                )) as MulticallResult[];
+                results.push(...res);
+            }
 
             let i = 0;
             for (const result of results) {
