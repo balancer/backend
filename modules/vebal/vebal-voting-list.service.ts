@@ -11,7 +11,7 @@ export class VeBalVotingListService {
     constructor(private votingGauges = new VotingGaugesRepository()) {}
 
     /*
-        👀 This methods id used by veBalGetVotingList resolver that is consumed by some partners 👀
+        This methods is used by veBalGetVotingList resolver that is consumed by some partners
         We should avoid breaking changes in the involved schema
     */
     public async getVotingListWithHardcodedPools(): Promise<GqlVotingPool[]> {
