@@ -1,7 +1,7 @@
 import { providers } from 'ethers';
 import { mainnetNetworkConfig } from '../modules/network/mainnet';
 
-// anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17769946
+// anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17878719
 
 // In CI we will use http://127.0.0.1:8555 to use the anvil fork;
 // const httpRpc = process.env.TEST_RPC_URL || 'https://cloudflare-eth.com';

@@ -118,7 +118,7 @@ it('Returns veBAL voting pool', async () => {
         "addedTimestamp": null,
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
         "isKilled": false,
-        "relativeWeightCap": null,
+        "relativeWeightCap": "0.1",
       }
     `);
 
@@ -179,7 +179,19 @@ it('Returns second TWAMM (from CRON finance) voting pool', async () => {
     `);
 }, 1000_000);
 
-it('Full flow', async () => {
+it('Fetches gauge_relative_weight using GaugeControllerHelper', async () => {
+    const repository = new VotingGaugesRepository();
+    let onchainRootAddresses: string[] = await repository.getVotingGaugeAddresses();
+
+    const result = await repository.fetchRelativeWeights(onchainRootAddresses.slice(0, 50));
+
+    console.log('Number of addresses download: ', onchainRootAddresses.length);
+
+    expect(Object.values(result).length).toBe(50);
+    expect(result['0x34f33cdaed8ba0e1ceece80e5f4a73bcf234cfac']).toMatchInlineSnapshot('0.000002246037288695');
+}, 1000_000);
+
+it.skip('Full flow (to test with production rpc)', async () => {
     const service = new VeBalVotingListService();
 
     const repository = new VotingGaugesRepository();
@@ -191,6 +203,13 @@ it('Full flow', async () => {
     // onchainRootAddresses = ['0xb78543e00712c3abba10d0852f6e38fde2aaba4d'];
 
     repository.deleteVotingGauges();
+    await service.sync(onchainRootAddresses);
+}, 1000_000);
+
+it('Full flow with subset of gauges', async () => {
+    const onchainRootAddresses = ['0x2dc55e84baf47296c2cf87b4ec3eb66fd7665611'];
+    const service = new VeBalVotingListService();
+
     await service.sync(onchainRootAddresses);
 }, 1000_000);
 
@@ -238,3 +257,42 @@ it('Confirm invalid gauge addresses', async () => {
         expect(gauge.relativeWeight).toBe(0);
     });
 });
+
+it('Uses streamer-v1-map to find gauges (that use streamer instead of recipient)', async () => {
+    const oldRootV1GaugeAddress = '0xcf5938ca6d9f19c73010c7493e19c02acfa8d24d';
+    const anotherOldRootV1GaugeAddress = '0x6823dca6d70061f2ae2aaa21661795a2294812bf';
+    const service = new VeBalVotingListService();
+
+    const rootGaugeAddresses = [oldRootV1GaugeAddress, anotherOldRootV1GaugeAddress];
+    const fetchedVotingGauges = await service.fetchVotingGauges(rootGaugeAddresses);
+
+    const repository = new VotingGaugesRepository();
+    const savedGauges = await repository.saveVotingGauges(fetchedVotingGauges);
+
+    expect(savedGauges).toMatchInlineSnapshot(`
+      [
+        {
+          "addedTimestamp": 1657479716,
+          "gaugeAddress": "0xcf5938ca6d9f19c73010c7493e19c02acfa8d24d",
+          "isInSubgraph": true,
+          "isKilled": true,
+          "network": "POLYGON",
+          "recipient": "0x90a6ec799f21a154ab7affd0b34c5f3f129808e2",
+          "relativeWeight": 0.000004272480965146,
+          "relativeWeightCap": undefined,
+          "stakingGaugeId": "0xaa59736b80cf77d1e7d56b7bba5a8050805f5064",
+        },
+        {
+          "addedTimestamp": 1650405644,
+          "gaugeAddress": "0x6823dca6d70061f2ae2aaa21661795a2294812bf",
+          "isInSubgraph": true,
+          "isKilled": true,
+          "network": "ARBITRUM",
+          "recipient": "0xd5cd8328d93bf4bef9824fd288f32c8f0da1c551",
+          "relativeWeight": 1.921078491e-9,
+          "relativeWeightCap": undefined,
+          "stakingGaugeId": "0xfaad21203a7856889cb6eb644ab6864e7253107a",
+        },
+      ]
+    `);
+}, 1000_000);
