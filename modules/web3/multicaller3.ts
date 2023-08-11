@@ -36,36 +36,30 @@ export class Multicaller3 {
 
     async execute<T extends Record<string, any>>(): Promise<T> {
         const returnObject = {};
-        // not print the full exception for now, not polluting the log too much
-        try {
-            const multicallContract = getContractAt(this.multi3Address, multicall3Abi);
-            const chunks = _.chunk(this.calls, this.batchSize);
-            const results: MulticallResult[] = [];
-            for (const chunk of chunks) {
-                const res = (await multicallContract.callStatic.aggregate3(
-                    chunk.map(([address, functionName, params, allowFailure]) => [
-                        address,
-                        allowFailure,
-                        this.interface.encodeFunctionData(functionName, params),
-                    ]),
-                )) as MulticallResult[];
-                results.push(...res);
-            }
+        const multicallContract = getContractAt(this.multi3Address, multicall3Abi);
+        const chunks = _.chunk(this.calls, this.batchSize);
+        const results: MulticallResult[] = [];
+        for (const chunk of chunks) {
+            const res = (await multicallContract.callStatic.aggregate3(
+                chunk.map(([address, functionName, params, allowFailure]) => [
+                    address,
+                    allowFailure,
+                    this.interface.encodeFunctionData(functionName, params),
+                ]),
+            )) as MulticallResult[];
+            results.push(...res);
+        }
 
-            let i = 0;
-            for (const result of results) {
-                let resultValue: Result | undefined = undefined;
-                if (result.success) {
-                    resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
-                    set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
-                } else {
-                    set(returnObject, this.paths[i], undefined);
-                }
-                i++;
+        let i = 0;
+        for (const result of results) {
+            let resultValue: Result | undefined = undefined;
+            if (result.success) {
+                resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
+                set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
+            } else {
+                set(returnObject, this.paths[i], undefined);
             }
-        } catch (err) {
-            console.log('multicall error', err);
-            throw `Non-stacktrace multicall error`;
+            i++;
         }
         this.calls = [];
         this.paths = [];
