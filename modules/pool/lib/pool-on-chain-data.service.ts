@@ -4,7 +4,12 @@ import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
 import GyroEV2Abi from '../abi/GyroEV2.json';
-import { Multicaller } from '../../web3/multicaller';
+import VaultAbi from '../abi/Vault.json';
+import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
+import WeightedPoolAbi from '../abi/WeightedPool.json';
+import StablePoolAbi from '../abi/StablePool.json';
+import MetaStablePool from '../abi/MetaStablePool.json';
+import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import { BigNumber, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
@@ -82,7 +87,6 @@ interface MulticallPoolStateExecuteResult {
         paused: boolean;
     };
 }
-
 interface MulticallExecuteResult {
     amp?: string[];
     swapFee: string;
@@ -96,7 +100,8 @@ interface MulticallExecuteResult {
     wrappedTokenRate?: BigNumber;
     rate?: BigNumber;
     swapEnabled?: boolean;
-    tokenRates?: BigNumber[];
+    protocolFeePercentageCache?: number;
+    tokenRates?: string[];
     metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
     linearPools?: Record<
         string,
@@ -178,7 +183,6 @@ export class PoolOnChainDataService {
 
     public async updateOnChainData(
         poolIds: string[],
-        provider: Provider,
         blockNumber: number,
     ): Promise<{ failed: string[]; success: string[] }> {
         const success: string[] = [];
@@ -187,10 +191,6 @@ export class PoolOnChainDataService {
         if (poolIds.length === 0) {
             return { failed, success };
         }
-
-        poolIds = poolIds.filter(
-            (poolId) => !networkContext.data.balancer.excludedPoolDataQueryPoolIds?.includes(poolId),
-        );
 
         const filteredPools = await prisma.prismaPool.findMany({
             where: {
@@ -310,11 +310,19 @@ export class PoolOnChainDataService {
                     ...LiquidityBootstrappingPoolAbi,
                     ...ComposableStablePoolAbi,
                     ...GyroEV2Abi,
+                    ...VaultAbi,
+                    ...aTokenRateProvider,
+                    ...WeightedPoolAbi,
+                    ...StablePoolAbi,
+                    ...StablePhantomPoolAbi,
+                    ...MetaStablePool,
+                    ...ComposableStablePoolAbi,
+                    //...WeightedPoolV2Abi,
                 ].map((row) => [row.name, row]),
             ),
         );
 
-        const multiPool = new Multicaller(networkContext.data.multicall, provider, abis);
+        const multiPool = new Multicaller3(networkContext.data.multicall3, abis);
 
         filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
@@ -573,7 +581,7 @@ export class PoolOnChainDataService {
     }
 
     public async queryPoolStatus(poolAddresses: string[]): Promise<PoolStatusResult> {
-        const multicall = new Multicaller3(networkContext.data.multicall3, ComposableStablePoolAbi);
+        const multicall = new Multicaller3(ComposableStablePoolAbi);
 
         poolAddresses.forEach((address) => {
             multicall.call(`${address}.inRecoveryMode`, address, 'inRecoveryMode');
