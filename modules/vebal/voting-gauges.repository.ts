@@ -3,15 +3,15 @@ import { keyBy, mapValues, zipObject } from 'lodash';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber, Contract } from 'ethers';
-import { Interface, formatEther } from 'ethers/lib/utils';
+import { formatEther } from 'ethers/lib/utils';
 import { mainnetNetworkConfig } from '../network/mainnet';
-import multicall3Abi from '../web3/abi/Multicall3.json';
-import { Multicaller } from '../web3/multicaller';
 import gaugeControllerAbi from './abi/gaugeController.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { Multicaller3 } from '../web3/multicaller3';
+import { networkContext } from '../network/network-context.service';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 
@@ -202,30 +202,13 @@ export class VotingGaugesRepository {
      * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
      */
     async fetchRelativeWeightCaps(gaugeAddresses: string[]) {
-        const iRootGaugeController = new Interface(rootGaugeAbi);
-        const allowFailures = true;
+        const multicall3 = new Multicaller3(networkContext.data.multicall3, rootGaugeAbi);
 
-        const calls = gaugeAddresses.map((address) => [
-            address,
-            allowFailures,
-            iRootGaugeController.encodeFunctionData('getRelativeWeightCap'),
-        ]);
+        gaugeAddresses.forEach((address) => {
+            multicall3.call(address, address, 'getRelativeWeightCap');
+        });
 
-        const multicall = this.getMulticall3Contract();
-        type Result = { success: boolean; returnData: string };
-        const results: Result[] = await multicall.callStatic.aggregate3(calls);
-
-        const relativeWeightCaps = results.map((result) =>
-            result.success
-                ? formatEther(iRootGaugeController.decodeFunctionResult('getRelativeWeightCap', result.returnData)[0])
-                : undefined,
-        );
-
-        return zipObject(gaugeAddresses, relativeWeightCaps);
-    }
-
-    getMulticall3Contract() {
-        return new Contract(mainnetNetworkConfig.data.multicall3, multicall3Abi, mainnetNetworkConfig.provider);
+        return (await multicall3.execute()) as Record<string, string | undefined>;
     }
 
     getGaugeControllerContract() {
@@ -275,11 +258,7 @@ export class VotingGaugesRepository {
     }
 
     async fetchIsKilled(gaugeAddresses: string[]) {
-        const rootGaugeMulticaller = new Multicaller(
-            mainnetNetworkConfig.data.multicall,
-            mainnetNetworkConfig.provider,
-            rootGaugeAbi,
-        );
+        const rootGaugeMulticaller = new Multicaller3(mainnetNetworkConfig.data.multicall, rootGaugeAbi);
 
         gaugeAddresses.forEach((address) => rootGaugeMulticaller.call(address, address, 'is_killed'));
 
@@ -295,11 +274,7 @@ export class VotingGaugesRepository {
             return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
         });
 
-        return new Multicaller(
-            mainnetNetworkConfig.data.multicall,
-            mainnetNetworkConfig.provider,
-            filteredGaugeControllerAbi,
-        );
+        return new Multicaller3(mainnetNetworkConfig.data.multicall, filteredGaugeControllerAbi);
     }
 
     generateGaugeIndexes(totalGauges: number) {
