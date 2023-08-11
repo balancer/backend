@@ -15,6 +15,8 @@ import { TokenService } from '../../token/token.service';
 import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { Multicaller3 } from '../../web3/multicaller3';
+import { add } from 'lodash';
 
 enum PoolQueriesTotalSupplyType {
     TOTAL_SUPPLY = 0,
@@ -74,10 +76,50 @@ const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
     ratePoolIdxs: [],
 };
 
+interface MulticallPoolStateExecuteResult {
+    inRecoveryMode: boolean;
+    pausedState: {
+        paused: boolean;
+    };
+}
+
 interface MulticallExecuteResult {
+    amp?: string[];
+    swapFee: string;
+    totalSupply: string;
+    weights?: string[];
+    targets?: string[];
+    poolTokens: {
+        tokens: string[];
+        balances: string[];
+    };
+    wrappedTokenRate?: BigNumber;
+    rate?: BigNumber;
     swapEnabled?: boolean;
-    protocolFeePercentageCache?: number;
-    tokenRates?: string[];
+    tokenRates?: BigNumber[];
+    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
+    linearPools?: Record<
+        string,
+        {
+            id: string;
+            priceRate: string;
+            totalSupply: string;
+            mainToken: { address: string; index: BigNumber };
+            wrappedToken: { address: string; index: BigNumber; rate: string };
+        }
+    >;
+    stablePhantomPools?: Record<
+        string,
+        {
+            id: string;
+            totalSupply: string;
+            tokenRates: BigNumber[];
+            poolTokens: {
+                tokens: string[];
+                balances: string[];
+            };
+        }
+    >;
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -112,13 +154,13 @@ export class PoolOnChainDataService {
             },
         });
 
-        const poolIdsFromDb = filteredPools.map((pool) => pool.id);
+        const poolAddressFromDb = filteredPools.map((pool) => pool.address);
 
-        const poolStatusResults = await this.queryPoolStatus(poolIdsFromDb);
+        const poolStatusResults = await this.queryPoolStatus(poolAddressFromDb);
 
         const operations = [];
 
-        for (const poolId of poolIdsFromDb) {
+        for (const poolId of poolAddressFromDb) {
             if (poolStatusResults[poolId]) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
@@ -530,22 +572,28 @@ export class PoolOnChainDataService {
         };
     }
 
-    public async queryPoolStatus(poolIds: string[]): Promise<PoolStatusResult> {
-        const contract = new Contract(
-            networkContext.data.balancer.poolDataQueryContract,
-            BalancerPoolDataQueryAbi,
-            networkContext.provider,
-        );
+    public async queryPoolStatus(poolAddresses: string[]): Promise<PoolStatusResult> {
+        const multicall = new Multicaller3(networkContext.data.multicall3, ComposableStablePoolAbi);
 
-        const response = await contract.getPoolStatus(poolIds, { loadInRecoveryMode: true, loadIsPaused: true });
+        poolAddresses.forEach((address) => {
+            multicall.call(`${address}.inRecoveryMode`, address, 'inRecoveryMode');
+            multicall.call(`${address}.pausedState`, address, 'getPausedState');
+        });
 
-        const result = poolIds.reduce((acc, id, i) => {
-            acc[id] = {
-                isPaused: response[0][i],
-                inRecoveryMode: response[1][i],
+        const poolStateResult = (await multicall.execute()) as Record<string, MulticallPoolStateExecuteResult>;
+
+        const result: PoolStatusResult = {};
+
+        for (const poolAddress in poolStateResult) {
+            result[poolAddress] = {
+                inRecoveryMode: poolStateResult[poolAddress].inRecoveryMode
+                    ? poolStateResult[poolAddress].inRecoveryMode
+                    : false,
+                isPaused: poolStateResult[poolAddress].pausedState
+                    ? poolStateResult[poolAddress].pausedState.paused
+                    : false,
             };
-            return acc;
-        }, {} as PoolStatusResult);
+        }
 
         return result;
     }
