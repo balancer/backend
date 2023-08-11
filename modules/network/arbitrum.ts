@@ -17,6 +17,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
+import { env } from '../../app/env';
 
 const arbitrumNetworkData: NetworkData = {
     chain: {
@@ -54,7 +55,7 @@ const arbitrumNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    rpcUrl: `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 2000,
     rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',

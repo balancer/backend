@@ -17,6 +17,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
+import { env } from '../../app/env';
 
 const mainnetNetworkData: NetworkData = {
     chain: {
@@ -54,7 +55,7 @@ const mainnetNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://eth.llamarpc.com',
+    rpcUrl: `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 700,
     rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
