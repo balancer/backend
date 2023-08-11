@@ -41,10 +41,10 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
     //     monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
     // }
     if (runningJobs.has(jobId)) {
-        console.log(`Skip job ${jobId}-skip`);
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-skip`);
         }
+        console.log(`Skip job ${jobId}-skip`);
         return;
     }
     // let sentryCheckInId = '';
@@ -78,10 +78,10 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         //     status: 'error',
         // });
 
-        console.log(`Error job ${jobId}-error`, error);
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-error`);
         }
+        console.log(`Error job ${jobId}-error`, error);
     } finally {
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
