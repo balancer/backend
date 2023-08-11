@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { keyBy, mapValues, zipObject } from 'lodash';
+import { keyBy, mapValues } from 'lodash';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber, Contract } from 'ethers';
@@ -73,7 +73,9 @@ export class VotingGaugesRepository {
                 network: this.toPrismaNetwork(gaugeTypes[gaugeAddress]),
                 isKilled: isKilled[gaugeAddress],
                 relativeWeight: relativeWeights[gaugeAddress],
-                relativeWeightCap: relativeWeightCaps[gaugeAddress],
+                relativeWeightCap: relativeWeightCaps[gaugeAddress]
+                    ? formatEther(relativeWeightCaps[gaugeAddress]!)
+                    : undefined,
                 isInSubgraph: false,
             });
         });
@@ -202,13 +204,13 @@ export class VotingGaugesRepository {
      * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
      */
     async fetchRelativeWeightCaps(gaugeAddresses: string[]) {
-        const multicall3 = new Multicaller3(networkContext.data.multicall3, rootGaugeAbi);
+        const multicall3 = new Multicaller3(networkContext.data.multicall3, rootGaugeAbi, 50);
 
         gaugeAddresses.forEach((address) => {
             multicall3.call(address, address, 'getRelativeWeightCap');
         });
 
-        return (await multicall3.execute()) as Record<string, string | undefined>;
+        return (await multicall3.execute()) as Record<string, BigNumber | undefined>;
     }
 
     getGaugeControllerContract() {
@@ -250,7 +252,7 @@ export class VotingGaugesRepository {
     async fetchRelativeWeights(gaugeAddresses: string[]) {
         const multicaller = this.buildGaugeControllerMulticaller();
         gaugeAddresses.forEach((address) =>
-            multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address]),
+            multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address], false),
         );
 
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
@@ -258,7 +260,7 @@ export class VotingGaugesRepository {
     }
 
     async fetchIsKilled(gaugeAddresses: string[]) {
-        const rootGaugeMulticaller = new Multicaller3(mainnetNetworkConfig.data.multicall, rootGaugeAbi);
+        const rootGaugeMulticaller = new Multicaller3(mainnetNetworkConfig.data.multicall3, rootGaugeAbi);
 
         gaugeAddresses.forEach((address) => rootGaugeMulticaller.call(address, address, 'is_killed'));
 
@@ -274,7 +276,7 @@ export class VotingGaugesRepository {
             return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
         });
 
-        return new Multicaller3(mainnetNetworkConfig.data.multicall, filteredGaugeControllerAbi);
+        return new Multicaller3(mainnetNetworkConfig.data.multicall3, filteredGaugeControllerAbi);
     }
 
     generateGaugeIndexes(totalGauges: number) {
