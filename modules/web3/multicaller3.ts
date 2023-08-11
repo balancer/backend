@@ -6,6 +6,7 @@ import ERC20Abi from './abi/ERC20.json';
 import { BigNumber } from 'ethers';
 import { getContractAt } from './contract';
 import multicall3Abi from '../web3/abi/Multicall3.json';
+import { networkContext } from '../network/network-context.service';
 
 export interface MulticallUserBalance {
     erc20Address: string;
@@ -16,14 +17,12 @@ export interface MulticallUserBalance {
 type MulticallResult = { success: boolean; returnData: string };
 
 export class Multicaller3 {
-    private multi3Address: string;
     private interface: Interface;
     private calls: [string, string, any, boolean][] = [];
     private paths: any[] = [];
     private batchSize: number;
 
-    constructor(multi3Address: string, abi: string | Array<Fragment | JsonFragment | string>, batchSize = 100) {
-        this.multi3Address = multi3Address;
+    constructor(abi: string | Array<Fragment | JsonFragment | string>, batchSize = 100) {
         this.interface = new Interface(abi);
         this.batchSize = batchSize;
     }
@@ -36,7 +35,7 @@ export class Multicaller3 {
 
     async execute<T extends Record<string, any>>(): Promise<T> {
         const returnObject = {};
-        const multicallContract = getContractAt(this.multi3Address, multicall3Abi);
+        const multicallContract = getContractAt(networkContext.data.multicall3, multicall3Abi);
         const chunks = _.chunk(this.calls, this.batchSize);
         const results: MulticallResult[] = [];
         for (const chunk of chunks) {
@@ -82,7 +81,7 @@ export class Multicaller3 {
         let data: MulticallUserBalance[] = [];
 
         for (const chunk of chunks) {
-            const multicall = new Multicaller3(multicallAddress, ERC20Abi);
+            const multicall = new Multicaller3(ERC20Abi);
 
             for (const { erc20Address, userAddress } of chunk) {
                 multicall.call(`${erc20Address}.${userAddress}`, erc20Address, 'balanceOf', [userAddress]);

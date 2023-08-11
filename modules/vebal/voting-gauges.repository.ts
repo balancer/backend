@@ -204,7 +204,7 @@ export class VotingGaugesRepository {
      * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
      */
     async fetchRelativeWeightCaps(gaugeAddresses: string[]) {
-        const multicall3 = new Multicaller3(networkContext.data.multicall3, rootGaugeAbi, 50);
+        const multicall3 = new Multicaller3(rootGaugeAbi, 50);
 
         gaugeAddresses.forEach((address) => {
             multicall3.call(address, address, 'getRelativeWeightCap');
@@ -260,7 +260,7 @@ export class VotingGaugesRepository {
     }
 
     async fetchIsKilled(gaugeAddresses: string[]) {
-        const rootGaugeMulticaller = new Multicaller3(mainnetNetworkConfig.data.multicall3, rootGaugeAbi);
+        const rootGaugeMulticaller = new Multicaller3(rootGaugeAbi);
 
         gaugeAddresses.forEach((address) => rootGaugeMulticaller.call(address, address, 'is_killed'));
 
@@ -276,7 +276,7 @@ export class VotingGaugesRepository {
             return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
         });
 
-        return new Multicaller3(mainnetNetworkConfig.data.multicall3, filteredGaugeControllerAbi);
+        return new Multicaller3(filteredGaugeControllerAbi);
     }
 
     generateGaugeIndexes(totalGauges: number) {

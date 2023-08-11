@@ -164,7 +164,7 @@ export class GaugeStakingService implements PoolStakingService {
 
     async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        const multicall = new Multicaller3(networkContext.data.multicall3, childChainGaugeV2Abi);
+        const multicall = new Multicaller3(childChainGaugeV2Abi);
 
         let response: { [gaugeAddress: string]: ChildChainInfo } = {};
 
