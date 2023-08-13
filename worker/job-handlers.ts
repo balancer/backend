@@ -43,8 +43,8 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
     if (runningJobs.has(jobId)) {
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-skip`);
-            console.log(`Skip job ${jobId}-skip`);
         }
+        console.log(`Skip job ${jobId}-skip`);
         return;
     }
     // let sentryCheckInId = '';
@@ -93,7 +93,7 @@ export async function scheduleWithInterval(job: WorkerJob, chainId: string): Pro
         console.log(`Schedule job ${job.name}-${chainId}-schedule`);
         scheduleJob(job, chainId);
     } catch (error) {
-        console.log(error);
+        console.log(`Error in scheduleJob: ${error}`);
         Sentry.captureException(error);
     } finally {
         console.log(`Reschedule job ${job.name}-${chainId}-reschedule`);
