@@ -14,6 +14,7 @@ export const schema = {
     SENTRY_AUTH_TOKEN: String,
     AWS_REGION: String,
     PROTOCOL: String,
+    INFURA_API_KEY: String,
     COINGECKO_API_KEY: {
         optional: true,
         type: String,

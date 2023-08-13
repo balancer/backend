@@ -21,6 +21,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { BeefyVaultAprService } from '../pool/lib/apr-data-sources/beefy-vault-apr.service copy';
+import { env } from '../../app/env';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -58,7 +59,7 @@ const optimismNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ankr.com/optimism',
+    rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 2000,
     beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
