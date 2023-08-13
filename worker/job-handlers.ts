@@ -12,6 +12,7 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
+import { chain } from 'lodash';
 
 export type WorkerJob = {
     name: string;
@@ -27,7 +28,8 @@ const defaultSamplingRate = 0;
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
         console.log(`Initializing job ${job.name}-${chainId}-init`);
-        await scheduleWithInterval(job, chainId);
+        // await scheduleWithInterval(job, chainId);
+        setInterval(scheduleJob, job.interval, job, chainId);
     }
 }
 
