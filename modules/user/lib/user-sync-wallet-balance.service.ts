@@ -123,6 +123,7 @@ export class UserSyncWalletBalanceService {
                 address: poolAddress,
             });
             events.push(...response);
+            i++;
         }
 
         const relevantERC20Addresses = poolAddresses;
