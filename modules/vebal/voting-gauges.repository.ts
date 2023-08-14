@@ -274,7 +274,7 @@ export class VotingGaugesRepository {
     async fetchRelativeWeights(gaugeAddresses: string[]) {
         const multicaller = this.buildGaugeControllerHelperMulticaller();
         gaugeAddresses.forEach((address) =>
-            multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address], false),
+            multicaller.call(address, gaugeControllerHelperAddress, 'gauge_relative_weight', [address], false),
         );
 
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
