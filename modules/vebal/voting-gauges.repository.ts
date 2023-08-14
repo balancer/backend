@@ -291,7 +291,7 @@ export class VotingGaugesRepository {
     }
 
     buildGaugeControllerMulticaller() {
-        return new Multicaller3(mainnetNetworkConfig.data.multicall, mainnetNetworkConfig.provider, gaugeControllerAbi);
+        return new Multicaller3(gaugeControllerAbi);
     }
 
     buildGaugeControllerHelperMulticaller() {
