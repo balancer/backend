@@ -112,7 +112,9 @@ export class UserSyncWalletBalanceService {
 
         const events: ethers.providers.Log[] = [];
 
+        let i = 1;
         for (const poolAddress of poolAddresses) {
+            console.log(`user-sync-wallet-balances-for-all-pools syncing ${i}/${poolAddresses.length} pools`);
             const response = await networkContext.provider.getLogs({
                 //ERC20 Transfer topic
                 topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
