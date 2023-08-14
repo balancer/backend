@@ -21,7 +21,7 @@ export async function createAlerts(chainId: string): Promise<void> {
 }
 
 async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
-    const cronsMetricPublisher = getCronMetricsPublisher(chainId);
+    const cronsMetricPublisher = getCronMetricsPublisher(chainId, 'init');
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
@@ -98,6 +98,6 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
         await cloudWatchClient.send(putAlarmCommand);
         // rate limits on the AWS API: 3 requests / second
-        await sleep(500);
+        await sleep(1000);
     }
 }

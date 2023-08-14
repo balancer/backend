@@ -55,7 +55,6 @@ const zkevmNetworkData: NetworkData = {
     },
     rpcUrl: 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
     bal: {
         address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',

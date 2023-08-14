@@ -74,7 +74,6 @@ const fantomNetworkData: NetworkData = {
     },
     rpcUrl: 'https://rpc.ftm.tools',
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 200,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',

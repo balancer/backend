@@ -42,7 +42,6 @@ export interface NetworkData {
     };
     rpcUrl: string;
     rpcMaxBlockRange: number;
-    rpcMaxBlockRangeBalances: number;
     coingecko: {
         nativeAssetId: string;
         platformId: string;
@@ -85,6 +84,7 @@ export interface NetworkData {
         delegationProxy: string;
     };
     gaugeControllerAddress?: string;
+    gaugeControllerHelperAddress?: string;
     balancer: {
         vault: string;
         weightedPoolV2Factories: string[];

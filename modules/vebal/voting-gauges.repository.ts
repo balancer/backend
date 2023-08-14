@@ -6,14 +6,18 @@ import { BigNumber, Contract } from 'ethers';
 import { formatEther } from 'ethers/lib/utils';
 import { mainnetNetworkConfig } from '../network/mainnet';
 import gaugeControllerAbi from './abi/gaugeController.json';
+import gaugeControllerHelperAbi from './abi/gaugeControllerHelper.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { v1RootGaugeRecipients } from './special-pools/streamer-v1-gauges';
 import { Multicaller3 } from '../web3/multicaller3';
 import { networkContext } from '../network/network-context.service';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
+// Helper contract that wraps gaugeControllerAddress contract to allow checkpointing and getting the updated relative weight
+const gaugeControllerHelperAddress = mainnetNetworkConfig.data.gaugeControllerHelperAddress!;
 
 export type VotingGauge = {
     gaugeAddress: string;
@@ -154,12 +158,7 @@ export class VotingGaugesRepository {
 
     async findStakingGaugeId(votingGauge: VotingGauge) {
         const chain = votingGauge.network as Chain;
-        let mainnetGaugeAddressOrRecipient: string | undefined;
-        if (chain === 'MAINNET') {
-            mainnetGaugeAddressOrRecipient = votingGauge.gaugeAddress;
-        } else {
-            mainnetGaugeAddressOrRecipient = votingGauge.recipient?.toLowerCase();
-        }
+        let mainnetGaugeAddressOrRecipient = this.getMatchingStakingGaugeAddress(chain, votingGauge);
 
         let gauge = await this.prisma.prismaPoolStakingGauge.findFirst({
             where: {
@@ -174,6 +173,11 @@ export class VotingGaugesRepository {
         if (!gauge) {
             // Only throw when voting gauge is valid
             if (this.isValidForVotingList(votingGauge)) {
+                /*
+                    Possible reason:
+                    old v1 gauge using streamer was killed but still have votes (gauge_relative_weight > 0)
+                    If that's the case, you should hardcode the new recipient in streamer-v1-gauges.ts
+                */
                 const errorMessage = `VotingGauge not found in PrismaPoolStakingGauge: ${JSON.stringify(votingGauge)}`;
                 console.error(errorMessage);
                 throw Error(errorMessage);
@@ -182,6 +186,24 @@ export class VotingGaugesRepository {
             return undefined;
         }
         return gauge.id;
+    }
+
+    /*
+        Returns the gaugeAddress that matches the current VotingGauge in PrismaPoolStakingGauge
+
+        v1 old gauge -> hardcoded recipient (old streamer)
+        L1 gauge --> same gauge address
+        L2 gauge -> root gauge recipient
+    */
+    getMatchingStakingGaugeAddress(chain: Chain, votingGauge: VotingGauge): string | undefined {
+        if (v1RootGaugeRecipients[votingGauge.gaugeAddress]) {
+            return v1RootGaugeRecipients[votingGauge.gaugeAddress].toLowerCase();
+        }
+        if (chain === 'MAINNET') {
+            return votingGauge.gaugeAddress;
+        } else {
+            return votingGauge.recipient?.toLowerCase();
+        }
     }
 
     updateOnchainGaugesWithSubgraphData(onchainGauges: VotingGauge[], subgraphGauges: SubGraphGauge[]) {
@@ -250,12 +272,13 @@ export class VotingGaugesRepository {
     }
 
     async fetchRelativeWeights(gaugeAddresses: string[]) {
-        const multicaller = this.buildGaugeControllerMulticaller();
+        const multicaller = this.buildGaugeControllerHelperMulticaller();
         gaugeAddresses.forEach((address) =>
             multicaller.call(address, gaugeControllerAddress, 'gauge_relative_weight', [address], false),
         );
 
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
+
         return mapValues(response, (value) => Number(formatEther(value)));
     }
 
@@ -268,15 +291,11 @@ export class VotingGaugesRepository {
     }
 
     buildGaugeControllerMulticaller() {
-        /*
-            gauge_relative_weight has 2 overridden instances with different amounts of inputs which causes problems with ethers
-            We apply a filter to exclude the function that we are not using
-        */
-        const filteredGaugeControllerAbi = gaugeControllerAbi.filter((item) => {
-            return !(item.type === 'function' && item.name === 'gauge_relative_weight' && item.inputs.length > 1);
-        });
+        return new Multicaller3(mainnetNetworkConfig.data.multicall, mainnetNetworkConfig.provider, gaugeControllerAbi);
+    }
 
-        return new Multicaller3(filteredGaugeControllerAbi);
+    buildGaugeControllerHelperMulticaller() {
+        return new Multicaller3(gaugeControllerHelperAbi);
     }
 
     generateGaugeIndexes(totalGauges: number) {

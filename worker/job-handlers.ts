@@ -12,6 +12,8 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
+import { chain } from 'lodash';
+import { sleep } from '../modules/common/promise';
 
 export type WorkerJob = {
     name: string;
@@ -26,24 +28,28 @@ const defaultSamplingRate = 0;
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
-        scheduleWithInterval(job, chainId);
+        console.log(`Initializing job ${job.name}-${chainId}-init`);
+        // await scheduleWithInterval(job, chainId);
+        setInterval(scheduleJob, job.interval, job, chainId);
+        // delay a bit for aws rate limits
+        await sleep(1000);
     }
 }
 
 async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any, samplingRate: number): Promise<void> {
     samplingRate = 0;
     const jobId = `${id}-${chainId}`;
-    const cronsMetricPublisher = getCronMetricsPublisher(chainId);
     // let monitorSlug = jobId;
     // if (jobId.length > 50) {
     //     //slug has 50 chars max length
     //     monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
     // }
     if (runningJobs.has(jobId)) {
-        console.log(`Skip job ${jobId}-skip`);
         if (process.env.AWS_ALERTS === 'true') {
+            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
             await cronsMetricPublisher.publish(`${jobId}-skip`);
         }
+        console.log(`Skip job ${jobId}-skip`);
         return;
     }
     // let sentryCheckInId = '';
@@ -67,6 +73,7 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         // });
 
         if (process.env.AWS_ALERTS === 'true') {
+            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
             await cronsMetricPublisher.publish(`${jobId}-done`);
         }
         console.log(`Successful job ${jobId}-done`);
@@ -77,10 +84,11 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
         //     status: 'error',
         // });
 
-        console.log(`Error job ${jobId}-error`, error);
         if (process.env.AWS_ALERTS === 'true') {
+            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
             await cronsMetricPublisher.publish(`${jobId}-error`);
         }
+        console.log(`Error job ${jobId}-error`, error);
     } finally {
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
@@ -89,13 +97,13 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
 
 export async function scheduleWithInterval(job: WorkerJob, chainId: string): Promise<void> {
     try {
-        console.log(`Schedule job ${job.name}-${chainId}`);
+        console.log(`Schedule job ${job.name}-${chainId}-schedule`);
         scheduleJob(job, chainId);
     } catch (error) {
-        console.log(error);
+        console.log(`Error in scheduleJob: ${error}`);
         Sentry.captureException(error);
     } finally {
-        console.log(`Reschedule job ${job.name}-${chainId}`);
+        console.log(`Reschedule job ${job.name}-${chainId}-reschedule`);
         setTimeout(() => {
             scheduleWithInterval(job, chainId);
         }, job.interval);

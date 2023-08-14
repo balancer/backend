@@ -50,8 +50,9 @@ export class CloudwatchMetricsPublisher {
 
             await this.client.send(command);
         } catch (err) {
-            Sentry.captureException(`Failed to publish "${metricName}" in "${this.environment}: ${err}`);
-            return;
+            // Sentry.captureException(`Failed to publish "${metricName}" in "${this.environment}: ${err}`);
+            console.log(`Failed to publish "${metricName}" in "${this.environment}: ${err}`);
+            throw err;
         }
     }
 }

@@ -54,7 +54,6 @@ const gnosisNetworkData: NetworkData = {
     },
     rpcUrl: 'https://rpc.gnosischain.com',
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
     bal: {
         address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
