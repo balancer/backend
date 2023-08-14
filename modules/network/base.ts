@@ -56,7 +56,7 @@ const baseNetworkData: NetworkData = {
     },
     rpcUrl: 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 500,
-    rpcMaxBlockRangeBalances: 50,
+    rpcMaxBlockRangeBalances: 20,
     sanity: {
         projectId: '',
         dataset: '',
