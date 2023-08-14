@@ -98,6 +98,6 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
         await cloudWatchClient.send(putAlarmCommand);
         // rate limits on the AWS API: 3 requests / second
-        await sleep(500);
+        await sleep(1000);
     }
 }

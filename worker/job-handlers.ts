@@ -13,6 +13,7 @@ import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { chain } from 'lodash';
+import { sleep } from '../modules/common/promise';
 
 export type WorkerJob = {
     name: string;
@@ -30,6 +31,8 @@ export async function scheduleJobs(chainId: string): Promise<void> {
         console.log(`Initializing job ${job.name}-${chainId}-init`);
         // await scheduleWithInterval(job, chainId);
         setInterval(scheduleJob, job.interval, job, chainId);
+        // delay a bit for aws rate limits
+        await sleep(1000);
     }
 }
 

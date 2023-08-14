@@ -7,6 +7,7 @@ import { AllNetworkConfigs } from '../modules/network/network-config';
 import { createAlerts } from './create-alerts';
 import { scheduleJobs } from './job-handlers';
 import { createMonitors } from './create-monitors';
+import { sleep } from '../modules/common/promise';
 
 export async function startWorker() {
     const app = express();
@@ -40,11 +41,12 @@ export async function startWorker() {
         for (const chainId of supportedNetworks) {
             scheduleJobs(chainId);
             if (process.env.AWS_ALERTS === 'true') {
-                //need to await these because otherwise we run into AWS ratelimits
                 //start up time will be a bit slower
-                await createAlerts(chainId);
+                createAlerts(chainId);
             }
             // await createMonitors(chainId);
+            // delay to accomodate for aws rate limits
+            await sleep(5000);
         }
     } catch (e) {
         console.log(`Fatal error happened during cron scheduling.`, e);
