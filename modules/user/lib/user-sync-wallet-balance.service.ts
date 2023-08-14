@@ -112,18 +112,27 @@ export class UserSyncWalletBalanceService {
 
         const events: ethers.providers.Log[] = [];
 
+        const logPromises: Promise<ethers.providers.Log[]>[] = [];
+
         let i = 1;
         for (const poolAddress of poolAddresses) {
             console.log(`user-sync-wallet-balances-for-all-pools syncing ${i}/${poolAddresses.length} pools`);
-            const response = await networkContext.provider.getLogs({
-                //ERC20 Transfer topic
-                topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-                fromBlock,
-                toBlock,
-                address: poolAddress,
-            });
-            events.push(...response);
+            logPromises.push(
+                networkContext.provider.getLogs({
+                    //ERC20 Transfer topic
+                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
+                    fromBlock,
+                    toBlock,
+                    address: poolAddress,
+                }),
+            );
             i++;
+        }
+
+        const allResponses = await Promise.all(logPromises);
+
+        for (const response of allResponses) {
+            events.push(...response);
         }
 
         const relevantERC20Addresses = poolAddresses;
