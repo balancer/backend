@@ -42,7 +42,6 @@ export interface NetworkData {
     };
     rpcUrl: string;
     rpcMaxBlockRange: number;
-    rpcMaxBlockRangeBalances: number;
     coingecko: {
         nativeAssetId: string;
         platformId: string;

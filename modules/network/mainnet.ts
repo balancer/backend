@@ -57,7 +57,6 @@ const mainnetNetworkData: NetworkData = {
     },
     rpcUrl: `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 700,
-    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3D',

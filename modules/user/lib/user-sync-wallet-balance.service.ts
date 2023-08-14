@@ -101,8 +101,8 @@ export class UserSyncWalletBalanceService {
         const fromBlock = syncStatus.blockNumber + 1;
         // as we use the erc20 transfer topic, we use a smaller block range than defined in the network context
         const toBlock =
-            latestBlock - fromBlock > networkContext.data.rpcMaxBlockRangeBalances
-                ? fromBlock + networkContext.data.rpcMaxBlockRangeBalances
+            latestBlock - fromBlock > networkContext.data.rpcMaxBlockRange
+                ? fromBlock + networkContext.data.rpcMaxBlockRange
                 : latestBlock;
 
         // no new blocks have been minted, needed for slow networks
@@ -110,13 +110,18 @@ export class UserSyncWalletBalanceService {
             return;
         }
 
-        //fetch all transfer events for the block range
-        const events = await networkContext.provider.getLogs({
-            //ERC20 Transfer topic
-            topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-            fromBlock,
-            toBlock,
-        });
+        const events: ethers.providers.Log[] = [];
+
+        for (const poolAddress of poolAddresses) {
+            const response = await networkContext.provider.getLogs({
+                //ERC20 Transfer topic
+                topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
+                fromBlock,
+                toBlock,
+                address: poolAddress,
+            });
+            events.push(...response);
+        }
 
         const relevantERC20Addresses = poolAddresses;
 

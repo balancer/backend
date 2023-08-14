@@ -61,7 +61,6 @@ const optimismNetworkData: NetworkData = {
     },
     rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 100,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',

@@ -55,7 +55,6 @@ const avalancheNetworkData: NetworkData = {
     },
     rpcUrl: `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
     bal: {
         address: '0xE15bCB9E0EA69e6aB9FA080c4c4A5632896298C3',

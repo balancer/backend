@@ -57,7 +57,6 @@ const arbitrumNetworkData: NetworkData = {
     },
     rpcUrl: `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
     rpcMaxBlockRange: 2000,
-    rpcMaxBlockRangeBalances: 200,
     protocolToken: 'bal',
     bal: {
         address: '0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8',
