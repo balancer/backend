@@ -17,7 +17,7 @@
         "vitest": "vitest"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudwatch": "^3.159.0",
+        "@aws-sdk/client-cloudwatch": "^3.388.0",
         "@aws-sdk/client-secrets-manager": "^3.195.0",
         "@aws-sdk/client-sqs": "^3.137.0",
         "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#beethovenx-master",
