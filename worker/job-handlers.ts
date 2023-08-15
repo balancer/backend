@@ -62,6 +62,7 @@ async function runIfNotAlreadyRunning(
 export function configureWorkerRoutes(app: Express) {
     app.post('/', async (req, res, next) => {
         const job = req.body as { name: string; chain: string };
+        console.log(`Got message: ${job.name}-${job.chain}`);
         const chainId = job.chain;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
