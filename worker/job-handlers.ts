@@ -45,10 +45,10 @@ async function runIfNotAlreadyRunning(id: string, chainId: string, fn: () => any
     //     monitorSlug = jobId.slice(jobId.length - 50, jobId.length);
     // }
     if (runningJobs.has(jobId)) {
-        if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
-            await cronsMetricPublisher.publish(`${jobId}-skip`);
-        }
+        // if (process.env.AWS_ALERTS === 'true') {
+        //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
+        //     await cronsMetricPublisher.publish(`${jobId}-skip`);
+        // }
         console.log(`Skip job ${jobId}-skip`);
         return;
     }
