@@ -8,6 +8,7 @@ import { createAlerts } from './create-alerts';
 import { createMonitors } from './create-monitors';
 import { sleep } from '../modules/common/promise';
 import { scheduleJobs } from './job-scheduler';
+import { configureWorkerRoutes } from './job-handlers';
 
 export async function startWorker() {
     const app = express();
@@ -27,6 +28,7 @@ export async function startWorker() {
     app.use(Sentry.Handlers.requestHandler());
     app.use(express.json());
 
+    configureWorkerRoutes(app);
     app.use(
         Sentry.Handlers.errorHandler({
             shouldHandleError(): boolean {
