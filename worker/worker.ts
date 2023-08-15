@@ -5,9 +5,9 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from '../prisma/prisma-client';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { createAlerts } from './create-alerts';
-import { scheduleJobs } from './job-handlers';
 import { createMonitors } from './create-monitors';
 import { sleep } from '../modules/common/promise';
+import { scheduleJobs } from './job-scheduler';
 
 export async function startWorker() {
     const app = express();

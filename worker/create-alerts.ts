@@ -7,9 +7,8 @@ import {
 import { env } from '../app/env';
 import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { AllNetworkConfigs } from '../modules/network/network-config';
-import { DeploymentEnv } from '../modules/network/network-config-types';
+import { DeploymentEnv, WorkerJob } from '../modules/network/network-config-types';
 import { networkContext } from '../modules/network/network-context.service';
-import { WorkerJob } from './job-handlers';
 import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
 import { sleep } from '../modules/common/promise';
