@@ -53,4 +53,8 @@ export async function startWorker() {
     } catch (e) {
         console.log(`Fatal error happened during cron scheduling.`, e);
     }
+
+    app.listen(env.PORT, () => {
+        console.log(`Worker listening on port ${env.PORT}`);
+    });
 }
