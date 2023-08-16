@@ -44,7 +44,7 @@ export async function startWorker() {
             scheduleJobs(chainId);
             if (process.env.AWS_ALERTS === 'true') {
                 //start up time will be a bit slower
-                createAlerts(chainId);
+                await createAlerts(chainId);
             }
             // await createMonitors(chainId);
             // delay to accomodate for aws rate limits
