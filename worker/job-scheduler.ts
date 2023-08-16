@@ -9,6 +9,7 @@ class WokerQueue {
     public async sendWithInterval(json: string, intervalMs: number, deDuplicationId?: string): Promise<void> {
         try {
             await this.sendMessage(json, deDuplicationId);
+            console.log(`Sent message to schedule job: ${json}`);
         } catch (error) {
             console.log(error);
             Sentry.captureException(error);
