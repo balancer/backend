@@ -117,6 +117,7 @@ it('Returns veBAL voting pool', async () => {
       {
         "addedTimestamp": null,
         "address": "0xb78543e00712c3abba10d0852f6e38fde2aaba4d",
+        "childGaugeAddress": null,
         "isKilled": false,
         "relativeWeightCap": "0.1",
       }
@@ -177,6 +178,27 @@ it('Returns second TWAMM (from CRON finance) voting pool', async () => {
         "relativeWeightCap": "0.02",
       }
     `);
+}, 1000_000);
+
+it('Returns childGaugeAddress field for L2 pools (but not for mainnet pools)', async () => {
+    const service = new VeBalVotingListService();
+
+    const list = await service.getVotingList();
+
+    const mainnetPools = list.filter((pool) => pool.chain === 'MAINNET');
+
+    expect(mainnetPools.length).toBeGreaterThan(0);
+
+    mainnetPools.forEach((pool) => {
+        expect(pool.gauge.childGaugeAddress).toBeNull();
+    });
+
+    const l2Pools = list.filter((pool) => pool.chain !== 'MAINNET');
+    expect(l2Pools.length).toBeGreaterThan(0);
+
+    l2Pools.forEach((pool) => {
+        expect(pool.gauge.childGaugeAddress).toBeDefined();
+    });
 }, 1000_000);
 
 it('Fetches gauge_relative_weight using GaugeControllerHelper', async () => {
