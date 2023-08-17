@@ -67,6 +67,9 @@ const fantomNetworkData: NetworkData = {
             '0x321162cd933e2be498cd2267a90534a804051b11', // multi wbtc
             '0x74b23882a30290451a17c44f4f05243b6b58c76d', // mutli weth
             '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179', // ankrftm
+            '0xd67de0e0a0fd7b15dc8348bb9be742f3c5850454', // BNB
+            '0x1e4f97b9f9f913c46f1632781732927b9019c68b', // CRV
+            '0x511d35c52a3c244e7b8bd92c0c297755fbd89212', // AVAX
         ],
     },
     tokenPrices: {
