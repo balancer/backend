@@ -110,7 +110,7 @@ const zkevmNetworkData: NetworkData = {
 export const zkevmNetworkConfig: NetworkConfig = {
     data: zkevmNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(zkevmNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new PhantomStableAprService(),
         new BoostedPoolAprService(),

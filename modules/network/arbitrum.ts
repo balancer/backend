@@ -125,7 +125,7 @@ const arbitrumNetworkData: NetworkData = {
 export const arbitrumNetworkConfig: NetworkConfig = {
     data: arbitrumNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(arbitrumNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: arbitrumNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new WstethAprService(tokenService, arbitrumNetworkData.lido!.wstEthContract),
         new ReaperCryptAprService(

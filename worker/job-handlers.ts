@@ -23,8 +23,6 @@ async function runIfNotAlreadyRunning(
     next: NextFunction,
 ): Promise<void> {
     const jobId = `${id}-${chainId}`;
-    console.log(`Current jobqueue length: ${runningJobs.size}`);
-
     if (runningJobs.has(jobId)) {
         // if (process.env.AWS_ALERTS === 'true') {
         //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
@@ -65,6 +63,7 @@ export function configureWorkerRoutes(app: Express) {
     app.post('/', async (req, res, next) => {
         const job = req.body as { name: string; chain: string };
         console.log(`Got message: ${job.name}-${job.chain}`);
+        console.log(`Current jobqueue length: ${runningJobs.size}`);
         const chainId = job.chain;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);

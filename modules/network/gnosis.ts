@@ -108,7 +108,7 @@ const gnosisNetworkData: NetworkData = {
 export const gnosisNetworkConfig: NetworkConfig = {
     data: gnosisNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(gnosisNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: gnosisNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new PhantomStableAprService(),
         new BoostedPoolAprService(),

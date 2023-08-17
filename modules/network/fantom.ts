@@ -214,7 +214,7 @@ const fantomNetworkData: NetworkData = {
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
     contentService: new SanityContentService(),
-    provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService, fantomNetworkData.yearn!.vaultsEndpoint),

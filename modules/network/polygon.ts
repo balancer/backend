@@ -114,7 +114,7 @@ const polygonNetworkData: NetworkData = {
 export const polygonNetworkConfig: NetworkConfig = {
     data: polygonNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(polygonNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: polygonNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
