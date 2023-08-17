@@ -26,5 +26,6 @@ export function getVeVotingGauge(poolId: string) {
         id: veVotingGaugeAddress,
         status: 'ACTIVE' as const,
         addedTimestamp: null,
+        stakingGauge: null,
     };
 }
