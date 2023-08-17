@@ -23,11 +23,13 @@ async function runIfNotAlreadyRunning(
     next: NextFunction,
 ): Promise<void> {
     const jobId = `${id}-${chainId}`;
+    console.log(`Current jobqueue length: ${runningJobs.size}`);
+
     if (runningJobs.has(jobId)) {
-        if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
-            await cronsMetricPublisher.publish(`${jobId}-skip`);
-        }
+        // if (process.env.AWS_ALERTS === 'true') {
+        //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
+        //     await cronsMetricPublisher.publish(`${jobId}-skip`);
+        // }
         console.log(`Skip job ${jobId}-skip`);
         res.sendStatus(200);
         return;
@@ -45,17 +47,17 @@ async function runIfNotAlreadyRunning(
             await cronsMetricPublisher.publish(`${jobId}-done`);
         }
         console.log(`Successful job ${jobId}-done`);
-        res.sendStatus(200);
     } catch (error) {
-        if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
-            await cronsMetricPublisher.publish(`${jobId}-error`);
-        }
+        // if (process.env.AWS_ALERTS === 'true') {
+        //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
+        //     await cronsMetricPublisher.publish(`${jobId}-error`);
+        // }
         console.log(`Error job ${jobId}-error`, error);
-        next(error);
+        // next(error);
     } finally {
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
+        res.sendStatus(200);
     }
 }
 
