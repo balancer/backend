@@ -123,7 +123,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const logPromises: Promise<ethers.providers.Log[]>[] = [];
         const erc20Interface = new ethers.utils.Interface(ERC20Abi);
 
-        console.log(`user-sync-staked-balances-${networkContext.chainId} getLogs of ${getContractAt.length} gauges`);
+        console.log(`user-sync-staked-balances-${networkContext.chainId} getLogs of ${gaugeAddresses.length} gauges`);
 
         for (const gaugeAddress of gaugeAddresses) {
             logPromises.push(
@@ -138,7 +138,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         }
         const allResponses = await Promise.all(logPromises);
         console.log(
-            `user-sync-staked-balances-${networkContext.chainId} getLogs of ${getContractAt.length} gauges done`,
+            `user-sync-staked-balances-${networkContext.chainId} getLogs of ${gaugeAddresses.length} gauges done`,
         );
 
         for (const response of allResponses) {
@@ -177,6 +177,10 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             provider: networkContext.provider,
             balancesToFetch,
         });
+
+        console.log(
+            `user-sync-staked-balances-${networkContext.chainId} got ${balancesToFetch.length} balances to fetch done.`,
+        );
 
         await prismaBulkExecuteOperations(
             [
