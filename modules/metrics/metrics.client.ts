@@ -55,3 +55,5 @@ export class CloudwatchMetricsPublisher {
         }
     }
 }
+
+export const cronsMetricPublisher = new CloudwatchMetricsPublisher('backendCrons');

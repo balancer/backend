@@ -7,11 +7,11 @@ import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/bloc
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
 import { datastudioService } from '../modules/datastudio/datastudio.service';
-import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
+import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 
 const runningJobs: Set<string> = new Set();
 
@@ -24,10 +24,9 @@ async function runIfNotAlreadyRunning(
 ): Promise<void> {
     const jobId = `${id}-${chainId}`;
     if (runningJobs.has(jobId)) {
-        // if (process.env.AWS_ALERTS === 'true') {
-        //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
-        //     await cronsMetricPublisher.publish(`${jobId}-skip`);
-        // }
+        if (process.env.AWS_ALERTS === 'true') {
+            await cronsMetricPublisher.publish(`${jobId}-skip`);
+        }
         console.log(`Skip job ${jobId}-skip`);
         res.sendStatus(200);
         return;
@@ -41,15 +40,13 @@ async function runIfNotAlreadyRunning(
         await fn();
 
         if (process.env.AWS_ALERTS === 'true') {
-            const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
             await cronsMetricPublisher.publish(`${jobId}-done`);
         }
         console.log(`Successful job ${jobId}-done`);
     } catch (error) {
-        // if (process.env.AWS_ALERTS === 'true') {
-        //     const cronsMetricPublisher = getCronMetricsPublisher(chainId, id);
-        //     await cronsMetricPublisher.publish(`${jobId}-error`);
-        // }
+        if (process.env.AWS_ALERTS === 'true') {
+            await cronsMetricPublisher.publish(`${jobId}-error`);
+        }
         console.log(`Error job ${jobId}-error`, error);
         // next(error);
     } finally {

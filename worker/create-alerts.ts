@@ -5,13 +5,13 @@ import {
     PutMetricAlarmCommand,
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../app/env';
-import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { DeploymentEnv, WorkerJob } from '../modules/network/network-config-types';
 import { networkContext } from '../modules/network/network-context.service';
 import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
 import { sleep } from '../modules/common/promise';
+import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 
 const ALARM_PREFIX = `CRON ALARM:`;
 
@@ -20,7 +20,6 @@ export async function createAlerts(chainId: string): Promise<void> {
 }
 
 async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
-    const cronsMetricPublisher = getCronMetricsPublisher(chainId, 'init');
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
