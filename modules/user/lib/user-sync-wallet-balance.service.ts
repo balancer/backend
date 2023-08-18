@@ -119,7 +119,6 @@ export class UserSyncWalletBalanceService {
 
         const logPromises: Promise<ethers.providers.Log[]>[] = [];
 
-        let i = 1;
         console.log(
             `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools`,
         );
@@ -133,7 +132,6 @@ export class UserSyncWalletBalanceService {
                     address: poolAddress,
                 }),
             );
-            i++;
         }
 
         const allResponses = await Promise.all(logPromises);
