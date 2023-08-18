@@ -16,14 +16,16 @@ export async function startScheduler() {
 
     try {
         for (const chainId of Object.keys(AllNetworkConfigs)) {
-            scheduleJobs(chainId);
-            if (process.env.AWS_ALERTS === 'true') {
-                //start up time will be a bit slower
-                await createAlerts(chainId);
+            if (chainId === '1') {
+                scheduleJobs(chainId);
+                if (process.env.AWS_ALERTS === 'true') {
+                    //start up time will be a bit slower
+                    await createAlerts(chainId);
+                }
+                // await createMonitors(chainId);
+                // delay to accomodate for aws rate limits
+                await sleep(5000);
             }
-            // await createMonitors(chainId);
-            // delay to accomodate for aws rate limits
-            await sleep(5000);
         }
     } catch (e) {
         console.log(`Fatal error happened during cron scheduling.`, e);
