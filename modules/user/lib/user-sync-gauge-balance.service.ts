@@ -185,7 +185,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({
-                    data: _.uniq(allUserAddress).map((address) => ({ address })),
+                    data: _.uniq(balances.map((balance) => balance.userAddress)).map((address) => ({ address })),
                     skipDuplicates: true,
                 }),
                 ...balances
