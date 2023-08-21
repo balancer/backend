@@ -6,7 +6,6 @@ import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
-import { WorkerJob } from '../../worker/job-handlers';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -17,6 +16,12 @@ export interface NetworkConfig {
     tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
+}
+export interface WorkerJob {
+    name: string;
+    interval: number;
+    alarmEvaluationPeriod?: number;
+    alarmDatapointsToAlarm?: number;
 }
 
 export type DeploymentEnv = 'canary' | 'main';

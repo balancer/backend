@@ -122,7 +122,7 @@ const mainnetNetworkData: NetworkData = {
 export const mainnetNetworkConfig: NetworkConfig = {
     data: mainnetNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(mainnetNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: mainnetNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new WstethAprService(tokenService, mainnetNetworkData.lido!.wstEthContract),
         new PhantomStableAprService(),

@@ -5,28 +5,30 @@ import * as Tracing from '@sentry/tracing';
 import { prisma } from '../prisma/prisma-client';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { createAlerts } from './create-alerts';
-import { scheduleJobs } from './job-handlers';
 import { createMonitors } from './create-monitors';
 import { sleep } from '../modules/common/promise';
+import { scheduleJobs } from './job-queue';
+import { configureWorkerRoutes } from './job-handlers';
 
 export async function startWorker() {
     const app = express();
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        environment: `multichain-${env.DEPLOYMENT_ENV}`,
+        environment: `multichain-worker-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
             new Tracing.Integrations.Prisma({ client: prisma }),
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
-        sampleRate: 1,
+        sampleRate: 0,
     });
 
     app.use(Sentry.Handlers.requestHandler());
     app.use(express.json());
 
+    configureWorkerRoutes(app);
     app.use(
         Sentry.Handlers.errorHandler({
             shouldHandleError(): boolean {
@@ -35,20 +37,7 @@ export async function startWorker() {
         }),
     );
 
-    const supportedNetworks = process.env.SUPPORTED_NETWORKS?.split(',') ?? Object.keys(AllNetworkConfigs);
-
-    try {
-        for (const chainId of supportedNetworks) {
-            scheduleJobs(chainId);
-            if (process.env.AWS_ALERTS === 'true') {
-                //start up time will be a bit slower
-                createAlerts(chainId);
-            }
-            // await createMonitors(chainId);
-            // delay to accomodate for aws rate limits
-            await sleep(5000);
-        }
-    } catch (e) {
-        console.log(`Fatal error happened during cron scheduling.`, e);
-    }
+    app.listen(env.PORT, () => {
+        console.log(`Worker listening on port ${env.PORT}`);
+    });
 }

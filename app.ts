@@ -18,10 +18,9 @@ import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
-import * as Tracing from '@sentry/tracing';
-import { prisma } from './prisma/prisma-client';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
+import { startScheduler } from './worker/scheduler';
 
 async function startServer() {
     const app = createExpressApp();
@@ -76,7 +75,6 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(sessionMiddleware);
 
-    //startWorker(app);
     if (env.PROTOCOL === 'beethoven') {
         loadRestRoutesBeethoven(app);
     } else if (env.PROTOCOL === 'balancer') {
@@ -119,6 +117,8 @@ async function startServer() {
 
 if (process.env.WORKER === 'true') {
     startWorker();
+} else if (process.env.SCHEDULER === 'true') {
+    startScheduler();
 } else {
     startServer();
 }

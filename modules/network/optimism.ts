@@ -179,7 +179,7 @@ const optimismNetworkData: NetworkData = {
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
     contentService: new SanityContentService(),
-    provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.rocket!.rEthContract),
         new WstethAprService(tokenService, optimismNetworkData.lido!.wstEthContract),

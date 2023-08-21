@@ -106,7 +106,7 @@ const avalancheNetworkData: NetworkData = {
 export const avalancheNetworkConfig: NetworkConfig = {
     data: avalancheNetworkData,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider(avalancheNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new PhantomStableAprService(),
         new BoostedPoolAprService(),

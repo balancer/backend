@@ -312,12 +312,12 @@ export class PoolCreatorService {
                 token,
                 ...(token.nestedPool?.tokens || []).map((nestedToken) => ({
                     ...nestedToken,
-                    nestedPoolId: token.nestedPool?.id,
+                    nestedPoolId: token.nestedPool?.id || null,
                 })),
                 ...(token.nestedPool?.tokens.map((nestedToken) =>
                     (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
                         ...doubleNestedToken,
-                        nestedPoolId: nestedToken.nestedPool?.id,
+                        nestedPoolId: nestedToken.nestedPool?.id || null,
                     })),
                 ) || []),
             ]),

@@ -52,7 +52,8 @@ export class CloudwatchMetricsPublisher {
         } catch (err) {
             // Sentry.captureException(`Failed to publish "${metricName}" in "${this.environment}: ${err}`);
             console.log(`Failed to publish "${metricName}" in "${this.environment}: ${err}`);
-            throw err;
         }
     }
 }
+
+export const cronsMetricPublisher = new CloudwatchMetricsPublisher('backendCrons');

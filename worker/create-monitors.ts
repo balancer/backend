@@ -1,8 +1,8 @@
 import { env } from '../app/env';
 import { AllNetworkConfigs } from '../modules/network/network-config';
-import { WorkerJob } from './job-handlers';
 import { sleep } from '../modules/common/promise';
 import axios from 'axios';
+import { WorkerJob } from '../modules/network/network-config-types';
 
 type SentryMonitorRetrieve = {
     name: string;

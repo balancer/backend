@@ -72,8 +72,8 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ftm.tools',
-    rpcMaxBlockRange: 2000,
+    rpcUrl: 'https://rpc.fantom.network',
+    rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',
@@ -214,7 +214,7 @@ const fantomNetworkData: NetworkData = {
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
     contentService: new SanityContentService(),
-    provider: new ethers.providers.JsonRpcProvider(fantomNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
         new YearnVaultAprService(tokenService, fantomNetworkData.yearn!.vaultsEndpoint),
