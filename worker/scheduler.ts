@@ -16,7 +16,7 @@ export async function startScheduler() {
 
     try {
         for (const chainId of Object.keys(AllNetworkConfigs)) {
-            if (chainId === '1' || chainId === '10') {
+            if (['1', '10', '250'].includes(chainId)) {
                 scheduleJobs(chainId);
                 if (process.env.AWS_ALERTS === 'true') {
                     //start up time will be a bit slower
