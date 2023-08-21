@@ -24,16 +24,20 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         region: env.AWS_REGION,
     });
 
+    const alarmNamesToPublish = jobs.map(
+        (cronJob) => `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`,
+    );
+
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
-    // delete all alarms
+    // delete alarms that are not in the current jobs array
     if (currentAlarms.MetricAlarms) {
-        const cronAlarms = currentAlarms.MetricAlarms.filter(
+        const currentAlarmsForChain = currentAlarms.MetricAlarms.filter(
             (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
         );
         const alarmNames: string[] = [];
-        for (const alarm of cronAlarms) {
-            if (alarm.AlarmName) {
+        for (const alarm of currentAlarmsForChain) {
+            if (alarm.AlarmName && !alarmNamesToPublish.includes(alarm.AlarmName)) {
                 alarmNames.push(alarm.AlarmName);
             }
         }
@@ -42,6 +46,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         }
     }
 
+    // update all other alarms
     for (const cronJob of jobs) {
         const alarmName = `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`;
 
