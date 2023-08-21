@@ -55,7 +55,7 @@ const mainnetNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
+    rpcUrl: env.INFURA_API_KEY ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
