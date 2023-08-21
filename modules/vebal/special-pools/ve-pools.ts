@@ -11,21 +11,29 @@ export const veGauges = Object.values(vePools).map((v) => v.toLowerCase());
 
 const isVebalPool = (poolId: string) => poolId === '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
 
-export function getVeVotingGauge(poolId: string) {
+export function getVeVotingGauges() {
     // Make sure that gauge addresses and poolIds are lowercase
     const vePoolsLowerCase: Record<string, string> = {};
     Object.entries(vePools).forEach(([key, value]) => {
         vePoolsLowerCase[key.toLowerCase()] = value.toLowerCase();
     });
 
-    const veVotingGaugeAddress = vePoolsLowerCase[poolId];
-    if (!veVotingGaugeAddress) return;
-    return {
-        // veBal pool have a max of 10% voting weight (AKA '0.1' relativeWeightCap)
-        relativeWeightCap: isVebalPool(poolId) ? '0.1' : null,
-        id: veVotingGaugeAddress,
-        status: 'ACTIVE' as const,
-        addedTimestamp: null,
-        stakingGauge: null,
-    };
+    let veVotingGauges = [];
+    for (const poolId in vePoolsLowerCase) {
+        veVotingGauges.push({
+            // veBal pool have a max of 10% voting weight (AKA '0.1' relativeWeightCap)
+            relativeWeightCap: isVebalPool(poolId) ? '0.1' : null,
+            id: vePoolsLowerCase[poolId],
+            status: 'ACTIVE' as const,
+            addedTimestamp: null,
+            stakingGauge: {
+                staking: {
+                    poolId,
+                    address: vePoolsLowerCase[poolId],
+                },
+            },
+        });
+    }
+
+    return veVotingGauges;
 }
