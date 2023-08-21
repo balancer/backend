@@ -61,6 +61,7 @@ export function configureWorkerRoutes(app: Express) {
         const job = req.body as { name: string; chain: string };
         console.log(`Got message: ${job.name}-${job.chain}`);
         console.log(`Current jobqueue length: ${runningJobs.size}`);
+        console.log(`Current jobqueue content: ${runningJobs}`);
         const chainId = job.chain;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
