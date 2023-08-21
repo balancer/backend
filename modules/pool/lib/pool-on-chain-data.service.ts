@@ -7,50 +7,18 @@ import VaultAbi from '../abi/Vault.json';
 import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
 import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
-import MetaStablePool from '../abi/MetaStablePool.json';
+import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
-import { BigNumber, Contract } from 'ethers';
+import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isComposableStablePool, isGyroEV2, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
-import BalancerPoolDataQueryAbi from '../abi/BalancerPoolDataQueries.json';
 import { networkContext } from '../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { Multicaller3 } from '../../web3/multicaller3';
-
-// enum PoolQueriesTotalSupplyType {
-//     TOTAL_SUPPLY = 0,
-//     VIRTUAL_SUPPLY,
-//     ACTUAL_SUPPLY,
-// }
-
-// enum PoolQuerySwapFeeType {
-//     SWAP_FEE_PERCENTAGE = 0,
-//     PERCENT_FEE,
-// }
-
-// interface PoolDataQueryConfig {
-//     loadTokenBalanceUpdatesAfterBlock: boolean;
-//     loadTotalSupply: boolean;
-//     loadSwapFees: boolean;
-//     loadLinearWrappedTokenRates: boolean;
-//     loadLinearTargets: boolean;
-//     loadNormalizedWeights: boolean;
-//     loadScalingFactors: boolean;
-//     loadAmps: boolean;
-//     loadRates: boolean;
-//     blockNumber: number;
-//     totalSupplyTypes: PoolQueriesTotalSupplyType[];
-//     swapFeeTypes: PoolQuerySwapFeeType[];
-//     linearPoolIdxs: number[];
-//     weightedPoolIdxs: number[];
-//     scalingFactorPoolIdxs: number[];
-//     ampPoolIdxs: number[];
-//     ratePoolIdxs: number[];
-// }
 
 interface PoolStatusResult {
     [key: string]: {
@@ -58,26 +26,6 @@ interface PoolStatusResult {
         inRecoveryMode: boolean;
     };
 }
-
-// const defaultPoolDataQueryConfig: PoolDataQueryConfig = {
-//     loadTokenBalanceUpdatesAfterBlock: false,
-//     loadTotalSupply: false,
-//     loadSwapFees: false,
-//     loadLinearWrappedTokenRates: false,
-//     loadLinearTargets: false,
-//     loadNormalizedWeights: false,
-//     loadScalingFactors: false,
-//     loadAmps: false,
-//     loadRates: false,
-//     blockNumber: 0,
-//     totalSupplyTypes: [],
-//     swapFeeTypes: [],
-//     linearPoolIdxs: [],
-//     weightedPoolIdxs: [],
-//     scalingFactorPoolIdxs: [],
-//     ampPoolIdxs: [],
-//     ratePoolIdxs: [],
-// };
 
 interface MulticallPoolStateExecuteResult {
     inRecoveryMode: boolean;
@@ -116,11 +64,6 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'GYROE',
 ];
 
-// export interface poolIdWithType {
-//     id: string;
-//     type: PrismaPoolType;
-// }
-
 export class PoolOnChainDataService {
     constructor(private readonly tokenService: TokenService) {}
 
@@ -133,22 +76,43 @@ export class PoolOnChainDataService {
                 chain: networkContext.chain,
                 type: { in: SUPPORTED_POOL_TYPES },
             },
+            include: {
+                dynamicData: true,
+            },
         });
 
-        const poolAddressFromDb = filteredPools.map((pool) => pool.address);
+        const multicall = new Multicaller3(ComposableStablePoolAbi);
 
-        const poolStatusResults = await this.queryPoolStatus(poolAddressFromDb);
+        filteredPools.forEach((pool) => {
+            multicall.call(`${pool.id}.inRecoveryMode`, pool.address, 'inRecoveryMode');
+            multicall.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
+        });
+
+        const multicallResult = (await multicall.execute()) as Record<string, MulticallPoolStateExecuteResult>;
+
+        const poolStatusResults: PoolStatusResult = {};
+
+        for (const poolAddress in multicallResult) {
+            poolStatusResults[poolAddress] = {
+                inRecoveryMode: multicallResult[poolAddress].inRecoveryMode
+                    ? multicallResult[poolAddress].inRecoveryMode
+                    : false,
+                isPaused: multicallResult[poolAddress].pausedState
+                    ? multicallResult[poolAddress].pausedState.paused
+                    : false,
+            };
+        }
 
         const operations = [];
 
-        for (const poolId of poolAddressFromDb) {
-            if (poolStatusResults[poolId]) {
+        for (const pool of filteredPools) {
+            if (poolStatusResults[pool.id] && pool.dynamicData) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: {
-                            isPaused: poolStatusResults[poolId].isPaused,
-                            isInRecoveryMode: poolStatusResults[poolId].inRecoveryMode,
+                            isPaused: poolStatusResults[pool.id].isPaused,
+                            isInRecoveryMode: poolStatusResults[pool.id].inRecoveryMode,
                         },
                     }),
                 );
@@ -193,14 +157,14 @@ export class PoolOnChainDataService {
                     ...WeightedPoolAbi,
                     ...StablePoolAbi,
                     ...StablePhantomPoolAbi,
-                    ...MetaStablePool,
+                    ...MetaStablePoolAbi,
                     ...ComposableStablePoolAbi,
                     //...WeightedPoolV2Abi,
                 ].map((row) => [row.name, row]),
             ),
         );
 
-        const multiPool = new Multicaller3(networkContext.data.multicall3, abis);
+        const multiPool = new Multicaller3(abis);
 
         filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
@@ -457,251 +421,5 @@ export class PoolOnChainDataService {
                 console.log('error syncing on chain data', e);
             }
         }
-
-        // const poolsOnChainDataArray = Object.entries(poolsOnChainData);
-
-        // for (const poolData of poolDataPerPool) {
-        //     if (poolData.ignored) {
-        //         failed.push(poolData.id);
-        //         continue;
-        //     }
-        //     const poolId = poolData.id;
-        //     const pool = filteredPools.find((pool) => pool.id === poolId)!;
-        //     let multicallResult;
-        //     for (const [id, data] of poolsOnChainDataArray) {
-        //         if (id === poolId) {
-        //             multicallResult = data;
-        //         }
-        //     }
-
-        //     try {
-        //         if (isStablePool(pool.type)) {
-        //             if (!poolData.amp) {
-        //                 console.error(`Stable Pool Missing Amp: ${poolId}`);
-        //                 continue;
-        //             }
-
-        //             // Need to scale amp by precision to match expected Subgraph scale
-        //             // amp is stored with 3 decimals of precision
-        //             const amp = formatFixed(poolData.amp, 3);
-
-        //             //only update if amp has changed
-        //             if (!pool.stableDynamicData || pool.stableDynamicData.amp !== amp) {
-        //                 await prisma.prismaPoolStableDynamicData.upsert({
-        //                     where: { id_chain: { id: pool.id, chain: networkContext.chain } },
-        //                     create: { id: pool.id, chain: networkContext.chain, poolId: pool.id, amp, blockNumber },
-        //                     update: { amp, blockNumber },
-        //                 });
-        //             }
-        //         }
-
-        //         if (pool.type === 'LINEAR') {
-        //             if (!poolData.linearTargets) {
-        //                 console.error(`Linear Pool Missing Targets: ${poolId}`);
-        //                 continue;
-        //             } else {
-        //                 const lowerTarget = formatFixed(poolData.linearTargets[0], 18);
-        //                 const upperTarget = formatFixed(poolData.linearTargets[1], 18);
-
-        //                 if (
-        //                     !pool.linearDynamicData ||
-        //                     pool.linearDynamicData.lowerTarget !== lowerTarget ||
-        //                     pool.linearDynamicData.upperTarget !== upperTarget
-        //                 ) {
-        //                     await prisma.prismaPoolLinearDynamicData.upsert({
-        //                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
-        //                         create: {
-        //                             id: pool.id,
-        //                             chain: networkContext.chain,
-        //                             poolId: pool.id,
-        //                             upperTarget,
-        //                             lowerTarget,
-        //                             blockNumber,
-        //                         },
-        //                         update: { upperTarget, lowerTarget, blockNumber },
-        //                     });
-        //                 }
-        //             }
-        //         }
-
-        //         const swapFee = formatFixed(poolData.swapFee, 18);
-        //         const totalShares = formatFixed(poolData.totalSupply, 18);
-        //         const swapEnabled =
-        //             typeof multicallResult?.swapEnabled !== 'undefined'
-        //                 ? multicallResult.swapEnabled
-        //                 : pool.dynamicData?.swapEnabled;
-
-        //         const yieldProtocolFeePercentage =
-        //             typeof multicallResult?.protocolFeePercentageCache !== 'undefined'
-        //                 ? formatFixed(multicallResult.protocolFeePercentageCache, 18)
-        //                 : `${networkContext.data.balancer.yieldProtocolFeePercentage}`;
-
-        //         if (
-        //             pool.dynamicData &&
-        //             (pool.dynamicData.swapFee !== swapFee ||
-        //                 pool.dynamicData.totalShares !== totalShares ||
-        //                 pool.dynamicData.swapEnabled !== swapEnabled ||
-        //                 pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage)
-        //         ) {
-        //             await prisma.prismaPoolDynamicData.update({
-        //                 where: { id_chain: { id: pool.id, chain: networkContext.chain } },
-        //                 data: {
-        //                     swapFee,
-        //                     totalShares,
-        //                     totalSharesNum: parseFloat(totalShares),
-        //                     swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
-        //                     protocolYieldFee: yieldProtocolFeePercentage,
-        //                     blockNumber,
-        //                 },
-        //             });
-        //         }
-
-        //         for (const poolToken of pool.tokens) {
-        //             const balance = formatFixed(poolData.balances[poolToken.index] || '0', poolToken.token.decimals);
-        //             const weight = poolData.weights ? formatFixed(poolData.weights[poolToken.index], 18) : null;
-
-        //             let priceRate = '1.0';
-
-        //             // set token rate from scaling factors
-        //             if (poolData.scalingFactors && poolData.scalingFactors[poolToken.index]) {
-        //                 priceRate = formatFixed(
-        //                     poolData.scalingFactors[poolToken.index]
-        //                         .mul(BigNumber.from('10').pow(poolToken.token.decimals))
-        //                         .div(`1000000000000000000`),
-        //                     18,
-        //                 );
-        //             }
-
-        //             // set GyroE V2 token rates using multicall values
-        //             if (isGyroEV2(pool) && multicallResult?.tokenRates !== undefined) {
-        //                 priceRate = formatFixed(multicallResult?.tokenRates[poolToken.index], 18);
-        //             }
-
-        //             // override the rate of the phantom bpt with pool.getRate if present
-        //             if (poolData.rate && isSameAddress(poolToken.address, pool.address)) {
-        //                 priceRate = formatFixed(poolData.rate, 18);
-        //             }
-
-        //             // override the rate of the wrapped token with pool.getWrappedTokenRate if present
-        //             if (poolData.wrappedTokenRate && pool.linearData?.wrappedIndex === poolToken.index) {
-        //                 priceRate = formatFixed(poolData.wrappedTokenRate, 18);
-        //             }
-
-        //             if (
-        //                 !poolToken.dynamicData ||
-        //                 poolToken.dynamicData.balance !== balance ||
-        //                 poolToken.dynamicData.priceRate !== priceRate ||
-        //                 poolToken.dynamicData.weight !== weight
-        //             ) {
-        //                 await prisma.prismaPoolTokenDynamicData.upsert({
-        //                     where: { id_chain: { id: poolToken.id, chain: networkContext.chain } },
-        //                     create: {
-        //                         id: poolToken.id,
-        //                         chain: networkContext.chain,
-        //                         poolTokenId: poolToken.id,
-        //                         blockNumber,
-        //                         priceRate,
-        //                         weight,
-        //                         balance,
-        //                         balanceUSD:
-        //                             poolToken.address === pool.address
-        //                                 ? 0
-        //                                 : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-        //                                   parseFloat(balance),
-        //                     },
-        //                     update: {
-        //                         blockNumber,
-        //                         priceRate,
-        //                         weight,
-        //                         balance,
-        //                         balanceUSD:
-        //                             poolToken.address === pool.address
-        //                                 ? 0
-        //                                 : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-        //                                   parseFloat(balance),
-        //                     },
-        //                 });
-        //             }
-        //         }
-        //     } catch (e) {
-        //         failed.push(poolData.id);
-        //         console.log('error syncing on chain data', e);
-        // //     }
-        //     success.push(poolData.id);
-
-        //     // console.log(
-        //     //     `Successful updates: ${success.length}, failed updates: ${failed.length}. Failed pool Ids: ${failed}`,
-        //     // );
-        // }
-        // return { failed, success };
-    }
-
-    // public async queryPoolData({
-    //     poolIds,
-    //     config,
-    // }: {
-    //     poolIds: string[];
-    //     config: Partial<PoolDataQueryConfig>;
-    // }): Promise<{
-    //     balances: BigNumber[][];
-    //     totalSupplies: BigNumber[];
-    //     swapFees: BigNumber[];
-    //     linearWrappedTokenRates: BigNumber[];
-    //     linearTargets: BigNumber[][];
-    //     weights: BigNumber[][];
-    //     scalingFactors: BigNumber[][];
-    //     amps: BigNumber[];
-    //     rates: BigNumber[];
-    //     ignoreIdxs: BigNumber[];
-    // }> {
-    //     const contract = new Contract(
-    //         networkContext.data.balancer.poolDataQueryContract,
-    //         BalancerPoolDataQueryAbi,
-    //         networkContext.provider,
-    //     );
-
-    //     const response = await contract.getPoolData(poolIds, {
-    //         ...defaultPoolDataQueryConfig,
-    //         ...config,
-    //     });
-
-    //     return {
-    //         balances: response[0],
-    //         totalSupplies: response[1],
-    //         swapFees: response[2],
-    //         linearWrappedTokenRates: response[3],
-    //         linearTargets: response[4],
-    //         weights: response[5],
-    //         scalingFactors: response[6],
-    //         amps: response[7],
-    //         rates: response[8],
-    //         ignoreIdxs: response[9],
-    //     };
-    // }
-
-    public async queryPoolStatus(poolAddresses: string[]): Promise<PoolStatusResult> {
-        const multicall = new Multicaller3(ComposableStablePoolAbi);
-
-        poolAddresses.forEach((address) => {
-            multicall.call(`${address}.inRecoveryMode`, address, 'inRecoveryMode');
-            multicall.call(`${address}.pausedState`, address, 'getPausedState');
-        });
-
-        const poolStateResult = (await multicall.execute()) as Record<string, MulticallPoolStateExecuteResult>;
-
-        const result: PoolStatusResult = {};
-
-        for (const poolAddress in poolStateResult) {
-            result[poolAddress] = {
-                inRecoveryMode: poolStateResult[poolAddress].inRecoveryMode
-                    ? poolStateResult[poolAddress].inRecoveryMode
-                    : false,
-                isPaused: poolStateResult[poolAddress].pausedState
-                    ? poolStateResult[poolAddress].pausedState.paused
-                    : false,
-            };
-        }
-
-        return result;
     }
 }

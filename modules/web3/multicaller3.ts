@@ -56,6 +56,7 @@ export class Multicaller3 {
                 resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
                 set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
             } else {
+                console.log(`Multicall failed to get ${this.paths[i]}`);
                 set(returnObject, this.paths[i], undefined);
             }
             i++;
