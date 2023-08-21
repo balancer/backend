@@ -3,9 +3,10 @@ import { prisma } from '../../prisma/prisma-client';
 import { chunk, keyBy } from 'lodash';
 import { VotingGauge, VotingGaugesRepository } from './voting-gauges.repository';
 import { oldVeBalAddress, specialVotingGaugeAddresses } from './special-pools/special-voting-gauge-addresses';
-import { getVeVotingGauge, veGauges, vePools } from './special-pools/ve-pools';
+import { getVeVotingGauges, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../schema';
+import { Chain } from '@prisma/client';
 
 export class VeBalVotingListService {
     constructor(private votingGauges = new VotingGaugesRepository()) {}
@@ -27,12 +28,15 @@ export class VeBalVotingListService {
         poolIds = [...poolIds, ...Object.keys(vePools)];
 
         const pools = await this.getPoolsForVotingList(poolIds);
+        const poolsById = keyBy(pools, 'id');
 
-        // Adds voting gauge info to each pool
-        return pools.map((pool) => {
-            // Use hardcoded data for ve gauges
-            const veVotingGauge = getVeVotingGauge(pool.id);
-            const votingGauge = veVotingGauge || validVotingGaugesByPoolId[pool.id];
+        const allGauges = [...validGauges, ...getVeVotingGauges()];
+
+        // For each voting gauge returns a pool with its gauge info inside
+        return allGauges.map((votingGauge) => {
+            const pool = poolsById[votingGauge.stakingGauge!.staking.poolId];
+            // Only L2 networks have childGaugeAddress
+            const childGaugeAddress = pool.chain === Chain.MAINNET ? null : votingGauge.stakingGauge?.staking.address;
             const votingPool = {
                 id: pool.id,
                 chain: pool.chain,
@@ -50,6 +54,7 @@ export class VeBalVotingListService {
                     relativeWeightCap: votingGauge.relativeWeightCap,
                     isKilled: votingGauge.status !== 'ACTIVE',
                     addedTimestamp: votingGauge.addedTimestamp,
+                    childGaugeAddress,
                 },
             };
             return votingPool;
@@ -109,7 +114,10 @@ export class VeBalVotingListService {
                 stakingGauge: {
                     select: {
                         staking: {
-                            select: { poolId: true },
+                            select: {
+                                poolId: true,
+                                address: true,
+                            },
                         },
                     },
                 },

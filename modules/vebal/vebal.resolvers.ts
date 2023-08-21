@@ -16,7 +16,8 @@ const resolvers: Resolvers = {
             This endpoint is consumed by some partners
 
             - Aura (contact: ask solarcurve or alberto)
-            - Defilytica (contact: ask Xeonus)
+            - Paladin (contact: ask solarcurve or alberto)
+            - DeFilytica and Aura analytics(contact: ask Xeonus)
             - Maybe more (TBD)
 
             Schema changes would affect those partners so, in case we need it, it would be better to keep the current schema and create a new endpoint with a
