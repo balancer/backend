@@ -72,8 +72,8 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.ftm.tools',
-    rpcMaxBlockRange: 2000,
+    rpcUrl: 'https://rpc.fantom.network',
+    rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',
