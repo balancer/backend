@@ -4,9 +4,8 @@ import { getContractAt } from '../../web3/contract';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
-import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
 import { Multicaller } from '../../web3/multicaller';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
@@ -89,8 +88,13 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             include: { staking: true },
             where: { chain: networkContext.chain },
         });
+
+        console.log(`user-sync-staked-balances-${networkContext.chainId} got data from db.`);
+
         const latestBlock = await networkContext.provider.getBlockNumber();
+        console.log(`user-sync-staked-balances-${networkContext.chainId} got latest block.`);
         const gaugeAddresses = await gaugeSubgraphService.getAllGaugeAddresses();
+        console.log(`user-sync-staked-balances-${networkContext.chainId} got ${gaugeAddresses.length} gauges.`);
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
@@ -104,19 +108,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             return;
         }
 
-        const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, RewardsOnlyGaugeAbi);
-
-        // the multicall response will be merged into this object
-        let response: {
-            [gauge: string]: { [userAddress: string]: BigNumber };
-        } = {};
-
-        // we keep track of all user addresses to create them as entities in the db
-        const allUserAddress: string[] = [];
-
         /*
             we need to figure out which users have a changed balance on any gauge contract and update their balance,
-            therefore we check all deposit, withdraw and transfer events since the last synced block
+            therefore we check all transfer events since the last synced block
          */
 
         const events: ethers.providers.Log[] = [];
