@@ -1,5 +1,7 @@
 import express from 'express';
 import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
+import { prisma } from '../prisma/prisma-client';
 import { env } from '../app/env';
 import { configureWorkerRoutes } from './job-handlers';
 
@@ -11,7 +13,7 @@ export async function startWorker() {
         environment: `multichain-worker-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
-            // new Tracing.Integrations.Prisma({ client: prisma }),
+            new Tracing.Integrations.Prisma({ client: prisma }),
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
