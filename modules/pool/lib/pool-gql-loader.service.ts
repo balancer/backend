@@ -618,6 +618,7 @@ export class PoolGqlLoaderService {
                     case 'THIRD_PARTY_REWARD': {
                         currentThirdPartyAprRangeMin += minApr;
                         currentThirdPartyAprRangeMax += maxApr;
+                        break;
                     }
                     case 'SWAP_FEE': {
                         swapFeeApr += maxApr;
