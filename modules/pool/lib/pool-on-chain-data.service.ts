@@ -84,22 +84,32 @@ export class PoolOnChainDataService {
         const multicall = new Multicaller3(ComposableStablePoolAbi);
 
         filteredPools.forEach((pool) => {
-            multicall.call(`${pool.id}.inRecoveryMode`, pool.address, 'inRecoveryMode');
-            multicall.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
+            if (!(pool.type === 'ELEMENT')) {
+                multicall.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
+            }
+            if (
+                !(pool.type === 'STABLE' && pool.version === 1) && // exclude stable v1
+                !(pool.type === 'WEIGHTED' && pool.version === 1) && // exclude weighted v1
+                !(pool.type === 'PHANTOM_STABLE' && pool.version === 1) && // exclude old phantom stable v1
+                !(pool.type === 'LINEAR' && pool.version === 1) && // exclude old linear v1
+                pool.type !== 'LIQUIDITY_BOOTSTRAPPING' && // exclude all LBP
+                pool.type !== 'META_STABLE' && // exclude meta stable
+                pool.type !== 'ELEMENT' // exclude element
+            ) {
+                multicall.call(`${pool.id}.inRecoveryMode`, pool.address, 'inRecoveryMode');
+            }
         });
 
         const multicallResult = (await multicall.execute()) as Record<string, MulticallPoolStateExecuteResult>;
 
         const poolStatusResults: PoolStatusResult = {};
 
-        for (const poolAddress in multicallResult) {
-            poolStatusResults[poolAddress] = {
-                inRecoveryMode: multicallResult[poolAddress].inRecoveryMode
-                    ? multicallResult[poolAddress].inRecoveryMode
+        for (const pool of filteredPools) {
+            poolStatusResults[pool.id] = {
+                inRecoveryMode: multicallResult[pool.id].inRecoveryMode
+                    ? multicallResult[pool.id].inRecoveryMode
                     : false,
-                isPaused: multicallResult[poolAddress].pausedState
-                    ? multicallResult[poolAddress].pausedState.paused
-                    : false,
+                isPaused: multicallResult[pool.id].pausedState ? multicallResult[pool.id].pausedState.paused : false,
             };
         }
 
@@ -360,7 +370,7 @@ export class PoolOnChainDataService {
                     }
 
                     if (poolToken.index !== i) {
-                        throw `Pooltoken index mismatch! "poolToken.index": ${poolToken.index} vs "i":${i}`;
+                        throw `Pooltoken index mismatch! "poolToken.index": ${poolToken.index} vs "i": ${i} on pool ${pool.id}`;
                     }
 
                     const balance = formatFixed(poolTokens.balances[i], poolToken.token.decimals);
