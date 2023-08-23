@@ -9,6 +9,7 @@ node_modules/
 *-error.log
 **/generated/*
 
+debug.ts
 schema.ts
 debug.ts
 graphql_schema_generated*.ts
