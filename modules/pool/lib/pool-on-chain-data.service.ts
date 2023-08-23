@@ -14,7 +14,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isGyroEV2, isStablePool, isWeightedPoolV2 } from './pool-utils';
+import { isComposableStablePool, isGyroEV2, isGyroPool, isStablePool, isWeightedPoolV2 } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { networkContext } from '../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -208,6 +208,9 @@ export class PoolOnChainDataService {
                 multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
                 multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
                 multiPool.call(`${pool.id}.wrappedTokenRate`, pool.address, 'getWrappedTokenRate');
+            } else if (isGyroPool(pool)) {
+                multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
+                multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
             }
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
@@ -215,6 +218,8 @@ export class PoolOnChainDataService {
             }
 
             if (pool.type === 'META_STABLE') {
+                multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
+
                 const tokenAddresses = pool.tokens.map((token) => token.address);
 
                 tokenAddresses.forEach((token, i) => {
