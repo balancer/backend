@@ -104,25 +104,24 @@ export class PoolOnChainDataService {
 
         const poolStatusResults: PoolStatusResult = {};
 
-        for (const pool of filteredPools) {
-            poolStatusResults[pool.id] = {
-                inRecoveryMode: multicallResult[pool.id].inRecoveryMode
-                    ? multicallResult[pool.id].inRecoveryMode
-                    : false,
-                isPaused: multicallResult[pool.id].pausedState ? multicallResult[pool.id].pausedState.paused : false,
-            };
-        }
-
         const operations = [];
-
         for (const pool of filteredPools) {
-            if (poolStatusResults[pool.id] && pool.dynamicData) {
+            if (pool.dynamicData) {
+                let isPaused = false;
+                let isInRecoveryMode = false;
+
+                if (multicallResult[pool.id] && multicallResult[pool.id].inRecoveryMode) {
+                    isInRecoveryMode = multicallResult[pool.id].inRecoveryMode;
+                }
+                if (multicallResult[pool.id] && multicallResult[pool.id].pausedState) {
+                    isPaused = multicallResult[pool.id].pausedState.paused;
+                }
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: networkContext.chain } },
                         data: {
-                            isPaused: poolStatusResults[pool.id].isPaused,
-                            isInRecoveryMode: poolStatusResults[pool.id].inRecoveryMode,
+                            isPaused,
+                            isInRecoveryMode,
                         },
                     }),
                 );
