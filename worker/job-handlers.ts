@@ -48,7 +48,7 @@ async function runIfNotAlreadyRunning(
             await cronsMetricPublisher.publish(`${jobId}-error`);
         }
         console.log(`Error job ${jobId}-error`, error);
-        // next(error);
+        next(error);
     } finally {
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
@@ -59,9 +59,7 @@ async function runIfNotAlreadyRunning(
 export function configureWorkerRoutes(app: Express) {
     app.post('/', async (req, res, next) => {
         const job = req.body as { name: string; chain: string };
-        console.log(`Got message: ${job.name}-${job.chain}`);
         console.log(`Current jobqueue length: ${runningJobs.size}`);
-        console.log(`Current jobqueue content: ${new Array(...runningJobs).join(',')}`);
         const chainId = job.chain;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);

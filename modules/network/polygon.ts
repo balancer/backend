@@ -54,7 +54,9 @@ const polygonNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
+    rpcUrl: env.INFURA_API_KEY
+        ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://rpc.ankr.com/polygon',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {

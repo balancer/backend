@@ -59,7 +59,9 @@ const optimismNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
+    rpcUrl: env.INFURA_API_KEY
+        ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
     sanity: {
         projectId: '1g2ag2hb',

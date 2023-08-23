@@ -55,7 +55,9 @@ const arbitrumNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
+    rpcUrl: env.INFURA_API_KEY
+        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://rpc.ankr.com/arbitrum',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
