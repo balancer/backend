@@ -15,6 +15,7 @@ import { v1RootGaugeRecipients } from './special-pools/streamer-v1-gauges';
 import { Multicaller3 } from '../web3/multicaller3';
 import { networkContext } from '../network/network-context.service';
 
+
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 // Helper contract that wraps gaugeControllerAddress contract to allow checkpointing and getting the updated relative weight
 const gaugeControllerHelperAddress = mainnetNetworkConfig.data.gaugeControllerHelperAddress!;
@@ -275,7 +276,7 @@ export class VotingGaugesRepository {
         const multicaller = this.buildGaugeControllerHelperMulticaller();
         gaugeAddresses.forEach((address) =>
             multicaller.call(address, gaugeControllerHelperAddress, 'gauge_relative_weight', [address], false),
-        );
+
 
         const response = (await multicaller.execute()) as Record<string, BigNumber>;
 

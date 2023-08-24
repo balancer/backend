@@ -105,6 +105,7 @@ export class UserSyncWalletBalanceService {
 
         const fromBlock = syncStatus.blockNumber + 1;
         // as we use the erc20 transfer topic, we use a smaller block range than defined in the network context
+
         const toBlock =
             latestBlock - fromBlock > networkContext.data.rpcMaxBlockRange
                 ? fromBlock + networkContext.data.rpcMaxBlockRange
