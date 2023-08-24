@@ -14,7 +14,7 @@ const NON_CIRCULATING_ADDRESSES = [
 ];
 
 export async function beetsGetCirculatingSupply() {
-    const beetsContract = getContractAt(networkContext.data.beets.address, beetsAbi);
+    const beetsContract = getContractAt(networkContext.data.beets!.address, beetsAbi);
 
     let totalSupply = await beetsContract.totalSupply();
 

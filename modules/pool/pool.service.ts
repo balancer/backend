@@ -193,24 +193,12 @@ export class PoolService {
         const poolIds = result.map((item) => item.id);
         const blockNumber = await networkContext.provider.getBlockNumber();
 
-        const failedUpdates: string[] = [];
-        const successfulUpdates: string[] = [];
-
         const chunks = _.chunk(poolIds, 100);
 
         for (const chunk of chunks) {
             await this.poolOnChainDataService.updateOnChainStatus(chunk);
-            const { failed, success } = await this.poolOnChainDataService.updateOnChainData(
-                chunk,
-                networkContext.provider,
-                blockNumber,
-            );
-            failedUpdates.push(...failed);
-            successfulUpdates.push(...success);
+            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
         }
-
-        const totalUpdates = successfulUpdates.length + failedUpdates.length;
-        console.log(`Successful updates: ${successfulUpdates.length}/${totalUpdates}`);
     }
 
     public async updateOnChainStatusForPools(poolIds: string[]) {
@@ -225,7 +213,7 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 100);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainData(chunk, networkContext.provider, blockNumber);
+            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
         }
     }
 
@@ -234,7 +222,7 @@ export class PoolService {
         const timestamp = moment().subtract(5, 'minutes').unix();
         const poolIds = await balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
 
-        await this.poolOnChainDataService.updateOnChainData(poolIds, networkContext.provider, blockNumber);
+        await this.poolOnChainDataService.updateOnChainData(poolIds, blockNumber);
     }
 
     public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {

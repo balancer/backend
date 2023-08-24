@@ -41,6 +41,10 @@ export function capturesYield(pool: PoolWithTypeAndFactory) {
     return isWeightedPoolV2(pool) || isComposableStablePool(pool) || pool.type === 'META_STABLE' || isGyroEV2(pool);
 }
 
+export function isGyroPool(pool: PoolWithTypeAndFactory) {
+    return pool.type.includes('GYRO');
+}
+
 export function isGyroEV2(pool: PoolWithTypeAndFactory) {
     return pool.type === 'GYROE' && pool.version === 2;
 }

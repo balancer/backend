@@ -5,14 +5,13 @@ import {
     PutMetricAlarmCommand,
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../app/env';
-import { getCronMetricsPublisher } from '../modules/metrics/cron.metric';
 import { AllNetworkConfigs } from '../modules/network/network-config';
-import { DeploymentEnv } from '../modules/network/network-config-types';
+import { DeploymentEnv, WorkerJob } from '../modules/network/network-config-types';
 import { networkContext } from '../modules/network/network-context.service';
-import { WorkerJob } from './job-handlers';
 import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
 import { sleep } from '../modules/common/promise';
+import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 
 const ALARM_PREFIX = `CRON ALARM:`;
 
@@ -21,21 +20,24 @@ export async function createAlerts(chainId: string): Promise<void> {
 }
 
 async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
-    const cronsMetricPublisher = getCronMetricsPublisher(chainId);
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
 
+    const alarmNamesToPublish = jobs.map(
+        (cronJob) => `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`,
+    );
+
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
-    // delete all alarms
+    // delete alarms that are not in the current jobs array
     if (currentAlarms.MetricAlarms) {
-        const cronAlarms = currentAlarms.MetricAlarms.filter(
+        const currentAlarmsForChain = currentAlarms.MetricAlarms.filter(
             (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
         );
         const alarmNames: string[] = [];
-        for (const alarm of cronAlarms) {
-            if (alarm.AlarmName) {
+        for (const alarm of currentAlarmsForChain) {
+            if (alarm.AlarmName && !alarmNamesToPublish.includes(alarm.AlarmName)) {
                 alarmNames.push(alarm.AlarmName);
             }
         }
@@ -44,6 +46,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         }
     }
 
+    // update all other alarms
     for (const cronJob of jobs) {
         const alarmName = `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`;
 
@@ -98,6 +101,6 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
         await cloudWatchClient.send(putAlarmCommand);
         // rate limits on the AWS API: 3 requests / second
-        await sleep(500);
+        await sleep(1000);
     }
 }

@@ -19,7 +19,12 @@ import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
-    constructor(private readonly fbeetsAddress: string, private readonly fbeetsFarmId: string) {}
+    constructor(
+        private readonly fbeetsAddress: string,
+        private readonly fbeetsFarmId: string,
+        private readonly masterchefAddress: string,
+        private readonly excludedFarmIds: string[],
+    ) {}
 
     public async syncChangedStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
@@ -54,7 +59,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         }
 
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
-            networkContext.data.masterchef.address,
+            this.masterchefAddress,
             startBlock,
             endBlock,
         );
@@ -140,9 +145,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                 }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: farmUsers
-                        .filter(
-                            (farmUser) => !networkContext.data.masterchef.excludedFarmIds.includes(farmUser.pool!.id),
-                        )
+                        .filter((farmUser) => !this.excludedFarmIds.includes(farmUser.pool!.id))
                         .map((farmUser) => {
                             const pool = pools.find((pool) => pool.address === farmUser.pool?.pair);
 
@@ -174,7 +177,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         if (staking.type !== 'MASTER_CHEF' && staking.type !== 'FRESH_BEETS') {
             return;
         }
-        const masterchef: BeethovenxMasterChef = getContractAt(networkContext.data.masterchef.address, MasterChefAbi);
+        const masterchef: BeethovenxMasterChef = getContractAt(this.masterchefAddress, MasterChefAbi);
         const userInfo = await masterchef.userInfo(staking.id, userAddress);
         const amountStaked = formatFixed(userInfo[0], 18);
 
@@ -244,7 +247,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             }));
         })
             .flat()
-            .filter((item) => !networkContext.data.masterchef.excludedFarmIds.includes(item.farmId));
+            .filter((item) => !this.excludedFarmIds.includes(item.farmId));
     }
 
     private async loadAllSubgraphUsers(): Promise<FarmUserFragment[]> {

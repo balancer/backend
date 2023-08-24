@@ -333,8 +333,8 @@ export class SanityContentService implements ContentService {
 
 export function getSanityClient() {
     return SanityClient({
-        projectId: networkContext.data.sanity.projectId,
-        dataset: networkContext.data.sanity.dataset,
+        projectId: networkContext.data.sanity!.projectId,
+        dataset: networkContext.data.sanity!.dataset,
         apiVersion: '2021-12-15',
         token: env.SANITY_API_TOKEN,
         useCdn: false,

@@ -24,6 +24,7 @@ export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
 
     constructor(
+        private readonly reaperMultistratSubgraphUrl: string,
         private readonly linearPoolFactories: string[],
         private readonly linearPoolsFromErc4626Factory: string[],
         private readonly averageAPRAcrossLastNHarvests: number,
@@ -153,9 +154,7 @@ export class ReaperCryptAprService implements PoolAprService {
     }
 
     private async getMultiStrategyAprFromSubgraph(address: string): Promise<number> {
-        const baseUrl = networkContext.data.reaper.multistratAprSubgraphUrl;
-
-        const { data } = await axios.post<MultiStratQueryResponse>(baseUrl, {
+        const { data } = await axios.post<MultiStratQueryResponse>(this.reaperMultistratSubgraphUrl, {
             query: `query {
             vault(id: "${address}"){
               apr

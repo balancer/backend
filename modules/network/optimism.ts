@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
-import { NetworkConfig, NetworkData } from './network-config-types';
+import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { RocketPoolStakedEthAprService } from '../pool/lib/apr-data-sources/optimism/rocket-pool-staked-eth-apr.service';
 import { tokenService } from '../token/token.service';
 import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
@@ -59,9 +59,10 @@ const optimismNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`,
+    rpcUrl: env.INFURA_API_KEY
+        ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
-    beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     sanity: {
         projectId: '1g2ag2hb',
         dataset: 'production',
@@ -69,6 +70,7 @@ const optimismNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
         address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
@@ -116,9 +118,6 @@ const optimismNetworkData: NetworkData = {
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
         },
-    },
-    yearn: {
-        vaultsEndpoint: 'https://#/',
     },
     reaper: {
         linearPoolFactories: [
@@ -182,30 +181,34 @@ const optimismNetworkData: NetworkData = {
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
     contentService: new SanityContentService(),
-    provider: new ethers.providers.JsonRpcProvider(optimismNetworkData.rpcUrl),
+    provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new RocketPoolStakedEthAprService(tokenService, optimismNetworkData.rocket!.rEthContract),
         new WstethAprService(tokenService, optimismNetworkData.lido!.wstEthContract),
         new OvernightAprService(optimismNetworkData.overnight!.aprEndpoint, tokenService),
         new ReaperCryptAprService(
-            optimismNetworkData.reaper.linearPoolFactories,
-            optimismNetworkData.reaper.linearPoolIdsFromErc4626Factory,
-            optimismNetworkData.reaper.averageAPRAcrossLastNHarvests,
+            optimismNetworkData.reaper!.multistratAprSubgraphUrl,
+            optimismNetworkData.reaper!.linearPoolFactories,
+            optimismNetworkData.reaper!.linearPoolIdsFromErc4626Factory,
+            optimismNetworkData.reaper!.averageAPRAcrossLastNHarvests,
             optimismNetworkData.stader ? optimismNetworkData.stader.sFtmxContract : undefined,
             optimismNetworkData.lido ? optimismNetworkData.lido.wstEthContract : undefined,
         ),
-        new BeefyVaultAprService(optimismNetworkData.beefy.linearPools, tokenService),
+        new BeefyVaultAprService(optimismNetworkData.beefy!.linearPools, tokenService),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [
-            optimismNetworkData.beets.address,
-            optimismNetworkData.bal.address,
+            optimismNetworkData.beets!.address,
+            optimismNetworkData.bal!.address,
         ]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
     tokenPriceHandlers: [
-        new BeetsPriceHandlerService(),
+        new BeetsPriceHandlerService(
+            optimismNetworkData.beets!.address,
+            optimismNetworkData.beets!.beetsPriceProviderRpcUrl,
+        ),
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
@@ -222,7 +225,7 @@ export const optimismNetworkConfig: NetworkConfig = {
     workerJobs: [
         {
             name: 'update-token-prices',
-            interval: every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'update-liquidity-for-inactive-pools',
@@ -232,19 +235,19 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-liquidity-for-active-pools',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'update-pool-apr',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-new-pools-from-subgraph',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-sanity-pool-data',
@@ -276,19 +279,19 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-changed-pools',
-            interval: every(15, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'seconds') : every(15, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(10, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'seconds') : every(10, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
         {
             name: 'user-sync-staked-balances',
-            interval: every(10, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'seconds') : every(10, 'seconds'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
@@ -312,7 +315,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-vebal-balances',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-vebal-totalSupply',

@@ -69,7 +69,7 @@ export class GaugeAprService implements PoolAprService {
 
                 // apply vebal boost for BAL rewards on v2 gauges
                 if (
-                    rewardToken.tokenAddress === networkContext.data.bal.address &&
+                    rewardToken.tokenAddress === networkContext.data.bal!.address &&
                     preferredStaking.gauge.version === 2
                 ) {
                     const aprItemId = `${pool.id}-${rewardTokenDefinition.symbol}-apr`;

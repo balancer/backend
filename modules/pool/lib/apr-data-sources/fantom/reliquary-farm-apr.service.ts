@@ -10,6 +10,8 @@ import { PoolAprService } from '../../../pool-types';
 import { networkContext } from '../../../../network/network-context.service';
 
 export class ReliquaryFarmAprService implements PoolAprService {
+    constructor(private readonly beetsAddress: string) {}
+
     public getAprServiceName(): string {
         return 'ReliquaryFarmAprService';
     }
@@ -38,7 +40,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const pricePerShare = totalLiquidity / totalShares;
 
-            const beetsPrice = tokenService.getPriceForToken(tokenPrices, networkContext.data.beets.address);
+            const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress);
             const farmBeetsPerYear = parseFloat(farm.beetsPerSecond) * secondsPerYear;
             const beetsValuePerYear = beetsPrice * farmBeetsPerYear;
 

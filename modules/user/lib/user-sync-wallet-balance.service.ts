@@ -92,7 +92,12 @@ export class UserSyncWalletBalanceService {
             select: { id: true, address: true },
             where: { chain: networkContext.chain },
         });
+
         const poolAddresses = response.map((item) => item.address);
+
+        if (networkContext.isFantomNetwork) {
+            poolAddresses.push(networkContext.data.fbeets!.address);
+        }
 
         if (!syncStatus) {
             throw new Error('UserWalletBalanceService: syncBalances called before initBalances');
@@ -100,20 +105,44 @@ export class UserSyncWalletBalanceService {
 
         const fromBlock = syncStatus.blockNumber + 1;
         // as we use the erc20 transfer topic, we use a smaller block range than defined in the network context
-        const toBlock = latestBlock - fromBlock > 100 ? fromBlock + 100 : latestBlock;
+
+        const toBlock =
+            latestBlock - fromBlock > networkContext.data.rpcMaxBlockRange
+                ? fromBlock + networkContext.data.rpcMaxBlockRange
+                : latestBlock;
 
         // no new blocks have been minted, needed for slow networks
         if (fromBlock > toBlock) {
             return;
         }
 
-        //fetch all transfer events for the block range
-        const events = await networkContext.provider.getLogs({
-            //ERC20 Transfer topic
-            topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-            fromBlock,
-            toBlock,
-        });
+        const events: ethers.providers.Log[] = [];
+
+        const logPromises: Promise<ethers.providers.Log[]>[] = [];
+
+        console.log(
+            `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools`,
+        );
+        for (const poolAddress of poolAddresses) {
+            logPromises.push(
+                networkContext.provider.getLogs({
+                    //ERC20 Transfer topic
+                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
+                    fromBlock,
+                    toBlock,
+                    address: poolAddress,
+                }),
+            );
+        }
+
+        const allResponses = await Promise.all(logPromises);
+        console.log(
+            `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools done.`,
+        );
+
+        for (const response of allResponses) {
+            events.push(...response);
+        }
 
         const relevantERC20Addresses = poolAddresses;
 
@@ -137,6 +166,10 @@ export class UserSyncWalletBalanceService {
                 })
                 .flat(),
             (entry) => entry.erc20Address + entry.userAddress,
+        );
+
+        console.log(
+            `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} got ${balancesToFetch.length} balances to fetch.`,
         );
 
         if (balancesToFetch.length === 0) {

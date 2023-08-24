@@ -15,9 +15,10 @@ import { time } from 'console';
 export class BeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'BeetsPriceHandlerService';
+    constructor(private readonly beetsAddress: string, private readonly beetsRpcProvider: string) {}
 
     public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return [networkContext.data.beets.address];
+        return [this.beetsAddress];
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
@@ -41,7 +42,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const vaultContract = new Contract(
             VaultFtmAddress,
             VaultAbi,
-            new ethers.providers.JsonRpcProvider(networkContext.data.beetsPriceProviderRpcUrl),
+            new ethers.providers.JsonRpcProvider(this.beetsRpcProvider),
         );
         const funds: FundManagement = {
             sender: AddressZero,
@@ -72,11 +73,11 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
 
         await prisma.prismaTokenCurrentPrice.upsert({
             where: {
-                tokenAddress_chain: { tokenAddress: networkContext.data.beets.address, chain: networkContext.chain },
+                tokenAddress_chain: { tokenAddress: this.beetsAddress, chain: networkContext.chain },
             },
             update: { price: beetsPrice },
             create: {
-                tokenAddress: networkContext.data.beets.address,
+                tokenAddress: this.beetsAddress,
                 chain: networkContext.chain,
                 timestamp,
                 price: beetsPrice,
@@ -86,14 +87,14 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         await prisma.prismaTokenPrice.upsert({
             where: {
                 tokenAddress_timestamp_chain: {
-                    tokenAddress: networkContext.data.beets.address,
+                    tokenAddress: this.beetsAddress,
                     timestamp,
                     chain: networkContext.chain,
                 },
             },
             update: { price: beetsPrice, close: beetsPrice },
             create: {
-                tokenAddress: networkContext.data.beets.address,
+                tokenAddress: this.beetsAddress,
                 chain: networkContext.chain,
                 timestamp,
                 price: beetsPrice,
@@ -104,6 +105,6 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
-        return [networkContext.data.beets.address];
+        return [this.beetsAddress];
     }
 }
