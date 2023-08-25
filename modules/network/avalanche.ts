@@ -217,13 +217,5 @@ export const avalancheNetworkConfig: NetworkConfig = {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
-        {
-            name: 'sync-vebal-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
-        },
-        {
-            name: 'sync-vebal-totalSupply',
-            interval: every(5, 'minutes'),
-        },
     ],
 };
