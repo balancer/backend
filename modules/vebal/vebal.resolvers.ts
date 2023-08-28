@@ -9,9 +9,14 @@ const resolvers: Resolvers = {
             const accountAddress = getRequiredAccountAddress(context);
             return veBalService.getVeBalUserBalance(accountAddress);
         },
+        veBalGetUser: async (parent, {}, context) => {
+            const accountAddress = getRequiredAccountAddress(context);
+            return veBalService.getVeBalUserData(accountAddress);
+        },
         veBalGetTotalSupply: async (parent, {}, context) => {
             return veBalService.getVeBalTotalSupply();
         },
+
         /*
             This endpoint is consumed by some partners
 

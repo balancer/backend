@@ -10,6 +10,7 @@ import ERC20Abi from '../web3/abi/ERC20.json';
 import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
 import { getContractAt } from '../web3/contract';
 import { AmountHumanReadable } from '../common/global-types';
+import { GqlVeBalUserData } from '../../schema';
 
 export class VeBalService {
     public async getVeBalUserBalance(userAddress: string): Promise<AmountHumanReadable> {
@@ -22,6 +23,34 @@ export class VeBalService {
             }
         }
         return '0.0';
+    }
+
+    public async getVeBalUserData(userAddress: string): Promise<GqlVeBalUserData> {
+        let rank = 1;
+        let balance = '0.0';
+        if (networkContext.data.veBal) {
+            const veBalUsers = await prisma.prismaVeBalUserBalance.findMany({
+                where: { chain: networkContext.chain },
+                orderBy: { balance: 'desc' },
+            });
+
+            for (const user of veBalUsers) {
+                if (user.userAddress === userAddress) {
+                    balance = user.balance;
+                    break;
+                }
+                rank++;
+            }
+        }
+        if (balance !== '0.0') {
+            return {
+                balance,
+                rank,
+            };
+        }
+        return {
+            balance: '0.0',
+        };
     }
 
     public async getVeBalTotalSupply(): Promise<AmountHumanReadable> {
