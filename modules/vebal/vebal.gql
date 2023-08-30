@@ -2,11 +2,17 @@ extend type Query {
     veBalGetUserBalance: AmountHumanReadable!
     veBalGetTotalSupply: AmountHumanReadable!
     veBalGetVotingList: [GqlVotingPool!]!
+    veBalGetUser: GqlVeBalUserData!
 }
 
 extend type Mutation {
     veBalSyncAllUserBalances: String!
     veBalSyncTotalSupply: String!
+}
+
+type GqlVeBalUserData {
+    balance: AmountHumanReadable!
+    rank: Int
 }
 
 type GqlVotingPool {

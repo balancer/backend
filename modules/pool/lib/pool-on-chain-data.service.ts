@@ -88,10 +88,6 @@ export class PoolOnChainDataService {
                 multicall.call(`${pool.id}.pausedState`, pool.address, 'getPausedState');
             }
             if (
-                !(pool.type === 'STABLE' && pool.version === 1) && // exclude stable v1
-                !(pool.type === 'WEIGHTED' && pool.version === 1) && // exclude weighted v1
-                !(pool.type === 'PHANTOM_STABLE' && pool.version === 1) && // exclude old phantom stable v1
-                !(pool.type === 'LINEAR' && pool.version === 1) && // exclude old linear v1
                 pool.type !== 'LIQUIDITY_BOOTSTRAPPING' && // exclude all LBP
                 pool.type !== 'META_STABLE' && // exclude meta stable
                 pool.type !== 'ELEMENT' // exclude element
