@@ -21,7 +21,10 @@ interface ChildChainInfo {
 }
 
 export class GaugeStakingService implements PoolStakingService {
-    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService, private readonly balAddress: string) {}
+    private balAddress: string;
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService, balAddress: string) {
+        this.balAddress = balAddress.toLowerCase();
+    }
     public async syncStakingForPools(): Promise<void> {
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -124,7 +127,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 }
                             } else {
                                 // we can't get BAL rate from the reward data but got it from the inflation_rate call which set the rewardToken.rate
-                                if (tokenAddress.toLowerCase() === this.balAddress.toLowerCase()) {
+                                if (tokenAddress === this.balAddress) {
                                     rewardRate = rewardToken.rate ? rewardToken.rate : '0.0';
                                 } else {
                                     const gaugeV2 = getContractAt(gauge.id, childChainGaugeV2Abi);

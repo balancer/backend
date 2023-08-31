@@ -57,7 +57,7 @@ const gnosisNetworkData: NetworkData = {
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
-        address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
+        address: '0x7ef541e2a22058048904fe5744f9c7e4c57af717',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
