@@ -54,7 +54,9 @@ const zkevmNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://zkevm-rpc.com',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
