@@ -61,7 +61,7 @@ const arbitrumNetworkData: NetworkData = {
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
-        address: '0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8',
+        address: '0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',

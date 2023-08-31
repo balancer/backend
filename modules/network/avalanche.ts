@@ -59,7 +59,7 @@ const avalancheNetworkData: NetworkData = {
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
-        address: '0xE15bCB9E0EA69e6aB9FA080c4c4A5632896298C3',
+        address: '0xe15bcb9e0ea69e6ab9fa080c4c4a5632896298c3',
     },
     veBal: {
         address: '',

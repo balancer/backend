@@ -58,7 +58,7 @@ const zkevmNetworkData: NetworkData = {
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
-        address: '0x120eF59b80774F02211563834d8E3b72cb1649d6',
+        address: '0x120ef59b80774f02211563834d8e3b72cb1649d6',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
