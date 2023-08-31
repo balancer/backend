@@ -21,7 +21,10 @@ interface ChildChainInfo {
 }
 
 export class GaugeStakingService implements PoolStakingService {
-    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService, private readonly balAddress: string) {}
+    private balAddress: string;
+    constructor(private readonly gaugeSubgraphService: GaugeSubgraphService, balAddress: string) {
+        this.balAddress = balAddress.toLowerCase();
+    }
     public async syncStakingForPools(): Promise<void> {
         const pools = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain },
@@ -114,7 +117,7 @@ export class GaugeStakingService implements PoolStakingService {
                             let periodFinish: number;
 
                             if (gaugeVersion === 1) {
-                                const gaugeV1 = await getContractAt(gauge.id, childChainGaugeV1Abi);
+                                const gaugeV1 = getContractAt(gauge.id, childChainGaugeV1Abi);
                                 const rewardData = await gaugeV1.reward_data(tokenAddress);
 
                                 periodFinish = rewardData[2];
@@ -127,7 +130,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 if (tokenAddress === this.balAddress) {
                                     rewardRate = rewardToken.rate ? rewardToken.rate : '0.0';
                                 } else {
-                                    const gaugeV2 = await getContractAt(gauge.id, childChainGaugeV2Abi);
+                                    const gaugeV2 = getContractAt(gauge.id, childChainGaugeV2Abi);
                                     const rewardData = await gaugeV2.reward_data(tokenAddress);
 
                                     periodFinish = parseFloat(formatUnits(rewardData[1], 0));
@@ -164,12 +167,20 @@ export class GaugeStakingService implements PoolStakingService {
 
     async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        const multicall = new Multicaller3(childChainGaugeV2Abi);
+        const childChainAbi = networkContext.chain === 'MAINNET'
+            ? 'function inflation_rate() view returns (uint256)'
+            : 'function inflation_rate(uint256 week) view returns (uint256)';
+        const multicall = new Multicaller3([childChainAbi]);
 
         let response: { [gaugeAddress: string]: ChildChainInfo } = {};
 
         gaugeAddresses.forEach((address) => {
-            multicall.call(address, address, 'inflation_rate', [currentWeek], true);
+            // Only L2 gauges have the inflation_rate with a week parameter
+            if (networkContext.chain === 'MAINNET') {
+                multicall.call(address, address, 'inflation_rate', [], true);
+            } else {
+                multicall.call(address, address, 'inflation_rate', [currentWeek], true);
+            }
         });
 
         const childChainData = (await multicall.execute()) as Record<string, string | undefined>;

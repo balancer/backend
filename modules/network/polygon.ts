@@ -60,7 +60,7 @@ const polygonNetworkData: NetworkData = {
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
-        address: '0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3',
+        address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
