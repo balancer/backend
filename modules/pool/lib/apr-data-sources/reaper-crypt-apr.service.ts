@@ -22,6 +22,7 @@ type MultiStratQueryResponse = {
 
 export class ReaperCryptAprService implements PoolAprService {
     private readonly APR_PERCENT_DIVISOR = 10_000;
+    private readonly APR_PERCENT_DIVISOR_SUBGRAPH = 100;
 
     constructor(
         private readonly reaperMultistratSubgraphUrl: string,
@@ -84,6 +85,10 @@ export class ReaperCryptAprService implements PoolAprService {
             const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;
             const totalLiquidity = pool.dynamicData!.totalLiquidity;
             let apr = totalLiquidity > 0 ? cryptApr * (poolWrappedLiquidity / totalLiquidity) : 0;
+
+            if (pool.id === '0xf970659221bb9d01b615321b63a26e857ffc030b0000000000000000000000e9') {
+                console.log(`found`);
+            }
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: itemId, chain: networkContext.chain } },
@@ -163,7 +168,7 @@ export class ReaperCryptAprService implements PoolAprService {
         });
 
         if (data.data.vault && data.data.vault.apr) {
-            return parseFloat(data.data.vault.apr);
+            return parseFloat(data.data.vault.apr) / this.APR_PERCENT_DIVISOR_SUBGRAPH;
         }
         return 0;
     }
