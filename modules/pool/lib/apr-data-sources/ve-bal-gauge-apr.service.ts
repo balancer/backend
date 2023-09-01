@@ -62,14 +62,14 @@ export class GaugeAprService implements PoolAprService {
                 const rewardTokenValuePerYear = tokenPrice * rewardTokenPerYear;
                 let rewardApr = gaugeTvl > 0 ? rewardTokenValuePerYear / gaugeTvl : 0;
 
-                const isThirdPartyApr = !this.primaryTokens.includes(tokenAddress);
+                const isThirdPartyApr = !this.primaryTokens.includes(tokenAddress.toLowerCase());
                 if (isThirdPartyApr) {
                     thirdPartyApr += rewardApr;
                 }
 
                 // apply vebal boost for BAL rewards on v2 gauges
                 if (
-                    rewardToken.tokenAddress === networkContext.data.bal!.address &&
+                    rewardToken.tokenAddress.toLowerCase() === networkContext.data.bal!.address.toLowerCase() &&
                     preferredStaking.gauge.version === 2
                 ) {
                     const aprItemId = `${pool.id}-${rewardTokenDefinition.symbol}-apr`;
