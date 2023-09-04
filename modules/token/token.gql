@@ -79,6 +79,7 @@ type GqlTokenDynamicData {
 enum GqlTokenChartDataRange {
     SEVEN_DAY
     THIRTY_DAY
+    NINETY_DAY
 }
 
 type GqlTokenCandlestickChartDataItem {

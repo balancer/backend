@@ -245,10 +245,17 @@ export class TokenPriceService {
         return !!response;
     }
 
-    private getStartTimestampFromRange(range: GqlTokenChartDataRange) {
-        return moment()
-            .subtract(range === 'SEVEN_DAY' ? 7 : 30, 'days')
-            .unix();
+    private getStartTimestampFromRange(range: GqlTokenChartDataRange): number {
+        switch (range) {
+            case 'SEVEN_DAY':
+                return moment().subtract(30, 'days').unix();
+            case 'THIRTY_DAY':
+                return moment().subtract(30, 'days').unix();
+            case 'NINETY_DAY':
+                return moment().subtract(90, 'days').unix();
+            default:
+                return moment().subtract(7, 'days').unix();
+        }
     }
 
     public async purgeOldTokenPrices(): Promise<number> {
