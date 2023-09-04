@@ -248,7 +248,7 @@ export class TokenPriceService {
     private getStartTimestampFromRange(range: GqlTokenChartDataRange): number {
         switch (range) {
             case 'SEVEN_DAY':
-                return moment().subtract(30, 'days').unix();
+                return moment().subtract(7, 'days').unix();
             case 'THIRTY_DAY':
                 return moment().subtract(30, 'days').unix();
             case 'NINETY_DAY':
