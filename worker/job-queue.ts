@@ -10,9 +10,10 @@ class WokerQueue {
     public async sendWithInterval(json: string, intervalMs: number, deDuplicationId?: string): Promise<void> {
         try {
             if (env.WORKER_QUEUE_URL.match(/localhost/)) {
-                return this.sendLocalMessage(json );
+                await this.sendLocalMessage(json );
+            } else {
+                await this.sendMessage(json, deDuplicationId);
             }
-            await this.sendMessage(json, deDuplicationId);
             console.log(`Sent message to schedule job on queue ${env.WORKER_QUEUE_URL}: ${json}`);
         } catch (error) {
             console.log(error);
