@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import * as Sentry from '@sentry/node';
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
@@ -8,6 +9,9 @@ class WokerQueue {
 
     public async sendWithInterval(json: string, intervalMs: number, deDuplicationId?: string): Promise<void> {
         try {
+            if (env.WORKER_QUEUE_URL.match(/localhost/)) {
+                return this.sendLocalMessage(json );
+            }
             await this.sendMessage(json, deDuplicationId);
             console.log(`Sent message to schedule job on queue ${env.WORKER_QUEUE_URL}: ${json}`);
         } catch (error) {
@@ -18,6 +22,14 @@ class WokerQueue {
                 this.sendWithInterval(json, intervalMs, deDuplicationId);
             }, intervalMs);
         }
+    }
+
+    public async sendLocalMessage(json: string): Promise<void> {
+        await axios.post(env.WORKER_QUEUE_URL, json, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     }
 
     public async sendMessage(json: string, deDuplicationId?: string, delaySeconds?: number): Promise<void> {
