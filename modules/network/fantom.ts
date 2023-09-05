@@ -113,25 +113,24 @@ const fantomNetworkData: NetworkData = {
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
     },
     balancer: {
-        vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+        vault: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
         composableStablePoolFactories: [
-            '0x5AdAF6509BCEc3219455348AC45d6D3261b1A990',
-            '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
-            '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
-            '0x911566c808bF00acB200B418564440A2Af177548',
-            '0x5c3094982cF3c97A06b7d62A6f7669F14a199B19',
-            '0x23F03a4fb344d8B98833d2ACe093cc305E03474f',
+            '0x5adaf6509bcec3219455348ac45d6d3261b1a990',
+            '0xb384a86f2fd7788720db42f9daa60fc07ecbea06',
+            '0x44814e3a603bb7f1198617995c5696c232f6e8ed',
+            '0x911566c808bf00acb200b418564440a2af177548',
+            '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
+            '0x23f03a4fb344d8b98833d2ace093cc305e03474f',
         ],
         weightedPoolV2Factories: [
-            '0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb',
-            '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
-            '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
-            '0xd678b6Acd834Cc969Bb19Ce82727f2a541fb7941',
-            '0xb841Df73861E65E6D61a80F503F095a91ce75e15',
+            '0xb2ed595afc445b47db7043bec25e772bf0fa1fbb',
+            '0x8ea1c497c16726e097f62c8c9fbd944143f27090',
+            '0xea87f3dffc679035653c0fba70e7bfe46e3fb733',
+            '0xd678b6acd834cc969bb19ce82727f2a541fb7941',
+            '0xb841df73861e65e6d61a80f503f095a91ce75e15',
         ],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        poolDataQueryContract: '0x9642Dbba0753B1518022d7617Be079f0d7EFD165',
         factoriesWithpoolSpecificProtocolFeePercentagesProvider: [
             '0xb841df73861e65e6d61a80f503f095a91ce75e15',
             '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
@@ -140,7 +139,7 @@ const fantomNetworkData: NetworkData = {
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
-        address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
+        address: '0x8166994d9ebbe5829ec86bd81258149b87facfd3',
         excludedFarmIds: [
             '34', //OHM bonding farm
             '28', //OHM bonding farm
@@ -149,7 +148,7 @@ const fantomNetworkData: NetworkData = {
         ],
     },
     reliquary: {
-        address: '0x1ed6411670c709F4e163854654BD52c74E66D7eC',
+        address: '0x1ed6411670c709f4e163854654bd52c74e66d7ec',
         excludedFarmIds: [
             '0', // test with dummy token
             '1', // test with fresh beets pool BPT
@@ -176,7 +175,7 @@ const fantomNetworkData: NetworkData = {
         vaultsEndpoint: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
     },
     copper: {
-        proxyAddress: '0xbC8a71C75ffbd2807c021F4F81a8832392dEF93c',
+        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
     },
     reaper: {
         linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
