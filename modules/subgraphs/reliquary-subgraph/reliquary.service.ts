@@ -73,7 +73,7 @@ export class ReliquarySubgraphService {
             const response = await this.sdk.ReliquaryRelics({
                 where: { ...where, relicId_gt: id },
                 block,
-                orderBy: Relic_OrderBy.id,
+                orderBy: Relic_OrderBy.relicId,
                 orderDirection: OrderDirection.asc,
                 first: limit,
             });
