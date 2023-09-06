@@ -16,6 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { env } from '../../app/env';
+import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 
 const gnosisNetworkData: NetworkData = {
     chain: {
@@ -92,6 +93,32 @@ const gnosisNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
+    ibAprConfig: {
+        defaultHandlers: {
+            wstETH: {
+                tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
+        },
+    },
+    datastudio: {
+        main: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+        canary: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+    },
     monitoring: {
         main: {
             alarmTopicArn: 'arn:aws:sns:ca-central-1:118697801881:api_alarms',
@@ -110,6 +137,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: gnosisNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
+        new IbTokensAprService(gnosisNetworkData.ibAprConfig),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(gnosisNetworkData.balancer.swapProtocolFeePercentage),

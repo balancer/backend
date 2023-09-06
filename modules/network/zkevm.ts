@@ -1,7 +1,6 @@
 import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { tokenService } from '../token/token.service';
-import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
@@ -17,6 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
+import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 
 const zkevmNetworkData: NetworkData = {
     chain: {
@@ -99,6 +99,47 @@ const zkevmNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
+    ibAprConfig: {
+        ovix: {
+            tokens: {
+                USDT: {
+                    yieldAddress: '0xad41c77d99e282267c1492cdefe528d7d5044253',
+                    wrappedAddress: '0x550d3bb1f77f97e4debb45d4f817d7b9f9a1affb',
+                },
+                USDC: {
+                    yieldAddress: '0x68d9baa40394da2e2c1ca05d30bf33f52823ee7b',
+                    wrappedAddress: '0x3a6789fc7c05a83cfdff5d2f9428ad9868b4ff85',
+                },
+            },
+        },
+        defaultHandlers: {
+            wstETH: {
+                tokenAddress: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
+        },
+    },
+    beefy: {
+        linearPools: [''],
+    },
+    datastudio: {
+        main: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+        canary: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+    },
     monitoring: {
         main: {
             alarmTopicArn: 'arn:aws:sns:ca-central-1:118697801881:api_alarms',
@@ -114,6 +155,7 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
+        new IbTokensAprService(zkevmNetworkData.ibAprConfig),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),

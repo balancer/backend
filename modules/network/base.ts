@@ -1,9 +1,6 @@
 import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { tokenService } from '../token/token.service';
-import { WstethAprService } from '../pool/lib/apr-data-sources/optimism/wsteth-apr.service';
-import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt-apr.service';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
@@ -18,6 +15,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
+import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 
 const baseNetworkData: NetworkData = {
     chain: {
@@ -76,6 +74,17 @@ const baseNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
+    ibAprConfig: {
+        defaultHandlers: {
+            cbETH: {
+                tokenAddress: '0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22',
+                sourceUrl: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
+                path: 'apy',
+                scale: 1,
+                isIbYield: true,
+            },
+        },
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 2,
@@ -95,10 +104,6 @@ const baseNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    lido: {
-        wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '',
-    },
     monitoring: {
         main: {
             alarmTopicArn: 'arn:aws:sns:ca-central-1:118697801881:api_alarms',
@@ -114,7 +119,7 @@ export const baseNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: baseNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new WstethAprService(tokenService, baseNetworkData.lido!.wstEthContract),
+        new IbTokensAprService(baseNetworkData.ibAprConfig),
         new BoostedPoolAprService(),
         new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(gaugeSubgraphService, tokenService, [baseNetworkData.bal!.address]),

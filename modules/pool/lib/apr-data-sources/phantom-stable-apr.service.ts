@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
+import { PrismaPoolWithTokens, prismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { collectsYieldFee } from '../pool-utils';
 import { networkContext } from '../../../network/network-context.service';
@@ -9,10 +9,15 @@ export class PhantomStableAprService implements PoolAprService {
         return 'PhantomStableAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
+    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const phantomStablePools = pools.filter((pool) => pool.type === 'PHANTOM_STABLE');
 
-        for (const pool of phantomStablePools) {
+        const phantomStablePoolsExpanded = await prisma.prismaPool.findMany({
+            ...prismaPoolWithExpandedNesting,
+            where: { chain: networkContext.chain, id: { in: phantomStablePools.map((pool) => pool.id) } },
+        });
+
+        for (const pool of phantomStablePoolsExpanded) {
             const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
                 ? parseFloat(pool.dynamicData.protocolYieldFee)
                 : networkContext.data.balancer.yieldProtocolFeePercentage;

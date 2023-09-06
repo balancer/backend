@@ -1,6 +1,6 @@
 import { Prisma, PrismaToken, PrismaTokenPrice, PrismaTokenTypeOption } from '@prisma/client';
 
-const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
+export const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: { tokens: true },
 });
 

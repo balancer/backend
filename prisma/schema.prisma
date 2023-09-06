@@ -345,6 +345,16 @@ enum PrismaPoolAprItemGroup {
     OVERNIGHT
     REAPER
     YEARN
+    IDLE
+    TRANCHESS
+    GEARBOX
+    AAVE
+    ANKR
+    TESSERA
+    TETU
+    OVIX
+    EULER
+    DEFAULT
 }
 
 model PrismaPoolCategory {

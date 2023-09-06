@@ -6,6 +6,7 @@ import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
+import { AaveAprConfig, IbAprConfig } from './apr-config-types';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -105,6 +106,7 @@ export interface NetworkData {
         address: string;
         excludedFarmIds: string[];
     };
+    ibAprConfig: IbAprConfig;
     reliquary?: {
         address: string;
         excludedFarmIds: string[];
@@ -112,17 +114,8 @@ export interface NetworkData {
     copper?: {
         proxyAddress: string;
     };
-    reaper?: {
-        linearPoolFactories: string[];
-        linearPoolIdsFromErc4626Factory: string[];
-        averageAPRAcrossLastNHarvests: number;
-        multistratAprSubgraphUrl: string;
-    };
     beefy?: {
         linearPools: string[];
-    };
-    yearn?: {
-        vaultsEndpoint: string;
     };
     lido?: {
         wstEthContract: string;

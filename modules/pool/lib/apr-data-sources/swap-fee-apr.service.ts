@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
+import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { networkContext } from '../../../network/network-context.service';
@@ -12,10 +12,17 @@ export class SwapFeeAprService implements PoolAprService {
         return 'SwapFeeAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
+    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const operations: any[] = [];
 
-        for (const pool of pools) {
+        const poolsExpanded = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain, id: { in: pools.map((pool) => pool.id) } },
+            include: {
+                dynamicData: true,
+            },
+        });
+
+        for (const pool of poolsExpanded) {
             if (pool.dynamicData) {
                 const apr =
                     pool.dynamicData.totalLiquidity > 0

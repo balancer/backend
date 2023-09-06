@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 import { prisma } from '../../../prisma/prisma-client';
-import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
+import { poolWithTokens } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -15,7 +15,7 @@ export class PoolAprUpdaterService {
 
     public async updatePoolAprs() {
         const pools = await prisma.prismaPool.findMany({
-            ...prismaPoolWithExpandedNesting,
+            ...poolWithTokens,
             where: { chain: networkContext.chain },
         });
 
