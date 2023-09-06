@@ -1,7 +1,7 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
-import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
+import { PrismaPoolWithExpandedNesting, PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { reliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
@@ -16,16 +16,34 @@ export class ReliquaryFarmAprService implements PoolAprService {
         return 'ReliquaryFarmAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
+    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const allSubgraphFarms = await reliquarySubgraphService.getAllFarms({});
         const filteredFarms = allSubgraphFarms.filter(
             (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
 
+        const expandedReliquaryPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain, id: { in: pools.map((pool) => pool.id) } },
+            include: {
+                dynamicData: true,
+                staking: {
+                    include: {
+                        reliquary: {
+                            include: {
+                                levels: {
+                                    orderBy: { level: 'asc' },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
         const tokenPrices = await tokenService.getTokenPrices();
         const operations: any[] = [];
 
-        for (const pool of pools) {
+        for (const pool of expandedReliquaryPools) {
             const subgraphFarm = filteredFarms.find((farm) => isSameAddress(pool.address, farm.poolTokenAddress));
             let farm;
             for (const stake of pool.staking) {

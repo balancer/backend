@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../../pool-types';
-import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
+import { PrismaPoolWithExpandedNesting, PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
 import axios from 'axios';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
@@ -15,13 +15,28 @@ export class SpookySwapAprService implements PoolAprService {
         return 'SpookySwapAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
+    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const xBooBaseApr = await liquidStakedBaseAprService.getXBooBaseApr();
 
+        const expandedSpookyPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain, id: { in: pools.map((pool) => pool.id) } },
+            include: {
+                dynamicData: true,
+                linearData: true,
+                tokens: {
+                    orderBy: { index: 'asc' },
+                    include: {
+                        dynamicData: true,
+                        token: true,
+                    },
+                },
+            },
+        });
+
         let operations: any[] = [];
 
-        for (const pool of pools) {
+        for (const pool of expandedSpookyPools) {
             if (
                 !pool.linearData ||
                 !pool.dynamicData ||
