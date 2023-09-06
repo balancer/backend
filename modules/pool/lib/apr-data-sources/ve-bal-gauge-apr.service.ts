@@ -92,6 +92,24 @@ export class GaugeAprService implements PoolAprService {
                     const aprItemId = `${pool.id}-${rewardTokenDefinition.symbol}-apr`;
                     const aprRangeId = `${pool.id}-bal-apr-range`;
 
+                    const itemData = {
+                        id: aprItemId,
+                        chain: networkContext.chain,
+                        poolId: pool.id,
+                        title: `${rewardTokenDefinition.symbol} reward APR`,
+                        apr: 0,
+                        type: PrismaPoolAprType.NATIVE_REWARD,
+                        group: null,
+                    };
+
+                    const rangeData = {
+                        id: aprRangeId,
+                        chain: networkContext.chain,
+                        aprItemId: aprItemId,
+                        min: rewardApr,
+                        max: rewardApr * this.MAX_VEBAL_BOOST,
+                    };
+
                     operations.push(
                         prisma.prismaPoolAprItem.upsert({
                             where: {
@@ -100,18 +118,8 @@ export class GaugeAprService implements PoolAprService {
                                     chain: networkContext.chain,
                                 },
                             },
-                            update: {
-                                apr: 0,
-                            },
-                            create: {
-                                id: aprItemId,
-                                chain: networkContext.chain,
-                                poolId: pool.id,
-                                title: `${rewardTokenDefinition.symbol} reward APR`,
-                                apr: 0,
-                                type: PrismaPoolAprType.NATIVE_REWARD,
-                                group: null,
-                            },
+                            update: itemData,
+                            create: itemData,
                         }),
                     );
 
@@ -120,17 +128,8 @@ export class GaugeAprService implements PoolAprService {
                             where: {
                                 id_chain: { id: aprRangeId, chain: networkContext.chain },
                             },
-                            update: {
-                                min: rewardApr,
-                                max: rewardApr * this.MAX_VEBAL_BOOST,
-                            },
-                            create: {
-                                id: aprRangeId,
-                                chain: networkContext.chain,
-                                aprItemId: aprItemId,
-                                min: rewardApr,
-                                max: rewardApr,
-                            },
+                            update: rangeData,
+                            create: rangeData,
                         }),
                     );
                 } else {
