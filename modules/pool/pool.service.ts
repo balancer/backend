@@ -265,7 +265,7 @@ export class PoolService {
     }
 
     public async reloadAllPoolAprs() {
-        await this.poolAprUpdaterService.realodAllPoolAprs();
+        await this.poolAprUpdaterService.reloadAllPoolAprs();
     }
 
     public async updateLiquidity24hAgoForAllPools() {

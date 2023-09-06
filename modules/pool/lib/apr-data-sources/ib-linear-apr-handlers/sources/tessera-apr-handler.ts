@@ -21,28 +21,23 @@ export class TesseraAprHandler implements AprHandler {
     }
 
     async getAprs() {
-        try {
-            let aprEntries = [];
-            for (const { tesseraPoolAddress, tokenAddress, isIbYield } of Object.values(this.tokens)) {
-                try {
-                    const contract = new Contract(tesseraPoolAddress, abi, networkContext.provider);
-                    const poolsUI = await contract.getPoolsUI();
+        let aprEntries = [];
+        for (const { tesseraPoolAddress, tokenAddress, isIbYield } of Object.values(this.tokens)) {
+            try {
+                const contract = new Contract(tesseraPoolAddress, abi, networkContext.provider);
+                const poolsUI = await contract.getPoolsUI();
 
-                    const pool = poolsUI[0];
-                    const staked = BigInt(pool.stakedAmount);
-                    const reward = BigInt(pool.currentTimeRange.rewardsPerHour) * BigInt(24 * 365);
-                    const apr = Number(reward.toString()) / Number(staked.toString());
-                    aprEntries.push([tokenAddress, { apr, isIbYield: isIbYield ?? false }]);
-                } catch (error) {
-                    console.error('Failed to fetch Tessera Ape Coin APR:', error);
-                    aprEntries.push([tokenAddress, { apr: 0, isIbYield: isIbYield ?? false }]);
-                }
+                const pool = poolsUI[0];
+                const staked = BigInt(pool.stakedAmount);
+                const reward = BigInt(pool.currentTimeRange.rewardsPerHour) * BigInt(24 * 365);
+                const apr = Number(reward.toString()) / Number(staked.toString());
+                aprEntries.push([tokenAddress, { apr, isIbYield: isIbYield ?? false }]);
+            } catch (error) {
+                console.error('Failed to fetch Tessera Ape Coin APR:', error);
+                Sentry.captureException(`Tessera IB APR handler failed: ${error}`);
+                aprEntries.push([tokenAddress, { apr: 0, isIbYield: isIbYield ?? false }]);
             }
-            return Object.fromEntries(aprEntries);
-        } catch (error) {
-            console.error('Failed to fetch Tessera APR:', error);
-            Sentry.captureException(`Tessera IB APR handler failed: ${error}`);
-            return {};
         }
+        return Object.fromEntries(aprEntries);
     }
 }
