@@ -152,6 +152,6 @@ export class GaugeAprService implements PoolAprService {
                 }
             }
         }
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(operations, true);
     }
 }
