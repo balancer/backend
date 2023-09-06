@@ -81,6 +81,7 @@ export const mainnetNetworkData: NetworkData = {
             '0xdba127fbc23fb20f5929c546af220a991b5c6e01',
             '0xfada0f4547ab2de89d1304a668c39b3e09aa7c76',
             '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
+            '0xba1b4a90bad57470a2cba762a32955dc491f76e0',
         ],
         weightedPoolV2Factories: [
             '0xcc508a455f5b0073973107db6a878ddbdab957bc',
