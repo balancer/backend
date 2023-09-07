@@ -466,6 +466,22 @@ export class PoolService {
                         where: { chain: networkContext.chain, gaugeId: staking.id },
                     });
 
+                    // delete votingGauge entry before deleting the staking gauge
+                    let gauge = await prisma.prismaPoolStakingGauge.findFirst({
+                        where: {
+                            chain: networkContext.chain,
+                            stakingId: staking.id,
+                        },
+                        select: {
+                            votingGauge: true,
+                        },
+                    });
+
+                    if(gauge && gauge.votingGauge)
+                        await prisma.prismaVotingGauge.deleteMany({
+                            where: { chain: networkContext.chain, id: gauge.votingGauge.id }
+                        });
+
                     await prisma.prismaPoolStakingGauge.deleteMany({
                         where: { chain: networkContext.chain, stakingId: staking.id },
                     });
