@@ -55,8 +55,6 @@ export class IbTokensAprService implements PoolAprService {
                 continue;
             }
 
-            // TODO: We should check whether the token has a rate provider set, but we don't store this information yet
-
             for (const token of pool.tokens) {
                 const tokenApr = aprs.get(token.address);
                 if (!tokenApr) {
@@ -75,7 +73,7 @@ export class IbTokensAprService implements PoolAprService {
 
                 let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
 
-                if (collectsYieldFee(pool)) {
+                if (collectsYieldFee(pool) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
                     const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
                         ? parseFloat(pool.dynamicData.protocolYieldFee)
                         : networkContext.data.balancer.yieldProtocolFeePercentage;
