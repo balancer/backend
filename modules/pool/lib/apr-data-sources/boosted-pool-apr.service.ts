@@ -66,7 +66,7 @@ export class BoostedPoolAprService implements PoolAprService {
             const aprItems = await prisma.prismaPoolAprItem.findMany({
                 where: {
                     poolId: { in: poolIds },
-                    type: { in: ['LINEAR_BOOSTED', 'PHANTOM_STABLE_BOOSTED', 'IB_YIELD'] },
+                    type: { in: ['LINEAR_BOOSTED', 'PHANTOM_STABLE_BOOSTED', 'IB_YIELD', 'SWAP_FEE'] },
                     chain: networkContext.chain,
                 },
             });
@@ -94,7 +94,9 @@ export class BoostedPoolAprService implements PoolAprService {
                     if (
                         collectsYieldFee(pool) &&
                         //nested phantom stables already have the yield fee removed
-                        token.nestedPool.type !== 'PHANTOM_STABLE'
+                        token.nestedPool.type !== 'PHANTOM_STABLE' &&
+                        // nested tokens/bpts that dont have a rate provider, we don't take any fees
+                        token.dynamicData.priceRate !== '1.0'
                     ) {
                         userApr = apr * (1 - protocolYieldFeePercentage);
                     }
