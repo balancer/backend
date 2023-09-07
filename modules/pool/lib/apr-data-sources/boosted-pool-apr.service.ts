@@ -80,7 +80,8 @@ export class BoostedPoolAprService implements PoolAprService {
                     !token.dynamicData ||
                     !token.nestedPool ||
                     !token.nestedPool.type ||
-                    token.dynamicData.balanceUSD === 0
+                    token.dynamicData.balanceUSD === 0 ||
+                    pool.dynamicData.totalLiquidity === 0
                 ) {
                     continue;
                 }
