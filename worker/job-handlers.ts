@@ -34,6 +34,10 @@ async function runIfNotAlreadyRunning(
     try {
         runningJobs.add(jobId);
 
+        Sentry.configureScope((scope) => {
+            scope.setTransactionName(`POST /${id}`);
+        });
+
         console.time(jobId);
         console.log(`Start job ${jobId}-start`);
 
