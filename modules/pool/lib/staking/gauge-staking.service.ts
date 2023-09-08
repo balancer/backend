@@ -110,8 +110,22 @@ export class GaugeStakingService implements PoolStakingService {
                         }
                     }
                     if (gauge.tokens) {
+                        const rewardTokens = await prisma.prismaToken.findMany({
+                            where: {
+                                address: { in: gauge.tokens.map((token) => token.id.split('-')[0].toLowerCase()) },
+                                chain: networkContext.chain,
+                            },
+                        });
                         for (let rewardToken of gauge.tokens) {
                             const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+                            const token = rewardTokens.find((token) => token.address === tokenAddress);
+                            if (!token) {
+                                console.error(
+                                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gauge.id} of pool ${pool.id}`,
+                                );
+                                continue;
+                            }
+
                             const id = `${gauge.id}-${tokenAddress}`;
 
                             let rewardRate = '0.0';
@@ -124,7 +138,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 periodFinish = rewardData[2];
                                 if (periodFinish > moment().unix()) {
                                     // period still running
-                                    rewardRate = formatFixed(rewardData[3], 18);
+                                    rewardRate = formatFixed(rewardData[3], token.decimals);
                                 }
                             } else {
                                 // we can't get BAL rate from the reward data but got it from the inflation_rate call which set the rewardToken.rate
@@ -137,7 +151,7 @@ export class GaugeStakingService implements PoolStakingService {
                                     periodFinish = parseFloat(formatUnits(rewardData[1], 0));
                                     if (periodFinish > moment().unix()) {
                                         // period still running
-                                        rewardRate = formatFixed(rewardData[2], 18);
+                                        rewardRate = formatFixed(rewardData[2], token.decimals);
                                     }
                                 }
                             }
