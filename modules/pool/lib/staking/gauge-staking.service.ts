@@ -12,7 +12,6 @@ import moment from 'moment';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import _ from 'lodash';
-import { veBalVotingListService } from '../../../vebal/vebal-voting-list.service';
 
 interface ChildChainInfo {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -217,7 +216,6 @@ export class GaugeStakingService implements PoolStakingService {
             await prisma.prismaPoolStakingGauge.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStaking.deleteMany({ where: { chain: networkContext.chain } });
             await this.syncStakingForPools();
-            await veBalVotingListService.syncVotingGauges();
         }
     }
 }
