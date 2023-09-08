@@ -12,6 +12,7 @@ import moment from 'moment';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import _ from 'lodash';
+import { veBalVotingListService } from '../../../vebal/vebal-voting-list.service';
 
 interface ChildChainInfo {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -83,6 +84,7 @@ export class GaugeStakingService implements PoolStakingService {
                             },
                             update: {
                                 status: gaugeStatus,
+                                version: gaugeVersion,
                             },
                         }),
                     );
@@ -167,9 +169,10 @@ export class GaugeStakingService implements PoolStakingService {
 
     async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        const childChainAbi = networkContext.chain === 'MAINNET'
-            ? 'function inflation_rate() view returns (uint256)'
-            : 'function inflation_rate(uint256 week) view returns (uint256)';
+        const childChainAbi =
+            networkContext.chain === 'MAINNET'
+                ? 'function inflation_rate() view returns (uint256)'
+                : 'function inflation_rate(uint256 week) view returns (uint256)';
         const multicall = new Multicaller3([childChainAbi]);
 
         let response: { [gaugeAddress: string]: ChildChainInfo } = {};
@@ -207,10 +210,14 @@ export class GaugeStakingService implements PoolStakingService {
             await prisma.prismaUserStakedBalance.deleteMany({
                 where: { staking: { type: 'GAUGE', chain: networkContext.chain } },
             });
+            await prisma.prismaVotingGauge.deleteMany({
+                where: { chain: networkContext.chain },
+            });
             await prisma.prismaPoolStakingGaugeReward.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStakingGauge.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStaking.deleteMany({ where: { chain: networkContext.chain } });
             await this.syncStakingForPools();
+            await veBalVotingListService.syncVotingGauges();
         }
     }
 }
