@@ -34,6 +34,7 @@ async function runIfNotAlreadyRunning(
     try {
         runningJobs.add(jobId);
 
+        // TODO, this does not seem to work properly as it is a "global" scope
         Sentry.configureScope((scope) => {
             scope.setTransactionName(`POST /${jobId}`);
         });
