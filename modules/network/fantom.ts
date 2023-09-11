@@ -86,6 +86,7 @@ const fantomNetworkData: NetworkData = {
             '0x9879abdea01a879644185341f7af7d8343556b7a', // multi tusd
             '0x3129662808bec728a27ab6a6b9afd3cbaca8a43c', // multi dola
             '0x0615dbba33fe61a31c7ed131bda6655ed76748b1', // multi ankr
+            '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
     tokenPrices: {
