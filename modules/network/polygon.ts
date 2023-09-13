@@ -56,7 +56,7 @@ const polygonNetworkData: NetworkData = {
     },
     rpcUrl: env.INFURA_API_KEY
         ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : 'https://rpc.ankr.com/polygon',
+        : 'https://polygon.sakurarpc.io',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
