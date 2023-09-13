@@ -148,9 +148,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-fbeets-ratio':
-                await runIfNotAlreadyRunning(job.name, chainId, () => beetsService.syncFbeetsRatio(), res, next);
-                break;
             case 'cache-average-block-time':
                 await runIfNotAlreadyRunning(
                     job.name,
