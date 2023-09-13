@@ -163,7 +163,7 @@ export const mainnetNetworkData: NetworkData = {
                         aTokenAddress: '0x018008bfb33d285247a21d44e50697654f754e63',
                         wrappedTokens: {
                             waDAI: '0x098256c06ab24f5655c5506a6488781bd711c14b',
-                            stataEthDAI: '0x098256c06ab24f5655c5506a6488781bd711c14b',
+                            stataEthDAI: '0xeb708639e8e518b86a916db3685f90216b1c1c67',
                         },
                     },
                     wETH: {
@@ -184,6 +184,14 @@ export const mainnetNetworkData: NetworkData = {
                     address: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
                     serviceName: 'eth',
                     isIbYield: true,
+                },
+            },
+        },
+        bloom: {
+            tokens: {
+                tbyFeb1924: {
+                    address: '0xc4cafefbc3dfea629c589728d648cb6111db3136',
+                    feedAddress: '0xde1f5f2d69339171d679fb84e4562febb71f36e6',
                 },
             },
         },
@@ -219,6 +227,14 @@ export const mainnetNetworkData: NetworkData = {
                 idleUSDT: {
                     address: '0xfa3afc9a194babd56e743fa3b7aa2ccbed3eaaad',
                     wrapped4626Address: '0x544897a3b944fdeb1f94a0ed973ea31a80ae18e1',
+                },
+            },
+        },
+        maker: {
+            tokens: {
+                sDAI: {
+                    address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+                    potAddress: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
                 },
             },
         },
@@ -297,6 +313,12 @@ export const mainnetNetworkData: NetworkData = {
                 tokenAddress: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f',
                 sourceUrl: 'https://data.jonesdao.io/api/v1/jones/apy-wjaura',
                 path: 'wjauraApy',
+                isIbYield: true,
+            },
+            ETHx: {
+                tokenAddress: '0x0f7f961648ae6db43c75663ac7e5414eb79b5704',
+                sourceUrl: 'https://universe.staderlabs.com/eth/apy',
+                path: 'value',
                 isIbYield: true,
             },
         },

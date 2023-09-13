@@ -158,6 +158,29 @@ const avalancheNetworkData: NetworkData = {
                 },
             },
         },
+        defaultHandlers: {
+            sAVAX: {
+                tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+                sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',
+                path: 'apr',
+                scale: 1,
+            },
+            yyAVAX: {
+                tokenAddress: '0xf7d9281e8e363584973f946201b82ba72c965d27',
+                sourceUrl: 'https://staging-api.yieldyak.com/yyavax',
+                path: 'yyAVAX.apr',
+            },
+            ggAVAX: {
+                tokenAddress: '0xa25eaf2906fa1a3a13edac9b9657108af7b703e3',
+                sourceUrl: 'https://ceres.gogopool.com',
+                path: 'ggAVAXMonthlyInterestMonth.value',
+                // According to solarcurve, the AVAX Monthly Interest must be multiplied by -12 to represent the APR in normal scale, for example, if the monthly interest is -0,15, the APR would be -0,15 * -12 = 1,8%.
+                // @solarcurve: We estimate by multiplying that value by -12 since its the exchange rate of AVAX -> ggAVAX, which will always return less ggAVAX than AVAX
+                // How this -12 became -8,333? It's because the scale parameter is used to divide the number, and the final apr percentage is in decimal format (1,8% = 0,018), so if:
+                // M * -12 = A (M is monthly rate and A is APR) => (M/x) = (A/100) => (A / -12x) = (A / 100) [replacing M by A/-12] => x = 100/-12 = -8,33333
+                scale: -8.3333,
+            },
+        },
     },
     beefy: {
         linearPools: [''],

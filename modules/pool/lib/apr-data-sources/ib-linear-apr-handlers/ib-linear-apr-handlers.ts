@@ -12,6 +12,8 @@ import { YearnAprHandler } from './sources/yearn-apr-handler';
 import { ReaperCryptAprHandler } from './sources/reaper-crypt-apr-handler';
 import { BeefyAprHandler } from './sources/beefy-apr-handler';
 import { IbAprConfig } from '../../../../network/apr-config-types';
+import { MakerAprHandler } from './sources/maker-apr-handler';
+import { BloomAprHandler } from './sources/bloom-apr-handler';
 
 export class IbLinearAprHandlers {
     private handlers: AprHandler[] = [];
@@ -38,6 +40,10 @@ export class IbLinearAprHandlers {
             const beefyHandler = new BeefyAprHandler(aprConfig.beefy);
             handlers.push(beefyHandler);
         }
+        if (aprConfig.bloom) {
+            const bloomAprHandler = new BloomAprHandler(aprConfig.bloom);
+            handlers.push(bloomAprHandler);
+        }
         if (aprConfig.euler) {
             const eulerHandler = new EulerAprHandler(aprConfig.euler);
             handlers.push(eulerHandler);
@@ -49,6 +55,10 @@ export class IbLinearAprHandlers {
         if (aprConfig.idle) {
             const idleHandler = new IdleAprHandler(aprConfig.idle);
             handlers.push(idleHandler);
+        }
+        if (aprConfig.maker) {
+            const makerHandler = new MakerAprHandler(aprConfig.maker);
+            handlers.push(makerHandler);
         }
         if (aprConfig.ovix) {
             const ovixHandler = new OvixAprHandler({

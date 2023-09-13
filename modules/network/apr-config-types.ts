@@ -1,10 +1,12 @@
 export interface IbAprConfig {
     aave?: AaveAprConfig;
     ankr?: AnkrAprConfig;
+    bloom?: BloomAprConfig;
     beefy?: BeefyAprConfig;
     euler?: EulerAprConfig;
     gearbox?: GearBoxAprConfig;
     idle?: IdleAprConfig;
+    maker?: MakerAprConfig;
     ovix?: OvixAprConfig;
     reaper?: ReaperAprConfig;
     tessera?: TesseraAprConfig;
@@ -55,6 +57,16 @@ export interface BeefyAprConfig {
     };
 }
 
+export interface BloomAprConfig {
+    tokens: {
+        [tokenName: string]: {
+            address: string;
+            feedAddress: string;
+            isIbYield?: boolean;
+        };
+    };
+}
+
 export interface EulerAprConfig {
     subgraphUrl: string;
     tokens: {
@@ -82,6 +94,16 @@ export interface IdleAprConfig {
         [tokenName: string]: {
             address: string;
             wrapped4626Address: string;
+            isIbYield?: boolean;
+        };
+    };
+}
+
+export interface MakerAprConfig {
+    tokens: {
+        [tokenName: string]: {
+            address: string;
+            potAddress: string;
             isIbYield?: boolean;
         };
     };

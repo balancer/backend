@@ -119,6 +119,12 @@ const zkevmNetworkData: NetworkData = {
                 path: 'data.smaApr',
                 isIbYield: true,
             },
+            rETH: {
+                tokenAddress: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942',
+                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
+                path: 'rethAPR',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
