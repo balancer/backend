@@ -72,7 +72,7 @@ interface CoinId {
    that happen.
 
 */
-const tokensPerInterval = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 10 : 6) : 3;
+const tokensPerInterval = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 10 : 5) : 3;
 const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
 
 export class CoingeckoService {
