@@ -31,13 +31,14 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
     const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
 
+    console.log(`Got ${currentAlarms.MetricAlarms?.length} alarms for chain ${chainId} from AWS.`);
+
     // delete alarms that are not in the current jobs array
     if (currentAlarms.MetricAlarms) {
         const currentAlarmsForChain = currentAlarms.MetricAlarms.filter(
             (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
         );
         const alarmsToDelete: string[] = [];
-        console.log(`Got ${currentAlarmsForChain.length} alarms for chain ${chainId} from AWS.`);
         console.log(`Got ${alarmNamesToPublish.length} alarms to publish for chain ${chainId}`);
 
         for (const alarm of currentAlarmsForChain) {
