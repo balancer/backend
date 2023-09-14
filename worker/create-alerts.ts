@@ -14,47 +14,43 @@ import { sleep } from '../modules/common/promise';
 import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 import { chain } from 'lodash';
 
-const ALARM_PREFIX = `CRON ALARM:`;
-
 export async function createAlerts(chainId: string): Promise<void> {
     await createAlertsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
 }
 
 async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
+    const ALARM_PREFIX = `CRON ALARM:${chainId}:${env.DEPLOYMENT_ENV}`;
+
     const cloudWatchClient = new CloudWatchClient({
         region: env.AWS_REGION,
     });
 
-    const alarmNamesToPublish = jobs.map(
-        (cronJob) => `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`,
+    const alarmNamesToPublish = jobs.map((cronJob) => `${ALARM_PREFIX}:${cronJob.name}`);
+
+    const currentActiveAlarms = await cloudWatchClient.send(
+        new DescribeAlarmsCommand({
+            AlarmNamePrefix: ALARM_PREFIX,
+            MaxRecords: 100,
+        }),
     );
 
-    const currentAlarms = await cloudWatchClient.send(new DescribeAlarmsCommand({}));
-
-    console.log(`Got ${currentAlarms.MetricAlarms?.length} alarms for chain ${chainId} from AWS.`);
-
     // delete alarms that are not in the current jobs array
-    if (currentAlarms.MetricAlarms) {
-        const currentAlarmsForChain = currentAlarms.MetricAlarms.filter(
-            (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
-        );
+    if (currentActiveAlarms.MetricAlarms) {
         const alarmsToDelete: string[] = [];
-        console.log(`Got ${alarmNamesToPublish.length} alarms to publish for chain ${chainId}`);
 
-        for (const alarm of currentAlarmsForChain) {
+        for (const alarm of currentActiveAlarms.MetricAlarms) {
             if (alarm.AlarmName && !alarmNamesToPublish.includes(alarm.AlarmName)) {
                 alarmsToDelete.push(alarm.AlarmName);
             }
         }
         if (alarmsToDelete.length > 0) {
-            console.log(`Removing alarms: ${alarmsToDelete}`);
             await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: alarmsToDelete }));
         }
     }
 
     // upsert all other alarms
     for (const cronJob of jobs) {
-        const alarmName = `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`;
+        const alarmName = `${ALARM_PREFIX}:${cronJob.name}`;
 
         // set the evaluation period for the alarm to the job interval. Minimum period is 1 minute.
         let periodInSeconds = cronJob.interval / 1000;
