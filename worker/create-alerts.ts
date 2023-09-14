@@ -12,6 +12,7 @@ import * as Sentry from '@sentry/node';
 import { secondsPerDay } from '../modules/common/time';
 import { sleep } from '../modules/common/promise';
 import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
+import { chain } from 'lodash';
 
 const ALARM_PREFIX = `CRON ALARM:`;
 
@@ -35,18 +36,22 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         const currentAlarmsForChain = currentAlarms.MetricAlarms.filter(
             (alarm) => alarm.AlarmName?.includes(ALARM_PREFIX) && alarm.AlarmName?.includes(`-${chainId}-`),
         );
-        const alarmNames: string[] = [];
+        const alarmsToDelete: string[] = [];
+        console.log(`Got ${currentAlarmsForChain.length} alarms for chain ${chainId} from AWS.`);
+        console.log(`Got ${alarmNamesToPublish.length} alarms to publish for chain ${chainId}`);
+
         for (const alarm of currentAlarmsForChain) {
             if (alarm.AlarmName && !alarmNamesToPublish.includes(alarm.AlarmName)) {
-                alarmNames.push(alarm.AlarmName);
+                alarmsToDelete.push(alarm.AlarmName);
             }
         }
-        if (alarmNames.length > 0) {
-            await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: alarmNames }));
+        if (alarmsToDelete.length > 0) {
+            console.log(`Removing alarms: ${alarmsToDelete}`);
+            await cloudWatchClient.send(new DeleteAlarmsCommand({ AlarmNames: alarmsToDelete }));
         }
     }
 
-    // update all other alarms
+    // upsert all other alarms
     for (const cronJob of jobs) {
         const alarmName = `${ALARM_PREFIX}${cronJob.name}-${chainId}-${env.DEPLOYMENT_ENV}`;
 
