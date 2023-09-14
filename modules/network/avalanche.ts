@@ -63,8 +63,8 @@ const avalancheNetworkData: NetworkData = {
         address: '0xe15bcb9e0ea69e6ab9fa080c4c4a5632896298c3',
     },
     veBal: {
-        address: '',
-        delegationProxy: '',
+        address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        delegationProxy: '0x0c6052254551eae3ecac77b01dfcf1025418828f',
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
