@@ -55,7 +55,7 @@ const zkevmNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+        env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
             : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
