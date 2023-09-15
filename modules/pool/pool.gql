@@ -97,6 +97,7 @@ interface GqlPoolBase {
     #fields that never change after creation
     id: ID!
     chain: GqlChain!
+    type: String!
     name: String!
     symbol: String!
     address: Bytes!
@@ -215,6 +216,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -240,6 +242,7 @@ type GqlPoolGyro implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -261,6 +264,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -282,6 +286,7 @@ type GqlPoolStable implements GqlPoolBase {
     tokens: [GqlPoolToken!]!
     amp: BigInt!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -303,6 +308,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     tokens: [GqlPoolToken!]!
     amp: BigInt!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -325,6 +331,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     amp: BigInt!
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
+    type: String!
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -349,6 +356,7 @@ type GqlPoolElement implements GqlPoolBase {
     principalToken: Bytes!
     baseToken: Bytes!
     staking: GqlPoolStaking
+    type: String!
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -375,6 +383,7 @@ type GqlPoolLinear implements GqlPoolBase {
     lowerTarget: BigInt!
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
+    type: String!
 }
 
 type GqlPoolLinearNested {
