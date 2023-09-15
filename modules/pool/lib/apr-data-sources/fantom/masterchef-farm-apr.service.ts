@@ -1,6 +1,6 @@
 import { PrismaPoolAprItem, PrismaTokenCurrentPrice } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
-import { PrismaPoolWithExpandedNesting } from '../../../../../prisma/prisma-types';
+import { PrismaPoolWithExpandedNesting, PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { blocksSubgraphService } from '../../../../subgraphs/blocks-subgraph/blocks-subgraph.service';
@@ -19,7 +19,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         return 'MasterchefFarmAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void> {
+    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const farms = await masterchefService.getAllFarms({});
 
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
@@ -27,7 +27,14 @@ export class MasterchefFarmAprService implements PoolAprService {
         const tokenPrices = await tokenService.getTokenPrices();
         const operations: any[] = [];
 
-        for (const pool of pools) {
+        const expandedMasterchefPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain, id: { in: pools.map((pool) => pool.id) } },
+            include: {
+                dynamicData: true,
+            },
+        });
+
+        for (const pool of expandedMasterchefPools) {
             const farm = farms.find((farm) => {
                 if (pool.id === networkContext.data.fbeets!.poolId) {
                     return farm.id === networkContext.data.fbeets!.farmId;

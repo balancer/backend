@@ -14,7 +14,6 @@ export async function startWorker() {
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
         ],
-        sampleRate: 0,
     });
 
     app.use(Sentry.Handlers.requestHandler());

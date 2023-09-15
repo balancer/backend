@@ -2,9 +2,6 @@ import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { SpookySwapAprService } from '../pool/lib/apr-data-sources/fantom/spooky-swap-apr.service';
 import { tokenService } from '../token/token.service';
-import { YearnVaultAprService } from '../pool/lib/apr-data-sources/fantom/yearn-vault-apr.service';
-import { StaderStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/stader-staked-ftm-apr.service';
-import { ReaperCryptAprService } from '../pool/lib/apr-data-sources/reaper-crypt-apr.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
@@ -24,11 +21,10 @@ import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-mast
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
-import { AnkrStakedFtmAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-ftm-apr.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { AnkrStakedEthAprService } from '../pool/lib/apr-data-sources/fantom/ankr-staked-eth-apr.service';
 import { env } from '../../app/env';
+import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -90,6 +86,7 @@ const fantomNetworkData: NetworkData = {
             '0x9879abdea01a879644185341f7af7d8343556b7a', // multi tusd
             '0x3129662808bec728a27ab6a6b9afd3cbaca8a43c', // multi dola
             '0x0615dbba33fe61a31c7ed131bda6655ed76748b1', // multi ankr
+            '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
     tokenPrices: {
@@ -113,25 +110,24 @@ const fantomNetworkData: NetworkData = {
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
     },
     balancer: {
-        vault: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+        vault: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
         composableStablePoolFactories: [
-            '0x5AdAF6509BCEc3219455348AC45d6D3261b1A990',
-            '0xB384A86F2Fd7788720db42f9daa60fc07EcBeA06',
-            '0x44814E3A603bb7F1198617995c5696C232F6e8Ed',
-            '0x911566c808bF00acB200B418564440A2Af177548',
-            '0x5c3094982cF3c97A06b7d62A6f7669F14a199B19',
-            '0x23F03a4fb344d8B98833d2ACe093cc305E03474f',
+            '0x5adaf6509bcec3219455348ac45d6d3261b1a990',
+            '0xb384a86f2fd7788720db42f9daa60fc07ecbea06',
+            '0x44814e3a603bb7f1198617995c5696c232f6e8ed',
+            '0x911566c808bf00acb200b418564440a2af177548',
+            '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
+            '0x23f03a4fb344d8b98833d2ace093cc305e03474f',
         ],
         weightedPoolV2Factories: [
-            '0xB2ED595Afc445b47Db7043bEC25e772bf0FA1fbb',
-            '0x8ea1c497c16726E097f62C8C9FBD944143F27090',
-            '0xea87F3dFfc679035653C0FBa70e7bfe46E3FB733',
-            '0xd678b6Acd834Cc969Bb19Ce82727f2a541fb7941',
-            '0xb841Df73861E65E6D61a80F503F095a91ce75e15',
+            '0xb2ed595afc445b47db7043bec25e772bf0fa1fbb',
+            '0x8ea1c497c16726e097f62c8c9fbd944143f27090',
+            '0xea87f3dffc679035653c0fba70e7bfe46e3fb733',
+            '0xd678b6acd834cc969bb19ce82727f2a541fb7941',
+            '0xb841df73861e65e6d61a80f503f095a91ce75e15',
         ],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        poolDataQueryContract: '0x9642Dbba0753B1518022d7617Be079f0d7EFD165',
         factoriesWithpoolSpecificProtocolFeePercentagesProvider: [
             '0xb841df73861e65e6d61a80f503f095a91ce75e15',
             '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
@@ -140,7 +136,7 @@ const fantomNetworkData: NetworkData = {
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     masterchef: {
-        address: '0x8166994d9ebBe5829EC86Bd81258149B87faCfd3',
+        address: '0x8166994d9ebbe5829ec86bd81258149b87facfd3',
         excludedFarmIds: [
             '34', //OHM bonding farm
             '28', //OHM bonding farm
@@ -149,7 +145,7 @@ const fantomNetworkData: NetworkData = {
         ],
     },
     reliquary: {
-        address: '0x1ed6411670c709F4e163854654BD52c74E66D7eC',
+        address: '0x1ed6411670c709f4e163854654bd52c74e66d7ec',
         excludedFarmIds: [
             '0', // test with dummy token
             '1', // test with fresh beets pool BPT
@@ -172,31 +168,95 @@ const fantomNetworkData: NetworkData = {
             swapGas: BigNumber.from('1000000'),
         },
     },
-    yearn: {
-        vaultsEndpoint: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
+    ibAprConfig: {
+        ankr: {
+            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+            tokens: {
+                ankrETH: {
+                    address: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                    serviceName: 'eth',
+                    isIbYield: true,
+                },
+                ankrFTM: {
+                    address: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
+                    serviceName: 'ftm',
+                    isIbYield: true,
+                },
+            },
+        },
+        reaper: {
+            subgraphSource: {
+                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
+                tokens: {
+                    rfwBTC: {
+                        address: '0xfa985463b7fa975d06cde703ec72efccf293c605',
+                    },
+                    rffUSDT: {
+                        address: '0xaea55c0e84af6e5ef8c9b7042fb6ab682516214a',
+                    },
+                    rfWFTM: {
+                        address: '0x963ffcd14d471e279245ee1570ad64ca78d8e67e',
+                    },
+                    rfWETH: {
+                        address: '0xc052627bc73117d2cb3569f133419550156bdfa1',
+                    },
+                    rfDAI: {
+                        address: '0x16e4399fa9ba6e58f12bf2d2bc35f8bde8a9a4ab',
+                    },
+                    rfUSDC: {
+                        address: '0xd55c59da5872de866e39b1e3af2065330ea8acd6',
+                    },
+                    rfUSDCCrypt: {
+                        // Not named as Multi-Strategy in the contract, but is multi-strategy
+                        address: '0x4455aef4b5d8ffe3436184e8a1ec99607f9a4340',
+                    },
+                    rfWFTMCrypt: {
+                        // Not named Multi-Strategy in the contract, but is multi-strategy
+                        address: '0xe4a54b6a175cf3f6d7a5e8ab7544c3e6e364dbf9',
+                    },
+                    rfWETHCrypt: {
+                        // Not named Multi-Strategy in the contract, but is multi-strategy
+                        address: '0x152d62dccc2c7c7930c4483cc2a24fefd23c24c2',
+                    },
+                    rfDAICrypt: {
+                        // Not named Multi-Strategy in the contract, but is multi-strategy
+                        address: '0x5427f192137405e6a4143d1c3321359bab2dbd87',
+                    },
+                    rfWBTCCrypt: {
+                        // Not named Multi-Strategy in the contract, but is multi-strategy
+                        address: '0x660c6ec76bd83f53263681f83cbeb35042dcd1cc',
+                    },
+                },
+            },
+            onchainSource: {
+                averageAPRAcrossLastNHarvests: 5,
+                tokens: {
+                    rfGrainSFTMX: {
+                        address: '0xab30a4956c7d838234e24f1c3e50082c0607f35f',
+                        isSftmX: true,
+                    },
+                    rfGrainFTM: {
+                        address: '0xc5b29d59d0b4717aa0dd8d11597d9fd3a05d86bb',
+                    },
+                },
+            },
+        },
+        yearn: {
+            sourceUrl: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
+        },
+        fixedAprHandler: {
+            sFTMx: {
+                address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+                apr: 0.046,
+                isIbYield: true,
+            },
+        },
     },
     copper: {
-        proxyAddress: '0xbC8a71C75ffbd2807c021F4F81a8832392dEF93c',
+        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
     },
-    reaper: {
-        linearPoolFactories: ['0xd448c4156b8de31e56fdfc071c8d96459bb28119'],
-        linearPoolIdsFromErc4626Factory: [
-            '0x55e0499d268858a5e804d7864dc2a6b4ef194c630000000000000000000005b1',
-            '0xa9a1f2f7407ce27bcef35d04c47e079e7d6d399e0000000000000000000005b6',
-            '0xa8bcdca345e61bad9bb539933a4009f7a6f4b7ea0000000000000000000006eb',
-            '0x654def39262548cc958d07c82622e23c52411c820000000000000000000006ec',
-            '0xd3f155d7f421414dc4177e54e4308274dfa8b9680000000000000000000006ed',
-            '0xb8b0e5e9f8b740b557e7c26fcbc753523a718a870000000000000000000006ee',
-            '0xdc910e2647caae5f63a760b70a2308e1c90d88860000000000000000000006ef',
-            '0x92502cd8e00f5b8e737b2ba203fdd7cd27b23c8f000000000000000000000718',
-            '0xc385e76e575b2d71eb877c27dcc1608f77fada99000000000000000000000719',
-            '0x685056d3a4e574b163d0fa05a78f1b0b3aa04a8000000000000000000000071a',
-            '0x3c1420df122ac809b9d1ba77906f833764d6450100000000000000000000071b',
-            '0xa0051ab2c3eb7f17758428b02a07cf72eb0ef1a300000000000000000000071c',
-            '0x442988091cdc18acb8912cd3fe062cda9233f9dc00000000000000000000071d',
-        ],
-        averageAPRAcrossLastNHarvests: 5,
-        multistratAprSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
+    beefy: {
+        linearPools: [''],
     },
     spooky: {
         xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
@@ -239,19 +299,8 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
+        new IbTokensAprService(fantomNetworkData.ibAprConfig),
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new YearnVaultAprService(tokenService, fantomNetworkData.yearn!.vaultsEndpoint),
-        new StaderStakedFtmAprService(tokenService, fantomNetworkData.stader!.sFtmxContract),
-        new AnkrStakedFtmAprService(tokenService, fantomNetworkData.ankr!.ankrFtmContract),
-        new AnkrStakedEthAprService(tokenService, fantomNetworkData.ankr!.ankrEthContract),
-        new ReaperCryptAprService(
-            fantomNetworkData.reaper!.multistratAprSubgraphUrl,
-            fantomNetworkData.reaper!.linearPoolFactories,
-            fantomNetworkData.reaper!.linearPoolIdsFromErc4626Factory,
-            fantomNetworkData.reaper!.averageAPRAcrossLastNHarvests,
-            fantomNetworkData.stader ? fantomNetworkData.stader.sFtmxContract : undefined,
-            fantomNetworkData.lido ? fantomNetworkData.lido.wstEthContract : undefined,
-        ),
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
@@ -293,7 +342,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     workerJobs: [
         {
             name: 'update-token-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'update-liquidity-for-inactive-pools',
@@ -303,35 +352,31 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'update-pool-apr',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-new-pools-from-subgraph',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'sync-sanity-pool-data',
-            interval: every(3, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
         },
         {
             name: 'sync-tokens-from-pool-tokens',
-            interval: every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'sync-fbeets-ratio',
-            interval: every(12, 'hours'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'cache-average-block-time',
@@ -339,11 +384,11 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-staking-for-pools',
-            interval: every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'cache-protocol-data',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-latest-snapshots-for-all-pools',
@@ -355,21 +400,21 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-changed-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(40, 'seconds') : every(20, 'seconds'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(20, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'seconds') : every(15, 'seconds'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'seconds') : every(15, 'seconds'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'sync-user-snapshots',
@@ -399,7 +444,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

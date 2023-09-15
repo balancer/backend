@@ -34,6 +34,11 @@ async function runIfNotAlreadyRunning(
     try {
         runningJobs.add(jobId);
 
+        // TODO, this does not seem to work properly as it is a "global" scope
+        Sentry.configureScope((scope) => {
+            scope.setTransactionName(`POST /${jobId}`);
+        });
+
         console.time(jobId);
         console.log(`Start job ${jobId}-start`);
 
@@ -142,9 +147,6 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
-                break;
-            case 'sync-fbeets-ratio':
-                await runIfNotAlreadyRunning(job.name, chainId, () => beetsService.syncFbeetsRatio(), res, next);
                 break;
             case 'cache-average-block-time':
                 await runIfNotAlreadyRunning(

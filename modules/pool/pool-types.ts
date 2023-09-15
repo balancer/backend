@@ -1,8 +1,8 @@
 import { PrismaPoolStakingType } from '@prisma/client';
-import { PrismaPoolWithExpandedNesting } from '../../prisma/prisma-types';
+import { PrismaPoolWithTokens } from '../../prisma/prisma-types';
 
 export interface PoolAprService {
-    updateAprForPools(pools: PrismaPoolWithExpandedNesting[]): Promise<void>;
+    updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void>;
     getAprServiceName(): string;
 }
 

@@ -83,6 +83,7 @@ export class GaugeStakingService implements PoolStakingService {
                             },
                             update: {
                                 status: gaugeStatus,
+                                version: gaugeVersion,
                             },
                         }),
                     );
@@ -109,8 +110,22 @@ export class GaugeStakingService implements PoolStakingService {
                         }
                     }
                     if (gauge.tokens) {
+                        const rewardTokens = await prisma.prismaToken.findMany({
+                            where: {
+                                address: { in: gauge.tokens.map((token) => token.id.split('-')[0].toLowerCase()) },
+                                chain: networkContext.chain,
+                            },
+                        });
                         for (let rewardToken of gauge.tokens) {
                             const tokenAddress = rewardToken.id.split('-')[0].toLowerCase();
+                            const token = rewardTokens.find((token) => token.address === tokenAddress);
+                            if (!token) {
+                                console.error(
+                                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gauge.id} of pool ${pool.id}`,
+                                );
+                                continue;
+                            }
+
                             const id = `${gauge.id}-${tokenAddress}`;
 
                             let rewardRate = '0.0';
@@ -123,7 +138,7 @@ export class GaugeStakingService implements PoolStakingService {
                                 periodFinish = rewardData[2];
                                 if (periodFinish > moment().unix()) {
                                     // period still running
-                                    rewardRate = formatFixed(rewardData[3], 18);
+                                    rewardRate = formatFixed(rewardData[3], token.decimals);
                                 }
                             } else {
                                 // we can't get BAL rate from the reward data but got it from the inflation_rate call which set the rewardToken.rate
@@ -136,7 +151,7 @@ export class GaugeStakingService implements PoolStakingService {
                                     periodFinish = parseFloat(formatUnits(rewardData[1], 0));
                                     if (periodFinish > moment().unix()) {
                                         // period still running
-                                        rewardRate = formatFixed(rewardData[2], 18);
+                                        rewardRate = formatFixed(rewardData[2], token.decimals);
                                     }
                                 }
                             }
@@ -167,9 +182,10 @@ export class GaugeStakingService implements PoolStakingService {
 
     async getChildChainGaugeInfo(gaugeAddresses: string[]): Promise<{ [gaugeAddress: string]: ChildChainInfo }> {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        const childChainAbi = networkContext.chain === 'MAINNET'
-            ? 'function inflation_rate() view returns (uint256)'
-            : 'function inflation_rate(uint256 week) view returns (uint256)';
+        const childChainAbi =
+            networkContext.chain === 'MAINNET'
+                ? 'function inflation_rate() view returns (uint256)'
+                : 'function inflation_rate(uint256 week) view returns (uint256)';
         const multicall = new Multicaller3([childChainAbi]);
 
         let response: { [gaugeAddress: string]: ChildChainInfo } = {};
@@ -206,6 +222,9 @@ export class GaugeStakingService implements PoolStakingService {
         if (stakingTypes.includes('GAUGE')) {
             await prisma.prismaUserStakedBalance.deleteMany({
                 where: { staking: { type: 'GAUGE', chain: networkContext.chain } },
+            });
+            await prisma.prismaVotingGauge.deleteMany({
+                where: { chain: networkContext.chain },
             });
             await prisma.prismaPoolStakingGaugeReward.deleteMany({ where: { chain: networkContext.chain } });
             await prisma.prismaPoolStakingGauge.deleteMany({ where: { chain: networkContext.chain } });
