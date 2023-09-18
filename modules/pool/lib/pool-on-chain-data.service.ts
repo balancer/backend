@@ -62,6 +62,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'GYRO',
     'GYRO3',
     'GYROE',
+    'FX',
 ];
 
 export class PoolOnChainDataService {

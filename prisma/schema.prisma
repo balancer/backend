@@ -101,6 +101,7 @@ enum PrismaPoolType {
     GYRO
     GYRO3
     GYROE
+    FX
 }
 
 model PrismaPoolLinearData {
