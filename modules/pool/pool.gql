@@ -561,6 +561,11 @@ type GqlPoolAprTotal {
     total: BigDecimal!
 }
 
+input GqlPoolTimePeriod {
+    gt: Int
+    lt: Int
+}
+
 enum GqlPoolOrderBy {
     totalLiquidity
     totalShares
@@ -587,6 +592,7 @@ input GqlPoolFilter {
     filterNotIn: [String!]
     chainIn: [GqlChain!]
     chainNotIn: [GqlChain!]
+    createTime: GqlPoolTimePeriod
 }
 
 enum GqlPoolFilterCategory {
