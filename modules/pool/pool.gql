@@ -76,6 +76,7 @@ type GqlPoolMinimal {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     type: GqlPoolMinimalType!
+    version: Int!
 }
 
 enum GqlPoolMinimalType {
@@ -98,6 +99,7 @@ interface GqlPoolBase {
     id: ID!
     chain: GqlChain!
     type: String!
+    version: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -217,6 +219,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -243,6 +246,7 @@ type GqlPoolGyro implements GqlPoolBase {
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -265,6 +269,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -287,6 +292,7 @@ type GqlPoolStable implements GqlPoolBase {
     amp: BigInt!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -309,6 +315,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     amp: BigInt!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -332,6 +339,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
     type: String!
+    version: Int!
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -357,6 +365,7 @@ type GqlPoolElement implements GqlPoolBase {
     baseToken: Bytes!
     staking: GqlPoolStaking
     type: String!
+    version: Int!
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -384,6 +393,7 @@ type GqlPoolLinear implements GqlPoolBase {
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
     type: String!
+    version: Int!
 }
 
 type GqlPoolLinearNested {
