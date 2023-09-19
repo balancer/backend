@@ -219,6 +219,10 @@ export class PoolGqlLoaderService {
                 in: where?.poolTypeIn || undefined,
                 notIn: where?.poolTypeNotIn || undefined,
             },
+            createTime: {
+                gt: where?.createTime?.gt || undefined,
+                lt: where?.createTime?.lt || undefined,
+            },
             AND: allTokensFilter,
             id: {
                 in: where?.idIn || undefined,
