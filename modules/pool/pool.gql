@@ -111,7 +111,7 @@ interface GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
-    priceRateProviders: [GqlPoolPriceRateProvider]
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -214,6 +214,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -236,6 +237,7 @@ type GqlPoolGyro implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     alpha: String!
     beta: String!
@@ -260,6 +262,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -281,6 +284,7 @@ type GqlPoolStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -302,6 +306,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -324,6 +329,7 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolTokenUnion!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
     staking: GqlPoolStaking
@@ -346,6 +352,7 @@ type GqlPoolElement implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     #element specific fields
     unitSeconds: BigInt!
@@ -370,6 +377,7 @@ type GqlPoolLinear implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
+    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     #linear specific fields
     mainIndex: Int!
