@@ -111,6 +111,8 @@ interface GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
+    priceRateProviders: [GqlPoolPriceRateProvider]
+
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
 }
@@ -539,6 +541,15 @@ type GqlPoolLinearPoolWrappedToken {
     name: String!
     symbol: String!
     decimals: Int!
+}
+
+type GqlPoolPriceRateProvider {
+    address: String!
+    token: GqlPoolPriceRateProviderToken!
+}
+
+type GqlPoolPriceRateProviderToken {
+    address: String!
 }
 
 type GqlPoolApr {

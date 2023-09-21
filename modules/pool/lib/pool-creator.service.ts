@@ -202,9 +202,16 @@ export class PoolCreatorService {
                                 return nestedPool.address === token.address;
                             });
 
+                            let priceRateProvider;
+                            if (pool.priceRateProviders) {
+                                const data = pool.priceRateProviders.find((provider) => provider.token.address === token.address)
+                                priceRateProvider = data?.address;
+                            }
+
                             return {
                                 id: token.id,
                                 address: token.address,
+                                priceRateProvider,
                                 nestedPoolId: nestedPool?.id,
                                 index: token.index || pool.tokensList.findIndex((address) => address === token.address),
                             };

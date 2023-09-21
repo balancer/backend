@@ -182,6 +182,12 @@ fragment BalancerPool on Pool {
     amp
     alpha
     beta
+    priceRateProviders {
+        address
+        token {
+            address
+        }
+    }
 
     tokens {
         ...BalancerPoolToken

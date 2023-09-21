@@ -28,6 +28,7 @@ import {
     GqlPoolUnion,
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
+    GqlPoolPriceRateProvider,
     QueryPoolGetPoolsArgs,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
@@ -322,6 +323,7 @@ export class PoolGqlLoaderService {
                 .map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
+            priceRateProviders: this.mapPriceRateProviders(pool),
         };
 
         //TODO: may need to build out the types here still
@@ -768,6 +770,21 @@ export class PoolGqlLoaderService {
                 hasRewardApr,
             },
         };
+    }
+
+    private mapPriceRateProviders(pool: PrismaPoolWithExpandedNesting): GqlPoolPriceRateProvider[] {
+        const providers: GqlPoolPriceRateProvider[] = [];
+        pool.tokens.forEach((token) => {
+            if (token.priceRateProvider) {
+                providers.push({
+                    address: token.priceRateProvider,
+                    token: {
+                        address: token.address
+                    }
+                })
+            }
+        })
+        return providers;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
