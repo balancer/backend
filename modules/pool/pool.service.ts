@@ -362,6 +362,38 @@ export class PoolService {
         }
     }
 
+    public async syncPriceRateProvidersForAllPools() {
+        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            console.log("Pool ", subgraphPool.id, " price rate providers: ", subgraphPool.priceRateProviders);
+            if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
+            console.log("Updating providers");
+
+            const poolTokens = subgraphPool.tokens || [];
+            for (let i = 0; i < poolTokens.length; i++) {
+                const token = poolTokens[i];
+
+                let priceRateProvider;
+                const data = subgraphPool.priceRateProviders.find((provider) => provider.token.address === token.address)
+                priceRateProvider = data?.address;
+                if (!priceRateProvider) continue;
+
+                console.log("Updating token ", token.id, " to provider: ", priceRateProvider);
+
+                try {
+                    await prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                        data: {
+                            priceRateProvider,
+                        },
+                    });
+                } catch (e) {
+                    console.error('Failed to update token ', token.id, ' error is: ', e);
+                }
+            }
+        }
+    }
+
     public async addToBlackList(poolId: string) {
         const category = await prisma.prismaPoolCategory.findFirst({
             where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
