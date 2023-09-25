@@ -93,6 +93,7 @@ export interface NetworkData {
     gaugeControllerHelperAddress?: string;
     balancer: {
         vault: string;
+        tokenAdmin?: string;
         weightedPoolV2Factories: string[];
         composableStablePoolFactories: string[];
         yieldProtocolFeePercentage: number;

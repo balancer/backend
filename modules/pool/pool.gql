@@ -824,6 +824,7 @@ type GqlPoolStakingGauge {
     rewards: [GqlPoolStakingGaugeReward!]!
     status: GqlPoolStakingGaugeStatus!
     version: Int!
+    workingSupply: String!
     # There can be more than one gauge per pool, but only one preferred. For simplicity of handling, we focus on
     # the primary gauge.
     otherGauges: [GqlPoolStakingOtherGauge!]

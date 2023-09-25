@@ -221,7 +221,7 @@ export const avalancheNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(avalancheNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [avalancheNetworkData.bal!.address]),
+        new GaugeAprService(tokenService, [avalancheNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, avalancheNetworkData.bal!.address)],
     tokenPriceHandlers: [

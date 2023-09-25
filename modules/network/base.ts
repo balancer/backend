@@ -122,7 +122,7 @@ export const baseNetworkConfig: NetworkConfig = {
         new IbTokensAprService(baseNetworkData.ibAprConfig),
         new BoostedPoolAprService(),
         new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [baseNetworkData.bal!.address]),
+        new GaugeAprService(tokenService, [baseNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, baseNetworkData.bal!.address)],
     tokenPriceHandlers: [

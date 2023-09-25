@@ -147,7 +147,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(gnosisNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [gnosisNetworkData.bal!.address]),
+        new GaugeAprService(tokenService, [gnosisNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, gnosisNetworkData.bal!.address)],
     tokenPriceHandlers: [

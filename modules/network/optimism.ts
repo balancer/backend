@@ -253,7 +253,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [
+        new GaugeAprService(tokenService, [
             optimismNetworkData.beets!.address,
             optimismNetworkData.bal!.address,
         ]),
