@@ -60,7 +60,7 @@ export class GaugeAprService implements PoolAprService {
                 gauge.rewards.map(async ({ tokenAddress, rewardPerSecond }) => {
                     const price = this.tokenService.getPriceForToken(tokenPrices, tokenAddress);
                     if (!price) {
-                        return Promise.reject('Price not found');
+                        return Promise.reject(`Price not found for ${tokenAddress}`);
                     }
 
                     let definition;
@@ -91,6 +91,7 @@ export class GaugeAprService implements PoolAprService {
             const aprItems = rewards
                 .map((reward) => {
                     if (reward.status === 'rejected') {
+                        console.error(`Failed to get reward data for ${gauge.id}: ${reward.reason}`)
                         return null;
                     }
 

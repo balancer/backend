@@ -61,7 +61,7 @@ const baseNetworkData: NetworkData = {
     },
     protocolToken: 'bal',
     bal: {
-        address: '0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1 ',
+        address: '0x4158734d47fc9692176b5085e0f52ee0da5d47f1',
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
