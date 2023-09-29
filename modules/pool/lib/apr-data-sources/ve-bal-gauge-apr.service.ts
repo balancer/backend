@@ -91,7 +91,9 @@ export class GaugeAprService implements PoolAprService {
             const aprItems = rewards
                 .map((reward) => {
                     if (reward.status === 'rejected') {
-                        console.error(`Failed to get reward data for ${gauge.id}: ${reward.reason}`)
+                        console.error(
+                            `Error: Failed to get reward data for ${gauge.id} on chain ${networkContext.chainId}: ${reward.reason}`,
+                        );
                         return null;
                     }
 
