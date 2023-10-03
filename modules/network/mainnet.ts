@@ -320,7 +320,7 @@ export const mainnetNetworkData: NetworkData = {
                 isIbYield: true,
             },
             ETHx: {
-                tokenAddress: '0x0f7f961648ae6db43c75663ac7e5414eb79b5704',
+                tokenAddress: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b',
                 sourceUrl: 'https://universe.staderlabs.com/eth/apy',
                 path: 'value',
                 isIbYield: true,
