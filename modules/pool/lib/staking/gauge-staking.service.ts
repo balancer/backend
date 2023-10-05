@@ -276,7 +276,7 @@ export class GaugeStakingService implements PoolStakingService {
             }),
             ...Object.keys(rewardsData)
                 .map((gaugeAddress) => [
-                    // L2 V1 case, includes tokens other than BAL
+                    // L2 V1 case with any token
                     ...Object.keys(rewardsData[gaugeAddress].rewardData).map((tokenAddress) => {
                         const id = `${gaugeAddress}-${tokenAddress}`.toLowerCase();
                         const { rate, period_finish } = rewardsData[gaugeAddress].rewardData[tokenAddress];

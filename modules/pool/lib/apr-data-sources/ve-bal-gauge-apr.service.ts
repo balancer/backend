@@ -117,7 +117,7 @@ export class GaugeAprService implements PoolAprService {
                         (networkContext.chain === 'MAINNET' || gauge.version === 2)
                     ) {
                         let minApr = 0;
-                        if (networkContext.chain === 'MAINNET' && workingSupplyTvl > 0) {
+                        if (workingSupplyTvl > 0) {
                             minApr = rewardPerYear / workingSupplyTvl;
                         } else if (gaugeTvl > 0) {
                             minApr = rewardPerYear / gaugeTvl;
