@@ -205,7 +205,7 @@ export class GaugeStakingService implements PoolStakingService {
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
-    private async getOnchainRewardTokensData(gauges: { id: string; version: 1 | 2; tokens: { id: string }[] }[]) {
+    private async getOnchainRewardTokensData(gauges: { id: string; version: 1 | 2; tokens: { id: string, decimals: number }[] }[]) {
         // Get onchain data for BAL rewards
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
         for (const gauge of gauges) {
@@ -227,9 +227,11 @@ export class GaugeStakingService implements PoolStakingService {
         const balData = (await this.balMulticaller.execute()) as GaugeBalDistributionData;
 
         // Get onchain data for reward tokens
+        const decimals: { [address: string]: number } = {};
         for (const gauge of gauges) {
             for (const token of gauge.tokens ?? []) {
                 const [address] = token.id.toLowerCase().split('-');
+                decimals[address] = token.decimals;
                 if (gauge.version === 1) {
                     this.rewardsMulticallerV1.call(
                         `${gauge.id}.rewardData.${address}`,
@@ -281,7 +283,7 @@ export class GaugeStakingService implements PoolStakingService {
                         const id = `${gaugeAddress}-${tokenAddress}`.toLowerCase();
                         const { rate, period_finish } = rewardsData[gaugeAddress].rewardData[tokenAddress];
                         const rewardPerSecond =
-                            period_finish && period_finish.toNumber() > now ? formatUnits(rate!) : '0.0';
+                            period_finish && period_finish.toNumber() > now ? formatUnits(rate!, decimals[tokenAddress]) : '0.0';
                         const { totalSupply } = balData[gaugeAddress];
 
                         return {
@@ -299,6 +301,8 @@ export class GaugeStakingService implements PoolStakingService {
             workingSupply: string;
             totalSupply: string;
         }[];
+
+        console.log(onchainRates)
 
         return onchainRates;
     }
