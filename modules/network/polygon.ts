@@ -263,7 +263,7 @@ export const polygonNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(polygonNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [polygonNetworkData.bal!.address]),
+        new GaugeAprService(tokenService, [polygonNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, polygonNetworkData.bal!.address)],
     tokenPriceHandlers: [

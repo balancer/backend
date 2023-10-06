@@ -76,6 +76,7 @@ type GqlPoolMinimal {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     type: GqlPoolMinimalType!
+    version: Int!
 }
 
 enum GqlPoolMinimalType {
@@ -91,12 +92,15 @@ enum GqlPoolMinimalType {
     GYRO
     GYRO3
     GYROE
+    FX
 }
 
 interface GqlPoolBase {
     #fields that never change after creation
     id: ID!
     chain: GqlChain!
+    type: String!
+    version: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -215,6 +219,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -240,6 +246,8 @@ type GqlPoolGyro implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -261,6 +269,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -282,6 +292,8 @@ type GqlPoolStable implements GqlPoolBase {
     tokens: [GqlPoolToken!]!
     amp: BigInt!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -303,6 +315,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
     tokens: [GqlPoolToken!]!
     amp: BigInt!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -325,6 +339,8 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     amp: BigInt!
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
+    type: String!
+    version: Int!
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -349,6 +365,8 @@ type GqlPoolElement implements GqlPoolBase {
     principalToken: Bytes!
     baseToken: Bytes!
     staking: GqlPoolStaking
+    type: String!
+    version: Int!
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -375,6 +393,8 @@ type GqlPoolLinear implements GqlPoolBase {
     lowerTarget: BigInt!
     staking: GqlPoolStaking
     bptPriceRate: BigDecimal!
+    type: String!
+    version: Int!
 }
 
 type GqlPoolLinearNested {
@@ -560,6 +580,11 @@ type GqlPoolAprTotal {
     total: BigDecimal!
 }
 
+input GqlPoolTimePeriod {
+    gt: Int
+    lt: Int
+}
+
 enum GqlPoolOrderBy {
     totalLiquidity
     totalShares
@@ -586,6 +611,7 @@ input GqlPoolFilter {
     filterNotIn: [String!]
     chainIn: [GqlChain!]
     chainNotIn: [GqlChain!]
+    createTime: GqlPoolTimePeriod
 }
 
 enum GqlPoolFilterCategory {
@@ -798,6 +824,7 @@ type GqlPoolStakingGauge {
     rewards: [GqlPoolStakingGaugeReward!]!
     status: GqlPoolStakingGaugeStatus!
     version: Int!
+    workingSupply: String!
     # There can be more than one gauge per pool, but only one preferred. For simplicity of handling, we focus on
     # the primary gauge.
     otherGauges: [GqlPoolStakingOtherGauge!]

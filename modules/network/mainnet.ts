@@ -78,6 +78,7 @@ export const mainnetNetworkData: NetworkData = {
     gaugeControllerHelperAddress: '0x8e5698dc4897dc12243c8642e77b4f21349db97c',
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+        tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
         composableStablePoolFactories: [
             '0xf9ac7b9df2b3454e841110cce5550bd5ac6f875f',
             '0x85a80afee867adf27b50bdb7b76da70f1e853062',
@@ -319,7 +320,7 @@ export const mainnetNetworkData: NetworkData = {
                 isIbYield: true,
             },
             ETHx: {
-                tokenAddress: '0x0f7f961648ae6db43c75663ac7e5414eb79b5704',
+                tokenAddress: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b',
                 sourceUrl: 'https://universe.staderlabs.com/eth/apy',
                 path: 'value',
                 isIbYield: true,
@@ -364,7 +365,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(gaugeSubgraphService, tokenService, [mainnetNetworkData.bal!.address]),
+        new GaugeAprService(tokenService, [mainnetNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, mainnetNetworkData.bal!.address)],
     tokenPriceHandlers: [
