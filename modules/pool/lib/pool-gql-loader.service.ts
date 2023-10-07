@@ -33,7 +33,7 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaPoolAprType } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
@@ -614,12 +614,17 @@ export class PoolGqlLoaderService {
                 currentAprRangeMaxTotal += maxApr;
 
                 switch (aprItem.type) {
-                    case 'NATIVE_REWARD': {
+                    case PrismaPoolAprType.NATIVE_REWARD: {
                         currentNativeAprRangeMin += minApr;
                         currentNativeAprRangeMax += maxApr;
                         break;
                     }
-                    case 'THIRD_PARTY_REWARD': {
+                    case PrismaPoolAprType.THIRD_PARTY_REWARD: {
+                        currentThirdPartyAprRangeMin += minApr;
+                        currentThirdPartyAprRangeMax += maxApr;
+                        break;
+                    }
+                    case PrismaPoolAprType.VOTING: {
                         currentThirdPartyAprRangeMin += minApr;
                         currentThirdPartyAprRangeMax += maxApr;
                         break;

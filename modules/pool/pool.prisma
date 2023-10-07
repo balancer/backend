@@ -293,6 +293,7 @@ enum PrismaPoolAprType {
     LINEAR_BOOSTED
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
+    VOTING
 }
 
 enum PrismaPoolAprItemGroup {

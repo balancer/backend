@@ -25,6 +25,7 @@ import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -306,6 +307,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),
         new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
+        new BeetswarsGaugeVotingAprService(),
     ],
     poolStakingServices: [
         new MasterChefStakingService(masterchefService, fantomNetworkData.masterchef!.excludedFarmIds),
