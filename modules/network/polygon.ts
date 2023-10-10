@@ -66,6 +66,9 @@ const polygonNetworkData: NetworkData = {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
     },
+    gyro: {
+        config: '0xfdc2e9e03f515804744a40d0f8d25c16e93fbe67'
+    },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
         composableStablePoolFactories: [

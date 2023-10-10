@@ -76,6 +76,9 @@ export const mainnetNetworkData: NetworkData = {
     },
     gaugeControllerAddress: '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
     gaugeControllerHelperAddress: '0x8e5698dc4897dc12243c8642e77b4f21349db97c',
+    gyro: {
+        config: '0xac89cc9d78bbad7eb3a02601b4d65daa1f908aa6'
+    },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
         tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',

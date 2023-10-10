@@ -1,3 +1,4 @@
+// TODO: let's make it simpler, it's already refactored in the SDK
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
@@ -19,6 +20,10 @@ import { TokenService } from '../../token/token.service';
 import { networkContext } from '../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { Multicaller3 } from '../../web3/multicaller3';
+import { formatBytes32String } from '@ethersproject/strings';
+import { keccak256 } from '@ethersproject/solidity';
+import { defaultAbiCoder } from '@ethersproject/abi';
+import GyroConfigAbi from '../abi/GyroConfig.json';
 
 interface PoolStatusResult {
     [key: string]: {
@@ -49,6 +54,7 @@ interface MulticallExecuteResult {
     protocolFeePercentageCache?: number | undefined;
     tokenRates?: BigNumber[] | undefined;
     metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][] | undefined;
+    gyroProtocolFee?: BigNumber | undefined;
 }
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -66,6 +72,8 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
 ];
 
 export class PoolOnChainDataService {
+    gyroDefaultFee = 0;
+    gyroPoolTypeFee = 0;
     constructor(private readonly tokenService: TokenService) {}
 
     public async updateOnChainStatus(poolIds: string[]): Promise<void> {
@@ -158,6 +166,7 @@ export class PoolOnChainDataService {
                     ...LiquidityBootstrappingPoolAbi,
                     ...ComposableStablePoolAbi,
                     ...GyroEV2Abi,
+                    ...GyroConfigAbi,
                     ...VaultAbi,
                     ...aTokenRateProvider,
                     ...WeightedPoolAbi,
@@ -171,6 +180,22 @@ export class PoolOnChainDataService {
         );
 
         const multiPool = new Multicaller3(abis);
+
+        // Adding Gyro default fee calls
+        const feeKey = formatBytes32String('PROTOCOL_SWAP_FEE_PERC');
+        if (networkContext.data.gyro?.config) {
+            const eclpKey = keccak256(
+                ['bytes'],
+                [
+                    defaultAbiCoder.encode(
+                        ['bytes32', 'bytes32'],
+                        [feeKey, formatBytes32String('E-CLP')]
+                    ),
+                ]
+            );
+            multiPool.call('gyro.default', networkContext.data.gyro.config, 'getUint', [feeKey]);
+            multiPool.call('gyro.eclp', networkContext.data.gyro.config, 'getUint', [eclpKey]);
+        }
 
         filteredPools.forEach((pool) => {
             if (!SUPPORTED_POOL_TYPES.includes(pool.type || '')) {
@@ -217,6 +242,20 @@ export class PoolOnChainDataService {
             } else if (isGyroPool(pool)) {
                 multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFeePercentage');
                 multiPool.call(`${pool.id}.rate`, pool.address, 'getRate');
+
+                // Get fee from Gyro config pool
+                if (networkContext.data.gyro?.config) {
+                    const poolFeeKey = keccak256(
+                        ['bytes'],
+                        [
+                            defaultAbiCoder.encode(
+                            ['bytes32', 'uint256'],
+                            [feeKey, pool.address]
+                            ),
+                        ]
+                    );
+                    multiPool.call(`${pool.id}.gyroProtocolFee`, networkContext.data.gyro.config, 'getUint', [poolFeeKey]);
+                }
             }
 
             if (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'INVESTMENT') {
@@ -259,9 +298,15 @@ export class PoolOnChainDataService {
         });
 
         let poolsOnChainData = {} as Record<string, MulticallExecuteResult>;
+        let gyroDefaults = {
+            default: 0,
+            eclp: 0,
+        }
 
         try {
-            poolsOnChainData = (await multiPool.execute()) as Record<string, MulticallExecuteResult>;
+            const { gyro, ..._poolsOnChainData } = (await multiPool.execute());
+            poolsOnChainData = _poolsOnChainData;
+            gyroDefaults = gyro;
         } catch (err: any) {
             console.error(err);
             throw `Issue with multicall execution. ${err}`;
@@ -332,10 +377,21 @@ export class PoolOnChainDataService {
                         ? onchainData.swapEnabled
                         : pool.dynamicData?.swapEnabled;
 
-                const yieldProtocolFeePercentage =
+                let yieldProtocolFeePercentage =
                     typeof onchainData.protocolFeePercentageCache !== 'undefined'
                         ? formatFixed(onchainData.protocolFeePercentageCache, 18)
                         : `${networkContext.data.balancer.yieldProtocolFeePercentage}`;
+
+                // Setting Gyro protocol fee
+                if (onchainData.gyroProtocolFee) {
+                    yieldProtocolFeePercentage = formatFixed(onchainData.gyroProtocolFee, 18);
+                } else if (pool.type.includes('GYRO')) {
+                    if (pool.type === 'GYROE') {
+                        yieldProtocolFeePercentage = formatFixed(gyroDefaults.eclp, 18) || '0';
+                    } else {
+                        yieldProtocolFeePercentage = formatFixed(gyroDefaults.default, 18) || '0';
+                    }
+                }
 
                 if (
                     pool.dynamicData &&
