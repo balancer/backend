@@ -8,7 +8,7 @@
     "private": true,
     "scripts": {
         "start": "node -r newrelic dist/app.js",
-        "start:local": "ts-node -r dotenv/config app",
+        "start:local": "NEW_RELIC_ENABLED=false ts-node -r dotenv/config app",
         "watch": "concurrently \"nodemon app\" \"yarn generate --watch\"",
         "build": "tsc",
         "generate": "graphql-codegen --config codegen.yml -r dotenv/config",
@@ -27,6 +27,7 @@
         "@gnosis.pm/safe-core-sdk": "^1.2.0",
         "@graphql-tools/load-files": "^6.5.2",
         "@graphql-tools/merge": "^8.2.1",
+        "@newrelic/apollo-server-plugin": "^4.0.0",
         "@prisma/client": "^5.3.1",
         "@sanity/client": "^2.23.1",
         "@sentry/node": "^7.56.0",

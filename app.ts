@@ -12,6 +12,8 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
+import { ApolloServerPlugin } from 'apollo-server-plugin-base';
+import createNewRelicPlugin from '@newrelic/apollo-server-plugin';
 import { beethovenSchema } from './graphql_schema_generated_beethoven';
 import { balancerSchema } from './graphql_schema_generated_balancer';
 import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
@@ -90,6 +92,14 @@ async function startServer() {
         }),
         sentryPlugin,
     ];
+
+    if (process.env.NODE_ENV !== 'local' && process.env.NEW_RELIC_APP_NAME) {
+        const newRelicPlugin = createNewRelicPlugin<ApolloServerPlugin>({})
+        plugins.push(
+            newRelicPlugin,
+        )
+    }
+
     if (process.env.APOLLO_SCHEMA_REPORTING && process.env.APOLLO_SCHEMA_REPORTING === 'true') {
         plugins.push(
             ApolloServerPluginUsageReporting({

@@ -4128,6 +4128,11 @@
   resolved "https://registry.yarnpkg.com/@n1ru4l/graphql-live-query/-/graphql-live-query-0.9.0.tgz#defaebdd31f625bee49e6745934f36312532b2bc"
   integrity sha512-BTpWy1e+FxN82RnLz4x1+JcEewVdfmUhV1C6/XYD5AjS7PQp9QFF7K8bCD6gzPTr2l+prvqOyVueQhFJxB1vfg==
 
+"@newrelic/apollo-server-plugin@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@newrelic/apollo-server-plugin/-/apollo-server-plugin-4.0.0.tgz#32087e6a7939795cc0e7f55135420d977e9f7984"
+  integrity sha512-L3HMj+qnUs26QsEbLy4qDYEDYGKlJSaCDoZRrxiIj4rn6rs6hRAHw2mt6oEjwRdfUoF8diqiF6G/+yjhv57tWA==
+
 "@newrelic/aws-sdk@^7.0.0":
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/@newrelic/aws-sdk/-/aws-sdk-7.0.1.tgz#c4cc5ad8e33d79d3e8708d7908b66c06349329a4"
