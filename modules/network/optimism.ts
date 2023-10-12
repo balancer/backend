@@ -207,6 +207,12 @@ const optimismNetworkData: NetworkData = {
                 path: 'value',
                 group: 'OVERNIGHT',
             },
+            sfrxETH: {
+                tokenAddress: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
+                sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                path: 'sfrxethApr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
