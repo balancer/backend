@@ -2,7 +2,7 @@ import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { secondsPerDay, timestampRoundedUpToNearestHour } from '../../common/time';
-import { PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
+import { Chain, PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { Cache, CacheClass } from 'memory-cache';
@@ -23,27 +23,27 @@ export class TokenPriceService {
         return networkContext.config.tokenPriceHandlers;
     }
 
-    public async getWhiteListedCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+    public async getWhiteListedCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
             where: {
-                chain: networkContext.chain,
-                token: {
-                    types: { some: { type: 'WHITE_LISTED' } },
-                },
+                chain: { in: chains },
+                token: { types: { some: { type: 'WHITE_LISTED' } } },
             },
         });
 
-        const wethPrice = tokenPrices.find(
-            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
-        );
+        for (const chain of chains) {
+            const wethPrice = tokenPrices.find(
+                (tokenPrice) => tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address,
+            );
 
-        if (wethPrice) {
-            tokenPrices.push({
-                ...wethPrice,
-                tokenAddress: networkContext.data.eth.address,
-            });
+            if (wethPrice) {
+                tokenPrices.push({
+                    ...wethPrice,
+                    tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
+                });
+            }
         }
 
         return tokenPrices;

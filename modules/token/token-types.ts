@@ -1,4 +1,5 @@
 import { PrismaTokenWithTypesAndPrices, PrismaTokenWithTypes } from '../../prisma/prisma-types';
+import { Chain } from '@prisma/client';
 
 export interface TokenPriceHandler {
     exitIfFails: boolean;
@@ -24,6 +25,7 @@ export interface TokenDefinition {
     symbol: string;
     decimals: number;
     chainId: number;
+    chain: Chain;
     logoURI?: string | null;
     priority: number;
     coingeckoPlatformId?: string | null;

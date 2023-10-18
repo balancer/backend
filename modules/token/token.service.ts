@@ -8,6 +8,7 @@ import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDele
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
 import { Dictionary } from 'lodash';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -49,27 +50,33 @@ export class TokenService {
         return tokens;
     }
 
-    public async getTokenDefinitions(): Promise<TokenDefinition[]> {
+    public async getTokenDefinitions(chains: Chain[]): Promise<TokenDefinition[]> {
         const tokens = await prisma.prismaToken.findMany({
-            where: { types: { some: { type: 'WHITE_LISTED' } }, chain: networkContext.chain },
+            where: { types: { some: { type: 'WHITE_LISTED' } }, chain: { in: chains } },
             include: { types: true },
             orderBy: { priority: 'desc' },
         });
 
-        const weth = tokens.find((token) => token.address === networkContext.data.weth.address);
+        for (const chain of chains) {
+            const weth = tokens.find(
+                (token) =>
+                    token.chain === chain && token.address === AllNetworkConfigsKeyedOnChain[chain].data.weth.address,
+            );
 
-        if (weth) {
-            tokens.push({
-                ...weth,
-                name: networkContext.data.eth.name,
-                address: networkContext.data.eth.address,
-                symbol: networkContext.data.eth.symbol,
-            });
+            if (weth) {
+                tokens.push({
+                    ...weth,
+                    name: AllNetworkConfigsKeyedOnChain[chain].data.eth.name,
+                    address: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
+                    symbol: AllNetworkConfigsKeyedOnChain[chain].data.eth.symbol,
+                    chain: AllNetworkConfigsKeyedOnChain[chain].data.chain.prismaId,
+                });
+            }
         }
 
         return tokens.map((token) => ({
             ...token,
-            chainId: networkContext.data.chain.id,
+            chainId: AllNetworkConfigsKeyedOnChain[token.chain].data.chain.id,
             //TODO: some linear wrapped tokens are tradable. ie: xBOO
             tradable: !token.types.find(
                 (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'LINEAR_WRAPPED_TOKEN',
@@ -100,7 +107,7 @@ export class TokenService {
         return response;
     }
 
-    public async getWhiteListedTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+    public async getWhiteListedTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         /*const cached = this.cache.get(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY) as PrismaTokenCurrentPrice[] | null;
 
         if (cached) {
@@ -112,7 +119,7 @@ export class TokenService {
 
         return tokenPrices;*/
 
-        return this.tokenPriceService.getWhiteListedCurrentTokenPrices();
+        return this.tokenPriceService.getWhiteListedCurrentTokenPrices(chains);
     }
 
     public async getProtocolTokenPrice(): Promise<string> {
