@@ -9,6 +9,7 @@ import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
 import { networkContext } from '../../network/network-context.service';
 import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
 const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices`;
@@ -48,21 +49,21 @@ export class TokenPriceService {
         return tokenPrices;
     }
 
-    public async getCurrentTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
+    public async getCurrentTokenPrices(chain = networkContext.chain): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: chain },
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
         });
 
         const wethPrice = tokenPrices.find(
-            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
+            (tokenPrice) => tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address,
         );
 
         if (wethPrice) {
             tokenPrices.push({
                 ...wethPrice,
-                tokenAddress: networkContext.data.eth.address,
+                tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
             });
         }
 

@@ -1,5 +1,5 @@
 import { AmountHumanReadable } from '../common/global-types';
-import { PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { Relic } from '../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
 
 export interface UserStakedBalanceService {
@@ -14,6 +14,7 @@ export interface UserPoolBalance {
     totalBalance: AmountHumanReadable;
     walletBalance: AmountHumanReadable;
     stakedBalance: AmountHumanReadable;
+    chain: Chain;
 }
 
 export interface UserSyncUserBalanceInput {

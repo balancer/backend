@@ -1,4 +1,4 @@
-import { PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
@@ -27,8 +27,8 @@ export class UserService {
         return networkContext.config.userStakedBalanceServices;
     }
 
-    public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
-        return this.userBalanceService.getUserPoolBalances(address);
+    public async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
+        return this.userBalanceService.getUserPoolBalances(address, chains);
     }
 
     public async getUserPoolInvestments(
@@ -85,7 +85,7 @@ export class UserService {
     }
 
     public async syncUserBalanceAllPools(userAddress: string) {
-        const allBalances = await this.userBalanceService.getUserPoolBalances(userAddress);
+        const allBalances = await this.userBalanceService.getUserPoolBalances(userAddress, [networkContext.chain]);
         for (const userPoolBalance of allBalances) {
             await this.syncUserBalance(userAddress, userPoolBalance.poolId);
         }

@@ -1,17 +1,13 @@
 import { TokenDefinition, TokenPriceItem } from './token-types';
 import { prisma } from '../../prisma/prisma-client';
 import { TokenPriceService } from './lib/token-price.service';
-import { PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import { Chain, PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { networkContext } from '../network/network-context.service';
-import { getContractAt } from '../web3/contract';
-import ERC20Abi from '../web3/abi/ERC20.json';
-import { BigNumber } from 'ethers';
-import { formatFixed } from '@ethersproject/bignumber';
-import { add } from 'lodash';
+import { Dictionary } from 'lodash';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -42,10 +38,10 @@ export class TokenService {
     }
 
     public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
-        let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chainId}`);
+        let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chain}`);
         if (!tokens) {
             tokens = await prisma.prismaToken.findMany({ where: { chain: networkContext.chain } });
-            this.cache.put(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chainId}`, tokens, 5 * 60 * 1000);
+            this.cache.put(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chain}`, tokens, 5 * 60 * 1000);
         }
         if (addresses) {
             return tokens.filter((token) => addresses.includes(token.address));
@@ -85,13 +81,23 @@ export class TokenService {
         return this.tokenPriceService.updateTokenPrices();
     }
 
-    public async getTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices = this.cache.get(`${TOKEN_PRICES_CACHE_KEY}:${networkContext.chainId}`);
+    public async getTokenPrices(chain = networkContext.chain): Promise<PrismaTokenCurrentPrice[]> {
+        let tokenPrices = this.cache.get(`${TOKEN_PRICES_CACHE_KEY}:${chain}`);
         if (!tokenPrices) {
-            tokenPrices = await this.tokenPriceService.getCurrentTokenPrices();
-            this.cache.put(`${TOKEN_PRICES_CACHE_KEY}:${networkContext.chainId}`, tokenPrices, 30 * 1000);
+            tokenPrices = await this.tokenPriceService.getCurrentTokenPrices(chain);
+            this.cache.put(`${TOKEN_PRICES_CACHE_KEY}:${chain}`, tokenPrices, 30 * 1000);
         }
         return tokenPrices;
+    }
+
+    public async getTokenPricesForChains(chains: Chain[]): Promise<Dictionary<PrismaTokenCurrentPrice[]>> {
+        const response: Dictionary<PrismaTokenCurrentPrice[]> = {};
+
+        for (const chain of chains) {
+            response[chain] = await this.getTokenPrices(chain);
+        }
+
+        return response;
     }
 
     public async getWhiteListedTokenPrices(): Promise<PrismaTokenCurrentPrice[]> {
@@ -190,11 +196,11 @@ export class TokenService {
     }
 
     public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`);
+        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chain}`);
         if (!tokenPrices24hAgo) {
             tokenPrices24hAgo = await this.tokenPriceService.getTokenPriceFrom24hAgo();
             this.cache.put(
-                `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chainId}`,
+                `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chain}`,
                 tokenPrices24hAgo,
                 60 * 15 * 1000,
             );
