@@ -12,27 +12,20 @@ export class BeefyAprHandler implements AprHandler {
         };
     };
     sourceUrl: string;
-    group = 'BEEFY';
+    group: string | undefined = 'BEEFY';
 
-    constructor(config: BeefyAprConfig) {
-        this.tokens = config.tokens;
-        this.sourceUrl = config.sourceUrl;
+    constructor(aprConfig: BeefyAprConfig) {
+        this.tokens = aprConfig.tokens;
+        this.sourceUrl = aprConfig.sourceUrl;
     }
 
-    async getAprs() {
+    async getAprs(): Promise<{ [p: string]: { apr: number; isIbYield: boolean } }> {
         try {
             const { data: aprData } = await axios.get<VaultApr>(this.sourceUrl);
-            const aprs = Object.values(this.tokens).map(({ address, vaultId, isIbYield }) => {
-                const apr = aprData[vaultId]?.vaultApr ?? 0;
-                return {
-                    [address]: {
-                        apr,
-                        isIbYield: isIbYield ?? false,
-                        group: this.group
-                    }
-                };
-            });
-
+            const aprs: { [tokenAddress: string]: { apr: number; isIbYield: boolean } } = {};
+            for (const { address, vaultId, isIbYield } of Object.values(this.tokens)) {
+                aprs[address] = { apr: aprData[vaultId].vaultApr, isIbYield: isIbYield ?? false };
+            }
             return aprs;
         } catch (error) {
             console.error(`Beefy IB APR hanlder failed: `, error);

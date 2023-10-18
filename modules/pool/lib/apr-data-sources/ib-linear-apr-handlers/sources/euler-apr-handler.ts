@@ -60,7 +60,6 @@ export class EulerAprHandler implements AprHandler {
                         Object.values(this.tokens).find(
                             ({ address }) => address.toLowerCase() === eTokenAddress.toLowerCase(),
                         )?.isIbYield ?? false,
-                    group: this.group,
                 },
             ]);
 

@@ -13,7 +13,7 @@ export class IbTokensAprService implements PoolAprService {
     private ibTokensAprHandlers: IbTokensAprHandlers;
 
     constructor(aprConfig: IbAprConfig) {
-        this.ibTokensAprHandlers = new IbTokensAprHandlers(aprConfig, networkContext.chain);
+        this.ibTokensAprHandlers = new IbTokensAprHandlers(aprConfig);
     }
 
     getAprServiceName(): string {
