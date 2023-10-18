@@ -12,12 +12,16 @@ export class YearnAprHandler implements AprHandler {
         this.sourceUrl = aprHandlerConfig.sourceUrl;
         this.isIbYield = aprHandlerConfig.isIbYield;
     }
-    async getAprs(): Promise<{ [p: string]: { apr: number; isIbYield: boolean } }> {
+    async getAprs() {
         try {
             const { data } = await axios.get<YearnVault[]>(this.sourceUrl);
             const aprs = Object.fromEntries(
                 data.map(({ address, apy: { net_apy } }) => {
-                    return [address.toLowerCase(), { apr: net_apy, isIbYield: this.isIbYield ?? false }];
+                    return [address.toLowerCase(), {
+                        apr: net_apy,
+                        isIbYield: this.isIbYield ?? false,
+                        group: this.group
+                    }];
                 }),
             );
             return aprs;
