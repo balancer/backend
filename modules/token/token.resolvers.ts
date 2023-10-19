@@ -3,15 +3,26 @@ import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
 import { networkContext } from '../network/network-context.service';
+import { headerChain } from '../context/header-chain';
 
 const resolvers: Resolvers = {
     Query: {
         tokenGetTokens: async (parent, { chains }, context) => {
-            chains = chains && chains.length > 0 ? chains : [networkContext.chain];
+            const currentChain = headerChain()
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                chains = [];
+            }
             return tokenService.getTokenDefinitions(chains);
         },
         tokenGetCurrentPrices: async (parent, { chains }, context) => {
-            chains = chains && chains.length > 0 ? chains : [networkContext.chain];
+            const currentChain = headerChain()
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                chains = [];
+            }
             const prices = await tokenService.getWhiteListedTokenPrices(chains);
 
             return prices.map((price) => ({

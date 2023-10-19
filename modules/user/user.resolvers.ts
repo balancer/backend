@@ -2,12 +2,17 @@ import { Resolvers } from '../../schema';
 import { userService } from './user.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { tokenService } from '../token/token.service';
-import { networkContext } from '../network/network-context.service';
+import { headerChain } from '../context/header-chain';
 
 const resolvers: Resolvers = {
     Query: {
         userGetPoolBalances: async (parent, { chains, address }, context) => {
-            chains = chains && chains.length > 0 ? chains : [networkContext.chain];
+            const currentChain = headerChain()
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                chains = [];
+            }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
             const balances = await userService.getUserPoolBalances(accountAddress, chains);
