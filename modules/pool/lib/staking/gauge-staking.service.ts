@@ -302,8 +302,6 @@ export class GaugeStakingService implements PoolStakingService {
             totalSupply: string;
         }[];
 
-        console.log(onchainRates)
-
         return onchainRates;
     }
 

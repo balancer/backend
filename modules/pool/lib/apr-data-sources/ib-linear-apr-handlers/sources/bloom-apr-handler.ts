@@ -5,16 +5,16 @@ import { abi as bloomBpsFeed } from './abis/bloom-bps-feed';
 import * as Sentry from '@sentry/node';
 
 export class BloomAprHandler implements AprHandler {
-    group: string | undefined;
+    group = "BLOOM";
 
     tokens: BloomAprConfig['tokens'];
 
-    constructor(aprConfig: BloomAprConfig) {
-        this.tokens = aprConfig.tokens;
+    constructor(config: BloomAprConfig) {
+        this.tokens = config.tokens;
     }
 
-    async getAprs(): Promise<{ [p: string]: { apr: number; isIbYield: boolean } }> {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean } } = {};
+    async getAprs() {
+        const aprs: { [p: string]: { apr: number; isIbYield: boolean, group?: string } } = {};
         for (const { address, feedAddress, isIbYield } of Object.values(this.tokens)) {
             try {
                 const feedContract = getContractAt(feedAddress, bloomBpsFeed);
@@ -23,7 +23,11 @@ export class BloomAprHandler implements AprHandler {
                     continue;
                 }
                 const tokenApr = (Number(currentRate) - 10000) / 10000;
-                aprs[address] = { apr: tokenApr, isIbYield: isIbYield ?? false };
+                aprs[address] = {
+                    apr: tokenApr,
+                    isIbYield: isIbYield ?? false,
+                    group: this.group
+                };
             } catch (error) {
                 console.error(`Bloom APR Failed for token ${address}: `, error);
                 Sentry.captureException(`Bloom APR Failed for token ${address}: ${error}`);

@@ -260,6 +260,10 @@ export class PoolUsdDataService {
         await prismaBulkExecuteOperations(operations);
     }
 
+    /**
+     * This function depends on pools data to be up to date, so it should be called after
+     * poolService.syncAllPoolsFromSubgraph or mutation poolSyncAllPoolsFromSubgraph
+     */
     public async updateLifetimeValuesForAllPools() {
         let updates: any[] = [];
         const subgraphPools = await this.balancerSubgraphService.getAllPools({});

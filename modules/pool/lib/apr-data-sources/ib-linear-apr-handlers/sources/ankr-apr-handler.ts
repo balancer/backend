@@ -12,14 +12,13 @@ export class AnkrAprHandler implements AprHandler {
         };
     };
     url: string;
-    readonly group = undefined;
 
-    constructor(aprHandlerConfig: AnkrAprConfig) {
-        this.tokens = aprHandlerConfig.tokens;
-        this.url = aprHandlerConfig.sourceUrl;
+    constructor(config: AnkrAprConfig) {
+        this.tokens = config.tokens;
+        this.url = config.sourceUrl;
     }
 
-    async getAprs(): Promise<{ [tokenAddress: string]: { apr: number; isIbYield: boolean } }> {
+    async getAprs() {
         try {
             const { data } = await axios.get(this.url);
             const services = (data as { services: { serviceName: string; apy: string }[] }).services;
@@ -29,7 +28,10 @@ export class AnkrAprHandler implements AprHandler {
                     if (!service) {
                         return [address, 0];
                     }
-                    return [address, { apr: parseFloat(service.apy) / 1e2, isIbYield: isIbYield ?? false }];
+                    return [address, {
+                        apr: parseFloat(service.apy) / 1e2,
+                        isIbYield: isIbYield ?? false,
+                    }];
                 }),
             );
             return aprs;

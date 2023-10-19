@@ -30,6 +30,7 @@ export class OvixAprHandler implements AprHandler {
                     {
                         apr: Math.pow(1 + (borrowRate as BigNumber).toNumber() / 1e18, 365 * 24 * 60 * 60) - 1,
                         isIbYield: isIbYield ?? false,
+                        group: this.group,
                     },
                 ];
             });

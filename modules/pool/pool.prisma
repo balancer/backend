@@ -310,6 +310,7 @@ enum PrismaPoolAprItemGroup {
     TETU
     OVIX
     EULER
+    MAKER
     DEFAULT
 }
 

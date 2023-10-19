@@ -30,7 +30,11 @@ export class TranchessAprHandler implements AprHandler {
                 ).filter(({ name }) => name === underlyingAssetName)[0].weeklyAveragePnlPercentage;
                 return [
                     address,
-                    { apr: (365 * Number(weeklyAveragePnlPercentage)) / 1e18, isIbYield: isIbYield ?? false },
+                    {
+                        apr: (365 * Number(weeklyAveragePnlPercentage)) / 1e18,
+                        isIbYield: isIbYield ?? false,
+                        group: this.group
+                    },
                 ];
             });
             // The key weeklyAveragePnlPercentage is the daily yield of qETH in 18 decimals, timing 365 should give you the APR.
