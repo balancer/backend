@@ -5,7 +5,7 @@ import { abi as bloomBpsFeed } from './abis/bloom-bps-feed';
 import * as Sentry from '@sentry/node';
 
 export class BloomAprHandler implements AprHandler {
-    group = "BLOOM";
+    group = "DEFAULT";
 
     tokens: BloomAprConfig['tokens'];
 
