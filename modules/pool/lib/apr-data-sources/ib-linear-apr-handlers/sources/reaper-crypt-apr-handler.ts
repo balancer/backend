@@ -45,7 +45,7 @@ export class ReaperCryptAprHandler implements AprHandler {
         this.averageAPRAcrossLastNHarvests = aprConfig.onchainSource?.averageAPRAcrossLastNHarvests;
     }
 
-    async getAprs() {
+    async getAprs(): Promise<{ [p: string]: { apr: number; isIbYield: boolean } }> {
         let multiStrategyAprs = {};
         let singleStrategyAprs = {};
         this.wstETHBaseApr = await this.getWstEthBaseApr();
@@ -122,11 +122,7 @@ export class ReaperCryptAprHandler implements AprHandler {
                 }
                 return {
                     ...acc,
-                    [id]: {
-                        apr: tokenApr,
-                        isIbYield: token.isIbYield ?? false,
-                        group: this.group,
-                    },
+                    [id]: { apr: tokenApr, isIbYield: token.isIbYield ?? false },
                 };
             }, {});
         } catch (error) {

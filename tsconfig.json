@@ -10,9 +10,5 @@
     "resolveJsonModule": true,
     "outDir": "./dist",
     "skipLibCheck": true
-  },
-  "exclude": [
-    "node_modules",
-    "debug"
-  ]
+  }
 }

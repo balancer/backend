@@ -300,14 +300,9 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            fantomNetworkData.ibAprConfig,
-            fantomNetworkData.chain.prismaId,
-            fantomNetworkData.balancer.yieldProtocolFeePercentage,
-            fantomNetworkData.balancer.swapProtocolFeePercentage
-        ),
+        new IbTokensAprService(fantomNetworkData.ibAprConfig),
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new PhantomStableAprService(fantomNetworkData.chain.prismaId, fantomNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),

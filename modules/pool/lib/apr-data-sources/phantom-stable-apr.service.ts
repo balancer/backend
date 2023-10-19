@@ -2,11 +2,9 @@ import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithTokens, prismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { collectsYieldFee } from '../pool-utils';
-import { Chain } from '@prisma/client';
+import { networkContext } from '../../../network/network-context.service';
 
 export class PhantomStableAprService implements PoolAprService {
-    constructor(private chain: Chain, private defaultProtocolFee: number) {}
-
     public getAprServiceName(): string {
         return 'PhantomStableAprService';
     }
@@ -16,17 +14,17 @@ export class PhantomStableAprService implements PoolAprService {
 
         const phantomStablePoolsExpanded = await prisma.prismaPool.findMany({
             ...prismaPoolWithExpandedNesting,
-            where: { chain: this.chain, id: { in: phantomStablePools.map((pool) => pool.id) } },
+            where: { chain: networkContext.chain, id: { in: phantomStablePools.map((pool) => pool.id) } },
         });
 
         for (const pool of phantomStablePoolsExpanded) {
             const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
                 ? parseFloat(pool.dynamicData.protocolYieldFee)
-                : this.defaultProtocolFee;
+                : networkContext.data.balancer.yieldProtocolFeePercentage;
             const linearPoolTokens = pool.tokens.filter((token) => token.nestedPool?.type === 'LINEAR');
             const linearPoolIds = linearPoolTokens.map((token) => token.nestedPool?.id || '');
             const aprItems = await prisma.prismaPoolAprItem.findMany({
-                where: { poolId: { in: linearPoolIds }, type: 'LINEAR_BOOSTED', chain: this.chain },
+                where: { poolId: { in: linearPoolIds }, type: 'LINEAR_BOOSTED', chain: networkContext.chain },
             });
 
             for (const token of linearPoolTokens) {
@@ -38,10 +36,10 @@ export class PhantomStableAprService implements PoolAprService {
                     const userApr = collectsYieldFee(pool) ? apr * (1 - protocolYieldFeePercentage) : apr;
 
                     await prisma.prismaPoolAprItem.upsert({
-                        where: { id_chain: { id: itemId, chain: this.chain } },
+                        where: { id_chain: { id: itemId, chain: networkContext.chain } },
                         create: {
                             id: itemId,
-                            chain: this.chain,
+                            chain: networkContext.chain,
                             poolId: pool.id,
                             apr: userApr,
                             title: aprItem.title,

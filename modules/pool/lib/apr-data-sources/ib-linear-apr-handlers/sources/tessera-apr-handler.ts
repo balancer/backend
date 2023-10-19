@@ -31,11 +31,7 @@ export class TesseraAprHandler implements AprHandler {
                 const staked = BigInt(pool.stakedAmount);
                 const reward = BigInt(pool.currentTimeRange.rewardsPerHour) * BigInt(24 * 365);
                 const apr = Number(reward.toString()) / Number(staked.toString());
-                aprEntries.push([tokenAddress, {
-                    apr,
-                    isIbYield: isIbYield ?? false,
-                    group: this.group
-                }]);
+                aprEntries.push([tokenAddress, { apr, isIbYield: isIbYield ?? false }]);
             } catch (error) {
                 console.error('Failed to fetch Tessera Ape Coin APR:', error);
                 Sentry.captureException(`Tessera IB APR handler failed: ${error}`);

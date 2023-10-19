@@ -14,7 +14,8 @@ export class AaveAprHandler implements AprHandler {
         };
     };
     subgraphUrl: string;
-    group = 'AAVE';
+
+    readonly group = 'AAVE';
 
     readonly query = `query getReserves($aTokens: [String!], $underlyingAssets: [Bytes!]) {
     reserves(
@@ -80,11 +81,7 @@ export class AaveAprHandler implements AprHandler {
                 .map(({ wrappedTokens, underlyingAssetAddress, isIbYield }) => {
                     const apr = aprsByUnderlyingAddress[underlyingAssetAddress];
                     return Object.values(wrappedTokens).map((wrappedTokenAddress) => ({
-                        [wrappedTokenAddress]: {
-                            apr,
-                            isIbYield: isIbYield ?? false,
-                            group: this.group,
-                        },
+                        [wrappedTokenAddress]: { apr, isIbYield: isIbYield ?? false },
                     }));
                 })
                 .flat()

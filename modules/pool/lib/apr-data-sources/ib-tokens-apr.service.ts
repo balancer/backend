@@ -1,8 +1,9 @@
 import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
+import { networkContext } from '../../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType, PrismaPoolLinearData } from '@prisma/client';
+import { PrismaPoolAprItemGroup, PrismaPoolAprType, PrismaPoolLinearData } from '@prisma/client';
 import { IbLinearAprHandlers as IbTokensAprHandlers, TokenApr } from './ib-linear-apr-handlers/ib-linear-apr-handlers';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';
@@ -11,13 +12,8 @@ import { IbAprConfig } from '../../../network/apr-config-types';
 export class IbTokensAprService implements PoolAprService {
     private ibTokensAprHandlers: IbTokensAprHandlers;
 
-    constructor(
-        aprConfig: IbAprConfig,
-        private chain: Chain,
-        private defaultYieldFee: number,
-        private defaultSwapFee: number
-    ) {
-        this.ibTokensAprHandlers = new IbTokensAprHandlers(aprConfig, chain);
+    constructor(aprConfig: IbAprConfig) {
+        this.ibTokensAprHandlers = new IbTokensAprHandlers(aprConfig);
     }
 
     getAprServiceName(): string {
@@ -37,7 +33,7 @@ export class IbTokensAprService implements PoolAprService {
         });
 
         const poolsWithIbTokensExpanded = await prisma.prismaPool.findMany({
-            where: { chain: this.chain, id: { in: poolsWithIbTokens.map((pool) => pool.id) } },
+            where: { chain: networkContext.chain, id: { in: poolsWithIbTokens.map((pool) => pool.id) } },
             include: {
                 dynamicData: true,
                 tokens: {
@@ -80,10 +76,10 @@ export class IbTokensAprService implements PoolAprService {
                 if (collectsYieldFee(pool) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
                     const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
                         ? parseFloat(pool.dynamicData.protocolYieldFee)
-                        : this.defaultYieldFee;
+                        : networkContext.data.balancer.yieldProtocolFeePercentage;
                     aprInPoolAfterFees =
                         pool.type === 'META_STABLE'
-                            ? aprInPoolAfterFees * (1 - this.defaultSwapFee)
+                            ? aprInPoolAfterFees * (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                             : aprInPoolAfterFees * (1 - protocolYieldFeePercentage);
                 }
 
@@ -94,7 +90,7 @@ export class IbTokensAprService implements PoolAprService {
 
                 const data = {
                     id: itemId,
-                    chain: this.chain,
+                    chain: networkContext.chain,
                     poolId: pool.id,
                     title: `${token.token.symbol} APR`,
                     apr: aprInPoolAfterFees,
@@ -104,7 +100,7 @@ export class IbTokensAprService implements PoolAprService {
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id_chain: { id: itemId, chain: this.chain } },
+                        where: { id_chain: { id: itemId, chain: networkContext.chain } },
                         create: data,
                         update: data,
                     }),

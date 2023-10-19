@@ -1,113 +1,169 @@
-import * as sources from './sources';
+import { AaveAprHandler } from './sources/aave-apr-handler';
+import { AnkrAprHandler } from './sources/ankr-apr-handler';
+import { DefaultAprHandler } from './sources/default-apr-handler';
+import { EulerAprHandler } from './sources/euler-apr-handler';
+import { GearboxAprHandler } from './sources/gearbox-apr-handler';
+import { IdleAprHandler } from './sources/idle-apr-handler';
+import { OvixAprHandler } from './sources/ovix-apr-handler';
+import { TesseraAprHandler } from './sources/tessera-apr-handler';
+import { TetuAprHandler } from './sources/tetu-apr-handler';
+import { TranchessAprHandler } from './sources/tranchess-apr-handler';
+import { YearnAprHandler } from './sources/yearn-apr-handler';
+import { ReaperCryptAprHandler } from './sources/reaper-crypt-apr-handler';
+import { BeefyAprHandler } from './sources/beefy-apr-handler';
 import { IbAprConfig } from '../../../../network/apr-config-types';
-import { Chain } from '@prisma/client';
-
-const sourceToHandler = {
-    aave: sources.AaveAprHandler,
-    ankr: sources.AnkrAprHandler,
-    beefy: sources.BeefyAprHandler,
-    bloom: sources.BloomAprHandler,
-    euler: sources.EulerAprHandler,
-    gearbox: sources.GearboxAprHandler,
-    idle: sources.IdleAprHandler,
-    maker: sources.MakerAprHandler,
-    ovix: sources.OvixAprHandler,
-    reaper: sources.ReaperCryptAprHandler,
-    tessera: sources.TesseraAprHandler,
-    tetu: sources.TetuAprHandler,
-    tranchess: sources.TranchessAprHandler,
-    yearn: sources.YearnAprHandler,
-    defaultHandlers: sources.DefaultAprHandler,
-}
+import { MakerAprHandler } from './sources/maker-apr-handler';
+import { BloomAprHandler } from './sources/bloom-apr-handler';
 
 export class IbLinearAprHandlers {
     private handlers: AprHandler[] = [];
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number; group?: string; isIbYield?: boolean } };
 
-    constructor(aprConfig: IbAprConfig, private chain?: Chain) {
-        const { fixedAprHandler, ...config } = aprConfig;
-        this.handlers = this.buildAprHandlers(config);
-        this.fixedAprTokens = fixedAprHandler;
+    constructor(aprConfig: IbAprConfig) {
+        this.handlers = this.buildAprHandlers(aprConfig);
+        this.fixedAprTokens = aprConfig.fixedAprHandler;
     }
 
-    private buildAprHandlers(aprConfig: IbAprConfig) {
+    buildAprHandlers(aprConfig: IbAprConfig) {
         const handlers: AprHandler[] = [];
-
-        // Add handlers from global configuration
-        for (const [source, config] of Object.entries(aprConfig)) {
-            const Handler = sourceToHandler[source as keyof typeof sourceToHandler];
-
-            // Handle nested configs
-            if (source === 'aave' || source === 'defaultHandlers') {
-                for (const nestedConfig of Object.values(config)) {
-                    handlers.push(new Handler(nestedConfig as any));
-                }
-            } else {
-                handlers.push(new Handler(config));
+        if (aprConfig.aave) {
+            for (const config of Object.values(aprConfig.aave)) {
+                const aaveHandler = new AaveAprHandler(config);
+                handlers.push(aaveHandler);
             }
         }
-
-        // Add handlers from self-configured sources
-        Object.values(sources as unknown as any[])
-            .filter((source): source is { chains: Chain[], Handler: AprHandlerConstructor }  => 'chains' in source)
-            .filter((source) => this.chain && source.chains.includes(this.chain))
-            .forEach((source) => {
-                handlers.push(new source.Handler());
-        });
-
+        if (aprConfig.ankr) {
+            const ankrHandler = new AnkrAprHandler(aprConfig.ankr);
+            handlers.push(ankrHandler);
+        }
+        if (aprConfig.beefy) {
+            const beefyHandler = new BeefyAprHandler(aprConfig.beefy);
+            handlers.push(beefyHandler);
+        }
+        if (aprConfig.bloom) {
+            const bloomAprHandler = new BloomAprHandler(aprConfig.bloom);
+            handlers.push(bloomAprHandler);
+        }
+        if (aprConfig.euler) {
+            const eulerHandler = new EulerAprHandler(aprConfig.euler);
+            handlers.push(eulerHandler);
+        }
+        if (aprConfig.gearbox) {
+            const gearboxHandler = new GearboxAprHandler(aprConfig.gearbox);
+            handlers.push(gearboxHandler);
+        }
+        if (aprConfig.idle) {
+            const idleHandler = new IdleAprHandler(aprConfig.idle);
+            handlers.push(idleHandler);
+        }
+        if (aprConfig.maker) {
+            const makerHandler = new MakerAprHandler(aprConfig.maker);
+            handlers.push(makerHandler);
+        }
+        if (aprConfig.ovix) {
+            const ovixHandler = new OvixAprHandler({
+                ...aprConfig.ovix,
+            });
+            handlers.push(ovixHandler);
+        }
+        if (aprConfig.reaper) {
+            const reaperCryptHandler = new ReaperCryptAprHandler({ ...aprConfig.reaper });
+            handlers.push(reaperCryptHandler);
+        }
+        if (aprConfig.tessera) {
+            const tesseraHandler = new TesseraAprHandler({
+                ...aprConfig.tessera,
+            });
+            handlers.push(tesseraHandler);
+        }
+        if (aprConfig.tetu) {
+            const tetuHandler = new TetuAprHandler(aprConfig.tetu);
+            handlers.push(tetuHandler);
+        }
+        if (aprConfig.tranchess) {
+            const tranchessHandler = new TranchessAprHandler(aprConfig.tranchess);
+            handlers.push(tranchessHandler);
+        }
+        if (aprConfig.yearn) {
+            const yearnHandler = new YearnAprHandler(aprConfig.yearn);
+            handlers.push(yearnHandler);
+        }
+        if (aprConfig.defaultHandlers) {
+            for (const handlerConfig of Object.values(aprConfig.defaultHandlers)) {
+                const handler = new DefaultAprHandler(handlerConfig);
+                handlers.push(handler);
+            }
+        }
         return handlers;
     }
 
+    // Any IB Yield tokens (such as rETH, wstETH) need to be added here. Linear Wrapped Tokens must NOT be added here.
+    buildIbYieldTokens(aprConfig: IbAprConfig): string[] {
+        const ibYieldTokenNamesForDefaultHandler = [
+            'rEth',
+            'stETH',
+            'wstETH',
+            'cbETH',
+            'sfrxETH',
+            'USDR',
+            'swETH',
+            'wjAURA',
+            'qETH',
+            'ankrETH',
+            'ankrFTM',
+            'sFTMx',
+            'stMATIC',
+            'MATICX',
+            'wbETH',
+            'ETHx',
+        ].map((token) => token.toLowerCase());
+
+        return [
+            ...Object.values(aprConfig?.ankr?.tokens || {}).map((token) => token.address),
+            ...Object.keys(aprConfig?.defaultHandlers || {}).filter((handler) =>
+                ibYieldTokenNamesForDefaultHandler.includes(handler.toLowerCase()),
+            ),
+            ...Object.keys(aprConfig?.fixedAprHandler || {}).filter((handler) =>
+                ibYieldTokenNamesForDefaultHandler.includes(handler.toLowerCase()),
+            ),
+        ];
+    }
+
     async fetchAprsFromAllHandlers(): Promise<TokenApr[]> {
-        let aprs: TokenApr[] = this.fixedAprTokens
-            ? Object.values(this.fixedAprTokens).map(({ address, apr, isIbYield, group }) => ({
-                apr,
-                address,
-                isIbYield: isIbYield ?? false,
-                group
-            }))
-            : [];
-
-        const results = await Promise.allSettled(this.handlers.map((handler) => handler.getAprs(this.chain)));
-
-        for (const result of results) {
-            if (result.status === 'fulfilled') {
-                aprs = aprs.concat(
-                    Object.entries(result.value).map(([address, { apr, isIbYield, group }]) => ({
-                        apr,
-                        address,
-                        isIbYield,
-                        group
-                    })),
-                );
-            } else {
-                console.error('Failed to fetch APRs from handler', result.reason);
+        let aprs: TokenApr[] = [];
+        for (const handler of this.handlers) {
+            const fetchedResponse: { [key: string]: { apr: number; isIbYield: boolean } } = await handler.getAprs();
+            for (const [address, { apr, isIbYield }] of Object.entries(fetchedResponse)) {
+                aprs.push({
+                    apr,
+                    isIbYield,
+                    group: handler.group,
+                    address,
+                });
             }
         }
-
+        if (this.fixedAprTokens) {
+            for (const { address, apr, isIbYield, group } of Object.values(this.fixedAprTokens)) {
+                aprs.push({
+                    apr,
+                    isIbYield: isIbYield ?? false,
+                    group,
+                    address,
+                });
+            }
+        }
         return aprs;
     }
 }
 
-interface AprHandlerConstructor {
-    new (config?: any): AprHandler;
-}
-
 export interface AprHandler {
-    group?: string;
-    getAprs(chain?: Chain): Promise<{
-        [tokenAddress: string]: {
-            /** Defined as float, eg: 0.01 is 1% */
-            apr: number;
-            isIbYield: boolean
-            group?: string;
-        }
-    }>;
+    group: string | undefined;
+    getAprs(): Promise<{ [tokenAddress: string]: { apr: number; isIbYield: boolean } }>;
 }
 
 export type TokenApr = {
     apr: number;
     address: string;
-    isIbYield: boolean;
     group?: string;
+    isIbYield: boolean;
 };

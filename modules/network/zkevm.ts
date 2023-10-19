@@ -162,13 +162,8 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            zkevmNetworkData.ibAprConfig,
-            zkevmNetworkData.chain.prismaId,
-            zkevmNetworkData.balancer.yieldProtocolFeePercentage,
-            zkevmNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(zkevmNetworkData.chain.prismaId, zkevmNetworkData.balancer.yieldProtocolFeePercentage),
+        new IbTokensAprService(zkevmNetworkData.ibAprConfig),
+        new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [zkevmNetworkData.bal!.address]),

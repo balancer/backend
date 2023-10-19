@@ -258,13 +258,8 @@ export const optimismNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            optimismNetworkData.ibAprConfig,
-            optimismNetworkData.chain.prismaId,
-            optimismNetworkData.balancer.yieldProtocolFeePercentage,
-            optimismNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(optimismNetworkData.chain.prismaId, optimismNetworkData.balancer.yieldProtocolFeePercentage),
+        new IbTokensAprService(optimismNetworkData.ibAprConfig),
+        new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [

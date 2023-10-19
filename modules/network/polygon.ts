@@ -262,13 +262,8 @@ export const polygonNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: polygonNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            polygonNetworkData.ibAprConfig,
-            polygonNetworkData.chain.prismaId,
-            polygonNetworkData.balancer.yieldProtocolFeePercentage,
-            polygonNetworkData.balancer.swapProtocolFeePercentage
-        ),
-        new PhantomStableAprService(polygonNetworkData.chain.prismaId, polygonNetworkData.balancer.yieldProtocolFeePercentage),
+        new IbTokensAprService(polygonNetworkData.ibAprConfig),
+        new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(polygonNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [polygonNetworkData.bal!.address]),

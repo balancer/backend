@@ -31,11 +31,7 @@ export class GearboxAprHandler implements AprHandler {
                     );
                     return [
                         dieselToken,
-                        {
-                            apr: Number(depositAPY_RAY.slice(0, 27)) / 1e27,
-                            isIbYield: tokenObj?.isIbYield ?? false,
-                            group: this.group,
-                        },
+                        { apr: Number(depositAPY_RAY.slice(0, 27)) / 1e27, isIbYield: tokenObj?.isIbYield ?? false },
                     ];
                 });
             return Object.fromEntries(aprEntries);

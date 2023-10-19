@@ -119,12 +119,7 @@ export const baseNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: baseNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            baseNetworkData.ibAprConfig,
-            baseNetworkData.chain.prismaId,
-            baseNetworkData.balancer.yieldProtocolFeePercentage,
-            baseNetworkData.balancer.swapProtocolFeePercentage
-        ),
+        new IbTokensAprService(baseNetworkData.ibAprConfig),
         new BoostedPoolAprService(),
         new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [baseNetworkData.bal!.address]),

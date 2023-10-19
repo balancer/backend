@@ -225,13 +225,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: arbitrumNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            arbitrumNetworkData.ibAprConfig,
-            arbitrumNetworkData.chain.prismaId,
-            arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
-            arbitrumNetworkData.balancer.swapProtocolFeePercentage
-        ),
-        new PhantomStableAprService(arbitrumNetworkData.chain.prismaId, arbitrumNetworkData.balancer.yieldProtocolFeePercentage),
+        new IbTokensAprService(arbitrumNetworkData.ibAprConfig),
+        new PhantomStableAprService(),
         new BoostedPoolAprService(),
         new SwapFeeAprService(arbitrumNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [arbitrumNetworkData.bal!.address]),
