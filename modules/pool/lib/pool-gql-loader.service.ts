@@ -565,7 +565,7 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
-        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.min ?? 0 > 0)) || [];
+        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
 
         // swap apr cannot have a range, so we can already sum it up
