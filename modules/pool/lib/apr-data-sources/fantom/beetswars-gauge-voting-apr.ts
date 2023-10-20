@@ -13,7 +13,10 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
-        if (pools.map((pool) => pool.id).includes(this.FRESH_BEETS_POOL_ID)) {
+        for (const pool of pools) {
+            if (pool.id !== this.FRESH_BEETS_POOL_ID) {
+                continue;
+            }
             const response = await axios.get('https://www.beetswars.live/api/trpc/chart.chartdata');
 
             const votingAprs: number[] = response.data.result.data.json.chartdata.votingApr;
@@ -28,6 +31,9 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
                     range: {
                         update: { min: minApr, max: maxApr },
                     },
+                    title: 'Voting APR',
+                    apr: 0,
+                    type: PrismaPoolAprType.VOTING,
                 },
                 create: {
                     id: itemId,

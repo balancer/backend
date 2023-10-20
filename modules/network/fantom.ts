@@ -243,7 +243,7 @@ const fantomNetworkData: NetworkData = {
             },
         },
         yearn: {
-            sourceUrl: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all',
+            sourceUrl: 'https://api.yexporter.io/v1/chains/250/vaults/all',
         },
         fixedAprHandler: {
             sFTMx: {
@@ -304,10 +304,13 @@ export const fantomNetworkConfig: NetworkConfig = {
             fantomNetworkData.ibAprConfig,
             fantomNetworkData.chain.prismaId,
             fantomNetworkData.balancer.yieldProtocolFeePercentage,
-            fantomNetworkData.balancer.swapProtocolFeePercentage
+            fantomNetworkData.balancer.swapProtocolFeePercentage,
         ),
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new PhantomStableAprService(fantomNetworkData.chain.prismaId, fantomNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(
+            fantomNetworkData.chain.prismaId,
+            fantomNetworkData.balancer.yieldProtocolFeePercentage,
+        ),
         new BoostedPoolAprService(),
         new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),
