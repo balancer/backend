@@ -57,7 +57,9 @@ const arbitrumNetworkData: NetworkData = {
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://arbitrum-one.public.blastapi.io',
+            : env.ALCHEMY_API_KEY
+                ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+                : 'https://arbitrum.sakurarpc.io',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
