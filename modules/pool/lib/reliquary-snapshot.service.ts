@@ -78,7 +78,7 @@ export class ReliquarySnapshotService {
                 const timestampForSnapshot =
                     snapshot.snapshotTimestamp + oneDayInMinutes * 60 < moment().utc().unix()
                         ? snapshot.snapshotTimestamp + oneDayInMinutes * 60
-                        : moment().utc().unix() - 600;
+                        : moment().utc().unix() - 1200;
 
                 const pool = await prisma.prismaPool.findFirstOrThrow({
                     where: { staking: { some: { reliquary: { id: `${farmId}` } } }, chain: networkContext.chain },
