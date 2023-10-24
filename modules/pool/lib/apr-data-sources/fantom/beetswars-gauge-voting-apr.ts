@@ -31,7 +31,7 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
                     range: {
                         update: { min: minApr, max: maxApr },
                     },
-                    title: 'Voting APR',
+                    title: 'Voting APR*',
                     apr: 0,
                     type: PrismaPoolAprType.VOTING,
                 },
@@ -39,7 +39,7 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
                     id: itemId,
                     chain: networkContext.chain,
                     poolId: this.FRESH_BEETS_POOL_ID,
-                    title: 'Voting APR',
+                    title: 'Voting APR*',
                     apr: 0,
                     range: {
                         create: {
