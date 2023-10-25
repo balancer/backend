@@ -4,6 +4,7 @@ import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
+    GqlFeaturedPool,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
@@ -67,6 +68,10 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
+    }
+
+    public async getGqlFeaturedPools(): Promise<GqlFeaturedPool[]> {
+        return this.poolGqlLoaderService.getFeaturedPools();
     }
 
     public async getGqlLinearPools(): Promise<GqlPoolLinear[]> {

@@ -11,6 +11,7 @@ import {
 import {
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
+    GqlFeaturedPool,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
@@ -38,6 +39,7 @@ import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
+import { poolMetadataService } from './pool-metadata.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string): Promise<GqlPoolUnion> {
@@ -64,6 +66,20 @@ export class PoolGqlLoaderService {
         });
 
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
+    }
+
+    public async getFeaturedPools(): Promise<GqlFeaturedPool[]> {
+        const poolsMetadata = await poolMetadataService.getPoolsMetadata();
+        const poolIds = poolsMetadata.map((pool) => pool.id);
+
+        const pools = await this.getPools({ where: { idIn: poolIds } });
+
+        return poolsMetadata.map(({ id, imageUrl, primary }) => ({
+            id,
+            imageUrl,
+            primary: Boolean(primary),
+            pool: pools.find((pool) => pool.id === id),
+        })) as GqlFeaturedPool[];
     }
 
     public async getLinearPools(): Promise<GqlPoolLinear[]> {

@@ -25,6 +25,7 @@ extend type Query {
     poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools: [GqlPoolLinear!]!
+    poolGetFeaturedPools: [GqlFeaturedPool!]!
 }
 
 extend type Mutation {
@@ -93,6 +94,13 @@ enum GqlPoolMinimalType {
     GYRO3
     GYROE
     FX
+}
+
+type GqlFeaturedPool {
+    id: ID!
+    primary: Boolean!
+    imageUrl: String!
+    pool: GqlPoolMinimal!
 }
 
 interface GqlPoolBase {
