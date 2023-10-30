@@ -328,6 +328,13 @@ export const mainnetNetworkData: NetworkData = {
                 path: 'value',
                 isIbYield: true,
             },
+            usdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
+            },
         },
     },
     beefy: {
