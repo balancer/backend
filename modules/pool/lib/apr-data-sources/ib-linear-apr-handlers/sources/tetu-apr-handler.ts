@@ -35,6 +35,7 @@ export class TetuAprHandler implements AprHandler {
                         apr: t.apr / 100,
                         isIbYield:
                             Object.values(this.tokens).find(({ address }) => address === t.vault)?.isIbYield ?? false,
+                        group: this.group,
                     },
                 ]);
             return Object.fromEntries(aprs);

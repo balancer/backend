@@ -34,10 +34,11 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaPoolAprType } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
+import { fixedNumber } from '../../view-helpers/fixed-number';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string): Promise<GqlPoolUnion> {
@@ -566,7 +567,7 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
-        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.min ?? 0 > 0)) || [];
+        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
 
         // swap apr cannot have a range, so we can already sum it up
@@ -616,12 +617,17 @@ export class PoolGqlLoaderService {
                 currentAprRangeMaxTotal += maxApr;
 
                 switch (aprItem.type) {
-                    case 'NATIVE_REWARD': {
+                    case PrismaPoolAprType.NATIVE_REWARD: {
                         currentNativeAprRangeMin += minApr;
                         currentNativeAprRangeMax += maxApr;
                         break;
                     }
-                    case 'THIRD_PARTY_REWARD': {
+                    case PrismaPoolAprType.THIRD_PARTY_REWARD: {
+                        currentThirdPartyAprRangeMin += minApr;
+                        currentThirdPartyAprRangeMax += maxApr;
+                        break;
+                    }
+                    case PrismaPoolAprType.VOTING: {
                         currentThirdPartyAprRangeMin += minApr;
                         currentThirdPartyAprRangeMax += maxApr;
                         break;
@@ -657,27 +663,27 @@ export class PoolGqlLoaderService {
 
         return {
             ...pool.dynamicData!,
-            totalLiquidity: `${totalLiquidity}`,
-            totalLiquidity24hAgo: `${totalLiquidity24hAgo}`,
+            totalLiquidity: `${fixedNumber(totalLiquidity, 2)}`,
+            totalLiquidity24hAgo: `${fixedNumber(totalLiquidity24hAgo, 2)}`,
             totalShares24hAgo,
-            fees24h: `${fees24h}`,
-            volume24h: `${volume24h}`,
-            yieldCapture24h: `${yieldCapture24h}`,
-            yieldCapture48h: `${yieldCapture48h}`,
-            fees48h: `${fees48h}`,
-            volume48h: `${volume48h}`,
-            lifetimeVolume: `${lifetimeVolume}`,
-            lifetimeSwapFees: `${lifetimeSwapFees}`,
+            fees24h: `${fixedNumber(fees24h, 2)}`,
+            volume24h: `${fixedNumber(volume24h, 2)}`,
+            yieldCapture24h: `${fixedNumber(yieldCapture24h, 2)}`,
+            yieldCapture48h: `${fixedNumber(yieldCapture48h, 2)}`,
+            fees48h: `${fixedNumber(fees48h, 2)}`,
+            volume48h: `${fixedNumber(volume48h, 2)}`,
+            lifetimeVolume: `${fixedNumber(lifetimeVolume, 2)}`,
+            lifetimeSwapFees: `${fixedNumber(lifetimeSwapFees, 2)}`,
             holdersCount: `${holdersCount}`,
             swapsCount: `${swapsCount}`,
             sharePriceAth: `${sharePriceAth}`,
             sharePriceAtl: `${sharePriceAtl}`,
-            totalLiquidityAth: `${totalLiquidityAth}`,
-            totalLiquidityAtl: `${totalLiquidityAtl}`,
-            volume24hAtl: `${volume24hAtl}`,
-            volume24hAth: `${volume24hAth}`,
-            fees24hAtl: `${fees24hAtl}`,
-            fees24hAth: `${fees24hAth}`,
+            totalLiquidityAth: `${fixedNumber(totalLiquidityAth, 2)}`,
+            totalLiquidityAtl: `${fixedNumber(totalLiquidityAtl, 2)}`,
+            volume24hAtl: `${fixedNumber(volume24hAtl, 2)}`,
+            volume24hAth: `${fixedNumber(volume24hAth, 2)}`,
+            fees24hAtl: `${fixedNumber(fees24hAtl, 2)}`,
+            fees24hAth: `${fixedNumber(fees24hAth, 2)}`,
             sharePriceAthTimestamp,
             sharePriceAtlTimestamp,
             totalLiquidityAthTimestamp,

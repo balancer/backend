@@ -108,6 +108,7 @@ export class DatastudioService {
                 staking: {
                     include: {
                         farm: { include: { rewarders: true } },
+                        reliquary: true,
                         gauge: { include: { rewards: true } },
                     },
                 },
@@ -115,7 +116,6 @@ export class DatastudioService {
         });
 
         const endOfYesterday = moment.tz('GMT').endOf('day').subtract(1, 'day');
-        const endOfDayBeforeYesterday = moment.tz('GMT').endOf('day').subtract(2, 'day').unix();
 
         for (const pool of pools) {
             let sharesChange = `0`;
@@ -286,6 +286,24 @@ export class DatastudioService {
                                 ]);
                             }
                         }
+                    }
+                }
+                if (stake.reliquary) {
+                    const beetsPerDay = parseFloat(stake.reliquary.beetsPerSecond) * secondsPerDay;
+                    const beetsValuePerDay = parseFloat(beetsPrice) * beetsPerDay;
+                    if (beetsPerDay > 0) {
+                        allEmissionDataRows.push([
+                            endOfYesterday.format('DD MMM YYYY'),
+                            `${endOfYesterday.unix()}`,
+                            `${now}`,
+                            pool.address,
+                            pool.name,
+                            'BEETS',
+                            networkContext.data.beets!.address,
+                            `${beetsPerDay}`,
+                            `${beetsValuePerDay}`,
+                            chainSlug,
+                        ]);
                     }
                 }
                 if (stake.gauge) {

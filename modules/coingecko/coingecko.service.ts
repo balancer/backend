@@ -109,7 +109,7 @@ export class CoingeckoService {
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('Too many requests for rate limit.');
 
-            const tokenDefinitions = await tokenService.getTokenDefinitions();
+            const tokenDefinitions = await tokenService.getTokenDefinitions([networkContext.chain]);
             const mapped = addresses.map((address) => this.getMappedTokenDetails(address, tokenDefinitions));
             const groupedByPlatform = _.groupBy(mapped, 'platform');
 
@@ -144,7 +144,7 @@ export class CoingeckoService {
         const now = Math.floor(Date.now() / 1000);
         const end = now;
         const start = end - days * twentyFourHoursInSecs;
-        const tokenDefinitions = await tokenService.getTokenDefinitions();
+        const tokenDefinitions = await tokenService.getTokenDefinitions([networkContext.chain]);
         const mapped = this.getMappedTokenDetails(address, tokenDefinitions);
 
         const endpoint = `/coins/${mapped.platform}/contract/${mapped.address}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;

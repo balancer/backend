@@ -341,6 +341,7 @@ enum PrismaPoolAprType {
     LINEAR_BOOSTED
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
+    VOTING
 }
 
 enum PrismaPoolAprItemGroup {
@@ -357,6 +358,7 @@ enum PrismaPoolAprItemGroup {
     TETU
     OVIX
     EULER
+    MAKER
     DEFAULT
 }
 
@@ -473,6 +475,8 @@ model PrismaPoolStakingGauge {
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)
+    workingSupply       String                          @default("0.0")
+    totalSupply         String                          @default("0.0")
 }
 
 enum PrismaPoolStakingGaugeStatus {

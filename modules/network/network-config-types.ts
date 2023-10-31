@@ -91,8 +91,12 @@ export interface NetworkData {
     };
     gaugeControllerAddress?: string;
     gaugeControllerHelperAddress?: string;
+    gyro?: {
+        config: string;
+    };
     balancer: {
         vault: string;
+        tokenAdmin?: string;
         weightedPoolV2Factories: string[];
         composableStablePoolFactories: string[];
         yieldProtocolFeePercentage: number;

@@ -5,7 +5,7 @@ import { abi as makerPotAbi } from './abis/maker-pot';
 import * as Sentry from '@sentry/node';
 
 export class MakerAprHandler implements AprHandler {
-    group: string | undefined;
+    group = 'MAKER';
     tokens: {
         [tokenName: string]: {
             address: string;
@@ -18,8 +18,8 @@ export class MakerAprHandler implements AprHandler {
         this.tokens = aprConfig.tokens;
     }
 
-    async getAprs(): Promise<{ [p: string]: { apr: number; isIbYield: boolean } }> {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean } } = {};
+    async getAprs() {
+        const aprs: { [p: string]: { apr: number; isIbYield: boolean, group: string } } = {};
         for (const { address, potAddress, isIbYield } of Object.values(this.tokens)) {
             try {
                 const potContract = getContractAt(potAddress, makerPotAbi);
@@ -28,7 +28,11 @@ export class MakerAprHandler implements AprHandler {
                     continue;
                 }
                 const tokenApr = (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60;
-                aprs[address] = { apr: tokenApr, isIbYield: isIbYield ?? false };
+                aprs[address] = {
+                    apr: tokenApr,
+                    isIbYield: isIbYield ?? false,
+                    group: this.group
+                };
             } catch (error) {
                 console.error(`Maker APR Failed for token ${address}: `, error);
                 Sentry.captureException(`Maker APR Failed for token ${address}: ${error}`);
