@@ -17,12 +17,14 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
             if (pool.id !== this.FRESH_BEETS_POOL_ID) {
                 continue;
             }
+
             const response = await axios.get('https://www.beetswars.live/api/trpc/chart.chartdata');
 
             const votingAprs: number[] = response.data.result.data.json.chartdata.votingApr;
 
             const minApr = 0;
             const maxApr = votingAprs[votingAprs.length - 1] / 100;
+
             const itemId = `${this.FRESH_BEETS_POOL_ID}-voting-apr`;
 
             await prisma.prismaPoolAprItem.upsert({
