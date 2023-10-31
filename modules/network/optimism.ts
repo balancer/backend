@@ -76,7 +76,7 @@ const optimismNetworkData: NetworkData = {
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
     },
     gyro: {
-        config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3'
+        config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
@@ -264,13 +264,13 @@ export const optimismNetworkConfig: NetworkConfig = {
             optimismNetworkData.balancer.yieldProtocolFeePercentage,
             optimismNetworkData.balancer.swapProtocolFeePercentage,
         ),
-        new PhantomStableAprService(optimismNetworkData.chain.prismaId, optimismNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(
+            optimismNetworkData.chain.prismaId,
+            optimismNetworkData.balancer.yieldProtocolFeePercentage,
+        ),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(tokenService, [
-            optimismNetworkData.beets!.address,
-            optimismNetworkData.bal!.address,
-        ]),
+        new GaugeAprService(tokenService, [optimismNetworkData.beets!.address, optimismNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
     tokenPriceHandlers: [
@@ -340,33 +340,29 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(90, 'minutes'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
-            interval: every(30, 'minutes'),
+            interval: every(50, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(20, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-user-snapshots',
-            interval: every(1, 'hours'),
         },
         {
             name: 'sync-coingecko-coinids',
