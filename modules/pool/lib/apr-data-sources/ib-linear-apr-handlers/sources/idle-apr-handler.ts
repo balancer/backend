@@ -32,7 +32,11 @@ export class IdleAprHandler implements AprHandler {
                 });
                 const [json] = data as { idleRate: string }[];
                 const value = Number(json.idleRate) / 1e20;
-                return [wrapped4626Address, { apr: value, isIbYield: isIbYield ?? false }];
+                return [wrapped4626Address, {
+                    apr: value,
+                    isIbYield: isIbYield ?? false,
+                    group: this.group,
+                }];
             });
             const res = Array(Object.keys(this.tokens).length);
             for (const [index, aprPromise] of aprPromises.entries()) {

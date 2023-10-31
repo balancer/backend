@@ -9,9 +9,9 @@ node_modules/
 *-error.log
 **/generated/*
 
+debug
 debug.ts
 schema.ts
-debug.ts
 graphql_schema_generated*.ts
 i18n/*
 google-service-account.json

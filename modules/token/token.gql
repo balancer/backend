@@ -1,6 +1,6 @@
 extend type Query {
-    tokenGetTokens: [GqlToken!]!
-    tokenGetCurrentPrices: [GqlTokenPrice!]!
+    tokenGetTokens(chains: [GqlChain!]): [GqlToken!]!
+    tokenGetCurrentPrices(chains: [GqlChain!]): [GqlTokenPrice!]!
     tokenGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
     tokenGetTokensDynamicData(addresses: [String!]!): [GqlTokenDynamicData!]!
     tokenGetTokenDynamicData(address: String!): GqlTokenDynamicData
@@ -28,6 +28,7 @@ extend type Mutation {
 
 type GqlTokenPrice {
     address: String!
+    chain: GqlChain!
     price: Float!
 }
 
@@ -55,6 +56,7 @@ type GqlToken {
     logoURI: String
     priority: Int!
     tradable: Boolean!
+    chain: GqlChain!
 }
 
 type GqlTokenDynamicData {

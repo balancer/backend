@@ -29,12 +29,17 @@ export class SwapFeeAprService implements PoolAprService {
                         ? (pool.dynamicData.fees24h * 365) / pool.dynamicData.totalLiquidity
                         : 0;
 
-                let userApr = apr * (1 - this.swapProtocolFeePercentage);
-
+                let protocolFee = this.swapProtocolFeePercentage;
+                if (pool.type === 'GYROE') {
+                    // Gyro has custom protocol fee structure
+                    protocolFee = parseFloat(pool.dynamicData.protocolYieldFee || '0');
+                }
                 if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
                     // pool does not collect any protocol fees
-                    userApr = apr;
+                    protocolFee = 0;
                 }
+
+                let userApr = apr * (1 - protocolFee);
 
                 // TODO: clean this up
                 if (userApr > MAX_DB_INT) {

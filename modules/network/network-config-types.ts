@@ -91,6 +91,9 @@ export interface NetworkData {
     };
     gaugeControllerAddress?: string;
     gaugeControllerHelperAddress?: string;
+    gyro?: {
+        config: string;
+    };
     balancer: {
         vault: string;
         tokenAdmin?: string;

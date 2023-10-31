@@ -6,7 +6,7 @@ env:
         RELIQUARY_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary'
         BLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks'
         BEETS_BAR_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'
-        YEARN_VAULTS_ENDPOINT: 'https://d28fcsszptni1s.cloudfront.net/v1/chains/250/vaults/all'
+        YEARN_VAULTS_ENDPOINT: 'https://api.yexporter.io/v1/chains/250/vaults/all'
         SUBGRAPH_ORIG: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar'
         GAUGE_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism'
         USER_SNAPSHOT_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom'

@@ -75,6 +75,9 @@ const optimismNetworkData: NetworkData = {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
     },
+    gyro: {
+        config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3'
+    },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
         composableStablePoolFactories: [
@@ -255,8 +258,13 @@ export const optimismNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(optimismNetworkData.ibAprConfig),
-        new PhantomStableAprService(),
+        new IbTokensAprService(
+            optimismNetworkData.ibAprConfig,
+            optimismNetworkData.chain.prismaId,
+            optimismNetworkData.balancer.yieldProtocolFeePercentage,
+            optimismNetworkData.balancer.swapProtocolFeePercentage,
+        ),
+        new PhantomStableAprService(optimismNetworkData.chain.prismaId, optimismNetworkData.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [

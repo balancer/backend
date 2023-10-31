@@ -3,21 +3,21 @@ import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
-import { PrismaPoolStaking } from '@prisma/client';
+import { Chain, PrismaPoolStaking } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 
 export class UserBalanceService {
     constructor() {}
 
-    public async getUserPoolBalances(address: string): Promise<UserPoolBalance[]> {
+    public async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
         const user = await prisma.prismaUser.findUnique({
             where: { address: address.toLowerCase() },
             include: {
                 walletBalances: {
-                    where: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
+                    where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
                 },
                 stakedBalances: {
-                    where: { chain: networkContext.chain, poolId: { not: null }, balanceNum: { gt: 0 } },
+                    where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
                 },
             },
         });
@@ -43,6 +43,8 @@ export class UserBalanceService {
                 totalBalance: formatFixed(stakedNum.add(walletNum), 18),
                 stakedBalance: stakedBalance?.balance || '0',
                 walletBalance: walletBalance?.balance || '0',
+                // the prisma query above ensures that one of these balances exists
+                chain: (stakedBalance?.chain || walletBalance?.chain)!,
             };
         });
     }
@@ -68,6 +70,7 @@ export class UserBalanceService {
             totalBalance: formatFixed(stakedNum.add(walletNum), 18),
             stakedBalance: stakedBalance?.balance || '0',
             walletBalance: walletBalance?.balance || '0',
+            chain: networkContext.chain,
         };
     }
 
