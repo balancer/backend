@@ -204,7 +204,9 @@ export class PoolCreatorService {
 
                             let priceRateProvider;
                             if (pool.priceRateProviders) {
-                                const data = pool.priceRateProviders.find((provider) => provider.token.address === token.address)
+                                const data = pool.priceRateProviders.find(
+                                    (provider) => provider.token.address === token.address,
+                                );
                                 priceRateProvider = data?.address;
                             }
 
@@ -250,7 +252,7 @@ export class PoolCreatorService {
                               },
                           }
                         : undefined,
-                gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(poolType)
+                gyroData: ['GYRO2', 'GYRO3', 'GYROE'].includes(poolType)
                     ? {
                           create: {
                               id: pool.id,
