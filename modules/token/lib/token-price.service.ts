@@ -145,14 +145,10 @@ export class TokenPriceService {
             where: { chain: networkContext.chain },
             include: {
                 types: true,
-                //fetch the last price stored
-                prices: { take: 1, orderBy: { timestamp: 'desc' } },
             },
         });
 
-        //order by timestamp ascending, so the tokens at the front of the list are the ones with the oldest timestamp
-        //this is for instances where a query gets rate limited and does not finish
-        let tokensWithTypes = _.sortBy(tokens, (token) => token.prices[0]?.timestamp || 0).map((token) => ({
+        let tokensWithTypes = tokens.map((token) => ({
             ...token,
             types: token.types.map((type) => type.type),
         }));
