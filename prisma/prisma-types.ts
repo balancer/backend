@@ -205,11 +205,6 @@ export type PrismaTokenWithTypes = PrismaToken & {
     types: PrismaTokenTypeOption[];
 };
 
-export type PrismaTokenWithTypesAndPrices = PrismaToken & {
-    types: PrismaTokenTypeOption[];
-    prices: PrismaTokenPrice[];
-};
-
 export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
