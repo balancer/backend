@@ -4,6 +4,7 @@ import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
+    GqlChain,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
@@ -61,8 +62,8 @@ export class PoolService {
         return networkContext.config.contentService;
     }
 
-    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id);
+    public async getGqlPool(id: string, chain: GqlChain): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id, chain);
     }
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -438,7 +439,7 @@ export class PoolService {
         await prisma.prismaPoolLinearData.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
         });
-        
+
         await prisma.prismaPoolGyroData.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
         });
@@ -481,9 +482,9 @@ export class PoolService {
                         },
                     });
 
-                    if(gauge && gauge.votingGauge)
+                    if (gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: networkContext.chain, id: gauge.votingGauge.id }
+                            where: { chain: networkContext.chain, id: gauge.votingGauge.id },
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({

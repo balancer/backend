@@ -1,5 +1,5 @@
 extend type Query {
-    poolGetPool(id: String!): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int

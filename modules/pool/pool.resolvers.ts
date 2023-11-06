@@ -3,11 +3,18 @@ import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
+import { headerChain } from '../context/header-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id }, context) => {
-            return poolService.getGqlPool(id);
+        poolGetPool: async (parent, { id, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('Chain is required');
+            }
+            return poolService.getGqlPool(id, chain);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
