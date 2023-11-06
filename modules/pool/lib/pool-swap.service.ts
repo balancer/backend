@@ -85,7 +85,9 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
         });
@@ -144,7 +146,9 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
             include: {

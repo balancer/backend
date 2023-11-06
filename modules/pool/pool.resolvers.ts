@@ -26,9 +26,21 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolFilters();
         },
         poolGetSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolSwaps(args);
         },
         poolGetBatchSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {

@@ -707,6 +707,7 @@ input GqlPoolSwapFilter {
     tokenInIn: [String!]
     tokenOutIn: [String!]
     poolIdIn: [String!]
+    chainIn: [GqlChain!]
 }
 
 type GqlPoolStaking {
