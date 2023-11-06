@@ -2,13 +2,12 @@ import { Resolvers } from '../../schema';
 import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
-import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
 
 const resolvers: Resolvers = {
     Query: {
         tokenGetTokens: async (parent, { chains }, context) => {
-            const currentChain = headerChain()
+            const currentChain = headerChain();
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
@@ -17,7 +16,7 @@ const resolvers: Resolvers = {
             return tokenService.getTokenDefinitions(chains);
         },
         tokenGetCurrentPrices: async (parent, { chains }, context) => {
-            const currentChain = headerChain()
+            const currentChain = headerChain();
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
