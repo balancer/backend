@@ -22,7 +22,7 @@ extend type Query {
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-    poolGetLinearPools: [GqlPoolLinear!]!
+    poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
 }
 
 extend type Mutation {

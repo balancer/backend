@@ -67,9 +67,9 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
-    public async getLinearPools(): Promise<GqlPoolLinear[]> {
+    public async getLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
         const pools = await prisma.prismaPool.findMany({
-            where: { type: 'LINEAR', chain: networkContext.chain },
+            where: { type: 'LINEAR', chain: { in: chains } },
             orderBy: { dynamicData: { totalLiquidity: 'desc' } },
             include: prismaPoolWithExpandedNesting.include,
         });

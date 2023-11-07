@@ -78,7 +78,7 @@ const balancerResolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                chains = [];
+                throw new Error('Chain is required');
             }
             const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
 
@@ -94,8 +94,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetLinearPools: async () => {
-            return poolService.getGqlLinearPools();
+        poolGetLinearPools: async (parent, { chains }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('Chain is required');
+            }
+            return poolService.getGqlLinearPools(chains);
         },
     },
     Mutation: {
