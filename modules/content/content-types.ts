@@ -36,9 +36,16 @@ export interface HomeScreenNewsItem {
     image?: string;
 }
 
+export interface FeaturedPoolMetadata {
+    id: string;
+    imageUrl: string;
+    primary: boolean;
+}
+
 export interface ContentService {
     syncTokenContentData(): Promise<void>;
     syncPoolContentData(): Promise<void>;
     getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]>;
+    getBalancerFeaturedPools(): Promise<FeaturedPoolMetadata[]>;
     getNewsItems(): Promise<HomeScreenNewsItem[]>;
 }
