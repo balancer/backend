@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                chains = [];
+                throw new Error('Chain is required');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
@@ -43,10 +43,16 @@ const resolvers: Resolvers = {
             const accountAddress = address || getRequiredAccountAddress(context);
             return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
         },
-        userGetStaking: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
+        userGetStaking: async (parent, { chains, address }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('Chain is required');
+            }
+            const accountAddress = address || getRequiredAccountAddress(context);
 
-            return userService.getUserStaking(accountAddress);
+            return userService.getUserStaking(accountAddress, chains);
         },
     },
     Mutation: {

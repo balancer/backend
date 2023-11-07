@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                chains = [];
+                throw new Error('Chain is required');
             }
             return tokenService.getTokenDefinitions(chains);
         },

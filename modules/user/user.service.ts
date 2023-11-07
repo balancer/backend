@@ -54,8 +54,8 @@ export class UserService {
         return this.userBalanceService.getUserFbeetsBalance(address);
     }
 
-    public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
-        return this.userBalanceService.getUserStaking(address);
+    public async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
+        return this.userBalanceService.getUserStaking(address, chains);
     }
 
     public async getUserBalanceSnapshotsForPool(

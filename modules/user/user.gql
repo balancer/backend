@@ -1,6 +1,6 @@
 extend type Query {
     userGetPoolBalances(chains: [GqlChain!], address: String): [GqlUserPoolBalance!]!
-    userGetStaking: [GqlPoolStaking!]!
+    userGetStaking(chains: [GqlChain!], address: String): [GqlPoolStaking!]!
     userGetPoolJoinExits(
         first: Int = 10
         skip: Int = 0

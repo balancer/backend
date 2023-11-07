@@ -712,6 +712,7 @@ input GqlPoolSwapFilter {
 
 type GqlPoolStaking {
     id: ID!
+    chain: GqlChain!
     type: GqlPoolStakingType!
     address: String!
     gauge: GqlPoolStakingGauge
