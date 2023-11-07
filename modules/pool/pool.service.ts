@@ -1,4 +1,4 @@
-import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _, { chain, includes } from 'lodash';
 import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
@@ -123,12 +123,12 @@ export class PoolService {
         return featuredPoolGroups;
     }
 
-    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForAllPools(range);
+    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForAllPools(chains, range);
     }
 
-    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
+    public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {

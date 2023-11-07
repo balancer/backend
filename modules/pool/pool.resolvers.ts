@@ -52,8 +52,14 @@ const balancerResolvers: Resolvers = {
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
         },
-        poolGetSnapshots: async (parent, { id, range }, context) => {
-            const snapshots = await poolService.getSnapshotsForPool(id, range);
+        poolGetSnapshots: async (parent, { id, chain, range }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('Chain is required');
+            }
+            const snapshots = await poolService.getSnapshotsForPool(id, chain, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,
@@ -67,8 +73,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetAllPoolsSnapshots: async (parent, { range }, context) => {
-            const snapshots = await poolService.getSnapshotsForAllPools(range);
+        poolGetAllPoolsSnapshots: async (parent, { chains, range }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                chains = [];
+            }
+            const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,

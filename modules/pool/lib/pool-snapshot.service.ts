@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import {
     balancerSubgraphService,
     BalancerSubgraphService,
@@ -12,7 +11,7 @@ import {
 import { GqlPoolSnapshotDataRange } from '../../../schema';
 import moment from 'moment-timezone';
 import _ from 'lodash';
-import { PrismaPoolSnapshot } from '@prisma/client';
+import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { CoingeckoService } from '../../coingecko/coingecko.service';
@@ -27,11 +26,11 @@ export class PoolSnapshotService {
         private readonly coingeckoService: CoingeckoService,
     ) {}
 
-    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
+    public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
 
         return prisma.prismaPoolSnapshot.findMany({
-            where: { poolId, timestamp: { gte: timestamp }, chain: networkContext.chain },
+            where: { poolId, timestamp: { gte: timestamp }, chain: chain },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -42,7 +41,7 @@ export class PoolSnapshotService {
         });
     }
 
-    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
+    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
 
         return prisma.prismaPoolSnapshot.findMany({
@@ -54,7 +53,7 @@ export class PoolSnapshotService {
                 pool: {
                     categories: { none: { category: 'BLACK_LISTED' } },
                 },
-                chain: networkContext.chain,
+                chain: { in: chains },
             },
             orderBy: { timestamp: 'asc' },
         });

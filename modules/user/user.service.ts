@@ -61,9 +61,10 @@ export class UserService {
     public async getUserBalanceSnapshotsForPool(
         accountAddress: string,
         poolId: string,
+        chain: Chain,
         days: GqlUserSnapshotDataRange,
     ): Promise<UserPoolSnapshot[]> {
-        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, days);
+        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, chain, days);
     }
 
     public async getUserRelicSnapshots(accountAddress: string, farmId: string, days: GqlUserSnapshotDataRange) {

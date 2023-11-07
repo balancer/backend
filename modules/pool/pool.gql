@@ -20,8 +20,8 @@ extend type Query {
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
-    poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-    poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools: [GqlPoolLinear!]!
 }
 
@@ -804,6 +804,7 @@ enum GqlPoolSnapshotDataRange {
 
 type GqlPoolSnapshot {
     id: ID!
+    chain: GqlChain!
     poolId: String!
     timestamp: Int!
     totalLiquidity: String!
