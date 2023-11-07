@@ -41,6 +41,12 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolJoinExits(args);
         },
         poolGetUserSwapVolume: async (parent, args, context) => {
