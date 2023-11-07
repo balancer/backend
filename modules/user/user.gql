@@ -1,7 +1,13 @@
 extend type Query {
     userGetPoolBalances(chains: [GqlChain!], address: String): [GqlUserPoolBalance!]!
     userGetStaking: [GqlPoolStaking!]!
-    userGetPoolJoinExits(first: Int = 10, skip: Int = 0, poolId: String!): [GqlPoolJoinExit!]!
+    userGetPoolJoinExits(
+        first: Int = 10
+        skip: Int = 0
+        poolId: String!
+        chain: GqlChain
+        address: String
+    ): [GqlPoolJoinExit!]!
     userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!, chain: GqlChain, address: String): [GqlPoolSwap!]!
 }
 

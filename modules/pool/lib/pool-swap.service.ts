@@ -67,10 +67,14 @@ export class PoolSwapService {
     public async getUserJoinExitsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolJoinExit[]> {
-        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
+        const balancerSubgraphService = new BalancerSubgraphService(
+            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+        );
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
             skip: skip,
@@ -82,6 +86,7 @@ export class PoolSwapService {
             ...joinExit,
             __typename: 'GqlPoolJoinExit',
             poolId: joinExit.pool.id,
+            chain: chain,
             amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
         }));
     }

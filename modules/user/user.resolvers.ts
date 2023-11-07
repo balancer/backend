@@ -22,10 +22,16 @@ const resolvers: Resolvers = {
                 tokenPrice: tokenService.getPriceForToken(tokenPrices[balance.chain] || [], balance.tokenAddress),
             }));
         },
-        userGetPoolJoinExits: async (parent, { first, skip, poolId }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
+        userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('Chain is required');
+            }
+            const accountAddress = address || getRequiredAccountAddress(context);
 
-            return userService.getUserPoolInvestments(accountAddress, poolId, first, skip);
+            return userService.getUserPoolInvestments(accountAddress, poolId, chain, first, skip);
         },
         userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();

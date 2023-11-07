@@ -33,10 +33,11 @@ export class UserService {
     public async getUserPoolInvestments(
         address: string,
         poolId: string,
+        chain: Chain,
         first?: number,
         skip?: number,
     ): Promise<GqlPoolJoinExit[]> {
-        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
+        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, chain, first, skip);
     }
 
     public async getUserSwaps(
