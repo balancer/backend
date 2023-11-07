@@ -15,12 +15,13 @@ import {
     QueryPoolGetSwapsArgs,
     QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
-import { PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
 import { networkContext } from '../../network/network-context.service';
 import * as Sentry from '@sentry/node';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {
     constructor(
@@ -96,10 +97,14 @@ export class PoolSwapService {
     public async getUserSwapsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolSwap[]> {
-        const result = await this.balancerSubgraphService.getSwaps({
+        const balancerSubgraphService = new BalancerSubgraphService(
+            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+        );
+        const result = await balancerSubgraphService.getSwaps({
             first,
             skip,
             where: {
@@ -112,6 +117,7 @@ export class PoolSwapService {
 
         return result.swaps.map((swap) => ({
             id: swap.id,
+            chain: chain,
             userAddress,
             poolId: swap.poolId.id,
             tokenIn: swap.tokenIn,

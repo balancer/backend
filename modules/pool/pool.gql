@@ -659,6 +659,7 @@ type GqlPoolFilterDefinition {
 
 type GqlPoolSwap {
     id: ID!
+    chain: GqlChain!
     poolId: String!
     userAddress: String!
     tokenIn: String!
@@ -672,6 +673,7 @@ type GqlPoolSwap {
 
 type GqlPoolBatchSwap {
     id: ID!
+    chain: GqlChain!
     userAddress: String!
     tokenIn: String!
     tokenOut: String!

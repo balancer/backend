@@ -5,7 +5,6 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
@@ -40,8 +39,14 @@ export class UserService {
         return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
     }
 
-    public async getUserSwaps(address: string, poolId: string, first?: number, skip?: number): Promise<GqlPoolSwap[]> {
-        return this.poolSwapService.getUserSwapsForPool(address, poolId, first, skip);
+    public async getUserSwaps(
+        address: string,
+        poolId: string,
+        chain: Chain,
+        first?: number,
+        skip?: number,
+    ): Promise<GqlPoolSwap[]> {
+        return this.poolSwapService.getUserSwapsForPool(address, poolId, chain, first, skip);
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
