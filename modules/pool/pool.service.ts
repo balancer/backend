@@ -17,7 +17,6 @@ import {
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
-    QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -102,10 +101,6 @@ export class PoolService {
 
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         return this.poolSwapService.getJoinExits(args);
-    }
-
-    public async getPoolUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs): Promise<GqlPoolUserSwapVolume[]> {
-        return this.poolSwapService.getUserSwapVolume(args);
     }
 
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
