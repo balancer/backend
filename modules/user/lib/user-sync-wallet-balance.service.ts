@@ -123,25 +123,32 @@ export class UserSyncWalletBalanceService {
         console.log(
             `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools`,
         );
-        for (const poolAddress of poolAddresses) {
-            logPromises.push(
-                networkContext.provider.getLogs({
-                    //ERC20 Transfer topic
-                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-                    fromBlock,
-                    toBlock,
-                    address: poolAddress,
-                }),
+        const chunks = _.chunk(poolAddresses, 100);
+        let i = 1;
+        for (const chunk of chunks) {
+            for (const poolAddress of poolAddresses) {
+                logPromises.push(
+                    networkContext.provider.getLogs({
+                        //ERC20 Transfer topic
+                        topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
+                        fromBlock,
+                        toBlock,
+                        address: poolAddress,
+                    }),
+                );
+            }
+
+            const allResponses = await Promise.all(logPromises);
+            console.log(
+                `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${
+                    chunk.length * i
+                } pools done.`,
             );
-        }
 
-        const allResponses = await Promise.all(logPromises);
-        console.log(
-            `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools done.`,
-        );
-
-        for (const response of allResponses) {
-            events.push(...response);
+            for (const response of allResponses) {
+                events.push(...response);
+            }
+            i++;
         }
 
         const relevantERC20Addresses = poolAddresses;
