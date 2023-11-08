@@ -49,6 +49,9 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
+        poolGetUserSwapVolume: async (parent, args, context) => {
+            return poolService.getPoolUserSwapVolume(args);
+        },
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
         },
