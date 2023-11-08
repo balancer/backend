@@ -131,6 +131,7 @@ export class PoolGqlLoaderService {
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
         const orderDirection = args.orderDirection || undefined;
+        const userAddress = args.userAddress;
 
         switch (args.orderBy) {
             case 'totalLiquidity':
@@ -206,6 +207,35 @@ export class PoolGqlLoaderService {
             });
         }
 
+        const userArgs: Prisma.PrismaPoolWhereInput = userAddress
+            ? {
+                  OR: [
+                      {
+                          userWalletBalances: {
+                              some: {
+                                  userAddress: {
+                                      equals: userAddress,
+                                      mode: 'insensitive' as const,
+                                  },
+                                  balanceNum: { gt: 0 },
+                              },
+                          },
+                      },
+                      {
+                          userStakedBalances: {
+                              some: {
+                                  userAddress: {
+                                      equals: userAddress,
+                                      mode: 'insensitive' as const,
+                                  },
+                                  balanceNum: { gt: 0 },
+                              },
+                          },
+                      },
+                  ],
+              }
+            : {};
+
         const filterArgs: Prisma.PrismaPoolWhereInput = {
             dynamicData: {
                 totalSharesNum: {
@@ -271,7 +301,10 @@ export class PoolGqlLoaderService {
         if (!textSearch) {
             return {
                 ...baseQuery,
-                where: filterArgs,
+                where: {
+                    ...filterArgs,
+                    ...userArgs,
+                },
             };
         }
 
@@ -279,10 +312,11 @@ export class PoolGqlLoaderService {
             ...baseQuery,
             where: {
                 OR: [
-                    { name: textSearch, ...filterArgs },
-                    { symbol: textSearch, ...filterArgs },
+                    { name: textSearch, ...filterArgs, ...userArgs },
+                    { symbol: textSearch, ...filterArgs, ...userArgs },
                     {
                         ...filterArgs,
+                        ...userArgs,
                         allTokens: {
                             some: {
                                 OR: [
