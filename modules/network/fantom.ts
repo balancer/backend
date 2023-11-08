@@ -93,7 +93,7 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://ftm.obsidianrpc.com',
+    rpcUrl: 'https://rpc.ankr.com/fantom',
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
