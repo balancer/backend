@@ -93,7 +93,7 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://fantom.drpc.org',
+    rpcUrl: 'https://rpc.fantom.gateway.fm',
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
