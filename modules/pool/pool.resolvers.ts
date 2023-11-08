@@ -22,6 +22,9 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
+        poolGetPoolFilters: async (parent, {}, context) => {
+            return poolService.getPoolFilters();
+        },
         poolGetSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
