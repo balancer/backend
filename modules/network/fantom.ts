@@ -93,7 +93,7 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc2.fantom.network',
+    rpcUrl: 'https://fantom.drpc.org',
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
@@ -102,7 +102,7 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
-        beetsPriceProviderRpcUrl: 'https://fantom.drpc.org',
+        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
