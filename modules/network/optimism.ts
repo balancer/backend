@@ -65,7 +65,7 @@ const optimismNetworkData: NetworkData = {
     },
     protocolToken: 'beets',
     beets: {
-        address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
