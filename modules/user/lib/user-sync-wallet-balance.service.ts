@@ -123,7 +123,7 @@ export class UserSyncWalletBalanceService {
         console.log(
             `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools`,
         );
-        const chunks = _.chunk(poolAddresses, 100);
+        const chunks = _.chunk(poolAddresses, 400);
         let i = 1;
         for (const chunk of chunks) {
             for (const poolAddress of poolAddresses) {
@@ -140,9 +140,7 @@ export class UserSyncWalletBalanceService {
 
             const allResponses = await Promise.all(logPromises);
             console.log(
-                `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${
-                    chunk.length * i
-                } pools done.`,
+                `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${chunk.length} pools done.`,
             );
 
             for (const response of allResponses) {
