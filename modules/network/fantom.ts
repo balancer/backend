@@ -102,7 +102,7 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+        beetsPriceProviderRpcUrl: 'https://fantom.drpc.org',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
