@@ -83,10 +83,13 @@ export class GaugeStakingService implements PoolStakingService {
 
     async syncStakingForPools(pools?: { id: string }[]): Promise<void> {
         // Getting data from the DB and subgraph
-        const poolIds = (pools ?? await prisma.prismaPool.findMany({
-            select: { id: true },
-            where: { chain: networkContext.chain },
-        })).map((pool) => pool.id);
+        const poolIds = (
+            pools ??
+            (await prisma.prismaPool.findMany({
+                select: { id: true },
+                where: { chain: networkContext.chain },
+            }))
+        ).map((pool) => pool.id);
         const { pools: subgraphPoolsWithGauges } = await this.gaugeSubgraphService.getPoolsWithGauges(poolIds);
 
         const subgraphGauges = subgraphPoolsWithGauges
@@ -180,7 +183,7 @@ export class GaugeStakingService implements PoolStakingService {
             if (!token) {
                 const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
                 console.error(
-                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId}`,
+                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
                 );
                 continue;
             }
@@ -205,7 +208,9 @@ export class GaugeStakingService implements PoolStakingService {
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
-    private async getOnchainRewardTokensData(gauges: { id: string; version: 1 | 2; tokens: { id: string, decimals: number }[] }[]) {
+    private async getOnchainRewardTokensData(
+        gauges: { id: string; version: 1 | 2; tokens: { id: string; decimals: number }[] }[],
+    ) {
         // Get onchain data for BAL rewards
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
         for (const gauge of gauges) {
@@ -283,7 +288,9 @@ export class GaugeStakingService implements PoolStakingService {
                         const id = `${gaugeAddress}-${tokenAddress}`.toLowerCase();
                         const { rate, period_finish } = rewardsData[gaugeAddress].rewardData[tokenAddress];
                         const rewardPerSecond =
-                            period_finish && period_finish.toNumber() > now ? formatUnits(rate!, decimals[tokenAddress]) : '0.0';
+                            period_finish && period_finish.toNumber() > now
+                                ? formatUnits(rate!, decimals[tokenAddress])
+                                : '0.0';
                         const { totalSupply } = balData[gaugeAddress];
 
                         return {

@@ -189,7 +189,7 @@ export class PoolOnChainDataService {
                 [
                     defaultAbiCoder.encode(
                         ['bytes32', 'bytes32'],
-                        [feeKey, formatBytes32String('E-CLP')]
+                        [feeKey, formatBytes32String('ECLP')]
                     ),
                 ]
             );
@@ -386,7 +386,7 @@ export class PoolOnChainDataService {
                 if (onchainData.gyroProtocolFee) {
                     yieldProtocolFeePercentage = formatFixed(onchainData.gyroProtocolFee, 18);
                 } else if (pool.type.includes('GYRO')) {
-                    if (pool.type === 'GYROE') {
+                    if (pool.type === 'GYROE' && gyroDefaults.eclp) {
                         yieldProtocolFeePercentage = formatFixed(gyroDefaults.eclp, 18) || '0';
                     } else {
                         yieldProtocolFeePercentage = formatFixed(gyroDefaults.default, 18) || '0';

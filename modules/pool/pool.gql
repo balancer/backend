@@ -416,6 +416,9 @@ type GqlPoolLinearNested {
     upperTarget: BigInt!
     lowerTarget: BigInt!
     bptPriceRate: BigDecimal!
+
+    type: String!
+    version: Int!
 }
 
 type GqlPoolPhantomStableNested {
@@ -434,6 +437,9 @@ type GqlPoolPhantomStableNested {
     amp: BigInt!
     swapFee: BigDecimal!
     bptPriceRate: BigDecimal!
+
+    type: String!
+    version: Int!
 }
 
 union GqlPoolUnion =
