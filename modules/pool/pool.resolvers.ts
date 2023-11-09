@@ -15,9 +15,6 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
-        poolGetPoolFilters: async (parent, {}, context) => {
-            return poolService.getPoolFilters();
-        },
         poolGetSwaps: async (parent, args, context) => {
             return poolService.getPoolSwaps(args);
         },
@@ -26,9 +23,6 @@ const balancerResolvers: Resolvers = {
         },
         poolGetJoinExits: async (parent, args, context) => {
             return poolService.getPoolJoinExits(args);
-        },
-        poolGetUserSwapVolume: async (parent, args, context) => {
-            return poolService.getPoolUserSwapVolume(args);
         },
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
