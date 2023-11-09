@@ -261,11 +261,15 @@ export class PoolGqlLoaderService {
                 mode: 'insensitive',
             },
             categories: {
-                every: {
-                    category: {
-                        notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
-                    },
-                },
+                ...(where?.categoryNotIn
+                    ? {
+                          every: {
+                              category: {
+                                  notIn: where.categoryNotIn,
+                              },
+                          },
+                      }
+                    : {}),
                 ...(where?.categoryIn
                     ? {
                           some: {
