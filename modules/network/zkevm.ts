@@ -72,6 +72,7 @@ const zkevmNetworkData: NetworkData = {
         composableStablePoolFactories: [
             '0x8ea89804145c007e7d226001a96955ad53836087',
             '0x956ccab09898c0af2aca5e6c229c3ad4e93d9288',
+            '0x577e5993b9cc480f07f98b5ebd055604bd9071c4'
         ],
         weightedPoolV2Factories: ['0x03f3fb107e74f2eac9358862e91ad3c692712054'],
         swapProtocolFeePercentage: 0.5,
