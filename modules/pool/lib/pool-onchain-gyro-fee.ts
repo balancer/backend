@@ -15,6 +15,8 @@ interface PoolInput {
 
 interface OnchainGyroFees {
     eclpFee?: string;
+    twoClpFee?: string;
+    threeClpFee?: string;
     defaultFee?: string;
     pools?: {
         [id: string]: {
@@ -45,8 +47,31 @@ export const fetchOnChainGyroFees = async (
             ),
         ]
     );
+
+    const twoClpKey = keccak256(
+        ['bytes'],
+        [
+            defaultAbiCoder.encode(
+                ['bytes32', 'bytes32'],
+                [feeKey, formatBytes32String('2CLP')]
+            ),
+        ]
+    );
+
+    const threeClpKey = keccak256(
+        ['bytes'],
+        [
+            defaultAbiCoder.encode(
+                ['bytes32', 'bytes32'],
+                [feeKey, formatBytes32String('3CLP')]
+            ),
+        ]
+    );
+
     multicaller.call('defaultFee', gyroConfigAddress, 'getUint', [feeKey]);
     multicaller.call('eclpFee', gyroConfigAddress, 'getUint', [eclpKey]);
+    multicaller.call('twoClpFee', gyroConfigAddress, 'getUint', [twoClpKey]);
+    multicaller.call('threeClpFee', gyroConfigAddress, 'getUint', [threeClpKey]);
 
     let poolTypeLookup: { [id: string]: PrismaPoolType } = {};
     pools.forEach(({ id, type, address }) => {
@@ -70,13 +95,23 @@ export const fetchOnChainGyroFees = async (
     const results = (await multicaller.execute()) as OnchainGyroFees;
     const defaultFee = results.defaultFee ?? '0';
     const eclpFee = results.eclpFee ?? '0';
+    const twoClpFee = results.twoClpFee ?? '0';
+    const threeClpFee = results.threeClpFee ?? '0';
 
     let parsed: { [address: string]: string } = {};
     if (results.pools) {
         parsed = Object.fromEntries(
             Object.entries(results.pools).map(([id, { poolFee }]) => [id,
                 formatEther(
-                    poolFee ? poolFee : poolTypeLookup[id].includes('GYROE') ? eclpFee : defaultFee
+                    poolFee
+                    ? poolFee
+                    : poolTypeLookup[id] == 'GYROE'
+                    ? eclpFee
+                    : poolTypeLookup[id] == 'GYRO'
+                    ? twoClpFee
+                    : poolTypeLookup[id] == 'GYRO3'
+                    ? threeClpFee
+                    : defaultFee
                 )
             ])
         );

@@ -165,8 +165,8 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
     weights: result.weights?.map(formatEther),
     targets: result.targets?.map(String),
     poolTokens: result.poolTokens ? {
-        tokens: result.poolTokens[0].map((t) => t.toLocaleLowerCase()),
-        balances: result.poolTokens[1].map((w, i) => formatUnits(w, decimalsLookup[result.poolTokens[0][i].toLocaleLowerCase()])),
+        tokens: result.poolTokens[0].map((token) => token.toLowerCase()),
+        balances: result.poolTokens[1].map((balance, i) => formatUnits(balance, decimalsLookup[result.poolTokens[0][i].toLowerCase()])),
         rates: result.poolTokens[0].map((_, i) => result.tokenRate && result.tokenRate[i] ? formatEther(result.tokenRate[i]) : undefined)
     } : { tokens: [], balances: [], rates: [] },
     wrappedTokenRate: result.wrappedTokenRate ? formatEther(result.wrappedTokenRate) : '1.0',

@@ -1,10 +1,9 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isStablePool } from './pool-utils';
 import { TokenService } from '../../token/token.service';
-import { networkContext } from '../../network/network-context.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { fetchOnChainPoolState } from './pool-onchain-state';
 import { fetchOnChainPoolData } from './pool-onchain-data';
@@ -25,7 +24,13 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
 ];
 
 export class PoolOnChainDataService {
-    constructor(private readonly tokenService: TokenService) {}
+    constructor(
+        private readonly tokenService: TokenService,
+        private chain: Chain,
+        private readonly vaultAddress: string,
+        private readonly yieldProtocolFeePercentage: number,
+        private readonly gyroConfig?: string,
+    ) {}
 
     public async updateOnChainStatus(poolIds: string[]): Promise<void> {
         if (poolIds.length === 0) return;
@@ -33,7 +38,7 @@ export class PoolOnChainDataService {
         const filteredPools = await prisma.prismaPool.findMany({
             where: {
                 id: { in: poolIds },
-                chain: networkContext.chain,
+                chain: this.chain,
                 type: { in: SUPPORTED_POOL_TYPES },
             },
             include: {
@@ -49,7 +54,7 @@ export class PoolOnChainDataService {
             if (pool.dynamicData) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: pool.id, chain: this.chain } },
                         data: {
                             isPaused,
                             isInRecoveryMode,
@@ -69,7 +74,7 @@ export class PoolOnChainDataService {
         const filteredPools = await prisma.prismaPool.findMany({
             where: {
                 id: { in: poolIds },
-                chain: networkContext.chain,
+                chain: this.chain,
                 type: { in: SUPPORTED_POOL_TYPES },
             },
             include: {
@@ -84,8 +89,12 @@ export class PoolOnChainDataService {
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
 
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const onchainResults = await fetchOnChainPoolData(filteredPools, networkContext.data.balancer.vault, 1024);
-        const gyroFees = await fetchOnChainGyroFees(gyroPools, networkContext.data.gyro?.config, 1024);
+        const onchainResults = await fetchOnChainPoolData(filteredPools, this.vaultAddress, 1024);
+        const gyroFees = await (
+            this.gyroConfig
+            ? fetchOnChainGyroFees(gyroPools, this.gyroConfig, 1024)
+            : Promise.resolve({} as { [address: string]: string })
+        );
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -104,8 +113,8 @@ export class PoolOnChainDataService {
                     if (!pool.stableDynamicData || pool.stableDynamicData.amp !== amp) {
                         operations.push(
                             prisma.prismaPoolStableDynamicData.upsert({
-                                where: { id_chain: { id: pool.id, chain: networkContext.chain } },
-                                create: { id: pool.id, chain: networkContext.chain, poolId: pool.id, amp, blockNumber },
+                                where: { id_chain: { id: pool.id, chain: this.chain } },
+                                create: { id: pool.id, chain: this.chain, poolId: pool.id, amp, blockNumber },
                                 update: { amp, blockNumber },
                             })
                         );
@@ -127,10 +136,10 @@ export class PoolOnChainDataService {
                         ) {
                             operations.push(
                                 prisma.prismaPoolLinearDynamicData.upsert({
-                                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                                    where: { id_chain: { id: pool.id, chain: this.chain } },
                                     create: {
                                         id: pool.id,
-                                        chain: networkContext.chain,
+                                        chain: this.chain,
                                         poolId: pool.id,
                                         upperTarget,
                                         lowerTarget,
@@ -152,7 +161,7 @@ export class PoolOnChainDataService {
                 const yieldProtocolFeePercentage =
                     gyroFees[pool.id] ||
                     onchainData.protocolYieldFeePercentageCache ||
-                    String(networkContext.data.balancer.yieldProtocolFeePercentage);
+                    String(this.yieldProtocolFeePercentage);
 
                 if (
                     pool.dynamicData &&
@@ -163,7 +172,7 @@ export class PoolOnChainDataService {
                 ) {
                     operations.push(
                         prisma.prismaPoolDynamicData.update({
-                            where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                            where: { id_chain: { id: pool.id, chain: this.chain } },
                             data: {
                                 swapFee,
                                 totalShares,
@@ -219,10 +228,10 @@ export class PoolOnChainDataService {
                     ) {
                         operations.push(
                             prisma.prismaPoolTokenDynamicData.upsert({
-                                where: { id_chain: { id: poolToken.id, chain: networkContext.chain } },
+                                where: { id_chain: { id: poolToken.id, chain: this.chain } },
                                 create: {
                                     id: poolToken.id,
-                                    chain: networkContext.chain,
+                                    chain: this.chain,
                                     poolTokenId: poolToken.id,
                                     blockNumber,
                                     priceRate,
@@ -253,8 +262,6 @@ export class PoolOnChainDataService {
                 console.log('error syncing on chain data', e);
             }
         }
-
-        Promise.all(operations).then((r) => console.log(r))
 
         await prismaBulkExecuteOperations(operations, false);
     }
