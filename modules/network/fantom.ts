@@ -94,9 +94,7 @@ const fantomNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl:
-        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.fantom.gateway.fm`
-            : `https://rpc.fantom.network`,
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.fantom.network` : `https://rpc.fantom.network`,
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
