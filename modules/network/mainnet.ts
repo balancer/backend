@@ -17,6 +17,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const underlyingTokens = {
     USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -25,7 +26,7 @@ const underlyingTokens = {
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
 };
 
-export const mainnetNetworkData: NetworkData = {
+const data: NetworkData = {
     chain: {
         slug: 'ethereum',
         id: 1,
@@ -367,25 +368,25 @@ export const mainnetNetworkData: NetworkData = {
 };
 
 export const mainnetNetworkConfig: NetworkConfig = {
-    data: mainnetNetworkData,
+    data,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider({ url: mainnetNetworkData.rpcUrl, timeout: 60000 }),
+    provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new IbTokensAprService(
-            mainnetNetworkData.ibAprConfig,
-            mainnetNetworkData.chain.prismaId,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-            mainnetNetworkData.balancer.swapProtocolFeePercentage,
+            data.ibAprConfig,
+            data.chain.prismaId,
+            data.balancer.yieldProtocolFeePercentage,
+            data.balancer.swapProtocolFeePercentage,
         ),
         new PhantomStableAprService(
-            mainnetNetworkData.chain.prismaId,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
+            data.chain.prismaId,
+            data.balancer.yieldProtocolFeePercentage,
         ),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(tokenService, [mainnetNetworkData.bal!.address]),
+        new SwapFeeAprService(data.balancer.swapProtocolFeePercentage),
+        new GaugeAprService(tokenService, [data.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, mainnetNetworkData.bal!.address)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
@@ -393,6 +394,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.

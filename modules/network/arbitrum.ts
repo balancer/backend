@@ -17,6 +17,7 @@ import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const arbitrumNetworkData: NetworkData = {
     chain: {
@@ -249,6 +250,9 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(arbitrumNetworkData.subgraphs.balancer, arbitrumNetworkData.chain.id),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.

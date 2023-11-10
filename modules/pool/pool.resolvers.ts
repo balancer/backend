@@ -3,11 +3,18 @@ import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
+import { headerChain } from '../context/header-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id }, context) => {
-            return poolService.getGqlPool(id);
+        poolGetPool: async (parent, { id, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('Chain is required');
+            }
+            return poolService.getGqlPool(id, chain);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
@@ -16,19 +23,43 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolsCount(args);
         },
         poolGetSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolSwaps(args);
         },
         poolGetBatchSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('Chain is required');
+            }
             return poolService.getPoolJoinExits(args);
         },
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
         },
-        poolGetSnapshots: async (parent, { id, range }, context) => {
-            const snapshots = await poolService.getSnapshotsForPool(id, range);
+        poolGetSnapshots: async (parent, { id, chain, range }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('Chain is required');
+            }
+            const snapshots = await poolService.getSnapshotsForPool(id, chain, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,
@@ -42,8 +73,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetAllPoolsSnapshots: async (parent, { range }, context) => {
-            const snapshots = await poolService.getSnapshotsForAllPools(range);
+        poolGetAllPoolsSnapshots: async (parent, { chains, range }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('Chain is required');
+            }
+            const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,
@@ -57,8 +94,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetLinearPools: async () => {
-            return poolService.getGqlLinearPools();
+        poolGetLinearPools: async (parent, { chains }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('Chain is required');
+            }
+            return poolService.getGqlLinearPools(chains);
         },
     },
     Mutation: {
