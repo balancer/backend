@@ -46,24 +46,36 @@ const getSwapFeeFn = (type: string) => {
     }
 };
 
+const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
+    if (['LINEAR', 'PHANTOM_STABLE'].includes(type)) {
+        return 'getVirtualSupply';
+    } else if (
+        type === 'COMPOSABLE_STABLE'
+        || (type === 'WEIGHTED' && version > 1)
+        || (type === 'GYROE' && version > 1)
+        || (type === 'UNKNOWN' && version > 1)) {
+        return 'getActualSupply';
+    } else {
+        return 'totalSupply';
+    }
+}
+
 interface PoolInput {
     id: string;
     address: string;
-    type: PrismaPoolType;
+    type: PrismaPoolType | 'COMPOSABLE_STABLE';
     tokens: {
         address: string,
         token: {
             decimals: number,
         }
     }[];
-    version?: number;
+    version: number;
 }
 
 interface OnchainData {
     poolTokens: [string[], BigNumber[]];
     totalSupply: BigNumber;
-    virtualSupply?: BigNumber;
-    actualSupply?: BigNumber;
     swapFee: BigNumber;
     swapEnabled?: boolean;
     protocolYieldFeePercentageCache?: BigNumber;
@@ -78,14 +90,12 @@ interface OnchainData {
 }
 
 const defaultCalls = (
-    { id, address, type }: PoolInput,
+    { id, address, type, version }: PoolInput,
     vaultAddress: string,
     multicaller: Multicaller3
 ) => {
     multicaller.call(`${id}.poolTokens`, vaultAddress, 'getPoolTokens', [id]);
-    multicaller.call(`${id}.totalSupply`, address, 'totalSupply');
-    multicaller.call(`${id}.virtualSupply`, address, 'getVirtualSupply');
-    multicaller.call(`${id}.actualSupply`, address, 'getActualSupply');
+    multicaller.call(`${id}.totalSupply`, address, getTotalSupplyFn(type, version));
     multicaller.call(`${id}.swapFee`, address, getSwapFeeFn(type));
     multicaller.call(`${id}.rate`, address, 'getRate');
     multicaller.call(`${id}.protocolYieldFeePercentageCache`, address, 'getProtocolFeePercentageCache', [2]);
@@ -133,7 +143,7 @@ const gyroECalls = (
     multicaller.call(`${id}.tokenRates`, address, 'getTokenRates');
 };
 
-const poolTypeCalls = (type: PrismaPoolType, version = 1) => {
+const poolTypeCalls = (type: PoolInput['type'], version = 1) => {
     const do_nothing = () => ({});
     switch (type) {
         case 'WEIGHTED':
@@ -144,12 +154,13 @@ const poolTypeCalls = (type: PrismaPoolType, version = 1) => {
         case 'STABLE':
         case 'PHANTOM_STABLE':
         case 'META_STABLE':
+        case 'COMPOSABLE_STABLE':
             return stableCalls;
         case 'GYROE':
             if (version === 2) {
-            return gyroECalls;
+                return gyroECalls;
             } else {
-            return do_nothing;
+                return do_nothing;
             }
         case 'LINEAR':
             return linearCalls;
@@ -161,7 +172,7 @@ const poolTypeCalls = (type: PrismaPoolType, version = 1) => {
 const parse = (result: OnchainData, decimalsLookup: { [address: string]: number }) => ({
     amp: result.amp ? formatFixed(result.amp[0], String(result.amp[2]).length - 1) : undefined,
     swapFee: formatEther(result.swapFee ?? '0'),
-    totalShares: formatEther(result.actualSupply || result.virtualSupply || result.totalSupply || '0'),
+    totalShares: formatEther(result.totalSupply || '0'),
     weights: result.weights?.map(formatEther),
     targets: result.targets?.map(String),
     poolTokens: result.poolTokens ? {
