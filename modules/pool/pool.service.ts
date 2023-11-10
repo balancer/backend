@@ -537,7 +537,7 @@ export class PoolService {
 
 export const poolService = new PoolService(
     new PoolCreatorService(userService),
-    new PoolOnChainDataService(tokenService, networkContext.chain, networkContext.data.balancer.vault, networkContext.data.balancer.yieldProtocolFeePercentage, networkContext.data.gyro?.config),
+    new PoolOnChainDataService(tokenService),
     new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
