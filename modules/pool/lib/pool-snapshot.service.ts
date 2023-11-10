@@ -1,7 +1,3 @@
-import {
-    balancerSubgraphService,
-    BalancerSubgraphService,
-} from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { prisma } from '../../../prisma/prisma-client';
 import {
     BalancerPoolSnapshotFragment,
@@ -22,9 +18,16 @@ import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
 export class PoolSnapshotService {
     constructor(
-        private readonly balancerSubgraphService: BalancerSubgraphService,
         private readonly coingeckoService: CoingeckoService,
     ) {}
+
+    private get balancerSubgraphService() {
+        return networkContext.config.services.balancerSubgraphService;
+    }
+
+    private get chain() {
+        return networkContext.chain;
+    }
 
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
@@ -37,7 +40,7 @@ export class PoolSnapshotService {
 
     public async getSnapshotForPool(poolId: string, timestamp: number) {
         return prisma.prismaPoolSnapshot.findUnique({
-            where: { id_chain: { id: `${poolId}-${timestamp}`, chain: networkContext.chain } },
+            where: { id_chain: { id: `${poolId}-${timestamp}`, chain: this.chain } },
         });
     }
 
@@ -82,14 +85,14 @@ export class PoolSnapshotService {
             where: {
                 // there is no guarantee that a pool receives a swap per day, so we get the last day with a swap
                 timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
             orderBy: { timestamp: 'desc' },
             distinct: 'poolId',
         });
 
         const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
-        const pools = await prisma.prismaPool.findMany({ where: { id: { in: poolIds }, chain: networkContext.chain } });
+        const pools = await prisma.prismaPool.findMany({ where: { id: { in: poolIds }, chain: this.chain } });
 
         for (const pool of pools) {
             const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === pool.id);
@@ -116,7 +119,7 @@ export class PoolSnapshotService {
                 );
 
                 return prisma.prismaPoolSnapshot.upsert({
-                    where: { id_chain: { id: snapshot.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: snapshot.id, chain: this.chain } },
                     create: data,
                     update: data,
                 });
@@ -129,8 +132,8 @@ export class PoolSnapshotService {
         const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
             where: {
                 OR: [
-                    { type: 'PHANTOM_STABLE', chain: networkContext.chain },
-                    { tokens: { some: { nestedPoolId: { not: null } } }, chain: networkContext.chain },
+                    { type: 'PHANTOM_STABLE', chain: this.chain },
+                    { tokens: { some: { nestedPoolId: { not: null } } }, chain: this.chain },
                 ],
             },
             include: { tokens: true },
@@ -168,7 +171,7 @@ export class PoolSnapshotService {
 
     public async createPoolSnapshotsForPoolsMissingSubgraphData(poolId: string, numDays = -1) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
-            where: { id_chain: { id: poolId, chain: networkContext.chain } },
+            where: { id_chain: { id: poolId, chain: this.chain } },
             include: prismaPoolWithExpandedNesting.include,
         });
 
@@ -183,7 +186,7 @@ export class PoolSnapshotService {
             throw new Error('Unsupported pool type');
         }
 
-        const swaps = await balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
+        const swaps = await this.balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
 
         const tokenPriceMap: TokenHistoricalPrices = {};
 
@@ -194,7 +197,7 @@ export class PoolSnapshotService {
 
             if (token.nestedPoolId && token.nestedPool) {
                 const snapshots = await prisma.prismaPoolSnapshot.findMany({
-                    where: { poolId: token.nestedPoolId, chain: networkContext.chain },
+                    where: { poolId: token.nestedPoolId, chain: this.chain },
                 });
 
                 tokenPriceMap[token.address] = snapshots.map((snapshot) => ({
@@ -207,7 +210,7 @@ export class PoolSnapshotService {
                     where: {
                         tokenAddress: token.address,
                         timestamp: { gte: startTimestamp },
-                        chain: networkContext.chain,
+                        chain: this.chain,
                     },
                 });
                 if (priceForDays.length === 0) {
@@ -277,7 +280,7 @@ export class PoolSnapshotService {
             const id = `${poolId}-${startTimestamp}`;
             const data = {
                 id,
-                chain: networkContext.chain,
+                chain: this.chain,
                 poolId,
                 timestamp: startTimestamp,
                 totalLiquidity: totalLiquidity || 0,
@@ -297,7 +300,7 @@ export class PoolSnapshotService {
 
             try {
                 await prisma.prismaPoolSnapshot.upsert({
-                    where: { id_chain: { id, chain: networkContext.chain } },
+                    where: { id_chain: { id, chain: this.chain } },
                     create: data,
                     update: data,
                 });
@@ -318,7 +321,7 @@ export class PoolSnapshotService {
 
         return {
             id: snapshot.id,
-            chain: networkContext.chain,
+            chain: this.chain,
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
             totalLiquidity: parseFloat(snapshot.liquidity),

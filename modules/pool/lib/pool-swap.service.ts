@@ -6,7 +6,6 @@ import {
     Swap_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { tokenService, TokenService } from '../../token/token.service';
-import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     GqlPoolJoinExit,
     GqlPoolSwap,
@@ -25,8 +24,15 @@ import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 export class PoolSwapService {
     constructor(
         private readonly tokenService: TokenService,
-        private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
+
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
+
+    private get chain() {
+        return networkContext.chain;
+    }
 
     public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         const first = !args.first || args.first > 100 ? 10 : args.first;
@@ -34,9 +40,8 @@ export class PoolSwapService {
         const allChainsJoinExits: GqlPoolJoinExit[] = [];
 
         for (const chain of args.where!.chainIn!) {
-            const balancerSubgraphService = new BalancerSubgraphService(
-                AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
-            );
+            const balancerSubgraphService =
+                AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
             const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
                 where: { pool_in: args.where?.poolIdIn },
@@ -70,9 +75,9 @@ export class PoolSwapService {
         first = 10,
         skip = 0,
     ): Promise<GqlPoolJoinExit[]> {
-        const balancerSubgraphService = new BalancerSubgraphService(
-            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
-        );
+        const balancerSubgraphService =
+            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+
         const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
@@ -121,9 +126,9 @@ export class PoolSwapService {
         first = 10,
         skip = 0,
     ): Promise<GqlPoolSwap[]> {
-        const balancerSubgraphService = new BalancerSubgraphService(
-            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
-        );
+        const balancerSubgraphService =
+            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+
         const result = await balancerSubgraphService.getSwaps({
             first,
             skip,
@@ -191,7 +196,7 @@ export class PoolSwapService {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({
             orderBy: { timestamp: 'desc' },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         //ensure we only sync the last 48 hours worth of swaps
@@ -256,7 +261,7 @@ export class PoolSwapService {
 
                     return {
                         id: swap.id,
-                        chain: networkContext.chain,
+                        chain: this.chain,
                         timestamp: swap.timestamp,
                         poolId: swap.poolId.id,
                         userAddress: swap.userAddress.id,
@@ -290,13 +295,13 @@ export class PoolSwapService {
         await prisma.prismaPoolSwap.deleteMany({
             where: {
                 timestamp: { lt: twoDaysAgo },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
         await prisma.prismaPoolBatchSwap.deleteMany({
             where: {
                 timestamp: { lt: twoDaysAgo },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
 
@@ -305,14 +310,14 @@ export class PoolSwapService {
 
     private async createBatchSwaps(txs: string[]) {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs }, chain: networkContext.chain } });
+        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs }, chain: this.chain } });
         const groupedByTxAndUser = _.groupBy(swaps, (swap) => `${swap.tx}${swap.userAddress}`);
         let operations: any[] = [
             prisma.prismaPoolSwap.updateMany({
-                where: { tx: { in: txs }, chain: networkContext.chain },
+                where: { tx: { in: txs }, chain: this.chain },
                 data: { batchSwapId: null, batchSwapIdx: null },
             }),
-            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: networkContext.chain } }),
+            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: this.chain } }),
         ];
 
         for (const group of Object.values(groupedByTxAndUser)) {
@@ -339,7 +344,7 @@ export class PoolSwapService {
                         prisma.prismaPoolBatchSwap.create({
                             data: {
                                 id: startSwap.id,
-                                chain: networkContext.chain,
+                                chain: this.chain,
                                 timestamp: startSwap.timestamp,
                                 userAddress: startSwap.userAddress,
                                 tokenIn: startSwap.tokenIn,
@@ -354,7 +359,7 @@ export class PoolSwapService {
                         }),
                         ...batchSwaps.map((swap, index) =>
                             prisma.prismaPoolSwap.update({
-                                where: { id_chain: { id: swap.id, chain: networkContext.chain } },
+                                where: { id_chain: { id: swap.id, chain: this.chain } },
                                 data: { batchSwapId: startSwap.id, batchSwapIdx: index },
                             }),
                         ),
