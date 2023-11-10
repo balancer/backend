@@ -352,13 +352,20 @@ export class PoolService {
 
     public async syncPoolVersionForAllPools() {
         const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+
         for (const subgraphPool of subgraphPools) {
-            await prisma.prismaPool.update({
-                where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
-                data: {
-                    version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
-                },
-            });
+            try {
+                await prisma.prismaPool.update({
+                    where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                    data: {
+                        version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
+                    },
+                });
+            } catch(e: any) {
+                // Some pools are filtered from the DB, like test pools,
+                // so we just ignore them without breaking the loop
+                console.error(e.meta.cause, 'Network', networkContext.chain, 'Pool ID: ', subgraphPool.id);
+            }
         }
     }
 
