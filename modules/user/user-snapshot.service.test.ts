@@ -13,6 +13,7 @@ import { mockServer } from '../tests-helper/mocks/mockHttpServer';
 import { userService } from './user.service';
 import { secondsPerDay } from '../common/time';
 import { networkContext } from '../network/network-context.service';
+import { Chain } from '@prisma/client';
 
 /*
 TEST SETUP:
@@ -182,7 +183,12 @@ test('The user requests the user stats for the first time, requesting from subgr
         ],
     );
 
-    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     //check if 4th snapshot has been inferred from three present ones
     expect(snapshotsFromService.length).toBe(4);
     const snapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
@@ -298,6 +304,7 @@ test('User in in the pool for a very long time, requests various different time 
     const thirtySnapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
         userAddress,
         poolId1,
+        Chain.FANTOM,
         'THIRTY_DAYS',
     );
 
@@ -316,6 +323,7 @@ test('User in in the pool for a very long time, requests various different time 
     const ninetySnapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
         userAddress,
         poolId1,
+        Chain.FANTOM,
         'NINETY_DAYS',
     );
     //also includes the one from today
@@ -412,7 +420,12 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
         ],
     );
 
-    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     //check if 4th snapshot has been inferred from three present ones
     expect(snapshotsFromService.length).toBe(4);
     const snapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
@@ -535,7 +548,12 @@ Mock data for user-balance-subgraph (important that timestamps are ASC, as this 
         ],
     );
 
-    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     //check if 4th snapshot has been inferred from three present ones
     expect(snapshotsFromService.length).toBe(2);
     const snapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
@@ -627,7 +645,12 @@ test('Return a snapshot with 0 valueUSD if there is no pool snapshot for the giv
         ],
     );
 
-    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(userAddress, pool2Id, 'THIRTY_DAYS');
+    const snapshotsFromService = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        pool2Id,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     // should get all 4 snapshots
     expect(snapshotsFromService.length).toBe(4);
     const snapshotsFromDb = await prisma.prismaUserPoolBalanceSnapshot.findMany({
@@ -661,6 +684,7 @@ test('Return a snapshot with 0 valueUSD if there is no pool snapshot for the giv
     const snapshotsAfterAdditionalPoolSnapshot = await userService.getUserBalanceSnapshotsForPool(
         userAddress,
         pool2Id,
+        Chain.FANTOM,
         'THIRTY_DAYS',
     );
     //expect still the same results here as above
@@ -804,7 +828,12 @@ test('User snapshots in the database must be picked up and synced by the sync pr
     expect(snapshotsFromDb.length).toBe(3);
 
     // after the sync, all 4 snapshots should be present
-    const snapshotsAfterSync = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const snapshotsAfterSync = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     expect(snapshotsAfterSync.length).toBe(4);
 
     // check if balances are calculated correctly
@@ -1000,7 +1029,12 @@ test('User has left and re-entered the pool. Make sure the sync does not persist
 
     // after the sync, 5 snapshots should be present.
     //Sevendaysago, sixdaysago (inferred), fivedaysago (0 balance), fourdays ago (0 balance), threedaysago and twodaysago (0 balance)
-    const snapshotsAfterSync = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const snapshotsAfterSync = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     expect(snapshotsAfterSync.length).toBe(6);
 
     const snapshotsFromDbAfterGet = await prisma.prismaUserPoolBalanceSnapshot.findMany({
@@ -1115,7 +1149,12 @@ test('Todays user snapshot must be gradually updated based on an updated pool sn
         ],
     );
 
-    const userSnapshotsBefore = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const userSnapshotsBefore = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     expect(userSnapshotsBefore.length).toBe(1);
 
     // check if balances are calculated correctly
@@ -1166,7 +1205,12 @@ test('Todays user snapshot must be gradually updated based on an updated pool sn
     await userService.syncUserBalanceSnapshots();
 
     // check numbers again
-    const userSnapshotsAfter = await userService.getUserBalanceSnapshotsForPool(userAddress, poolId1, 'THIRTY_DAYS');
+    const userSnapshotsAfter = await userService.getUserBalanceSnapshotsForPool(
+        userAddress,
+        poolId1,
+        Chain.FANTOM,
+        'THIRTY_DAYS',
+    );
     expect(userSnapshotsBefore.length).toBe(1);
 
     // check if balances are calculated correctly
@@ -1292,6 +1336,7 @@ test('User requests pool snapshots for Fidelio Duetto Pool. Make sure fBeets are
     const userBalanceSnapshots = await userService.getUserBalanceSnapshotsForPool(
         userAddress,
         fidelioPoolId,
+        Chain.FANTOM,
         'THIRTY_DAYS',
     );
     expect(userBalanceSnapshots.length).toBe(4);

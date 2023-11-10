@@ -14,12 +14,13 @@ import {
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetSwapsArgs,
 } from '../../../schema';
-import { PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
 import { networkContext } from '../../network/network-context.service';
 import * as Sentry from '@sentry/node';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {
     constructor(
@@ -30,29 +31,49 @@ export class PoolSwapService {
     public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         const first = !args.first || args.first > 100 ? 10 : args.first;
 
-        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
-            where: { pool_in: args.where?.poolIdIn },
-            first,
-            skip: args.skip,
-            orderBy: JoinExit_OrderBy.Timestamp,
-            orderDirection: OrderDirection.Desc,
-        });
+        const allChainsJoinExits: GqlPoolJoinExit[] = [];
 
-        return joinExits.map((joinExit) => ({
-            ...joinExit,
-            __typename: 'GqlPoolJoinExit',
-            poolId: joinExit.pool.id,
-            amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
-        }));
+        for (const chain of args.where!.chainIn!) {
+            const balancerSubgraphService = new BalancerSubgraphService(
+                AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+            );
+
+            const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
+                where: { pool_in: args.where?.poolIdIn },
+                first,
+                skip: args.skip,
+                orderBy: JoinExit_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Desc,
+            });
+
+            const mappedJoinExits: GqlPoolJoinExit[] = joinExits.map((joinExit) => ({
+                ...joinExit,
+                __typename: 'GqlPoolJoinExit',
+                chain: chain,
+                poolId: joinExit.pool.id,
+                amounts: joinExit.amounts.map((amount, index) => ({
+                    address: joinExit.pool.tokensList[index],
+                    amount,
+                })),
+            }));
+
+            allChainsJoinExits.push(...mappedJoinExits);
+        }
+
+        return allChainsJoinExits;
     }
 
     public async getUserJoinExitsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolJoinExit[]> {
-        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
+        const balancerSubgraphService = new BalancerSubgraphService(
+            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+        );
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
             skip: skip,
@@ -64,6 +85,7 @@ export class PoolSwapService {
             ...joinExit,
             __typename: 'GqlPoolJoinExit',
             poolId: joinExit.pool.id,
+            chain: chain,
             amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
         }));
     }
@@ -84,7 +106,9 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
         });
@@ -93,10 +117,14 @@ export class PoolSwapService {
     public async getUserSwapsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolSwap[]> {
-        const result = await this.balancerSubgraphService.getSwaps({
+        const balancerSubgraphService = new BalancerSubgraphService(
+            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+        );
+        const result = await balancerSubgraphService.getSwaps({
             first,
             skip,
             where: {
@@ -109,6 +137,7 @@ export class PoolSwapService {
 
         return result.swaps.map((swap) => ({
             id: swap.id,
+            chain: chain,
             userAddress,
             poolId: swap.poolId.id,
             tokenIn: swap.tokenIn,
@@ -143,7 +172,9 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
             include: {

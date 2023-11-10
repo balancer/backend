@@ -5,7 +5,6 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
@@ -34,30 +33,38 @@ export class UserService {
     public async getUserPoolInvestments(
         address: string,
         poolId: string,
+        chain: Chain,
         first?: number,
         skip?: number,
     ): Promise<GqlPoolJoinExit[]> {
-        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, first, skip);
+        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, chain, first, skip);
     }
 
-    public async getUserSwaps(address: string, poolId: string, first?: number, skip?: number): Promise<GqlPoolSwap[]> {
-        return this.poolSwapService.getUserSwapsForPool(address, poolId, first, skip);
+    public async getUserSwaps(
+        address: string,
+        poolId: string,
+        chain: Chain,
+        first?: number,
+        skip?: number,
+    ): Promise<GqlPoolSwap[]> {
+        return this.poolSwapService.getUserSwapsForPool(address, poolId, chain, first, skip);
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
         return this.userBalanceService.getUserFbeetsBalance(address);
     }
 
-    public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
-        return this.userBalanceService.getUserStaking(address);
+    public async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
+        return this.userBalanceService.getUserStaking(address, chains);
     }
 
     public async getUserBalanceSnapshotsForPool(
         accountAddress: string,
         poolId: string,
+        chain: Chain,
         days: GqlUserSnapshotDataRange,
     ): Promise<UserPoolSnapshot[]> {
-        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, days);
+        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, chain, days);
     }
 
     public async getUserRelicSnapshots(accountAddress: string, farmId: string, days: GqlUserSnapshotDataRange) {
