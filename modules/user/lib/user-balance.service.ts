@@ -74,12 +74,12 @@ export class UserBalanceService {
         };
     }
 
-    public async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
+    public async getUserStaking(address: string): Promise<PrismaPoolStaking[]> {
         const user = await prisma.prismaUser.findUnique({
             where: { address },
             include: {
                 stakedBalances: {
-                    where: { chain: { in: chains }, balanceNum: { gt: 0 } },
+                    where: { chain: networkContext.chain, balanceNum: { gt: 0 } },
                     include: {
                         staking: {
                             include: {

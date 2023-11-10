@@ -1,5 +1,5 @@
 extend type Query {
-    poolGetPool(id: String!, chain: GqlChain): GqlPoolBase!
+    poolGetPool(id: String!): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int
@@ -20,9 +20,9 @@ extend type Query {
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
-    poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-    poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-    poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
+    poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetLinearPools: [GqlPoolLinear!]!
 }
 
 extend type Mutation {
@@ -657,7 +657,6 @@ type GqlPoolFilterDefinition {
 
 type GqlPoolSwap {
     id: ID!
-    chain: GqlChain!
     poolId: String!
     userAddress: String!
     tokenIn: String!
@@ -671,7 +670,6 @@ type GqlPoolSwap {
 
 type GqlPoolBatchSwap {
     id: ID!
-    chain: GqlChain!
     userAddress: String!
     tokenIn: String!
     tokenOut: String!
@@ -707,12 +705,10 @@ input GqlPoolSwapFilter {
     tokenInIn: [String!]
     tokenOutIn: [String!]
     poolIdIn: [String!]
-    chainIn: [GqlChain!]
 }
 
 type GqlPoolStaking {
     id: ID!
-    chain: GqlChain!
     type: GqlPoolStakingType!
     address: String!
     gauge: GqlPoolStakingGauge
@@ -730,12 +726,10 @@ enum GqlPoolStakingGaugeStatus {
 
 input GqlPoolJoinExitFilter {
     poolIdIn: [String!]
-    chainIn: [GqlChain!]
 }
 
 type GqlPoolJoinExit {
     id: ID!
-    chain: GqlChain!
     type: GqlPoolJoinExitType!
     sender: String!
     poolId: String!
@@ -805,7 +799,6 @@ enum GqlPoolSnapshotDataRange {
 
 type GqlPoolSnapshot {
     id: ID!
-    chain: GqlChain!
     poolId: String!
     timestamp: Int!
     totalLiquidity: String!

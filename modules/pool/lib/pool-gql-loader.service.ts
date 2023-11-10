@@ -11,7 +11,6 @@ import {
 import {
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
-    GqlChain,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
@@ -34,16 +33,16 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Chain, Prisma, PrismaPoolAprType } from '@prisma/client';
+import { Prisma, PrismaPoolAprType } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 
 export class PoolGqlLoaderService {
-    public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
+    public async getPool(id: string): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
-            where: { id_chain: { id, chain: chain } },
+            where: { id_chain: { id, chain: networkContext.chain } },
             include: prismaPoolWithExpandedNesting.include,
         });
 
@@ -67,9 +66,9 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
-    public async getLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
+    public async getLinearPools(): Promise<GqlPoolLinear[]> {
         const pools = await prisma.prismaPool.findMany({
-            where: { type: 'LINEAR', chain: { in: chains } },
+            where: { type: 'LINEAR', chain: networkContext.chain },
             orderBy: { dynamicData: { totalLiquidity: 'desc' } },
             include: prismaPoolWithExpandedNesting.include,
         });

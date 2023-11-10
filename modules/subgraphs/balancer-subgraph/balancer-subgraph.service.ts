@@ -52,7 +52,7 @@ const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools`;
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;
 
-    constructor(private readonly subgraphUrl = networkContext.data.subgraphs.balancer) {
+    constructor() {
         this.cache = new Cache<string, any>();
     }
 
@@ -314,7 +314,7 @@ export class BalancerSubgraphService {
     }
 
     private get sdk() {
-        const client = new GraphQLClient(this.subgraphUrl);
+        const client = new GraphQLClient(networkContext.data.subgraphs.balancer);
 
         return getSdk(client);
     }

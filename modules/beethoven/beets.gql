@@ -5,7 +5,7 @@ extend type Query {
 
     userGetFbeetsBalance: GqlUserFbeetsBalance!
 
-    userGetPoolSnapshots(poolId: String!, chain: GqlChain!, range: GqlUserSnapshotDataRange!): [GqlUserPoolSnapshot!]!
+    userGetPoolSnapshots(poolId: String!, range: GqlUserSnapshotDataRange!): [GqlUserPoolSnapshot!]!
     userGetRelicSnapshots(farmId: String!, range: GqlUserSnapshotDataRange!): [GqlUserRelicSnapshot!]!
 
     userGetPortfolioSnapshots(days: Int!): [GqlUserPortfolioSnapshot!]!

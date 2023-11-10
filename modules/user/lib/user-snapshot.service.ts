@@ -4,14 +4,7 @@ import moment from 'moment-timezone';
 import { UserPoolSnapshot, UserRelicSnapshot } from '../user-types';
 import { GqlUserSnapshotDataRange } from '../../../schema';
 import { PoolSnapshotService } from '../../pool/lib/pool-snapshot.service';
-import {
-    Chain,
-    Prisma,
-    PrismaPool,
-    PrismaPoolSnapshot,
-    PrismaPoolStaking,
-    PrismaUserRelicSnapshot,
-} from '@prisma/client';
+import { Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolStaking, PrismaUserRelicSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { oneDayInSeconds, secondsPerDay } from '../../common/time';
 import { UserBalanceSnapshotFragment } from '../../subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types';
@@ -316,7 +309,6 @@ export class UserSnapshotService {
     public async getUserPoolBalanceSnapshotsForPool(
         userAddress: string,
         poolId: string,
-        chain: Chain,
         range: GqlUserSnapshotDataRange,
     ): Promise<UserPoolSnapshot[]> {
         const oldestRequestedSnapshotTimestamp = this.getTimestampForRange(range);
@@ -382,7 +374,7 @@ export class UserSnapshotService {
 
             const prismaInput: Prisma.PrismaUserPoolBalanceSnapshotCreateManyInput[] = [];
 
-            poolSnapshots = await this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
+            poolSnapshots = await this.poolSnapshotService.getSnapshotsForPool(poolId, range);
 
             /*
             For each snapshot from the subgraph, this will get the poolSnapshot for the same timestamp and enrich with $ value data
@@ -444,7 +436,7 @@ export class UserSnapshotService {
 
         // Only get them if we didn't get them above
         if (poolSnapshots.length === 0) {
-            poolSnapshots = await this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
+            poolSnapshots = await this.poolSnapshotService.getSnapshotsForPool(poolId, range);
         }
 
         /*

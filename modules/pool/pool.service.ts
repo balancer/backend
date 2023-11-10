@@ -1,10 +1,9 @@
-import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
+import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _, { chain, includes } from 'lodash';
 import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
-    GqlChain,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
@@ -61,16 +60,16 @@ export class PoolService {
         return networkContext.config.contentService;
     }
 
-    public async getGqlPool(id: string, chain: GqlChain): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id, chain);
+    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id);
     }
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
     }
 
-    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools(chains);
+    public async getGqlLinearPools(): Promise<GqlPoolLinear[]> {
+        return this.poolGqlLoaderService.getLinearPools();
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -123,12 +122,12 @@ export class PoolService {
         return featuredPoolGroups;
     }
 
-    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForAllPools(chains, range);
+    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForAllPools(range);
     }
 
-    public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
+    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
@@ -434,7 +433,7 @@ export class PoolService {
         await prisma.prismaPoolLinearData.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
         });
-
+        
         await prisma.prismaPoolGyroData.deleteMany({
             where: { chain: networkContext.chain, poolId: poolId },
         });
@@ -477,9 +476,9 @@ export class PoolService {
                         },
                     });
 
-                    if (gauge && gauge.votingGauge)
+                    if(gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: networkContext.chain, id: gauge.votingGauge.id },
+                            where: { chain: networkContext.chain, id: gauge.votingGauge.id }
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({
