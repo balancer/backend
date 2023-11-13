@@ -125,15 +125,20 @@ const linearCalls = (
 };
 
 const stableCalls = (
-    { id, address, tokens }: PoolInput,
+    { id, address, type, tokens }: PoolInput,
     multicaller: Multicaller3
 ) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
-    tokens.forEach(({ address: tokenAddress }, i) => {
-        multicaller.call(`${id}.tokenRate[${i}]`, address, 'getTokenRate', [tokenAddress]);
-        multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
-    });
+    if (type === 'META_STABLE') {
+        tokens.forEach(({ address: tokenAddress }, i) => {
+            multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
+        });
+    } else {
+        tokens.forEach(({ address: tokenAddress }, i) => {
+            multicaller.call(`${id}.tokenRate[${i}]`, address, 'getTokenRate', [tokenAddress]);
+        });
+    }
 };
 
 const gyroECalls = (
@@ -178,14 +183,20 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
     poolTokens: result.poolTokens ? {
         tokens: result.poolTokens[0].map((token) => token.toLowerCase()),
         balances: result.poolTokens[1].map((balance, i) => formatUnits(balance, decimalsLookup[result.poolTokens[0][i].toLowerCase()])),
-        rates: result.poolTokens[0].map((_, i) => result.tokenRate && result.tokenRate[i] ? formatEther(result.tokenRate[i]) : undefined)
+        rates: result.poolTokens[0].map((_, i) =>
+            result.tokenRate && result.tokenRate[i]
+            ? formatEther(result.tokenRate[i])
+            : result.tokenRates && result.tokenRates[i]
+            ? formatEther(result.tokenRates[i])
+            : result.metaPriceRateCache && result.metaPriceRateCache[i][0].gt(0)
+            ? formatEther(result.metaPriceRateCache[i][0])
+            : undefined
+        )
     } : { tokens: [], balances: [], rates: [] },
     wrappedTokenRate: result.wrappedTokenRate ? formatEther(result.wrappedTokenRate) : '1.0',
     rate: result.rate ? formatEther(result.rate) : '1.0',
     swapEnabled: result.swapEnabled,
     protocolYieldFeePercentageCache: result.protocolYieldFeePercentageCache ? formatEther(result.protocolYieldFeePercentageCache) : undefined,
-    tokenRates: result.tokenRates?.map((tokenRate) => tokenRate ? formatEther(tokenRate) : '1.0') || [],
-    metaPriceRateCache: result.metaPriceRateCache?.length ? result.metaPriceRateCache.map((r) => r ? r[0].gt(0) ? formatEther(r[0]) : '1.0' : r) : undefined
 });
 
 export const fetchOnChainPoolData = async (

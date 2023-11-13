@@ -217,12 +217,7 @@ export class PoolOnChainDataService {
                     // set token price rate for various rate types
 
                     // top level token rates, e.g. LSTs in pools
-                    let priceRate = poolTokens.rates[i] || (onchainData.tokenRates[i] ?? '1.0');
-
-                    // metastable pools
-                    if (onchainData.metaPriceRateCache && onchainData.metaPriceRateCache[i]) {
-                        priceRate = onchainData.metaPriceRateCache[i];
-                    }
+                    let priceRate = poolTokens.rates[i] ?? '1.0';
 
                     // bpt price rate
                     if (onchainData.rate && isSameAddress(poolToken.address, pool.address)) {
