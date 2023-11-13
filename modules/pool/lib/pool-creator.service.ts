@@ -1,4 +1,3 @@
-import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
@@ -12,9 +11,13 @@ import { networkContext } from '../../network/network-context.service';
 export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
 
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
+
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: networkContext.chain } });
-        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
 
         const poolIds: string[] = [];
@@ -43,7 +46,7 @@ export class PoolCreatorService {
             where: { chain: networkContext.chain },
         });
 
-        const subgraphPools = await balancerSubgraphService.getAllPools(
+        const subgraphPools = await this.balancerSubgraphService.getAllPools(
             {
                 where: { createTime_gte: latest?.createTime || 0 },
             },
@@ -66,7 +69,7 @@ export class PoolCreatorService {
     }
 
     public async reloadPoolNestedTokens(poolId: string): Promise<void> {
-        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         const poolToLoad = subgraphPools.find((pool) => pool.id === poolId);
 
         if (!poolToLoad) {
@@ -335,7 +338,7 @@ export class PoolCreatorService {
     }
 
     public async reloadPoolTokenIndexes(poolId: string): Promise<void> {
-        const { pool: subgraphPool } = await balancerSubgraphService.getPool({ id: poolId });
+        const { pool: subgraphPool } = await this.balancerSubgraphService.getPool({ id: poolId });
 
         if (!subgraphPool) {
             throw new Error('Pool with id does not exist');

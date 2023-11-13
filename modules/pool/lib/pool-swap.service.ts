@@ -6,54 +6,79 @@ import {
     Swap_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { tokenService, TokenService } from '../../token/token.service';
-import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     GqlPoolJoinExit,
     GqlPoolSwap,
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetSwapsArgs,
-    QueryPoolGetUserSwapVolumeArgs,
 } from '../../../schema';
-import { PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
 import { networkContext } from '../../network/network-context.service';
 import * as Sentry from '@sentry/node';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {
     constructor(
         private readonly tokenService: TokenService,
-        private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
+
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
+
+    private get chain() {
+        return networkContext.chain;
+    }
 
     public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         const first = !args.first || args.first > 100 ? 10 : args.first;
 
-        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
-            where: { pool_in: args.where?.poolIdIn },
-            first,
-            skip: args.skip,
-            orderBy: JoinExit_OrderBy.Timestamp,
-            orderDirection: OrderDirection.Desc,
-        });
+        const allChainsJoinExits: GqlPoolJoinExit[] = [];
 
-        return joinExits.map((joinExit) => ({
-            ...joinExit,
-            __typename: 'GqlPoolJoinExit',
-            poolId: joinExit.pool.id,
-            amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
-        }));
+        for (const chain of args.where!.chainIn!) {
+            const balancerSubgraphService =
+                AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+
+            const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
+                where: { pool_in: args.where?.poolIdIn },
+                first,
+                skip: args.skip,
+                orderBy: JoinExit_OrderBy.Timestamp,
+                orderDirection: OrderDirection.Desc,
+            });
+
+            const mappedJoinExits: GqlPoolJoinExit[] = joinExits.map((joinExit) => ({
+                ...joinExit,
+                __typename: 'GqlPoolJoinExit',
+                chain: chain,
+                poolId: joinExit.pool.id,
+                amounts: joinExit.amounts.map((amount, index) => ({
+                    address: joinExit.pool.tokensList[index],
+                    amount,
+                })),
+            }));
+
+            allChainsJoinExits.push(...mappedJoinExits);
+        }
+
+        return allChainsJoinExits;
     }
 
     public async getUserJoinExitsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolJoinExit[]> {
-        const { joinExits } = await this.balancerSubgraphService.getPoolJoinExits({
+        const balancerSubgraphService =
+            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
             skip: skip,
@@ -65,6 +90,7 @@ export class PoolSwapService {
             ...joinExit,
             __typename: 'GqlPoolJoinExit',
             poolId: joinExit.pool.id,
+            chain: chain,
             amounts: joinExit.amounts.map((amount, index) => ({ address: joinExit.pool.tokensList[index], amount })),
         }));
     }
@@ -85,7 +111,9 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
         });
@@ -94,10 +122,14 @@ export class PoolSwapService {
     public async getUserSwapsForPool(
         userAddress: string,
         poolId: string,
+        chain: Chain,
         first = 10,
         skip = 0,
     ): Promise<GqlPoolSwap[]> {
-        const result = await this.balancerSubgraphService.getSwaps({
+        const balancerSubgraphService =
+            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+
+        const result = await balancerSubgraphService.getSwaps({
             first,
             skip,
             where: {
@@ -110,6 +142,7 @@ export class PoolSwapService {
 
         return result.swaps.map((swap) => ({
             id: swap.id,
+            chain: chain,
             userAddress,
             poolId: swap.poolId.id,
             tokenIn: swap.tokenIn,
@@ -144,34 +177,15 @@ export class PoolSwapService {
                 tokenOut: {
                     in: args.where?.tokenOutIn || undefined,
                 },
-                chain: networkContext.chain,
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
             },
             orderBy: { timestamp: 'desc' },
             include: {
                 swaps: { include: { pool: { include: prismaPoolMinimal.include } } },
             },
         });
-    }
-
-    public async getUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs) {
-        const yesterday = moment().subtract(1, 'day').unix();
-        const take = !args.first || args.first > 100 ? 10 : args.first;
-
-        const result = await prisma.prismaPoolSwap.groupBy({
-            take,
-            skip: args.skip || undefined,
-            by: ['userAddress'],
-            _sum: { valueUSD: true },
-            orderBy: { _sum: { valueUSD: 'desc' } },
-            where: {
-                poolId: { in: args.where?.poolIdIn || undefined },
-                tokenIn: { in: args.where?.tokenInIn || undefined },
-                tokenOut: { in: args.where?.tokenOutIn || undefined },
-                timestamp: { gte: yesterday },
-            },
-        });
-
-        return result.map((item) => ({ userAddress: item.userAddress, swapVolumeUSD: `${item._sum.valueUSD || 0}` }));
     }
 
     /**
@@ -182,7 +196,7 @@ export class PoolSwapService {
         const tokenPrices = await this.tokenService.getTokenPrices();
         const lastSwap = await prisma.prismaPoolSwap.findFirst({
             orderBy: { timestamp: 'desc' },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         //ensure we only sync the last 48 hours worth of swaps
@@ -247,7 +261,7 @@ export class PoolSwapService {
 
                     return {
                         id: swap.id,
-                        chain: networkContext.chain,
+                        chain: this.chain,
                         timestamp: swap.timestamp,
                         poolId: swap.poolId.id,
                         userAddress: swap.userAddress.id,
@@ -281,13 +295,13 @@ export class PoolSwapService {
         await prisma.prismaPoolSwap.deleteMany({
             where: {
                 timestamp: { lt: twoDaysAgo },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
         await prisma.prismaPoolBatchSwap.deleteMany({
             where: {
                 timestamp: { lt: twoDaysAgo },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
 
@@ -296,14 +310,14 @@ export class PoolSwapService {
 
     private async createBatchSwaps(txs: string[]) {
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs }, chain: networkContext.chain } });
+        const swaps = await prisma.prismaPoolSwap.findMany({ where: { tx: { in: txs }, chain: this.chain } });
         const groupedByTxAndUser = _.groupBy(swaps, (swap) => `${swap.tx}${swap.userAddress}`);
         let operations: any[] = [
             prisma.prismaPoolSwap.updateMany({
-                where: { tx: { in: txs }, chain: networkContext.chain },
+                where: { tx: { in: txs }, chain: this.chain },
                 data: { batchSwapId: null, batchSwapIdx: null },
             }),
-            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: networkContext.chain } }),
+            prisma.prismaPoolBatchSwap.deleteMany({ where: { tx: { in: txs }, chain: this.chain } }),
         ];
 
         for (const group of Object.values(groupedByTxAndUser)) {
@@ -330,7 +344,7 @@ export class PoolSwapService {
                         prisma.prismaPoolBatchSwap.create({
                             data: {
                                 id: startSwap.id,
-                                chain: networkContext.chain,
+                                chain: this.chain,
                                 timestamp: startSwap.timestamp,
                                 userAddress: startSwap.userAddress,
                                 tokenIn: startSwap.tokenIn,
@@ -345,7 +359,7 @@ export class PoolSwapService {
                         }),
                         ...batchSwaps.map((swap, index) =>
                             prisma.prismaPoolSwap.update({
-                                where: { id_chain: { id: swap.id, chain: networkContext.chain } },
+                                where: { id_chain: { id: swap.id, chain: this.chain } },
                                 data: { batchSwapId: startSwap.id, batchSwapIdx: index },
                             }),
                         ),

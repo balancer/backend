@@ -36,12 +36,13 @@ const beetsResolvers: Resolvers = {
                 ...balance,
             };
         },
-        userGetPoolSnapshots: async (parent, { poolId, range }, context) => {
+        userGetPoolSnapshots: async (parent, { poolId, chain, range }, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
             return userService.getUserBalanceSnapshotsForPool(
                 accountAddress.toLowerCase(),
                 poolId.toLowerCase(),
+                chain,
                 range,
             );
         },

@@ -4,7 +4,6 @@ import moment from 'moment-timezone';
 import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { TokenService } from '../../token/token.service';
 import { BlocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { networkContext } from '../../network/network-context.service';
 import { capturesYield } from './pool-utils';
 import * as Sentry from '@sentry/node';
@@ -13,8 +12,11 @@ export class PoolUsdDataService {
     constructor(
         private readonly tokenService: TokenService,
         private readonly blockSubgraphService: BlocksSubgraphService,
-        private readonly balancerSubgraphService: BalancerSubgraphService,
     ) {}
+
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
 
     /**
      * Liquidity is dependent on token prices, so the values here are constantly in flux.

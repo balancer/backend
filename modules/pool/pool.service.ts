@@ -1,9 +1,10 @@
-import { PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
 import _, { chain, includes } from 'lodash';
 import { Cache } from 'memory-cache';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
+    GqlChain,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
@@ -16,10 +17,8 @@ import {
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
-    QueryPoolGetUserSwapVolumeArgs,
 } from '../../schema';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { balancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
@@ -53,6 +52,14 @@ export class PoolService {
         private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
+    private get chain() {
+        return networkContext.chain;
+    }
+
+    private get chainId() {
+        return networkContext.chainId;
+    }
+
     private get poolStakingServices(): PoolStakingService[] {
         return networkContext.config.poolStakingServices;
     }
@@ -61,16 +68,20 @@ export class PoolService {
         return networkContext.config.contentService;
     }
 
-    public async getGqlPool(id: string): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id);
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
+
+    public async getGqlPool(id: string, chain: GqlChain): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id, chain);
     }
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
     }
 
-    public async getGqlLinearPools(): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools();
+    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
+        return this.poolGqlLoaderService.getLinearPools(chains);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -78,7 +89,7 @@ export class PoolService {
     }
 
     public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
-        return prisma.prismaPoolFilter.findMany({ where: { chain: networkContext.chain } });
+        return prisma.prismaPoolFilter.findMany({ where: { chain: this.chain } });
     }
 
     public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
@@ -103,13 +114,9 @@ export class PoolService {
         return this.poolSwapService.getJoinExits(args);
     }
 
-    public async getPoolUserSwapVolume(args: QueryPoolGetUserSwapVolumeArgs): Promise<GqlPoolUserSwapVolume[]> {
-        return this.poolSwapService.getUserSwapVolume(args);
-    }
-
     public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
         const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
-            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
         );
 
         if (cached) {
@@ -119,7 +126,7 @@ export class PoolService {
         const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
 
         this.cache.put(
-            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${networkContext.chainId}`,
+            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
             featuredPoolGroups,
             60 * 5 * 1000,
         );
@@ -127,12 +134,12 @@ export class PoolService {
         return featuredPoolGroups;
     }
 
-    public async getSnapshotsForAllPools(range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForAllPools(range);
+    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForAllPools(chains, range);
     }
 
-    public async getSnapshotsForPool(poolId: string, range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForPool(poolId, range);
+    public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
+        return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
@@ -158,7 +165,7 @@ export class PoolService {
     public async syncPoolAllTokensRelationship(): Promise<void> {
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
 
         for (const pool of pools) {
@@ -187,7 +194,7 @@ export class PoolService {
                 categories: {
                     none: { category: 'BLACK_LISTED' },
                 },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
         const poolIds = result.map((item) => item.id);
@@ -220,7 +227,7 @@ export class PoolService {
     public async loadOnChainDataForPoolsWithActiveUpdates() {
         const blockNumber = await networkContext.provider.getBlockNumber();
         const timestamp = moment().subtract(5, 'minutes').unix();
-        const poolIds = await balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
+        const poolIds = await this.balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
 
         await this.poolOnChainDataService.updateOnChainData(poolIds, blockNumber);
     }
@@ -275,7 +282,7 @@ export class PoolService {
     public async loadSnapshotsForPools(poolIds: string[], reload: boolean) {
         if (reload) {
             await prisma.prismaPoolSnapshot.deleteMany({
-                where: { chain: networkContext.chain, poolId: { in: poolIds } },
+                where: { chain: this.chain, poolId: { in: poolIds } },
             });
         }
 
@@ -283,7 +290,7 @@ export class PoolService {
     }
 
     public async loadSnapshotsForAllPools() {
-        await prisma.prismaPoolSnapshot.deleteMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaPoolSnapshot.deleteMany({ where: { chain: this.chain } });
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
             where: {
@@ -292,7 +299,7 @@ export class PoolService {
                         gt: 0.000000000001,
                     },
                 },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
         const chunks = _.chunk(pools, 10);
@@ -312,10 +319,10 @@ export class PoolService {
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: networkContext.chain } });
-        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: networkContext.chain } });
+        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
+        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
+        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
+        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
         const farmIds = farms.map((farm) => parseFloat(farm.id));
         for (const farmId of farmIds) {
             await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
@@ -351,12 +358,12 @@ export class PoolService {
     }
 
     public async syncPoolVersionForAllPools() {
-        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
 
         for (const subgraphPool of subgraphPools) {
             try {
                 await prisma.prismaPool.update({
-                    where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                    where: { id_chain: { chain: this.chain, id: subgraphPool.id } },
                     data: {
                         version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
                     },
@@ -364,14 +371,15 @@ export class PoolService {
             } catch(e: any) {
                 // Some pools are filtered from the DB, like test pools,
                 // so we just ignore them without breaking the loop
-                console.error(e.meta.cause, 'Network', networkContext.chain, 'Pool ID: ', subgraphPool.id);
+                const error = e.meta ? e.meta.cause : e;
+                console.error(error, 'Network', networkContext.chain, 'Pool ID: ', subgraphPool.id);
             }
         }
     }
 
     public async addToBlackList(poolId: string) {
         const category = await prisma.prismaPoolCategory.findFirst({
-            where: { poolId, chain: networkContext.chain, category: 'BLACK_LISTED' },
+            where: { poolId, chain: this.chain, category: 'BLACK_LISTED' },
         });
 
         if (category) {
@@ -380,9 +388,9 @@ export class PoolService {
 
         await prisma.prismaPoolCategory.create({
             data: {
-                id: `${networkContext.chain}-${poolId}-BLACK_LISTED`,
+                id: `${this.chain}-${poolId}-BLACK_LISTED`,
                 category: 'BLACK_LISTED',
-                chain: networkContext.chain,
+                chain: this.chain,
                 poolId,
             },
         });
@@ -392,7 +400,7 @@ export class PoolService {
         await prisma.prismaPoolCategory.deleteMany({
             where: {
                 category: 'BLACK_LISTED',
-                chain: networkContext.chain,
+                chain: this.chain,
                 poolId,
             },
         });
@@ -400,87 +408,87 @@ export class PoolService {
 
     public async deletePool(poolId: string) {
         const pool = await prisma.prismaPool.findUniqueOrThrow({
-            where: { id_chain: { id: poolId, chain: networkContext.chain } },
+            where: { id_chain: { id: poolId, chain: this.chain } },
         });
 
         const poolTokens = await prisma.prismaPoolToken.findMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         const poolTokenIds = poolTokens.map((poolToken) => poolToken.id);
         const poolTokenAddresses = poolTokens.map((poolToken) => poolToken.address);
 
         await prisma.prismaPoolSnapshot.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaTokenType.deleteMany({
-            where: { chain: networkContext.chain, tokenAddress: pool.address },
+            where: { chain: this.chain, tokenAddress: pool.address },
         });
 
         await prisma.prismaUserWalletBalance.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolTokenDynamicData.deleteMany({
-            where: { chain: networkContext.chain, poolTokenId: { in: poolTokenIds } },
+            where: { chain: this.chain, poolTokenId: { in: poolTokenIds } },
         });
 
         await prisma.prismaTokenDynamicData.deleteMany({
-            where: { chain: networkContext.chain, tokenAddress: { in: poolTokenAddresses } },
+            where: { chain: this.chain, tokenAddress: { in: poolTokenAddresses } },
         });
 
         await prisma.prismaPoolToken.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolDynamicData.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolToken.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolLinearData.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
-        
+
         await prisma.prismaPoolGyroData.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolExpandedTokens.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolLinearDynamicData.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolAprItem.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolSwap.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         const poolStaking = await prisma.prismaPoolStaking.findMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         for (const staking of poolStaking) {
             switch (staking.type) {
                 case 'GAUGE':
                     await prisma.prismaPoolStakingGaugeReward.deleteMany({
-                        where: { chain: networkContext.chain, gaugeId: staking.id },
+                        where: { chain: this.chain, gaugeId: staking.id },
                     });
 
                     // delete votingGauge entry before deleting the staking gauge
                     let gauge = await prisma.prismaPoolStakingGauge.findFirst({
                         where: {
-                            chain: networkContext.chain,
+                            chain: this.chain,
                             stakingId: staking.id,
                         },
                         select: {
@@ -488,32 +496,32 @@ export class PoolService {
                         },
                     });
 
-                    if(gauge && gauge.votingGauge)
+                    if (gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: networkContext.chain, id: gauge.votingGauge.id }
+                            where: { chain: this.chain, id: gauge.votingGauge.id },
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({
-                        where: { chain: networkContext.chain, stakingId: staking.id },
+                        where: { chain: this.chain, stakingId: staking.id },
                     });
                     break;
 
                 case 'MASTER_CHEF':
                     await prisma.prismaPoolStakingMasterChefFarmRewarder.deleteMany({
-                        where: { chain: networkContext.chain, farmId: staking.id },
+                        where: { chain: this.chain, farmId: staking.id },
                     });
 
                     await prisma.prismaPoolStakingMasterChefFarm.deleteMany({
-                        where: { chain: networkContext.chain, stakingId: staking.id },
+                        where: { chain: this.chain, stakingId: staking.id },
                     });
                     break;
                 case 'RELIQUARY':
                     await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({
-                        where: { chain: networkContext.chain, farmId: staking.id.split('-')[1] },
+                        where: { chain: this.chain, farmId: staking.id.split('-')[1] },
                     });
 
                     await prisma.prismaPoolStakingReliquaryFarm.deleteMany({
-                        where: { chain: networkContext.chain, stakingId: staking.id },
+                        where: { chain: this.chain, stakingId: staking.id },
                     });
                     break;
                 default:
@@ -522,15 +530,15 @@ export class PoolService {
         }
 
         await prisma.prismaUserStakedBalance.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPoolStaking.deleteMany({
-            where: { chain: networkContext.chain, poolId: poolId },
+            where: { chain: this.chain, poolId: poolId },
         });
 
         await prisma.prismaPool.delete({
-            where: { id_chain: { id: poolId, chain: networkContext.chain } },
+            where: { id_chain: { id: poolId, chain: this.chain } },
         });
     }
 }
@@ -538,11 +546,11 @@ export class PoolService {
 export const poolService = new PoolService(
     new PoolCreatorService(userService),
     new PoolOnChainDataService(tokenService),
-    new PoolUsdDataService(tokenService, blocksSubgraphService, balancerSubgraphService),
+    new PoolUsdDataService(tokenService, blocksSubgraphService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
     new PoolSyncService(),
-    new PoolSwapService(tokenService, balancerSubgraphService),
-    new PoolSnapshotService(balancerSubgraphService, coingeckoService),
+    new PoolSwapService(tokenService),
+    new PoolSnapshotService(coingeckoService),
     new ReliquarySnapshotService(reliquarySubgraphService),
 );

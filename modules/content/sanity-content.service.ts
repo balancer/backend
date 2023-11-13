@@ -26,11 +26,6 @@ interface SanityToken {
 interface SanityPoolConfig {
     incentivizedPools: string[];
     blacklistedPools: string[];
-    poolFilters: {
-        id: string;
-        title: string;
-        pools: string[];
-    }[];
 }
 
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
@@ -209,13 +204,11 @@ export class SanityContentService implements ContentService {
         const response = await getSanityClient().fetch(`*[_type == "config" && chainId == ${networkContext.chainId}][0]{
             incentivizedPools,
             blacklistedPools,
-            poolFilters
         }`);
 
         const config: SanityPoolConfig = {
             incentivizedPools: response?.incentivizedPools ?? [],
             blacklistedPools: response?.blacklistedPools ?? [],
-            poolFilters: response?.poolFilters ?? [],
         };
 
         const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: networkContext.chain } });
@@ -224,32 +217,6 @@ export class SanityContentService implements ContentService {
 
         await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED');
         await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED');
-
-        await prisma.$transaction([
-            prisma.prismaPoolFilterMap.deleteMany({ where: { chain: networkContext.chain } }),
-            prisma.prismaPoolFilter.deleteMany({ where: { chain: networkContext.chain } }),
-            prisma.prismaPoolFilter.createMany({
-                data: config.poolFilters.map((item) => ({
-                    id: item.id,
-                    chain: networkContext.chain,
-                    title: item.title,
-                })),
-                skipDuplicates: true,
-            }),
-            prisma.prismaPoolFilterMap.createMany({
-                data: config.poolFilters
-                    .map((item) => {
-                        return item.pools.map((poolId) => ({
-                            id: `${item.id}-${poolId}`,
-                            chain: networkContext.chain,
-                            poolId,
-                            filterId: item.id,
-                        }));
-                    })
-                    .flat(),
-                skipDuplicates: true,
-            }),
-        ]);
     }
 
     private async updatePoolCategory(currentPoolIds: string[], newPoolIds: string[], category: PrismaPoolCategoryType) {
