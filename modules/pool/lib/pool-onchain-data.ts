@@ -15,6 +15,35 @@ import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import { JsonFragment } from '@ethersproject/abi';
 
+interface PoolInput {
+    id: string;
+    address: string;
+    type: PrismaPoolType | 'COMPOSABLE_STABLE';
+    tokens: {
+        address: string,
+        token: {
+            decimals: number,
+        }
+    }[];
+    version: number;
+}
+
+interface OnchainData {
+    poolTokens: [string[], BigNumber[]];
+    totalSupply: BigNumber;
+    swapFee: BigNumber;
+    swapEnabled?: boolean;
+    protocolYieldFeePercentageCache?: BigNumber;
+    rate?: BigNumber;
+    weights?: BigNumber[];
+    targets?: [BigNumber, BigNumber];
+    wrappedTokenRate?: BigNumber;
+    amp?: [BigNumber, boolean, BigNumber];
+    tokenRates?: [BigNumber, BigNumber];
+    tokenRate?: BigNumber[];
+    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
+}
+
 const abi: JsonFragment[] = Object.values(
     // Remove duplicate entries using their names
     Object.fromEntries(
@@ -60,35 +89,6 @@ const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
     }
 }
 
-interface PoolInput {
-    id: string;
-    address: string;
-    type: PrismaPoolType | 'COMPOSABLE_STABLE';
-    tokens: {
-        address: string,
-        token: {
-            decimals: number,
-        }
-    }[];
-    version: number;
-}
-
-interface OnchainData {
-    poolTokens: [string[], BigNumber[]];
-    totalSupply: BigNumber;
-    swapFee: BigNumber;
-    swapEnabled?: boolean;
-    protocolYieldFeePercentageCache?: BigNumber;
-    rate?: BigNumber;
-    weights?: BigNumber[];
-    targets?: [BigNumber, BigNumber];
-    wrappedTokenRate?: BigNumber;
-    amp?: [BigNumber, boolean, BigNumber];
-    tokenRates?: [BigNumber, BigNumber];
-    tokenRate?: BigNumber[];
-    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
-}
-
 const defaultCalls = (
     { id, address, type, version }: PoolInput,
     vaultAddress: string,
@@ -125,21 +125,26 @@ const linearCalls = (
 };
 
 const stableCalls = (
-    { id, address, type, tokens }: PoolInput,
+    { id, address, tokens }: PoolInput,
     multicaller: Multicaller3
 ) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
-    if (type === 'META_STABLE') {
-        tokens.forEach(({ address: tokenAddress }, i) => {
-            multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
-        });
-    } else {
-        tokens.forEach(({ address: tokenAddress }, i) => {
-            multicaller.call(`${id}.tokenRate[${i}]`, address, 'getTokenRate', [tokenAddress]);
-        });
-    }
+    tokens.forEach(({ address: tokenAddress }, i) => {
+        multicaller.call(`${id}.tokenRate[${i}]`, address, 'getTokenRate', [tokenAddress]);
+    });
 };
+
+const metaStableCalls = (
+    { id, address, tokens }: PoolInput,
+    multicaller: Multicaller3
+) => {
+    multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
+
+    tokens.forEach(({ address: tokenAddress }, i) => {
+        multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
+    });
+}
 
 const gyroECalls = (
     { id, address }: PoolInput,
@@ -158,9 +163,10 @@ const poolTypeCalls = (type: PoolInput['type'], version = 1) => {
             return lbpAndInvestmentCalls;
         case 'STABLE':
         case 'PHANTOM_STABLE':
-        case 'META_STABLE':
         case 'COMPOSABLE_STABLE':
             return stableCalls;
+        case 'META_STABLE':
+            return metaStableCalls;
         case 'GYROE':
             if (version === 2) {
                 return gyroECalls;
