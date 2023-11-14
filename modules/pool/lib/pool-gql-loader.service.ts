@@ -751,18 +751,7 @@ export class PoolGqlLoaderService {
                             }),
                         );
                         const apr = _.sumBy(items, 'apr');
-                        let title = '';
-
-                        switch (group) {
-                            case 'YEARN':
-                                title = 'Yearn boosted APR';
-                                break;
-                            case 'REAPER':
-                                title = 'Reaper boosted APR';
-                                break;
-                            case 'OVERNIGHT':
-                                title = 'Overnight boosted APR';
-                        }
+                        const title = `${group.charAt(0) + group.slice(1).toLowerCase()} boosted APR`;
 
                         return {
                             id: `${pool.id}-${group}`,
