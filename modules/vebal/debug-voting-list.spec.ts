@@ -286,7 +286,7 @@ it('Uses streamer-v1-map to find gauges (that use streamer instead of recipient)
     const service = new VeBalVotingListService();
 
     const rootGaugeAddresses = [oldRootV1GaugeAddress, anotherOldRootV1GaugeAddress];
-    const fetchedVotingGauges = await service.fetchVotingGauges(rootGaugeAddresses);
+    const { votingGauges: fetchedVotingGauges } = await service.fetchVotingGauges(rootGaugeAddresses);
 
     const repository = new VotingGaugesRepository();
     const savedGauges = await repository.saveVotingGauges(fetchedVotingGauges);
