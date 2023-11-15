@@ -132,7 +132,7 @@ export class PoolGqlLoaderService {
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
         const orderDirection = args.orderDirection || undefined;
-        const userAddress = args.userAddress;
+        const userAddress = args.where?.userAddress;
 
         switch (args.orderBy) {
             case 'totalLiquidity':
