@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('tokenGetTokens error: Provide "chains" param');
             }
             return tokenService.getTokenDefinitions(chains);
         },
@@ -20,7 +20,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('tokenGetCurrentPrices error: Provide "chains" param');
             }
             const prices = await tokenService.getWhiteListedTokenPrices(chains);
 
