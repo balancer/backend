@@ -7,6 +7,7 @@ extend type Query {
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
         textSearch: String
+        userAddress: String
     ): [GqlPoolMinimal!]!
     poolGetPoolsCount(
         first: Int
@@ -15,6 +16,7 @@ extend type Query {
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
         textSearch: String
+        userAddress: String
     ): Int!
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
