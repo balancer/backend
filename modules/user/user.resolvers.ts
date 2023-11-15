@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('userGetPoolBalances error: Provide "chains" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
@@ -27,7 +27,7 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('Chain is required');
+                throw new Error('userGetPoolJoinExits error: Provide "chain" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 
@@ -38,7 +38,7 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('Chain is required');
+                throw new Error('userGetSwaps error: Provide "chain" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
@@ -48,7 +48,7 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('userGetStaking error: Provide "chains" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 

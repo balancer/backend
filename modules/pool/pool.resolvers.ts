@@ -12,7 +12,7 @@ const balancerResolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetPool error: Provide "chain" param');
             }
             return poolService.getGqlPool(id, chain);
         },
@@ -27,7 +27,7 @@ const balancerResolvers: Resolvers = {
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
             } else if (!args.where?.chainIn) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetSwaps error: Provide "where.chainIn" param');
             }
             return poolService.getPoolSwaps(args);
         },
@@ -36,7 +36,7 @@ const balancerResolvers: Resolvers = {
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
             } else if (!args.where?.chainIn) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetBatchSwaps error: Provide "where.chainIn" param');
             }
             return poolService.getPoolBatchSwaps(args);
         },
@@ -45,7 +45,7 @@ const balancerResolvers: Resolvers = {
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
             } else if (!args.where?.chainIn) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
             }
             return poolService.getPoolJoinExits(args);
         },
@@ -57,7 +57,7 @@ const balancerResolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetSnapshots error: Provide "chain" param');
             }
             const snapshots = await poolService.getSnapshotsForPool(id, chain, range);
 
@@ -78,7 +78,7 @@ const balancerResolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetAllPoolsSnapshots error: Provide "chains" param');
             }
             const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
 
@@ -99,7 +99,7 @@ const balancerResolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('Chain is required');
+                throw new Error('poolGetLinearPools error: Provide "chains" param');
             }
             return poolService.getGqlLinearPools(chains);
         },
