@@ -22,9 +22,7 @@ import * as Sentry from '@sentry/node';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {
-    constructor(
-        private readonly tokenService: TokenService,
-    ) {}
+    constructor(private readonly tokenService: TokenService) {}
 
     private get balancerSubgraphService() {
         return networkContext.services.balancerSubgraphService;
@@ -39,30 +37,31 @@ export class PoolSwapService {
 
         const allChainsJoinExits: GqlPoolJoinExit[] = [];
 
-        for (const chain of args.where!.chainIn!) {
-            const balancerSubgraphService =
-                AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+        if (args.where?.chainIn) {
+            for (const chain of args.where.chainIn) {
+                const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
-            const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
-                where: { pool_in: args.where?.poolIdIn },
-                first,
-                skip: args.skip,
-                orderBy: JoinExit_OrderBy.Timestamp,
-                orderDirection: OrderDirection.Desc,
-            });
+                const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
+                    where: { pool_in: args.where?.poolIdIn },
+                    first,
+                    skip: args.skip,
+                    orderBy: JoinExit_OrderBy.Timestamp,
+                    orderDirection: OrderDirection.Desc,
+                });
 
-            const mappedJoinExits: GqlPoolJoinExit[] = joinExits.map((joinExit) => ({
-                ...joinExit,
-                __typename: 'GqlPoolJoinExit',
-                chain: chain,
-                poolId: joinExit.pool.id,
-                amounts: joinExit.amounts.map((amount, index) => ({
-                    address: joinExit.pool.tokensList[index],
-                    amount,
-                })),
-            }));
+                const mappedJoinExits: GqlPoolJoinExit[] = joinExits.map((joinExit) => ({
+                    ...joinExit,
+                    __typename: 'GqlPoolJoinExit',
+                    chain: chain,
+                    poolId: joinExit.pool.id,
+                    amounts: joinExit.amounts.map((amount, index) => ({
+                        address: joinExit.pool.tokensList[index],
+                        amount,
+                    })),
+                }));
 
-            allChainsJoinExits.push(...mappedJoinExits);
+                allChainsJoinExits.push(...mappedJoinExits);
+            }
         }
 
         return allChainsJoinExits;
@@ -75,8 +74,7 @@ export class PoolSwapService {
         first = 10,
         skip = 0,
     ): Promise<GqlPoolJoinExit[]> {
-        const balancerSubgraphService =
-            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+        const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
         const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
@@ -126,8 +124,7 @@ export class PoolSwapService {
         first = 10,
         skip = 0,
     ): Promise<GqlPoolSwap[]> {
-        const balancerSubgraphService =
-            AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
+        const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
         const result = await balancerSubgraphService.getSwaps({
             first,
