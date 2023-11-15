@@ -33,14 +33,14 @@ export class PoolSnapshotService {
         const timestamp = this.getTimestampForRange(range);
 
         return prisma.prismaPoolSnapshot.findMany({
-            where: { poolId, timestamp: { gte: timestamp }, chain: chain },
+            where: { poolId, timestamp: { gte: timestamp }, chain },
             orderBy: { timestamp: 'asc' },
         });
     }
 
-    public async getSnapshotForPool(poolId: string, timestamp: number) {
+    public async getSnapshotForPool(poolId: string, timestamp: number, chain: Chain) {
         return prisma.prismaPoolSnapshot.findUnique({
-            where: { id_chain: { id: `${poolId}-${timestamp}`, chain: this.chain } },
+            where: { id_chain: { id: `${poolId}-${timestamp}`, chain } },
         });
     }
 

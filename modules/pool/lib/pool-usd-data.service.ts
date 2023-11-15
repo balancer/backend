@@ -18,6 +18,10 @@ export class PoolUsdDataService {
         return networkContext.services.balancerSubgraphService;
     }
 
+    private get chain() {
+        return networkContext.chain;
+    }
+
     /**
      * Liquidity is dependent on token prices, so the values here are constantly in flux.
      * When updating, the easiest is to update all pools at once.
@@ -26,7 +30,7 @@ export class PoolUsdDataService {
         minShares: number = 0.00000000001,
         maxShares: number = Number.MAX_SAFE_INTEGER,
     ) {
-        const tokenPrices = await this.tokenService.getTokenPrices();
+        const tokenPrices = await this.tokenService.getTokenPrices(this.chain);
         const pools = await prisma.prismaPool.findMany({
             include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
             where: {
@@ -40,7 +44,7 @@ export class PoolUsdDataService {
                         },
                     ],
                 },
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
 
@@ -66,7 +70,7 @@ export class PoolUsdDataService {
                                 tokenId: item.id,
                                 poolId: pool.id,
                                 poolName: pool.name,
-                                chain: networkContext.chain,
+                                chain: pool.chain,
                             },
                         },
                     );
@@ -74,7 +78,7 @@ export class PoolUsdDataService {
                 }
                 updates.push(
                     prisma.prismaPoolTokenDynamicData.update({
-                        where: { id_chain: { id: item.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: item.id, chain: pool.chain } },
                         data: { balanceUSD: item.balanceUSD },
                     }),
                 );
@@ -86,7 +90,7 @@ export class PoolUsdDataService {
                         tags: {
                             poolId: pool.id,
                             poolName: pool.name,
-                            chain: networkContext.chain,
+                            chain: pool.chain,
                         },
                     },
                 );
@@ -95,7 +99,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: pool.id, chain: pool.chain } },
                     data: { totalLiquidity },
                 }),
             );
@@ -136,7 +140,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: pool.id, chain: this.chain } },
                     data: { totalLiquidity24hAgo: totalLiquidity, totalShares24hAgo: pool.totalShares },
                 }),
             );
@@ -153,7 +157,7 @@ export class PoolUsdDataService {
         const yesterday = moment().subtract(1, 'day').unix();
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
-            where: poolIds ? { id: { in: poolIds }, chain: networkContext.chain } : { chain: networkContext.chain },
+            where: poolIds ? { id: { in: poolIds }, chain: this.chain } : { chain: this.chain },
             include: {
                 swaps: { where: { timestamp: { gte: twoDaysAgo } } },
                 dynamicData: true,
@@ -182,7 +186,7 @@ export class PoolUsdDataService {
             ) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: pool.id, chain: pool.chain } },
                         data: { volume24h, fees24h, volume48h, fees48h },
                     }),
                 );
@@ -198,7 +202,7 @@ export class PoolUsdDataService {
     */
     public async updateYieldCaptureForAllPools() {
         const pools = await prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
             include: {
                 dynamicData: true,
                 aprItems: true,
@@ -252,7 +256,7 @@ export class PoolUsdDataService {
 
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: pool.id, chain: pool.chain } },
                         data: { yieldCapture24h, yieldCapture48h },
                     }),
                 );
@@ -272,7 +276,7 @@ export class PoolUsdDataService {
         const stakedUsers = await prisma.prismaUserStakedBalance.groupBy({
             by: ['poolId'],
             _count: { userAddress: true },
-            where: { chain: networkContext.chain, balanceNum: { gt: 0 } },
+            where: { chain: this.chain, balanceNum: { gt: 0 } },
         });
 
         for (const pool of subgraphPools) {
@@ -280,7 +284,7 @@ export class PoolUsdDataService {
 
             updates.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: pool.id, chain: this.chain } },
                     data: {
                         lifetimeVolume: parseFloat(pool.totalSwapVolume),
                         lifetimeSwapFees: parseFloat(pool.totalSwapFee),
@@ -291,7 +295,7 @@ export class PoolUsdDataService {
             );
 
             const snapshots = await prisma.prismaPoolSnapshot.findMany({
-                where: { poolId: pool.id, chain: networkContext.chain },
+                where: { poolId: pool.id, chain: this.chain },
             });
 
             if (snapshots.length > 0) {
@@ -306,7 +310,7 @@ export class PoolUsdDataService {
 
                 updates.push(
                     prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: pool.id, chain: this.chain } },
                         data: {
                             sharePriceAth: sharePriceAth.sharePrice,
                             sharePriceAthTimestamp: sharePriceAth.timestamp,
