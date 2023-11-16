@@ -257,6 +257,7 @@ export class UserSnapshotService {
                             const userPoolBalanceSnapshotData = this.createUserPoolSnapshotData(
                                 poolSnapshot,
                                 pool,
+                                networkContext.chain,
                                 userSubgraphSnapshot,
                                 totalBalance,
                                 walletBalance,
@@ -328,6 +329,7 @@ export class UserSnapshotService {
             userAddress,
             0,
             poolId,
+            chain,
         );
 
         let storedUserSnapshotsInRangeForPool = storedUserSnapshotsForPool.filter(
@@ -347,7 +349,7 @@ export class UserSnapshotService {
 
             const pool = await prisma.prismaPool.findUniqueOrThrow({
                 where: {
-                    id_chain: { id: poolId, chain: networkContext.chain },
+                    id_chain: { id: poolId, chain: chain },
                 },
                 include: {
                     staking: true,
@@ -422,6 +424,7 @@ export class UserSnapshotService {
                 const userPoolBalanceSnapshotData = this.createUserPoolSnapshotData(
                     poolSnapshotForTimestamp,
                     pool,
+                    chain,
                     userSubgraphSnapshot,
                     totalBalance,
                     walletBalance,
@@ -439,6 +442,7 @@ export class UserSnapshotService {
                 userAddress,
                 oldestRequestedSnapshotTimestamp,
                 poolId,
+                chain,
             );
         }
 
@@ -475,7 +479,7 @@ export class UserSnapshotService {
                         lt: oldestRequestedSnapshotTimestamp,
                     },
                     poolId: poolId,
-                    chain: networkContext.chain,
+                    chain: chain,
                 },
                 orderBy: { timestamp: 'desc' },
             });
@@ -573,7 +577,7 @@ export class UserSnapshotService {
                         (1 - networkContext.data.balancer.swapProtocolFeePercentage)
                     }`;
                     await prisma.prismaUserPoolBalanceSnapshot.update({
-                        where: { id_chain: { id: currentSnapshot.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: currentSnapshot.id, chain: chain } },
                         data: currentSnapshot,
                     });
                 }
@@ -621,6 +625,7 @@ export class UserSnapshotService {
     private createUserPoolSnapshotData(
         poolSnapshot: PrismaPoolSnapshot | undefined | null,
         pool: PrismaPool & { staking: PrismaPoolStaking[] },
+        chain: Chain,
         subgraphSnapshot: UserBalanceSnapshotFragment,
         totalBalance: number,
         walletBalance: string,
@@ -631,7 +636,7 @@ export class UserSnapshotService {
 
         const userPoolBalanceSnapshotData = {
             id: `${pool.id}-${subgraphSnapshot.user.id.toLowerCase()}-${subgraphSnapshot.timestamp}`,
-            chain: networkContext.chain,
+            chain: chain,
             timestamp: subgraphSnapshot.timestamp,
             userAddress: subgraphSnapshot.user.id.toLowerCase(),
             poolId: pool.id,
@@ -702,6 +707,7 @@ export class UserSnapshotService {
         userAddress: string,
         oldestRequestedSnapshotTimestamp: number,
         poolId: string,
+        chain: Chain,
     ) {
         return await prisma.prismaUserPoolBalanceSnapshot.findMany({
             where: {
@@ -710,7 +716,7 @@ export class UserSnapshotService {
                     gte: oldestRequestedSnapshotTimestamp,
                 },
                 poolId: poolId,
-                chain: networkContext.chain,
+                chain: chain,
             },
             orderBy: { timestamp: 'asc' },
         });
