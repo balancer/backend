@@ -11,6 +11,7 @@ import {
 import {
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
+    GqlChain,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
@@ -33,16 +34,16 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Prisma, PrismaPoolAprType } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolAprType } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 
 export class PoolGqlLoaderService {
-    public async getPool(id: string): Promise<GqlPoolUnion> {
+    public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
         const pool = await prisma.prismaPool.findUnique({
-            where: { id_chain: { id, chain: networkContext.chain } },
+            where: { id_chain: { id, chain: chain } },
             include: prismaPoolWithExpandedNesting.include,
         });
 
@@ -66,9 +67,9 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
-    public async getLinearPools(): Promise<GqlPoolLinear[]> {
+    public async getLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
         const pools = await prisma.prismaPool.findMany({
-            where: { type: 'LINEAR', chain: networkContext.chain },
+            where: { type: 'LINEAR', chain: { in: chains } },
             orderBy: { dynamicData: { totalLiquidity: 'desc' } },
             include: prismaPoolWithExpandedNesting.include,
         });
@@ -131,6 +132,7 @@ export class PoolGqlLoaderService {
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
         const orderDirection = args.orderDirection || undefined;
+        const userAddress = args.where?.userAddress;
 
         switch (args.orderBy) {
             case 'totalLiquidity':
@@ -206,6 +208,35 @@ export class PoolGqlLoaderService {
             });
         }
 
+        const userArgs: Prisma.PrismaPoolWhereInput = userAddress
+            ? {
+                  OR: [
+                      {
+                          userWalletBalances: {
+                              some: {
+                                  userAddress: {
+                                      equals: userAddress,
+                                      mode: 'insensitive' as const,
+                                  },
+                                  balanceNum: { gt: 0 },
+                              },
+                          },
+                      },
+                      {
+                          userStakedBalances: {
+                              some: {
+                                  userAddress: {
+                                      equals: userAddress,
+                                      mode: 'insensitive' as const,
+                                  },
+                                  balanceNum: { gt: 0 },
+                              },
+                          },
+                      },
+                  ],
+              }
+            : {};
+
         const filterArgs: Prisma.PrismaPoolWhereInput = {
             dynamicData: {
                 totalSharesNum: {
@@ -231,11 +262,15 @@ export class PoolGqlLoaderService {
                 mode: 'insensitive',
             },
             categories: {
-                every: {
-                    category: {
-                        notIn: ['BLACK_LISTED', ...(where?.categoryNotIn || [])],
-                    },
-                },
+                ...(where?.categoryNotIn
+                    ? {
+                          every: {
+                              category: {
+                                  notIn: where.categoryNotIn,
+                              },
+                          },
+                      }
+                    : {}),
                 ...(where?.categoryIn
                     ? {
                           some: {
@@ -271,7 +306,10 @@ export class PoolGqlLoaderService {
         if (!textSearch) {
             return {
                 ...baseQuery,
-                where: filterArgs,
+                where: {
+                    ...filterArgs,
+                    ...userArgs,
+                },
             };
         }
 
@@ -279,10 +317,11 @@ export class PoolGqlLoaderService {
             ...baseQuery,
             where: {
                 OR: [
-                    { name: textSearch, ...filterArgs },
-                    { symbol: textSearch, ...filterArgs },
+                    { name: textSearch, ...filterArgs, ...userArgs },
+                    { symbol: textSearch, ...filterArgs, ...userArgs },
                     {
                         ...filterArgs,
+                        ...userArgs,
                         allTokens: {
                             some: {
                                 OR: [
@@ -750,18 +789,7 @@ export class PoolGqlLoaderService {
                             }),
                         );
                         const apr = _.sumBy(items, 'apr');
-                        let title = '';
-
-                        switch (group) {
-                            case 'YEARN':
-                                title = 'Yearn boosted APR';
-                                break;
-                            case 'REAPER':
-                                title = 'Reaper boosted APR';
-                                break;
-                            case 'OVERNIGHT':
-                                title = 'Overnight boosted APR';
-                        }
+                        const title = `${group.charAt(0) + group.slice(1).toLowerCase()} boosted APR`;
 
                         return {
                             id: `${pool.id}-${group}`,

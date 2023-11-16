@@ -135,8 +135,10 @@ export class VeBalVotingListService {
     async sync(votingGaugeAddresses: string[]) {
         const chunks = chunk(votingGaugeAddresses, 50);
 
+        const syncErrors: Error[] = [];
         for (const addressChunk of chunks) {
-            const votingGauges = await this.fetchVotingGauges(addressChunk);
+            const { votingGauges, errors } = await this.fetchVotingGauges(addressChunk);
+            syncErrors.push(...errors);
 
             /*
                 We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
@@ -145,20 +147,30 @@ export class VeBalVotingListService {
                 (gauge) => !specialVotingGaugeAddresses.includes(gauge.gaugeAddress),
             );
 
-            await this.votingGauges.saveVotingGauges(cleanVotingGauges);
+            const { saveErrors } = await this.votingGauges.saveVotingGauges(cleanVotingGauges);
+            syncErrors.push(...saveErrors);
+        }
+        if (syncErrors.length > 0) {
+            throw new Error(`Errors while syncing voting gauges: ${syncErrors.map((error) => error.message)}`);
         }
     }
 
     async fetchVotingGauges(votingGaugeAddresses: string[]) {
+        const errors: Error[] = [];
+
         const subgraphGauges = await this.votingGauges.fetchVotingGaugesFromSubgraph(votingGaugeAddresses);
 
         const onchainGauges = await this.votingGauges.fetchOnchainVotingGauges(votingGaugeAddresses);
 
         const votingGauges = this.votingGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
-        this.throwIfMissingVotingGaugeData(votingGauges);
+        try {
+            this.throwIfMissingVotingGaugeData(votingGauges);
+        } catch (error) {
+            errors.push(error as Error);
+        }
 
-        return votingGauges;
+        return { votingGauges, errors };
     }
 
     throwIfMissingVotingGaugeData(votingGauges: VotingGauge[]) {

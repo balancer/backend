@@ -119,16 +119,22 @@ export class VotingGaugesRepository {
     }
 
     async saveVotingGauges(votingGauges: VotingGauge[]) {
-        const votingGaugesWithStakingGaugeId = Promise.all(
+        const saveErrors: Error[] = [];
+        const votingGaugesWithStakingGaugeId = await Promise.all(
             votingGauges.map(async (gauge) => {
-                const stakingId = await this.findStakingGaugeId(gauge);
-                gauge.stakingGaugeId = stakingId;
-                await this.saveVotingGauge(gauge);
-                return gauge;
+                try {
+                    const stakingId = await this.findStakingGaugeId(gauge);
+                    gauge.stakingGaugeId = stakingId;
+                    await this.saveVotingGauge(gauge);
+                    return gauge;
+                } catch (error) {
+                    saveErrors.push(error as Error);
+                    return gauge;
+                }
             }),
         );
 
-        return votingGaugesWithStakingGaugeId;
+        return { votingGaugesWithStakingGaugeId, saveErrors };
     }
 
     async saveVotingGauge(gauge: VotingGauge) {

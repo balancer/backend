@@ -107,7 +107,7 @@ const repository = new VotingGaugesRepository(prismaMock);
 it('successfully saves onchain gauges', async () => {
     const votingGauge = aVotingGauge({ network: Chain.OPTIMISM });
 
-    const votingGauges = await repository.saveVotingGauges([votingGauge]);
+    const { votingGaugesWithStakingGaugeId: votingGauges } = await repository.saveVotingGauges([votingGauge]);
 
     expect(votingGauges[0]).toMatchObject(votingGauge);
     expect(votingGauges[0].stakingGaugeId).toBe(defaultStakingGaugeId);

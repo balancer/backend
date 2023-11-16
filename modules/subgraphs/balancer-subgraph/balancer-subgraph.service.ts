@@ -44,16 +44,17 @@ import { subgraphLoadAll } from '../subgraph-util';
 import { Cache, CacheClass } from 'memory-cache';
 import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
-import { networkContext } from '../../network/network-context.service';
 
 const ALL_POOLS_CACHE_KEY = `balance-subgraph_all-pools`;
 const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools`;
 
 export class BalancerSubgraphService {
     private cache: CacheClass<string, any>;
+    private sdk: ReturnType<typeof getSdk>;
 
-    constructor() {
+    constructor(subgraphUrl: string, private chainId: number) {
         this.cache = new Cache<string, any>();
+        this.sdk = getSdk(new GraphQLClient(subgraphUrl));
     }
 
     public async getMetadata() {
@@ -265,7 +266,7 @@ export class BalancerSubgraphService {
 
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
         const cached = this.cache.get(
-            `${PORTFOLIO_POOLS_CACHE_KEY}:${networkContext.chainId}`,
+            `${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`,
         ) as BalancerPortfolioPoolsDataQuery | null;
 
         if (cached) {
@@ -274,13 +275,13 @@ export class BalancerSubgraphService {
 
         const portfolioPools = await this.sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
 
-        this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${networkContext.chainId}`, portfolioPools, fiveMinutesInMs);
+        this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`, portfolioPools, fiveMinutesInMs);
 
         return portfolioPools;
     }
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
-        const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${networkContext.chainId}:${block}`) as
+        const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`) as
             | BalancerPoolFragment[]
             | null;
 
@@ -294,7 +295,7 @@ export class BalancerSubgraphService {
             block: { number: block },
         });
 
-        this.cache.put(`${ALL_POOLS_CACHE_KEY}:${networkContext.chainId}:${block}`, pools, twentyFourHoursInMs);
+        this.cache.put(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`, pools, twentyFourHoursInMs);
 
         return pools;
     }
@@ -313,12 +314,6 @@ export class BalancerSubgraphService {
         return [...ampUpdates, ...gradualWeightUpdates].map((item) => item.poolId.id);
     }
 
-    private get sdk() {
-        const client = new GraphQLClient(networkContext.data.subgraphs.balancer);
-
-        return getSdk(client);
-    }
-
     private normalizeBalancerUser(user: BalancerUserFragment): BalancerUserFragment {
         return {
             ...user,
@@ -330,5 +325,3 @@ export class BalancerSubgraphService {
         };
     }
 }
-
-export const balancerSubgraphService = new BalancerSubgraphService();

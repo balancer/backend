@@ -7,11 +7,11 @@ import { headerChain } from '../context/header-chain';
 const resolvers: Resolvers = {
     Query: {
         userGetPoolBalances: async (parent, { chains, address }, context) => {
-            const currentChain = headerChain()
+            const currentChain = headerChain();
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                chains = [];
+                throw new Error('userGetPoolBalances error: Provide "chains" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
@@ -22,19 +22,37 @@ const resolvers: Resolvers = {
                 tokenPrice: tokenService.getPriceForToken(tokenPrices[balance.chain] || [], balance.tokenAddress),
             }));
         },
-        userGetPoolJoinExits: async (parent, { first, skip, poolId }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
+        userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('userGetPoolJoinExits error: Provide "chain" param');
+            }
+            const accountAddress = address || getRequiredAccountAddress(context);
 
-            return userService.getUserPoolInvestments(accountAddress, poolId, first, skip);
+            return userService.getUserPoolInvestments(accountAddress, poolId, chain, first, skip);
         },
-        userGetSwaps: async (parent, { first, skip, poolId }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-            return userService.getUserSwaps(accountAddress, poolId, first, skip);
+        userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('userGetSwaps error: Provide "chain" param');
+            }
+            const accountAddress = address || getRequiredAccountAddress(context);
+            return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
         },
-        userGetStaking: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
+        userGetStaking: async (parent, { chains, address }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('userGetStaking error: Provide "chains" param');
+            }
+            const accountAddress = address || getRequiredAccountAddress(context);
 
-            return userService.getUserStaking(accountAddress);
+            return userService.getUserStaking(accountAddress, chains);
         },
     },
     Mutation: {
