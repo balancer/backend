@@ -57,8 +57,11 @@ export class PoolOnChainDataService {
 
         const operations = [];
         for (const pool of filteredPools) {
+            if (!state[pool.id]) continue; // Some pool types are filtered out in the state fetching function
+
             const { isPaused, isInRecoveryMode } = state[pool.id];
-            if (pool.dynamicData) {
+            const data = pool.dynamicData;
+            if (data && data.isPaused !== isPaused && data.isInRecoveryMode !== isInRecoveryMode) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: this.options.chain } },
@@ -66,7 +69,7 @@ export class PoolOnChainDataService {
                             isPaused,
                             isInRecoveryMode,
                         },
-                    }),
+                    })
                 );
             }
         }
