@@ -21,10 +21,7 @@ const parse = (result: OnchainState) => ({
     isInRecoveryMode: result.inRecoveryMode ? result.inRecoveryMode : false,
 });
 
-export const fetchOnChainPoolState = async (
-  pools: PoolInput[],
-  batchSize = 1024
-) => {
+export const fetchOnChainPoolState = async (pools: PoolInput[], batchSize = 1024) => {
     if (pools.length === 0) {
         return {};
     }
@@ -32,7 +29,8 @@ export const fetchOnChainPoolState = async (
     const multicaller = new Multicaller3(abi, batchSize);
 
     pools.forEach(({ id, type, address }) => {
-        if (!(type === 'ELEMENT')) {
+        // filter certain pool types that don't have pausedState or recovery mode
+        if (type !== 'ELEMENT') {
             multicaller.call(`${id}.pausedState`, address, 'getPausedState');
         }
         if (
@@ -48,9 +46,7 @@ export const fetchOnChainPoolState = async (
         [id: string]: OnchainState;
     };
 
-    const parsed = Object.fromEntries(
-        Object.entries(results).map(([key, result]) => [key, parse(result)])
-    );
+    const parsed = Object.fromEntries(Object.entries(results).map(([key, result]) => [key, parse(result)]));
 
     return parsed;
 };

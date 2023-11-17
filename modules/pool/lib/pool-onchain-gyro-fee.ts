@@ -22,14 +22,10 @@ interface OnchainGyroFees {
         [id: string]: {
             poolFee?: string;
         };
-    }
+    };
 }
 
-export const fetchOnChainGyroFees = async (
-  pools: PoolInput[],
-  gyroConfigAddress?: string,
-  batchSize = 1024
-) => {
+export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress?: string, batchSize = 1024) => {
     if (pools.length === 0 || !gyroConfigAddress) {
         return {};
     }
@@ -40,32 +36,17 @@ export const fetchOnChainGyroFees = async (
 
     const eclpKey = keccak256(
         ['bytes'],
-        [
-            defaultAbiCoder.encode(
-                ['bytes32', 'bytes32'],
-                [feeKey, formatBytes32String('ECLP')]
-            ),
-        ]
+        [defaultAbiCoder.encode(['bytes32', 'bytes32'], [feeKey, formatBytes32String('ECLP')])],
     );
 
     const twoClpKey = keccak256(
         ['bytes'],
-        [
-            defaultAbiCoder.encode(
-                ['bytes32', 'bytes32'],
-                [feeKey, formatBytes32String('2CLP')]
-            ),
-        ]
+        [defaultAbiCoder.encode(['bytes32', 'bytes32'], [feeKey, formatBytes32String('2CLP')])],
     );
 
     const threeClpKey = keccak256(
         ['bytes'],
-        [
-            defaultAbiCoder.encode(
-                ['bytes32', 'bytes32'],
-                [feeKey, formatBytes32String('3CLP')]
-            ),
-        ]
+        [defaultAbiCoder.encode(['bytes32', 'bytes32'], [feeKey, formatBytes32String('3CLP')])],
     );
 
     multicaller.call('defaultFee', gyroConfigAddress, 'getUint', [feeKey]);
@@ -78,12 +59,7 @@ export const fetchOnChainGyroFees = async (
         if (type.includes('GYRO')) {
             const poolFeeKey = keccak256(
                 ['bytes'],
-                [
-                    defaultAbiCoder.encode(
-                    ['bytes32', 'uint256'],
-                    [feeKey, address]
-                    ),
-                ]
+                [defaultAbiCoder.encode(['bytes32', 'uint256'], [feeKey, address])],
             );
 
             multicaller.call(`pools.${id}.poolFee`, gyroConfigAddress, 'getUint', [poolFeeKey]);
@@ -101,19 +77,20 @@ export const fetchOnChainGyroFees = async (
     let parsed: { [address: string]: string } = {};
     if (results.pools) {
         parsed = Object.fromEntries(
-            Object.entries(results.pools).map(([id, { poolFee }]) => [id,
+            Object.entries(results.pools).map(([id, { poolFee }]) => [
+                id,
                 formatEther(
                     poolFee
-                    ? poolFee
-                    : poolTypeLookup[id] == 'GYROE'
-                    ? eclpFee
-                    : poolTypeLookup[id] == 'GYRO'
-                    ? twoClpFee
-                    : poolTypeLookup[id] == 'GYRO3'
-                    ? threeClpFee
-                    : defaultFee
-                )
-            ])
+                        ? poolFee
+                        : poolTypeLookup[id] == 'GYROE'
+                        ? eclpFee
+                        : poolTypeLookup[id] == 'GYRO'
+                        ? twoClpFee
+                        : poolTypeLookup[id] == 'GYRO3'
+                        ? threeClpFee
+                        : defaultFee,
+                ),
+            ]),
         );
     }
 

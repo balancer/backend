@@ -20,10 +20,10 @@ interface PoolInput {
     address: string;
     type: PrismaPoolType | 'COMPOSABLE_STABLE';
     tokens: {
-        address: string,
+        address: string;
         token: {
-            decimals: number,
-        }
+            decimals: number;
+        };
     }[];
     version: number;
 }
@@ -79,20 +79,21 @@ const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
     if (['LINEAR', 'PHANTOM_STABLE'].includes(type)) {
         return 'getVirtualSupply';
     } else if (
-        type === 'COMPOSABLE_STABLE'
-        || (type === 'WEIGHTED' && version > 1)
-        || (type === 'GYROE' && version > 1)
-        || (type === 'UNKNOWN' && version > 1)) {
+        type === 'COMPOSABLE_STABLE' ||
+        (type === 'WEIGHTED' && version > 1) ||
+        (type === 'GYROE' && version > 1) ||
+        (type === 'UNKNOWN' && version > 1)
+    ) {
         return 'getActualSupply';
     } else {
         return 'totalSupply';
     }
-}
+};
 
-const defaultCalls = (
+const addDefaultCallsToMulticaller = (
     { id, address, type, version }: PoolInput,
     vaultAddress: string,
-    multicaller: Multicaller3
+    multicaller: Multicaller3,
 ) => {
     multicaller.call(`${id}.poolTokens`, vaultAddress, 'getPoolTokens', [id]);
     multicaller.call(`${id}.totalSupply`, address, getTotalSupplyFn(type, version));
@@ -101,33 +102,21 @@ const defaultCalls = (
     multicaller.call(`${id}.protocolYieldFeePercentageCache`, address, 'getProtocolFeePercentageCache', [2]);
 };
 
-const weightedCalls = (
-    { id, address }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const weightedCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
 };
 
-const lbpAndInvestmentCalls =(
-    { id, address }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
     multicaller.call(`${id}.swapEnabled`, address, 'getSwapEnabled');
 };
 
-const linearCalls = (
-    { id, address }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const linearCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.targets`, address, 'getTargets');
     multicaller.call(`${id}.wrappedTokenRate`, address, 'getWrappedTokenRate');
 };
 
-const stableCalls = (
-    { id, address, tokens }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
     tokens.forEach(({ address: tokenAddress }, i) => {
@@ -135,25 +124,19 @@ const stableCalls = (
     });
 };
 
-const metaStableCalls = (
-    { id, address, tokens }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const metaStableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
     tokens.forEach(({ address: tokenAddress }, i) => {
         multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
     });
-}
+};
 
-const gyroECalls = (
-    { id, address }: PoolInput,
-    multicaller: Multicaller3
-) => {
+const gyroECalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.tokenRates`, address, 'getTokenRates');
 };
 
-const poolTypeCalls = (type: PoolInput['type'], version = 1) => {
+const addPoolTypeSpecificCallsToMulticaller = (type: PoolInput['type'], version = 1) => {
     const do_nothing = () => ({});
     switch (type) {
         case 'WEIGHTED':
@@ -186,30 +169,32 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
     totalShares: formatEther(result.totalSupply || '0'),
     weights: result.weights?.map(formatEther),
     targets: result.targets?.map(String),
-    poolTokens: result.poolTokens ? {
-        tokens: result.poolTokens[0].map((token) => token.toLowerCase()),
-        balances: result.poolTokens[1].map((balance, i) => formatUnits(balance, decimalsLookup[result.poolTokens[0][i].toLowerCase()])),
-        rates: result.poolTokens[0].map((_, i) =>
-            result.tokenRate && result.tokenRate[i]
-            ? formatEther(result.tokenRate[i])
-            : result.tokenRates && result.tokenRates[i]
-            ? formatEther(result.tokenRates[i])
-            : result.metaPriceRateCache && result.metaPriceRateCache[i][0].gt(0)
-            ? formatEther(result.metaPriceRateCache[i][0])
-            : undefined
-        )
-    } : { tokens: [], balances: [], rates: [] },
+    poolTokens: result.poolTokens
+        ? {
+              tokens: result.poolTokens[0].map((token) => token.toLowerCase()),
+              balances: result.poolTokens[1].map((balance, i) =>
+                  formatUnits(balance, decimalsLookup[result.poolTokens[0][i].toLowerCase()]),
+              ),
+              rates: result.poolTokens[0].map((_, i) =>
+                  result.tokenRate && result.tokenRate[i]
+                      ? formatEther(result.tokenRate[i])
+                      : result.tokenRates && result.tokenRates[i]
+                      ? formatEther(result.tokenRates[i])
+                      : result.metaPriceRateCache && result.metaPriceRateCache[i][0].gt(0)
+                      ? formatEther(result.metaPriceRateCache[i][0])
+                      : undefined,
+              ),
+          }
+        : { tokens: [], balances: [], rates: [] },
     wrappedTokenRate: result.wrappedTokenRate ? formatEther(result.wrappedTokenRate) : '1.0',
     rate: result.rate ? formatEther(result.rate) : '1.0',
     swapEnabled: result.swapEnabled,
-    protocolYieldFeePercentageCache: result.protocolYieldFeePercentageCache ? formatEther(result.protocolYieldFeePercentageCache) : undefined,
+    protocolYieldFeePercentageCache: result.protocolYieldFeePercentageCache
+        ? formatEther(result.protocolYieldFeePercentageCache)
+        : undefined,
 });
 
-export const fetchOnChainPoolData = async (
-    pools: PoolInput[],
-    vaultAddress: string,
-    batchSize = 1024
-) => {
+export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: string, batchSize = 1024) => {
     if (pools.length === 0) {
         return {};
     }
@@ -217,8 +202,8 @@ export const fetchOnChainPoolData = async (
     const multicaller = new Multicaller3(abi, batchSize);
 
     pools.forEach((pool) => {
-        defaultCalls(pool, vaultAddress, multicaller);
-        poolTypeCalls(pool.type, pool.version)(pool, multicaller);
+        addDefaultCallsToMulticaller(pool, vaultAddress, multicaller);
+        addPoolTypeSpecificCallsToMulticaller(pool.type, pool.version)(pool, multicaller);
     });
 
     const results = (await multicaller.execute()) as {
@@ -226,13 +211,11 @@ export const fetchOnChainPoolData = async (
     };
 
     const decimalsLookup = Object.fromEntries(
-        pools.flatMap((pool) =>
-            pool.tokens.map(({ address, token }) => [address, token.decimals])
-        )
+        pools.flatMap((pool) => pool.tokens.map(({ address, token }) => [address, token.decimals])),
     );
 
     const parsed = Object.fromEntries(
-        Object.entries(results).map(([key, result]) => [key, parse(result, decimalsLookup)])
+        Object.entries(results).map(([key, result]) => [key, parse(result, decimalsLookup)]),
     );
 
     return parsed;

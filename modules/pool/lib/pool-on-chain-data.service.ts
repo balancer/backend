@@ -2,7 +2,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isStablePool } from './pool-utils';
+import { isComposableStablePool, isStablePool } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { fetchOnChainPoolState } from './pool-onchain-state';
@@ -25,9 +25,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
 ];
 
 export class PoolOnChainDataService {
-    constructor(
-        private readonly tokenService: TokenService,
-    ) {}
+    constructor(private readonly tokenService: TokenService) {}
 
     private get options() {
         return {
@@ -36,7 +34,7 @@ export class PoolOnChainDataService {
             yieldProtocolFeePercentage: networkContext.data.balancer.yieldProtocolFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
             composableStableFactories: networkContext.data.balancer.composableStablePoolFactories,
-        }
+        };
     }
 
     public async updateOnChainStatus(poolIds: string[]): Promise<void> {
@@ -61,7 +59,7 @@ export class PoolOnChainDataService {
 
             const { isPaused, isInRecoveryMode } = state[pool.id];
             const data = pool.dynamicData;
-            if (data && data.isPaused !== isPaused && data.isInRecoveryMode !== isInRecoveryMode) {
+            if (data && (data.isPaused !== isPaused || data.isInRecoveryMode !== isInRecoveryMode)) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: pool.id, chain: this.options.chain } },
@@ -69,7 +67,7 @@ export class PoolOnChainDataService {
                             isPaused,
                             isInRecoveryMode,
                         },
-                    })
+                    }),
                 );
             }
         }
@@ -99,20 +97,20 @@ export class PoolOnChainDataService {
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
         const poolsWithComposableStableType = filteredPools.map((pool) => ({
             ...pool,
-            type: (
-                pool.factory && this.options.composableStableFactories.includes(pool.factory)
-                ? 'COMPOSABLE_STABLE'
-                : pool.type
-            ) as PrismaPoolType | 'COMPOSABLE_STABLE',
+            type: (isComposableStablePool(pool) ? 'COMPOSABLE_STABLE' : pool.type) as
+                | PrismaPoolType
+                | 'COMPOSABLE_STABLE',
         }));
 
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const onchainResults = await fetchOnChainPoolData(poolsWithComposableStableType, this.options.vaultAddress, 1024);
-        const gyroFees = await (
-            this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, 1024)
-            : Promise.resolve({} as { [address: string]: string })
+        const onchainResults = await fetchOnChainPoolData(
+            poolsWithComposableStableType,
+            this.options.vaultAddress,
+            1024,
         );
+        const gyroFees = await (this.options.gyroConfig
+            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, 1024)
+            : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -133,7 +131,7 @@ export class PoolOnChainDataService {
                                 where: { id_chain: { id: pool.id, chain: this.options.chain } },
                                 create: { id: pool.id, chain: this.options.chain, poolId: pool.id, amp, blockNumber },
                                 update: { amp, blockNumber },
-                            })
+                            }),
                         );
                     }
                 }
@@ -163,7 +161,7 @@ export class PoolOnChainDataService {
                                         blockNumber,
                                     },
                                     update: { upperTarget, lowerTarget, blockNumber },
-                                })
+                                }),
                             );
                         }
                     }
@@ -198,7 +196,7 @@ export class PoolOnChainDataService {
                                 protocolYieldFee: yieldProtocolFeePercentage,
                                 blockNumber,
                             },
-                        })
+                        }),
                     );
                 }
 
@@ -253,7 +251,7 @@ export class PoolOnChainDataService {
                                         poolToken.address === pool.address
                                             ? 0
                                             : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                            parseFloat(balance),
+                                              parseFloat(balance),
                                 },
                                 update: {
                                     blockNumber,
@@ -264,9 +262,9 @@ export class PoolOnChainDataService {
                                         poolToken.address === pool.address
                                             ? 0
                                             : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                            parseFloat(balance),
+                                              parseFloat(balance),
                                 },
-                            })
+                            }),
                         );
                     }
                 }
