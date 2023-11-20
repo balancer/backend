@@ -20,7 +20,10 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
 
             const response = await axios.get('https://www.beetswars.live/api/trpc/chart.chartdata');
 
-            const votingAprs: number[] = response.data.result.data.json.chartdata.votingApr;
+            const raw: number[] = response.data.result.data.json.chartdata.votingApr;
+
+            // Filter out non-numbers and infinity values
+            const votingAprs = raw.filter((apr) => apr && isFinite(apr));
 
             const minApr = 0;
             const maxApr = votingAprs[votingAprs.length - 1] / 100;
