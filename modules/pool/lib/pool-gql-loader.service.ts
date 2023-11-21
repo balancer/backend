@@ -357,9 +357,7 @@ export class PoolGqlLoaderService {
             investConfig: this.getPoolInvestConfig(pool),
             withdrawConfig: this.getPoolWithdrawConfig(pool),
             nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens
-                .filter((token) => token.address !== pool.address)
-                .map((token) => this.mapPoolTokenToGqlUnion(token)),
+            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
         };
