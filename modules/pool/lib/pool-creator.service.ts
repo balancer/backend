@@ -189,7 +189,7 @@ export class PoolCreatorService {
 
         // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
         let poolTypeVersion = pool.poolTypeVersion ? pool.poolTypeVersion : 1;
-        if (pool.poolType === 'PHANTOM_STABLE') {
+        if (pool.poolType === 'StablePhantom') {
             poolTypeVersion = 0;
         }
 
@@ -372,7 +372,7 @@ export class PoolCreatorService {
         for (const subgraphPool of subgraphPools) {
             // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
             let poolTypeVersion = subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1;
-            if (subgraphPool.poolType === 'PHANTOM_STABLE') {
+            if (subgraphPool.poolType === 'StablePhantom') {
                 poolTypeVersion = 0;
             }
 
