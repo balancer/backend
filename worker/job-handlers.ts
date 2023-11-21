@@ -173,7 +173,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => protocolService.cacheProtocolMetrics(networkContext.chainId, networkContext.chain),
+                    () => protocolService.cacheProtocolMetrics(networkContext.chain),
                     res,
                     next,
                 );

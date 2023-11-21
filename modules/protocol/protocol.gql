@@ -1,6 +1,6 @@
 extend type Query {
-    protocolMetricsChain: GqlProtocolMetricsChain!
-    protocolMetricsAggregated(chainIds: [String!]!): GqlProtocolMetricsAggregated!
+    protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
+    protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
     latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
 
