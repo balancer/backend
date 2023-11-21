@@ -94,14 +94,9 @@ export class PoolOnChainDataService {
         });
 
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
-        const poolsWithComposableStableType = filteredPools.filter((pool) => isComposableStablePool(pool));
 
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const onchainResults = await fetchOnChainPoolData(
-            poolsWithComposableStableType,
-            this.options.vaultAddress,
-            1024,
-        );
+        const onchainResults = await fetchOnChainPoolData(filteredPools, this.options.vaultAddress, 1024);
         const gyroFees = await (this.options.gyroConfig
             ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, 1024)
             : Promise.resolve({} as { [address: string]: string }));
