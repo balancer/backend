@@ -88,7 +88,9 @@ export class PoolCreatorService {
             const nestedPool = subgraphPools.find((nestedPool) => {
                 const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
 
-                return nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'PHANTOM_STABLE');
+                return (
+                    nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'COMPOSABLE_STABLE')
+                );
             });
 
             if (nestedPool) {
@@ -160,7 +162,7 @@ export class PoolCreatorService {
         const allNestedTypePools = await prisma.prismaPool.findMany({
             where: {
                 chain: networkContext.chain,
-                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.PHANTOM_STABLE] },
+                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
             },
             select: { id: true, address: true },
         });
@@ -185,6 +187,12 @@ export class PoolCreatorService {
             ],
         });
 
+        // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
+        let poolTypeVersion = pool.poolTypeVersion ? pool.poolTypeVersion : 1;
+        if (pool.poolType === 'PHANTOM_STABLE') {
+            poolTypeVersion = 0;
+        }
+
         await prisma.prismaPool.create({
             data: {
                 id: pool.id,
@@ -195,7 +203,7 @@ export class PoolCreatorService {
                 name: pool.name || '',
                 decimals: 18,
                 type: poolType,
-                version: pool.poolTypeVersion ? pool.poolTypeVersion : 1,
+                version: poolTypeVersion,
                 owner: pool.owner || ZERO_ADDRESS,
                 factory: pool.factory,
                 tokens: {
@@ -256,7 +264,7 @@ export class PoolCreatorService {
                       }
                     : undefined,
                 stableDynamicData:
-                    poolType === 'STABLE' || poolType === 'PHANTOM_STABLE' || poolType === 'META_STABLE'
+                    poolType === 'STABLE' || poolType === 'COMPOSABLE_STABLE' || poolType === 'META_STABLE'
                         ? {
                               create: {
                                   id: pool.id,
@@ -364,9 +372,9 @@ export class PoolCreatorService {
 
             if (poolType === 'LINEAR') {
                 return 0;
-            } else if (poolType === 'PHANTOM_STABLE') {
-                //if the phantom stable has a nested phantom stable, it needs to appear later in the list
-                const nestedPhantomStableToken = (pool.tokens || []).find((token) => {
+            } else if (poolType === 'COMPOSABLE_STABLE') {
+                //if the composable stable has a nested composable stable, it needs to appear later in the list
+                const nestedComposableStableToken = (pool.tokens || []).find((token) => {
                     if (token.address === pool.address) {
                         return false;
                     }
@@ -374,10 +382,10 @@ export class PoolCreatorService {
                     const nestedPool = subgraphPools.find((nestedPool) => nestedPool.address === token.address);
                     const nestedPoolType = this.mapSubgraphPoolTypeToPoolType(nestedPool?.poolType || '');
 
-                    return nestedPoolType === 'PHANTOM_STABLE';
+                    return nestedPoolType === 'COMPOSABLE_STABLE';
                 });
 
-                return nestedPhantomStableToken ? 2 : 1;
+                return nestedComposableStableToken ? 2 : 1;
             }
 
             return 3;
@@ -394,10 +402,11 @@ export class PoolCreatorService {
                 return 'STABLE';
             case 'MetaStable':
                 return 'META_STABLE';
+            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
             case 'StablePhantom':
-                return 'PHANTOM_STABLE';
+                return 'COMPOSABLE_STABLE';
             case 'ComposableStable':
-                return 'PHANTOM_STABLE';
+                return 'COMPOSABLE_STABLE';
             case 'Linear':
                 return 'LINEAR';
             case 'Element':
