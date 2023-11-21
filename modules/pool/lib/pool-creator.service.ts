@@ -366,6 +366,42 @@ export class PoolCreatorService {
         }
     }
 
+    public async updatePoolTypesAndVersionForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+
+        for (const subgraphPool of subgraphPools) {
+            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
+            let poolTypeVersion = subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1;
+            if (subgraphPool.poolType === 'PHANTOM_STABLE') {
+                poolTypeVersion = 0;
+            }
+
+            const poolType = this.mapSubgraphPoolTypeToPoolType(subgraphPool.poolType || '');
+
+            try {
+                await prisma.prismaPool.update({
+                    where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                    data: {
+                        version: poolTypeVersion,
+                        type: poolType,
+                    },
+                });
+            } catch (e: any) {
+                // Some pools are filtered from the DB, like test pools,
+                // so we just ignore them without breaking the loop
+                const error = e.meta ? e.meta.cause : e;
+                console.error(
+                    'Error in updating pool versions: ',
+                    error,
+                    'Network',
+                    networkContext.chain,
+                    'Pool ID: ',
+                    subgraphPool.id,
+                );
+            }
+        }
+    }
+
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
         return _.sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
