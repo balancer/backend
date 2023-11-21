@@ -76,7 +76,7 @@ const getSwapFeeFn = (type: string) => {
 };
 
 const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
-    if (['LINEAR', 'PHANTOM_STABLE'].includes(type)) {
+    if (['LINEAR'].includes(type) || (type === 'COMPOSABLE_STABLE' && version === 0)) {
         return 'getVirtualSupply';
     } else if (
         type === 'COMPOSABLE_STABLE' ||
