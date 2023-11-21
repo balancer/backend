@@ -1,11 +1,10 @@
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
-import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { Cache } from 'memory-cache';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
