@@ -12,10 +12,8 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { beethovenSchema } from './graphql_schema_generated_beethoven';
-import { balancerSchema } from './graphql_schema_generated_balancer';
-import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
+import { schema } from './graphql_schema_generated';
+import { resolvers } from './app/gql/resolvers';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
@@ -103,9 +101,9 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: {
             JSON: GraphQLJSON,
-            ...(env.PROTOCOL === 'beethoven' ? beethovenResolvers : balancerResolvers),
+            ...resolvers,
         },
-        typeDefs: env.PROTOCOL === 'beethoven' ? beethovenSchema : balancerSchema,
+        typeDefs: schema,
         introspection: true,
         plugins,
         context: ({ req }) => req.context,
