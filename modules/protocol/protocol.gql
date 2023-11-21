@@ -1,5 +1,5 @@
 extend type Query {
-    protocolMetricsChain(chain: GqlChain!): GqlProtocolMetricsChain!
+    protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
     protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
     latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
