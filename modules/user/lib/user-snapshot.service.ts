@@ -231,7 +231,7 @@ export class UserSnapshotService {
                             where: {
                                 id_chain: {
                                     id: latestStoredUserPoolSnapshot.poolId,
-                                    chain: networkContext.chain,
+                                    chain: latestStoredUserPoolSnapshot.chain,
                                 },
                             },
                             include: {
@@ -246,8 +246,9 @@ export class UserSnapshotService {
                         if (totalBalance > 0) {
                             //enrich with poolsnapshot data and save
                             const poolSnapshot = await this.poolSnapshotService.getSnapshotForPool(
-                                latestStoredUserPoolSnapshot.poolId,
+                                pool.id,
                                 userSubgraphSnapshot.timestamp,
+                                pool.chain,
                             );
 
                             /*
@@ -268,7 +269,7 @@ export class UserSnapshotService {
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
                                     where: {
-                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: networkContext.chain },
+                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: userPoolBalanceSnapshotData.chain },
                                     },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,
@@ -281,7 +282,7 @@ export class UserSnapshotService {
                                 id: `${pool.id}-${userSubgraphSnapshot.user.id.toLowerCase()}-${
                                     userSubgraphSnapshot.timestamp
                                 }`,
-                                chain: networkContext.chain,
+                                chain: pool.chain,
                                 timestamp: userSubgraphSnapshot.timestamp,
                                 userAddress: userSubgraphSnapshot.user.id.toLowerCase(),
                                 poolId: pool.id,
@@ -298,7 +299,7 @@ export class UserSnapshotService {
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
                                     where: {
-                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: networkContext.chain },
+                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: userPoolBalanceSnapshotData.chain },
                                     },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,

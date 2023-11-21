@@ -57,7 +57,7 @@ const data: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0xa43a7c62d56df036c187e1966c03e2799d8987ed'], // truMatic, has coingecko entry but no price
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
