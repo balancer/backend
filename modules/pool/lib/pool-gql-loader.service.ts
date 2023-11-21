@@ -80,6 +80,7 @@ export class PoolGqlLoaderService {
     public mapToMinimalGqlPool(pool: PrismaPoolMinimal): GqlPoolMinimal {
         return {
             ...pool,
+            // we need this mapping because we migrated from PHANTOMSTABLE type to COMPOSABLESTABLE in the DB, but now only return COMPOSABLESTABLE
             type: pool.type === 'PHANTOM_STABLE' ? PrismaPoolType.COMPOSABLE_STABLE : pool.type,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
