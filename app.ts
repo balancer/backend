@@ -1,5 +1,4 @@
-import { loadRestRoutesBeethoven } from './modules/beethoven/loadRestRoutes';
-import { loadRestRoutesBalancer } from './modules/balancer/loadRestRoutes';
+import { loadRestRoutes } from './modules/common/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -74,11 +73,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(sessionMiddleware);
 
-    if (env.PROTOCOL === 'beethoven') {
-        loadRestRoutesBeethoven(app);
-    } else if (env.PROTOCOL === 'balancer') {
-        loadRestRoutesBalancer(app);
-    }
+    loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
 
