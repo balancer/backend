@@ -11,7 +11,6 @@ import {
 import {
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
-    GqlChain,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolInvestConfig,
@@ -27,6 +26,7 @@ import {
     GqlPoolTokenExpanded,
     GqlPoolTokenUnion,
     GqlPoolUnion,
+    GqlPoolUserBalance,
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
@@ -34,7 +34,7 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Chain, Prisma, PrismaPoolAprType } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
@@ -59,6 +59,24 @@ export class PoolGqlLoaderService {
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
+        // only include wallet and staked balances if the query requests it
+        // this makes sure that we don't load ALL user balances when we don't filter on userAddress
+
+        if (args.where?.userAddress) {
+            const pools = await prisma.prismaPool.findMany({
+                ...this.mapQueryArgsToPoolQuery(args),
+                include: {
+                    ...prismaPoolMinimal.include,
+                    userWalletBalances: true,
+                    userStakedBalances: true,
+                },
+            });
+
+            return pools.map((pool) =>
+                this.mapToMinimalGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances),
+            );
+        }
+
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
             include: prismaPoolMinimal.include,
@@ -77,7 +95,11 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
     }
 
-    public mapToMinimalGqlPool(pool: PrismaPoolMinimal): GqlPoolMinimal {
+    public mapToMinimalGqlPool(
+        pool: PrismaPoolMinimal,
+        userWalletbalances: PrismaUserWalletBalance[] = [],
+        userStakedBalances: PrismaUserStakedBalance[] = [],
+    ): GqlPoolMinimal {
         return {
             ...pool,
             decimals: 18,
@@ -85,6 +107,7 @@ export class PoolGqlLoaderService {
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
+            userBalance: this.getUserBalance(userWalletbalances, userStakedBalances),
         };
     }
 
@@ -568,6 +591,13 @@ export class PoolGqlLoaderService {
             farm: null,
             reliquary: null,
         };
+    }
+
+    private getUserBalance(
+        userWalletBalances: PrismaUserWalletBalance[],
+        userStakedBalances: PrismaUserStakedBalance[],
+    ): GqlPoolUserBalance | null {
+        throw new Error('Method not implemented.');
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
