@@ -31,9 +31,10 @@ export const schema = {
         type: String,
     },
     WORKER_QUEUE_URL: String,
+    DATABASE_URL: String,
 };
 
 export const env: Env = load(schema, {
-    path: resolve(__dirname, '../.env'),
-    overrideProcessEnv: process.env.NODE_ENV !== 'production',
+    path: resolve(__dirname, `../../.env`),
+    overrideProcessEnv: true,
 });
