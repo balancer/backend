@@ -63,7 +63,14 @@ async function runIfNotAlreadyRunning(
 
 export function configureWorkerRoutes(app: Express) {
     app.post('/', async (req, res, next) => {
-        const job = req.body as { name: string; chain: string };
+        const job = req.body as { name: string; chain: string; run?: boolean };
+
+        // Worker only works when enabled
+        if (process.env.JOBS_ENABLED !== 'true' && Boolean(job.run) !== true) {
+            res.sendStatus(200);
+            return;
+        }
+
         console.log(`Current jobqueue length: ${runningJobs.size}`);
         const chainId = job.chain;
         initRequestScopedContext();

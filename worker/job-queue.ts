@@ -10,7 +10,7 @@ class WokerQueue {
     public async sendWithInterval(json: string, intervalMs: number, deDuplicationId?: string): Promise<void> {
         try {
             if (env.WORKER_QUEUE_URL.match(/localhost/)) {
-                await this.sendLocalMessage(json );
+                await this.sendLocalMessage(json);
             } else {
                 await this.sendMessage(json, deDuplicationId);
             }
@@ -28,8 +28,8 @@ class WokerQueue {
     public async sendLocalMessage(json: string): Promise<void> {
         await axios.post(env.WORKER_QUEUE_URL, json, {
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+            },
         });
     }
 
