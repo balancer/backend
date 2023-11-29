@@ -30,7 +30,10 @@ export const schema = {
         optional: true,
         type: String,
     },
-    WORKER_QUEUE_URL: String,
+    WORKER_QUEUE_URL: {
+        optional: true,
+        type: String,
+    },
     DATABASE_URL: String,
 };
 
