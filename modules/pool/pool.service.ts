@@ -114,7 +114,7 @@ export class PoolService {
         return this.poolSwapService.getJoinExits(args);
     }
 
-    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
         const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
             `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
         );
