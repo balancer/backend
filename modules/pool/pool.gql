@@ -19,7 +19,6 @@ extend type Query {
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
-    poolGetUserSwapVolume(first: Int, skip: Int, where: GqlUserSwapVolumeFilter): [GqlPoolUserSwapVolume!]!
     poolGetFeaturedPoolGroups(chains: [GqlChain!]!): [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
@@ -92,13 +91,6 @@ enum GqlPoolMinimalType {
     GYRO3
     GYROE
     FX
-}
-
-type GqlFeaturedPool {
-    id: ID!
-    primary: Boolean!
-    imageUrl: String!
-    pool: GqlPoolMinimal!
 }
 
 interface GqlPoolBase {
