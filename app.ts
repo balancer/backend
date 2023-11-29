@@ -1,5 +1,4 @@
-import { loadRestRoutesBeethoven } from './modules/beethoven/loadRestRoutes';
-import { loadRestRoutesBalancer } from './modules/balancer/loadRestRoutes';
+import { loadRestRoutes } from './modules/common/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -12,11 +11,8 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import createNewRelicPlugin from '@newrelic/apollo-server-plugin';
-import { beethovenSchema } from './graphql_schema_generated_beethoven';
-import { balancerSchema } from './graphql_schema_generated_balancer';
-import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
+import { schema } from './graphql_schema_generated';
+import { resolvers } from './app/gql/resolvers';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
@@ -77,11 +73,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(sessionMiddleware);
 
-    if (env.PROTOCOL === 'beethoven') {
-        loadRestRoutesBeethoven(app);
-    } else if (env.PROTOCOL === 'balancer') {
-        loadRestRoutesBalancer(app);
-    }
+    loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
 
@@ -92,13 +84,6 @@ async function startServer() {
         }),
         sentryPlugin,
     ];
-
-    if (process.env.NODE_ENV !== 'local' && process.env.NEW_RELIC_APP_NAME) {
-        const newRelicPlugin = createNewRelicPlugin<ApolloServerPlugin>({})
-        plugins.push(
-            newRelicPlugin,
-        )
-    }
 
     if (process.env.APOLLO_SCHEMA_REPORTING && process.env.APOLLO_SCHEMA_REPORTING === 'true') {
         plugins.push(
@@ -111,9 +96,9 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: {
             JSON: GraphQLJSON,
-            ...(env.PROTOCOL === 'beethoven' ? beethovenResolvers : balancerResolvers),
+            ...resolvers,
         },
-        typeDefs: env.PROTOCOL === 'beethoven' ? beethovenSchema : balancerSchema,
+        typeDefs: schema,
         introspection: true,
         plugins,
         context: ({ req }) => req.context,

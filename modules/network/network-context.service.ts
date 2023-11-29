@@ -57,6 +57,10 @@ export class NetworkContextService {
     public get protocolSupportedChainIds(): string[] {
         return this.isBalancerChain ? BalancerChainIds : BeethovenChainIds;
     }
+
+    public get services() {
+        return this.config.services;
+    }
 }
 
 export const networkContext = new NetworkContextService(env.DEFAULT_CHAIN_ID);

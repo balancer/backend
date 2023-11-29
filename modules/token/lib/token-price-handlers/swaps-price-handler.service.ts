@@ -1,5 +1,5 @@
 import { TokenPriceHandler } from '../../token-types';
-import { PrismaTokenWithTypes, PrismaTokenWithTypesAndPrices } from '../../../../prisma/prisma-types';
+import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import moment from 'moment-timezone';
@@ -10,13 +10,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'SwapsPriceHandlerService';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypesAndPrices[]): Promise<string[]> {
-        // also update any tokens with a coingecko ID that haven't been updated for three hours. This is a fall back to coingecko pricing.
-        const threeHoursAgo = moment().subtract(3, 'hours').utc().unix();
-
-        // get the most recent price in front
-        tokens.forEach((token) => (token.prices = _.orderBy(token.prices, 'timestamp', 'desc')));
-
+    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         return tokens
             .filter(
                 (token) =>
@@ -24,8 +18,6 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
                     !token.types.includes('PHANTOM_BPT') &&
                     !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
                     (!token.coingeckoTokenId ||
-                        !token.prices.length ||
-                        token.prices[0].timestamp < threeHoursAgo ||
                         networkContext.data.coingecko.excludedTokenAddresses.includes(token.address)),
             )
             .map((token) => token.address);

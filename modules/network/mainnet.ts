@@ -17,6 +17,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const underlyingTokens = {
     USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -25,7 +26,7 @@ const underlyingTokens = {
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
 };
 
-export const mainnetNetworkData: NetworkData = {
+const data: NetworkData = {
     chain: {
         slug: 'ethereum',
         id: 1,
@@ -56,7 +57,7 @@ export const mainnetNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0xa43a7c62d56df036c187e1966c03e2799d8987ed'], // truMatic, has coingecko entry but no price
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -77,7 +78,7 @@ export const mainnetNetworkData: NetworkData = {
     gaugeControllerAddress: '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
     gaugeControllerHelperAddress: '0x8e5698dc4897dc12243c8642e77b4f21349db97c',
     gyro: {
-        config: '0xac89cc9d78bbad7eb3a02601b4d65daa1f908aa6'
+        config: '0xac89cc9d78bbad7eb3a02601b4d65daa1f908aa6',
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
@@ -328,6 +329,13 @@ export const mainnetNetworkData: NetworkData = {
                 path: 'value',
                 isIbYield: true,
             },
+            usdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
+            },
         },
     },
     beefy: {
@@ -360,22 +368,22 @@ export const mainnetNetworkData: NetworkData = {
 };
 
 export const mainnetNetworkConfig: NetworkConfig = {
-    data: mainnetNetworkData,
+    data,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider({ url: mainnetNetworkData.rpcUrl, timeout: 60000 }),
+    provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new IbTokensAprService(
-            mainnetNetworkData.ibAprConfig,
-            mainnetNetworkData.chain.prismaId,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-            mainnetNetworkData.balancer.swapProtocolFeePercentage
+            data.ibAprConfig,
+            data.chain.prismaId,
+            data.balancer.yieldProtocolFeePercentage,
+            data.balancer.swapProtocolFeePercentage,
         ),
-        new PhantomStableAprService(mainnetNetworkData.chain.prismaId, mainnetNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(data.chain.prismaId, data.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(tokenService, [mainnetNetworkData.bal!.address]),
+        new SwapFeeAprService(data.balancer.swapProtocolFeePercentage),
+        new GaugeAprService(tokenService, [data.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, mainnetNetworkData.bal!.address)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
@@ -383,6 +391,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -403,27 +414,27 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(8, 'minutes') : every(4, 'minutes'),
         },
         {
             name: 'update-pool-apr',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(7, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'sync-new-pools-from-subgraph',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(12, 'minutes') : every(8, 'minutes'),
         },
         {
             name: 'sync-tokens-from-pool-tokens',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(7, 'minutes'),
         },
         {
             name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(15, 'minutes') : every(8, 'minutes'),
         },
         {
             name: 'cache-average-block-time',
@@ -431,29 +442,29 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-staking-for-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(15, 'minutes') : every(10, 'minutes'),
         },
         {
             name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(90, 'minutes'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
-            interval: every(30, 'minutes'),
+            interval: every(45, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(20, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(10, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(29, 'minutes') : every(9, 'minutes'),
         },
         {
             name: 'user-sync-staked-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(10, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(31, 'minutes') : every(11, 'minutes'),
         },
         {
             name: 'sync-coingecko-coinids',
@@ -467,15 +478,15 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(75, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(14, 'minutes'),
         },
         {
             name: 'sync-vebal-totalSupply',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
         },
         {
             name: 'sync-vebal-voting-gauges',

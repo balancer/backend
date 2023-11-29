@@ -18,6 +18,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -65,7 +66,7 @@ const optimismNetworkData: NetworkData = {
     },
     protocolToken: 'beets',
     beets: {
-        address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
@@ -76,7 +77,7 @@ const optimismNetworkData: NetworkData = {
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
     },
     gyro: {
-        config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3'
+        config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
@@ -118,6 +119,16 @@ const optimismNetworkData: NetworkData = {
         },
     },
     ibAprConfig: {
+        ankr: {
+            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+            tokens: {
+                ankrETH: {
+                    address: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                    serviceName: 'eth',
+                    isIbYield: true,
+                },
+            },
+        },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/breakdown?_=',
             tokens: {
@@ -264,13 +275,13 @@ export const optimismNetworkConfig: NetworkConfig = {
             optimismNetworkData.balancer.yieldProtocolFeePercentage,
             optimismNetworkData.balancer.swapProtocolFeePercentage,
         ),
-        new PhantomStableAprService(optimismNetworkData.chain.prismaId, optimismNetworkData.balancer.yieldProtocolFeePercentage),
+        new PhantomStableAprService(
+            optimismNetworkData.chain.prismaId,
+            optimismNetworkData.balancer.yieldProtocolFeePercentage,
+        ),
         new BoostedPoolAprService(),
         new SwapFeeAprService(optimismNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(tokenService, [
-            optimismNetworkData.beets!.address,
-            optimismNetworkData.bal!.address,
-        ]),
+        new GaugeAprService(tokenService, [optimismNetworkData.beets!.address, optimismNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
     tokenPriceHandlers: [
@@ -284,6 +295,9 @@ export const optimismNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(optimismNetworkData.subgraphs.balancer, optimismNetworkData.chain.id),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -340,33 +354,29 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(90, 'minutes'),
         },
         {
             name: 'update-lifetime-values-for-all-pools',
-            interval: every(30, 'minutes'),
+            interval: every(50, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(20, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(15, 'seconds'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-user-snapshots',
-            interval: every(1, 'hours'),
         },
         {
             name: 'sync-coingecko-coinids',

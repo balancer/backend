@@ -1,4 +1,4 @@
-import { PrismaTokenWithTypesAndPrices, PrismaTokenWithTypes } from '../../prisma/prisma-types';
+import { PrismaTokenWithTypes } from '../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
 
 export interface TokenPriceHandler {
@@ -9,7 +9,7 @@ export interface TokenPriceHandler {
      * Determines what tokens this price handler is capable of fetching a price for
      * @param tokens tokens needing prices
      */
-    getAcceptedTokens(tokens: PrismaTokenWithTypesAndPrices[]): Promise<string[]>;
+    getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]>;
 
     /**
      * Updates prices for the provided tokens, returning an array of addresses of the tokens

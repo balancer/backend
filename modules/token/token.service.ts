@@ -77,10 +77,7 @@ export class TokenService {
         return tokens.map((token) => ({
             ...token,
             chainId: AllNetworkConfigsKeyedOnChain[token.chain].data.chain.id,
-            //TODO: some linear wrapped tokens are tradable. ie: xBOO
-            tradable: !token.types.find(
-                (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'LINEAR_WRAPPED_TOKEN',
-            ),
+            tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
         }));
     }
 

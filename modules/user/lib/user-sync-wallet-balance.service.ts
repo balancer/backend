@@ -6,7 +6,6 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
-import { balancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { beetsBarService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
@@ -15,9 +14,14 @@ import { networkContext } from '../../network/network-context.service';
 
 export class UserSyncWalletBalanceService {
     constructor() {}
+
+    private get balancerSubgraphService() {
+        return networkContext.services.balancerSubgraphService;
+    }
+
     public async initBalancesForPools() {
         console.log('initBalancesForPools: loading balances, pools, block...');
-        const { block } = await balancerSubgraphService.getMetadata();
+        const { block } = await this.balancerSubgraphService.getMetadata();
 
         let endBlock = block.number;
         console.log(`Loading balances at block ${endBlock}`);
@@ -32,7 +36,7 @@ export class UserSyncWalletBalanceService {
             where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } }, chain: networkContext.chain },
         });
         const poolIdsToInit = pools.map((pool) => pool.id);
-        const shares = await balancerSubgraphService.getAllPoolSharesWithBalance(poolIdsToInit, [
+        const shares = await this.balancerSubgraphService.getAllPoolSharesWithBalance(poolIdsToInit, [
             AddressZero,
             networkContext.data.balancer.vault,
         ]);
@@ -123,25 +127,30 @@ export class UserSyncWalletBalanceService {
         console.log(
             `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools`,
         );
-        for (const poolAddress of poolAddresses) {
-            logPromises.push(
-                networkContext.provider.getLogs({
-                    //ERC20 Transfer topic
-                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-                    fromBlock,
-                    toBlock,
-                    address: poolAddress,
-                }),
+        const chunks = _.chunk(poolAddresses, 400);
+        let i = 1;
+        for (const chunk of chunks) {
+            for (const poolAddress of poolAddresses) {
+                logPromises.push(
+                    networkContext.provider.getLogs({
+                        //ERC20 Transfer topic
+                        topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
+                        fromBlock,
+                        toBlock,
+                        address: poolAddress,
+                    }),
+                );
+            }
+
+            const allResponses = await Promise.all(logPromises);
+            console.log(
+                `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${chunk.length} pools done.`,
             );
-        }
 
-        const allResponses = await Promise.all(logPromises);
-        console.log(
-            `user-sync-wallet-balances-for-all-pools-${networkContext.chainId} getLogs of ${poolAddresses.length} pools done.`,
-        );
-
-        for (const response of allResponses) {
-            events.push(...response);
+            for (const response of allResponses) {
+                events.push(...response);
+            }
+            i++;
         }
 
         const relevantERC20Addresses = poolAddresses;
@@ -222,9 +231,9 @@ export class UserSyncWalletBalanceService {
     }
 
     public async initBalancesForPool(poolId: string) {
-        const { block } = await balancerSubgraphService.getMetadata();
+        const { block } = await this.balancerSubgraphService.getMetadata();
 
-        const shares = await balancerSubgraphService.getAllPoolSharesWithBalance([poolId], [AddressZero]);
+        const shares = await this.balancerSubgraphService.getAllPoolSharesWithBalance([poolId], [AddressZero]);
 
         await prismaBulkExecuteOperations(
             [

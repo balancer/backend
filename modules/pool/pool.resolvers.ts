@@ -3,11 +3,18 @@ import { Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
+import { headerChain } from '../context/header-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id }, context) => {
-            return poolService.getGqlPool(id);
+        poolGetPool: async (parent, { id, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('poolGetPool error: Provide "chain" param');
+            }
+            return poolService.getGqlPool(id, chain);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
@@ -15,26 +22,44 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
-        poolGetPoolFilters: async (parent, {}, context) => {
-            return poolService.getPoolFilters();
-        },
         poolGetSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('poolGetSwaps error: Provide "where.chainIn" param');
+            }
             return poolService.getPoolSwaps(args);
         },
         poolGetBatchSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('poolGetBatchSwaps error: Provide "where.chainIn" param');
+            }
             return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.where?.chainIn && currentChain) {
+                args.where = { ...args.where, chainIn: [currentChain] };
+            } else if (!args.where?.chainIn) {
+                throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
+            }
             return poolService.getPoolJoinExits(args);
-        },
-        poolGetUserSwapVolume: async (parent, args, context) => {
-            return poolService.getPoolUserSwapVolume(args);
         },
         poolGetFeaturedPoolGroups: async (parent, args, context) => {
             return poolService.getFeaturedPoolGroups();
         },
-        poolGetSnapshots: async (parent, { id, range }, context) => {
-            const snapshots = await poolService.getSnapshotsForPool(id, range);
+        poolGetSnapshots: async (parent, { id, chain, range }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('poolGetSnapshots error: Provide "chain" param');
+            }
+            const snapshots = await poolService.getSnapshotsForPool(id, chain, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,
@@ -48,8 +73,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetAllPoolsSnapshots: async (parent, { range }, context) => {
-            const snapshots = await poolService.getSnapshotsForAllPools(range);
+        poolGetAllPoolsSnapshots: async (parent, { chains, range }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('poolGetAllPoolsSnapshots error: Provide "chains" param');
+            }
+            const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
 
             return snapshots.map((snapshot) => ({
                 ...snapshot,
@@ -63,8 +94,14 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetLinearPools: async () => {
-            return poolService.getGqlLinearPools();
+        poolGetLinearPools: async (parent, { chains }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('poolGetLinearPools error: Provide "chains" param');
+            }
+            return poolService.getGqlLinearPools(chains);
         },
     },
     Mutation: {
