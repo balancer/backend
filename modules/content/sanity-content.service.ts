@@ -2,7 +2,7 @@ import { isSameAddress } from '@balancer-labs/sdk';
 import { Prisma, PrismaPoolCategoryType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
-import { ConfigHomeScreen, ContentService, FeaturedPoolMetadata, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import { ConfigHomeScreen, ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 
@@ -328,10 +328,6 @@ export class SanityContentService implements ContentService {
             return data.newsItems;
         }
         throw new Error(`No news items found for chain id ${networkContext.chainId}`);
-    }
-
-    public async getBalancerFeaturedPools(): Promise<FeaturedPoolMetadata[]> {
-        return [];
     }
 }
 

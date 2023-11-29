@@ -3,12 +3,17 @@ import { Prisma } from '@prisma/client';
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
-import { ContentService, FeaturedPoolMetadata, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 
 const POOLS_METADATA_URL = "https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json";
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
+interface FeaturedPoolMetadata {
+    id: string;
+    imageUrl: string;
+    primary: boolean;
+}
 interface WhitelistedTokenList {
     name: string;
     timestamp: string;
@@ -161,11 +166,15 @@ export class GithubContentService implements ContentService {
     }
     async syncPoolContentData(): Promise<void> {}
     async getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]> {
-        return [];
-    }
-    async getBalancerFeaturedPools(): Promise<FeaturedPoolMetadata[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
-        return data;
+        return data.map(({ id, imageUrl, primary }) => ({
+                _key: '',
+                _type: '',
+                id,
+                items: [],
+                icon: imageUrl,
+                title: ''
+        })) as HomeScreenFeaturedPoolGroup[];
     }
     async getNewsItems(): Promise<HomeScreenNewsItem[]> {
         return [];

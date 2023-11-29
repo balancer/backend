@@ -67,22 +67,6 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
-    public async getFeaturedPools(): Promise<GqlFeaturedPool[]> {
-        const poolsMetadata = await networkContext.config.contentService.getBalancerFeaturedPools();
-        const poolIds = poolsMetadata.map((pool) => pool.id);
-
-        const pools = await prisma.prismaPool.findMany({
-            where: { id: {in: poolIds }, chain: networkContext.chain },
-        });
-        
-        return poolsMetadata.map(({ id, imageUrl, primary }) => ({
-            id,
-            imageUrl,
-            primary: Boolean(primary),
-            pool: pools.find((pool) => pool.id === id),
-        })) as GqlFeaturedPool[];
-    }
-
     public async getLinearPools(): Promise<GqlPoolLinear[]> {
         const pools = await prisma.prismaPool.findMany({
             where: { type: 'LINEAR', chain: networkContext.chain },

@@ -21,11 +21,10 @@ extend type Query {
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetUserSwapVolume(first: Int, skip: Int, where: GqlUserSwapVolumeFilter): [GqlPoolUserSwapVolume!]!
-    poolGetFeaturedPoolGroups: [GqlPoolFeaturedPoolGroup!]!
+    poolGetFeaturedPoolGroups(chains: [GqlChain!]!): [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools: [GqlPoolLinear!]!
-    poolGetFeaturedPools: [GqlFeaturedPool!]!
 }
 
 extend type Mutation {
