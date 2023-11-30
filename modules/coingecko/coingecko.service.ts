@@ -74,6 +74,7 @@ interface CoinId {
 */
 const tokensPerInterval = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 10 : 5) : 3;
 const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
+const addressChunkSize = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 180 : 10) : 10;
 
 export class CoingeckoService {
     private readonly baseUrl: string;
@@ -104,8 +105,8 @@ export class CoingeckoService {
      *  Rate limit for the CoinGecko API is 10 calls each second per IP address.
      */
     public async getTokenPrices(addresses: string[]): Promise<TokenPrices> {
-        //max 180 addresses per request because of URI size limit
-        const addressesPerRequest = 180;
+        //max 10 addresses per request because of URI size limit
+        const addressesPerRequest = addressChunkSize;
         try {
             if (addresses.length / addressesPerRequest > 10) throw new Error('Too many requests for rate limit.');
 
