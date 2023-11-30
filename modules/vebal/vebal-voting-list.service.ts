@@ -143,10 +143,6 @@ export class VeBalVotingListService {
         for (const addressChunk of chunks) {
             const { votingGauges, errors } = await this.fetchVotingGauges(addressChunk);
             syncErrors.push(...errors);
-
-            if (addressChunk.includes('0xd639e7fae7a8d0233d416bfd5da2ae4f917d2e77')) {
-                console.log(`found`);
-            }
             /*
                 We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
             */
