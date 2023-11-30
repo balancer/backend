@@ -141,12 +141,12 @@ export class VeBalVotingListService {
 
         const syncErrors: Error[] = [];
         for (const addressChunk of chunks) {
-            const { votingGauges, errors } = await this.fetchVotingGauges(addressChunk);
+            const { filteredGauges, errors } = await this.fetchVotingGauges(addressChunk);
             syncErrors.push(...errors);
             /*
                 We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
             */
-            const cleanVotingGauges = votingGauges.filter(
+            const cleanVotingGauges = filteredGauges.filter(
                 (gauge) => !specialVotingGaugeAddresses.includes(gauge.gaugeAddress),
             );
 
@@ -167,16 +167,23 @@ export class VeBalVotingListService {
 
         const votingGauges = this.votingGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
-        try {
-            this.throwIfMissingVotingGaugeData(votingGauges);
-        } catch (error) {
-            errors.push(error as Error);
-        }
+        const gaugesWithMissingData = this.returnGaugesWithMissingData(votingGauges);
 
-        return { votingGauges, errors };
+        const filteredGauges = votingGauges.filter(
+            (gauge) => !gaugesWithMissingData.map((gauge) => gauge.gaugeAddress).includes(gauge.gaugeAddress),
+        );
+
+        if (gaugesWithMissingData.length > 0) {
+            const errorMessage =
+                'Detected active voting gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
+                JSON.stringify(gaugesWithMissingData);
+            console.error(errorMessage);
+            errors.push(new Error(errorMessage));
+        }
+        return { filteredGauges, errors };
     }
 
-    throwIfMissingVotingGaugeData(votingGauges: VotingGauge[]) {
+    returnGaugesWithMissingData(votingGauges: VotingGauge[]) {
         const gaugesWithMissingData = votingGauges
             .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
             .filter((gauge) => !gauge.isInSubgraph)
@@ -184,13 +191,7 @@ export class VeBalVotingListService {
             // Ignore old Vebal gauge address
             .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
 
-        if (gaugesWithMissingData.length > 0) {
-            const errorMessage =
-                'Detected active voting gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
-                JSON.stringify(gaugesWithMissingData);
-            console.error(errorMessage);
-            throw new Error(errorMessage);
-        }
+        return gaugesWithMissingData;
     }
 }
 
