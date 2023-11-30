@@ -180,6 +180,7 @@ export class VeBalVotingListService {
         const gaugesWithMissingData = votingGauges
             .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
             .filter((gauge) => !gauge.isInSubgraph)
+            .filter((gauge) => gauge.relativeWeight > 0)
             // Ignore old Vebal gauge address
             .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
 
