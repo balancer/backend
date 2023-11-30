@@ -100,9 +100,13 @@ export class VeBalVotingListService {
     }
 
     public async getValidVotingGauges() {
+        // A gauge should be included in the voting list when:
+        //  - it is alive (not killed)
+        //  - it is killed and has valid votes (the users should be able to reallocate votes)
         const gaugesWithStaking = await prisma.prismaVotingGauge.findMany({
             where: {
                 stakingGaugeId: { not: null },
+                OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }],
             },
             select: {
                 id: true,
@@ -139,7 +143,6 @@ export class VeBalVotingListService {
         for (const addressChunk of chunks) {
             const { votingGauges, errors } = await this.fetchVotingGauges(addressChunk);
             syncErrors.push(...errors);
-
             /*
                 We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
             */
@@ -177,7 +180,6 @@ export class VeBalVotingListService {
         const gaugesWithMissingData = votingGauges
             .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
             .filter((gauge) => !gauge.isInSubgraph)
-            .filter(this.votingGauges.isValidForVotingList)
             // Ignore old Vebal gauge address
             .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
 
