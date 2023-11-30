@@ -13,7 +13,10 @@ export const schema = {
     SENTRY_DSN: String,
     SENTRY_AUTH_TOKEN: String,
     AWS_REGION: String,
-    PROTOCOL: String,
+    PROTOCOL: {
+        optional: true,
+        type: String,
+    },
     INFURA_API_KEY: {
         optional: true,
         type: String,
