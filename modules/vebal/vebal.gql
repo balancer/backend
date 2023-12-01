@@ -20,7 +20,7 @@ type GqlVotingPool {
     chain: GqlChain!
     symbol: String!
     address: Bytes!
-    type: GqlPoolMinimalType!
+    type: GqlPoolType!
 
     tokens: [GqlVotingGaugeToken!]!
 
