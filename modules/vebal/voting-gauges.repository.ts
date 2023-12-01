@@ -138,7 +138,6 @@ export class VotingGaugesRepository {
     }
 
     async saveVotingGauge(gauge: VotingGauge) {
-        if (!this.isValidForVotingList(gauge)) return;
         try {
             const upsertFields = {
                 id: gauge.gaugeAddress,

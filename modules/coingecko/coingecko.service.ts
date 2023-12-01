@@ -72,8 +72,10 @@ interface CoinId {
    that happen.
 
 */
-const tokensPerInterval = env.COINGECKO_API_KEY ? ((env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? 10 : 5) : 3;
-const requestRateLimiter = new RateLimiter({ tokensPerInterval, interval: 'minute' });
+const tokensPerMinute = env.COINGECKO_API_KEY ? 10 : 3;
+const requestRateLimiter = new RateLimiter({ tokensPerInterval: tokensPerMinute, interval: 'minute' });
+//max 10 addresses per request because of URI size limit, pro is max 180 because of URI limit
+const addressChunkSize = env.COINGECKO_API_KEY ? 180 : 20;
 
 export class CoingeckoService {
     private readonly baseUrl: string;
@@ -104,10 +106,10 @@ export class CoingeckoService {
      *  Rate limit for the CoinGecko API is 10 calls each second per IP address.
      */
     public async getTokenPrices(addresses: string[]): Promise<TokenPrices> {
-        //max 180 addresses per request because of URI size limit
-        const addressesPerRequest = 180;
+        const addressesPerRequest = addressChunkSize;
         try {
-            if (addresses.length / addressesPerRequest > 10) throw new Error('Too many requests for rate limit.');
+            // if (addresses.length / addressesPerRequest > tokensPerMinute)
+            //     throw new Error('Too many requests for rate limit.');
 
             const tokenDefinitions = await tokenService.getTokenDefinitions([networkContext.chain]);
             const mapped = addresses.map((address) => this.getMappedTokenDetails(address, tokenDefinitions));
