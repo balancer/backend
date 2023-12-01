@@ -13,6 +13,7 @@ import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
 import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
+import FxPoolAbi from '../abi/FxPool.json';
 import { JsonFragment } from '@ethersproject/abi';
 
 interface PoolInput {
@@ -60,6 +61,7 @@ const abi: JsonFragment[] = Object.values(
             ...StablePhantomPoolAbi,
             ...MetaStablePoolAbi,
             ...ComposableStablePoolAbi,
+            ...FxPoolAbi,
             //...WeightedPoolV2Abi,
         ].map((row) => [row.name, row]),
     ),
