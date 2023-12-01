@@ -39,6 +39,8 @@ import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
+import { parseUnits } from 'ethers/lib/utils';
+import { formatFixed } from '@ethersproject/bignumber';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
@@ -61,14 +63,29 @@ export class PoolGqlLoaderService {
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         // only include wallet and staked balances if the query requests it
         // this makes sure that we don't load ALL user balances when we don't filter on userAddress
-
         if (args.where?.userAddress) {
             const pools = await prisma.prismaPool.findMany({
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
                     ...prismaPoolMinimal.include,
-                    userWalletBalances: true,
-                    userStakedBalances: true,
+                    userWalletBalances: {
+                        where: {
+                            userAddress: {
+                                equals: args.where?.userAddress,
+                                mode: 'insensitive' as const,
+                            },
+                            balanceNum: { gt: 0 },
+                        },
+                    },
+                    userStakedBalances: {
+                        where: {
+                            userAddress: {
+                                equals: args.where?.userAddress,
+                                mode: 'insensitive' as const,
+                            },
+                            balanceNum: { gt: 0 },
+                        },
+                    },
                 },
             });
 
@@ -596,8 +613,15 @@ export class PoolGqlLoaderService {
     private getUserBalance(
         userWalletBalances: PrismaUserWalletBalance[],
         userStakedBalances: PrismaUserStakedBalance[],
-    ): GqlPoolUserBalance | null {
-        throw new Error('Method not implemented.');
+    ): GqlPoolUserBalance {
+        const stakedNum = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
+        const walletNum = parseUnits(userStakedBalances.at(0)?.balance || '0', 18);
+
+        return {
+            walletBalance: userWalletBalances.at(0)?.balance || '0',
+            stakedBalance: userStakedBalances.at(0)?.balance || '0',
+            totalBalance: formatFixed(stakedNum.add(walletNum), 18),
+        };
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {
