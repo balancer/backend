@@ -66,7 +66,7 @@ export function configureWorkerRoutes(app: Express) {
         const job = req.body as { name: string; chain: string; run?: boolean };
 
         // Worker only works when enabled
-        if (process.env.JOBS_ENABLED !== 'true' && Boolean(job.run) !== true) {
+        if (process.env.JOBS_ENABLED !== 'true') {
             res.sendStatus(200);
             return;
         }
