@@ -1,11 +1,10 @@
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
-import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { Cache } from 'memory-cache';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
-import { AllNetworkConfigs } from '../network/network-config';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
@@ -24,12 +23,12 @@ export class ProtocolService {
 
     constructor() {}
 
-    public async getAggregatedMetrics(chainIds: string[]): Promise<GqlProtocolMetricsAggregated> {
+    public async getAggregatedMetrics(chains: Chain[]): Promise<GqlProtocolMetricsAggregated> {
         const chainMetrics: GqlProtocolMetricsChain[] = [];
 
-        for (const chainId of chainIds) {
+        for (const chain of chains) {
             // this should resolve quickly if all chains are cached, possible to get slammed by an unlucky query though
-            const metrics = await this.getMetrics(chainId);
+            const metrics = await this.getMetrics(chain);
 
             chainMetrics.push(metrics);
         }
@@ -60,22 +59,22 @@ export class ProtocolService {
         };
     }
 
-    public async getMetrics(chainId: string): Promise<GqlProtocolMetricsChain> {
-        const cached = this.cache.get(`${PROTOCOL_METRICS_CACHE_KEY}:${chainId}`);
+    public async getMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
+        const cached = this.cache.get(`${PROTOCOL_METRICS_CACHE_KEY}:${chain}`);
 
         if (cached) {
             return cached;
         }
 
-        return this.cacheProtocolMetrics(chainId, AllNetworkConfigs[chainId].data.chain.prismaId);
+        return this.cacheProtocolMetrics(chain);
     }
 
-    public async cacheProtocolMetrics(chainId: string, chain: Chain): Promise<GqlProtocolMetricsChain> {
+    public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
         const startOfDay = moment().startOf('day').unix();
         const sevenDayRange = moment().startOf('day').subtract(7, 'days').unix();
 
-        const client = new GraphQLClient(AllNetworkConfigs[chainId].data.subgraphs.balancer);
+        const client = new GraphQLClient(AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer);
         const subgraphClient = getSdk(client);
 
         const { balancers } = await subgraphClient.BalancerProtocolData({});
@@ -125,10 +124,10 @@ export class ProtocolService {
             },
         });
 
-        const balancerV1Tvl = await this.getBalancerV1Tvl(chainId);
+        const balancerV1Tvl = await this.getBalancerV1Tvl(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
 
         const protocolData = {
-            chainId,
+            chainId: `${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`,
             totalLiquidity: `${totalLiquidity + balancerV1Tvl}`,
             totalSwapFee,
             totalSwapVolume,
@@ -141,7 +140,7 @@ export class ProtocolService {
             numLiquidityProviders: `${holdersQueryResponse._sum.holdersCount || '0'}`,
         };
 
-        this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chainId}`, protocolData, 60 * 30 * 1000);
+        this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chain}`, protocolData, 60 * 30 * 1000);
 
         return protocolData;
     }

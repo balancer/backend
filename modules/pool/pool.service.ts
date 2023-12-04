@@ -125,11 +125,7 @@ export class PoolService {
 
         const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
 
-        this.cache.put(
-            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
-            featuredPoolGroups,
-            60 * 5 * 1000,
-        );
+        this.cache.put(`${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`, featuredPoolGroups, 60 * 5 * 1000);
 
         return featuredPoolGroups;
     }
@@ -359,13 +355,21 @@ export class PoolService {
 
     public async syncPoolVersionForAllPools() {
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+
         for (const subgraphPool of subgraphPools) {
-            await prisma.prismaPool.update({
-                where: { id_chain: { chain: this.chain, id: subgraphPool.id } },
-                data: {
-                    version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
-                },
-            });
+            try {
+                await prisma.prismaPool.update({
+                    where: { id_chain: { chain: this.chain, id: subgraphPool.id } },
+                    data: {
+                        version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
+                    },
+                });
+            } catch (e: any) {
+                // Some pools are filtered from the DB, like test pools,
+                // so we just ignore them without breaking the loop
+                const error = e.meta ? e.meta.cause : e;
+                console.error(error, 'Network', networkContext.chain, 'Pool ID: ', subgraphPool.id);
+            }
         }
     }
 
@@ -490,7 +494,7 @@ export class PoolService {
 
                     if (gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: this.chain, id: gauge.votingGauge.id },
+                            where: { chain: this.chain, id: { in: gauge.votingGauge.map((gauge) => gauge.id) } },
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({
