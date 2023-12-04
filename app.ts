@@ -28,6 +28,7 @@ async function startServer() {
         // tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
+        ignoreErrors: [/.*error: Provide.*chain.*param/],
         integrations: [
             // new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
