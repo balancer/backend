@@ -1,5 +1,6 @@
 import express from 'express';
 import * as Sentry from '@sentry/node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 import { env } from '../app/env';
 import { configureWorkerRoutes } from './job-handlers';
 
@@ -13,6 +14,7 @@ export async function startWorker() {
         integrations: [
             // new Tracing.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
+            new ProfilingIntegration(),
         ],
         tracesSampleRate: env.DEPLOYMENT_ENV === 'main' ? 0.2 : 1.0,
     });
