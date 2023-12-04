@@ -83,7 +83,6 @@ const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
     } else if (
         type === 'COMPOSABLE_STABLE' ||
         (type === 'WEIGHTED' && version > 1) ||
-        (type === 'GYROE' && version > 1) ||
         (type === 'UNKNOWN' && version > 1)
     ) {
         return 'getActualSupply';
