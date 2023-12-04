@@ -423,7 +423,7 @@ model PrismaPoolStakingGauge {
     chain               Chain
 
     gaugeAddress        String
-    votingGauge         PrismaVotingGauge?
+    votingGauge         PrismaVotingGauge[]
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)
