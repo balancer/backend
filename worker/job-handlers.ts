@@ -12,6 +12,8 @@ import { networkContext } from '../modules/network/network-context.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
+import moment from 'moment';
+import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 
 const runningJobs: Set<string> = new Set();
 
@@ -31,6 +33,7 @@ async function runIfNotAlreadyRunning(
         res.sendStatus(200);
         return;
     }
+    const startJobTime = moment();
     try {
         runningJobs.add(jobId);
 
@@ -44,13 +47,17 @@ async function runIfNotAlreadyRunning(
 
         await fn();
 
+        const durationSuccess = moment.duration(moment().diff(startJobTime)).asSeconds();
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-done`);
+            await cronsDurationMetricPublisher.publish(`${jobId}-done`, durationSuccess);
         }
         console.log(`Successful job ${jobId}-done`);
     } catch (error) {
+        const durationError = moment.duration(moment().diff(startJobTime)).asSeconds();
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-error`);
+            await cronsDurationMetricPublisher.publish(`${jobId}-error`, durationError);
         }
         console.log(`Error job ${jobId}-error`, error);
         next(error);
