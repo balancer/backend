@@ -287,9 +287,8 @@ export class PoolUsdDataService {
             const lifetimeVolume = Math.min(parseFloat(pool.totalSwapVolume), max);
             const lifetimeSwapFees = Math.min(parseFloat(pool.totalSwapFee), max);
 
-            // updates.push(
-            try {
-                await prisma.prismaPoolDynamicData.update({
+            updates.push(
+                prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: this.chain } },
                     data: {
                         lifetimeVolume: lifetimeVolume,
@@ -297,56 +296,52 @@ export class PoolUsdDataService {
                         holdersCount: parseInt(pool.holdersCount) + (staked?._count.userAddress || 0),
                         swapsCount: parseInt(pool.swapsCount),
                     },
-                });
-            } catch (e) {
-                console.error(`Error updating lifetime values for pool ${pool.id} (${pool.name})`);
-                throw e;
-            }
-            // );
+                }),
+            );
 
             const snapshots = await prisma.prismaPoolSnapshot.findMany({
                 where: { poolId: pool.id, chain: this.chain },
             });
 
-            // if (snapshots.length > 0) {
-            //     const sharePriceAth = _.orderBy(snapshots, 'sharePrice', 'desc')[0];
-            //     const sharePriceAtl = _.orderBy(snapshots, 'sharePrice', 'asc')[0];
-            //     const totalLiquidityAth = _.orderBy(snapshots, 'totalLiquidity', 'desc')[0];
-            //     const totalLiquidityAtl = _.orderBy(snapshots, 'totalLiquidity', 'asc')[0];
-            //     const volume24hAth = _.orderBy(snapshots, 'volume24h', 'desc')[0];
-            //     const volume24hAtl = _.orderBy(snapshots, 'volume24h', 'asc')[0];
-            //     const fees24hAth = _.orderBy(snapshots, 'fees24h', 'desc')[0];
-            //     const fees24hAtl = _.orderBy(snapshots, 'fees24h', 'asc')[0];
+            if (snapshots.length > 0) {
+                const sharePriceAth = _.orderBy(snapshots, 'sharePrice', 'desc')[0];
+                const sharePriceAtl = _.orderBy(snapshots, 'sharePrice', 'asc')[0];
+                const totalLiquidityAth = _.orderBy(snapshots, 'totalLiquidity', 'desc')[0];
+                const totalLiquidityAtl = _.orderBy(snapshots, 'totalLiquidity', 'asc')[0];
+                const volume24hAth = _.orderBy(snapshots, 'volume24h', 'desc')[0];
+                const volume24hAtl = _.orderBy(snapshots, 'volume24h', 'asc')[0];
+                const fees24hAth = _.orderBy(snapshots, 'fees24h', 'desc')[0];
+                const fees24hAtl = _.orderBy(snapshots, 'fees24h', 'asc')[0];
 
-            //     updates.push(
-            //         prisma.prismaPoolDynamicData.update({
-            //             where: { id_chain: { id: pool.id, chain: this.chain } },
-            //             data: {
-            //                 sharePriceAth: sharePriceAth.sharePrice,
-            //                 sharePriceAthTimestamp: sharePriceAth.timestamp,
-            //                 sharePriceAtl: sharePriceAtl.sharePrice,
-            //                 sharePriceAtlTimestamp: sharePriceAtl.timestamp,
+                updates.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: pool.id, chain: this.chain } },
+                        data: {
+                            sharePriceAth: sharePriceAth.sharePrice,
+                            sharePriceAthTimestamp: sharePriceAth.timestamp,
+                            sharePriceAtl: sharePriceAtl.sharePrice,
+                            sharePriceAtlTimestamp: sharePriceAtl.timestamp,
 
-            //                 totalLiquidityAth: totalLiquidityAth.totalLiquidity,
-            //                 totalLiquidityAthTimestamp: totalLiquidityAth.timestamp,
-            //                 totalLiquidityAtl: totalLiquidityAtl.totalLiquidity,
-            //                 totalLiquidityAtlTimestamp: totalLiquidityAtl.timestamp,
+                            totalLiquidityAth: totalLiquidityAth.totalLiquidity,
+                            totalLiquidityAthTimestamp: totalLiquidityAth.timestamp,
+                            totalLiquidityAtl: totalLiquidityAtl.totalLiquidity,
+                            totalLiquidityAtlTimestamp: totalLiquidityAtl.timestamp,
 
-            //                 volume24hAth: volume24hAth.volume24h,
-            //                 volume24hAthTimestamp: volume24hAth.timestamp,
-            //                 volume24hAtl: volume24hAtl.volume24h,
-            //                 volume24hAtlTimestamp: volume24hAtl.timestamp,
+                            volume24hAth: volume24hAth.volume24h,
+                            volume24hAthTimestamp: volume24hAth.timestamp,
+                            volume24hAtl: volume24hAtl.volume24h,
+                            volume24hAtlTimestamp: volume24hAtl.timestamp,
 
-            //                 fees24hAth: fees24hAth.fees24h,
-            //                 fees24hAthTimestamp: fees24hAth.timestamp,
-            //                 fees24hAtl: fees24hAtl.fees24h,
-            //                 fees24hAtlTimestamp: fees24hAtl.timestamp,
-            //             },
-            //         }),
-            //     );
-            // }
+                            fees24hAth: fees24hAth.fees24h,
+                            fees24hAthTimestamp: fees24hAth.timestamp,
+                            fees24hAtl: fees24hAtl.fees24h,
+                            fees24hAtlTimestamp: fees24hAtl.timestamp,
+                        },
+                    }),
+                );
+            }
         }
 
-        // await prismaBulkExecuteOperations(updates);
+        await prismaBulkExecuteOperations(updates);
     }
 }
