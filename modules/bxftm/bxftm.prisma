@@ -1,0 +1,7 @@
+model PrismaBxFtmWithdrawalRequest {
+    id                 String              @id
+
+    user               String
+    amount             String
+    isWithdrawn        Boolean
+}

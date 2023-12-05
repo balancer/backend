@@ -1,0 +1,28 @@
+query WithdrawalRequests(
+    $skip: Int
+    $first: Int
+    $orderBy: WithdrawalRequest_orderBy
+    $orderDirection: OrderDirection
+    $where: WithdrawalRequest_filter
+    $block: Block_height
+) {
+    withdrawalRequests(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...WithdrawalRequest
+    }
+}
+
+fragment WithdrawalRequest on WithdrawalRequest {
+    id
+    amount
+    isWithdrawn
+    user {
+        id
+    }
+}

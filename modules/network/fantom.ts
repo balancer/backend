@@ -27,6 +27,7 @@ import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { BxftmSubgraphService } from '../subgraphs/bxftm-subgraph/bxftm.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -45,6 +46,7 @@ const fantomNetworkData: NetworkData = {
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
+        bxftm: 'https://api.thegraph.com/subgraphs/name/franzns/bxftm',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -347,7 +349,11 @@ export const fantomNetworkConfig: NetworkConfig = {
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(fantomNetworkData.subgraphs.balancer, fantomNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            fantomNetworkData.subgraphs.balancer,
+            fantomNetworkData.chain.id,
+        ),
+        bxFtmSubgraphService: new BxftmSubgraphService(fantomNetworkData.subgraphs.bxftm!),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 

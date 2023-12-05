@@ -44,6 +44,14 @@ model PrismaFbeets {
     ratio               String
 }
 
+model PrismaBxFtmWithdrawalRequest {
+    id                 String              @id
+
+    user               String
+    amount             String
+    isWithdrawn        Boolean
+}
+
 model PrismaPool {
     @@id([id, chain])
     @@unique([address, chain])

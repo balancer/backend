@@ -1,0 +1,14 @@
+extend type Query {
+    bxftmGetWithdrawalRequests(user: String!): [GqlBxFtmWithdrawalRequests!]!
+}
+
+extend type Mutation {
+    bxFtmSyncWithdrawalRequests: String!
+}
+
+type GqlBxFtmWithdrawalRequests {
+    id: String!
+    user: String!
+    amount: AmountHumanReadable!
+    isWithdrawn: Boolean!
+}

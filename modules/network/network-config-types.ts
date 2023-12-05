@@ -6,8 +6,9 @@ import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
-import { AaveAprConfig, IbAprConfig } from './apr-config-types';
+import { IbAprConfig } from './apr-config-types';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { BxftmSubgraphService } from '../subgraphs/bxftm-subgraph/bxftm.service';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -23,6 +24,7 @@ export interface NetworkConfig {
 
 interface NetworkServices {
     balancerSubgraphService: BalancerSubgraphService;
+    bxFtmSubgraphService?: BxftmSubgraphService;
 }
 
 export interface WorkerJob {
@@ -69,6 +71,7 @@ export interface NetworkData {
         blocks: string;
         masterchef?: string;
         reliquary?: string;
+        bxftm?: string;
         beetsBar?: string;
         gauge?: string;
         veBalLocks?: string;
