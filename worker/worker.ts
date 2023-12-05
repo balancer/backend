@@ -16,7 +16,7 @@ export async function startWorker() {
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
         ],
-        tracesSampleRate: env.DEPLOYMENT_ENV === 'main' ? 0.1 : 1.0,
+        tracesSampleRate: 0.2,
         profilesSampleRate: 1.0,
     });
 
