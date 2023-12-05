@@ -27,6 +27,7 @@ export class BxFtmService {
                 user: request.user.id,
                 amount: request.amount,
                 isWithdrawn: request.isWithdrawn,
+                requestTimestamp: request.requestTime,
             };
             operations.push(
                 prisma.prismaBxFtmWithdrawalRequest.upsert({

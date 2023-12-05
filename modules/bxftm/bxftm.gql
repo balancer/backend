@@ -1,14 +1,23 @@
 extend type Query {
     bxftmGetWithdrawalRequests(user: String!): [GqlBxFtmWithdrawalRequests!]!
+    bxFtmGetStakingData: GqlBxFtmStakingData!
 }
 
 extend type Mutation {
     bxFtmSyncWithdrawalRequests: String!
+    bxFtmSyncStakingData: String!
+}
+
+type GqlBxFtmStakingData {
+    totalAmountStaked: AmountHumanReadable!
+    totalAmountInPool: AmountHumanReadable!
+    numberOfVaults: Int!
 }
 
 type GqlBxFtmWithdrawalRequests {
     id: String!
     user: String!
     amount: AmountHumanReadable!
+    requestTimestamp: Int!
     isWithdrawn: Boolean!
 }

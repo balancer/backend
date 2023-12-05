@@ -45,11 +45,12 @@ model PrismaFbeets {
 }
 
 model PrismaBxFtmWithdrawalRequest {
-    id                 String              @id
+    id                      String              @id
 
-    user               String
-    amount             String
-    isWithdrawn        Boolean
+    user                    String
+    amount                  String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
 }
 
 model PrismaPool {
