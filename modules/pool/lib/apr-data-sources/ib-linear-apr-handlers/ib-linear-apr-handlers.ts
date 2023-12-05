@@ -7,6 +7,7 @@ const sourceToHandler = {
     ankr: sources.AnkrAprHandler,
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
+    bxftm: sources.BxFtmAprHandler,
     euler: sources.EulerAprHandler,
     gearbox: sources.GearboxAprHandler,
     idle: sources.IdleAprHandler,
@@ -18,7 +19,7 @@ const sourceToHandler = {
     tranchess: sources.TranchessAprHandler,
     yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
-}
+};
 
 export class IbLinearAprHandlers {
     private handlers: AprHandler[] = [];
@@ -43,17 +44,18 @@ export class IbLinearAprHandlers {
                     handlers.push(new Handler(nestedConfig as any));
                 }
             } else {
+                console.log(source);
                 handlers.push(new Handler(config));
             }
         }
 
         // Add handlers from self-configured sources
         Object.values(sources as unknown as any[])
-            .filter((source): source is { chains: Chain[], Handler: AprHandlerConstructor }  => 'chains' in source)
+            .filter((source): source is { chains: Chain[]; Handler: AprHandlerConstructor } => 'chains' in source)
             .filter((source) => this.chain && source.chains.includes(this.chain))
             .forEach((source) => {
                 handlers.push(new source.Handler());
-        });
+            });
 
         return handlers;
     }
@@ -61,11 +63,11 @@ export class IbLinearAprHandlers {
     async fetchAprsFromAllHandlers(): Promise<TokenApr[]> {
         let aprs: TokenApr[] = this.fixedAprTokens
             ? Object.values(this.fixedAprTokens).map(({ address, apr, isIbYield, group }) => ({
-                apr,
-                address,
-                isIbYield: isIbYield ?? false,
-                group
-            }))
+                  apr,
+                  address,
+                  isIbYield: isIbYield ?? false,
+                  group,
+              }))
             : [];
 
         const results = await Promise.allSettled(this.handlers.map((handler) => handler.getAprs(this.chain)));
@@ -77,7 +79,7 @@ export class IbLinearAprHandlers {
                         apr,
                         address,
                         isIbYield,
-                        group
+                        group,
                     })),
                 );
             } else {
@@ -99,9 +101,9 @@ export interface AprHandler {
         [tokenAddress: string]: {
             /** Defined as float, eg: 0.01 is 1% */
             apr: number;
-            isIbYield: boolean
+            isIbYield: boolean;
             group?: string;
-        }
+        };
     }>;
 }
 

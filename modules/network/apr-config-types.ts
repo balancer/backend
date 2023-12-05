@@ -3,6 +3,7 @@ export interface IbAprConfig {
     ankr?: AnkrAprConfig;
     bloom?: BloomAprConfig;
     beefy?: BeefyAprConfig;
+    bxftm?: BxFtmAprConfig;
     euler?: EulerAprConfig;
     gearbox?: GearBoxAprConfig;
     idle?: IdleAprConfig;
@@ -63,6 +64,15 @@ export interface BloomAprConfig {
             address: string;
             feedAddress: string;
             isIbYield?: boolean;
+        };
+    };
+}
+
+export interface BxFtmAprConfig {
+    tokens: {
+        [underlyingAssetName: string]: {
+            address: string;
+            ftmStakingAddress: string;
         };
     };
 }
