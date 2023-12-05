@@ -17,6 +17,7 @@ export async function startWorker() {
             new ProfilingIntegration(),
         ],
         tracesSampleRate: env.DEPLOYMENT_ENV === 'main' ? 0.2 : 1.0,
+        profilesSampleRate: 1.0,
     });
 
     app.use(Sentry.Handlers.requestHandler());
