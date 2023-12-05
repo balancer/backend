@@ -6,3 +6,11 @@ model PrismaBxFtmWithdrawalRequest {
     requestTimestamp        Int
     isWithdrawn             Boolean
 }
+
+model PrismaBxFtmStakingData {
+    id                      String              @id
+    totalFtm                String
+    totalFtmStaked          String
+    totalFtmInPool          String
+    numberOfVaults          Int
+}

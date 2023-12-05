@@ -8,7 +8,9 @@ extend type Mutation {
     bxFtmSyncStakingData: String!
 }
 
+# TODO provide more info such as how much is staked on which validator
 type GqlBxFtmStakingData {
+    totalAmount: AmountHumanReadable!
     totalAmountStaked: AmountHumanReadable!
     totalAmountInPool: AmountHumanReadable!
     numberOfVaults: Int!

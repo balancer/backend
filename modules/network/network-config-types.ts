@@ -92,6 +92,10 @@ export interface NetworkData {
         poolId: string;
         poolAddress: string;
     };
+    bxFtm?: {
+        stakingContractAddress: string;
+        bxFtmAddress: string;
+    };
     bal?: {
         address: string;
     };

@@ -110,6 +110,10 @@ const fantomNetworkData: NetworkData = {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
+    bxFtm: {
+        stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+        bxFtmAddress: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+    },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
         farmId: '22',

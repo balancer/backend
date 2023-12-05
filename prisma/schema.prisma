@@ -53,6 +53,14 @@ model PrismaBxFtmWithdrawalRequest {
     isWithdrawn             Boolean
 }
 
+model PrismaBxFtmStakingData {
+    id                      String              @id
+    totalFtm                String
+    totalFtmStaked          String
+    totalFtmInPool          String
+    numberOfVaults          Int
+}
+
 model PrismaPool {
     @@id([id, chain])
     @@unique([address, chain])
