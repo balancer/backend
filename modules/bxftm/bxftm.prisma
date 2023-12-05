@@ -1,11 +1,3 @@
-model PrismaBxFtmWithdrawalRequest {
-    id                      String              @id
-
-    user                    String
-    amount                  String
-    requestTimestamp        Int
-    isWithdrawn             Boolean
-}
 
 model PrismaBxFtmStakingData {
     id                      String              @id
@@ -13,4 +5,20 @@ model PrismaBxFtmStakingData {
     totalFtmStaked          String
     totalFtmInPool          String
     numberOfVaults          Int
+
+    maxDepositLimit         String
+    minDepositLimit         String
+
+    undelegatePaused        Boolean
+    withdrawPaused          Boolean
+    maintenancePaused       Boolean
+}
+
+model PrismaBxFtmWithdrawalRequest {
+    id                      String              @id
+
+    user                    String
+    amount                  String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
 }

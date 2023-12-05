@@ -34,6 +34,11 @@ export class BxFtmService {
             numberOfVaults: stakingData.numberOfVaults,
             totalAmountStaked: stakingData.totalFtmStaked,
             totalAmount: stakingData.totalFtm,
+            maxDepositLimit: stakingData.maxDepositLimit,
+            minDepositLimit: stakingData.minDepositLimit,
+            maintenancePaused: stakingData.maintenancePaused,
+            undelegatePaused: stakingData.undelegatePaused,
+            withdrawPaused: stakingData.withdrawPaused,
         };
     }
 
@@ -42,12 +47,22 @@ export class BxFtmService {
         multicaller.call('currentVaultCount', this.stakingContractAddress, 'currentVaultCount');
         multicaller.call('poolBalance', this.stakingContractAddress, 'getPoolBalance');
         multicaller.call('totalFtm', this.stakingContractAddress, 'totalFTMWorth');
+        multicaller.call('maxDeposit', this.stakingContractAddress, 'maxDeposit');
+        multicaller.call('minDeposit', this.stakingContractAddress, 'minDeposit');
+        multicaller.call('maintenancePaused', this.stakingContractAddress, 'maintenancePaused');
+        multicaller.call('undelegatePaused', this.stakingContractAddress, 'undelegatePaused');
+        multicaller.call('withdrawPaused', this.stakingContractAddress, 'withdrawPaused');
 
         const result = await multicaller.execute();
 
         const vaultCount = result['currentVaultCount'] as BigNumber;
         const poolBalance = result['poolBalance'] as BigNumber;
         const totalFtm = result['totalFtm'] as BigNumber;
+        const maxDeposit = result['maxDeposit'] as BigNumber;
+        const minDeposit = result['minDeposit'] as BigNumber;
+        const maintenancePaused = result['maintenancePaused'] as boolean;
+        const undelegatePaused = result['undelegatePaused'] as boolean;
+        const withdrawPaused = result['withdrawPaused'] as boolean;
 
         const stakingData = {
             id: this.stakingContractAddress,
@@ -55,6 +70,11 @@ export class BxFtmService {
             totalFtmInPool: formatFixed(poolBalance.toString(), 18),
             numberOfVaults: parseFloat(vaultCount.toString()),
             totalFtm: formatFixed(totalFtm.toString(), 18),
+            maxDepositLimit: formatFixed(maxDeposit.toString(), 18),
+            minDepositLimit: formatFixed(minDeposit.toString(), 18),
+            maintenancePaused: maintenancePaused,
+            undelegatePaused: undelegatePaused,
+            withdrawPaused: withdrawPaused,
         };
 
         await prisma.prismaBxFtmStakingData.upsert({

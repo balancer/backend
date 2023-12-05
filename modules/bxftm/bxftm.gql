@@ -14,6 +14,11 @@ type GqlBxFtmStakingData {
     totalAmountStaked: AmountHumanReadable!
     totalAmountInPool: AmountHumanReadable!
     numberOfVaults: Int!
+    undelegatePaused: Boolean!
+    withdrawPaused: Boolean!
+    maintenancePaused: Boolean!
+    minDepositLimit: BigInt!
+    maxDepositLimit: BigInt!
 }
 
 type GqlBxFtmWithdrawalRequests {
