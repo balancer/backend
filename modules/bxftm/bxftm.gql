@@ -19,6 +19,7 @@ type GqlBxFtmStakingData {
     maintenancePaused: Boolean!
     minDepositLimit: BigInt!
     maxDepositLimit: BigInt!
+    apr: String!
 }
 
 type GqlBxFtmWithdrawalRequests {

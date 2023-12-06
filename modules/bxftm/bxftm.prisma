@@ -5,6 +5,7 @@ model PrismaBxFtmStakingData {
     totalFtmStaked          String
     totalFtmInPool          String
     numberOfVaults          Int
+    apr                     String
 
     maxDepositLimit         String
     minDepositLimit         String

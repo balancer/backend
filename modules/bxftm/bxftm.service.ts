@@ -6,9 +6,10 @@ import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { networkContext } from '../network/network-context.service';
 import { Multicaller3 } from '../web3/multicaller3';
 import FTMStaking from './abi/FTMStaking.json';
-import { BigNumber, ethers } from 'ethers';
+import Vault from './abi/Vault.json';
+import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
-import { vault } from 'googleapis/build/src/apis/vault';
+import { getContractAt } from '../web3/contract';
 
 export class BxFtmService {
     constructor(
@@ -39,6 +40,7 @@ export class BxFtmService {
             maintenancePaused: stakingData.maintenancePaused,
             undelegatePaused: stakingData.undelegatePaused,
             withdrawPaused: stakingData.withdrawPaused,
+            apr: stakingData.apr,
         };
     }
 
@@ -64,6 +66,8 @@ export class BxFtmService {
         const undelegatePaused = result['undelegatePaused'] as boolean;
         const withdrawPaused = result['withdrawPaused'] as boolean;
 
+        const apr = await this.getStakingApr();
+
         const stakingData = {
             id: this.stakingContractAddress,
             totalFtmStaked: formatFixed(totalFtm.sub(poolBalance).toString(), 18),
@@ -75,6 +79,7 @@ export class BxFtmService {
             maintenancePaused: maintenancePaused,
             undelegatePaused: undelegatePaused,
             withdrawPaused: withdrawPaused,
+            apr: apr,
         };
 
         await prisma.prismaBxFtmStakingData.upsert({
@@ -105,6 +110,37 @@ export class BxFtmService {
             );
         }
         await prismaBulkExecuteOperations(operations);
+    }
+
+    private async getStakingApr(): Promise<string> {
+        const baseApr = 0.018;
+        const maxLockApr = 0.06;
+        const validatorFee = 0.15;
+        const bxFtmFee = 0.1;
+        const ftmStakingContract = getContractAt(this.stakingContractAddress, FTMStaking.abi);
+
+        const totalFtm = (await ftmStakingContract.totalFTMWorth()) as BigNumber;
+        const poolFtm = (await ftmStakingContract.getPoolBalance()) as BigNumber;
+        const maturedVaultCount = await ftmStakingContract.getMaturedVaultLength();
+
+        let maturedFtmAmount = BigNumber.from('0');
+
+        for (let i = 0; i < maturedVaultCount; i++) {
+            const vaultAddress = await ftmStakingContract.getMaturedVault(i);
+            const vaultContract = getContractAt(vaultAddress, Vault.abi);
+            const vaultAmount = await vaultContract.currentStakeValue();
+            maturedFtmAmount = maturedFtmAmount.add(vaultAmount);
+        }
+
+        const totalFtmNum = parseFloat(formatFixed(totalFtm.toString(), 18));
+        const poolFtmNum = parseFloat(formatFixed(poolFtm.toString(), 18));
+        const maturedFtmNum = parseFloat(formatFixed(maturedFtmAmount.toString(), 18));
+        const stakedFtmNum = totalFtmNum - poolFtmNum - maturedFtmNum;
+
+        const totalMaxLockApr = (stakedFtmNum / totalFtmNum) * (maxLockApr * (1 - validatorFee)) * (1 - bxFtmFee);
+        const totalBaseApr = (maturedFtmNum / totalFtmNum) * (baseApr * (1 - validatorFee)) * (1 - bxFtmFee);
+
+        return `${totalMaxLockApr + totalBaseApr}`;
     }
 }
 
