@@ -33,14 +33,29 @@ async function runIfNotAlreadyRunning(
         res.sendStatus(200);
         return;
     }
+
+    const sentryTags = {
+        job: id,
+        chainId,
+    };
+
+    const sentryTransaction = Sentry.startTransaction({
+        op: 'http',
+        name: `POST /${jobId}`,
+        tags: sentryTags,
+    });
+
+    Sentry.configureScope((scope) => scope.setSpan(sentryTransaction));
+
+    const sentryChildSpan = sentryTransaction.startChild({
+        op: 'background-job',
+        description: `Running job ${jobId}`,
+        tags: sentryTags,
+    });
+
     const startJobTime = moment();
     try {
         runningJobs.add(jobId);
-
-        // TODO, this does not seem to work properly as it is a "global" scope
-        Sentry.configureScope((scope) => {
-            scope.setTransactionName(`POST /${jobId}`);
-        });
 
         console.time(jobId);
         console.log(`Start job ${jobId}-start`);
@@ -54,6 +69,8 @@ async function runIfNotAlreadyRunning(
         }
         console.log(`Successful job ${jobId}-done`);
     } catch (error) {
+        Sentry.captureException(error);
+
         const durationError = moment.duration(moment().diff(startJobTime)).asSeconds();
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-error`);
@@ -62,6 +79,9 @@ async function runIfNotAlreadyRunning(
         console.log(`Error job ${jobId}-error`, error);
         next(error);
     } finally {
+        sentryChildSpan.finish();
+        sentryTransaction.finish();
+
         runningJobs.delete(jobId);
         console.timeEnd(jobId);
         res.sendStatus(200);
@@ -71,6 +91,7 @@ async function runIfNotAlreadyRunning(
 export function configureWorkerRoutes(app: Express) {
     app.post('/', async (req, res, next) => {
         const job = req.body as { name: string; chain: string };
+
         console.log(`Current jobqueue length: ${runningJobs.size}`);
         const chainId = job.chain;
         initRequestScopedContext();
