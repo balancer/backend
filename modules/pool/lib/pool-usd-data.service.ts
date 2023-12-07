@@ -282,12 +282,17 @@ export class PoolUsdDataService {
         for (const pool of subgraphPools) {
             const staked = stakedUsers.find((stakedUser) => stakedUser.poolId === pool.id);
 
+            // Limit numbers, as we have seen some pools with skewd values
+            const max = 1e18;
+            const lifetimeVolume = Math.min(parseFloat(pool.totalSwapVolume), max);
+            const lifetimeSwapFees = Math.min(parseFloat(pool.totalSwapFee), max);
+
             updates.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: this.chain } },
                     data: {
-                        lifetimeVolume: parseFloat(pool.totalSwapVolume),
-                        lifetimeSwapFees: parseFloat(pool.totalSwapFee),
+                        lifetimeVolume: lifetimeVolume,
+                        lifetimeSwapFees: lifetimeSwapFees,
                         holdersCount: parseInt(pool.holdersCount) + (staked?._count.userAddress || 0),
                         swapsCount: parseInt(pool.swapsCount),
                     },
