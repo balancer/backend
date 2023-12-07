@@ -21,6 +21,7 @@ type GqlBxFtmStakingData {
     maxDepositLimit: AmountHumanReadable!
     exchangeRate: String!
     stakingApr: String!
+    withdrawalDelay: Int!
 }
 
 type GqlBxFtmWithdrawalRequests {

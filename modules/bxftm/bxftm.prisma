@@ -10,17 +10,21 @@ model PrismaBxFtmStakingData {
 
     maxDepositLimit         String
     minDepositLimit         String
+    withdrawalDelay         Int
 
     undelegatePaused        Boolean
     withdrawPaused          Boolean
     maintenancePaused       Boolean
+
+    withdrawalRequests      PrismaBxFtmWithdrawalRequest[]
 }
 
 model PrismaBxFtmWithdrawalRequest {
-    id                      String              @id
+    id                      String                  @id
+    ftmStakingId            PrismaBxFtmStakingData  @relation(fields:[id], references: [id])
 
-    user                    String
-    amount                  String
-    requestTimestamp        Int
-    isWithdrawn             Boolean
+    user                                            String
+    amount                                          String
+    requestTimestamp                                Int
+    isWithdrawn                                     Boolean
 }

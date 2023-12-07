@@ -44,7 +44,6 @@ export class IbLinearAprHandlers {
                     handlers.push(new Handler(nestedConfig as any));
                 }
             } else {
-                console.log(source);
                 handlers.push(new Handler(config));
             }
         }
