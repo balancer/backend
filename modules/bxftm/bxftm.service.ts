@@ -40,7 +40,8 @@ export class BxFtmService {
             maintenancePaused: stakingData.maintenancePaused,
             undelegatePaused: stakingData.undelegatePaused,
             withdrawPaused: stakingData.withdrawPaused,
-            apr: stakingData.apr,
+            stakingApr: stakingData.stakingApr,
+            exchangeRate: stakingData.exchangeRate,
         };
     }
 
@@ -54,6 +55,7 @@ export class BxFtmService {
         multicaller.call('maintenancePaused', this.stakingContractAddress, 'maintenancePaused');
         multicaller.call('undelegatePaused', this.stakingContractAddress, 'undelegatePaused');
         multicaller.call('withdrawPaused', this.stakingContractAddress, 'withdrawPaused');
+        multicaller.call('getExchangeRate', this.stakingContractAddress, 'getExchangeRate');
 
         const result = await multicaller.execute();
 
@@ -62,11 +64,12 @@ export class BxFtmService {
         const totalFtm = result['totalFtm'] as BigNumber;
         const maxDeposit = result['maxDeposit'] as BigNumber;
         const minDeposit = result['minDeposit'] as BigNumber;
+        const exchangeRate = result['getExchangeRate'] as BigNumber;
         const maintenancePaused = result['maintenancePaused'] as boolean;
         const undelegatePaused = result['undelegatePaused'] as boolean;
         const withdrawPaused = result['withdrawPaused'] as boolean;
 
-        const apr = await this.getStakingApr();
+        const stakingApr = await this.getStakingApr();
 
         const stakingData = {
             id: this.stakingContractAddress,
@@ -79,7 +82,8 @@ export class BxFtmService {
             maintenancePaused: maintenancePaused,
             undelegatePaused: undelegatePaused,
             withdrawPaused: withdrawPaused,
-            apr: apr,
+            stakingApr: stakingApr,
+            exchangeRate: exchangeRate,
         };
 
         await prisma.prismaBxFtmStakingData.upsert({
