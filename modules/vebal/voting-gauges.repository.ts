@@ -128,7 +128,7 @@ export class VotingGaugesRepository {
                     await this.saveVotingGauge(gauge);
                     return gauge;
                 } catch (error) {
-                    saveErrors.push(error as Error);
+                    saveErrors.push(new Error(`Failed to save voting gauge ${gauge.gaugeAddress} with error ${error}`));
                     return gauge;
                 }
             }),
@@ -138,7 +138,6 @@ export class VotingGaugesRepository {
     }
 
     async saveVotingGauge(gauge: VotingGauge) {
-        if (!this.isValidForVotingList(gauge)) return;
         try {
             const upsertFields = {
                 id: gauge.gaugeAddress,

@@ -13,6 +13,8 @@ env:
         VEBALLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges'
 phases:
     install:
+        runtime-versions:
+            nodejs: 18
         commands:
             - yarn install
     build:
@@ -23,6 +25,8 @@ phases:
             - yarn build
     post_build:
         commands:
+            - rm -fr node_modules
+            - yarn install --prod
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn
 #      - npx graphcdn push

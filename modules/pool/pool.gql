@@ -75,6 +75,13 @@ type GqlPoolMinimal {
     staking: GqlPoolStaking
     type: GqlPoolMinimalType!
     version: Int!
+    userBalance: GqlPoolUserBalance
+}
+
+type GqlPoolUserBalance {
+    totalBalance: AmountHumanReadable!
+    walletBalance: AmountHumanReadable!
+    stakedBalance: AmountHumanReadable!
 }
 
 enum GqlPoolMinimalType {

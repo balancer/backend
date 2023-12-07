@@ -478,7 +478,7 @@ export class PoolService {
 
                     if (gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: this.chain, id: gauge.votingGauge.id },
+                            where: { chain: this.chain, id: { in: gauge.votingGauge.map((gauge) => gauge.id) } },
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({
