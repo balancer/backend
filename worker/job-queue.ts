@@ -5,16 +5,20 @@ import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk
 import { env } from '../app/env';
 
 class WokerQueue {
-    constructor(private readonly client: SQSClient, private readonly queueUrl: string) {}
+    constructor(private readonly client: SQSClient, private readonly queueUrl?: string) {}
 
     public async sendWithInterval(json: string, intervalMs: number, deDuplicationId?: string): Promise<void> {
         try {
-            if (env.WORKER_QUEUE_URL.match(/localhost/)) {
-                await this.sendLocalMessage(json );
+            if (this.queueUrl === undefined) {
+                return;
+            }
+
+            if (this.queueUrl.match(/localhost/)) {
+                await this.sendLocalMessage(json);
             } else {
                 await this.sendMessage(json, deDuplicationId);
             }
-            console.log(`Sent message to schedule job on queue ${env.WORKER_QUEUE_URL}: ${json}`);
+            console.log(`Sent message to schedule job on queue ${this.queueUrl}: ${json}`);
         } catch (error) {
             console.log(error);
             Sentry.captureException(error);
@@ -26,10 +30,14 @@ class WokerQueue {
     }
 
     public async sendLocalMessage(json: string): Promise<void> {
-        await axios.post(env.WORKER_QUEUE_URL, json, {
+        if (this.queueUrl === undefined) {
+            throw new Error('WORKER_QUEUE_URL is undefined');
+        }
+
+        await axios.post(this.queueUrl, json, {
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+            },
         });
     }
 
