@@ -104,6 +104,7 @@ export class BxFtmService {
         for (const request of allWithdrawalRequests) {
             const requestData = {
                 id: request.id,
+                ftmStaking: this.stakingContractAddress,
                 user: request.user.id,
                 amount: request.amount,
                 isWithdrawn: request.isWithdrawn,
