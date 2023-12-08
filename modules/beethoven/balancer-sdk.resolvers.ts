@@ -4,10 +4,18 @@ import { tokenService } from '../token/token.service';
 import { sorService } from '../sor/sor.service';
 import { getTokenAmountHuman } from '../sor/utils';
 import { GraphTraversalConfig } from '../sor/types';
+import { headerChain } from '../context/header-chain';
 
 const balancerSdkResolvers: Resolvers = {
     Query: {
         sorGetSwaps: async (parent, args, context) => {
+            const currentChain = headerChain();
+            if (!args.chain && currentChain) {
+                args.chain = currentChain;
+            } else if (!args.chain) {
+                throw new Error('poolGetPool error: Provide "chain" param');
+            }
+            const chain = args.chain;
             const tokenIn = args.tokenIn.toLowerCase();
             const tokenOut = args.tokenOut.toLowerCase();
             const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
@@ -18,6 +26,7 @@ const balancerSdkResolvers: Resolvers = {
 
             const swaps = await sorService.getBeetsSwaps({
                 ...args,
+                chain,
                 tokenIn,
                 tokenOut,
                 graphTraversalConfig,

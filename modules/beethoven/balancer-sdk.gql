@@ -1,6 +1,6 @@
 extend type Query {
     sorGetSwaps(
-        chain: GqlChain!
+        chain: GqlChain
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
