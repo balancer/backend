@@ -4,7 +4,7 @@ import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorV2.service';
 import { GetSwapsInput, SwapResult, SwapService } from './types';
 import { EMPTY_COWSWAP_RESPONSE } from './constants';
-import { getSorMetricsPublisher } from '../metrics/sor.metric';
+import { publishMetric } from '../metrics/sor.metric';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
@@ -121,9 +121,8 @@ export class SorService {
         v1Time: number,
         v2Time: number,
     ) {
-        const sorMetricsPublisher = getSorMetricsPublisher(chain);
-        await sorMetricsPublisher.publish(`SOR_VALID_V1`, v1.isValid ? 1 : 0);
-        await sorMetricsPublisher.publish(`SOR_VALID_V2`, v2.isValid ? 1 : 0);
+        await publishMetric(chain, `SOR_VALID_V1`, v1.isValid ? 1 : 0);
+        await publishMetric(chain, `SOR_VALID_V2`, v2.isValid ? 1 : 0);
 
         if (!version) return;
 
@@ -154,9 +153,9 @@ export class SorService {
         let diff = bn(diffN.toFixed(decimals), decimals);
         let bestResultAmount = version === 'V1' ? v1ResultAmount : v2ResultAmount;
 
-        await sorMetricsPublisher.publish(`SOR_TIME_V1`, v1Time);
-        await sorMetricsPublisher.publish(`SOR_TIME_V2`, v2Time);
-        await sorMetricsPublisher.publish(`SOR_V2_PERFORMACE`, v2Perf);
+        await publishMetric(chain, `SOR_TIME_V1`, v1Time);
+        await publishMetric(chain, `SOR_TIME_V2`, v2Time);
+        await publishMetric(chain, `SOR_V2_PERFORMACE`, v2Perf);
 
         console.log(
             [

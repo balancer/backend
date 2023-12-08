@@ -13,7 +13,7 @@ const balancerSdkResolvers: Resolvers = {
             if (!args.chain && currentChain) {
                 args.chain = currentChain;
             } else if (!args.chain) {
-                throw new Error('poolGetPool error: Provide "chain" param');
+                throw new Error('sorGetSwaps error: Provide "chain" param');
             }
             const chain = args.chain;
             const tokenIn = args.tokenIn.toLowerCase();
@@ -22,7 +22,13 @@ const balancerSdkResolvers: Resolvers = {
             // Use TokenAmount to help follow scaling requirements in later logic
             // args.swapAmount is HumanScale
             const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain);
-            const graphTraversalConfig = args.graphTraversalConfig as GraphTraversalConfig;
+            const graphTraversalConfig = (
+                args.graphTraversalConfig
+                    ? args.graphTraversalConfig
+                    : {
+                          maxNonBoostedPathDepth: 6,
+                      }
+            ) as GraphTraversalConfig;
 
             const swaps = await sorService.getBeetsSwaps({
                 ...args,

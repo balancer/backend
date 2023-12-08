@@ -26,10 +26,33 @@ input GqlSorSwapOptionsInput {
     forceRefresh: Boolean #don't use any cached responses
 }
 
+"""
+Configuration options for SOR V2
+"""
 input GqlGraphTraversalConfigInput {
-    maxDepth: Int # default 6
-    maxNonBoostedPathDepth: Int # default 3
-    maxNonBoostedHopTokensInBoostedPath: Int # default 2
+    """
+    The max hops in a path.
+
+    Default: 6
+    """
+    maxDepth: Int
+    """
+    Limit of "non-boosted" pools for efficiency.
+
+    Default: 6
+    """
+    maxNonBoostedPathDepth: Int
+    """
+    Limit non boosted hop tokens in a boosted path.
+
+    Default: 2
+    """
+    maxNonBoostedHopTokensInBoostedPath: Int
+    """
+    Max number of paths to return (can be less)
+
+    Default: 5
+    """
     approxPathsToReturn: Int # default 5
     poolIdsToInclude: [String]
 }
