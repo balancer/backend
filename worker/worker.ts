@@ -17,7 +17,7 @@ export async function startWorker() {
             new ProfilingIntegration(),
         ],
         tracesSampleRate: 0.2,
-        profilesSampleRate: 1.0,
+        profilesSampleRate: 0.1,
     });
 
     app.use(Sentry.Handlers.requestHandler());

@@ -110,6 +110,10 @@ const data: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [
+                "0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3", 
+                "0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4", // Linear pools that cause issues with new b-sdk
+            ],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -117,6 +121,10 @@ const data: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [
+                "0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3", 
+                "0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4", // Linear pools that cause issues with new b-sdk
+            ],
         },
     },
     ibAprConfig: {
