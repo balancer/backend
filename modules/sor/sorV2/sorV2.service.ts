@@ -358,6 +358,7 @@ export class SorV2Service implements SwapService {
                         'ELEMENT', // not supported by b-sdk
                         'UNKNOWN', // not supported by b-sdk
                         'INVESTMENT', // not supported by b-sdk
+                        'FX', // TODO: FX pool tokens are missing latestFXPrice - needs to be added to the DB
                     ],
                 },
                 AND: {
