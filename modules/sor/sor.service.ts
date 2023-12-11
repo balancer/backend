@@ -121,8 +121,8 @@ export class SorService {
         v1Time: number,
         v2Time: number,
     ) {
-        await publishMetric(chain, `SOR_VALID_V1`, v1.isValid ? 1 : 0);
-        await publishMetric(chain, `SOR_VALID_V2`, v2.isValid ? 1 : 0);
+        // await publishMetric(chain, `SOR_VALID_V1`, v1.isValid ? 1 : 0);
+        // await publishMetric(chain, `SOR_VALID_V2`, v2.isValid ? 1 : 0);
 
         if (!version) return;
 
@@ -153,9 +153,9 @@ export class SorService {
         let diff = bn(diffN.toFixed(decimals), decimals);
         let bestResultAmount = version === 'V1' ? v1ResultAmount : v2ResultAmount;
 
-        await publishMetric(chain, `SOR_TIME_V1`, v1Time);
-        await publishMetric(chain, `SOR_TIME_V2`, v2Time);
-        await publishMetric(chain, `SOR_V2_PERFORMACE`, v2Perf);
+        // await publishMetric(chain, `SOR_TIME_V1`, v1Time);
+        // await publishMetric(chain, `SOR_TIME_V2`, v2Time);
+        // await publishMetric(chain, `SOR_V2_PERFORMACE`, v2Perf);
 
         console.log(
             [
