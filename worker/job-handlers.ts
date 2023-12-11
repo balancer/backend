@@ -14,6 +14,7 @@ import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.servi
 import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
+import { sftmxService } from '../modules/sftmx/sftmx.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -277,6 +278,12 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
+                break;
+            case 'sync-sftmx-staking-data':
+                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncStakingData(), res, next);
+                break;
+            case 'sync-sftmx-withdrawal-requests':
+                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
                 break;
             default:
                 res.sendStatus(400);

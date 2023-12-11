@@ -479,5 +479,13 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'feed-data-to-datastudio',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
+        {
+            name: 'sync-sftmx-staking-data',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-withdrawal-requests',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(5, 'minutes'),
+        },
     ],
 };
