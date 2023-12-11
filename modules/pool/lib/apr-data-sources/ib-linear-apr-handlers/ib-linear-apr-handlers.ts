@@ -7,7 +7,7 @@ const sourceToHandler = {
     ankr: sources.AnkrAprHandler,
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
-    bxftm: sources.BxFtmAprHandler,
+    sftmx: sources.SftmxAprHandler,
     euler: sources.EulerAprHandler,
     gearbox: sources.GearboxAprHandler,
     idle: sources.IdleAprHandler,

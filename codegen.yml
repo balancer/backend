@@ -53,9 +53,9 @@ generates:
         schema: ${RELIQUARY_SUBGRAPH}
         plugins:
             - schema-ast
-    modules/subgraphs/bxftm-subgraph/generated/bxftm-subgraph-types.ts:
-        schema: ${BXFTM_SUBGRAPH}
-        documents: 'modules/subgraphs/bxftm-subgraph/bxftm-subgraph-queries.graphql'
+    modules/subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types.ts:
+        schema: ${SFTMX_SUBGRAPH}
+        documents: 'modules/subgraphs/sftmx-subgraph/sftmx-subgraph-queries.graphql'
         plugins:
             - typescript
             - typescript-operations
@@ -67,8 +67,8 @@ generates:
                 BigDecimal: string
             namingConvention:
                 enumValues: keep
-    modules/subgraphs/bxftm-subgraph/generated/bxftm-subgraph-schema.graphql:
-        schema: ${BXFTM_SUBGRAPH}
+    modules/subgraphs/sftmx-subgraph/generated/sftmx-subgraph-schema.graphql:
+        schema: ${SFTMX_SUBGRAPH}
         plugins:
             - schema-ast
     modules/subgraphs/blocks-subgraph/generated/blocks-subgraph-types.ts:

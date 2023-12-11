@@ -4,9 +4,9 @@ import {
     WithdrawalRequestFragment,
     WithdrawalRequest_OrderBy,
     getSdk,
-} from './generated/bxftm-subgraph-types';
+} from './generated/sftmx-subgraph-types';
 
-export class BxftmSubgraphService {
+export class SftmxSubgraphService {
     private sdk: ReturnType<typeof getSdk>;
 
     constructor(subgraphUrl: string) {

@@ -1,9 +1,8 @@
 import { prisma } from '../../prisma/prisma-client';
-import { GqlBxFtmStakingData, GqlBxFtmWithdrawalRequests, QueryBxftmGetWithdrawalRequestsArgs } from '../../schema';
-import { BxftmSubgraphService } from '../subgraphs/bxftm-subgraph/bxftm.service';
+import { GqlSftmxStakingData, GqlSftmxWithdrawalRequests } from '../../schema';
+import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
-import { networkContext } from '../network/network-context.service';
 import { Multicaller3 } from '../web3/multicaller3';
 import FTMStaking from './abi/FTMStaking.json';
 import Vault from './abi/Vault.json';
@@ -11,14 +10,14 @@ import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { getContractAt } from '../web3/contract';
 
-export class BxFtmService {
+export class SftmxService {
     constructor(
-        private readonly bxFtmSubgraphService: BxftmSubgraphService,
+        private readonly sftmxSubgraphService: SftmxSubgraphService,
         private readonly stakingContractAddress: string,
     ) {}
 
-    public async getWithdrawalRequests(user: string): Promise<GqlBxFtmWithdrawalRequests[]> {
-        const balances = await prisma.prismaBxFtmWithdrawalRequest.findMany({
+    public async getWithdrawalRequests(user: string): Promise<GqlSftmxWithdrawalRequests[]> {
+        const balances = await prisma.prismaSftmxWithdrawalRequest.findMany({
             where: {
                 user: user,
             },
@@ -26,8 +25,8 @@ export class BxFtmService {
         return balances;
     }
 
-    public async getStakingData(): Promise<GqlBxFtmStakingData> {
-        const stakingData = await prisma.prismaBxFtmStakingData.findUniqueOrThrow({
+    public async getStakingData(): Promise<GqlSftmxStakingData> {
+        const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
             where: { id: this.stakingContractAddress },
         });
         return {
@@ -90,7 +89,7 @@ export class BxFtmService {
             withdrawalDelay: parseFloat(withdrawalDelay.toString()),
         };
 
-        await prisma.prismaBxFtmStakingData.upsert({
+        await prisma.prismaSftmxStakingData.upsert({
             where: { id: this.stakingContractAddress },
             create: stakingData,
             update: stakingData,
@@ -98,7 +97,7 @@ export class BxFtmService {
     }
 
     public async syncWithdrawalRequests() {
-        const allWithdrawalRequests = await this.bxFtmSubgraphService.getAllWithdrawawlRequestsWithPaging();
+        const allWithdrawalRequests = await this.sftmxSubgraphService.getAllWithdrawawlRequestsWithPaging();
 
         const operations = [];
         for (const request of allWithdrawalRequests) {
@@ -111,7 +110,7 @@ export class BxFtmService {
                 requestTimestamp: request.requestTime,
             };
             operations.push(
-                prisma.prismaBxFtmWithdrawalRequest.upsert({
+                prisma.prismaSftmxWithdrawalRequest.upsert({
                     where: { id: requestData.id },
                     create: requestData,
                     update: requestData,
@@ -125,7 +124,7 @@ export class BxFtmService {
         const baseApr = 0.018;
         const maxLockApr = 0.06;
         const validatorFee = 0.15;
-        const bxFtmFee = 0.1;
+        const sftmxFee = 0.1;
         const ftmStakingContract = getContractAt(this.stakingContractAddress, FTMStaking.abi);
 
         const totalFtm = (await ftmStakingContract.totalFTMWorth()) as BigNumber;
@@ -146,14 +145,14 @@ export class BxFtmService {
         const maturedFtmNum = parseFloat(formatFixed(maturedFtmAmount.toString(), 18));
         const stakedFtmNum = totalFtmNum - poolFtmNum - maturedFtmNum;
 
-        const totalMaxLockApr = (stakedFtmNum / totalFtmNum) * (maxLockApr * (1 - validatorFee)) * (1 - bxFtmFee);
-        const totalBaseApr = (maturedFtmNum / totalFtmNum) * (baseApr * (1 - validatorFee)) * (1 - bxFtmFee);
+        const totalMaxLockApr = (stakedFtmNum / totalFtmNum) * (maxLockApr * (1 - validatorFee)) * (1 - sftmxFee);
+        const totalBaseApr = (maturedFtmNum / totalFtmNum) * (baseApr * (1 - validatorFee)) * (1 - sftmxFee);
 
         return `${totalMaxLockApr + totalBaseApr}`;
     }
 }
 
-export const bxFtmService = new BxFtmService(
-    AllNetworkConfigsKeyedOnChain['FANTOM'].services.bxFtmSubgraphService!,
-    AllNetworkConfigsKeyedOnChain['FANTOM'].data.bxFtm!.stakingContractAddress,
+export const sftmxService = new SftmxService(
+    AllNetworkConfigsKeyedOnChain['FANTOM'].services.sftmxSubgraphService!,
+    AllNetworkConfigsKeyedOnChain['FANTOM'].data.sftmx!.stakingContractAddress,
 );

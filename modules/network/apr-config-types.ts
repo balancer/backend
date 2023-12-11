@@ -3,7 +3,7 @@ export interface IbAprConfig {
     ankr?: AnkrAprConfig;
     bloom?: BloomAprConfig;
     beefy?: BeefyAprConfig;
-    bxftm?: BxFtmAprConfig;
+    sftmx?: SftmxAprConfig;
     euler?: EulerAprConfig;
     gearbox?: GearBoxAprConfig;
     idle?: IdleAprConfig;
@@ -68,7 +68,7 @@ export interface BloomAprConfig {
     };
 }
 
-export interface BxFtmAprConfig {
+export interface SftmxAprConfig {
     tokens: {
         [underlyingAssetName: string]: {
             address: string;

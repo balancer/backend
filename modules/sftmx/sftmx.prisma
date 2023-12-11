@@ -1,5 +1,5 @@
 
-model PrismaBxFtmStakingData {
+model PrismaSftmxStakingData {
     id                      String              @id
     totalFtm                String
     totalFtmStaked          String
@@ -16,12 +16,12 @@ model PrismaBxFtmStakingData {
     withdrawPaused          Boolean
     maintenancePaused       Boolean
 
-    withdrawalRequests      PrismaBxFtmWithdrawalRequest[]
+    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
 }
 
-model PrismaBxFtmWithdrawalRequest {
+model PrismaSftmxWithdrawalRequest {
     id                      String                  @id
-    ftmStakingId            PrismaBxFtmStakingData  @relation(fields:[id], references: [id])
+    ftmStakingId            PrismaSftmxStakingData  @relation(fields:[id], references: [id])
 
     user                                            String
     amount                                          String

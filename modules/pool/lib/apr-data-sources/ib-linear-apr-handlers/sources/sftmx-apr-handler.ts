@@ -1,13 +1,13 @@
 import * as Sentry from '@sentry/node';
 import { AprHandler } from '../ib-linear-apr-handlers';
-import { BxFtmAprConfig } from '../../../../../network/apr-config-types';
+import { SftmxAprConfig } from '../../../../../network/apr-config-types';
 import { BigNumber, ethers } from 'ethers';
 import { getContractAt } from '../../../../../web3/contract';
-import FTMStaking from '../../../../../bxftm/abi/FTMStaking.json';
-import Vault from '../../../../../bxftm/abi/Vault.json';
+import FTMStaking from '../../../../../sftmx/abi/FTMStaking.json';
+import Vault from '../../../../../sftmx/abi/Vault.json';
 import { formatFixed } from '@ethersproject/bignumber';
 
-export class BxFtmAprHandler implements AprHandler {
+export class SftmxAprHandler implements AprHandler {
     tokens: {
         [underlyingAssetName: string]: {
             address: string;
@@ -15,7 +15,7 @@ export class BxFtmAprHandler implements AprHandler {
         };
     };
 
-    constructor(config: BxFtmAprConfig) {
+    constructor(config: SftmxAprConfig) {
         this.tokens = config.tokens;
     }
 
@@ -30,7 +30,7 @@ export class BxFtmAprHandler implements AprHandler {
         const baseApr = 0.018;
         const maxLockApr = 0.06;
         const validatorFee = 0.15;
-        const bxFtmFee = 0.1;
+        const sftmxFee = 0.1;
         try {
             const aprs: {
                 [tokenAddress: string]: {
@@ -63,20 +63,20 @@ export class BxFtmAprHandler implements AprHandler {
                 const stakedFtmNum = totalFtmNum - poolFtmNum - maturedFtmNum;
 
                 const totalMaxLockApr =
-                    (stakedFtmNum / totalFtmNum) * (maxLockApr * (1 - validatorFee)) * (1 - bxFtmFee);
-                const totalBaseApr = (maturedFtmNum / totalFtmNum) * (baseApr * (1 - validatorFee)) * (1 - bxFtmFee);
+                    (stakedFtmNum / totalFtmNum) * (maxLockApr * (1 - validatorFee)) * (1 - sftmxFee);
+                const totalBaseApr = (maturedFtmNum / totalFtmNum) * (baseApr * (1 - validatorFee)) * (1 - sftmxFee);
 
-                const totalBxFtmApr = totalMaxLockApr + totalBaseApr;
+                const totalSftmxApr = totalMaxLockApr + totalBaseApr;
 
                 aprs[tokenDefinition.address] = {
-                    apr: totalBxFtmApr,
+                    apr: totalSftmxApr,
                     isIbYield: true,
                 };
             }
             return aprs;
         } catch (error) {
-            console.error('Failed to fetch bxFTM APR:', error);
-            Sentry.captureException(`bxFTM IB APR handler failed: ${error}`);
+            console.error('Failed to fetch sftmx APR:', error);
+            Sentry.captureException(`sftmx IB APR handler failed: ${error}`);
             return {};
         }
     }

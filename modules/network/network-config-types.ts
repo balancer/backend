@@ -8,7 +8,7 @@ import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
 import { IbAprConfig } from './apr-config-types';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { BxftmSubgraphService } from '../subgraphs/bxftm-subgraph/bxftm.service';
+import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 
 export interface NetworkConfig {
     data: NetworkData;
@@ -24,7 +24,7 @@ export interface NetworkConfig {
 
 interface NetworkServices {
     balancerSubgraphService: BalancerSubgraphService;
-    bxFtmSubgraphService?: BxftmSubgraphService;
+    sftmxSubgraphService?: SftmxSubgraphService;
 }
 
 export interface WorkerJob {
@@ -71,7 +71,7 @@ export interface NetworkData {
         blocks: string;
         masterchef?: string;
         reliquary?: string;
-        bxftm?: string;
+        sftmx?: string;
         beetsBar?: string;
         gauge?: string;
         veBalLocks?: string;
@@ -92,9 +92,9 @@ export interface NetworkData {
         poolId: string;
         poolAddress: string;
     };
-    bxFtm?: {
+    sftmx?: {
         stakingContractAddress: string;
-        bxFtmAddress: string;
+        sftmxAddress: string;
     };
     bal?: {
         address: string;

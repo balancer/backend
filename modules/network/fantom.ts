@@ -27,7 +27,7 @@ import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { BxftmSubgraphService } from '../subgraphs/bxftm-subgraph/bxftm.service';
+import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -46,7 +46,7 @@ const fantomNetworkData: NetworkData = {
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
-        bxftm: 'https://api.thegraph.com/subgraphs/name/franzns/bxftm',
+        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -110,9 +110,9 @@ const fantomNetworkData: NetworkData = {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
-    bxFtm: {
+    sftmx: {
         stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
-        bxFtmAddress: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+        sftmxAddress: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
@@ -195,7 +195,7 @@ const fantomNetworkData: NetworkData = {
                 },
             },
         },
-        bxftm: {
+        sftmx: {
             tokens: {
                 sftmx: {
                     address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
@@ -365,7 +365,7 @@ export const fantomNetworkConfig: NetworkConfig = {
             fantomNetworkData.subgraphs.balancer,
             fantomNetworkData.chain.id,
         ),
-        bxFtmSubgraphService: new BxftmSubgraphService(fantomNetworkData.subgraphs.bxftm!),
+        sftmxSubgraphService: new SftmxSubgraphService(fantomNetworkData.subgraphs.sftmx!),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
