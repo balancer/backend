@@ -26,7 +26,7 @@ const balancerSdkResolvers: Resolvers = {
                 args.graphTraversalConfig
                     ? args.graphTraversalConfig
                     : {
-                          maxNonBoostedPathDepth: 6,
+                          maxNonBoostedPathDepth: 4,
                       }
             ) as GraphTraversalConfig;
 
