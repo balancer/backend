@@ -93,6 +93,7 @@ const zkevmNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -100,6 +101,7 @@ const zkevmNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {

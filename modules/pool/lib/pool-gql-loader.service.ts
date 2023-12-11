@@ -13,6 +13,7 @@ import {
     GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolGyro,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
     GqlPoolLinear,
@@ -110,6 +111,16 @@ export class PoolGqlLoaderService {
         });
 
         return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
+    }
+
+    public async getGyroPools(): Promise<GqlPoolGyro[]> {
+        const pools = await prisma.prismaPool.findMany({
+            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: networkContext.chain },
+            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
+            include: prismaPoolWithExpandedNesting.include,
+        });
+
+        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolGyro[];
     }
 
     public mapToMinimalGqlPool(
@@ -457,6 +468,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
             case 'GYRO3':
                 return {
@@ -465,6 +491,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
             case 'GYROE':
                 return {
@@ -473,6 +514,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
         }
 
