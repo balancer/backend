@@ -288,7 +288,10 @@ export const polygonNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(polygonNetworkData.subgraphs.balancer, polygonNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            polygonNetworkData.subgraphs.balancer,
+            polygonNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -383,6 +386,10 @@ export const polygonNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };
