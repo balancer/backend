@@ -270,22 +270,36 @@ export class SorV2Service implements SwapService {
         this.cache = new Cache<string, BasePool[]>();
     }
 
-    public async getSwapResult({
-        chain,
-        tokenIn,
-        tokenOut,
-        swapType,
-        swapAmount,
-        graphTraversalConfig,
-    }: GetSwapsInput): Promise<SwapResult> {
+    public async getSwapResult(
+        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
+        maxNonBoostedPathDepth = 4,
+    ): Promise<SwapResult> {
         try {
             const poolsFromDb = await this.getBasePools(chain);
             const tIn = await this.getToken(tokenIn as Address, chain);
             const tOut = await this.getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapType(swapType);
-            const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount, poolsFromDb, {
-                graphTraversalConfig,
-            });
+            const config = graphTraversalConfig
+                ? {
+                      graphTraversalConfig: {
+                          maxNonBoostedPathDepth,
+                          ...graphTraversalConfig,
+                      },
+                  }
+                : {
+                      graphTraversalConfig: {
+                          maxNonBoostedPathDepth,
+                      },
+                  };
+
+            console.info(
+                `SOR: Fetching SORv2 on ${chain} for ${tokenIn} -> ${tokenOut} with maxNonBoostedPathDepth`,
+                maxNonBoostedPathDepth,
+            );
+            const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount, poolsFromDb, config);
+            if (!swap && maxNonBoostedPathDepth < 6) {
+                return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
+            }
             return new SwapResultV2(swap);
         } catch (err: any) {
             console.error(

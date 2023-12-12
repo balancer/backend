@@ -22,13 +22,7 @@ const balancerSdkResolvers: Resolvers = {
             // Use TokenAmount to help follow scaling requirements in later logic
             // args.swapAmount is HumanScale
             const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain);
-            const graphTraversalConfig = (
-                args.graphTraversalConfig
-                    ? args.graphTraversalConfig
-                    : {
-                          maxNonBoostedPathDepth: 4,
-                      }
-            ) as GraphTraversalConfig;
+            const graphTraversalConfig = args.graphTraversalConfig as GraphTraversalConfig | undefined;
 
             const swaps = await sorService.getBeetsSwaps({
                 ...args,
