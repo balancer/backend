@@ -23,6 +23,7 @@ extend type Query {
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
+    poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
 }
 
 extend type Mutation {
@@ -80,8 +81,11 @@ type GqlPoolMinimal {
 
 type GqlPoolUserBalance {
     totalBalance: AmountHumanReadable!
+    totalBalanceUsd: Float!
     walletBalance: AmountHumanReadable!
+    walletBalanceUsd: Float!
     stakedBalance: AmountHumanReadable!
+    stakedBalanceUsd: Float!
 }
 
 enum GqlPoolMinimalType {
@@ -248,6 +252,21 @@ type GqlPoolGyro implements GqlPoolBase {
 
     alpha: String!
     beta: String!
+    sqrtAlpha: String!
+    sqrtBeta: String!
+    root3Alpha: String!
+    c: String!
+    s: String!
+    lambda: String!
+    tauAlphaX: String!
+    tauAlphaY: String!
+    tauBetaX: String!
+    tauBetaY: String!
+    u: String!
+    v: String!
+    w: String!
+    z: String!
+    dSq: String!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -603,6 +622,7 @@ enum GqlPoolOrderBy {
     volume24h
     fees24h
     apr
+    userbalanceUsd
 }
 
 enum GqlPoolOrderDirection {

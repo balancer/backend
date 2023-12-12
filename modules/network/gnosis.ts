@@ -81,6 +81,7 @@ const gnosisNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: '',
@@ -88,6 +89,7 @@ const gnosisNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {

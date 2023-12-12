@@ -13,6 +13,7 @@ import {
     GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolGyro,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
     GqlPoolLinear,
@@ -89,9 +90,18 @@ export class PoolGqlLoaderService {
                 },
             });
 
-            return pools.map((pool) =>
+            const gqlPools = pools.map((pool) =>
                 this.mapToMinimalGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances),
             );
+
+            if (args.orderBy === 'userbalanceUsd') {
+                if (args.orderDirection === 'asc') {
+                    return gqlPools.sort((a, b) => a.userBalance!.totalBalanceUsd - b.userBalance!.totalBalanceUsd);
+                }
+                return gqlPools.sort((a, b) => b.userBalance!.totalBalanceUsd - a.userBalance!.totalBalanceUsd);
+            }
+
+            return gqlPools;
         }
 
         const pools = await prisma.prismaPool.findMany({
@@ -112,6 +122,16 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
     }
 
+    public async getGyroPools(): Promise<GqlPoolGyro[]> {
+        const pools = await prisma.prismaPool.findMany({
+            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: networkContext.chain },
+            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
+            include: prismaPoolWithExpandedNesting.include,
+        });
+
+        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolGyro[];
+    }
+
     public mapToMinimalGqlPool(
         pool: PrismaPoolMinimal,
         userWalletbalances: PrismaUserWalletBalance[] = [],
@@ -124,7 +144,7 @@ export class PoolGqlLoaderService {
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
-            userBalance: this.getUserBalance(userWalletbalances, userStakedBalances),
+            userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
         };
     }
 
@@ -457,6 +477,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
             case 'GYRO3':
                 return {
@@ -465,6 +500,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
             case 'GYROE':
                 return {
@@ -473,6 +523,21 @@ export class PoolGqlLoaderService {
                     type: mappedData.type,
                     alpha: pool.gyroData?.alpha || '',
                     beta: pool.gyroData?.beta || '',
+                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
+                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
+                    root3Alpha: pool.gyroData?.root3Alpha || '',
+                    c: pool.gyroData?.c || '',
+                    s: pool.gyroData?.s || '',
+                    lambda: pool.gyroData?.lambda || '',
+                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
+                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
+                    tauBetaX: pool.gyroData?.tauBetaX || '',
+                    tauBetaY: pool.gyroData?.tauBetaY || '',
+                    u: pool.gyroData?.u || '',
+                    v: pool.gyroData?.v || '',
+                    w: pool.gyroData?.w || '',
+                    z: pool.gyroData?.z || '',
+                    dSq: pool.gyroData?.dSq || '',
                 };
         }
 
@@ -611,16 +676,27 @@ export class PoolGqlLoaderService {
     }
 
     private getUserBalance(
+        pool: PrismaPoolMinimal,
         userWalletBalances: PrismaUserWalletBalance[],
         userStakedBalances: PrismaUserStakedBalance[],
     ): GqlPoolUserBalance {
-        const stakedNum = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
-        const walletNum = parseUnits(userStakedBalances.at(0)?.balance || '0', 18);
+        let bptPrice = 0;
+        if (pool.dynamicData && pool.dynamicData.totalLiquidity > 0 && parseFloat(pool.dynamicData.totalShares) > 0) {
+            bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
+        }
+
+        const walletBalance = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
+        const stakedBalance = parseUnits(userStakedBalances.at(0)?.balance || '0', 18);
+        const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
+        const stakedBalanceNum = userStakedBalances.at(0)?.balanceNum || 0;
 
         return {
             walletBalance: userWalletBalances.at(0)?.balance || '0',
             stakedBalance: userStakedBalances.at(0)?.balance || '0',
-            totalBalance: formatFixed(stakedNum.add(walletNum), 18),
+            totalBalance: formatFixed(stakedBalance.add(walletBalance), 18),
+            walletBalanceUsd: walletBalanceNum * bptPrice,
+            stakedBalanceUsd: stakedBalanceNum * bptPrice,
+            totalBalanceUsd: (walletBalanceNum + stakedBalanceNum) * bptPrice,
         };
     }
 

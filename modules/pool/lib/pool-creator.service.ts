@@ -36,6 +36,39 @@ export class PoolCreatorService {
                 await this.createPoolRecord(subgraphPool, blockNumber);
 
                 poolIds.push(subgraphPool.id);
+            } else if (subgraphPool.poolType?.includes('Gyro')) {
+                await prisma.prismaPool.update({
+                    data: {
+                        gyroData: {
+                            update: {
+                                id: subgraphPool.id,
+                                alpha: subgraphPool.alpha || '',
+                                beta: subgraphPool.beta || '',
+                                sqrtAlpha: subgraphPool.sqrtAlpha || '',
+                                sqrtBeta: subgraphPool.sqrtBeta || '',
+                                root3Alpha: subgraphPool.root3Alpha || '',
+                                c: subgraphPool.c || '',
+                                s: subgraphPool.s || '',
+                                lambda: subgraphPool.lambda || '',
+                                tauAlphaX: subgraphPool.tauAlphaX || '',
+                                tauAlphaY: subgraphPool.tauAlphaY || '',
+                                tauBetaX: subgraphPool.tauBetaX || '',
+                                tauBetaY: subgraphPool.tauBetaY || '',
+                                u: subgraphPool.u || '',
+                                v: subgraphPool.v || '',
+                                w: subgraphPool.w || '',
+                                z: subgraphPool.z || '',
+                                dSq: subgraphPool.dSq || '',
+                            },
+                        },
+                    },
+                    where: {
+                        id_chain: {
+                            id: subgraphPool.id,
+                            chain: this.chain,
+                        },
+                    },
+                });
             }
         }
 
@@ -264,6 +297,21 @@ export class PoolCreatorService {
                               id: pool.id,
                               alpha: pool.alpha || '',
                               beta: pool.beta || '',
+                              sqrtAlpha: pool.sqrtAlpha || '',
+                              sqrtBeta: pool.sqrtBeta || '',
+                              root3Alpha: pool.root3Alpha || '',
+                              c: pool.c || '',
+                              s: pool.s || '',
+                              lambda: pool.lambda || '',
+                              tauAlphaX: pool.tauAlphaX || '',
+                              tauAlphaY: pool.tauAlphaY || '',
+                              tauBetaX: pool.tauBetaX || '',
+                              tauBetaY: pool.tauBetaY || '',
+                              u: pool.u || '',
+                              v: pool.v || '',
+                              w: pool.w || '',
+                              z: pool.z || '',
+                              dSq: pool.dSq || '',
                           },
                       }
                     : undefined,

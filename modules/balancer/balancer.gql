@@ -1,7 +1,39 @@
-extend type Query {
-    balancerQueryTest: String!
-}
-
 extend type Mutation {
     balancerMutationTest: String!
+}
+
+extend type Query {
+    sorGetCowSwaps(
+        chain: GqlChain!
+        tokenIn: String!
+        tokenOut: String!
+        swapType: GqlSorSwapType!
+        swapAmount: BigDecimal! #expected in raw amount
+    ): GqlCowSwapApiResponse!
+}
+
+enum GqlSorSwapType {
+    EXACT_IN
+    EXACT_OUT
+}
+
+type GqlCowSwapApiResponse {
+    tokenAddresses: [String!]!
+    swaps: [GqlSwap!]!
+    swapAmount: String!
+    swapAmountForSwaps: String!
+    returnAmount: String!
+    returnAmountFromSwaps: String!
+    returnAmountConsideringFees: String!
+    tokenIn: String!
+    tokenOut: String!
+    marketSp: String!
+}
+
+type GqlSwap {
+    poolId: String!
+    assetInIndex: Int!
+    assetOutIndex: Int!
+    amount: String!
+    userData: String!
 }

@@ -103,6 +103,9 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getGqlLinearPools(chains);
         },
+        poolGetGyroPools: async () => {
+            return poolService.getGqlGyroPools();
+        }
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {

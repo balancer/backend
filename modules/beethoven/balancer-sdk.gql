@@ -1,10 +1,12 @@
 extend type Query {
     sorGetSwaps(
+        chain: GqlChain
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
+        graphTraversalConfig: GqlGraphTraversalConfigInput
     ): GqlSorGetSwapsResponse!
     sorGetBatchSwapForTokensIn(
         tokensIn: [GqlTokenAmountHumanReadable!]!
@@ -22,6 +24,37 @@ input GqlSorSwapOptionsInput {
     timestamp: Int #used for caching purposes
     maxPools: Int
     forceRefresh: Boolean #don't use any cached responses
+}
+
+"""
+Configuration options for SOR V2
+"""
+input GqlGraphTraversalConfigInput {
+    """
+    The max hops in a path.
+
+    Default: 6
+    """
+    maxDepth: Int
+    """
+    Limit of "non-boosted" pools for efficiency.
+
+    Default: 6
+    """
+    maxNonBoostedPathDepth: Int
+    """
+    Limit non boosted hop tokens in a boosted path.
+
+    Default: 2
+    """
+    maxNonBoostedHopTokensInBoostedPath: Int
+    """
+    Max number of paths to return (can be less)
+
+    Default: 5
+    """
+    approxPathsToReturn: Int # default 5
+    poolIdsToInclude: [String]
 }
 
 type GqlSorGetSwapsResponse {
@@ -76,4 +109,25 @@ type GqlSorGetBatchSwapForTokensInResponse {
     tokenOutAmount: AmountHumanReadable!
     swaps: [GqlSorSwap!]!
     assets: [String!]!
+}
+
+type GqlCowSwapApiResponse {
+    tokenAddresses: [String!]!
+    swaps: [GqlSwap!]!
+    swapAmount: String!
+    swapAmountForSwaps: String!
+    returnAmount: String!
+    returnAmountFromSwaps: String!
+    returnAmountConsideringFees: String!
+    tokenIn: String!
+    tokenOut: String!
+    marketSp: String!
+}
+
+type GqlSwap {
+    poolId: String!
+    assetInIndex: Int!
+    assetOutIndex: Int!
+    amount: String!
+    userData: String!
 }

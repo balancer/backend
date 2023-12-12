@@ -152,6 +152,7 @@ export interface NetworkData {
             forceRefresh: boolean;
             gasPrice: BigNumber;
             swapGas: BigNumber;
+            poolIdsToExclude: string[];
         };
     };
     datastudio?: {
