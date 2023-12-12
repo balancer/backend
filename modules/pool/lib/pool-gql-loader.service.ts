@@ -42,6 +42,8 @@ import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
+import { StringDecoder } from 'string_decoder';
+import { SwapKind } from '@balancer/sdk';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
@@ -64,7 +66,15 @@ export class PoolGqlLoaderService {
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         // only include wallet and staked balances if the query requests it
         // this makes sure that we don't load ALL user balances when we don't filter on userAddress
+        // need to support ordering and paging by userbalanceUsd. Need to take care of that here, as the DB does not (and should not) store the usd balance
         if (args.where?.userAddress) {
+            const first = args.first;
+            const skip = args.skip ? args.skip : 0;
+            if (args.orderBy === 'userbalanceUsd') {
+                // we need to retrieve all pools, regardless of paging request as we can't page on a DB level because there is no balance usd stored
+                args.first = undefined;
+                args.skip = undefined;
+            }
             const pools = await prisma.prismaPool.findMany({
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
@@ -95,10 +105,17 @@ export class PoolGqlLoaderService {
             );
 
             if (args.orderBy === 'userbalanceUsd') {
+                let sortedPools = [];
                 if (args.orderDirection === 'asc') {
-                    return gqlPools.sort((a, b) => a.userBalance!.totalBalanceUsd - b.userBalance!.totalBalanceUsd);
+                    sortedPools = gqlPools.sort(
+                        (a, b) => a.userBalance!.totalBalanceUsd - b.userBalance!.totalBalanceUsd,
+                    );
+                } else {
+                    sortedPools = gqlPools.sort(
+                        (a, b) => b.userBalance!.totalBalanceUsd - a.userBalance!.totalBalanceUsd,
+                    );
                 }
-                return gqlPools.sort((a, b) => b.userBalance!.totalBalanceUsd - a.userBalance!.totalBalanceUsd);
+                return first ? sortedPools.slice(skip, skip + first) : sortedPools.slice(skip, undefined);
             }
 
             return gqlPools;
