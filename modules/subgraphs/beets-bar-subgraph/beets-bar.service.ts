@@ -8,7 +8,6 @@ import {
 } from './generated/beets-bar-subgraph-types';
 import { Cache, CacheClass } from 'memory-cache';
 import { twentyFourHoursInMs } from '../../common/time';
-import { networkContext } from '../../network/network-context.service';
 
 const ALL_USERS_CACHE_KEY = `beets-bar-subgraph_all-users`;
 const BEETS_BAR_CACHE_KEY_PREFIX = `beets-bar`;
@@ -17,7 +16,7 @@ const BEETS_BAR_NOW_CACHE_KEY = `beets-bar-now`;
 export class BeetsBarSubgraphService {
     cache: CacheClass<string, any>;
 
-    constructor() {
+    constructor(private subgraphUrl: string, private fbeetsAddress?: string, private chainId = 250) {
         this.cache = new Cache<string, any>();
     }
 
@@ -42,7 +41,7 @@ export class BeetsBarSubgraphService {
     }> {
         const { beetsBarUser, beetsBar, previousBeetsBarUser, previousBeetsBar } = await this.sdk.BeetsBarPortfolioData(
             {
-                barId: networkContext.data.fbeets?.address || '',
+                barId: this.fbeetsAddress || '',
                 userAddress,
                 previousBlockNumber,
             },
@@ -59,7 +58,7 @@ export class BeetsBarSubgraphService {
     public async getBeetsBar(block?: number): Promise<BeetsBarFragment> {
         if (block) {
             const cached = this.cache.get(
-                `${BEETS_BAR_CACHE_KEY_PREFIX}:${networkContext.chainId}:${block}`,
+                `${BEETS_BAR_CACHE_KEY_PREFIX}:${this.chainId}:${block}`,
             ) as BeetsBarFragment | null;
 
             if (cached) {
@@ -68,12 +67,12 @@ export class BeetsBarSubgraphService {
         }
 
         const { bar } = await this.sdk.GetBeetsBar({
-            id: networkContext.data.fbeets?.address || '',
+            id: this.fbeetsAddress || '',
             block: { number: block },
         });
 
         this.cache.put(
-            `${BEETS_BAR_CACHE_KEY_PREFIX}:${networkContext.chainId}:${block}`,
+            `${BEETS_BAR_CACHE_KEY_PREFIX}:${this.chainId}:${block}`,
             bar ?? this.emptyBeetsBar,
             twentyFourHoursInMs,
         );
@@ -86,21 +85,19 @@ export class BeetsBarSubgraphService {
     }
 
     public async getBeetsBarNow(): Promise<BeetsBarFragment> {
-        const cached = this.cache.get(
-            `${BEETS_BAR_NOW_CACHE_KEY}:${networkContext.chainId}`,
-        ) as BeetsBarFragment | null;
+        const cached = this.cache.get(`${BEETS_BAR_NOW_CACHE_KEY}:${this.chainId}`) as BeetsBarFragment | null;
 
         if (cached) {
             return cached;
         }
 
-        const { bar } = await this.sdk.GetBeetsBar({ id: networkContext.data.fbeets?.address || '' });
+        const { bar } = await this.sdk.GetBeetsBar({ id: this.fbeetsAddress || '' });
 
         if (!bar) {
             return this.emptyBeetsBar;
         }
 
-        this.cache.put(`${BEETS_BAR_NOW_CACHE_KEY}:${networkContext.chainId}`, bar, 60000);
+        this.cache.put(`${BEETS_BAR_NOW_CACHE_KEY}:${this.chainId}`, bar, 60000);
 
         return bar;
     }
@@ -116,7 +113,7 @@ export class BeetsBarSubgraphService {
     }
 
     public async getUserAtBlock(address: string, block: number): Promise<BeetsBarUserFragment | null> {
-        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${networkContext.chainId}:${block}`) as
+        const cachedUsers = this.cache.get(`${ALL_USERS_CACHE_KEY}:${this.chainId}:${block}`) as
             | BeetsBarUserFragment[]
             | null;
 
@@ -126,21 +123,21 @@ export class BeetsBarSubgraphService {
 
         const users = await this.getAllUsers({ block: { number: block } });
 
-        this.cache.put(`${ALL_USERS_CACHE_KEY}:${networkContext.chainId}:${block}`, users, twentyFourHoursInMs);
+        this.cache.put(`${ALL_USERS_CACHE_KEY}:${this.chainId}:${block}`, users, twentyFourHoursInMs);
 
         return users.find((user) => user.id === address) || null;
     }
 
     private get sdk() {
-        const client = new GraphQLClient(networkContext.data.subgraphs.beetsBar || '');
+        const client = new GraphQLClient(this.subgraphUrl || '');
 
         return getSdk(client);
     }
 
     private get emptyBeetsBar(): BeetsBarFragment {
         return {
-            id: networkContext.data.fbeets?.address || '',
-            address: networkContext.data.fbeets?.address || '',
+            id: this.fbeetsAddress || '',
+            address: this.fbeetsAddress || '',
             block: '',
             decimals: 19,
             fBeetsBurned: '0',
@@ -156,5 +153,3 @@ export class BeetsBarSubgraphService {
         };
     }
 }
-
-export const beetsBarService = new BeetsBarSubgraphService();
