@@ -17,37 +17,8 @@ export class DatastudioService {
     constructor(private readonly secretsManager: SecretsManager, private readonly jwtClientHelper: GoogleJwtClient) {}
 
     public async feedPoolData() {
-        // const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
-        const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(
-            `-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgqKRSmWLafMl4
-52i0ix8qdmjBJFTIGtRst5iq0vXGYQ/NzL6sb1iARrUzMb8bfqL/LU75bY4P+H78
-bg9SVYQkN4up6pDiF7QPiNyDIdLxbueksQuHItQPDrvHcF3m1JpY5/xwncAT4PQQ
-0if4FmGkPdoCzcU41dr/EFeOtRrXFn0R12g+BCPhq7GQNDSVw7T6qrtnS7PEmq56
-L19rgtI/GnilOfI901bYsso5RPMli2dg5JPAq2Z9BDsEeq1AqkzMFOacKQRGl1G2
-pF3ZjH0Jaia8YhORhDNJhu8cuis1Zqtz6fzS73OoFPfc4zyg5Tsk+WBQTTbHO4W8
-aOsC1XLzAgMBAAECggEAAuaMHIBTVSCCFAW8NTVeQFiQfg0XUItXBHqUinyOkBJy
-/O3gnaF7q+Ya6PMnFnjE8wo/JuF47CJy9c8YN3/FwN6Ham+Y8O+bEIRKm1olwkSU
-qdf6rIZAyMN6VYp3CVKhisGZ60cIgUxDNLBRT8BWzkozlf4KLoNJeXYWZ30SrqXc
-hpDtYnc2vdboJTd1sMPOlImcXbwtbBpg3172hnhixdeWOT7Bm3O3SeOuJ1uqB0oK
-q3eVz9LdeGAzR3UKq6F8YbHzzvQRDD0jHKQsw1dpvLxK9G2pYqmxBCz5gUfvDznV
-p7sTrYqGxFmU1YI3yNlEWxCVkHXploSq7wMGpIgAoQKBgQDMfy4nTGnNlervONgX
-l5o4OKxA+QOdF5fa1wkWnEJZ/+h6vVe0uCjckab1mJIsuUMgdSuG0YITY7kChUzh
-Ds0pr1yn8i0SC4PFj9RINA7fK36UO3uoWceolj4m4jUkgcHV2zKxt8uFGkKk1WlG
-41WmYDHQ/JqLnmWq1w85wYjpAwKBgQDJHwcdo/Hq2bZH864Vx8XEg6Q6xUjGlisT
-G8r6x1yp9b951+bQ11TU8edmoyRHkzAHnCsC0jcboolLRhxv8+dHfkwTrVpNXysN
-/ZISDIkK50Pjsr7XbD8yC9MtI/i0SGCJ9xUISS4zypdKc5iktj3Zf7O8MxfLKNQA
-nJEI4T2TUQKBgG3Z3+wiYy+Z2gM5sPMzcBfFcdrRKXzIwL1BCFPKCuaXzsWoUqX0
-y5Z484w4skUuG/4ikwgwIUTTK/5Lpxm6vsEmv4pEUKvB3b5R3gIPXPHLRorQTUQJ
-PnS0iJyQpWWAAqUjw96t0bkleylartvyoP7n67rNByP7KbgVIMuwyCALAoGBAJ0F
-s4mJuVORfMY6U10/5oEiAjO8WbBqB+FYXqZixk8Pxdm8HcJJjDrhTrgMgUO8f9BB
-NjdypoHV6XkymPszIwvnaEAopQspVTUMF2IuFUTFAHUi1erc4Y4SO2LP5dnjdDPj
-C7G3aPIYpvwCuldGzY0lLc+u2FHOY47Crl2PdYKxAoGABYMe8KZ0j16KmhM2M8hY
-fxkQoLHw9k6eBoRXAUrQYeuwldQHsL6OUzjgPdbOFt47Gtyl8c4eB1vURyiDQU8Z
-nhJNukRX5uaoIn1EaThY377nUoQrf2z6y4+mgruhL8SnuVYfBUhfskdMecENd8FA
-ksEywRzrXaBtLpGaf9GRWCw=
------END PRIVATE KEY-----`,
-        );
+        const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
+        const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
 
         const databaseTabName = networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName;
         const sheetId = networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].sheetId;
