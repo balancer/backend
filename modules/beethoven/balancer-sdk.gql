@@ -6,7 +6,6 @@ extend type Query {
         swapType: GqlSorSwapType!
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
-        graphTraversalConfig: GqlGraphTraversalConfigInput
     ): GqlSorGetSwapsResponse!
     sorGetBatchSwapForTokensIn(
         tokensIn: [GqlTokenAmountHumanReadable!]!

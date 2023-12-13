@@ -3,7 +3,6 @@ import { balancerSorService } from './balancer-sor.service';
 import { tokenService } from '../token/token.service';
 import { sorService } from '../sor/sor.service';
 import { getTokenAmountHuman } from '../sor/utils';
-import { GraphTraversalConfig } from '../sor/types';
 import { headerChain } from '../context/header-chain';
 
 const balancerSdkResolvers: Resolvers = {
@@ -22,14 +21,12 @@ const balancerSdkResolvers: Resolvers = {
             // Use TokenAmount to help follow scaling requirements in later logic
             // args.swapAmount is HumanScale
             const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain);
-            const graphTraversalConfig = args.graphTraversalConfig as GraphTraversalConfig | undefined;
 
             const swaps = await sorService.getBeetsSwaps({
                 ...args,
                 chain,
                 tokenIn,
                 tokenOut,
-                graphTraversalConfig,
                 swapAmount: amount,
             });
 

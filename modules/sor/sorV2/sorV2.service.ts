@@ -249,12 +249,12 @@ class SwapResultV2 implements SwapResult {
         const swapAmount =
             swap.swapKind === SwapKind.GivenIn ? inputAmount.amount.toString() : outputAmount.amount.toString();
         return {
-            marketSp: '', // TODO - Check if CowSwap actually use this? Could this be calculate using out/in?
+            marketSp: '', // CowSwap is not using this field, confirmed.
             returnAmount,
-            returnAmountConsideringFees: returnAmount, // TODO - Check if CowSwap actually use this?
-            returnAmountFromSwaps: returnAmount, // TODO - Check if CowSwap actually use this?
+            returnAmountConsideringFees: returnAmount, // CowSwap is not using this field, confirmed.
+            returnAmountFromSwaps: returnAmount, // CowSwap is not using this field, confirmed.
             swapAmount,
-            swapAmountForSwaps: swapAmount, // TODO - Check if CowSwap actually use this?
+            swapAmountForSwaps: swapAmount, // CowSwap is not using this field, confirmed.
             swaps,
             tokenAddresses: swap.assets,
             tokenIn: swap.inputAmount.token.address,
