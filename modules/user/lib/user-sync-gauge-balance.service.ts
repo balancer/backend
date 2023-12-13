@@ -88,20 +88,16 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             include: { staking: true },
             where: { chain: networkContext.chain },
         });
-
         console.log(`user-sync-staked-balances-${networkContext.chainId} got data from db.`);
 
         const latestBlock = await networkContext.provider.getBlockNumber();
         console.log(`user-sync-staked-balances-${networkContext.chainId} got latest block.`);
+
         const gaugeAddresses = await gaugeSubgraphService.getAllGaugeAddresses();
-        console.log(`user-sync-staked-balances-${networkContext.chainId} got ${gaugeAddresses.length} gauges.`);
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
-        const endBlock =
-            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
-                ? startBlock + networkContext.data.rpcMaxBlockRange
-                : latestBlock;
+        const endBlock = latestBlock;
 
         // no new blocks have been minted, needed for slow networks
         if (startBlock > endBlock) {
@@ -112,32 +108,63 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             we need to figure out which users have a changed balance on any gauge contract and update their balance,
             therefore we check all transfer events since the last synced block
          */
-
-        const events: ethers.providers.Log[] = [];
-        const logPromises: Promise<ethers.providers.Log[]>[] = [];
         const erc20Interface = new ethers.utils.Interface(ERC20Abi);
 
-        console.log(`user-sync-staked-balances-${networkContext.chainId} getLogs of ${gaugeAddresses.length} gauges`);
-
-        for (const gaugeAddress of gaugeAddresses) {
-            logPromises.push(
-                networkContext.provider.getLogs({
-                    //ERC20 Transfer topic
-                    topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'],
-                    fromBlock: startBlock,
-                    toBlock: endBlock,
-                    address: gaugeAddress,
-                }),
-            );
-        }
-        const allResponses = await Promise.all(logPromises);
+        // Split the range into smaller chunks to avoid RPC limits, setting up to 50 times max block range
+        const maxBlockRange = networkContext.data.rpcMaxBlockRange;
+        const toBlock = Math.min(startBlock + 50 * maxBlockRange, latestBlock);
+        const range = toBlock - startBlock;
+        console.log(`user-sync-staked-balances-${networkContext.chainId} block range from ${startBlock} to ${toBlock}`);
         console.log(
-            `user-sync-staked-balances-${networkContext.chainId} getLogs of ${gaugeAddresses.length} gauges done`,
+            `user-sync-staked-balances-${networkContext.chainId} getLogs for ${_.uniq(gaugeAddresses).length} gauges.`,
         );
+        const events = await Promise.all(
+            // Getting logs in batches of max blocks allowed by RPC
+            Array.from({ length: Math.ceil(range / maxBlockRange) }, (_, i) => i).map(async (i) => {
+                const from = startBlock + i * maxBlockRange;
+                const to = Math.min(startBlock + (i + 1) * maxBlockRange, toBlock);
 
-        for (const response of allResponses) {
-            events.push(...response);
-        }
+                // Usually RPCs are handling any number of addresses, but it here batching just to be on the safe side
+                const logRequests: Promise<ethers.providers.Log[]>[] = _.chunk(gaugeAddresses, 500).map((addresses) => {
+                    // Fetch logs with a raw json request until we support Viem or Ethers6
+                    const payload = {
+                        jsonrpc: '2.0',
+                        id: 1,
+                        method: 'eth_getLogs',
+                        params: [
+                            {
+                                address: addresses,
+                                topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+                                fromBlock: '0x' + BigInt(from).toString(16),
+                                toBlock: '0x' + BigInt(to).toString(16),
+                            },
+                        ],
+                    };
+
+                    return fetch(networkContext.data.rpcUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    })
+                        .then((response) => response.json() as Promise<{ result: ethers.providers.Log[] }>)
+                        .then(({ result }) => result)
+                        .catch((error) => {
+                            console.error('Error fetching logs:', error);
+                            return [];
+                        });
+                });
+
+                const events = await Promise.all(logRequests).then((res) => res.flat());
+
+                return events;
+            }),
+        ).then((res) => res.flat().filter((event) => event));
+
+        console.log(
+            `user-sync-staked-balances-${networkContext.chainId} getLogs for ${gaugeAddresses.length} gauges done`,
+        );
 
         const balancesToFetch = _.uniqBy(
             events
