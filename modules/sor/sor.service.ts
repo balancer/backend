@@ -46,6 +46,7 @@ export class SorService {
     }
 
     private async getSwap(input: GetSwapsInput, v1Service: SwapService = sorV1BalancerService) {
+        console.log(`Running SOR for ${input.swapAmount} ${input.tokenIn} > ${input.tokenOut}`);
         const v1Start = +new Date();
         const swapV1 = await v1Service.getSwapResult(input);
         const v1Time = +new Date() - v1Start;
