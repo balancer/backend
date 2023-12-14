@@ -299,7 +299,7 @@ export class SorV2Service implements SwapService {
                 maxNonBoostedPathDepth,
             );
             const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount, poolsFromDb, config);
-            if (!swap && maxNonBoostedPathDepth < 5) {
+            if (!swap && maxNonBoostedPathDepth < 4) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return new SwapResultV2(swap);
