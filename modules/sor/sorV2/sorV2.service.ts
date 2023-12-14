@@ -89,7 +89,7 @@ class SwapResultV2 implements SwapResult {
     ): Promise<GqlSorGetSwapsResponse> {
         const sor = new BalancerSorService();
         const tokens = await tokenService.getTokens();
-        const priceImpact = swap.priceImpact.percentage.toFixed(4);
+        const priceImpact = swap.priceImpact.decimal.toFixed(4);
         let poolIds: string[];
         if (swap.isBatchSwap) {
             const swaps = swap.swaps as BatchSwapStep[];
