@@ -16,6 +16,7 @@ import { resolvers } from './app/gql/resolvers';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
@@ -33,9 +34,12 @@ async function startServer() {
             // new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
             // new Tracing.Integrations.Prisma({ client: prisma }),
-            // new Tracing.Integrations.Express({ app }),
-            // new Sentry.Integrations.Http({ tracing: true }),
+            new Sentry.Integrations.Express({ app }),
+            new Sentry.Integrations.Http({ tracing: true }),
+            new ProfilingIntegration(),
         ],
+        tracesSampleRate: 0.2,
+        profilesSampleRate: 0.1,
         beforeSend(event, hint) {
             const error = hint.originalException as string;
             if (error?.toString().includes('Unknown token:')) {
@@ -55,7 +59,7 @@ async function startServer() {
     });
 
     app.use(Sentry.Handlers.requestHandler());
-    // app.use(Sentry.Handlers.tracingHandler());
+    app.use(Sentry.Handlers.tracingHandler());
     // app.use(Sentry.Handlers.errorHandler());
 
     app.use(helmet.dnsPrefetchControl());
