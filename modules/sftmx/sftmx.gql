@@ -10,9 +10,9 @@ extend type Mutation {
 
 # TODO provide more info such as how much is staked on which validator
 type GqlSftmxStakingData {
-    totalAmount: AmountHumanReadable!
-    totalAmountStaked: AmountHumanReadable!
-    totalAmountInPool: AmountHumanReadable!
+    totalFtmAmount: AmountHumanReadable!
+    totalFtmAmountStaked: AmountHumanReadable!
+    totalFtmAmountInPool: AmountHumanReadable!
     numberOfVaults: Int!
     undelegatePaused: Boolean!
     withdrawPaused: Boolean!
@@ -27,7 +27,7 @@ type GqlSftmxStakingData {
 type GqlSftmxWithdrawalRequests {
     id: String!
     user: String!
-    amount: AmountHumanReadable!
+    amountSftmx: AmountHumanReadable!
     requestTimestamp: Int!
     isWithdrawn: Boolean!
 }

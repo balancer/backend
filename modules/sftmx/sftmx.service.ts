@@ -30,10 +30,10 @@ export class SftmxService {
             where: { id: this.stakingContractAddress },
         });
         return {
-            totalAmountInPool: stakingData.totalFtmInPool,
+            totalFtmAmountInPool: stakingData.totalFtmInPool,
             numberOfVaults: stakingData.numberOfVaults,
-            totalAmountStaked: stakingData.totalFtmStaked,
-            totalAmount: stakingData.totalFtm,
+            totalFtmAmountStaked: stakingData.totalFtmStaked,
+            totalFtmAmount: stakingData.totalFtm,
             maxDepositLimit: stakingData.maxDepositLimit,
             minDepositLimit: stakingData.minDepositLimit,
             maintenancePaused: stakingData.maintenancePaused,
