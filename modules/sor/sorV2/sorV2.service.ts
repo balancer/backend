@@ -274,7 +274,7 @@ export class SorV2Service implements SwapService {
 
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
-        maxNonBoostedPathDepth = 4,
+        maxNonBoostedPathDepth = 3,
     ): Promise<SwapResult> {
         try {
             const poolsFromDb = await this.getBasePools(chain);
