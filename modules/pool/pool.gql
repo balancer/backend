@@ -1,5 +1,5 @@
 extend type Query {
-    poolGetPool(id: String!, chain: GqlChain): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int
@@ -125,6 +125,8 @@ interface GqlPoolBase {
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolDynamicData {
