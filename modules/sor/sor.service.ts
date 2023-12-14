@@ -26,6 +26,7 @@ export class SorService {
     }
 
     async getBeetsSwaps(input: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
+        console.log('getBeetsSwaps input', JSON.stringify(input));
         const swap = await this.getSwap(input, sorV1BeetsService);
         const emptyResponse = sorV1BeetsService.zeroResponse(
             input.swapType,
