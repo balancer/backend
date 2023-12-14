@@ -6,7 +6,6 @@ import { GqlSorSwapType, GqlCowSwapApiResponse, GqlSorGetSwapsResponse } from '.
 import { GetSwapsInput, SwapService, SwapResult } from '../types';
 import { FundManagement, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
 import { env } from '../../../app/env';
-import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import { DeploymentEnv } from '../../network/network-config-types';
 
@@ -33,7 +32,7 @@ class SwapResultV1 implements SwapResult {
         }
     }
 
-    async getCowSwapResponse(chain = networkContext.chain, queryFirst = false): Promise<GqlCowSwapApiResponse> {
+    async getCowSwapResponse(chain: Chain, queryFirst = false): Promise<GqlCowSwapApiResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
 
         if (queryFirst) {
