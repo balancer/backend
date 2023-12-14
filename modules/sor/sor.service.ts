@@ -26,6 +26,7 @@ export class SorService {
     }
 
     async getBeetsSwaps(input: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
+        console.log('getBeetsSwaps input', JSON.stringify(input));
         const swap = await this.getSwap(input, sorV1BeetsService);
         const emptyResponse = sorV1BeetsService.zeroResponse(
             input.swapType,
@@ -46,6 +47,7 @@ export class SorService {
     }
 
     private async getSwap(input: GetSwapsInput, v1Service: SwapService = sorV1BalancerService) {
+        console.log(`Running SOR for ${input.swapAmount} ${input.tokenIn} > ${input.tokenOut}`);
         const v1Start = +new Date();
         const swapV1 = await v1Service.getSwapResult(input);
         const v1Time = +new Date() - v1Start;
