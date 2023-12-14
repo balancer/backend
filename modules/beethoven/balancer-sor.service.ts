@@ -148,6 +148,7 @@ export class BalancerSorService {
         marketSp: string;
         swaps: SwapV2[];
         tokenAddresses: string[];
+        priceImpact?: string;
     }): GqlSorGetSwapsResponse {
         const {
             tokenIn,
@@ -164,6 +165,7 @@ export class BalancerSorService {
             marketSp,
             swaps,
             tokenAddresses,
+            priceImpact: rawPriceImpact,
         } = swapData;
 
         const tokenInAmountFixed = formatFixed(tokenInAmtEvm, this.getTokenDecimals(tokenIn, tokens));
@@ -214,7 +216,7 @@ export class BalancerSorService {
             })),
             effectivePrice: effectivePrice.toString(),
             effectivePriceReversed: effectivePriceReversed.toString(),
-            priceImpact: priceImpact.toString(),
+            priceImpact: rawPriceImpact ? rawPriceImpact : priceImpact.toString(),
         };
     }
 

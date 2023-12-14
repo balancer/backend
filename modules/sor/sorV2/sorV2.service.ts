@@ -89,6 +89,7 @@ class SwapResultV2 implements SwapResult {
     ): Promise<GqlSorGetSwapsResponse> {
         const sor = new BalancerSorService();
         const tokens = await tokenService.getTokens();
+        const priceImpact = swap.priceImpact.percentage.toFixed(4);
         let poolIds: string[];
         if (swap.isBatchSwap) {
             const swaps = swap.swaps as BatchSwapStep[];
@@ -130,6 +131,7 @@ class SwapResultV2 implements SwapResult {
             marketSp: '0', // Daniel confirmed returning 0 should be fine here
             swaps: this.mapSwaps(swap.swaps, swap.assets),
             tokenAddresses: swap.assets,
+            priceImpact,
         };
         return sor.formatResponse(swapData);
     }
