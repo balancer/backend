@@ -22,6 +22,7 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
 export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
     const chainId = Number(chainToIdMap[chain]);
 
+    // also check for the polygon native asset
     if (
         (tokenAddr === NATIVE_ADDRESS || tokenAddr === '0x0000000000000000000000000000000000001010') &&
         chainId in NATIVE_ASSETS

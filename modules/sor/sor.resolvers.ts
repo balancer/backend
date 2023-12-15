@@ -15,7 +15,7 @@ const balancerSdkResolvers: Resolvers = {
                 throw new Error('sorGetSwaps error: Provide "chain" param');
             }
 
-            return sorService.getBeetsSwaps(args);
+            return sorService.getSorSwaps(args);
         },
         sorGetBatchSwapForTokensIn: async (parent, args, context) => {
             const tokens = await tokenService.getTokens();
