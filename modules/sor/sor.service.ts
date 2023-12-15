@@ -47,7 +47,6 @@ export class SorService {
     }
 
     private async getSwap(input: GetSwapsInput, v1Service: SwapService = sorV1BalancerService) {
-        console.log(`Running SOR for ${input.swapAmount} ${input.tokenIn} > ${input.tokenOut}`);
         const v1Start = +new Date();
         const swapV1 = await v1Service.getSwapResult(input);
         const v1Time = +new Date() - v1Start;
@@ -144,7 +143,7 @@ export class SorService {
         const fp = (a: bigint, d: number) => Number(formatUnits(String(a), d));
         const bn = (a: string, d: number) => BigInt(String(parseUnits(a, d)));
         const prismaToken = await tokenService.getToken(resultToken, chain);
-        const decimals = prismaToken!.decimals;
+        const decimals = prismaToken ? prismaToken.decimals : 18; // most probably native asset
         let v2Perf =
             version === 'V1'
                 ? 1 - fp(v1ResultAmount, decimals) / fp(v2ResultAmount, decimals) // negative perf means V1 is better
