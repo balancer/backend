@@ -14,6 +14,30 @@ import { gaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgr
 import { AddressZero } from '@ethersproject/constants';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
+    get chain() {
+        return networkContext.chain;
+    }
+
+    get chainId() {
+        return networkContext.chainId;
+    }
+
+    get provider() {
+        return networkContext.provider;
+    }
+
+    get rpcUrl() {
+        return networkContext.data.rpcUrl;
+    }
+
+    get rpcMaxBlockRange() {
+        return networkContext.data.rpcMaxBlockRange;
+    }
+
+    get multicallAddress() {
+        return networkContext.data.multicall;
+    }
+
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (!stakingTypes.includes('GAUGE')) {
             return;
@@ -25,7 +49,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
             select: { id: true },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
 
         const filteredGaugeShares = gaugeShares.filter((share) => {
@@ -45,14 +69,14 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { chain: networkContext.chain } }),
+                prisma.prismaUserStakedBalance.deleteMany({ where: { chain: this.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: filteredGaugeShares.map((share) => {
                         const pool = pools.find((pool) => pool.id === share.gauge.poolId);
 
                         return {
                             id: `${share.gauge.id}-${share.user.id}`,
-                            chain: networkContext.chain,
+                            chain: this.chain,
                             balance: share.balance,
                             balanceNum: parseFloat(share.balance),
                             userAddress: share.user.id,
@@ -63,8 +87,8 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     }),
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
-                    where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },
-                    create: { type: 'STAKED', chain: networkContext.chain, blockNumber: block.number },
+                    where: { type_chain: { type: 'STAKED', chain: this.chain } },
+                    create: { type: 'STAKED', chain: this.chain, blockNumber: block.number },
                     update: { blockNumber: block.number },
                 }),
             ],
@@ -77,7 +101,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     public async syncChangedStakedBalances(): Promise<void> {
         // we always store the latest synced block
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },
+            where: { type_chain: { type: 'STAKED', chain: this.chain } },
         });
 
         if (!status) {
@@ -86,12 +110,12 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         const pools = await prisma.prismaPool.findMany({
             include: { staking: true },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
-        console.log(`user-sync-staked-balances-${networkContext.chainId} got data from db.`);
+        console.log(`user-sync-staked-balances-${this.chainId} got data from db.`);
 
-        const latestBlock = await networkContext.provider.getBlockNumber();
-        console.log(`user-sync-staked-balances-${networkContext.chainId} got latest block.`);
+        const latestBlock = await this.provider.getBlockNumber();
+        console.log(`user-sync-staked-balances-${this.chainId} got latest block.`);
 
         const gaugeAddresses = await gaugeSubgraphService.getAllGaugeAddresses();
 
@@ -111,18 +135,15 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const erc20Interface = new ethers.utils.Interface(ERC20Abi);
 
         // Split the range into smaller chunks to avoid RPC limits, setting up to 50 times max block range
-        const maxBlockRange = networkContext.data.rpcMaxBlockRange;
-        const toBlock = Math.min(startBlock + 50 * maxBlockRange, latestBlock);
+        const toBlock = Math.min(startBlock + 50 * this.rpcMaxBlockRange, latestBlock);
         const range = toBlock - startBlock;
-        console.log(`user-sync-staked-balances-${networkContext.chainId} block range from ${startBlock} to ${toBlock}`);
-        console.log(
-            `user-sync-staked-balances-${networkContext.chainId} getLogs for ${_.uniq(gaugeAddresses).length} gauges.`,
-        );
+        console.log(`user-sync-staked-balances-${this.chainId} block range from ${startBlock} to ${toBlock}`);
+        console.log(`user-sync-staked-balances-${this.chainId} getLogs for ${_.uniq(gaugeAddresses).length} gauges.`);
         const events = await Promise.all(
             // Getting logs in batches of max blocks allowed by RPC
-            Array.from({ length: Math.ceil(range / maxBlockRange) }, (_, i) => i).map(async (i) => {
-                const from = startBlock + i * maxBlockRange;
-                const to = Math.min(startBlock + (i + 1) * maxBlockRange, toBlock);
+            Array.from({ length: Math.ceil(range / this.rpcMaxBlockRange) }, (_, i) => i).map(async (i) => {
+                const from = startBlock + i * this.rpcMaxBlockRange;
+                const to = Math.min(startBlock + (i + 1) * this.rpcMaxBlockRange, toBlock);
 
                 // Usually RPCs are handling any number of addresses, but it here batching just to be on the safe side
                 const logRequests: Promise<ethers.providers.Log[]>[] = _.chunk(gaugeAddresses, 500).map((addresses) => {
@@ -141,7 +162,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                         ],
                     };
 
-                    return fetch(networkContext.data.rpcUrl, {
+                    return fetch(this.rpcUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -162,9 +183,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             }),
         ).then((res) => res.flat().filter((event) => event));
 
-        console.log(
-            `user-sync-staked-balances-${networkContext.chainId} getLogs for ${gaugeAddresses.length} gauges done`,
-        );
+        console.log(`user-sync-staked-balances-${this.chainId} getLogs for ${gaugeAddresses.length} gauges done`);
 
         const balancesToFetch = _.uniqBy(
             events
@@ -180,13 +199,11 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             (entry) => entry.erc20Address + entry.userAddress,
         );
 
-        console.log(
-            `user-sync-staked-balances-${networkContext.chainId} got ${balancesToFetch.length} balances to fetch.`,
-        );
+        console.log(`user-sync-staked-balances-${this.chainId} got ${balancesToFetch.length} balances to fetch.`);
 
         if (balancesToFetch.length === 0) {
             await prisma.prismaUserBalanceSyncStatus.update({
-                where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },
+                where: { type_chain: { type: 'STAKED', chain: this.chain } },
                 data: { blockNumber: endBlock },
             });
 
@@ -194,14 +211,12 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         }
 
         const balances = await Multicaller.fetchBalances({
-            multicallAddress: networkContext.data.multicall,
-            provider: networkContext.provider,
+            multicallAddress: this.multicallAddress,
+            provider: this.provider,
             balancesToFetch,
         });
 
-        console.log(
-            `user-sync-staked-balances-${networkContext.chainId} got ${balancesToFetch.length} balances to fetch done.`,
-        );
+        console.log(`user-sync-staked-balances-${this.chainId} got ${balancesToFetch.length} balances to fetch done.`);
 
         await prismaBulkExecuteOperations(
             [
@@ -220,7 +235,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             where: {
                                 id_chain: {
                                     id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
-                                    chain: networkContext.chain,
+                                    chain: this.chain,
                                 },
                             },
                             update: {
@@ -229,7 +244,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             },
                             create: {
                                 id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
-                                chain: networkContext.chain,
+                                chain: this.chain,
                                 balance: formatFixed(userBalance.balance, 18),
                                 balanceNum: parseFloat(formatFixed(userBalance.balance, 18)),
                                 userAddress: userBalance.userAddress,
@@ -243,7 +258,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     where: {
                         type_chain: {
                             type: 'STAKED',
-                            chain: networkContext.chain,
+                            chain: this.chain,
                         },
                     },
                     data: { blockNumber: endBlock },
@@ -259,14 +274,14 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const amount = formatFixed(balance, 18);
 
         await prisma.prismaUserStakedBalance.upsert({
-            where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: networkContext.chain } },
+            where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
             update: {
                 balance: amount,
                 balanceNum: parseFloat(amount),
             },
             create: {
                 id: `${staking.address}-${userAddress}`,
-                chain: networkContext.chain,
+                chain: this.chain,
                 balance: amount,
                 balanceNum: parseFloat(amount),
                 userAddress: userAddress,
