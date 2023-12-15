@@ -275,6 +275,7 @@ model PrismaPoolTokenDynamicData {
     balanceUSD          Float
     weight              String?
     priceRate           String
+    latestFxPrice       Float?
 }
 
 model PrismaPoolSwap {

@@ -298,7 +298,10 @@ export const optimismNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(optimismNetworkData.subgraphs.balancer, optimismNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            optimismNetworkData.subgraphs.balancer,
+            optimismNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
