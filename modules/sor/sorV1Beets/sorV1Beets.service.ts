@@ -1,7 +1,7 @@
 import { formatEther } from 'viem';
 import { GqlSorSwapType, GqlCowSwapApiResponse, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../../schema';
 import { GetSwapsInput, SwapService, SwapResult } from '../types';
-import { BalancerSorService } from '../../beethoven/balancer-sor.service';
+import { BalancerSorService } from './balancer-sor.service';
 import { tokenService } from '../../token/token.service';
 import { TokenAmount } from '@balancer/sdk';
 

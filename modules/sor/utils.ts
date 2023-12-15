@@ -22,7 +22,10 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
 export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
     const chainId = Number(chainToIdMap[chain]);
 
-    if (tokenAddr === NATIVE_ADDRESS && chainId in NATIVE_ASSETS) {
+    if (
+        (tokenAddr === NATIVE_ADDRESS || tokenAddr === '0x0000000000000000000000000000000000001010') &&
+        chainId in NATIVE_ASSETS
+    ) {
         return NATIVE_ASSETS[chainId as keyof typeof NATIVE_ASSETS];
     } else {
         const prismaToken = await tokenService.getToken(tokenAddr, chain);

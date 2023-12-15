@@ -32,7 +32,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsInput, SwapResult, SwapService } from '../types';
 import { poolService } from '../../pool/pool.service';
 import { tokenService } from '../../token/token.service';
-import { BalancerSorService } from '../../beethoven/balancer-sor.service';
+import { BalancerSorService } from '../sorV1Beets/balancer-sor.service';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
 import { Cache, CacheClass } from 'memory-cache';
