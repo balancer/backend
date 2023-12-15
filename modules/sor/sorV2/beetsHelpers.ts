@@ -1,4 +1,4 @@
-import { BatchSwapStep, SingleSwap, SwapKind } from '@balancer/sdk';
+import { BatchSwapStep, NATIVE_ADDRESS, SingleSwap, SwapKind, ZERO_ADDRESS } from '@balancer/sdk';
 import { GqlPoolMinimal, GqlSorSwapRoute, GqlSorSwapRouteHop } from '../../../schema';
 import { formatFixed } from '@ethersproject/bignumber';
 
@@ -77,8 +77,8 @@ export function splitPaths(
     if (kind === SwapKind.GivenOut) {
         swapsCopy.reverse();
     }
-    const assetInIndex = BigInt(assets.indexOf(assetIn));
-    const assetOutIndex = BigInt(assets.indexOf(assetOut));
+    const assetInIndex = BigInt(assets.indexOf(assetIn === NATIVE_ADDRESS ? ZERO_ADDRESS : assetIn));
+    const assetOutIndex = BigInt(assets.indexOf(assetOut === NATIVE_ADDRESS ? ZERO_ADDRESS : assetOut));
     let path: BatchSwapStep[];
     let paths: BatchSwapStep[][] = [];
     swapsCopy.forEach((swap) => {

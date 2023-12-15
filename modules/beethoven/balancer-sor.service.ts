@@ -18,6 +18,7 @@ import * as Sentry from '@sentry/node';
 import _ from 'lodash';
 import { Logger } from '@ethersproject/logger';
 import { SwapInfoRoute } from '@balancer-labs/sor';
+import { NATIVE_ADDRESS, ZERO_ADDRESS } from '@balancer/sdk';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -331,7 +332,7 @@ export class BalancerSorService {
     }
 
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
-        if (tokenAddress === '0x0000000000000000000000000000000000000000') {
+        if (tokenAddress === ZERO_ADDRESS || tokenAddress === NATIVE_ADDRESS) {
             return 18;
         }
 
