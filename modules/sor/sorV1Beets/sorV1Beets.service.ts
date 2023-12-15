@@ -23,11 +23,11 @@ class SwapResultV1 implements SwapResult {
         }
     }
 
-    async getCowSwapResponse(chain = 'MAINNET', queryFirst = false): Promise<GqlCowSwapApiResponse> {
+    async getCowSwapResponse(queryFirst = false): Promise<GqlCowSwapApiResponse> {
         throw new Error('Use Balancer Service');
     }
 
-    async getBeetsSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse> {
+    async getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
         // Beets service is already querying onchain
         return this.swap;
@@ -42,7 +42,7 @@ export class SorV1BeetsService implements SwapService {
 
     public async getSwapResult(input: GetSwapsInput & { swapOptions: GqlSorSwapOptionsInput }): Promise<SwapResult> {
         try {
-            const swap = await this.querySorBeets(input);
+            const swap = await this.querySorV1(input);
             return new SwapResultV1(swap, input.swapType);
         } catch (err) {
             console.log(`sorV1 Service Error`, err);
@@ -59,7 +59,7 @@ export class SorV1BeetsService implements SwapService {
         return this.sorService.zeroResponse(swapType, tokenIn, tokenOut, formatEther(swapAmount.scale18));
     }
 
-    private async querySorBeets(
+    private async querySorV1(
         input: GetSwapsInput & { swapOptions: GqlSorSwapOptionsInput },
     ): Promise<GqlSorGetSwapsResponse> {
         const tokens = await tokenService.getTokens();
