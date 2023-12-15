@@ -105,7 +105,7 @@ export class SftmxService {
                 id: request.id,
                 ftmStaking: this.stakingContractAddress,
                 user: request.user.id,
-                amount: request.amount,
+                amountSftmx: request.amount,
                 isWithdrawn: request.isWithdrawn,
                 requestTimestamp: request.requestTime,
             };

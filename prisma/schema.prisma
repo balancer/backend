@@ -641,7 +641,7 @@ model PrismaSftmxWithdrawalRequest {
     ftmStakingId            PrismaSftmxStakingData  @relation(fields:[id], references: [id])
 
     user                                            String
-    amount                                          String
+    amountSftmx                                     String
     requestTimestamp                                Int
     isWithdrawn                                     Boolean
 }

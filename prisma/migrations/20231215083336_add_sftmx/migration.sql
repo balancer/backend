@@ -21,7 +21,7 @@ CREATE TABLE "PrismaSftmxStakingData" (
 CREATE TABLE "PrismaSftmxWithdrawalRequest" (
     "id" TEXT NOT NULL,
     "user" TEXT NOT NULL,
-    "amount" TEXT NOT NULL,
+    "amountSftmx" TEXT NOT NULL,
     "requestTimestamp" INTEGER NOT NULL,
     "isWithdrawn" BOOLEAN NOT NULL,
 
