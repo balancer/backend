@@ -332,7 +332,11 @@ export class BalancerSorService {
     }
 
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
-        if (tokenAddress === ZERO_ADDRESS || tokenAddress === NATIVE_ADDRESS) {
+        if (
+            tokenAddress === ZERO_ADDRESS ||
+            tokenAddress === NATIVE_ADDRESS ||
+            tokenAddress === '0x0000000000000000000000000000000000001010'
+        ) {
             return 18;
         }
 
