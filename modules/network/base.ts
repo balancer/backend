@@ -115,6 +115,22 @@ const baseNetworkData: NetworkData = {
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
+    datastudio: {
+        main: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+        canary: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+    },
 };
 
 export const baseNetworkConfig: NetworkConfig = {
@@ -141,7 +157,10 @@ export const baseNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(baseNetworkData.subgraphs.balancer, baseNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            baseNetworkData.subgraphs.balancer,
+            baseNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -236,6 +255,10 @@ export const baseNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

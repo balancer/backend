@@ -253,7 +253,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(arbitrumNetworkData.subgraphs.balancer, arbitrumNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            arbitrumNetworkData.subgraphs.balancer,
+            arbitrumNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -348,6 +351,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };
