@@ -8,6 +8,8 @@ import { headerChain } from '../context/header-chain';
 const balancerSdkResolvers: Resolvers = {
     Query: {
         sorGetSwaps: async (parent, args, context) => {
+            console.log('sorGetSwaps args', JSON.stringify(args));
+
             const currentChain = headerChain();
             if (!args.chain && currentChain) {
                 args.chain = currentChain;

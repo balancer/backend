@@ -39,7 +39,7 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
@@ -349,7 +349,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(fantomNetworkData.subgraphs.balancer, fantomNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            fantomNetworkData.subgraphs.balancer,
+            fantomNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 

@@ -1,7 +1,6 @@
 import {
     BasePool,
     sorGetSwapsWithPools,
-    Token,
     Address,
     SwapKind,
     sorParseRawPools,
@@ -14,23 +13,29 @@ import {
     RawGyro2Pool,
     RawGyro3Pool,
     RawGyroEPool,
+    HumanAmount,
+    SupportedRawPoolTypes,
+    SingleSwap,
+    BatchSwapStep,
 } from '@balancer/sdk';
-import { GqlSorSwapType, GqlSwap, GqlSorGetSwapsResponse, GqlPoolMinimal, GqlSorSwapRoute } from '../../../schema';
+import {
+    GqlSorSwapType,
+    GqlSwap,
+    GqlSorGetSwapsResponse,
+    GqlPoolMinimal,
+    GqlSorSwapRoute,
+    GqlCowSwapApiResponse,
+} from '../../../schema';
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { GetSwapsInput, SwapResult, SwapService } from '../types';
-import { tokenService } from '../../token/token.service';
-import { networkContext } from '../../network/network-context.service';
-import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
-import { HumanAmount, SupportedRawPoolTypes } from '@balancer/sdk';
+import { prisma } from '../../../prisma/prisma-client';
+import { GetSwapsInput, SwapResult, SwapService } from '../types';
+import { poolService } from '../../pool/pool.service';
+import { tokenService } from '../../token/token.service';
+import { BalancerSorService } from '../../beethoven/balancer-sor.service';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
 import { Cache, CacheClass } from 'memory-cache';
-import { GqlCowSwapApiResponse } from '../../../schema';
-import { BalancerSorService } from '../../beethoven/balancer-sor.service';
-import { poolService } from '../../pool/pool.service';
-import { BatchSwapStep } from '@balancer/sdk';
-import { SingleSwap } from '@balancer/sdk';
 import { SwapInfoRoute, SwapTypes, Swap, bnum, SwapInfoRouteHop } from '@balancer-labs/sor';
 import { BigNumber } from 'ethers';
 import { oldBnumScale } from '../../big-number/old-big-number';
@@ -38,6 +43,7 @@ import { mapRoutes } from './beetsHelpers';
 import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
+import { getToken } from '../utils';
 
 const ALL_BASEPOOLS_CACHE_KEY = `basePools:all`;
 
@@ -59,7 +65,7 @@ class SwapResultV2 implements SwapResult {
         }
     }
 
-    async getCowSwapResponse(chain = networkContext.chain, queryFirst = false): Promise<GqlCowSwapApiResponse> {
+    async getCowSwapResponse(chain: Chain, queryFirst = false): Promise<GqlCowSwapApiResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
 
         if (!queryFirst) return this.mapResultToCowSwap(this.swap, this.swap.inputAmount, this.swap.outputAmount);
@@ -274,12 +280,12 @@ export class SorV2Service implements SwapService {
 
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
-        maxNonBoostedPathDepth = 4,
+        maxNonBoostedPathDepth = 3,
     ): Promise<SwapResult> {
         try {
             const poolsFromDb = await this.getBasePools(chain);
-            const tIn = await this.getToken(tokenIn as Address, chain);
-            const tOut = await this.getToken(tokenOut as Address, chain);
+            const tIn = await getToken(tokenIn as Address, chain);
+            const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapType(swapType);
             const config = graphTraversalConfig
                 ? {
@@ -299,7 +305,7 @@ export class SorV2Service implements SwapService {
                 maxNonBoostedPathDepth,
             );
             const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount, poolsFromDb, config);
-            if (!swap && maxNonBoostedPathDepth < 6) {
+            if (!swap && maxNonBoostedPathDepth < 4) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return new SwapResultV2(swap);
@@ -319,21 +325,6 @@ export class SorV2Service implements SwapService {
             });
             return new SwapResultV2(null);
         }
-    }
-
-    /**
-     * Gets a b-sdk Token based off tokenAddr.
-     * @param address
-     * @param chain
-     * @returns
-     */
-    private async getToken(address: Address, chain: Chain): Promise<Token> {
-        const token = await tokenService.getToken(address, chain);
-        if (!token) {
-            throw new Error('Unknown token: ' + address);
-        }
-        const chainId = Number(chainToIdMap[chain]);
-        return new Token(chainId, address, token.decimals, token.symbol);
     }
 
     private mapSwapType(swapType: GqlSorSwapType): SwapKind {
