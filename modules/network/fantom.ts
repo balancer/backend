@@ -96,8 +96,8 @@ const fantomNetworkData: NetworkData = {
     },
     rpcUrl:
         (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.fantom.gateway.fm`
-            : `https://rpc.fantom.network`,
+            ? `https://rpc.ankr.com/fantom`
+            : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
