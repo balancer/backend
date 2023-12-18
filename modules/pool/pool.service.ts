@@ -13,8 +13,6 @@ import {
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
-    GqlPoolUserSwapVolume,
-    InputMaybe,
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
@@ -74,7 +72,7 @@ export class PoolService {
         return networkContext.services.balancerSubgraphService;
     }
 
-    public async getGqlPool(id: string, chain: GqlChain, userAddress?: InputMaybe<string>): Promise<GqlPoolUnion> {
+    public async getGqlPool(id: string, chain: GqlChain, userAddress?: string): Promise<GqlPoolUnion> {
         return this.poolGqlLoaderService.getPool(id, chain, userAddress);
     }
 

@@ -14,7 +14,7 @@ const balancerResolvers: Resolvers = {
             } else if (!chain) {
                 throw new Error('poolGetPool error: Provide "chain" param');
             }
-            return poolService.getGqlPool(id, chain, userAddress);
+            return poolService.getGqlPool(id, chain, userAddress ? userAddress : undefined);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);

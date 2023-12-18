@@ -30,7 +30,6 @@ import {
     GqlPoolUserBalance,
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
-    InputMaybe,
     QueryPoolGetPoolsArgs,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
@@ -45,7 +44,7 @@ import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 
 export class PoolGqlLoaderService {
-    public async getPool(id: string, chain: Chain, userAddress?: InputMaybe<string>): Promise<GqlPoolUnion> {
+    public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
         let pool = undefined;
         pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id, chain: chain } },
@@ -63,7 +62,7 @@ export class PoolGqlLoaderService {
             throw new Error('Pool exists, but has an unknown type');
         }
 
-        return this.mapPoolToGqlPool(pool);
+        return this.mapPoolToGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances);
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -82,24 +81,7 @@ export class PoolGqlLoaderService {
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
                     ...prismaPoolMinimal.include,
-                    userWalletBalances: {
-                        where: {
-                            userAddress: {
-                                equals: args.where?.userAddress,
-                                mode: 'insensitive' as const,
-                            },
-                            balanceNum: { gt: 0 },
-                        },
-                    },
-                    userStakedBalances: {
-                        where: {
-                            userAddress: {
-                                equals: args.where?.userAddress,
-                                mode: 'insensitive' as const,
-                            },
-                            balanceNum: { gt: 0 },
-                        },
-                    },
+                    ...this.getUserBalancesInclude(args.where.userAddress),
                 },
             });
 
@@ -1267,7 +1249,7 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private getUserBalancesInclude(userAddress?: InputMaybe<string>) {
+    private getUserBalancesInclude(userAddress?: string) {
         if (!userAddress) {
             return {};
         }
