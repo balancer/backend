@@ -95,7 +95,7 @@ const fantomNetworkData: NetworkData = {
         maxHourlyPriceHistoryNumDays: 100,
     },
     rpcUrl:
-        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.fantom.network` : `https://rpc.fantom.network`,
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.ankr.com/fantom` : `https://rpc.fantom.network`,
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
@@ -347,7 +347,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(fantomNetworkData.subgraphs.balancer, fantomNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            fantomNetworkData.subgraphs.balancer,
+            fantomNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
