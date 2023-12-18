@@ -42,14 +42,16 @@ import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
-import { StringDecoder } from 'string_decoder';
-import { SwapKind } from '@balancer/sdk';
 
 export class PoolGqlLoaderService {
-    public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
-        const pool = await prisma.prismaPool.findUnique({
+    public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
+        let pool = undefined;
+        pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id, chain: chain } },
-            include: prismaPoolWithExpandedNesting.include,
+            include: {
+                ...prismaPoolWithExpandedNesting.include,
+                ...this.getUserBalancesInclude(userAddress),
+            },
         });
 
         if (!pool) {
@@ -60,7 +62,7 @@ export class PoolGqlLoaderService {
             throw new Error('Pool exists, but has an unknown type');
         }
 
-        return this.mapPoolToGqlPool(pool);
+        return this.mapPoolToGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances);
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -79,24 +81,7 @@ export class PoolGqlLoaderService {
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
                     ...prismaPoolMinimal.include,
-                    userWalletBalances: {
-                        where: {
-                            userAddress: {
-                                equals: args.where?.userAddress,
-                                mode: 'insensitive' as const,
-                            },
-                            balanceNum: { gt: 0 },
-                        },
-                    },
-                    userStakedBalances: {
-                        where: {
-                            userAddress: {
-                                equals: args.where?.userAddress,
-                                mode: 'insensitive' as const,
-                            },
-                            balanceNum: { gt: 0 },
-                        },
-                    },
+                    ...this.getUserBalancesInclude(args.where.userAddress),
                 },
             });
 
@@ -423,7 +408,11 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private mapPoolToGqlPool(pool: PrismaPoolWithExpandedNesting): GqlPoolUnion {
+    private mapPoolToGqlPool(
+        pool: PrismaPoolWithExpandedNesting,
+        userWalletbalances: PrismaUserWalletBalance[] = [],
+        userStakedBalances: PrismaUserStakedBalance[] = [],
+    ): GqlPoolUnion {
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
         const mappedData = {
@@ -437,6 +426,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
+            userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
         };
 
         //TODO: may need to build out the types here still
@@ -1256,6 +1246,32 @@ export class PoolGqlLoaderService {
             totalMainTokenBalance: `${mainTokenBalance
                 .plus(wrappedTokenBalance.times(wrappedToken.dynamicData?.priceRate || '1'))
                 .toFixed(mainToken.token.decimals)}`,
+        };
+    }
+
+    private getUserBalancesInclude(userAddress?: string) {
+        if (!userAddress) {
+            return {};
+        }
+        return {
+            userWalletBalances: {
+                where: {
+                    userAddress: {
+                        equals: userAddress,
+                        mode: 'insensitive' as const,
+                    },
+                    balanceNum: { gt: 0 },
+                },
+            },
+            userStakedBalances: {
+                where: {
+                    userAddress: {
+                        equals: userAddress,
+                        mode: 'insensitive' as const,
+                    },
+                    balanceNum: { gt: 0 },
+                },
+            },
         };
     }
 }

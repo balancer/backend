@@ -1,5 +1,5 @@
 extend type Query {
-    poolGetPool(id: String!, chain: GqlChain): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int
@@ -125,6 +125,8 @@ interface GqlPoolBase {
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolDynamicData {
@@ -230,6 +232,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -272,6 +276,8 @@ type GqlPoolGyro implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -295,6 +301,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -318,6 +326,8 @@ type GqlPoolStable implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -341,6 +351,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolPhantomStable implements GqlPoolBase {
@@ -365,6 +377,8 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     bptPriceRate: BigDecimal!
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -391,6 +405,8 @@ type GqlPoolElement implements GqlPoolBase {
     staking: GqlPoolStaking
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -419,6 +435,8 @@ type GqlPoolLinear implements GqlPoolBase {
     bptPriceRate: BigDecimal!
     type: String!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLinearNested {
