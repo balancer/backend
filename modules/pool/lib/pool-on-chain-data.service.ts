@@ -15,6 +15,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'STABLE',
     'META_STABLE',
     'PHANTOM_STABLE',
+    'COMPOSABLE_STABLE',
     'LINEAR',
     'LIQUIDITY_BOOTSTRAPPING',
     'ELEMENT',
