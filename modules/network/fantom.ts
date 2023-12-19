@@ -39,7 +39,7 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
@@ -96,8 +96,8 @@ const fantomNetworkData: NetworkData = {
     },
     rpcUrl:
         (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.fantom.gateway.fm`
-            : `https://rpc.fantom.network`,
+            ? `https://rpc.ankr.com/fantom`
+            : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',

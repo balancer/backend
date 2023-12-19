@@ -7,14 +7,14 @@ import { headerChain } from '../context/header-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id, chain }, context) => {
+        poolGetPool: async (parent, { id, chain, userAddress }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
                 throw new Error('poolGetPool error: Provide "chain" param');
             }
-            return poolService.getGqlPool(id, chain);
+            return poolService.getGqlPool(id, chain, userAddress ? userAddress : undefined);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
@@ -105,7 +105,7 @@ const balancerResolvers: Resolvers = {
         },
         poolGetGyroPools: async () => {
             return poolService.getGqlGyroPools();
-        }
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {

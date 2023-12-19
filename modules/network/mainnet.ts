@@ -97,8 +97,8 @@ const data: NetworkData = {
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
             poolIdsToExclude: [
-                "0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3", 
-                "0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4", // Linear pools that cause issues with new b-sdk
+                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
             ],
         },
         canary: {
@@ -108,8 +108,8 @@ const data: NetworkData = {
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
             poolIdsToExclude: [
-                "0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3", 
-                "0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4", // Linear pools that cause issues with new b-sdk
+                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
             ],
         },
     },
@@ -490,6 +490,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-global-coingecko-prices',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

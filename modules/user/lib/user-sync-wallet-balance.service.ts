@@ -212,7 +212,7 @@ export class UserSyncWalletBalanceService {
 
                 return events;
             }),
-        ).then((res) => res.flat());
+        ).then((res) => res.flat().filter((event) => event));
 
         console.log(
             `user-sync-wallet-balances-for-all-pools-${this.chainId} getLogs of ${poolAddresses.length} pools done`,
