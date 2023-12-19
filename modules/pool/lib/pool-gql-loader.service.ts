@@ -20,7 +20,7 @@ import {
     GqlPoolLinearNested,
     GqlPoolMinimal,
     GqlPoolNestingType,
-    GqlPoolPhantomStableNested,
+    GqlPoolComposableStableNested,
     GqlPoolStaking,
     GqlPoolToken,
     GqlPoolTokenDisplay,
@@ -445,9 +445,9 @@ export class PoolGqlLoaderService {
                     amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
-            case 'PHANTOM_STABLE':
+            case 'COMPOSABLE_STABLE':
                 return {
-                    __typename: 'GqlPoolPhantomStable',
+                    __typename: 'GqlPoolComposableStable',
                     ...mappedData,
                     amp: pool.stableDynamicData?.amp || '0',
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
@@ -598,7 +598,7 @@ export class PoolGqlLoaderService {
                             weight: poolToken?.dynamicData?.weight,
                         };
                     }
-                } else if (allToken.nestedPool?.type === 'PHANTOM_STABLE') {
+                } else if (allToken.nestedPool?.type === 'COMPOSABLE_STABLE') {
                     const mainTokens =
                         allToken.nestedPool.allTokens.filter(
                             (nestedToken) =>
@@ -941,7 +941,7 @@ export class PoolGqlLoaderService {
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
         const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
-        const supportsNativeAssetDeposit = pool.type !== 'PHANTOM_STABLE';
+        const supportsNativeAssetDeposit = pool.type !== 'COMPOSABLE_STABLE';
         let options: GqlPoolInvestOption[] = [];
 
         for (const poolToken of poolTokens) {
@@ -950,7 +950,7 @@ export class PoolGqlLoaderService {
 
         return {
             //TODO could flag these as disabled in sanity
-            proportionalEnabled: pool.type !== 'PHANTOM_STABLE' && pool.type !== 'META_STABLE',
+            proportionalEnabled: pool.type !== 'COMPOSABLE_STABLE' && pool.type !== 'META_STABLE',
             singleAssetEnabled: true,
             options,
         };
@@ -1006,11 +1006,11 @@ export class PoolGqlLoaderService {
                           ]
                         : [this.mapPoolTokenToGql(mainToken)],
             });
-        } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
+        } else if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
 
-            if (pool.type === 'PHANTOM_STABLE' || isWeightedPoolV2(pool)) {
-                //when nesting a phantom stable inside a phantom stable, all of the underlying tokens can be used when investing
+            if (pool.type === 'COMPOSABLE_STABLE' || isWeightedPoolV2(pool)) {
+                //when nesting a composable stable inside a composable stable, all of the underlying tokens can be used when investing
                 //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
                 // ie: USDC/DAI/USDT for nested bbaUSD
                 for (const nestedToken of nestedTokens) {
@@ -1030,7 +1030,7 @@ export class PoolGqlLoaderService {
                     });
                 }
             } else {
-                //if the parent pool does not have phantom bpt (ie: weighted), the user can only invest with 1 of the phantom stable tokens
+                //if the parent pool does not have phantom bpt (ie: weighted), the user can only invest with 1 of the composable stable tokens
                 options.push({
                     poolTokenIndex: poolToken.index,
                     poolTokenAddress: poolToken.address,
@@ -1091,7 +1091,7 @@ export class PoolGqlLoaderService {
                 ...this.getLinearPoolTokenData(token, nestedPool),
                 pool: this.mapNestedPoolToGqlPoolLinearNested(nestedPool, percentOfSupplyNested),
             };
-        } else if (nestedPool && nestedPool.type === 'PHANTOM_STABLE') {
+        } else if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
             const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
             const percentOfSupplyNested =
                 totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
@@ -1099,8 +1099,8 @@ export class PoolGqlLoaderService {
             //50_000_000_000_000
             return {
                 ...this.mapPoolTokenToGql(token),
-                __typename: 'GqlPoolTokenPhantomStable',
-                pool: this.mapNestedPoolToGqlPoolPhantomStableNested(nestedPool, percentOfSupplyNested),
+                __typename: 'GqlPoolTokenComposableStable',
+                pool: this.mapNestedPoolToGqlPoolComposableStableNested(nestedPool, percentOfSupplyNested),
             };
         }
 
@@ -1154,14 +1154,14 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private mapNestedPoolToGqlPoolPhantomStableNested(
+    private mapNestedPoolToGqlPoolComposableStableNested(
         pool: PrismaNestedPoolWithSingleLayerNesting,
         percentOfSupplyNested: number,
-    ): GqlPoolPhantomStableNested {
+    ): GqlPoolComposableStableNested {
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
         return {
-            __typename: 'GqlPoolPhantomStableNested',
+            __typename: 'GqlPoolComposableStableNested',
             ...pool,
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => {

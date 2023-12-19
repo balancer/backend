@@ -70,8 +70,6 @@ const baseNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: ['0x8df317a729fcaa260306d7de28888932cb579b88'],
-        weightedPoolV2Factories: ['0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },

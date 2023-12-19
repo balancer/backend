@@ -1,5 +1,5 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { Chain, PrismaPoolType } from '@prisma/client';
+import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isComposableStablePool, isStablePool } from './pool-utils';
@@ -33,7 +33,6 @@ export class PoolOnChainDataService {
             vaultAddress: networkContext.data.balancer.vault,
             yieldProtocolFeePercentage: networkContext.data.balancer.yieldProtocolFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
-            composableStableFactories: networkContext.data.balancer.composableStablePoolFactories,
         };
     }
 
@@ -95,19 +94,9 @@ export class PoolOnChainDataService {
         });
 
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
-        const poolsWithComposableStableType = filteredPools.map((pool) => ({
-            ...pool,
-            type: (isComposableStablePool(pool) ? 'COMPOSABLE_STABLE' : pool.type) as
-                | PrismaPoolType
-                | 'COMPOSABLE_STABLE',
-        }));
 
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const onchainResults = await fetchOnChainPoolData(
-            poolsWithComposableStableType,
-            this.options.vaultAddress,
-            1024,
-        );
+        const onchainResults = await fetchOnChainPoolData(filteredPools, this.options.vaultAddress, 1024);
         const gyroFees = await (this.options.gyroConfig
             ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, 1024)
             : Promise.resolve({} as { [address: string]: string }));
