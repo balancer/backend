@@ -262,6 +262,9 @@ export class PoolCreatorService {
                                 id: token.id,
                                 address: token.address,
                                 priceRateProvider,
+                                exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
+                                    ? token.isExemptFromYieldProtocolFee
+                                    : false,
                                 nestedPoolId: nestedPool?.id,
                                 index: token.index || pool.tokensList.findIndex((address) => address === token.address),
                             };

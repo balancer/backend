@@ -362,22 +362,24 @@ export class PoolService {
     }
 
     public async syncPriceRateProvidersForAllPools() {
-        const subgraphPools = await balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         for (const subgraphPool of subgraphPools) {
-            console.log("Pool ", subgraphPool.id, " price rate providers: ", subgraphPool.priceRateProviders);
+            console.log('Pool ', subgraphPool.id, ' price rate providers: ', subgraphPool.priceRateProviders);
             if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
-            console.log("Updating providers");
+            console.log('Updating providers');
 
             const poolTokens = subgraphPool.tokens || [];
             for (let i = 0; i < poolTokens.length; i++) {
                 const token = poolTokens[i];
 
                 let priceRateProvider;
-                const data = subgraphPool.priceRateProviders.find((provider) => provider.token.address === token.address)
+                const data = subgraphPool.priceRateProviders.find(
+                    (provider) => provider.token.address === token.address,
+                );
                 priceRateProvider = data?.address;
                 if (!priceRateProvider) continue;
 
-                console.log("Updating token ", token.id, " to provider: ", priceRateProvider);
+                console.log('Updating token ', token.id, ' to provider: ', priceRateProvider);
 
                 try {
                     await prisma.prismaPoolToken.update({
