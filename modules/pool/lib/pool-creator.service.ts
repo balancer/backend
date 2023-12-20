@@ -300,7 +300,7 @@ export class PoolCreatorService {
                               },
                           }
                         : undefined,
-                gyroData: ['GYRO2', 'GYRO3', 'GYROE'].includes(poolType)
+                gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(poolType)
                     ? {
                           create: {
                               id: pool.id,
