@@ -70,14 +70,6 @@ const avalancheNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0x3b1eb8eb7b43882b385ab30533d9a2bef9052a98',
-            '0xe42ffa682a26ef8f25891db4882932711d42e467',
-        ],
-        weightedPoolV2Factories: [
-            '0x94f68b54191f62f781fe8298a8a5fa3ed772d227',
-            '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
