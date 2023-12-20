@@ -364,6 +364,9 @@ export class SorV2Service implements SwapService {
                         gt: 0.000000000001,
                     },
                     swapEnabled: true,
+                    totalLiquidity: {
+                        gt: 50,
+                    },
                 },
                 id: {
                     notIn: [...poolIdsToExclude, ...poolsToIgnore],
