@@ -288,6 +288,7 @@ export class SorV2Service implements SwapService {
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
+        const MAX_INCREASED_PATH_DEPTH = maxNonBoostedPathDepth + 1;
         try {
             const poolsFromDb = await this.getBasePools(chain);
             const tIn = await getToken(tokenIn as Address, chain);
@@ -311,11 +312,17 @@ export class SorV2Service implements SwapService {
                 maxNonBoostedPathDepth,
             );
             const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount, poolsFromDb, config);
-            if (!swap && maxNonBoostedPathDepth < 4) {
+            if (!swap && maxNonBoostedPathDepth < MAX_INCREASED_PATH_DEPTH) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
+            if (
+                err.message.includes('No potential swap paths provided') &&
+                maxNonBoostedPathDepth < MAX_INCREASED_PATH_DEPTH
+            ) {
+                return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
+            }
             console.error(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
             );
