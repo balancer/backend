@@ -30,7 +30,6 @@ import {
     GqlPoolUserBalance,
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
-    GqlPoolPriceRateProvider,
     QueryPoolGetPoolsArgs,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
@@ -428,7 +427,6 @@ export class PoolGqlLoaderService {
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
-            priceRateProviders: this.mapPriceRateProviders(pool),
         };
 
         //TODO: may need to build out the types here still
@@ -941,21 +939,6 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private mapPriceRateProviders(pool: PrismaPoolWithExpandedNesting): GqlPoolPriceRateProvider[] {
-        const providers: GqlPoolPriceRateProvider[] = [];
-        pool.tokens.forEach((token) => {
-            if (token.priceRateProvider) {
-                providers.push({
-                    address: token.priceRateProvider,
-                    token: {
-                        address: token.address,
-                    },
-                });
-            }
-        });
-        return providers;
-    }
-
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
         const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
         const supportsNativeAssetDeposit = pool.type !== 'COMPOSABLE_STABLE';
@@ -1130,6 +1113,7 @@ export class PoolGqlLoaderService {
             ...poolToken.token,
             __typename: 'GqlPoolToken',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
+            priceRateProvider: poolToken.priceRateProvider,
             balance: poolToken.dynamicData?.balance || '0',
             index: poolToken.index,
             weight: poolToken.dynamicData?.weight,

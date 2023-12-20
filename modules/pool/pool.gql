@@ -125,8 +125,6 @@ interface GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
-
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
 
@@ -230,7 +228,6 @@ type GqlPoolWeighted implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -257,7 +254,6 @@ type GqlPoolGyro implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     alpha: String!
     beta: String!
@@ -300,7 +296,6 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -326,7 +321,6 @@ type GqlPoolStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -352,7 +346,6 @@ type GqlPoolMetaStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -379,7 +372,6 @@ type GqlPoolComposableStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolTokenUnion!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
     staking: GqlPoolStaking
@@ -406,7 +398,6 @@ type GqlPoolElement implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     #element specific fields
     unitSeconds: BigInt!
@@ -435,7 +426,6 @@ type GqlPoolLinear implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     tokens: [GqlPoolToken!]!
-    priceRateProviders: [GqlPoolPriceRateProvider!]!
 
     #linear specific fields
     mainIndex: Int!
@@ -518,6 +508,7 @@ interface GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -534,6 +525,7 @@ type GqlPoolToken implements GqlPoolTokenBase {
     #dynamic data
     balance: BigDecimal!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -548,6 +540,7 @@ type GqlPoolTokenLinear implements GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
 
     pool: GqlPoolLinearNested!
@@ -568,6 +561,7 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -617,15 +611,6 @@ type GqlPoolLinearPoolWrappedToken {
     name: String!
     symbol: String!
     decimals: Int!
-}
-
-type GqlPoolPriceRateProvider {
-    address: String!
-    token: GqlPoolPriceRateProviderToken!
-}
-
-type GqlPoolPriceRateProviderToken {
-    address: String!
 }
 
 type GqlPoolApr {
@@ -688,21 +673,6 @@ enum GqlPoolFilterCategory {
     INCENTIVIZED
     BLACK_LISTED
 }
-
-# enum GqlPoolFilterType {
-#     WEIGHTED
-#     STABLE
-#     META_STABLE
-#     PHANTOM_STABLE
-#     ELEMENT
-#     LINEAR
-#     UNKNOWN
-#     LIQUIDITY_BOOTSTRAPPING
-#     INVESTMENT
-#     GYRO
-#     GYRO3
-#     GYROE
-# }
 
 type GqlPoolTokenExpanded {
     id: ID!
