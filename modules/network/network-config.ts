@@ -9,7 +9,6 @@ import { zkevmNetworkConfig } from './zkevm';
 import { avalancheNetworkConfig } from './avalanche';
 import { baseNetworkConfig } from './base';
 import { Chain } from '@prisma/client';
-import { keyBy, pickBy } from 'lodash';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
@@ -37,3 +36,8 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
 
 export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453'];
 export const BeethovenChainIds = ['250', '10'];
+
+export const chainToIdMap = Object.values(AllNetworkConfigs).reduce((acc, config) => {
+    acc[config.data.chain.gqlId] = String(config.data.chain.id);
+    return acc;
+}, {} as { [chain in Chain]: string });

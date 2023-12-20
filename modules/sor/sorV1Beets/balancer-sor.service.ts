@@ -1,22 +1,24 @@
-import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType } from '../../schema';
+import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType, GqlPoolMinimal } from '../../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
-import { poolService } from '../pool/pool.service';
-import { oldBnum } from '../big-number/old-big-number';
+import { poolService } from '../../pool/pool.service';
+import { oldBnum } from '../../big-number/old-big-number';
 import axios from 'axios';
 import { FundManagement, SwapInfo, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
-import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../web3/addresses';
+import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../../web3/addresses';
 import { BigNumber } from 'ethers';
-import { TokenAmountHumanReadable } from '../common/global-types';
+import { TokenAmountHumanReadable } from '../../common/global-types';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
-import VaultAbi from '../pool/abi/Vault.json';
-import { env } from '../../app/env';
-import { networkContext } from '../network/network-context.service';
-import { DeploymentEnv } from '../network/network-config-types';
+import VaultAbi from '../../pool/abi/Vault.json';
+import { env } from '../../../app/env';
+import { networkContext } from '../../network/network-context.service';
+import { DeploymentEnv } from '../../network/network-config-types';
 import * as Sentry from '@sentry/node';
 import _ from 'lodash';
 import { Logger } from '@ethersproject/logger';
+import { SwapInfoRoute } from '@balancer-labs/sor';
+import { NATIVE_ADDRESS, ZERO_ADDRESS } from '@balancer/sdk';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -55,35 +57,7 @@ export class BalancerSorService {
         let swapInfo = await this.querySor(swapType, tokenIn, tokenOut, swapAmountScaled, swapOptions);
         // no swaps found, return 0
         if (swapInfo.swaps.length === 0) {
-            return {
-                ...swapInfo,
-                tokenIn: replaceZeroAddressWithEth(swapInfo.tokenIn),
-                tokenOut: replaceZeroAddressWithEth(swapInfo.tokenOut),
-                swapType,
-                tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : BigNumber.from('0').toString(),
-                tokenOutAmount: swapType === 'EXACT_IN' ? BigNumber.from('0').toString() : swapAmount,
-                swapAmount: swapType === 'EXACT_IN' ? BigNumber.from('0').toString() : swapAmount,
-                swapAmountScaled: BigNumber.from('0').toString(),
-                swapAmountForSwaps: swapInfo.swapAmountForSwaps
-                    ? BigNumber.from(swapInfo.swapAmountForSwaps).toString()
-                    : undefined,
-                returnAmount: BigNumber.from('0').toString(),
-                returnAmountScaled: BigNumber.from('0').toString(),
-                returnAmountConsideringFees: BigNumber.from(swapInfo.returnAmountConsideringFees).toString(),
-                returnAmountFromSwaps: swapInfo.returnAmountFromSwaps
-                    ? BigNumber.from(swapInfo.returnAmountFromSwaps).toString()
-                    : undefined,
-                routes: swapInfo.routes.map((route) => ({
-                    ...route,
-                    hops: route.hops.map((hop) => ({
-                        ...hop,
-                        pool: pools.find((pool) => pool.id === hop.poolId)!,
-                    })),
-                })),
-                effectivePrice: BigNumber.from('0').toString(),
-                effectivePriceReversed: BigNumber.from('0').toString(),
-                priceImpact: BigNumber.from('0').toString(),
-            };
+            return this.zeroResponse(swapType, tokenIn, tokenOut, swapAmount);
         }
 
         let deltas: string[] = [];
@@ -142,27 +116,72 @@ export class BalancerSorService {
         const tokenInAmount = BigNumber.from(deltas[swapInfo.tokenAddresses.indexOf(tokenIn)]);
         const tokenOutAmount = BigNumber.from(deltas[swapInfo.tokenAddresses.indexOf(tokenOut)]).abs();
 
-        const swapAmountQuery = swapType === 'EXACT_OUT' ? tokenOutAmount : tokenInAmount;
-        const returnAmount = swapType === 'EXACT_IN' ? tokenOutAmount : tokenInAmount;
+        return this.formatResponse({
+            tokenIn: swapInfo.tokenIn,
+            tokenOut: swapInfo.tokenOut,
+            tokens,
+            tokenInAmtEvm: tokenInAmount.toString(),
+            tokenOutAmtEvm: tokenOutAmount.toString(),
+            swapAmountForSwaps: BigNumber.from(swapInfo.swapAmountForSwaps).toString(),
+            returnAmountConsideringFees: BigNumber.from(swapInfo.returnAmountConsideringFees).toString(),
+            returnAmountFromSwaps: BigNumber.from(swapInfo.returnAmountFromSwaps).toString(),
+            routes: swapInfo.routes,
+            pools,
+            marketSp: swapInfo.marketSp,
+            swaps: swapInfo.swaps,
+            tokenAddresses: swapInfo.tokenAddresses,
+            swapType,
+        });
+    }
 
-        const returnAmountFixed = formatFixed(
-            returnAmount,
-            this.getTokenDecimals(swapType === 'EXACT_IN' ? tokenOut : tokenIn, tokens),
-        );
+    formatResponse(swapData: {
+        tokenIn: string;
+        tokenOut: string;
+        swapType: GqlSorSwapType;
+        tokens: PrismaToken[];
+        tokenInAmtEvm: string;
+        tokenOutAmtEvm: string;
+        swapAmountForSwaps: string;
+        returnAmountConsideringFees: string;
+        returnAmountFromSwaps: string;
+        routes: SwapInfoRoute[];
+        pools: GqlPoolMinimal[];
+        marketSp: string;
+        swaps: SwapV2[];
+        tokenAddresses: string[];
+        priceImpact?: string;
+    }): GqlSorGetSwapsResponse {
+        const {
+            tokenIn,
+            tokenOut,
+            swapType,
+            tokens,
+            tokenInAmtEvm,
+            tokenOutAmtEvm,
+            swapAmountForSwaps,
+            returnAmountConsideringFees,
+            returnAmountFromSwaps,
+            routes,
+            pools,
+            marketSp,
+            swaps,
+            tokenAddresses,
+            priceImpact: rawPriceImpact,
+        } = swapData;
 
-        const swapAmountQueryFixed = formatFixed(
-            swapAmountQuery,
-            this.getTokenDecimals(swapType === 'EXACT_OUT' ? tokenOut : tokenIn, tokens),
-        );
+        const tokenInAmountFixed = formatFixed(tokenInAmtEvm, this.getTokenDecimals(tokenIn, tokens));
+        const tokenOutAmountFixed = formatFixed(tokenOutAmtEvm, this.getTokenDecimals(tokenOut, tokens));
 
-        const tokenInAmountFixed = formatFixed(tokenInAmount, this.getTokenDecimals(tokenIn, tokens));
-        const tokenOutAmountFixed = formatFixed(tokenOutAmount, this.getTokenDecimals(tokenOut, tokens));
+        const swapAmountQuery = swapType === 'EXACT_OUT' ? tokenOutAmtEvm : tokenInAmtEvm;
+        const returnAmount = swapType === 'EXACT_IN' ? tokenOutAmtEvm : tokenInAmtEvm;
+        const swapAmountQueryFixed = swapType === 'EXACT_OUT' ? tokenOutAmountFixed : tokenInAmountFixed;
+        const returnAmountFixed = swapType === 'EXACT_IN' ? tokenOutAmountFixed : tokenInAmountFixed;
 
         const effectivePrice = oldBnum(tokenInAmountFixed).div(tokenOutAmountFixed);
         const effectivePriceReversed = oldBnum(tokenOutAmountFixed).div(tokenInAmountFixed);
-        const priceImpact = effectivePrice.div(swapInfo.marketSp).minus(1);
+        const priceImpact = effectivePrice.div(marketSp).minus(1);
 
-        for (const route of swapInfo.routes) {
+        for (const route of routes) {
             route.tokenInAmount = oldBnum(tokenInAmountFixed)
                 .multipliedBy(route.share)
                 .dp(this.getTokenDecimals(tokenIn, tokens))
@@ -174,24 +193,22 @@ export class BalancerSorService {
         }
 
         return {
-            ...swapInfo,
-            tokenIn: replaceZeroAddressWithEth(swapInfo.tokenIn),
-            tokenOut: replaceZeroAddressWithEth(swapInfo.tokenOut),
+            swaps,
+            marketSp,
+            tokenAddresses,
+            tokenIn: replaceZeroAddressWithEth(tokenIn),
+            tokenOut: replaceZeroAddressWithEth(tokenOut),
             swapType,
             tokenInAmount: tokenInAmountFixed,
             tokenOutAmount: tokenOutAmountFixed,
             swapAmount: swapAmountQueryFixed,
-            swapAmountScaled: swapAmountQuery.toString(),
-            swapAmountForSwaps: swapInfo.swapAmountForSwaps
-                ? BigNumber.from(swapInfo.swapAmountForSwaps).toString()
-                : undefined,
+            swapAmountScaled: swapAmountQuery,
+            swapAmountForSwaps: swapAmountForSwaps ? BigNumber.from(swapAmountForSwaps).toString() : undefined,
             returnAmount: returnAmountFixed,
-            returnAmountScaled: returnAmount.toString(),
-            returnAmountConsideringFees: BigNumber.from(swapInfo.returnAmountConsideringFees).toString(),
-            returnAmountFromSwaps: swapInfo.returnAmountFromSwaps
-                ? BigNumber.from(swapInfo.returnAmountFromSwaps).toString()
-                : undefined,
-            routes: swapInfo.routes.map((route) => ({
+            returnAmountScaled: returnAmount,
+            returnAmountConsideringFees: BigNumber.from(returnAmountConsideringFees).toString(),
+            returnAmountFromSwaps: returnAmountFromSwaps ? BigNumber.from(returnAmountFromSwaps).toString() : undefined,
+            routes: routes.map((route) => ({
                 ...route,
                 hops: route.hops.map((hop) => ({
                     ...hop,
@@ -200,7 +217,36 @@ export class BalancerSorService {
             })),
             effectivePrice: effectivePrice.toString(),
             effectivePriceReversed: effectivePriceReversed.toString(),
-            priceImpact: priceImpact.toString(),
+            priceImpact: rawPriceImpact ? rawPriceImpact : priceImpact.toString(),
+        };
+    }
+
+    zeroResponse(
+        swapType: GqlSorSwapType,
+        tokenIn: string,
+        tokenOut: string,
+        swapAmount: string,
+    ): GqlSorGetSwapsResponse {
+        return {
+            marketSp: '0',
+            tokenAddresses: [],
+            swaps: [],
+            tokenIn: replaceZeroAddressWithEth(tokenIn),
+            tokenOut: replaceZeroAddressWithEth(tokenOut),
+            swapType,
+            tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : '0',
+            tokenOutAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
+            swapAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
+            swapAmountScaled: '0',
+            swapAmountForSwaps: '0',
+            returnAmount: '0',
+            returnAmountScaled: '0',
+            returnAmountConsideringFees: '0',
+            returnAmountFromSwaps: '0',
+            routes: [],
+            effectivePrice: '0',
+            effectivePriceReversed: '0',
+            priceImpact: '0',
         };
     }
 
@@ -286,18 +332,24 @@ export class BalancerSorService {
     }
 
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
-        if (tokenAddress === '0x0000000000000000000000000000000000000000') {
+        if (
+            tokenAddress === ZERO_ADDRESS ||
+            tokenAddress === NATIVE_ADDRESS ||
+            tokenAddress === '0x0000000000000000000000000000000000001010'
+        ) {
             return 18;
         }
 
         tokenAddress = tokenAddress.toLowerCase();
         const match = tokens.find((token) => token.address === tokenAddress);
 
-        if (!match) {
-            throw new Error('Unknown token: ' + tokenAddress);
+        let decimals = match?.decimals;
+        if (!decimals) {
+            console.error(`Unknown token: ${tokenAddress}`);
+            decimals = 18;
         }
 
-        return match.decimals;
+        return decimals;
     }
 
     private batchSwaps(assetArray: string[][], swaps: SwapV2[][]): { swaps: SwapV2[]; assets: string[] } {

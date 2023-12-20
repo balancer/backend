@@ -100,9 +100,13 @@ export class VeBalVotingListService {
     }
 
     public async getValidVotingGauges() {
+        // A gauge should be included in the voting list when:
+        //  - it is alive (not killed)
+        //  - it is killed and has valid votes (the users should be able to reallocate votes)
         const gaugesWithStaking = await prisma.prismaVotingGauge.findMany({
             where: {
                 stakingGaugeId: { not: null },
+                OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }],
             },
             select: {
                 id: true,
@@ -135,47 +139,59 @@ export class VeBalVotingListService {
     async sync(votingGaugeAddresses: string[]) {
         const chunks = chunk(votingGaugeAddresses, 50);
 
+        const syncErrors: Error[] = [];
         for (const addressChunk of chunks) {
-            const votingGauges = await this.fetchVotingGauges(addressChunk);
-
+            const { filteredGauges, errors } = await this.fetchVotingGauges(addressChunk);
+            syncErrors.push(...errors);
             /*
                 We avoid saving gauges in specialVotingGaugeAddresses because they require special handling
             */
-            const cleanVotingGauges = votingGauges.filter(
+            const cleanVotingGauges = filteredGauges.filter(
                 (gauge) => !specialVotingGaugeAddresses.includes(gauge.gaugeAddress),
             );
 
-            await this.votingGauges.saveVotingGauges(cleanVotingGauges);
+            const { saveErrors } = await this.votingGauges.saveVotingGauges(cleanVotingGauges);
+            syncErrors.push(...saveErrors);
+        }
+        if (syncErrors.length > 0) {
+            throw new Error(`Errors while syncing voting gauges: ${syncErrors.map((error) => error.message)}`);
         }
     }
 
     async fetchVotingGauges(votingGaugeAddresses: string[]) {
+        const errors: Error[] = [];
+
         const subgraphGauges = await this.votingGauges.fetchVotingGaugesFromSubgraph(votingGaugeAddresses);
 
         const onchainGauges = await this.votingGauges.fetchOnchainVotingGauges(votingGaugeAddresses);
 
         const votingGauges = this.votingGauges.updateOnchainGaugesWithSubgraphData(onchainGauges, subgraphGauges);
 
-        this.throwIfMissingVotingGaugeData(votingGauges);
+        const gaugesWithMissingData = this.returnGaugesWithMissingData(votingGauges);
 
-        return votingGauges;
-    }
-
-    throwIfMissingVotingGaugeData(votingGauges: VotingGauge[]) {
-        const gaugesWithMissingData = votingGauges
-            .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
-            .filter((gauge) => !gauge.isInSubgraph)
-            .filter(this.votingGauges.isValidForVotingList)
-            // Ignore old Vebal gauge address
-            .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
+        const filteredGauges = votingGauges.filter(
+            (gauge) => !gaugesWithMissingData.map((gauge) => gauge.gaugeAddress).includes(gauge.gaugeAddress),
+        );
 
         if (gaugesWithMissingData.length > 0) {
             const errorMessage =
                 'Detected active voting gauge/s with votes (relative weight > 0) that are not in subgraph: ' +
                 JSON.stringify(gaugesWithMissingData);
             console.error(errorMessage);
-            throw new Error(errorMessage);
+            errors.push(new Error(errorMessage));
         }
+        return { filteredGauges, errors };
+    }
+
+    returnGaugesWithMissingData(votingGauges: VotingGauge[]) {
+        const gaugesWithMissingData = votingGauges
+            .filter((gauge) => !veGauges.includes(gauge.gaugeAddress))
+            .filter((gauge) => !gauge.isInSubgraph)
+            .filter((gauge) => gauge.relativeWeight > 0)
+            // Ignore old Vebal gauge address
+            .filter((gauge) => gauge.gaugeAddress !== oldVeBalAddress);
+
+        return gaugesWithMissingData;
     }
 }
 

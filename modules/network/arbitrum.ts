@@ -17,6 +17,7 @@ import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const arbitrumNetworkData: NetworkData = {
     chain: {
@@ -71,18 +72,6 @@ const arbitrumNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0xaeb406b0e430bf5ea2dc0b9fe62e4e53f74b3a33',
-            '0x85a80afee867adf27b50bdb7b76da70f1e853062',
-            '0x1c99324edc771c82a0dccb780cc7dda0045e50e7',
-            '0x2498a2b0d6462d2260eac50ae1c3e03f4829ba95',
-            '0xa8920455934da4d853faac1f94fe7bef72943ef1',
-        ],
-        weightedPoolV2Factories: [
-            '0x8df6efec5547e31b0eb7d1291b511ff8a2bf987c',
-            '0xf1665e19bc105be4edd3739f88315cc699cc5b65',
-            '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -96,6 +85,7 @@ const arbitrumNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -103,6 +93,7 @@ const arbitrumNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
@@ -249,6 +240,12 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(
+            arbitrumNetworkData.subgraphs.balancer,
+            arbitrumNetworkData.chain.id,
+        ),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -342,6 +339,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

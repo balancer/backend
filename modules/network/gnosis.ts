@@ -17,6 +17,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const gnosisNetworkData: NetworkData = {
     chain: {
@@ -54,7 +55,8 @@ const gnosisNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: 'https://rpc.gnosis.gateway.fm',
+    rpcUrl:
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.gnosischain.com` : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -66,17 +68,6 @@ const gnosisNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0x76578ecf9a141296ec657847fb45b0585bcda3a6',
-            '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
-            '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
-            '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
-        ],
-        weightedPoolV2Factories: [
-            '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
-            '0xf302f9f50958c5593770fdf4d4812309ff77414f',
-            '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -90,6 +81,7 @@ const gnosisNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: '',
@@ -97,6 +89,7 @@ const gnosisNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
@@ -165,6 +158,12 @@ export const gnosisNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(
+            gnosisNetworkData.subgraphs.balancer,
+            gnosisNetworkData.chain.id,
+        ),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -258,6 +257,10 @@ export const gnosisNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

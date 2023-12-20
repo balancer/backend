@@ -286,13 +286,15 @@ it('Uses streamer-v1-map to find gauges (that use streamer instead of recipient)
     const service = new VeBalVotingListService();
 
     const rootGaugeAddresses = [oldRootV1GaugeAddress, anotherOldRootV1GaugeAddress];
-    const fetchedVotingGauges = await service.fetchVotingGauges(rootGaugeAddresses);
+    const { votingGauges: fetchedVotingGauges } = await service.fetchVotingGauges(rootGaugeAddresses);
 
     const repository = new VotingGaugesRepository();
     const savedGauges = await repository.saveVotingGauges(fetchedVotingGauges);
 
     expect(savedGauges).toMatchInlineSnapshot(`
-      [
+    {
+      "saveErrors": [],
+      "votingGaugesWithStakingGaugeId": [
         {
           "addedTimestamp": 1657479716,
           "gaugeAddress": "0xcf5938ca6d9f19c73010c7493e19c02acfa8d24d",
@@ -315,6 +317,7 @@ it('Uses streamer-v1-map to find gauges (that use streamer instead of recipient)
           "relativeWeightCap": undefined,
           "stakingGaugeId": "0xfaad21203a7856889cb6eb644ab6864e7253107a",
         },
-      ]
+      ],
+    }
     `);
 }, 1000_000);

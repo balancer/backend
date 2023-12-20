@@ -27,7 +27,6 @@ enum PrismaVotingGaugeStatus {
 
 model PrismaVotingGauge {
   @@id([id, chain])
-  @@unique([stakingGaugeId, chain])
 
   id      String
   chain   Chain

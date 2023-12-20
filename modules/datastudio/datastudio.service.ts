@@ -244,7 +244,7 @@ export class DatastudioService {
             for (const stake of pool.staking) {
                 const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
                 const tokenPrices = await tokenService.getTokenPrices();
-                const beetsPrice = await beetsService.getBeetsPrice();
+                const beetsPrice = stake.farm || stake.reliquary ? await beetsService.getBeetsPrice() : '0';
                 if (stake.farm) {
                     const beetsPerDay = parseFloat(stake.farm.beetsPerBlock) * blocksPerDay;
                     const beetsValuePerDay = parseFloat(beetsPrice) * beetsPerDay;

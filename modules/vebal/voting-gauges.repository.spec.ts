@@ -107,7 +107,7 @@ const repository = new VotingGaugesRepository(prismaMock);
 it('successfully saves onchain gauges', async () => {
     const votingGauge = aVotingGauge({ network: Chain.OPTIMISM });
 
-    const votingGauges = await repository.saveVotingGauges([votingGauge]);
+    const { votingGaugesWithStakingGaugeId: votingGauges } = await repository.saveVotingGauges([votingGauge]);
 
     expect(votingGauges[0]).toMatchObject(votingGauge);
     expect(votingGauges[0].stakingGaugeId).toBe(defaultStakingGaugeId);
@@ -116,19 +116,14 @@ it('successfully saves onchain gauges', async () => {
 describe('When staking gauge is not found ', () => {
     beforeEach(() => prismaMock.prismaPoolStakingGauge.findFirst.mockResolvedValue(null));
 
-    it('throws when gauge is valid for voting (not killed)', async () => {
+    it('has errors when gauge is valid for voting (not killed)', async () => {
         const repository = new VotingGaugesRepository(prismaMock);
 
         const votingGauge = aVotingGauge({ network: Chain.MAINNET, isKilled: false });
 
-        let error: Error = EmptyError;
-        try {
-            await repository.saveVotingGauges([votingGauge]);
-        } catch (e) {
-            error = e as Error;
-        }
+        const { votingGaugesWithStakingGaugeId, saveErrors } = await repository.saveVotingGauges([votingGauge]);
 
-        expect(error.message).toContain('VotingGauge not found in PrismaPoolStakingGauge:');
+        expect(saveErrors.length).toBe(1);
     });
 
     it('does not throw when gauge is valid for voting (killed with no votes)', async () => {

@@ -1,6 +1,6 @@
 extend type Query {
-    protocolMetricsChain: GqlProtocolMetricsChain!
-    protocolMetricsAggregated(chainIds: [String!]!): GqlProtocolMetricsAggregated!
+    protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
+    protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
     latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
 
@@ -16,8 +16,6 @@ type GqlProtocolMetricsAggregated {
     swapFee24h: BigDecimal!
     swapVolume24h: BigDecimal!
     yieldCapture24h: BigDecimal!
-    swapFee7d: BigDecimal!
-    swapVolume7d: BigDecimal!
     numLiquidityProviders: BigInt!
     chains: [GqlProtocolMetricsChain!]!
 }
@@ -31,8 +29,6 @@ type GqlProtocolMetricsChain {
     swapFee24h: BigDecimal!
     swapVolume24h: BigDecimal!
     yieldCapture24h: BigDecimal!
-    swapFee7d: BigDecimal!
-    swapVolume7d: BigDecimal!
     numLiquidityProviders: BigInt!
 }
 

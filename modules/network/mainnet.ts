@@ -17,6 +17,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const underlyingTokens = {
     USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -25,7 +26,7 @@ const underlyingTokens = {
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
 };
 
-export const mainnetNetworkData: NetworkData = {
+const data: NetworkData = {
     chain: {
         slug: 'ethereum',
         id: 1,
@@ -56,7 +57,7 @@ export const mainnetNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0xa43a7c62d56df036c187e1966c03e2799d8987ed'], // truMatic, has coingecko entry but no price
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -82,22 +83,8 @@ export const mainnetNetworkData: NetworkData = {
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
         tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
-        composableStablePoolFactories: [
-            '0xf9ac7b9df2b3454e841110cce5550bd5ac6f875f',
-            '0x85a80afee867adf27b50bdb7b76da70f1e853062',
-            '0xdba127fbc23fb20f5929c546af220a991b5c6e01',
-            '0xfada0f4547ab2de89d1304a668c39b3e09aa7c76',
-            '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
-            '0xba1b4a90bad57470a2cba762a32955dc491f76e0',
-        ],
-        weightedPoolV2Factories: [
-            '0xcc508a455f5b0073973107db6a878ddbdab957bc',
-            '0x5dd94da3644ddd055fcf6b3e1aa310bb7801eb8b',
-            '0x897888115ada5773e02aa29f775430bfb5f34c51',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
-        excludedPoolDataQueryPoolIds: ['0xf71d0774b214c4cf51e33eb3d30ef98132e4dbaa00000000000000000000046e'],
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -109,6 +96,10 @@ export const mainnetNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [
+                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
+            ],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -116,6 +107,10 @@ export const mainnetNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [
+                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
+            ],
         },
     },
     ibAprConfig: {
@@ -367,25 +362,22 @@ export const mainnetNetworkData: NetworkData = {
 };
 
 export const mainnetNetworkConfig: NetworkConfig = {
-    data: mainnetNetworkData,
+    data,
     contentService: new GithubContentService(),
-    provider: new ethers.providers.JsonRpcProvider({ url: mainnetNetworkData.rpcUrl, timeout: 60000 }),
+    provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new IbTokensAprService(
-            mainnetNetworkData.ibAprConfig,
-            mainnetNetworkData.chain.prismaId,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-            mainnetNetworkData.balancer.swapProtocolFeePercentage,
+            data.ibAprConfig,
+            data.chain.prismaId,
+            data.balancer.yieldProtocolFeePercentage,
+            data.balancer.swapProtocolFeePercentage,
         ),
-        new PhantomStableAprService(
-            mainnetNetworkData.chain.prismaId,
-            mainnetNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new PhantomStableAprService(data.chain.prismaId, data.balancer.yieldProtocolFeePercentage),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(mainnetNetworkData.balancer.swapProtocolFeePercentage),
-        new GaugeAprService(tokenService, [mainnetNetworkData.bal!.address]),
+        new SwapFeeAprService(data.balancer.swapProtocolFeePercentage),
+        new GaugeAprService(tokenService, [data.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, mainnetNetworkData.bal!.address)],
+    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
     tokenPriceHandlers: [
         new CoingeckoPriceHandlerService(coingeckoService),
         new BptPriceHandlerService(),
@@ -393,6 +385,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
@@ -495,6 +490,14 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-global-coingecko-prices',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
+        },
+        {
+            name: 'sync-latest-fx-prices',
+            interval: every(10, 'minutes'),
         },
     ],
 };

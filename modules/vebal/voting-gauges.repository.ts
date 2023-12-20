@@ -119,20 +119,25 @@ export class VotingGaugesRepository {
     }
 
     async saveVotingGauges(votingGauges: VotingGauge[]) {
-        const votingGaugesWithStakingGaugeId = Promise.all(
+        const saveErrors: Error[] = [];
+        const votingGaugesWithStakingGaugeId = await Promise.all(
             votingGauges.map(async (gauge) => {
-                const stakingId = await this.findStakingGaugeId(gauge);
-                gauge.stakingGaugeId = stakingId;
-                await this.saveVotingGauge(gauge);
-                return gauge;
+                try {
+                    const stakingId = await this.findStakingGaugeId(gauge);
+                    gauge.stakingGaugeId = stakingId;
+                    await this.saveVotingGauge(gauge);
+                    return gauge;
+                } catch (error) {
+                    saveErrors.push(new Error(`Failed to save voting gauge ${gauge.gaugeAddress} with error ${error}`));
+                    return gauge;
+                }
             }),
         );
 
-        return votingGaugesWithStakingGaugeId;
+        return { votingGaugesWithStakingGaugeId, saveErrors };
     }
 
     async saveVotingGauge(gauge: VotingGauge) {
-        if (!this.isValidForVotingList(gauge)) return;
         try {
             const upsertFields = {
                 id: gauge.gaugeAddress,

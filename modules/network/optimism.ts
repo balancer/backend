@@ -18,6 +18,7 @@ import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { env } from '../../app/env';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const optimismNetworkData: NetworkData = {
     chain: {
@@ -65,7 +66,7 @@ const optimismNetworkData: NetworkData = {
     },
     protocolToken: 'beets',
     beets: {
-        address: '0x97513e975a7fa9072c72c92d8000b0db90b163c5',
+        address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
@@ -80,17 +81,6 @@ const optimismNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0xf145cafb67081895ee80eb7c04a30cf87f07b745',
-            '0xe2e901ab09f37884ba31622df3ca7fc19aa443be',
-            '0x1802953277fd955f9a254b80aa0582f193cf1d77',
-            '0x043a2dad730d585c44fb79d2614f295d2d625412',
-        ],
-        weightedPoolV2Factories: [
-            '0xad901309d9e9dbc5df19c84f729f429f0189a633',
-            '0xa0dabebaad1b243bbb243f933013d560819eb66f',
-            '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -108,6 +98,7 @@ const optimismNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
@@ -115,9 +106,20 @@ const optimismNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
+        ankr: {
+            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+            tokens: {
+                ankrETH: {
+                    address: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                    serviceName: 'eth',
+                    isIbYield: true,
+                },
+            },
+        },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/breakdown?_=',
             tokens: {
@@ -284,6 +286,12 @@ export const optimismNetworkConfig: NetworkConfig = {
         new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    services: {
+        balancerSubgraphService: new BalancerSubgraphService(
+            optimismNetworkData.subgraphs.balancer,
+            optimismNetworkData.chain.id,
+        ),
+    },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.

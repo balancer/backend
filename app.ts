@@ -1,5 +1,4 @@
-import { loadRestRoutesBeethoven } from './modules/beethoven/loadRestRoutes';
-import { loadRestRoutesBalancer } from './modules/balancer/loadRestRoutes';
+import { loadRestRoutes } from './modules/common/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
 import { corsMiddleware } from './app/middleware/corsMiddleware';
@@ -12,13 +11,12 @@ import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginUsageReporting,
 } from 'apollo-server-core';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { beethovenSchema } from './graphql_schema_generated_beethoven';
-import { balancerSchema } from './graphql_schema_generated_balancer';
-import { balancerResolvers, beethovenResolvers } from './app/gql/resolvers';
+import { schema } from './graphql_schema_generated';
+import { resolvers } from './app/gql/resolvers';
 import helmet from 'helmet';
 import GraphQLJSON from 'graphql-type-json';
 import * as Sentry from '@sentry/node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
@@ -31,13 +29,17 @@ async function startServer() {
         // tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
+        ignoreErrors: [/.*error: Provide.*chain.*param/],
         integrations: [
             // new Tracing.Integrations.Apollo(),
             // new Tracing.Integrations.GraphQL(),
             // new Tracing.Integrations.Prisma({ client: prisma }),
-            // new Tracing.Integrations.Express({ app }),
-            // new Sentry.Integrations.Http({ tracing: true }),
+            new Sentry.Integrations.Express({ app }),
+            new Sentry.Integrations.Http({ tracing: true }),
+            new ProfilingIntegration(),
         ],
+        tracesSampleRate: 0.2,
+        profilesSampleRate: 0.1,
         beforeSend(event, hint) {
             const error = hint.originalException as string;
             if (error?.toString().includes('Unknown token:')) {
@@ -57,7 +59,7 @@ async function startServer() {
     });
 
     app.use(Sentry.Handlers.requestHandler());
-    // app.use(Sentry.Handlers.tracingHandler());
+    app.use(Sentry.Handlers.tracingHandler());
     // app.use(Sentry.Handlers.errorHandler());
 
     app.use(helmet.dnsPrefetchControl());
@@ -76,11 +78,7 @@ async function startServer() {
     app.use(contextMiddleware);
     app.use(sessionMiddleware);
 
-    if (env.PROTOCOL === 'beethoven') {
-        loadRestRoutesBeethoven(app);
-    } else if (env.PROTOCOL === 'balancer') {
-        loadRestRoutesBalancer(app);
-    }
+    loadRestRoutes(app);
 
     const httpServer = http.createServer(app);
 
@@ -103,9 +101,9 @@ async function startServer() {
     const server = new ApolloServer({
         resolvers: {
             JSON: GraphQLJSON,
-            ...(env.PROTOCOL === 'beethoven' ? beethovenResolvers : balancerResolvers),
+            ...resolvers,
         },
-        typeDefs: env.PROTOCOL === 'beethoven' ? beethovenSchema : balancerSchema,
+        typeDefs: schema,
         introspection: true,
         plugins,
         context: ({ req }) => req.context,

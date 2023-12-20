@@ -205,11 +205,6 @@ export type PrismaTokenWithTypes = PrismaToken & {
     types: PrismaTokenTypeOption[];
 };
 
-export type PrismaTokenWithTypesAndPrices = PrismaToken & {
-    types: PrismaTokenTypeOption[];
-    prices: PrismaTokenPrice[];
-};
-
 export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
@@ -281,3 +276,22 @@ export const prismaPoolBatchSwapWithSwaps = Prisma.validator<Prisma.PrismaPoolBa
 });
 
 export type PrismaPoolBatchSwapWithSwaps = Prisma.PrismaPoolBatchSwapGetPayload<typeof prismaPoolBatchSwapWithSwaps>;
+
+export const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolArgs>()({
+              include: {
+                stableDynamicData: true,
+                dynamicData: true,
+                linearDynamicData: true,
+                linearData: true,
+                gyroData: true,
+                tokens: {
+                    orderBy: { index: 'asc' },
+                    include: {
+                        token: true,
+                        dynamicData: true,
+                    },
+                },
+            }  
+});
+
+export type PrismaPoolWithDynamic = Prisma.PrismaPoolGetPayload<typeof prismaPoolWithDynamic>;
