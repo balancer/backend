@@ -42,7 +42,7 @@ export class VeBalVotingListService {
                 chain: pool.chain,
                 symbol: pool.symbol,
                 address: pool.address,
-                type: pool.type,
+                type: pool.type === 'COMPOSABLE_STABLE' ? 'PHANTOM_STABLE' : pool.type,
                 tokens: pool.tokens.map((token) => ({
                     address: token.address,
                     weight: token.dynamicData?.weight,
