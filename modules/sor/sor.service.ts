@@ -1,54 +1,81 @@
-import { GqlCowSwapApiResponse, GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../schema';
-import { sorV1BalancerService } from './sorV1Balancer/sorV1Balancer.service';
+import {
+    GqlCowSwapApiResponse,
+    GqlSorSwapType,
+    GqlSorGetSwapsResponse,
+    QuerySorGetSwapsArgs,
+    QuerySorGetCowSwapsArgs,
+} from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorV2.service';
-import { GetSwapsInput, SwapResult, SwapService } from './types';
+import { GetSwapsInput, SwapResult } from './types';
 import { EMPTY_COWSWAP_RESPONSE } from './constants';
-import { publishMetric } from '../metrics/sor.metric';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
+import { getTokenAmountHuman, getTokenAmountRaw } from './utils';
 
 export class SorService {
-    async getCowSwaps(input: GetSwapsInput): Promise<GqlCowSwapApiResponse> {
-        const swap = await this.getSwap({ ...input, swapOptions: {} });
-        const emptyResponse = EMPTY_COWSWAP_RESPONSE(input.tokenIn, input.tokenOut, input.swapAmount);
+    async getCowSwaps(args: QuerySorGetCowSwapsArgs): Promise<GqlCowSwapApiResponse> {
+        console.log('getCowSwaps args', JSON.stringify(args));
+        const amountToken = args.swapType === 'EXACT_IN' ? args.tokenIn : args.tokenOut;
+        // Use TokenAmount to help follow scaling requirements in later logic
+        // args.swapAmount is RawScale, e.g. 1USDC should be passed as 1000000
+        const amount = await getTokenAmountRaw(amountToken, args.swapAmount, args.chain!);
+
+        const swap = await sorV2Service.getSwapResult({
+            chain: args.chain!,
+            swapAmount: amount,
+            swapType: args.swapType,
+            tokenIn: args.tokenIn.toLowerCase(),
+            tokenOut: args.tokenOut.toLowerCase(),
+            swapOptions: {},
+        });
+        const emptyResponse = EMPTY_COWSWAP_RESPONSE(args.tokenIn, args.tokenOut, amount);
 
         if (!swap) return emptyResponse;
 
         try {
             // Updates with latest onchain data before returning
-            return await swap.getCowSwapResponse(input.chain, true);
+            return await swap.getCowSwapResponse(true);
         } catch (err) {
             console.log(`Error Retrieving QuerySwap`, err);
             return emptyResponse;
         }
     }
 
-    async getBeetsSwaps(input: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
-        console.log('getBeetsSwaps input', JSON.stringify(input));
-        const swap = await this.getSwap(input, sorV1BeetsService);
-        const emptyResponse = sorV1BeetsService.zeroResponse(
-            input.swapType,
-            input.tokenIn,
-            input.tokenOut,
-            input.swapAmount,
-        );
+    async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {
+        console.log('getSorSwaps args', JSON.stringify(args));
+        const tokenIn = args.tokenIn.toLowerCase();
+        const tokenOut = args.tokenOut.toLowerCase();
+        const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
+        // Use TokenAmount to help follow scaling requirements in later logic
+        // args.swapAmount is HumanScale
+        const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
+
+        const swap = await this.getComparingSwap({
+            chain: args.chain!,
+            swapAmount: amount,
+            swapOptions: args.swapOptions,
+            swapType: args.swapType,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+        });
+        const emptyResponse = sorV1BeetsService.zeroResponse(args.swapType, args.tokenIn, args.tokenOut, amount);
 
         if (!swap) return emptyResponse;
 
         try {
             // Updates with latest onchain data before returning
-            return swap.getBeetsSwapResponse(true);
+            return swap.getSorSwapResponse(true);
         } catch (err) {
             console.log(`Error Retrieving QuerySwap`, err);
             return emptyResponse;
         }
     }
 
-    private async getSwap(input: GetSwapsInput, v1Service: SwapService = sorV1BalancerService) {
+    private async getComparingSwap(input: GetSwapsInput) {
         const v1Start = +new Date();
-        const swapV1 = await v1Service.getSwapResult(input);
+        const swapV1 = await sorV1BeetsService.getSwapResult(input);
         const v1Time = +new Date() - v1Start;
 
         const v2Start = +new Date();
@@ -122,9 +149,6 @@ export class SorService {
         v1Time: number,
         v2Time: number,
     ) {
-        // await publishMetric(chain, `SOR_VALID_V1`, v1.isValid ? 1 : 0);
-        // await publishMetric(chain, `SOR_VALID_V2`, v2.isValid ? 1 : 0);
-
         if (!version) return;
 
         let v1ResultAmount = v1.inputAmount;
@@ -153,10 +177,6 @@ export class SorService {
         let diffN = fp(v2ResultAmount, decimals) - fp(v1ResultAmount, decimals);
         let diff = bn(diffN.toFixed(decimals), decimals);
         let bestResultAmount = version === 'V1' ? v1ResultAmount : v2ResultAmount;
-
-        // await publishMetric(chain, `SOR_TIME_V1`, v1Time);
-        // await publishMetric(chain, `SOR_TIME_V2`, v2Time);
-        // await publishMetric(chain, `SOR_V2_PERFORMACE`, v2Perf);
 
         console.log(
             [

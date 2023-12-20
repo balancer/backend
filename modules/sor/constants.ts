@@ -1,14 +1,14 @@
 import { TokenAmount } from '@balancer/sdk';
 import { GqlCowSwapApiResponse, GqlSorSwapType } from '../../schema';
 
-export const EMPTY_COWSWAP_RESPONSE = (assetIn: string, assetOut: string, amount: TokenAmount): GqlCowSwapApiResponse => {
+export const EMPTY_COWSWAP_RESPONSE = (
+    assetIn: string,
+    assetOut: string,
+    amount: TokenAmount,
+): GqlCowSwapApiResponse => {
     return {
-        marketSp: '0',
         returnAmount: '0',
-        returnAmountConsideringFees: '0',
-        returnAmountFromSwaps: '0',
         swapAmount: amount.amount.toString(),
-        swapAmountForSwaps: '0',
         swaps: [],
         tokenAddresses: [],
         tokenIn: assetIn,
@@ -352,4 +352,3 @@ export const poolsToIgnore = [
     '0xbfd65c6160cfd638a85c645e6e6d8acac5dac935000000000000000000000004',
     '0xe274c9deb6ed34cfe4130f8d0a8a948dea5bb28600000000000000000000000d',
 ];
-

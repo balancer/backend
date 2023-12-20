@@ -32,7 +32,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsInput, SwapResult, SwapService } from '../types';
 import { poolService } from '../../pool/pool.service';
 import { tokenService } from '../../token/token.service';
-import { BalancerSorService } from '../../beethoven/balancer-sor.service';
+import { BalancerSorService } from '../sorV1Beets/balancer-sor.service';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
 import { Cache, CacheClass } from 'memory-cache';
@@ -49,43 +49,53 @@ const ALL_BASEPOOLS_CACHE_KEY = `basePools:all`;
 
 class SwapResultV2 implements SwapResult {
     private swap: SwapSdk | null;
+    private chain: Chain;
     public inputAmount: bigint = BigInt(0);
     public outputAmount: bigint = BigInt(0);
     public isValid: boolean;
 
-    constructor(swap: SwapSdk | null) {
+    constructor(swap: SwapSdk | null, chain: Chain) {
         if (swap === null) {
             this.isValid = false;
             this.swap = null;
+            this.chain = chain;
         } else {
             this.isValid = true;
             this.swap = swap;
             this.inputAmount = swap.inputAmount.amount;
             this.outputAmount = swap.outputAmount.amount;
+            this.chain = chain;
         }
     }
 
-    async getCowSwapResponse(chain: Chain, queryFirst = false): Promise<GqlCowSwapApiResponse> {
+    async getCowSwapResponse(queryFirst = false): Promise<GqlCowSwapApiResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
 
         if (!queryFirst) return this.mapResultToCowSwap(this.swap, this.swap.inputAmount, this.swap.outputAmount);
         else {
-            const rpcUrl = AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl;
-            // Needs node >= 18 (https://github.com/wagmi-dev/viem/discussions/147)
+            const rpcUrl = AllNetworkConfigsKeyedOnChain[this.chain].data.rpcUrl;
             const updatedResult = await this.swap.query(rpcUrl);
-            // console.log(`UPDATE:`, this.swap.quote.amount.toString(), updatedResult.amount.toString());
 
-            const ip = this.swap.swapKind === SwapKind.GivenIn ? this.swap.inputAmount : updatedResult;
-            const op = this.swap.swapKind === SwapKind.GivenIn ? updatedResult : this.swap.outputAmount;
+            const inputAmount = this.swap.swapKind === SwapKind.GivenIn ? this.swap.inputAmount : updatedResult;
+            const outputAmount = this.swap.swapKind === SwapKind.GivenIn ? updatedResult : this.swap.outputAmount;
 
-            return this.mapResultToCowSwap(this.swap, ip, op);
+            return this.mapResultToCowSwap(this.swap, inputAmount, outputAmount);
         }
     }
 
-    async getBeetsSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse> {
+    async getSorSwapResponse(queryFirst = false): Promise<GqlSorGetSwapsResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
 
-        return await this.mapResultToBeetsSwap(this.swap, this.swap.inputAmount, this.swap.outputAmount);
+        if (!queryFirst) return this.mapResultToBeetsSwap(this.swap, this.swap.inputAmount, this.swap.outputAmount);
+        else {
+            const rpcUrl = AllNetworkConfigsKeyedOnChain[this.chain].data.rpcUrl;
+            const updatedResult = await this.swap.query(rpcUrl);
+
+            const inputAmount = this.swap.swapKind === SwapKind.GivenIn ? this.swap.inputAmount : updatedResult;
+            const outputAmount = this.swap.swapKind === SwapKind.GivenIn ? updatedResult : this.swap.outputAmount;
+
+            return this.mapResultToBeetsSwap(this.swap, inputAmount, outputAmount);
+        }
     }
 
     private async mapResultToBeetsSwap(
@@ -257,12 +267,8 @@ class SwapResultV2 implements SwapResult {
         const swapAmount =
             swap.swapKind === SwapKind.GivenIn ? inputAmount.amount.toString() : outputAmount.amount.toString();
         return {
-            marketSp: '', // CowSwap is not using this field, confirmed.
             returnAmount,
-            returnAmountConsideringFees: returnAmount, // CowSwap is not using this field, confirmed.
-            returnAmountFromSwaps: returnAmount, // CowSwap is not using this field, confirmed.
             swapAmount,
-            swapAmountForSwaps: swapAmount, // CowSwap is not using this field, confirmed.
             swaps,
             tokenAddresses: swap.assets,
             tokenIn: swap.inputAmount.token.address,
@@ -280,7 +286,7 @@ export class SorV2Service implements SwapService {
 
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
-        maxNonBoostedPathDepth = 3,
+        maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
         try {
             const poolsFromDb = await this.getBasePools(chain);
@@ -308,7 +314,7 @@ export class SorV2Service implements SwapService {
             if (!swap && maxNonBoostedPathDepth < 4) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
-            return new SwapResultV2(swap);
+            return new SwapResultV2(swap, chain);
         } catch (err: any) {
             console.error(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
@@ -323,7 +329,7 @@ export class SorV2Service implements SwapService {
                     chain,
                 },
             });
-            return new SwapResultV2(null);
+            return new SwapResultV2(null, chain);
         }
     }
 
@@ -354,6 +360,9 @@ export class SorV2Service implements SwapService {
                         gt: 0.000000000001,
                     },
                     swapEnabled: true,
+                    totalLiquidity: {
+                        gt: 50,
+                    },
                 },
                 id: {
                     notIn: [...poolIdsToExclude, ...poolsToIgnore],
@@ -509,6 +518,8 @@ export class SorV2Service implements SwapService {
                 return 'MetaStable';
             case PrismaPoolType.PHANTOM_STABLE:
                 // Composablestables are PHANTOM_STABLE in Prisma. b-sdk treats Phantoms as ComposableStable.
+                return 'ComposableStable';
+            case PrismaPoolType.COMPOSABLE_STABLE:
                 return 'ComposableStable';
             case PrismaPoolType.GYRO:
                 return 'Gyro2';

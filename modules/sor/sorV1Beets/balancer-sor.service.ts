@@ -1,19 +1,19 @@
-import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType, GqlPoolMinimal } from '../../schema';
+import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType, GqlPoolMinimal } from '../../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { PrismaToken } from '@prisma/client';
-import { poolService } from '../pool/pool.service';
-import { oldBnum } from '../big-number/old-big-number';
+import { poolService } from '../../pool/pool.service';
+import { oldBnum } from '../../big-number/old-big-number';
 import axios from 'axios';
 import { FundManagement, SwapInfo, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
-import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../web3/addresses';
+import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../../web3/addresses';
 import { BigNumber } from 'ethers';
-import { TokenAmountHumanReadable } from '../common/global-types';
+import { TokenAmountHumanReadable } from '../../common/global-types';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
-import VaultAbi from '../pool/abi/Vault.json';
-import { env } from '../../app/env';
-import { networkContext } from '../network/network-context.service';
-import { DeploymentEnv } from '../network/network-config-types';
+import VaultAbi from '../../pool/abi/Vault.json';
+import { env } from '../../../app/env';
+import { networkContext } from '../../network/network-context.service';
+import { DeploymentEnv } from '../../network/network-config-types';
 import * as Sentry from '@sentry/node';
 import _ from 'lodash';
 import { Logger } from '@ethersproject/logger';
@@ -332,7 +332,11 @@ export class BalancerSorService {
     }
 
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
-        if (tokenAddress === ZERO_ADDRESS || tokenAddress === NATIVE_ADDRESS) {
+        if (
+            tokenAddress === ZERO_ADDRESS ||
+            tokenAddress === NATIVE_ADDRESS ||
+            tokenAddress === '0x0000000000000000000000000000000000001010'
+        ) {
             return 18;
         }
 
