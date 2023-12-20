@@ -521,6 +521,8 @@ export class SorV2Service implements SwapService {
             case PrismaPoolType.PHANTOM_STABLE:
                 // Composablestables are PHANTOM_STABLE in Prisma. b-sdk treats Phantoms as ComposableStable.
                 return 'ComposableStable';
+            case PrismaPoolType.COMPOSABLE_STABLE:
+                return 'ComposableStable';
             case PrismaPoolType.GYRO:
                 return 'Gyro2';
             case PrismaPoolType.GYRO3:
