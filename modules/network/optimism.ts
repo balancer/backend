@@ -81,17 +81,6 @@ const optimismNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0xf145cafb67081895ee80eb7c04a30cf87f07b745',
-            '0xe2e901ab09f37884ba31622df3ca7fc19aa443be',
-            '0x1802953277fd955f9a254b80aa0582f193cf1d77',
-            '0x043a2dad730d585c44fb79d2614f295d2d625412',
-        ],
-        weightedPoolV2Factories: [
-            '0xad901309d9e9dbc5df19c84f729f429f0189a633',
-            '0xa0dabebaad1b243bbb243f933013d560819eb66f',
-            '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -109,6 +98,7 @@ const optimismNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
@@ -116,6 +106,7 @@ const optimismNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
@@ -296,7 +287,10 @@ export const optimismNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(optimismNetworkData.subgraphs.balancer, optimismNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            optimismNetworkData.subgraphs.balancer,
+            optimismNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 

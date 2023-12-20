@@ -27,22 +27,22 @@ export class TokenService {
         await networkContext.config.contentService.syncTokenContentData();
     }
 
-    public async getToken(address: string): Promise<PrismaToken | null> {
+    public async getToken(address: string, chain = networkContext.chain): Promise<PrismaToken | null> {
         return prisma.prismaToken.findUnique({
             where: {
                 address_chain: {
                     address: address.toLowerCase(),
-                    chain: networkContext.chain,
+                    chain,
                 },
             },
         });
     }
 
-    public async getTokens(addresses?: string[]): Promise<PrismaToken[]> {
-        let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chain}`);
+    public async getTokens(addresses?: string[], chain = networkContext.chain): Promise<PrismaToken[]> {
+        let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${chain}`);
         if (!tokens) {
-            tokens = await prisma.prismaToken.findMany({ where: { chain: networkContext.chain } });
-            this.cache.put(`${ALL_TOKENS_CACHE_KEY}:${networkContext.chain}`, tokens, 5 * 60 * 1000);
+            tokens = await prisma.prismaToken.findMany({ where: { chain: chain } });
+            this.cache.put(`${ALL_TOKENS_CACHE_KEY}:${chain}`, tokens, 5 * 60 * 1000);
         }
         if (addresses) {
             return tokens.filter((token) => addresses.includes(token.address));

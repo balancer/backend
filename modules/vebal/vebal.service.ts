@@ -31,12 +31,18 @@ export class VeBalService {
         if (networkContext.data.veBal) {
             const veBalUsers = await prisma.prismaVeBalUserBalance.findMany({
                 where: { chain: networkContext.chain },
-                orderBy: { balance: 'desc' },
             });
 
-            for (const user of veBalUsers) {
+            const veBalUsersNum = veBalUsers.map(user => ({
+                ...user,
+                balance: parseFloat(user.balance),
+            }));
+
+            veBalUsersNum.sort((a, b) => b.balance - a.balance);
+
+            for (const user of veBalUsersNum) {
                 if (user.userAddress === userAddress) {
-                    balance = user.balance;
+                    balance = user.balance.toString();
                     break;
                 }
                 rank++;

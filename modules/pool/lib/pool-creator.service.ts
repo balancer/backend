@@ -16,7 +16,7 @@ export class PoolCreatorService {
     }
 
     private get chain() {
-        return networkContext.chain
+        return networkContext.chain;
     }
 
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
@@ -36,6 +36,39 @@ export class PoolCreatorService {
                 await this.createPoolRecord(subgraphPool, blockNumber);
 
                 poolIds.push(subgraphPool.id);
+            } else if (subgraphPool.poolType?.includes('Gyro')) {
+                await prisma.prismaPool.update({
+                    data: {
+                        gyroData: {
+                            update: {
+                                id: subgraphPool.id,
+                                alpha: subgraphPool.alpha || '',
+                                beta: subgraphPool.beta || '',
+                                sqrtAlpha: subgraphPool.sqrtAlpha || '',
+                                sqrtBeta: subgraphPool.sqrtBeta || '',
+                                root3Alpha: subgraphPool.root3Alpha || '',
+                                c: subgraphPool.c || '',
+                                s: subgraphPool.s || '',
+                                lambda: subgraphPool.lambda || '',
+                                tauAlphaX: subgraphPool.tauAlphaX || '',
+                                tauAlphaY: subgraphPool.tauAlphaY || '',
+                                tauBetaX: subgraphPool.tauBetaX || '',
+                                tauBetaY: subgraphPool.tauBetaY || '',
+                                u: subgraphPool.u || '',
+                                v: subgraphPool.v || '',
+                                w: subgraphPool.w || '',
+                                z: subgraphPool.z || '',
+                                dSq: subgraphPool.dSq || '',
+                            },
+                        },
+                    },
+                    where: {
+                        id_chain: {
+                            id: subgraphPool.id,
+                            chain: this.chain,
+                        },
+                    },
+                });
             }
         }
 
@@ -92,7 +125,9 @@ export class PoolCreatorService {
             const nestedPool = subgraphPools.find((nestedPool) => {
                 const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
 
-                return nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'PHANTOM_STABLE');
+                return (
+                    nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'COMPOSABLE_STABLE')
+                );
             });
 
             if (nestedPool) {
@@ -164,7 +199,7 @@ export class PoolCreatorService {
         const allNestedTypePools = await prisma.prismaPool.findMany({
             where: {
                 chain: this.chain,
-                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.PHANTOM_STABLE] },
+                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
             },
             select: { id: true, address: true },
         });
@@ -189,6 +224,12 @@ export class PoolCreatorService {
             ],
         });
 
+        // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
+        let poolTypeVersion = pool.poolTypeVersion ? pool.poolTypeVersion : 1;
+        if (pool.poolType === 'StablePhantom') {
+            poolTypeVersion = 0;
+        }
+
         await prisma.prismaPool.create({
             data: {
                 id: pool.id,
@@ -199,7 +240,7 @@ export class PoolCreatorService {
                 name: pool.name || '',
                 decimals: 18,
                 type: poolType,
-                version: pool.poolTypeVersion ? pool.poolTypeVersion : 1,
+                version: poolTypeVersion,
                 owner: pool.owner || ZERO_ADDRESS,
                 factory: pool.factory,
                 tokens: {
@@ -256,11 +297,26 @@ export class PoolCreatorService {
                               id: pool.id,
                               alpha: pool.alpha || '',
                               beta: pool.beta || '',
+                              sqrtAlpha: pool.sqrtAlpha || '',
+                              sqrtBeta: pool.sqrtBeta || '',
+                              root3Alpha: pool.root3Alpha || '',
+                              c: pool.c || '',
+                              s: pool.s || '',
+                              lambda: pool.lambda || '',
+                              tauAlphaX: pool.tauAlphaX || '',
+                              tauAlphaY: pool.tauAlphaY || '',
+                              tauBetaX: pool.tauBetaX || '',
+                              tauBetaY: pool.tauBetaY || '',
+                              u: pool.u || '',
+                              v: pool.v || '',
+                              w: pool.w || '',
+                              z: pool.z || '',
+                              dSq: pool.dSq || '',
                           },
                       }
                     : undefined,
                 stableDynamicData:
-                    poolType === 'STABLE' || poolType === 'PHANTOM_STABLE' || poolType === 'META_STABLE'
+                    poolType === 'STABLE' || poolType === 'COMPOSABLE_STABLE' || poolType === 'META_STABLE'
                         ? {
                               create: {
                                   id: pool.id,
@@ -362,15 +418,51 @@ export class PoolCreatorService {
         }
     }
 
+    public async updatePoolTypesAndVersionForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+
+        for (const subgraphPool of subgraphPools) {
+            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
+            let poolTypeVersion = subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1;
+            if (subgraphPool.poolType === 'StablePhantom') {
+                poolTypeVersion = 0;
+            }
+
+            const poolType = this.mapSubgraphPoolTypeToPoolType(subgraphPool.poolType || '');
+
+            try {
+                await prisma.prismaPool.update({
+                    where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
+                    data: {
+                        version: poolTypeVersion,
+                        type: poolType,
+                    },
+                });
+            } catch (e: any) {
+                // Some pools are filtered from the DB, like test pools,
+                // so we just ignore them without breaking the loop
+                const error = e.meta ? e.meta.cause : e;
+                console.error(
+                    'Error in updating pool versions: ',
+                    error,
+                    'Network',
+                    networkContext.chain,
+                    'Pool ID: ',
+                    subgraphPool.id,
+                );
+            }
+        }
+    }
+
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
         return _.sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
 
             if (poolType === 'LINEAR') {
                 return 0;
-            } else if (poolType === 'PHANTOM_STABLE') {
-                //if the phantom stable has a nested phantom stable, it needs to appear later in the list
-                const nestedPhantomStableToken = (pool.tokens || []).find((token) => {
+            } else if (poolType === 'COMPOSABLE_STABLE') {
+                //if the composable stable has a nested composable stable, it needs to appear later in the list
+                const nestedComposableStableToken = (pool.tokens || []).find((token) => {
                     if (token.address === pool.address) {
                         return false;
                     }
@@ -378,10 +470,10 @@ export class PoolCreatorService {
                     const nestedPool = subgraphPools.find((nestedPool) => nestedPool.address === token.address);
                     const nestedPoolType = this.mapSubgraphPoolTypeToPoolType(nestedPool?.poolType || '');
 
-                    return nestedPoolType === 'PHANTOM_STABLE';
+                    return nestedPoolType === 'COMPOSABLE_STABLE';
                 });
 
-                return nestedPhantomStableToken ? 2 : 1;
+                return nestedComposableStableToken ? 2 : 1;
             }
 
             return 3;
@@ -398,10 +490,11 @@ export class PoolCreatorService {
                 return 'STABLE';
             case 'MetaStable':
                 return 'META_STABLE';
+            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
             case 'StablePhantom':
-                return 'PHANTOM_STABLE';
+                return 'COMPOSABLE_STABLE';
             case 'ComposableStable':
-                return 'PHANTOM_STABLE';
+                return 'COMPOSABLE_STABLE';
             case 'Linear':
                 return 'LINEAR';
             case 'Element':

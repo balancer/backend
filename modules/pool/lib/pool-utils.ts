@@ -1,7 +1,4 @@
 import { PrismaPoolDynamicData, PrismaPoolType } from '@prisma/client';
-import { isSameAddress } from '@balancer-labs/sdk';
-import { networkContext } from '../../network/network-context.service';
-import { prisma } from '../../../prisma/prisma-client';
 
 type PoolWithTypeAndFactory = {
     address: string;
@@ -16,21 +13,11 @@ export function isStablePool(poolType: PrismaPoolType) {
 }
 
 export function isWeightedPoolV2(pool: PoolWithTypeAndFactory) {
-    return (
-        pool.type === 'WEIGHTED' &&
-        networkContext.data.balancer.weightedPoolV2Factories.find((factory) =>
-            isSameAddress(pool.factory || '', factory),
-        ) !== undefined
-    );
+    return pool.type === 'WEIGHTED' && pool.version >= 2;
 }
 
 export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
-    return (
-        pool.type === 'PHANTOM_STABLE' &&
-        networkContext.data.balancer.composableStablePoolFactories.find((factory) =>
-            isSameAddress(pool.factory || '', factory),
-        ) !== undefined
-    );
+    return pool.type === 'COMPOSABLE_STABLE' && pool.version > 0;
 }
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {

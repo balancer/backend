@@ -1,6 +1,13 @@
 import { PrismaClient } from '@prisma/client';
+import { env } from '../app/env';
 
-export let prisma = new PrismaClient();
+export let prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: env.DATABASE_URL,
+        },
+    },
+});
 
 // Debugging query times
 // export let prisma = new PrismaClient({

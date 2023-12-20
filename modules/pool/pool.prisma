@@ -47,6 +47,7 @@ enum PrismaPoolType {
     STABLE
     META_STABLE
     PHANTOM_STABLE
+    COMPOSABLE_STABLE
     ELEMENT
     LINEAR
     UNKNOWN
@@ -96,6 +97,21 @@ model PrismaPoolGyroData{
 
     alpha               String
     beta                String
+    sqrtAlpha           String?
+    sqrtBeta            String?
+    root3Alpha          String?
+    c                   String?
+    s                   String?
+    lambda              String?
+    tauAlphaX           String?
+    tauAlphaY           String?
+    tauBetaX            String?
+    tauBetaY            String?
+    u                   String?
+    v                   String?
+    w                   String?
+    z                   String?
+    dSq                 String?
 }
 
 model PrismaPoolDynamicData {
@@ -423,7 +439,7 @@ model PrismaPoolStakingGauge {
     chain               Chain
 
     gaugeAddress        String
-    votingGauge         PrismaVotingGauge?
+    votingGauge         PrismaVotingGauge[]
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)

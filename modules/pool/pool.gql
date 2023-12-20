@@ -1,5 +1,5 @@
 extend type Query {
-    poolGetPool(id: String!, chain: GqlChain): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
     poolGetPools(
         first: Int
         skip: Int
@@ -23,6 +23,7 @@ extend type Query {
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
+    poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
 }
 
 extend type Mutation {
@@ -54,7 +55,7 @@ extend type Mutation {
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
-    poolSyncAllPoolVersions: String!
+    poolSyncAllPoolTypesVersions: String!
     poolInitOnChainDataForAllPools: String!
 }
 
@@ -80,8 +81,11 @@ type GqlPoolMinimal {
 
 type GqlPoolUserBalance {
     totalBalance: AmountHumanReadable!
+    totalBalanceUsd: Float!
     walletBalance: AmountHumanReadable!
+    walletBalanceUsd: Float!
     stakedBalance: AmountHumanReadable!
+    stakedBalanceUsd: Float!
 }
 
 enum GqlPoolType {
@@ -89,6 +93,7 @@ enum GqlPoolType {
     STABLE
     META_STABLE
     PHANTOM_STABLE
+    COMPOSABLE_STABLE
     ELEMENT
     LINEAR
     UNKNOWN
@@ -121,6 +126,8 @@ interface GqlPoolBase {
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolDynamicData {
@@ -183,7 +190,7 @@ type GqlPoolInvestOption {
 
     # we use an array here for invest options where there are more than one option, but only one can be selected
     # - FTM/wFTM or ETH/wETH
-    # - weighted boosted with nested phantom stable (bb-yv-USD) where you can only invest with DAI or USDC, not both at the same time
+    # - weighted boosted with nested composable stable (bb-yv-USD) where you can only invest with DAI or USDC, not both at the same time
     tokenOptions: [GqlPoolToken!]!
 }
 
@@ -226,6 +233,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -247,11 +256,28 @@ type GqlPoolGyro implements GqlPoolBase {
 
     alpha: String!
     beta: String!
+    sqrtAlpha: String!
+    sqrtBeta: String!
+    root3Alpha: String!
+    c: String!
+    s: String!
+    lambda: String!
+    tauAlphaX: String!
+    tauAlphaY: String!
+    tauBetaX: String!
+    tauBetaY: String!
+    u: String!
+    v: String!
+    w: String!
+    z: String!
+    dSq: String!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -275,6 +301,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -298,6 +326,8 @@ type GqlPoolStable implements GqlPoolBase {
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -321,9 +351,11 @@ type GqlPoolMetaStable implements GqlPoolBase {
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
-type GqlPoolPhantomStable implements GqlPoolBase {
+type GqlPoolComposableStable implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
     name: String!
@@ -345,6 +377,8 @@ type GqlPoolPhantomStable implements GqlPoolBase {
     bptPriceRate: BigDecimal!
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -371,6 +405,8 @@ type GqlPoolElement implements GqlPoolBase {
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -399,6 +435,8 @@ type GqlPoolLinear implements GqlPoolBase {
     bptPriceRate: BigDecimal!
     type: GqlPoolType!
     version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolLinearNested {
@@ -425,7 +463,7 @@ type GqlPoolLinearNested {
     version: Int!
 }
 
-type GqlPoolPhantomStableNested {
+type GqlPoolComposableStableNested {
     id: ID!
     name: String!
     symbol: String!
@@ -433,7 +471,7 @@ type GqlPoolPhantomStableNested {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    tokens: [GqlPoolTokenPhantomStableNestedUnion!]!
+    tokens: [GqlPoolTokenComposableStableNestedUnion!]!
     nestingType: GqlPoolNestingType!
 
     totalShares: BigDecimal!
@@ -451,14 +489,14 @@ union GqlPoolUnion =
     | GqlPoolStable
     | GqlPoolMetaStable
     | GqlPoolLinear
-    | GqlPoolPhantomStable
+    | GqlPoolComposableStable
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
-union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolPhantomStableNested
+union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolComposableStableNested
 
-union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenPhantomStable | GqlPoolTokenLinear
-union GqlPoolTokenPhantomStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
+union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable | GqlPoolTokenLinear
+union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
 
 interface GqlPoolTokenBase {
     id: ID!
@@ -510,7 +548,7 @@ type GqlPoolTokenLinear implements GqlPoolTokenBase {
     totalBalance: BigDecimal!
 }
 
-type GqlPoolTokenPhantomStable implements GqlPoolTokenBase {
+type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
     id: ID!
     address: String!
     balance: BigDecimal!
@@ -523,7 +561,7 @@ type GqlPoolTokenPhantomStable implements GqlPoolTokenBase {
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
 
-    pool: GqlPoolPhantomStableNested!
+    pool: GqlPoolComposableStableNested!
 }
 
 type GqlPoolLinearPoolData {
@@ -540,7 +578,7 @@ type GqlPoolLinearPoolData {
     mainTokenTotalBalance: String!
 }
 
-type GqlPoolStablePhantomPoolData {
+type GqlPoolStableComposablePoolData {
     id: ID!
     address: String!
     symbol: String!
@@ -601,6 +639,7 @@ enum GqlPoolOrderBy {
     volume24h
     fees24h
     apr
+    userbalanceUsd
 }
 
 enum GqlPoolOrderDirection {

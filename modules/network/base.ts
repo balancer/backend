@@ -70,8 +70,6 @@ const baseNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: ['0x8df317a729fcaa260306d7de28888932cb579b88'],
-        weightedPoolV2Factories: ['0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4'],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -96,6 +94,7 @@ const baseNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -103,6 +102,7 @@ const baseNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     monitoring: {
@@ -111,6 +111,22 @@ const baseNetworkData: NetworkData = {
         },
         canary: {
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
+        },
+    },
+    datastudio: {
+        main: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '11anHUEb9snGwvB-errb5HvO8TvoLTRJhkDdD80Gxw1Q',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
+        },
+        canary: {
+            user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
+            sheetId: '1HnJOuRQXGy06tNgqjYMzQNIsaCSCC01Yxe_lZhXBDpY',
+            databaseTabName: 'Database v2',
+            compositionTabName: 'Pool Composition v2',
+            emissionDataTabName: 'EmissionData',
         },
     },
 };
@@ -139,7 +155,10 @@ export const baseNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(baseNetworkData.subgraphs.balancer, baseNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            baseNetworkData.subgraphs.balancer,
+            baseNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -234,6 +253,10 @@ export const baseNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

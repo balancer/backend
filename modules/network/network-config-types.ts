@@ -104,12 +104,8 @@ export interface NetworkData {
     balancer: {
         vault: string;
         tokenAdmin?: string;
-        weightedPoolV2Factories: string[];
-        composableStablePoolFactories: string[];
         yieldProtocolFeePercentage: number;
         swapProtocolFeePercentage: number;
-        excludedPoolDataQueryPoolIds?: string[];
-        factoriesWithpoolSpecificProtocolFeePercentagesProvider?: string[];
     };
     multicall: string;
     multicall3: string;
@@ -156,6 +152,7 @@ export interface NetworkData {
             forceRefresh: boolean;
             gasPrice: BigNumber;
             swapGas: BigNumber;
+            poolIdsToExclude: string[];
         };
     };
     datastudio?: {
