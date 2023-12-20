@@ -57,6 +57,7 @@ extend type Mutation {
     poolDeletePool(poolId: String!): String!
     poolSyncAllPoolTypesVersions: String!
     poolSyncPriceRateProviders: String!
+    poolSyncProtocolYieldFeeExemptions: String!
     poolInitOnChainDataForAllPools: String!
 }
 

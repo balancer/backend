@@ -330,6 +330,13 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolSyncProtocolYieldFeeExemptions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncProtocolYieldFeeExemptionsForAllPools();
+
+            return 'success';
+        },
     },
 };
 
