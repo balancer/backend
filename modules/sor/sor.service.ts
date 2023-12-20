@@ -12,7 +12,7 @@ import { EMPTY_COWSWAP_RESPONSE } from './constants';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getTokenAmountHuman, getTokenAmountRaw } from './utils';
+import { getToken, getTokenAmountHuman, getTokenAmountRaw, zeroResponse } from './utils';
 
 export class SorService {
     async getCowSwaps(args: QuerySorGetCowSwapsArgs): Promise<GqlCowSwapApiResponse> {
@@ -48,6 +48,17 @@ export class SorService {
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
+        const emptyResponse = zeroResponse(args.swapType, args.tokenIn, args.tokenOut, args.swapAmount);
+
+        // check if tokens addresses exist
+        try {
+            await getToken(tokenIn, args.chain!);
+            await getToken(tokenOut, args.chain!);
+        } catch (e) {
+            console.log(e);
+            return emptyResponse;
+        }
+
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
@@ -60,7 +71,6 @@ export class SorService {
             tokenIn: tokenIn,
             tokenOut: tokenOut,
         });
-        const emptyResponse = sorV1BeetsService.zeroResponse(args.swapType, args.tokenIn, args.tokenOut, amount);
 
         if (!swap) return emptyResponse;
 
