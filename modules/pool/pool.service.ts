@@ -371,7 +371,7 @@ export class PoolService {
                     await prisma.prismaPoolToken.update({
                         where: { id_chain: { id: token.id, chain: networkContext.chain } },
                         data: {
-                            exemptFromYield: token.isExemptFromYieldProtocolFee
+                            exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
                                 ? token.isExemptFromYieldProtocolFee
                                 : false,
                         },
