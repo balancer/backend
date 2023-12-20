@@ -25,13 +25,9 @@ type GqlCowSwapApiResponse {
     tokenAddresses: [String!]!
     swaps: [GqlSwap!]!
     swapAmount: String!
-    swapAmountForSwaps: String!
     returnAmount: String!
-    returnAmountFromSwaps: String!
-    returnAmountConsideringFees: String!
     tokenIn: String!
     tokenOut: String!
-    marketSp: String!
 }
 
 type GqlSwap {
