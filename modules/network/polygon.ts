@@ -379,5 +379,9 @@ export const polygonNetworkConfig: NetworkConfig = {
             name: 'feed-data-to-datastudio',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
+        {
+            name: 'sync-latest-fx-prices',
+            interval: every(10, 'minutes'),
+        },
     ],
 };
