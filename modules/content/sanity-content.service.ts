@@ -1,5 +1,5 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Prisma, PrismaPoolCategoryType } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolCategoryType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ConfigHomeScreen, ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
@@ -247,7 +247,8 @@ export class SanityContentService implements ContentService {
         ]);
     }
 
-    public async getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]> {
+    public async getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]> {
+        // TODO: get featured pools by given chainIds instead of networkContext.chainId
         const data = await getSanityClient().fetch<ConfigHomeScreen | null>(`
         *[_type == "homeScreen" && chainId == ${networkContext.chainId}][0]{
             ...,

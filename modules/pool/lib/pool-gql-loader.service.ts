@@ -38,6 +38,7 @@ import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
+import { chainToChainId } from '../../context/header-chain';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain): Promise<GqlPoolUnion> {
@@ -91,8 +92,9 @@ export class PoolGqlLoaderService {
         return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
     }
 
-    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const featuredPoolGroups = await networkContext.config.contentService.getFeaturedPoolGroups();
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
+        const chainIds = chains.map((chain) => chainToChainId[chain]);
+        const featuredPoolGroups = await networkContext.config.contentService.getFeaturedPoolGroups(chainIds);
         const poolIds = featuredPoolGroups
             .map((group) =>
                 group.items

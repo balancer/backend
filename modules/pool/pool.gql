@@ -784,6 +784,7 @@ type GqlPoolFeaturedPoolGroup {
     id: ID!
     title: String!
     icon: String!
+    primary: Boolean!
     items: [GqlPoolFeaturedPoolGroupItem!]!
 }
 

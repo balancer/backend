@@ -5,7 +5,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 
-const POOLS_METADATA_URL = "https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json";
+const POOLS_METADATA_URL = "https://raw.githubusercontent.com/balancer/metadata/chains/pools/featured.json";
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
@@ -13,6 +13,7 @@ interface FeaturedPoolMetadata {
     id: string;
     imageUrl: string;
     primary: boolean;
+    chainId: number;
 }
 interface WhitelistedTokenList {
     name: string;
@@ -165,15 +166,21 @@ export class GithubContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: types });
     }
     async syncPoolContentData(): Promise<void> {}
-    async getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]> {
+    async getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
-        return data.map(({ id, imageUrl, primary }) => ({
-                _key: '',
-                _type: '',
+        const pools = data.filter((pool) => chainIds.includes(pool.chainId.toString()));
+        return pools.map(({ id, imageUrl, primary }) => ({
                 id,
-                items: [],
+                _type: 'homeScreenFeaturedPoolGroupPoolId',
+                items: [
+                    {
+                        _key: '',
+                        _type: 'homeScreenFeaturedPoolGroupPoolId',
+                        poolId: id,
+                    }
+                ],
                 icon: imageUrl,
-                title: ''
+                primary: Boolean(primary),
         })) as HomeScreenFeaturedPoolGroup[];
     }
     async getNewsItems(): Promise<HomeScreenNewsItem[]> {

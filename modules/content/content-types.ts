@@ -10,6 +10,7 @@ export interface HomeScreenFeaturedPoolGroup {
     id: string;
     items: (HomeScreenFeaturedPoolGroupItemPoolId | HomeScreenFeaturedPoolGroupItemExternalLink)[];
     title: string;
+    primary: boolean;
 }
 
 interface HomeScreenFeaturedPoolGroupItemPoolId {
@@ -39,6 +40,6 @@ export interface HomeScreenNewsItem {
 export interface ContentService {
     syncTokenContentData(): Promise<void>;
     syncPoolContentData(): Promise<void>;
-    getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]>;
+    getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]>;
     getNewsItems(): Promise<HomeScreenNewsItem[]>;
 }
