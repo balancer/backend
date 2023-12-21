@@ -70,14 +70,6 @@ const avalancheNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0x3b1eb8eb7b43882b385ab30533d9a2bef9052a98',
-            '0xe42ffa682a26ef8f25891db4882932711d42e467',
-        ],
-        weightedPoolV2Factories: [
-            '0x94f68b54191f62f781fe8298a8a5fa3ed772d227',
-            '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -91,6 +83,7 @@ const avalancheNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
@@ -98,6 +91,7 @@ const avalancheNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
@@ -241,7 +235,10 @@ export const avalancheNetworkConfig: NetworkConfig = {
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(avalancheNetworkData.subgraphs.balancer, avalancheNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            avalancheNetworkData.subgraphs.balancer,
+            avalancheNetworkData.chain.id,
+        ),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -336,6 +333,14 @@ export const avalancheNetworkConfig: NetworkConfig = {
         {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+        },
+        {
+            name: 'feed-data-to-datastudio',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-latest-fx-prices',
+            interval: every(10, 'minutes'),
         },
     ],
 };

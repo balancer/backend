@@ -27,6 +27,7 @@ import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -39,12 +40,13 @@ const fantomNetworkData: NetworkData = {
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx',
+        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
         beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
         blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
+        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -96,8 +98,8 @@ const fantomNetworkData: NetworkData = {
     },
     rpcUrl:
         (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.fantom.gateway.fm`
-            : `https://rpc.fantom.network`,
+            ? `https://rpc.ankr.com/fantom`
+            : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
     sanity: {
         projectId: '1g2ag2hb',
@@ -108,6 +110,10 @@ const fantomNetworkData: NetworkData = {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
+    sftmx: {
+        stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+        sftmxAddress: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+    },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
         farmId: '22',
@@ -116,27 +122,8 @@ const fantomNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-        composableStablePoolFactories: [
-            '0x5adaf6509bcec3219455348ac45d6d3261b1a990',
-            '0xb384a86f2fd7788720db42f9daa60fc07ecbea06',
-            '0x44814e3a603bb7f1198617995c5696c232f6e8ed',
-            '0x911566c808bf00acb200b418564440a2af177548',
-            '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
-            '0x23f03a4fb344d8b98833d2ace093cc305e03474f',
-        ],
-        weightedPoolV2Factories: [
-            '0xb2ed595afc445b47db7043bec25e772bf0fa1fbb',
-            '0x8ea1c497c16726e097f62c8c9fbd944143f27090',
-            '0xea87f3dffc679035653c0fba70e7bfe46e3fb733',
-            '0xd678b6acd834cc969bb19ce82727f2a541fb7941',
-            '0xb841df73861e65e6d61a80f503f095a91ce75e15',
-        ],
         swapProtocolFeePercentage: 0.25,
         yieldProtocolFeePercentage: 0.25,
-        factoriesWithpoolSpecificProtocolFeePercentagesProvider: [
-            '0xb841df73861e65e6d61a80f503f095a91ce75e15',
-            '0x5c3094982cf3c97a06b7d62a6f7669f14a199b19',
-        ],
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -164,6 +151,7 @@ const fantomNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
         canary: {
             url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
@@ -171,6 +159,7 @@ const fantomNetworkData: NetworkData = {
             forceRefresh: false,
             gasPrice: BigNumber.from(10),
             swapGas: BigNumber.from('1000000'),
+            poolIdsToExclude: [],
         },
     },
     ibAprConfig: {
@@ -189,6 +178,14 @@ const fantomNetworkData: NetworkData = {
                 },
             },
         },
+        // sftmx: {
+        //     tokens: {
+        //         sftmx: {
+        //             address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+        //             ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+        //         },
+        //     },
+        // },
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
@@ -347,7 +344,11 @@ export const fantomNetworkConfig: NetworkConfig = {
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(fantomNetworkData.subgraphs.balancer, fantomNetworkData.chain.id),
+        balancerSubgraphService: new BalancerSubgraphService(
+            fantomNetworkData.subgraphs.balancer,
+            fantomNetworkData.chain.id,
+        ),
+        sftmxSubgraphService: new SftmxSubgraphService(fantomNetworkData.subgraphs.sftmx!),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -457,7 +458,15 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-staking-data',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-withdrawal-requests',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(5, 'minutes'),
         },
     ],
 };

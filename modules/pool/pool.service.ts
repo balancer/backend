@@ -7,12 +7,12 @@ import {
     GqlChain,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolGyro,
     GqlPoolJoinExit,
     GqlPoolLinear,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
-    GqlPoolUserSwapVolume,
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
@@ -70,8 +70,8 @@ export class PoolService {
         return networkContext.services.balancerSubgraphService;
     }
 
-    public async getGqlPool(id: string, chain: GqlChain): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id, chain);
+    public async getGqlPool(id: string, chain: GqlChain, userAddress?: string): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(id, chain, userAddress);
     }
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -80,6 +80,10 @@ export class PoolService {
 
     public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
         return this.poolGqlLoaderService.getLinearPools(chains);
+    }
+
+    public async getGqlGyroPools(): Promise<GqlPoolGyro[]> {
+        return this.poolGqlLoaderService.getGyroPools();
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -339,22 +343,58 @@ export class PoolService {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
-    public async syncPoolVersionForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+    public async syncPoolTypeAndVersionForAllPools() {
+        await this.poolCreatorService.updatePoolTypesAndVersionForAllPools();
+    }
 
+    public async syncProtocolYieldFeeExemptionsForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         for (const subgraphPool of subgraphPools) {
-            try {
-                await prisma.prismaPool.update({
-                    where: { id_chain: { chain: this.chain, id: subgraphPool.id } },
-                    data: {
-                        version: subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1,
-                    },
-                });
-            } catch (e: any) {
-                // Some pools are filtered from the DB, like test pools,
-                // so we just ignore them without breaking the loop
-                const error = e.meta ? e.meta.cause : e;
-                console.error(error, 'Network', networkContext.chain, 'Pool ID: ', subgraphPool.id);
+            const poolTokens = subgraphPool.tokens || [];
+            for (let i = 0; i < poolTokens.length; i++) {
+                const token = poolTokens[i];
+                try {
+                    await prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                        data: {
+                            exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
+                                ? token.isExemptFromYieldProtocolFee
+                                : false,
+                        },
+                    });
+                } catch (e) {
+                    console.error('Failed to update token ', token.id, ' error is: ', e);
+                }
+            }
+        }
+    }
+
+    public async syncPriceRateProvidersForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
+
+            const poolTokens = subgraphPool.tokens || [];
+            for (let i = 0; i < poolTokens.length; i++) {
+                const token = poolTokens[i];
+
+                let priceRateProvider;
+                const data = subgraphPool.priceRateProviders.find(
+                    (provider) => provider.token.address === token.address,
+                );
+                priceRateProvider = data?.address;
+                if (!priceRateProvider) continue;
+
+                try {
+                    await prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                        data: {
+                            priceRateProvider,
+                        },
+                    });
+                } catch (e) {
+                    console.error('Failed to update token ', token.id, ' error is: ', e);
+                }
             }
         }
     }
@@ -480,7 +520,7 @@ export class PoolService {
 
                     if (gauge && gauge.votingGauge)
                         await prisma.prismaVotingGauge.deleteMany({
-                            where: { chain: this.chain, id: gauge.votingGauge.id },
+                            where: { chain: this.chain, id: { in: gauge.votingGauge.map((gauge) => gauge.id) } },
                         });
 
                     await prisma.prismaPoolStakingGauge.deleteMany({

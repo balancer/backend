@@ -47,6 +47,7 @@ enum PrismaPoolType {
     STABLE
     META_STABLE
     PHANTOM_STABLE
+    COMPOSABLE_STABLE
     ELEMENT
     LINEAR
     UNKNOWN
@@ -96,6 +97,21 @@ model PrismaPoolGyroData{
 
     alpha               String
     beta                String
+    sqrtAlpha           String?
+    sqrtBeta            String?
+    root3Alpha          String?
+    c                   String?
+    s                   String?
+    lambda              String?
+    tauAlphaX           String?
+    tauAlphaY           String?
+    tauBetaX            String?
+    tauBetaY            String?
+    u                   String?
+    v                   String?
+    w                   String?
+    z                   String?
+    dSq                 String?
 }
 
 model PrismaPoolDynamicData {
@@ -184,17 +200,20 @@ model PrismaPoolLinearDynamicData {
 model PrismaPoolToken {
     @@id([id, chain])
 
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
-    chain               Chain
+    id                          String
+    poolId                      String
+    pool                        PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    chain                       Chain
 
-    address             String
-    token               PrismaToken          @relation(fields:[address, chain], references: [address, chain])
-    index               Int
+    address                     String
+    token                       PrismaToken          @relation(fields:[address, chain], references: [address, chain])
+    index                       Int
 
-    nestedPoolId        String?
-    nestedPool          PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
+    nestedPoolId                String?
+    nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
+
+    priceRateProvider           String?
+    exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
 }
@@ -214,6 +233,7 @@ model PrismaPoolTokenDynamicData {
     balanceUSD          Float
     weight              String?
     priceRate           String
+    latestFxPrice       Float?
 }
 
 model PrismaPoolSwap {
@@ -423,7 +443,7 @@ model PrismaPoolStakingGauge {
     chain               Chain
 
     gaugeAddress        String
-    votingGauge         PrismaVotingGauge?
+    votingGauge         PrismaVotingGauge[]
     rewards             PrismaPoolStakingGaugeReward[]
     status              PrismaPoolStakingGaugeStatus    @default(ACTIVE)
     version             Int                             @default(1)

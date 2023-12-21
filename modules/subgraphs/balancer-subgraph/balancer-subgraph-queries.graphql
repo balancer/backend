@@ -141,6 +141,7 @@ fragment BalancerToken on Token {
     id
     symbol
     address
+    latestFXPrice
     latestUSDPrice
     totalVolumeNotional
     totalVolumeUSD
@@ -182,6 +183,27 @@ fragment BalancerPool on Pool {
     amp
     alpha
     beta
+    sqrtAlpha
+    sqrtBeta
+    root3Alpha
+    c
+    s
+    lambda
+    tauAlphaX
+    tauAlphaY
+    tauBetaX
+    tauBetaY
+    u
+    v
+    w
+    z
+    dSq
+    priceRateProviders {
+        address
+        token {
+            address
+        }
+    }
 
     tokens {
         ...BalancerPoolToken
@@ -197,7 +219,11 @@ fragment BalancerPoolToken on PoolToken {
     balance
     weight
     priceRate
+    isExemptFromYieldProtocolFee
     index
+    token {
+        latestFXPrice
+    }
 }
 
 query BalancerPools(

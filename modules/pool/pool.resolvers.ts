@@ -7,14 +7,14 @@ import { headerChain } from '../context/header-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id, chain }, context) => {
+        poolGetPool: async (parent, { id, chain, userAddress }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
                 throw new Error('poolGetPool error: Provide "chain" param');
             }
-            return poolService.getGqlPool(id, chain);
+            return poolService.getGqlPool(id, chain, userAddress ? userAddress : undefined);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
@@ -108,6 +108,9 @@ const balancerResolvers: Resolvers = {
                 throw new Error('poolGetLinearPools error: Provide "chains" param');
             }
             return poolService.getGqlLinearPools(chains);
+        },
+        poolGetGyroPools: async () => {
+            return poolService.getGqlGyroPools();
         },
     },
     Mutation: {
@@ -319,10 +322,24 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncAllPoolVersions: async (parent, {}, context) => {
+        poolSyncAllPoolTypesVersions: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await poolService.syncPoolVersionForAllPools();
+            await poolService.syncPoolTypeAndVersionForAllPools();
+
+            return 'success';
+        },
+        poolSyncPriceRateProviders: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncPriceRateProvidersForAllPools();
+
+            return 'success';
+        },
+        poolSyncProtocolYieldFeeExemptions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncProtocolYieldFeeExemptionsForAllPools();
 
             return 'success';
         },
