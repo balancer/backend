@@ -14,6 +14,8 @@ import { veBalVotingListService } from '../modules/vebal/vebal-voting-list.servi
 import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
+import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
+import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
 
 const runningJobs: Set<string> = new Set();
@@ -275,6 +277,20 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     chainId,
                     () => veBalVotingListService.syncVotingGauges(),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-latest-fx-prices':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const config = AllNetworkConfigs[chainId].data;
+                        const subgraphUrl = config.subgraphs.balancer;
+                        const chain = config.chain.prismaId;
+                        return syncLatestFXPrices(subgraphUrl, chain);
+                    },
                     res,
                     next,
                 );

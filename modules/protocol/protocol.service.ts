@@ -40,8 +40,6 @@ export class ProtocolService {
         const swapVolume24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume24h));
         const swapFee24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee24h));
         const yieldCapture24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.yieldCapture24h));
-        const swapVolume7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume7d));
-        const swapFee7d = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee7d));
         const numLiquidityProviders = _.sumBy(chainMetrics, (metrics) => parseInt(metrics.numLiquidityProviders));
 
         return {
@@ -52,8 +50,6 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
-            swapVolume7d: `${swapVolume7d}`,
-            swapFee7d: `${swapFee7d}`,
             numLiquidityProviders: `${numLiquidityProviders}`,
             chains: chainMetrics,
         };
@@ -71,8 +67,6 @@ export class ProtocolService {
 
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
-        const startOfDay = moment().startOf('day').unix();
-        const sevenDayRange = moment().startOf('day').subtract(7, 'days').unix();
 
         const client = new GraphQLClient(AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer);
         const subgraphClient = getSdk(client);
@@ -115,15 +109,6 @@ export class ProtocolService {
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
 
-        //we take the aggregate of the last 7 days previous to today, since today's values grow throughout the day
-        const snapshotQueryResponse = await prisma.prismaPoolSnapshot.aggregate({
-            _sum: { fees24h: true, volume24h: true },
-            where: {
-                chain,
-                timestamp: { gte: sevenDayRange, lt: startOfDay },
-            },
-        });
-
         const balancerV1Tvl = await this.getBalancerV1Tvl(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
 
         const protocolData = {
@@ -135,8 +120,6 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
-            swapVolume7d: `${snapshotQueryResponse._sum.volume24h}`,
-            swapFee7d: `${snapshotQueryResponse._sum.fees24h}`,
             numLiquidityProviders: `${holdersQueryResponse._sum.holdersCount || '0'}`,
         };
 
