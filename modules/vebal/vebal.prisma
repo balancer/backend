@@ -31,7 +31,7 @@ model PrismaVotingGauge {
   id      String
   chain   Chain
 
-  stakingGauge      PrismaPoolStakingGauge? @relation(fields: [stakingGaugeId, chain], references: [id, chain])
+  stakingGauge      PrismaPoolStakingGauge? @relation(fields: [stakingGaugeId, chain], references: [id, chain], onDelete: Cascade)
   status            PrismaVotingGaugeStatus @default(ACTIVE)
   gaugeAddress      String
   stakingGaugeId    String?

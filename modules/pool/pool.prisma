@@ -65,7 +65,7 @@ model PrismaPoolLinearData {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     mainIndex           Int
@@ -78,7 +78,7 @@ model PrismaPoolElementData {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     unitSeconds         String
@@ -92,7 +92,7 @@ model PrismaPoolGyroData{
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     alpha               String
@@ -120,7 +120,7 @@ model PrismaPoolDynamicData {
 
     id                      String
     poolId                  String
-    pool                    PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                    PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain                   Chain
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
@@ -174,7 +174,7 @@ model PrismaPoolStableDynamicData {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -188,7 +188,7 @@ model PrismaPoolLinearDynamicData {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -202,7 +202,7 @@ model PrismaPoolToken {
 
     id                          String
     poolId                      String
-    pool                        PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                        PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain                       Chain
 
     address                     String
@@ -224,7 +224,7 @@ model PrismaPoolTokenDynamicData {
 
     id                  String
     poolTokenId         String
-    poolToken           PrismaPoolToken     @relation(fields:[poolTokenId, chain], references: [id, chain])
+    poolToken           PrismaPoolToken     @relation(fields:[poolTokenId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     blockNumber         Int
     updatedAt           DateTime            @updatedAt
@@ -241,7 +241,7 @@ model PrismaPoolSwap {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     userAddress         String
@@ -284,7 +284,7 @@ model PrismaPoolAprItem {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     title               String
     apr                 Float
@@ -301,7 +301,7 @@ model PrismaPoolAprRange {
     id                  String
     chain               Chain
     aprItemId           String
-    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId, chain], references: [id, chain])
+    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId, chain], references: [id, chain], onDelete: Cascade)
     min                 Float
     max                 Float
 }
@@ -355,11 +355,11 @@ model PrismaPoolExpandedTokens {
     tokenAddress        String
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     nestedPoolId        String?
-    nestedPool          PrismaPool?         @relation(name: "NestedPoolForAllToken", fields:[nestedPoolId, chain], references: [id, chain])
+    nestedPool          PrismaPool?         @relation(name: "NestedPoolForAllToken", fields:[nestedPoolId, chain], references: [id, chain], onDelete: Cascade)
 }
 
 
@@ -381,7 +381,7 @@ model PrismaPoolFilterMap {
     filterId            String
     filter              PrismaPoolFilter    @relation(fields:[filterId, chain], references: [id, chain])
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
 }
 
 model PrismaPoolStaking {
@@ -389,7 +389,7 @@ model PrismaPoolStaking {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     type                PrismaPoolStakingType
     address             String
@@ -439,7 +439,7 @@ model PrismaPoolStakingGauge {
 
     id                  String
     stakingId           String
-    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain])
+    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     gaugeAddress        String
@@ -463,7 +463,7 @@ model PrismaPoolStakingGaugeReward{
 
     id                  String
     gaugeId             String
-    gauge               PrismaPoolStakingGauge @relation(fields:[gaugeId, chain], references: [id, chain])
+    gauge               PrismaPoolStakingGauge @relation(fields:[gaugeId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
 
     tokenAddress        String
@@ -510,7 +510,7 @@ model PrismaPoolSnapshot {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     timestamp           Int
 
