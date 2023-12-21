@@ -8,6 +8,7 @@ import {
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolFx,
     GqlPoolGyro,
     GqlPoolJoinExit,
     GqlPoolLinear,
@@ -85,6 +86,10 @@ export class PoolService {
 
     public async getGqlGyroPools(): Promise<GqlPoolGyro[]> {
         return this.poolGqlLoaderService.getGyroPools();
+    }
+
+    public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
+        return this.poolGqlLoaderService.getFxPools(chains);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {

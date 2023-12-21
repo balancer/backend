@@ -94,6 +94,16 @@ const balancerResolvers: Resolvers = {
         poolGetGyroPools: async () => {
             return poolService.getGqlGyroPools();
         },
+
+        poolGetFxPools: async (parent, { chains }) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('poolGetLinearPools error: Provide "chains" param');
+            }
+            return poolService.getGqlFxPools(chains);
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
