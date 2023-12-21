@@ -50,7 +50,7 @@ const arbitrumNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'arbitrum-one',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
