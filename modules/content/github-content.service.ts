@@ -1,11 +1,12 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Prisma } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import { chainIdToChain } from '../network/network-config';
 
-const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/chains/pools/featured.json';
+const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
@@ -164,12 +165,13 @@ export class GithubContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: types });
     }
     async syncPoolContentData(): Promise<void> {}
-    async getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]> {
+    async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
-        const pools = data.filter((pool) => chainIds.includes(pool.chainId.toString()));
+        const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
         return pools.map(({ id, imageUrl, primary, chainId }) => ({
             id,
             _type: 'homeScreenFeaturedPoolGroupPoolId',
+            title: 'Popular pools',
             items: [
                 {
                     _key: '',
@@ -178,7 +180,7 @@ export class GithubContentService implements ContentService {
                 },
             ],
             icon: imageUrl,
-            chainId: chainId,
+            chain: chainIdToChain[chainId],
             primary: Boolean(primary),
         })) as HomeScreenFeaturedPoolGroup[];
     }

@@ -101,10 +101,6 @@ const fantomNetworkData: NetworkData = {
             ? `https://rpc.ankr.com/fantom`
             : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
-    sanity: {
-        projectId: '1g2ag2hb',
-        dataset: 'production',
-    },
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
@@ -298,7 +294,7 @@ const fantomNetworkData: NetworkData = {
 
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
-    contentService: new SanityContentService(),
+    contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new IbTokensAprService(

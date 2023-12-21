@@ -1,10 +1,10 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { Chain, Prisma, PrismaPoolCategoryType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
-import { networkContext } from '../network/network-context.service';
 import { ConfigHomeScreen, ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
+import { chainToIdMap } from '../network/network-config';
 
 interface SanityToken {
     name: string;
@@ -35,9 +35,15 @@ const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
 };
 
 export class SanityContentService implements ContentService {
+    constructor(
+        private readonly chain: Chain,
+        private readonly projectId = '1g2ag2hb',
+        private readonly dataset = 'production',
+    ) {}
+
     async syncTokenContentData(): Promise<void> {
-        const sanityTokens = await getSanityClient().fetch<SanityToken[]>(`
-            *[_type=="${SANITY_TOKEN_TYPE_MAP[networkContext.chainId]}"] {
+        const sanityTokens = await this.getSanityClient().fetch<SanityToken[]>(`
+            *[_type=="${SANITY_TOKEN_TYPE_MAP[chainToIdMap[this.chain]]}"] {
                 name,
                 address,
                 symbol,
@@ -77,12 +83,12 @@ export class SanityContentService implements ContentService {
 
             await prisma.prismaToken.upsert({
                 where: {
-                    address_chain: { address: tokenAddress, chain: networkContext.chain },
+                    address_chain: { address: tokenAddress, chain: this.chain },
                 },
                 create: {
                     name: sanityToken.name,
                     address: tokenAddress,
-                    chain: networkContext.chain,
+                    chain: this.chain,
                     symbol: sanityToken.symbol,
                     decimals: sanityToken.decimals,
                     logoURI: sanityToken.logoURI,
@@ -110,7 +116,7 @@ export class SanityContentService implements ContentService {
         const whiteListedTokens = await prisma.prismaTokenType.findMany({
             where: {
                 type: 'WHITE_LISTED',
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
 
@@ -125,7 +131,7 @@ export class SanityContentService implements ContentService {
         await prisma.prismaTokenType.createMany({
             data: addToWhitelist.map((token) => ({
                 id: `${token.address}-white-listed`,
-                chain: networkContext.chain,
+                chain: this.chain,
                 tokenAddress: token.address.toLowerCase(),
                 type: 'WHITE_LISTED' as const,
             })),
@@ -133,7 +139,7 @@ export class SanityContentService implements ContentService {
         });
 
         await prisma.prismaTokenType.deleteMany({
-            where: { id: { in: removeFromWhitelist.map((token) => token.id) }, chain: networkContext.chain },
+            where: { id: { in: removeFromWhitelist.map((token) => token.id) }, chain: this.chain },
         });
 
         await this.syncTokenTypes();
@@ -143,7 +149,7 @@ export class SanityContentService implements ContentService {
         const pools = await this.loadPoolData();
         const tokens = await prisma.prismaToken.findMany({
             include: { types: true },
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
         const types: Prisma.PrismaTokenTypeCreateManyInput[] = [];
 
@@ -154,7 +160,7 @@ export class SanityContentService implements ContentService {
             if (pool && !tokenTypes.includes('BPT')) {
                 types.push({
                     id: `${token.address}-bpt`,
-                    chain: networkContext.chain,
+                    chain: this.chain,
                     type: 'BPT',
                     tokenAddress: token.address,
                 });
@@ -163,7 +169,7 @@ export class SanityContentService implements ContentService {
             if ((pool?.type === 'PHANTOM_STABLE' || pool?.type === 'LINEAR') && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
-                    chain: networkContext.chain,
+                    chain: this.chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
                 });
@@ -176,7 +182,7 @@ export class SanityContentService implements ContentService {
             if (linearPool && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
                     id: `${token.address}-linear-wrapped`,
-                    chain: networkContext.chain,
+                    chain: this.chain,
                     type: 'LINEAR_WRAPPED_TOKEN',
                     tokenAddress: token.address,
                 });
@@ -188,7 +194,7 @@ export class SanityContentService implements ContentService {
 
     private async loadPoolData() {
         return prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
             select: {
                 address: true,
                 symbol: true,
@@ -201,7 +207,9 @@ export class SanityContentService implements ContentService {
     }
 
     public async syncPoolContentData(): Promise<void> {
-        const response = await getSanityClient().fetch(`*[_type == "config" && chainId == ${networkContext.chainId}][0]{
+        const response = await this.getSanityClient().fetch(`*[_type == "config" && chainId == ${
+            chainToIdMap[this.chain]
+        }][0]{
             incentivizedPools,
             blacklistedPools,
         }`);
@@ -211,7 +219,7 @@ export class SanityContentService implements ContentService {
             blacklistedPools: response?.blacklistedPools ?? [],
         };
 
-        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: networkContext.chain } });
+        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: this.chain } });
         const incentivized = categories.filter((item) => item.category === 'INCENTIVIZED').map((item) => item.poolId);
         const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
 
@@ -225,7 +233,7 @@ export class SanityContentService implements ContentService {
 
         // make sure the pools really exist to prevent sanity mistakes from breaking the system
         const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: itemsToAdd }, chain: networkContext.chain },
+            where: { id: { in: itemsToAdd }, chain: this.chain },
             select: { id: true },
         });
         const poolIds = pools.map((pool) => pool.id);
@@ -235,47 +243,53 @@ export class SanityContentService implements ContentService {
             prisma.prismaPoolCategory.createMany({
                 data: existingItemsToAdd.map((poolId) => ({
                     id: `${poolId}-${category}`,
-                    chain: networkContext.chain,
+                    chain: this.chain,
                     category,
                     poolId,
                 })),
                 skipDuplicates: true,
             }),
             prisma.prismaPoolCategory.deleteMany({
-                where: { poolId: { in: itemsToRemove }, category, chain: networkContext.chain },
+                where: { poolId: { in: itemsToRemove }, category, chain: this.chain },
             }),
         ]);
     }
 
-    public async getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]> {
-        // TODO: get featured pools by given chainIds instead of networkContext.chainId
-        const data = await getSanityClient().fetch<ConfigHomeScreen | null>(`
-        *[_type == "homeScreen" && chainId == ${networkContext.chainId}][0]{
-            ...,
-            "featuredPoolGroups": featuredPoolGroups[]{
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
+        const featuredPoolGroups: HomeScreenFeaturedPoolGroup[] = [];
+        for (const chain of chains) {
+            const data = await this.getSanityClient().fetch<ConfigHomeScreen | null>(`
+            *[_type == "homeScreen" && chainId == ${chainToIdMap[chain]}][0]{
                 ...,
-                "icon": icon.asset->url + "?w=64",
-                "items": items[]{
+                "featuredPoolGroups": featuredPoolGroups[]{
                     ...,
-                    "image": image.asset->url + "?w=600"
+                    "icon": icon.asset->url + "?w=64",
+                    "items": items[]{
+                        ...,
+                        "image": image.asset->url + "?w=600"
+                    }
+                },
+                "newsItems": newsItems[]{
+                    ...,
+                    "image": image.asset->url + "?w=800"
                 }
-            },
-            "newsItems": newsItems[]{
-                ...,
-                "image": image.asset->url + "?w=800"
+            }
+        `);
+            if (data) {
+                featuredPoolGroups.push(
+                    ...data.featuredPoolGroups.map((pool) => ({
+                        ...pool,
+                        chain: chain,
+                    })),
+                );
             }
         }
-    `);
-
-        if (data?.featuredPoolGroups) {
-            return data.featuredPoolGroups;
-        }
-        throw new Error(`No featured pool groups found for chain id ${networkContext.chainId}`);
+        return featuredPoolGroups;
     }
 
     public async getNewsItems(): Promise<HomeScreenNewsItem[]> {
-        const data = await getSanityClient().fetch<ConfigHomeScreen | null>(`
-    *[_type == "homeScreen" && chainId == ${networkContext.chainId}][0]{
+        const data = await this.getSanityClient().fetch<ConfigHomeScreen | null>(`
+    *[_type == "homeScreen" && chainId == ${chainToIdMap[this.chain]}][0]{
         ...,
         "featuredPoolGroups": featuredPoolGroups[]{
             ...,
@@ -295,16 +309,16 @@ export class SanityContentService implements ContentService {
         if (data?.newsItems) {
             return data.newsItems;
         }
-        throw new Error(`No news items found for chain id ${networkContext.chainId}`);
+        throw new Error(`No news items found for chain id ${this.chain}`);
     }
-}
 
-export function getSanityClient() {
-    return SanityClient({
-        projectId: networkContext.data.sanity!.projectId,
-        dataset: networkContext.data.sanity!.dataset,
-        apiVersion: '2021-12-15',
-        token: env.SANITY_API_TOKEN,
-        useCdn: false,
-    });
+    private getSanityClient() {
+        return SanityClient({
+            projectId: this.projectId,
+            dataset: this.dataset,
+            apiVersion: '2021-12-15',
+            token: env.SANITY_API_TOKEN,
+            useCdn: false,
+        });
+    }
 }

@@ -1,3 +1,6 @@
+import { Chain } from '@prisma/client';
+import { GqlChain } from '../../schema';
+
 export interface ConfigHomeScreen {
     featuredPoolGroups: HomeScreenFeaturedPoolGroup[];
     newsItems: HomeScreenNewsItem[];
@@ -11,7 +14,7 @@ export interface HomeScreenFeaturedPoolGroup {
     items: (HomeScreenFeaturedPoolGroupItemPoolId | HomeScreenFeaturedPoolGroupItemExternalLink)[];
     title: string;
     primary: boolean;
-    chainId: number;
+    chain: GqlChain;
 }
 
 interface HomeScreenFeaturedPoolGroupItemPoolId {
@@ -41,6 +44,6 @@ export interface HomeScreenNewsItem {
 export interface ContentService {
     syncTokenContentData(): Promise<void>;
     syncPoolContentData(): Promise<void>;
-    getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]>;
+    getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]>;
     getNewsItems(): Promise<HomeScreenNewsItem[]>;
 }

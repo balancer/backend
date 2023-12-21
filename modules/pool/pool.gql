@@ -821,7 +821,7 @@ type GqlPoolFeaturedPoolGroup {
     title: String!
     icon: String!
     primary: Boolean!
-    chainId: Int!
+    chain: GqlChain!
     items: [GqlPoolFeaturedPoolGroupItem!]!
 }
 
