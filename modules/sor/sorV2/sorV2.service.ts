@@ -13,6 +13,7 @@ import {
     RawGyro2Pool,
     RawGyro3Pool,
     RawGyroEPool,
+    RawFxPool,
     HumanAmount,
     SupportedRawPoolTypes,
     SingleSwap,
@@ -44,6 +45,7 @@ import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { getToken } from '../utils';
+import { FxData } from '../../pool/subgraph-mapper';
 
 const ALL_BASEPOOLS_CACHE_KEY = `basePools:all`;
 
@@ -377,7 +379,6 @@ export class SorV2Service implements SwapService {
                         'ELEMENT', // not supported by b-sdk
                         'UNKNOWN', // not supported by b-sdk
                         'INVESTMENT', // not supported by b-sdk
-                        'FX', // needs more data
                     ],
                 },
                 AND: {
@@ -428,6 +429,22 @@ export class SorV2Service implements SwapService {
                 inRecoveryMode: !!prismaPool.dynamicData?.isInRecoveryMode,
                 name: 'n/a',
             };
+            if (['FX'].includes(rawPool.poolType)) {
+                const data = prismaPool.data as FxData;
+                rawPool = {
+                    ...rawPool,
+                    ...data,
+                    tokens: rawPool.tokens.map((t, i) => {
+                        return {
+                            ...t,
+                            token: {
+                                latestFXPrice: prismaPool.tokens[i].dynamicData?.latestFxPrice?.toString(),
+                                fxOracleDecimals: 18,
+                            },
+                        };
+                    }),
+                } as RawFxPool;
+            }
             if (['Weighted', 'Investment', 'LiquidityBootstrapping'].includes(rawPool.poolType)) {
                 rawPool = {
                     ...rawPool,
