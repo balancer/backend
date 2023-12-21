@@ -1113,6 +1113,7 @@ export class PoolGqlLoaderService {
             ...poolToken.token,
             __typename: 'GqlPoolToken',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
+            priceRateProvider: poolToken.priceRateProvider,
             balance: poolToken.dynamicData?.balance || '0',
             index: poolToken.index,
             weight: poolToken.dynamicData?.weight,

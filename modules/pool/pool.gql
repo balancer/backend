@@ -56,6 +56,8 @@ extend type Mutation {
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
     poolSyncAllPoolTypesVersions: String!
+    poolSyncPriceRateProviders: String!
+    poolSyncProtocolYieldFeeExemptions: String!
     poolInitOnChainDataForAllPools: String!
 }
 
@@ -507,6 +509,7 @@ interface GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -523,6 +526,7 @@ type GqlPoolToken implements GqlPoolTokenBase {
     #dynamic data
     balance: BigDecimal!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -537,6 +541,7 @@ type GqlPoolTokenLinear implements GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
 
     pool: GqlPoolLinearNested!
@@ -557,6 +562,7 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
     symbol: String!
     index: Int!
     priceRate: BigDecimal!
+    priceRateProvider: String
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
@@ -668,21 +674,6 @@ enum GqlPoolFilterCategory {
     INCENTIVIZED
     BLACK_LISTED
 }
-
-# enum GqlPoolFilterType {
-#     WEIGHTED
-#     STABLE
-#     META_STABLE
-#     PHANTOM_STABLE
-#     ELEMENT
-#     LINEAR
-#     UNKNOWN
-#     LIQUIDITY_BOOTSTRAPPING
-#     INVESTMENT
-#     GYRO
-#     GYRO3
-#     GYROE
-# }
 
 type GqlPoolTokenExpanded {
     id: ID!

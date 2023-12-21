@@ -323,6 +323,20 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
+        poolSyncPriceRateProviders: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncPriceRateProvidersForAllPools();
+
+            return 'success';
+        },
+        poolSyncProtocolYieldFeeExemptions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncProtocolYieldFeeExemptionsForAllPools();
+
+            return 'success';
+        },
     },
 };
 
