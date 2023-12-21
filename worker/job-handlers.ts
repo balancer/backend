@@ -16,6 +16,7 @@ import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
+import { sftmxService } from '../modules/sftmx/sftmx.service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -293,6 +294,12 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
+                break;
+            case 'sync-sftmx-staking-data':
+                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncStakingData(), res, next);
+                break;
+            case 'sync-sftmx-withdrawal-requests':
+                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
                 break;
             default:
                 res.sendStatus(400);

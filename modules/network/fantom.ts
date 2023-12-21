@@ -27,6 +27,7 @@ import { env } from '../../app/env';
 import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 
 const fantomNetworkData: NetworkData = {
     chain: {
@@ -45,6 +46,7 @@ const fantomNetworkData: NetworkData = {
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
+        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -94,7 +96,8 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+    rpcUrl:
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://rpc.ankr.com/fantom`
             : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
@@ -106,6 +109,10 @@ const fantomNetworkData: NetworkData = {
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
         beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
+    },
+    sftmx: {
+        stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+        sftmxAddress: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
     },
     fbeets: {
         address: '0xfcef8a994209d6916eb2c86cdd2afd60aa6f54b1',
@@ -171,6 +178,14 @@ const fantomNetworkData: NetworkData = {
                 },
             },
         },
+        // sftmx: {
+        //     tokens: {
+        //         sftmx: {
+        //             address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+        //             ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+        //         },
+        //     },
+        // },
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
@@ -333,6 +348,7 @@ export const fantomNetworkConfig: NetworkConfig = {
             fantomNetworkData.subgraphs.balancer,
             fantomNetworkData.chain.id,
         ),
+        sftmxSubgraphService: new SftmxSubgraphService(fantomNetworkData.subgraphs.sftmx!),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -443,6 +459,14 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'feed-data-to-datastudio',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-staking-data',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-withdrawal-requests',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(5, 'minutes'),
         },
     ],
 };
