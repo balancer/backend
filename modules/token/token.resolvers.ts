@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
 import { headerChain } from '../context/header-chain';
+import { syncLatestFXPrices } from './latest-fx-price';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 const resolvers: Resolvers = {
     Query: {
@@ -134,6 +136,14 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
 
             await tokenService.syncCoingeckoPricesForAllChains();
+
+            return 'success';
+        },
+        tokenSyncLatestFxPrices: async (parent, { chain }, context) => {
+            isAdminRoute(context);
+            const subgraphUrl = AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer;
+
+            await syncLatestFXPrices(subgraphUrl, chain);
 
             return 'success';
         },

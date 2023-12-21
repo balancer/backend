@@ -93,6 +93,7 @@ enum PrismaPoolType {
     STABLE
     META_STABLE
     PHANTOM_STABLE
+    COMPOSABLE_STABLE
     ELEMENT
     LINEAR
     UNKNOWN
@@ -275,6 +276,7 @@ model PrismaPoolTokenDynamicData {
     balanceUSD          Float
     weight              String?
     priceRate           String
+    latestFxPrice       Float?
 }
 
 model PrismaPoolSwap {

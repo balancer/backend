@@ -19,8 +19,8 @@ export interface GraphTraversalConfig {
 }
 
 export interface SwapResult {
-    getCowSwapResponse(chain: Chain, queryFirst: boolean): Promise<GqlCowSwapApiResponse>;
-    getBeetsSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse>;
+    getCowSwapResponse(queryFirst: boolean): Promise<GqlCowSwapApiResponse>;
+    getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse>;
     isValid: boolean;
     outputAmount: bigint;
     inputAmount: bigint;

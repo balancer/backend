@@ -72,18 +72,6 @@ const polygonNetworkData: NetworkData = {
     },
     balancer: {
         vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        composableStablePoolFactories: [
-            '0x136fd06fa01ecf624c7f2b3cb15742c1339dc2c4',
-            '0x85a80afee867adf27b50bdb7b76da70f1e853062',
-            '0x7bc6c0e73edaa66ef3f6e2f27b0ee8661834c6c9',
-            '0x6ab5549bbd766a43afb687776ad8466f8b42f777',
-            '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
-        ],
-        weightedPoolV2Factories: [
-            '0x0e39c3d9b2ec765efd9c5c70bb290b1fcd8536e3',
-            '0x82e4cfaef85b1b6299935340c964c942280327f4',
-            '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
-        ],
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
@@ -389,7 +377,11 @@ export const polygonNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-latest-fx-prices',
+            interval: every(10, 'minutes'),
         },
     ],
 };
