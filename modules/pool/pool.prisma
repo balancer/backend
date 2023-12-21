@@ -18,6 +18,7 @@ model PrismaPool {
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
     gyroData            PrismaPoolGyroData?
+    data                Json @default("{}")
 
     tokens              PrismaPoolToken[]
 
