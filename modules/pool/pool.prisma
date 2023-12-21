@@ -133,8 +133,8 @@ model PrismaPoolDynamicData {
     totalShares             String
     totalSharesNum          Float               @default(0)
     totalLiquidity          Float
-    volume24h               Float
-    fees24h                 Float
+    volume24h               Float               @default(0)
+    fees24h                 Float               @default(0)
     yieldCapture24h         Float               @default(0)
     apr                     Float               @default(0)
     volume48h               Float               @default(0)
