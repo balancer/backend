@@ -7,6 +7,7 @@ import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { UserService } from '../../user/user.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { networkContext } from '../../network/network-context.service';
+import { subgraphToPrisma } from '../subgraph-mapper';
 
 export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
@@ -224,136 +225,9 @@ export class PoolCreatorService {
             ],
         });
 
-        // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
-        let poolTypeVersion = pool.poolTypeVersion ? pool.poolTypeVersion : 1;
-        if (pool.poolType === 'StablePhantom') {
-            poolTypeVersion = 0;
-        }
+        const prismaPoolRecordWithAssociations = subgraphToPrisma(pool, this.chain, blockNumber, allNestedTypePools);
 
-        await prisma.prismaPool.create({
-            data: {
-                id: pool.id,
-                chain: this.chain,
-                createTime: pool.createTime,
-                address: pool.address,
-                symbol: pool.symbol || '',
-                name: pool.name || '',
-                decimals: 18,
-                type: poolType,
-                version: poolTypeVersion,
-                owner: pool.owner || ZERO_ADDRESS,
-                factory: pool.factory,
-                tokens: {
-                    createMany: {
-                        data: poolTokens.map((token) => {
-                            const nestedPool = allNestedTypePools.find((nestedPool) => {
-                                return nestedPool.address === token.address;
-                            });
-
-                            let priceRateProvider;
-                            if (pool.priceRateProviders) {
-                                const data = pool.priceRateProviders.find(
-                                    (provider) => provider.token.address === token.address,
-                                );
-                                priceRateProvider = data?.address;
-                            }
-
-                            return {
-                                id: token.id,
-                                address: token.address,
-                                priceRateProvider,
-                                exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
-                                    ? token.isExemptFromYieldProtocolFee
-                                    : false,
-                                nestedPoolId: nestedPool?.id,
-                                index: token.index || pool.tokensList.findIndex((address) => address === token.address),
-                            };
-                        }),
-                    },
-                },
-                linearData:
-                    poolType === 'LINEAR'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  mainIndex: pool.mainIndex || 0,
-                                  wrappedIndex: pool.wrappedIndex || 0,
-                              },
-                          }
-                        : undefined,
-                linearDynamicData:
-                    poolType === 'LINEAR'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  upperTarget: pool.upperTarget || '',
-                                  lowerTarget: pool.lowerTarget || '',
-                                  blockNumber,
-                              },
-                          }
-                        : undefined,
-                elementData:
-                    poolType === 'ELEMENT'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  unitSeconds: pool.unitSeconds || '',
-                                  principalToken: pool.principalToken || '',
-                                  baseToken: pool.baseToken || '',
-                              },
-                          }
-                        : undefined,
-                gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(poolType)
-                    ? {
-                          create: {
-                              id: pool.id,
-                              alpha: pool.alpha || '',
-                              beta: pool.beta || '',
-                              sqrtAlpha: pool.sqrtAlpha || '',
-                              sqrtBeta: pool.sqrtBeta || '',
-                              root3Alpha: pool.root3Alpha || '',
-                              c: pool.c || '',
-                              s: pool.s || '',
-                              lambda: pool.lambda || '',
-                              tauAlphaX: pool.tauAlphaX || '',
-                              tauAlphaY: pool.tauAlphaY || '',
-                              tauBetaX: pool.tauBetaX || '',
-                              tauBetaY: pool.tauBetaY || '',
-                              u: pool.u || '',
-                              v: pool.v || '',
-                              w: pool.w || '',
-                              z: pool.z || '',
-                              dSq: pool.dSq || '',
-                          },
-                      }
-                    : undefined,
-                stableDynamicData:
-                    poolType === 'STABLE' || poolType === 'COMPOSABLE_STABLE' || poolType === 'META_STABLE'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  amp: pool.amp || '',
-                                  blockNumber,
-                              },
-                          }
-                        : undefined,
-                dynamicData: {
-                    create: {
-                        id: pool.id,
-                        blockNumber,
-                        swapFee: pool.swapFee,
-                        swapEnabled: pool.swapEnabled,
-                        totalShares: pool.totalShares,
-                        totalSharesNum: parseFloat(pool.totalShares),
-                        totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
-                        volume24h: 0,
-                        fees24h: 0,
-                        volume48h: 0,
-                        fees48h: 0,
-                    },
-                },
-            },
-        });
+        await prisma.prismaPool.create(prismaPoolRecordWithAssociations);
 
         await prisma.prismaPoolTokenDynamicData.createMany({
             data: poolTokens.map((token) => ({
