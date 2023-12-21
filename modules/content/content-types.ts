@@ -11,6 +11,7 @@ export interface HomeScreenFeaturedPoolGroup {
     items: (HomeScreenFeaturedPoolGroupItemPoolId | HomeScreenFeaturedPoolGroupItemExternalLink)[];
     title: string;
     primary: boolean;
+    chainId: number;
 }
 
 interface HomeScreenFeaturedPoolGroupItemPoolId {

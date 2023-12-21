@@ -5,7 +5,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 
-const POOLS_METADATA_URL = "https://raw.githubusercontent.com/balancer/metadata/chains/pools/featured.json";
+const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/chains/pools/featured.json';
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
@@ -35,16 +35,14 @@ export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
         const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
 
-        const filteredTokenList = githubAllTokenList.tokens.filter(
-            (token) =>  {
-                if (`${token.chainId}` !== networkContext.chainId) {
-                    return false;
-                }
-
-                const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals']
-                return requiredKeys.every((key) => token?.[key as keyof WhitelistedToken] != null)
+        const filteredTokenList = githubAllTokenList.tokens.filter((token) => {
+            if (`${token.chainId}` !== networkContext.chainId) {
+                return false;
             }
-        );
+
+            const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals'];
+            return requiredKeys.every((key) => token?.[key as keyof WhitelistedToken] != null);
+        });
 
         for (const githubToken of filteredTokenList) {
             const tokenAddress = githubToken.address.toLowerCase();
@@ -169,18 +167,19 @@ export class GithubContentService implements ContentService {
     async getFeaturedPoolGroups(chainIds: string[]): Promise<HomeScreenFeaturedPoolGroup[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chainIds.includes(pool.chainId.toString()));
-        return pools.map(({ id, imageUrl, primary }) => ({
-                id,
-                _type: 'homeScreenFeaturedPoolGroupPoolId',
-                items: [
-                    {
-                        _key: '',
-                        _type: 'homeScreenFeaturedPoolGroupPoolId',
-                        poolId: id,
-                    }
-                ],
-                icon: imageUrl,
-                primary: Boolean(primary),
+        return pools.map(({ id, imageUrl, primary, chainId }) => ({
+            id,
+            _type: 'homeScreenFeaturedPoolGroupPoolId',
+            items: [
+                {
+                    _key: '',
+                    _type: 'homeScreenFeaturedPoolGroupPoolId',
+                    poolId: id,
+                },
+            ],
+            icon: imageUrl,
+            chainId: chainId,
+            primary: Boolean(primary),
         })) as HomeScreenFeaturedPoolGroup[];
     }
     async getNewsItems(): Promise<HomeScreenNewsItem[]> {

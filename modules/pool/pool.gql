@@ -19,7 +19,7 @@ extend type Query {
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
-    poolGetFeaturedPoolGroups(chains: [GqlChain!]!): [GqlPoolFeaturedPoolGroup!]!
+    poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetAllPoolsSnapshots(chains: [GqlChain!], range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
@@ -785,6 +785,7 @@ type GqlPoolFeaturedPoolGroup {
     title: String!
     icon: String!
     primary: Boolean!
+    chainId: Int!
     items: [GqlPoolFeaturedPoolGroupItem!]!
 }
 
