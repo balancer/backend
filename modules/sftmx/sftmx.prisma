@@ -21,10 +21,11 @@ model PrismaSftmxStakingData {
 
 model PrismaSftmxWithdrawalRequest {
     id                      String                  @id
-    ftmStakingId            PrismaSftmxStakingData  @relation(fields:[id], references: [id])
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
 
-    user                                            String
-    amountSftmx                                     String
-    requestTimestamp                                Int
-    isWithdrawn                                     Boolean
+    user                    String
+    amountSftmx             String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
 }

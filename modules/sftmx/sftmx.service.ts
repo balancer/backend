@@ -103,7 +103,7 @@ export class SftmxService {
         for (const request of allWithdrawalRequests) {
             const requestData = {
                 id: request.id,
-                ftmStaking: this.stakingContractAddress,
+                ftmStakingId: this.stakingContractAddress,
                 user: request.user.id,
                 amountSftmx: request.amount,
                 isWithdrawn: request.isWithdrawn,
