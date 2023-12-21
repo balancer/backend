@@ -94,8 +94,7 @@ const fantomNetworkData: NetworkData = {
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
     },
-    rpcUrl:
-        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+    rpcUrl: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://rpc.ankr.com/fantom`
             : `https://rpc.fantom.gateway.fm`,
     rpcMaxBlockRange: 1000,
