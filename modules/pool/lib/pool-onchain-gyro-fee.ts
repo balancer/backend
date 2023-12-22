@@ -70,9 +70,9 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
 
     const results = (await multicaller.execute()) as OnchainGyroFees;
     const defaultFee = results.defaultFee ?? '0';
-    const eclpFee = results.eclpFee ?? '0';
-    const twoClpFee = results.twoClpFee ?? '0';
-    const threeClpFee = results.threeClpFee ?? '0';
+    const eclpFee = results.eclpFee ?? defaultFee;
+    const twoClpFee = results.twoClpFee ?? defaultFee;
+    const threeClpFee = results.threeClpFee ?? defaultFee;
 
     let parsed: { [address: string]: string } = {};
     if (results.pools) {
