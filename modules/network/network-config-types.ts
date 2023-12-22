@@ -77,10 +77,6 @@ export interface NetworkData {
         veBalLocks?: string;
         userBalances: string;
     };
-    sanity?: {
-        projectId: string;
-        dataset: string;
-    };
     protocolToken: 'beets' | 'bal';
     beets?: {
         address: string;

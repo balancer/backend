@@ -36,8 +36,6 @@ import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliqu
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 
-const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
-
 export class PoolService {
     private cache = new Cache<string, any>();
     constructor(
@@ -118,20 +116,8 @@ export class PoolService {
         return this.poolSwapService.getJoinExits(args);
     }
 
-    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
-            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
-        );
-
-        if (cached) {
-            return cached;
-        }
-
-        const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
-
-        this.cache.put(`${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`, featuredPoolGroups, 60 * 5 * 1000);
-
-        return featuredPoolGroups;
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
+        return this.poolGqlLoaderService.getFeaturedPoolGroups(chains);
     }
 
     public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {

@@ -42,6 +42,10 @@ import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
+import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } from '../../network/network-config';
+import { GithubContentService } from '../../content/github-content.service';
+import SanityClientConstructor from '@sanity/client';
+import { SanityContentService } from '../../content/sanity-content.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -154,8 +158,15 @@ export class PoolGqlLoaderService {
         return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
     }
 
-    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const featuredPoolGroups = await networkContext.config.contentService.getFeaturedPoolGroups();
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
+        const featuredPoolGroups = [];
+        if (chains.some((chain) => BalancerChainIds.includes(chainToIdMap[chain]))) {
+            const githubContentService = new GithubContentService();
+            featuredPoolGroups.push(...(await githubContentService.getFeaturedPoolGroups(chains)));
+        } else if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
+            const sanityContentService = new SanityContentService('FANTOM');
+            featuredPoolGroups.push(...(await sanityContentService.getFeaturedPoolGroups(chains)));
+        }
         const poolIds = featuredPoolGroups
             .map((group) =>
                 group.items
