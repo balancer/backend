@@ -820,7 +820,7 @@ type GqlPoolFeaturedPoolGroup {
     id: ID!
     title: String!
     icon: String!
-    primary: Boolean!
+    primary: Boolean
     chain: GqlChain!
     items: [GqlPoolFeaturedPoolGroupItem!]!
 }
