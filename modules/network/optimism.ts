@@ -51,7 +51,7 @@ const optimismNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'optimistic-ethereum',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
