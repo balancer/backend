@@ -54,6 +54,11 @@ async function startServer() {
                 console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
+            if (error?.toString().includes('No potential swap paths provided')) {
+                console.log(`The following error occurred but was not sent to Sentry: ${error}`);
+                return null;
+            }
+
             return event;
         },
     });
