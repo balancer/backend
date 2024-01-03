@@ -1,0 +1,33 @@
+extend type Query {
+    sftmxGetWithdrawalRequests(user: String!): [GqlSftmxWithdrawalRequests!]!
+    sftmxGetStakingData: GqlSftmxStakingData!
+}
+
+extend type Mutation {
+    sftmxSyncWithdrawalRequests: String!
+    sftmxSyncStakingData: String!
+}
+
+# TODO provide more info such as how much is staked on which validator
+type GqlSftmxStakingData {
+    totalFtmAmount: AmountHumanReadable!
+    totalFtmAmountStaked: AmountHumanReadable!
+    totalFtmAmountInPool: AmountHumanReadable!
+    numberOfVaults: Int!
+    undelegatePaused: Boolean!
+    withdrawPaused: Boolean!
+    maintenancePaused: Boolean!
+    minDepositLimit: AmountHumanReadable!
+    maxDepositLimit: AmountHumanReadable!
+    exchangeRate: String!
+    stakingApr: String!
+    withdrawalDelay: Int!
+}
+
+type GqlSftmxWithdrawalRequests {
+    id: String!
+    user: String!
+    amountSftmx: AmountHumanReadable!
+    requestTimestamp: Int!
+    isWithdrawn: Boolean!
+}

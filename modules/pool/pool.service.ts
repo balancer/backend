@@ -36,8 +36,6 @@ import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliqu
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 
-const FEATURED_POOL_GROUPS_CACHE_KEY = `pool:featuredPoolGroups`;
-
 export class PoolService {
     private cache = new Cache<string, any>();
     constructor(
@@ -118,20 +116,8 @@ export class PoolService {
         return this.poolSwapService.getJoinExits(args);
     }
 
-    public async getFeaturedPoolGroups(): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const cached: GqlPoolFeaturedPoolGroup[] = await this.cache.get(
-            `${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`,
-        );
-
-        if (cached) {
-            return cached;
-        }
-
-        const featuredPoolGroups = await this.poolGqlLoaderService.getFeaturedPoolGroups();
-
-        this.cache.put(`${FEATURED_POOL_GROUPS_CACHE_KEY}:${this.chainId}`, featuredPoolGroups, 60 * 5 * 1000);
-
-        return featuredPoolGroups;
+    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
+        return this.poolGqlLoaderService.getFeaturedPoolGroups(chains);
     }
 
     public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
@@ -359,6 +345,58 @@ export class PoolService {
 
     public async syncPoolTypeAndVersionForAllPools() {
         await this.poolCreatorService.updatePoolTypesAndVersionForAllPools();
+    }
+
+    public async syncProtocolYieldFeeExemptionsForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            const poolTokens = subgraphPool.tokens || [];
+            for (let i = 0; i < poolTokens.length; i++) {
+                const token = poolTokens[i];
+                try {
+                    await prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                        data: {
+                            exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
+                                ? token.isExemptFromYieldProtocolFee
+                                : false,
+                        },
+                    });
+                } catch (e) {
+                    console.error('Failed to update token ', token.id, ' error is: ', e);
+                }
+            }
+        }
+    }
+
+    public async syncPriceRateProvidersForAllPools() {
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        for (const subgraphPool of subgraphPools) {
+            if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
+
+            const poolTokens = subgraphPool.tokens || [];
+            for (let i = 0; i < poolTokens.length; i++) {
+                const token = poolTokens[i];
+
+                let priceRateProvider;
+                const data = subgraphPool.priceRateProviders.find(
+                    (provider) => provider.token.address === token.address,
+                );
+                priceRateProvider = data?.address;
+                if (!priceRateProvider) continue;
+
+                try {
+                    await prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
+                        data: {
+                            priceRateProvider,
+                        },
+                    });
+                } catch (e) {
+                    console.error('Failed to update token ', token.id, ' error is: ', e);
+                }
+            }
+        }
     }
 
     public async addToBlackList(poolId: string) {

@@ -1,12 +1,21 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Prisma } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import { chainIdToChain } from '../network/network-config';
+
+const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
+interface FeaturedPoolMetadata {
+    id: string;
+    imageUrl: string;
+    primary: boolean;
+    chainId: number;
+}
 interface WhitelistedTokenList {
     name: string;
     timestamp: string;
@@ -27,16 +36,14 @@ export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
         const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
 
-        const filteredTokenList = githubAllTokenList.tokens.filter(
-            (token) =>  {
-                if (`${token.chainId}` !== networkContext.chainId) {
-                    return false;
-                }
-
-                const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals']
-                return requiredKeys.every((key) => token?.[key as keyof WhitelistedToken] != null)
+        const filteredTokenList = githubAllTokenList.tokens.filter((token) => {
+            if (`${token.chainId}` !== networkContext.chainId) {
+                return false;
             }
-        );
+
+            const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals'];
+            return requiredKeys.every((key) => token?.[key as keyof WhitelistedToken] != null);
+        });
 
         for (const githubToken of filteredTokenList) {
             const tokenAddress = githubToken.address.toLowerCase();
@@ -158,8 +165,24 @@ export class GithubContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: types });
     }
     async syncPoolContentData(): Promise<void> {}
-    async getFeaturedPoolGroups(): Promise<HomeScreenFeaturedPoolGroup[]> {
-        return [];
+    async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
+        const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
+        const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
+        return pools.map(({ id, imageUrl, primary, chainId }) => ({
+            id,
+            _type: 'homeScreenFeaturedPoolGroupPoolId',
+            title: 'Popular pools',
+            items: [
+                {
+                    _key: '',
+                    _type: 'homeScreenFeaturedPoolGroupPoolId',
+                    poolId: id,
+                },
+            ],
+            icon: imageUrl,
+            chain: chainIdToChain[chainId],
+            primary: Boolean(primary),
+        })) as HomeScreenFeaturedPoolGroup[];
     }
     async getNewsItems(): Promise<HomeScreenNewsItem[]> {
         return [];

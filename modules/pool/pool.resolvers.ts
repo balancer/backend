@@ -49,8 +49,14 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
-        poolGetFeaturedPoolGroups: async (parent, args, context) => {
-            return poolService.getFeaturedPoolGroups();
+        poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('poolGetFeaturedPoolGroups error: Provide "chains" param');
+            }
+            return poolService.getFeaturedPoolGroups(chains);
         },
         poolGetSnapshots: async (parent, { id, chain, range }, context) => {
             const currentChain = headerChain();
@@ -320,6 +326,20 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.syncPoolTypeAndVersionForAllPools();
+
+            return 'success';
+        },
+        poolSyncPriceRateProviders: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncPriceRateProvidersForAllPools();
+
+            return 'success';
+        },
+        poolSyncProtocolYieldFeeExemptions: async (parent, {}, context) => {
+            isAdminRoute(context);
+
+            await poolService.syncProtocolYieldFeeExemptionsForAllPools();
 
             return 'success';
         },

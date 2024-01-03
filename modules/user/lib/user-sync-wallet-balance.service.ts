@@ -1,7 +1,6 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { formatFixed } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
-import { ethers } from 'ethers';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -12,6 +11,7 @@ import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
+import { getEvents } from '../../web3/events';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -130,7 +130,6 @@ export class UserSyncWalletBalanceService {
     }
 
     public async syncChangedBalancesForAllPools() {
-        const erc20Interface = new ethers.utils.Interface(ERC20Abi);
         const latestBlock = await this.provider.getBlockNumber();
         const syncStatus = await prisma.prismaUserBalanceSyncStatus.findUnique({
             where: { type_chain: { type: 'WALLET', chain: this.chain } },
@@ -157,62 +156,20 @@ export class UserSyncWalletBalanceService {
             return;
         }
 
-        // Split the range into smaller chunks to avoid RPC limits, setting up to 50 times max block range
-        const toBlock = Math.min(fromBlock + 50 * this.rpcMaxBlockRange, latestBlock);
-        const range = toBlock - fromBlock;
+        // Split the range into smaller chunks to avoid RPC limits, setting up to 5 times max block range
+        const toBlock = Math.min(fromBlock + 5 * this.rpcMaxBlockRange, latestBlock);
         console.log(`UserWalletBalanceService: syncing balances from ${fromBlock} to ${toBlock}`);
         console.log(`user-sync-wallet-balances-for-all-pools-${this.chainId} getLogs of ${poolAddresses.length} pools`);
-        const events = await Promise.all(
-            // Getting logs in batches of max blocks allowed by RPC
-            Array.from({ length: Math.ceil(range / this.rpcMaxBlockRange) }, (_, i) => i).map(async (i) => {
-                const from = fromBlock + i * this.rpcMaxBlockRange;
-                const to = Math.min(fromBlock + (i + 1) * this.rpcMaxBlockRange, toBlock);
 
-                // Usually RPCs are handling any number of addresses, but it here batching just to be on the safe side
-                const logRequests: Promise<ethers.providers.Log[]>[] = _.chunk(poolAddresses, 500).map((addresses) => {
-                    // Fetch logs with a raw json request until we support Viem or Ethers6
-                    const payload = {
-                        jsonrpc: '2.0',
-                        id: 1,
-                        method: 'eth_getLogs',
-                        params: [
-                            {
-                                address: addresses,
-                                topics: [ethers.utils.id('Transfer(address,address,uint256)')],
-                                fromBlock: '0x' + BigInt(from).toString(16),
-                                toBlock: '0x' + BigInt(to).toString(16),
-                            },
-                        ],
-                    };
-
-                    return fetch(AllNetworkConfigs[this.chainId].data.rpcUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload),
-                    })
-                        .then((response) => response.json() as Promise<{ result: ethers.providers.Log[] }>)
-                        .then(({ result }) => result)
-                        .catch((error) => {
-                            console.error('Error fetching logs:', error);
-                            return [];
-                        });
-
-                    // Fetching logs with Viem
-                    // viemClient.getLogs({
-                    //     address: addresses,
-                    //     event: parseAbiItem('event Transfer(address indexed, address indexed, uint256)'),
-                    //     fromBlock: BigInt(from),
-                    //     toBlock: BigInt(to),
-                    // })
-                });
-
-                const events = await Promise.all(logRequests).then((res) => res.flat());
-
-                return events;
-            }),
-        ).then((res) => res.flat().filter((event) => event));
+        const events = await getEvents(
+            fromBlock,
+            toBlock,
+            poolAddresses,
+            ['Transfer'],
+            AllNetworkConfigs[this.chainId].data.rpcUrl,
+            this.rpcMaxBlockRange,
+            ERC20Abi,
+        );
 
         console.log(
             `user-sync-wallet-balances-for-all-pools-${this.chainId} getLogs of ${poolAddresses.length} pools done`,
@@ -230,14 +187,10 @@ export class UserSyncWalletBalanceService {
                     //we also need to track fbeets balance
                     relevantERC20Addresses.includes(event.address.toLowerCase()),
                 )
-                .map((event) => {
-                    const parsed = erc20Interface.parseLog(event);
-
-                    return [
-                        { erc20Address: event.address, userAddress: parsed.args?.from as string },
-                        { erc20Address: event.address, userAddress: parsed.args?.to as string },
-                    ];
-                })
+                .map((event) => [
+                    { erc20Address: event.address, userAddress: event.args?.from as string },
+                    { erc20Address: event.address, userAddress: event.args?.to as string },
+                ])
                 .flat(),
             (entry) => entry.erc20Address + entry.userAddress,
         );

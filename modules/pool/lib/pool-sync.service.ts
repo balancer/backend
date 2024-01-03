@@ -1,47 +1,70 @@
 import * as _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { PrismaLastBlockSyncedCategory } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { poolService } from '../pool.service';
-import { getContractAt } from '../../web3/contract';
 import VaultAbi from '../abi/Vault.json';
 import { networkContext } from '../../network/network-context.service';
+import { getEvents } from '../../web3/events';
 
 export class PoolSyncService {
+    get chain(): Chain {
+        return networkContext.chain;
+    }
+
+    get chainId(): string {
+        return networkContext.chainId;
+    }
+
+    get provider() {
+        return networkContext.provider;
+    }
+
+    get vaultAddress() {
+        return networkContext.data.balancer.vault;
+    }
+
+    get rpcUrl() {
+        return networkContext.data.rpcUrl;
+    }
+
+    get rpcMaxBlockRange() {
+        return networkContext.data.rpcMaxBlockRange;
+    }
+
     public async syncChangedPools() {
         let lastSync = await prisma.prismaLastBlockSynced.findUnique({
-            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: this.chain } },
         });
         const lastSyncBlock = lastSync?.blockNumber ?? 0;
-        const latestBlock = await networkContext.provider.getBlockNumber();
+        const latestBlock = await this.provider.getBlockNumber();
 
         const startBlock = lastSyncBlock + 1;
-        const endBlock =
-            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
-                ? startBlock + networkContext.data.rpcMaxBlockRange
-                : latestBlock;
+        const endBlock = latestBlock;
 
         // no new blocks have been minted, needed for slow networks
         if (startBlock > endBlock) {
             return;
         }
 
-        const contract = getContractAt(networkContext.data.balancer.vault, VaultAbi);
-
-        const events = await contract.queryFilter(
-            { address: networkContext.data.balancer.vault },
-            startBlock,
-            endBlock,
-        );
-
+        // Update status for all the pools
         const allPools = await prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
-
         await poolService.updateOnChainStatusForPools(allPools.map((pool) => pool.id));
 
-        const filteredEvents = events.filter((event) =>
-            ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'].includes(event.event!),
+        // Get state changing events from the vault contract
+        const filteredEvents = await getEvents(
+            startBlock,
+            endBlock,
+            [this.vaultAddress],
+            ['PoolBalanceChanged', 'PoolBalanceManaged', 'Swap'],
+            this.rpcUrl,
+            this.rpcMaxBlockRange,
+            VaultAbi,
         );
+
+        console.log(`sync-changed-pools-${this.chainId} found ${filteredEvents.length} events`);
+
         const poolIds: string[] = _.uniq(filteredEvents.map((event) => event.args!.poolId));
         if (poolIds.length !== 0) {
             console.log(`Syncing ${poolIds.length} pools between blocks ${startBlock} and ${endBlock}`);
@@ -52,23 +75,23 @@ export class PoolSyncService {
         }
 
         await prisma.prismaLastBlockSynced.upsert({
-            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: this.chain } },
             update: {
                 blockNumber: endBlock,
             },
             create: {
                 category: PrismaLastBlockSyncedCategory.POOLS,
                 blockNumber: endBlock,
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
     }
 
     public async initOnChainDataForAllPools() {
-        const latestBlock = await networkContext.provider.getBlockNumber();
+        const latestBlock = await this.provider.getBlockNumber();
 
         const allPools = await prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: this.chain },
         });
 
         const poolIds = allPools.map((pool) => pool.id);
@@ -81,14 +104,14 @@ export class PoolSyncService {
         await poolService.updateVolumeAndFeeValuesForPools(poolIds);
 
         await prisma.prismaLastBlockSynced.upsert({
-            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
+            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: this.chain } },
             update: {
                 blockNumber: latestBlock,
             },
             create: {
                 category: PrismaLastBlockSyncedCategory.POOLS,
                 blockNumber: latestBlock,
-                chain: networkContext.chain,
+                chain: this.chain,
             },
         });
     }
@@ -107,10 +130,10 @@ export class PoolSyncService {
 
         await prisma.prismaPoolCategory.createMany({
             data: poolsWithGauges.map((pool) => ({
-                id: `${networkContext.chain}-${pool.id}-INCENTIVIZED`,
+                id: `${this.chain}-${pool.id}-INCENTIVIZED`,
                 poolId: pool.id,
                 category: 'INCENTIVIZED' as const,
-                chain: networkContext.chain,
+                chain: this.chain,
             })),
             skipDuplicates: true,
         });
@@ -118,7 +141,7 @@ export class PoolSyncService {
         await prisma.prismaPoolCategory.deleteMany({
             where: {
                 category: 'INCENTIVIZED',
-                chain: networkContext.chain,
+                chain: this.chain,
                 poolId: {
                     notIn: poolsWithGauges.map((pool) => pool.id),
                 },

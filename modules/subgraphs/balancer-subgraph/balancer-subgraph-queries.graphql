@@ -198,6 +198,12 @@ fragment BalancerPool on Pool {
     w
     z
     dSq
+    priceRateProviders {
+        address
+        token {
+            address
+        }
+    }
 
     tokens {
         ...BalancerPoolToken
@@ -213,6 +219,7 @@ fragment BalancerPoolToken on PoolToken {
     balance
     weight
     priceRate
+    isExemptFromYieldProtocolFee
     index
     token {
         latestFXPrice

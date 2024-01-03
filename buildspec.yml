@@ -11,6 +11,7 @@ env:
         GAUGE_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism'
         USER_SNAPSHOT_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom'
         VEBALLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges'
+        SFTMX_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx'
 phases:
     install:
         runtime-versions:

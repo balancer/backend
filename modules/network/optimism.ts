@@ -51,7 +51,7 @@ const optimismNetworkData: NetworkData = {
     coingecko: {
         nativeAssetId: 'ethereum',
         platformId: 'optimistic-ethereum',
-        excludedTokenAddresses: [],
+        excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
     tokenPrices: {
         maxHourlyPriceHistoryNumDays: 100,
@@ -60,10 +60,6 @@ const optimismNetworkData: NetworkData = {
         ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
-    sanity: {
-        projectId: '1g2ag2hb',
-        dataset: 'production',
-    },
     protocolToken: 'beets',
     beets: {
         address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
@@ -257,7 +253,7 @@ const optimismNetworkData: NetworkData = {
 
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
-    contentService: new SanityContentService(),
+    contentService: new SanityContentService(optimismNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new IbTokensAprService(

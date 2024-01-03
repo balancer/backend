@@ -246,17 +246,20 @@ model PrismaPoolLinearDynamicData {
 model PrismaPoolToken {
     @@id([id, chain])
 
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
-    chain               Chain
+    id                          String
+    poolId                      String
+    pool                        PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    chain                       Chain
 
-    address             String
-    token               PrismaToken          @relation(fields:[address, chain], references: [address, chain])
-    index               Int
+    address                     String
+    token                       PrismaToken          @relation(fields:[address, chain], references: [address, chain])
+    index                       Int
 
-    nestedPoolId        String?
-    nestedPool          PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
+    nestedPoolId                String?
+    nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
+
+    priceRateProvider           String?
+    exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
 }
@@ -614,6 +617,39 @@ model PrismaReliquaryTokenBalanceSnapshot {
     name                String
     decimals            Int
     balance             String
+}
+
+
+
+model PrismaSftmxStakingData {
+    id                      String              @id
+    totalFtm                String
+    totalFtmStaked          String
+    totalFtmInPool          String
+    numberOfVaults          Int
+    stakingApr              String
+    exchangeRate            String
+
+    maxDepositLimit         String
+    minDepositLimit         String
+    withdrawalDelay         Int
+
+    undelegatePaused        Boolean
+    withdrawPaused          Boolean
+    maintenancePaused       Boolean
+
+    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
+}
+
+model PrismaSftmxWithdrawalRequest {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    user                    String
+    amountSftmx             String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
 }
 
 
