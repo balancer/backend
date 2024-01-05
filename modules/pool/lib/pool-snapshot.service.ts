@@ -17,9 +17,7 @@ import { networkContext } from '../../network/network-context.service';
 import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 
 export class PoolSnapshotService {
-    constructor(
-        private readonly coingeckoService: CoingeckoService,
-    ) {}
+    constructor(private readonly coingeckoService: CoingeckoService) {}
 
     private get balancerSubgraphService() {
         return networkContext.config.services.balancerSubgraphService;
@@ -41,24 +39,6 @@ export class PoolSnapshotService {
     public async getSnapshotForPool(poolId: string, timestamp: number, chain: Chain) {
         return prisma.prismaPoolSnapshot.findUnique({
             where: { id_chain: { id: `${poolId}-${timestamp}`, chain } },
-        });
-    }
-
-    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
-        const timestamp = this.getTimestampForRange(range);
-
-        return prisma.prismaPoolSnapshot.findMany({
-            where: {
-                timestamp: { gte: timestamp },
-                totalSharesNum: {
-                    gt: 0.000000000001,
-                },
-                pool: {
-                    categories: { none: { category: 'BLACK_LISTED' } },
-                },
-                chain: { in: chains },
-            },
-            orderBy: { timestamp: 'asc' },
         });
     }
 

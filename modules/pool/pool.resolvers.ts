@@ -79,27 +79,6 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetAllPoolsSnapshots: async (parent, { chains, range }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetAllPoolsSnapshots error: Provide "chains" param');
-            }
-            const snapshots = await poolService.getSnapshotsForAllPools(chains, range);
-
-            return snapshots.map((snapshot) => ({
-                ...snapshot,
-                totalLiquidity: `${snapshot.totalLiquidity}`,
-                sharePrice: `${snapshot.sharePrice}`,
-                volume24h: `${snapshot.volume24h}`,
-                fees24h: `${snapshot.fees24h}`,
-                totalSwapVolume: `${snapshot.totalSwapVolume}`,
-                totalSwapFee: `${snapshot.totalSwapFee}`,
-                swapsCount: `${snapshot.swapsCount}`,
-                holdersCount: `${snapshot.holdersCount}`,
-            }));
-        },
         poolGetLinearPools: async (parent, { chains }, context) => {
             const currentChain = headerChain();
             if (!chains && currentChain) {
