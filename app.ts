@@ -20,6 +20,7 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
+import { prisma } from './prisma/prisma-client';
 
 async function startServer() {
     const app = createExpressApp();
@@ -31,9 +32,9 @@ async function startServer() {
         enabled: env.NODE_ENV === 'production',
         ignoreErrors: [/.*error: Provide.*chain.*param/],
         integrations: [
-            // new Tracing.Integrations.Apollo(),
-            // new Tracing.Integrations.GraphQL(),
-            // new Tracing.Integrations.Prisma({ client: prisma }),
+            new Sentry.Integrations.Apollo(),
+            new Sentry.Integrations.GraphQL(),
+            new Sentry.Integrations.Prisma({ client: prisma }),
             new Sentry.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
