@@ -216,8 +216,8 @@ export class TokenService {
         return this.tokenPriceService.getHistoricalTokenPrices();
     }
 
-    public async purgeOldTokenPrices() {
-        this.tokenPriceService.purgeOldTokenPrices();
+    public async purgeOldTokenPrices(): Promise<number> {
+        return this.tokenPriceService.purgeOldTokenPrices();
     }
 
     public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {

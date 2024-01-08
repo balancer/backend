@@ -255,20 +255,35 @@ export class TokenPriceService {
         }
     }
 
-    // this can break if it tries to delete too many records, then we need to do findMany->deleteMany approach, check git history
-    public async purgeOldTokenPrices() {
+    public async purgeOldTokenPrices(): Promise<number> {
         const purgeBeforeTimestamp = moment()
             .startOf('day')
             .subtract(networkContext.data.tokenPrices.maxHourlyPriceHistoryNumDays, 'days')
             .utc()
             .unix();
-
-        await prisma.prismaTokenPrice.deleteMany({
+        const oldPrices = await prisma.prismaTokenPrice.findMany({
             where: {
                 chain: networkContext.chain,
                 timestamp: { lt: purgeBeforeTimestamp },
             },
         });
+
+        // returns all non midnight prices
+        const tobeDeleted = oldPrices.filter((tokenPrice) => tokenPrice.timestamp % secondsPerDay !== 0);
+
+        //apparently prisma has a limitation on delete
+        const chunks = _.chunk(tobeDeleted, 1000);
+
+        for (const chunk of chunks) {
+            await prisma.prismaTokenPrice.deleteMany({
+                where: {
+                    chain: networkContext.chain,
+                    timestamp: { in: chunk.map((tokenPrice) => tokenPrice.timestamp) },
+                },
+            });
+        }
+
+        return tobeDeleted.length;
     }
 
     private async updateCandleStickData() {
