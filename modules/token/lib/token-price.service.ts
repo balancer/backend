@@ -256,7 +256,7 @@ export class TokenPriceService {
     }
 
     public async purgeOldTokenPricesForAllChains(): Promise<number> {
-        const purgeBeforeTimestamp = moment().startOf('day').subtract(180, 'days').utc().unix();
+        const purgeBeforeTimestamp = moment().startOf('day').subtract(100, 'days').utc().unix();
         const oldPrices = await prisma.prismaTokenPrice.findMany({
             where: {
                 timestamp: { lt: purgeBeforeTimestamp },
