@@ -349,10 +349,6 @@ export class PoolService {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
-    public async syncPoolTypeAndVersionForAllPools() {
-        await this.poolCreatorService.updatePoolTypesAndVersionForAllPools();
-    }
-
     public async syncProtocolYieldFeeExemptionsForAllPools() {
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         for (const subgraphPool of subgraphPools) {
