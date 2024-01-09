@@ -87,6 +87,19 @@ export const subgraphToPrismaUpdate = (
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
         data: dbData.data, // DISCUSS: simplify DB schema by migrating from individual tables to a JSON column with types enforced on read. And same with dynamic data.
+        tokens: {
+            update: dbData.tokens.map((token) => ({
+                where: {
+                    id_chain: {
+                        id: token.id,
+                        chain: chain,
+                    },
+                },
+                data: {
+                    ...token,
+                },
+            })),
+        },
         linearData:
             dbData.base.type === 'LINEAR'
                 ? {
