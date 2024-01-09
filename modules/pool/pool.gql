@@ -54,8 +54,6 @@ extend type Mutation {
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
-    poolSyncPriceRateProviders: String!
-    poolSyncProtocolYieldFeeExemptions: String!
     poolInitOnChainDataForAllPools: String!
 }
 

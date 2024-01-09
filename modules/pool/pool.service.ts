@@ -341,58 +341,6 @@ export class PoolService {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
-    public async syncProtocolYieldFeeExemptionsForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        for (const subgraphPool of subgraphPools) {
-            const poolTokens = subgraphPool.tokens || [];
-            for (let i = 0; i < poolTokens.length; i++) {
-                const token = poolTokens[i];
-                try {
-                    await prisma.prismaPoolToken.update({
-                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
-                        data: {
-                            exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
-                                ? token.isExemptFromYieldProtocolFee
-                                : false,
-                        },
-                    });
-                } catch (e) {
-                    console.error('Failed to update token ', token.id, ' error is: ', e);
-                }
-            }
-        }
-    }
-
-    public async syncPriceRateProvidersForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        for (const subgraphPool of subgraphPools) {
-            if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
-
-            const poolTokens = subgraphPool.tokens || [];
-            for (let i = 0; i < poolTokens.length; i++) {
-                const token = poolTokens[i];
-
-                let priceRateProvider;
-                const data = subgraphPool.priceRateProviders.find(
-                    (provider) => provider.token.address === token.address,
-                );
-                priceRateProvider = data?.address;
-                if (!priceRateProvider) continue;
-
-                try {
-                    await prisma.prismaPoolToken.update({
-                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
-                        data: {
-                            priceRateProvider,
-                        },
-                    });
-                } catch (e) {
-                    console.error('Failed to update token ', token.id, ' error is: ', e);
-                }
-            }
-        }
-    }
-
     public async addToBlackList(poolId: string) {
         const category = await prisma.prismaPoolCategory.findFirst({
             where: { poolId, chain: this.chain, category: 'BLACK_LISTED' },
