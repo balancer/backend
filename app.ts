@@ -27,7 +27,6 @@ async function startServer() {
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        // tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         ignoreErrors: [/.*error: Provide.*chain.*param/],
@@ -39,8 +38,8 @@ async function startServer() {
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
         ],
-        tracesSampleRate: 0.2,
-        profilesSampleRate: 0.1,
+        tracesSampleRate: 0.005,
+        profilesSampleRate: 0.005,
         beforeSend(event, hint) {
             const error = hint.originalException as string;
             if (error?.toString().includes('Unknown token:')) {

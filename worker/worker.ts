@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/node';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import { env } from '../app/env';
 import { configureWorkerRoutes } from './job-handlers';
+import { prisma } from '../prisma/prisma-client';
 
 export async function startWorker() {
     const app = express();
@@ -12,12 +13,15 @@ export async function startWorker() {
         environment: `multichain-worker-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         integrations: [
-            // new Tracing.Integrations.Express({ app }),
+            new Sentry.Integrations.Apollo(),
+            new Sentry.Integrations.GraphQL(),
+            new Sentry.Integrations.Prisma({ client: prisma }),
+            new Sentry.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
         ],
-        tracesSampleRate: 0.2,
-        profilesSampleRate: 0.1,
+        tracesSampleRate: 0.005,
+        profilesSampleRate: 0.005,
     });
 
     app.use(Sentry.Handlers.requestHandler());
