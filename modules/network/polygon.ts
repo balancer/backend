@@ -52,9 +52,6 @@ const polygonNetworkData: NetworkData = {
         platformId: 'polygon-pos',
         excludedTokenAddresses: [],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl: env.INFURA_API_KEY
         ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://polygon.sakurarpc.io',
@@ -360,12 +357,6 @@ export const polygonNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',

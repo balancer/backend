@@ -53,9 +53,6 @@ const optimismNetworkData: NetworkData = {
         platformId: 'optimistic-ethereum',
         excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl: env.INFURA_API_KEY
         ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://mainnet.optimism.io',
@@ -367,12 +364,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',

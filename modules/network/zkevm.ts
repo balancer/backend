@@ -52,9 +52,6 @@ const zkevmNetworkData: NetworkData = {
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl:
         env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
@@ -263,12 +260,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',

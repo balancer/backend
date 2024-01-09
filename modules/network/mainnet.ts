@@ -63,9 +63,6 @@ const data: NetworkData = {
             '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee', // weEth, has coingekco entry but no price
         ],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
@@ -469,12 +466,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(2, 'hours'),
         },
         {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(75, 'minutes'),
         },
@@ -490,11 +481,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-voting-gauges',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(5, 'minutes'),
         },
-        // The following are multichain jobs and should only run once for all chains.
-        {
-            name: 'sync-global-coingecko-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
-        },
         {
             name: 'feed-data-to-datastudio',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
@@ -502,6 +488,17 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
+        },
+        // The following are multichain jobs and should only run once for all chains.
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
+        },
+        {
+            name: 'global-purge-old-tokenprices',
+            interval: every(1, 'days'),
+            alarmEvaluationPeriod: 1,
+            alarmDatapointsToAlarm: 1,
         },
     ],
 };

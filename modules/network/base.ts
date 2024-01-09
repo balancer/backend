@@ -51,9 +51,6 @@ const baseNetworkData: NetworkData = {
         platformId: 'base',
         excludedTokenAddresses: [],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl: 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 500,
     protocolToken: 'bal',
@@ -231,12 +228,6 @@ export const baseNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',

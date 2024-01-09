@@ -52,9 +52,6 @@ const avalancheNetworkData: NetworkData = {
         platformId: 'avalanche',
         excludedTokenAddresses: [],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
@@ -319,12 +316,6 @@ export const avalancheNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',
