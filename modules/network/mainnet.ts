@@ -66,7 +66,7 @@ const data: NetworkData = {
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://eth.llamarpc.com',
+            : 'https://rpc.eth.gateway.fm',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
