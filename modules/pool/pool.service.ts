@@ -333,10 +333,6 @@ export class PoolService {
         await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }
 
-    public async reloadPoolNestedTokens(poolId: string) {
-        await this.poolCreatorService.reloadPoolNestedTokens(poolId);
-    }
-
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
     }

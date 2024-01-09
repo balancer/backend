@@ -49,7 +49,6 @@ extend type Mutation {
     poolUpdateLifetimeValuesForAllPools: String!
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
-    poolReloadPoolNestedTokens(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
     poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!

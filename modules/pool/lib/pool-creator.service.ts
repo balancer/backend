@@ -81,42 +81,6 @@ export class PoolCreatorService {
         return Array.from(poolIds);
     }
 
-    public async reloadPoolNestedTokens(poolId: string): Promise<void> {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        const poolToLoad = subgraphPools.find((pool) => pool.id === poolId);
-
-        if (!poolToLoad) {
-            throw new Error('Pool with id does not exist');
-        }
-
-        const poolTokens = poolToLoad.tokens || [];
-
-        for (let i = 0; i < poolTokens.length; i++) {
-            const token = poolTokens[i];
-
-            if (token.address === poolToLoad.address) {
-                continue;
-            }
-
-            const nestedPool = subgraphPools.find((nestedPool) => {
-                const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
-
-                return (
-                    nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'COMPOSABLE_STABLE')
-                );
-            });
-
-            if (nestedPool) {
-                await prisma.prismaPoolToken.update({
-                    where: { id_chain: { id: token.id, chain: this.chain } },
-                    data: { nestedPoolId: nestedPool.id },
-                });
-            }
-        }
-
-        await this.createAllTokensRelationshipForPool(poolId);
-    }
-
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
         let operations: any[] = [];
         const pools = await prisma.prismaPool.findMany({
@@ -233,6 +197,8 @@ export class PoolCreatorService {
                 },
             },
         });
+
+        await this.createAllTokensRelationshipForPool(pool.id);
     }
 
     public async createAllTokensRelationshipForPool(poolId: string): Promise<void> {
