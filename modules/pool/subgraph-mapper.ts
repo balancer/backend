@@ -3,7 +3,7 @@ import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/b
 import { AddressZero } from '@ethersproject/constants';
 import * as dataMappers from './pool-data';
 
-export const subgraphToPrisma = (
+export const subgraphToPrismaCreate = (
     pool: BalancerPoolFragment,
     chain: Chain,
     blockNumber: number,
@@ -73,6 +73,61 @@ export const subgraphToPrisma = (
     };
 
     return prismaPoolRecordWithAssociations;
+};
+
+export const subgraphToPrismaUpdate = (
+    pool: BalancerPoolFragment,
+    chain: Chain,
+    blockNumber: number,
+    nestedPools: { id: string; address: string }[],
+) => {
+    const dbData = subgraphMapper(pool, chain, blockNumber, nestedPools);
+    const { id, ...baseWithoutId } = dbData.base;
+
+    const prismaPoolRecordWithDataAssociations = {
+        ...baseWithoutId,
+        data: dbData.data, // DISCUSS: simplify DB schema by migrating from individual tables to a JSON column with types enforced on read. And same with dynamic data.
+        linearData:
+            dbData.base.type === 'LINEAR'
+                ? {
+                      update: {
+                          ...(dbData.data as ReturnType<typeof dataMapper['LINEAR']>),
+                      },
+                  }
+                : undefined,
+        elementData:
+            dbData.base.type === 'ELEMENT'
+                ? {
+                      update: {
+                          ...(dbData.data as ReturnType<typeof dataMapper['ELEMENT']>),
+                      },
+                  }
+                : undefined,
+        gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
+            ? {
+                  update: {
+                      ...(dbData.data as ReturnType<typeof dataMapper['GYRO']>),
+                  },
+              }
+            : undefined,
+        linearDynamicData:
+            dbData.base.type === 'LINEAR'
+                ? {
+                      update: {
+                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['LINEAR']>),
+                      },
+                  }
+                : undefined,
+        stableDynamicData: ['STABLE', 'COMPOSABLE_STABLE', 'META_STABLE'].includes(dbData.base.type)
+            ? {
+                  update: {
+                      ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['STABLE']>),
+                  },
+              }
+            : undefined,
+    };
+
+    return prismaPoolRecordWithDataAssociations;
 };
 
 const subgraphMapper = (
