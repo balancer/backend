@@ -251,8 +251,14 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-latest-relic-snapshots':
                 await runIfNotAlreadyRunning(job.name, chainId, () => userService.syncUserRelicSnapshots(), res, next);
                 break;
-            case 'purge-old-tokenprices':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.purgeOldTokenPrices(), res, next);
+            case 'global-purge-old-tokenprices':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => tokenService.purgeOldTokenPricesForAllChains(),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-coingecko-coinids':
                 await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), res, next);

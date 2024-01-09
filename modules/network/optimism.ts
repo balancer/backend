@@ -53,9 +53,6 @@ const optimismNetworkData: NetworkData = {
         platformId: 'optimistic-ethereum',
         excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl: env.INFURA_API_KEY
         ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://mainnet.optimism.io',
@@ -323,10 +320,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
-            name: 'sync-sanity-pool-data',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
-        },
-        {
             name: 'sync-tokens-from-pool-tokens',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
@@ -373,12 +366,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: every(2, 'hours'),
         },
         {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
@@ -393,6 +380,10 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'feed-data-to-datastudio',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-sanity-pool-data',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
         },
     ],
 };

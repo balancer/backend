@@ -62,9 +62,6 @@ export interface NetworkData {
         platformId: string;
         excludedTokenAddresses: string[];
     };
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: number;
-    };
     subgraphs: {
         startDate: string;
         balancer: string;

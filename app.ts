@@ -20,25 +20,25 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
+import { prisma } from './prisma/prisma-client';
 
 async function startServer() {
     const app = createExpressApp();
 
     Sentry.init({
         dsn: env.SENTRY_DSN,
-        // tracesSampleRate: 0.005,
         environment: `multichain-${env.DEPLOYMENT_ENV}`,
         enabled: env.NODE_ENV === 'production',
         ignoreErrors: [/.*error: Provide.*chain.*param/],
         integrations: [
-            // new Tracing.Integrations.Apollo(),
-            // new Tracing.Integrations.GraphQL(),
-            // new Tracing.Integrations.Prisma({ client: prisma }),
+            new Sentry.Integrations.Apollo(),
+            new Sentry.Integrations.GraphQL(),
+            new Sentry.Integrations.Prisma({ client: prisma }),
             new Sentry.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
         ],
-        tracesSampleRate: 0.2,
+        tracesSampleRate: 0.005,
         profilesSampleRate: 0.1,
         beforeSend(event, hint) {
             const error = hint.originalException as string;

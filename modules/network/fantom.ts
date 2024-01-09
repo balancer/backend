@@ -93,9 +93,6 @@ const fantomNetworkData: NetworkData = {
             '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl:
         (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://rpc.ankr.com/fantom`
@@ -437,12 +434,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-relic-snapshots',
             interval: every(1, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'sync-coingecko-coinids',

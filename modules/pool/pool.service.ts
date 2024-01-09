@@ -120,10 +120,6 @@ export class PoolService {
         return this.poolGqlLoaderService.getFeaturedPoolGroups(chains);
     }
 
-    public async getSnapshotsForAllPools(chains: Chain[], range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForAllPools(chains, range);
-    }
-
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
         return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
     }

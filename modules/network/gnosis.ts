@@ -52,9 +52,6 @@ const gnosisNetworkData: NetworkData = {
         platformId: 'xdai',
         excludedTokenAddresses: [],
     },
-    tokenPrices: {
-        maxHourlyPriceHistoryNumDays: 100,
-    },
     rpcUrl:
         (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.gnosischain.com` : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
@@ -239,12 +236,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
         {
             name: 'sync-coingecko-coinids',
             interval: every(2, 'hours'),
-        },
-        {
-            name: 'purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',
