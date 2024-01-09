@@ -341,10 +341,6 @@ export class PoolService {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
     }
 
-    public async reloadPoolTokenIndexes(poolId: string) {
-        await this.poolCreatorService.reloadPoolTokenIndexes(poolId);
-    }
-
     public async setPoolsWithPreferredGaugesAsIncentivized() {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }

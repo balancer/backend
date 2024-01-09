@@ -51,7 +51,6 @@ extend type Mutation {
     poolSyncPool(poolId: String!): String!
     poolReloadPoolNestedTokens(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
-    poolReloadPoolTokenIndexes(poolId: String!): String!
     poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!

@@ -272,27 +272,6 @@ export class PoolCreatorService {
         });
     }
 
-    public async reloadPoolTokenIndexes(poolId: string): Promise<void> {
-        const { pool: subgraphPool } = await this.balancerSubgraphService.getPool({ id: poolId });
-
-        if (!subgraphPool) {
-            throw new Error('Pool with id does not exist');
-        }
-
-        const poolTokens = subgraphPool.tokens || [];
-
-        for (let i = 0; i < poolTokens.length; i++) {
-            const token = poolTokens[i];
-
-            await prisma.prismaPoolToken.update({
-                where: { id_chain: { id: token.id, chain: this.chain } },
-                data: {
-                    index: token.index || subgraphPool.tokensList.findIndex((address) => address === token.address),
-                },
-            });
-        }
-    }
-
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
         return _.sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
