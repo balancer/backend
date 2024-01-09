@@ -39,7 +39,7 @@ async function startServer() {
             new ProfilingIntegration(),
         ],
         tracesSampleRate: 0.005,
-        profilesSampleRate: 0.005,
+        profilesSampleRate: 0.1,
         beforeSend(event, hint) {
             const error = hint.originalException as string;
             if (error?.toString().includes('Unknown token:')) {

@@ -217,7 +217,7 @@ export class TokenService {
     }
 
     public async purgeOldTokenPricesForAllChains() {
-        await this.tokenPriceService.purgeOldTokenPricesForAllChains();
+        return this.tokenPriceService.purgeOldTokenPricesForAllChains();
     }
 
     public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {
