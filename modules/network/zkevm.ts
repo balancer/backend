@@ -121,6 +121,12 @@ const zkevmNetworkData: NetworkData = {
                 path: 'rethAPR',
                 isIbYield: true,
             },
+            ankrETH: {
+                tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
         },
     },
     beefy: {

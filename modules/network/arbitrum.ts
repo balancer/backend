@@ -19,7 +19,7 @@ import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.s
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
-const arbitrumNetworkData: NetworkData = {
+export const arbitrumNetworkData: NetworkData = {
     chain: {
         slug: 'arbitrum',
         id: 42161,
@@ -173,6 +173,25 @@ const arbitrumNetworkData: NetworkData = {
                 tokenAddress: '0x95ab45875cffdba1e5f451b950bc2e42c0053f39',
                 sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
                 path: 'sfrxethApr',
+                isIbYield: true,
+            },
+            sFRAX: {
+                tokenAddress: '0xe3b3fe7bca19ca77ad877a5bebab186becfad906',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            ankrETH: {
+                tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
+            plsRDNT: {
+                tokenAddress: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
+                sourceUrl: 'https://plutusdao.io/api/getPlsRdntInfo',
+                path: 'apr',
+                scale: 10000,
                 isIbYield: true,
             },
         },

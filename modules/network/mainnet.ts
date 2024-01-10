@@ -258,6 +258,8 @@ const data: NetworkData = {
                 },
             },
         },
+        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
         defaultHandlers: {
             vETH: {
                 tokenAddress: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
@@ -330,6 +332,12 @@ const data: NetworkData = {
                 path: 'value',
                 isIbYield: true,
                 scale: 1,
+            },
+            ankrETH: {
+                tokenAddress: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
             },
         },
     },

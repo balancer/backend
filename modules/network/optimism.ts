@@ -208,6 +208,19 @@ const optimismNetworkData: NetworkData = {
                 path: 'sfrxethApr',
                 isIbYield: true,
             },
+            sFRAX: {
+                tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            stERN: {
+                tokenAddress: '0x3ee6107d9c93955acbb3f39871d32b02f82b78ab',
+                sourceUrl:
+                    'https://2ch9hbg8hh.execute-api.us-east-1.amazonaws.com/dev/api/vault/0x3eE6107d9C93955acBb3f39871D32B02F82B78AB:0xa',
+                path: 'data.yields.apy',
+                isIbYield: true,
+            },
         },
     },
     beefy: {

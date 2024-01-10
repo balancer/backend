@@ -47,15 +47,20 @@ export class DefaultAprHandler implements AprHandler {
         }
     }
 
-    getValueFromPath(obj: any, path: string) {
-        if (path === '') {
-            return obj;
-        }
+    // Get a specific value from a JSON object based on a path
+    getValueFromPath = (obj: any, path: string) => {
         const parts = path.split('.');
         let value = obj;
         for (const part of parts) {
-            value = value[part];
+            if (part[0] === '{' && part[part.length - 1] === '}') {
+                const selector = part.slice(1, -1);
+                const variableName = selector.split('==')[0].trim();
+                const variableValue = selector.split('==')[1].trim().replace(/"/g, '');
+                value = value.find((v: any) => v[variableName] === variableValue);
+            } else {
+                value = value[part];
+            }
         }
         return value;
-    }
+    };
 }

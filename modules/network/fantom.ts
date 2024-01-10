@@ -246,6 +246,14 @@ const fantomNetworkData: NetworkData = {
                 isIbYield: true,
             },
         },
+        defaultHandlers: {
+            ankrETH: {
+                tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
+        },
     },
     copper: {
         proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',

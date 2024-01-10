@@ -19,6 +19,8 @@ const sourceToHandler = {
     tranchess: sources.TranchessAprHandler,
     yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
+    stakewise: sources.Stakewise,
+    etherfi: sources.Etherfi,
 };
 
 export class YbAprHandlers {
