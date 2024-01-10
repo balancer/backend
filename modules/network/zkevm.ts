@@ -16,7 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const zkevmNetworkData: NetworkData = {
@@ -95,7 +95,7 @@ const zkevmNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         ovix: {
             tokens: {
                 USDT: {
@@ -157,8 +157,8 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            zkevmNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            zkevmNetworkData.ybAprConfig,
             zkevmNetworkData.chain.prismaId,
             zkevmNetworkData.balancer.yieldProtocolFeePercentage,
             zkevmNetworkData.balancer.swapProtocolFeePercentage,

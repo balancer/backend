@@ -6,7 +6,7 @@ import { TokenPriceHandler } from '../token/token-types';
 import { BaseProvider } from '@ethersproject/providers';
 import { GqlChain } from '../../schema';
 import { ContentService } from '../content/content-types';
-import { IbAprConfig } from './apr-config-types';
+import { YbAprConfig } from './apr-config-types';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 
@@ -113,7 +113,7 @@ export interface NetworkData {
         address: string;
         excludedFarmIds: string[];
     };
-    ibAprConfig: IbAprConfig;
+    ybAprConfig: YbAprConfig;
     reliquary?: {
         address: string;
         excludedFarmIds: string[];

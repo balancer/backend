@@ -15,7 +15,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const baseNetworkData: NetworkData = {
@@ -66,7 +66,7 @@ const baseNetworkData: NetworkData = {
         swapProtocolFeePercentage: 0.5,
         yieldProtocolFeePercentage: 0.5,
     },
-    ibAprConfig: {
+    ybAprConfig: {
         defaultHandlers: {
             cbETH: {
                 tokenAddress: '0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22',
@@ -129,8 +129,8 @@ export const baseNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: baseNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            baseNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            baseNetworkData.ybAprConfig,
             baseNetworkData.chain.prismaId,
             baseNetworkData.balancer.yieldProtocolFeePercentage,
             baseNetworkData.balancer.swapProtocolFeePercentage,

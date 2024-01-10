@@ -16,7 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const avalancheNetworkData: NetworkData = {
@@ -91,7 +91,7 @@ const avalancheNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         aave: {
             v3: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-avalanche',
@@ -209,8 +209,8 @@ export const avalancheNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            avalancheNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            avalancheNetworkData.ybAprConfig,
             avalancheNetworkData.chain.prismaId,
             avalancheNetworkData.balancer.yieldProtocolFeePercentage,
             avalancheNetworkData.balancer.swapProtocolFeePercentage,

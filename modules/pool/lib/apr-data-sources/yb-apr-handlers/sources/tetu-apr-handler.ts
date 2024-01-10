@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { TetuAprConfig } from '../../../../../network/apr-config-types';
 import * as Sentry from '@sentry/node';
 

@@ -24,7 +24,7 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
@@ -155,7 +155,7 @@ const fantomNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         ankr: {
             sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
             tokens: {
@@ -294,8 +294,8 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            fantomNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            fantomNetworkData.ybAprConfig,
             fantomNetworkData.chain.prismaId,
             fantomNetworkData.balancer.yieldProtocolFeePercentage,
             fantomNetworkData.balancer.swapProtocolFeePercentage,

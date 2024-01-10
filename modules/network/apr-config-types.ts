@@ -1,4 +1,4 @@
-export interface IbAprConfig {
+export interface YbAprConfig {
     aave?: AaveAprConfig;
     ankr?: AnkrAprConfig;
     bloom?: BloomAprConfig;

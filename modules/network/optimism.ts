@@ -16,7 +16,7 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
@@ -102,7 +102,7 @@ const optimismNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         ankr: {
             sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
             tokens: {
@@ -253,8 +253,8 @@ export const optimismNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(optimismNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            optimismNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            optimismNetworkData.ybAprConfig,
             optimismNetworkData.chain.prismaId,
             optimismNetworkData.balancer.yieldProtocolFeePercentage,
             optimismNetworkData.balancer.swapProtocolFeePercentage,

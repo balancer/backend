@@ -15,7 +15,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
@@ -93,7 +93,7 @@ const arbitrumNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         aave: {
             v3: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-arbitrum',
@@ -215,8 +215,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: arbitrumNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            arbitrumNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            arbitrumNetworkData.ybAprConfig,
             arbitrumNetworkData.chain.prismaId,
             arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
             arbitrumNetworkData.balancer.swapProtocolFeePercentage,

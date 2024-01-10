@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import * as Sentry from '@sentry/node';
 
 export class DefaultAprHandler implements AprHandler {
@@ -37,8 +37,8 @@ export class DefaultAprHandler implements AprHandler {
                 [this.tokenAddress]: {
                     apr: scaledValue,
                     isIbYield: this.isIbYield ?? false,
-                    group: this.group
-                }
+                    group: this.group,
+                },
             };
         } catch (error) {
             console.error(`Failed to fetch APRs in url ${this.url}:`, error);

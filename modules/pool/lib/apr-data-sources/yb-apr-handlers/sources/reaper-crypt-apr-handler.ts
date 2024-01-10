@@ -1,4 +1,4 @@
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { getContractAt } from '../../../../../web3/contract';
 import ReaperCryptStrategyAbi from './abis/ReaperCryptStrategy.json';
 import axios from 'axios';

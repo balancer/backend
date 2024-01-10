@@ -1,5 +1,5 @@
 import { BeefyAprConfig } from '../../../../../network/apr-config-types';
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import axios from 'axios';
 import * as Sentry from '@sentry/node';
 
@@ -28,8 +28,8 @@ export class BeefyAprHandler implements AprHandler {
                     [address]: {
                         apr,
                         isIbYield: isIbYield ?? false,
-                        group: this.group
-                    }
+                        group: this.group,
+                    },
                 };
             });
 

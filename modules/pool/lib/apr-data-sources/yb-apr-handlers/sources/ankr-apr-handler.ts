@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as Sentry from '@sentry/node';
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { AnkrAprConfig } from '../../../../../network/apr-config-types';
 
 export class AnkrAprHandler implements AprHandler {
@@ -28,10 +28,13 @@ export class AnkrAprHandler implements AprHandler {
                     if (!service) {
                         return [address, 0];
                     }
-                    return [address, {
-                        apr: parseFloat(service.apy) / 1e2,
-                        isIbYield: isIbYield ?? false,
-                    }];
+                    return [
+                        address,
+                        {
+                            apr: parseFloat(service.apy) / 1e2,
+                            isIbYield: isIbYield ?? false,
+                        },
+                    ];
                 }),
             );
             return aprs;
