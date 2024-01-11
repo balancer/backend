@@ -150,7 +150,7 @@ const subgraphMapper = (
     nestedPools: { id: string; address: string }[],
 ) => {
     const type = mapSubgraphPoolTypeToPoolType(pool.poolType!);
-    const version = mapPoolTypeVersion(type, pool.poolTypeVersion!);
+    const version = mapPoolTypeVersion(pool.poolType!, pool.poolTypeVersion!);
 
     const base = {
         id: pool.id,
