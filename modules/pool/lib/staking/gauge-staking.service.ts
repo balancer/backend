@@ -24,6 +24,8 @@ import type { JsonFragment } from '@ethersproject/abi';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
+import { FtmStaking_OrderBy } from '../../../subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types';
+import { total } from './bal-emissions';
 
 interface GaugeRate {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -81,15 +83,14 @@ export class GaugeStakingService implements PoolStakingService {
         ]);
     }
 
-    async syncStakingForPools(pools?: { id: string }[]): Promise<void> {
+    async syncStakingForPools(): Promise<void> {
         // Getting data from the DB and subgraph
-        const poolIds = (
-            pools ??
-            (await prisma.prismaPool.findMany({
-                select: { id: true },
-                where: { chain: networkContext.chain },
-            }))
-        ).map((pool) => pool.id);
+
+        const dbPools = await prisma.prismaPool.findMany({
+            where: { chain: networkContext.chain },
+            include: { staking: { include: { gauge: { include: { rewards: true } } } } },
+        });
+        const poolIds = dbPools.map((pool) => pool.id);
         const { pools: subgraphPoolsWithGauges } = await this.gaugeSubgraphService.getPoolsWithGauges(poolIds);
 
         const subgraphGauges = subgraphPoolsWithGauges
@@ -101,7 +102,7 @@ export class GaugeStakingService implements PoolStakingService {
             .filter((pool) => pool.preferentialGauge)
             .map((pool) => pool.preferentialGauge!.id);
 
-        const dbGauges = subgraphGauges.map((gauge) => ({
+        const gaugesForDb = subgraphGauges.map((gauge) => ({
             id: gauge.id,
             poolId: gauge.poolId!,
             // we need to set the status based on the preferentialGauge entity on the gaugePool. If it's set there, it's preferential, otherwise it's active (or killed)
@@ -130,51 +131,71 @@ export class GaugeStakingService implements PoolStakingService {
             },
         });
 
-        const onchainRates = await this.getOnchainRewardTokensData(dbGauges);
+        const onchainRates = await this.getOnchainRewardTokensData(gaugesForDb);
 
         // Prepare DB operations
         const operations: any[] = [];
 
-        // DB operations for gauges
-        for (const gauge of dbGauges) {
-            operations.push(
-                prisma.prismaPoolStaking.upsert({
-                    where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
-                    create: {
-                        id: gauge.id,
-                        chain: networkContext.chain,
-                        poolId: gauge.poolId,
-                        type: 'GAUGE',
-                        address: gauge.id,
-                    },
-                    update: {},
-                }),
-            );
+        const allDbStakings = dbPools.map((pool) => pool.staking).flat();
+        const allDbStakingGauges = dbPools
+            .map((pool) => pool.staking)
+            .flat()
+            .map((gauge) => gauge.gauge);
 
-            operations.push(
-                prisma.prismaPoolStakingGauge.upsert({
-                    where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
-                    create: {
-                        id: gauge.id,
-                        stakingId: gauge.id,
-                        gaugeAddress: gauge.id,
-                        chain: networkContext.chain,
-                        status: gauge.status,
-                        version: gauge.version,
-                        workingSupply: onchainRates.find(({ id }) => `${gauge.id}-${this.balAddress}` === id)
-                            ?.workingSupply,
-                        totalSupply: onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply,
-                    },
-                    update: {
-                        status: gauge.status,
-                        version: gauge.version,
-                        workingSupply: onchainRates.find(({ id }) => `${gauge.id}-${this.balAddress}` === id)
-                            ?.workingSupply,
-                        totalSupply: onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply,
-                    },
-                }),
-            );
+        // DB operations for gauges
+        for (const gauge of gaugesForDb) {
+            const dbStaking = allDbStakings.find((staking) => staking.id === gauge.id);
+            if (!dbStaking) {
+                operations.push(
+                    prisma.prismaPoolStaking.upsert({
+                        where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                        create: {
+                            id: gauge.id,
+                            chain: networkContext.chain,
+                            poolId: gauge.poolId,
+                            type: 'GAUGE',
+                            address: gauge.id,
+                        },
+                        update: {},
+                    }),
+                );
+            }
+
+            const dbStakingGauge = allDbStakingGauges.find((stakingGauge) => stakingGauge?.id === gauge.id);
+            const workingSupply = onchainRates.find(({ id }) => `${gauge.id}-${this.balAddress}` === id)?.workingSupply;
+            const totalSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
+            if (
+                !dbStakingGauge ||
+                dbStakingGauge.status !== gauge.status ||
+                dbStakingGauge.version !== gauge.version ||
+                dbStakingGauge.workingSupply !== workingSupply ||
+                dbStakingGauge.totalSupply !== totalSupply
+            ) {
+                operations.push(
+                    prisma.prismaPoolStakingGauge.upsert({
+                        where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                        create: {
+                            id: gauge.id,
+                            stakingId: gauge.id,
+                            gaugeAddress: gauge.id,
+                            chain: networkContext.chain,
+                            status: gauge.status,
+                            version: gauge.version,
+                            workingSupply: workingSupply,
+                            totalSupply: totalSupply,
+                        },
+                        update: {
+                            status: gauge.status,
+                            version: gauge.version,
+                            workingSupply: workingSupply,
+                            totalSupply: totalSupply,
+                        },
+                    }),
+                );
+            }
         }
+
+        const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
         // DB operations for gauge reward tokens
         for (const { id, rewardPerSecond } of onchainRates) {
@@ -188,24 +209,28 @@ export class GaugeStakingService implements PoolStakingService {
                 continue;
             }
 
-            operations.push(
-                prisma.prismaPoolStakingGaugeReward.upsert({
-                    create: {
-                        id,
-                        chain: networkContext.chain,
-                        gaugeId,
-                        tokenAddress,
-                        rewardPerSecond,
-                    },
-                    update: {
-                        rewardPerSecond,
-                    },
-                    where: { id_chain: { id, chain: networkContext.chain } },
-                }),
-            );
+            const dbStakingGaugeRewards = allStakingGaugeRewards.find((rewards) => rewards?.id === id);
+
+            if (!dbStakingGaugeRewards || dbStakingGaugeRewards.rewardPerSecond !== rewardPerSecond) {
+                operations.push(
+                    prisma.prismaPoolStakingGaugeReward.upsert({
+                        create: {
+                            id,
+                            chain: networkContext.chain,
+                            gaugeId,
+                            tokenAddress,
+                            rewardPerSecond,
+                        },
+                        update: {
+                            rewardPerSecond,
+                        },
+                        where: { id_chain: { id, chain: networkContext.chain } },
+                    }),
+                );
+            }
         }
 
-        await prismaBulkExecuteOperations(operations, true, undefined);
+        await prismaBulkExecuteOperations(operations, true);
     }
 
     private async getOnchainRewardTokensData(
