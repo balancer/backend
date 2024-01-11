@@ -171,7 +171,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         if (balancesToFetch.length === 0) {
             await prisma.prismaUserBalanceSyncStatus.update({
                 where: { type_chain: { type: 'STAKED', chain: this.chain } },
-                data: { blockNumber: endBlock },
+                data: { blockNumber: toBlock },
             });
 
             return;
@@ -228,7 +228,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             chain: this.chain,
                         },
                     },
-                    data: { blockNumber: endBlock },
+                    data: { blockNumber: toBlock },
                 }),
             ],
             true,
