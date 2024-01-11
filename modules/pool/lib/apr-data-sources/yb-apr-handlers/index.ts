@@ -4,7 +4,6 @@ import { Chain } from '@prisma/client';
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
-    ankr: sources.AnkrAprHandler,
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
     sftmx: sources.SftmxAprHandler,

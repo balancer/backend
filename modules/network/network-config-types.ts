@@ -137,10 +137,6 @@ export interface NetworkData {
     spooky?: {
         xBooContract: string;
     };
-    ankr?: {
-        ankrFtmContract: string;
-        ankrEthContract: string;
-    };
     overnight?: {
         aprEndpoint: string;
     };

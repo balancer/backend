@@ -180,16 +180,6 @@ const data: NetworkData = {
                 },
             },
         },
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrETH: {
-                    address: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
-                    serviceName: 'eth',
-                    isIbYield: true,
-                },
-            },
-        },
         bloom: {
             tokens: {
                 tbyFeb1924: {

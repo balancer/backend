@@ -1,6 +1,5 @@
 export interface YbAprConfig {
     aave?: AaveAprConfig;
-    ankr?: AnkrAprConfig;
     bloom?: BloomAprConfig;
     beefy?: BeefyAprConfig;
     sftmx?: SftmxAprConfig;
@@ -32,17 +31,6 @@ export interface AaveAprConfig {
                 };
                 isIbYield?: boolean;
             };
-        };
-    };
-}
-
-export interface AnkrAprConfig {
-    sourceUrl: string;
-    tokens: {
-        [underlyingAssetName: string]: {
-            address: string;
-            serviceName: string;
-            isIbYield?: boolean;
         };
     };
 }

@@ -103,16 +103,6 @@ const optimismNetworkData: NetworkData = {
         },
     },
     ybAprConfig: {
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrETH: {
-                    address: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
-                    serviceName: 'eth',
-                    isIbYield: true,
-                },
-            },
-        },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/breakdown?_=',
             tokens: {
@@ -219,6 +209,12 @@ const optimismNetworkData: NetworkData = {
                 sourceUrl:
                     'https://2ch9hbg8hh.execute-api.us-east-1.amazonaws.com/dev/api/vault/0x3eE6107d9C93955acBb3f39871D32B02F82B78AB:0xa',
                 path: 'data.yields.apy',
+                isIbYield: true,
+            },
+            ankrETH: {
+                tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
         },
