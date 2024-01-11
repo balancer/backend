@@ -68,11 +68,22 @@ export class PoolCreatorService {
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
         const poolIds = new Set<string>();
 
+        const allNestedTypePools = [
+            ...(await prisma.prismaPool.findMany({
+                where: {
+                    chain: this.chain,
+                    type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
+                },
+                select: { id: true, address: true },
+            })),
+            ...sortedSubgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
+        ];
+
         for (const subgraphPool of sortedSubgraphPools) {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
             if (!existsInDb) {
-                await this.createPoolRecord(subgraphPool, blockNumber);
+                await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
 
                 poolIds.add(subgraphPool.id);
             }
@@ -135,7 +146,7 @@ export class PoolCreatorService {
     private async createPoolRecord(
         pool: BalancerPoolFragment,
         blockNumber: number,
-        nestedPools: { id: string; address: string }[] = [],
+        nestedPools: { id: string; address: string }[],
     ) {
         const poolTokens = pool.tokens || [];
 
