@@ -47,27 +47,32 @@ export class MasterChefStakingService implements PoolStakingService {
                 18,
             );
 
-            operations.push(
-                prisma.prismaPoolStaking.upsert({
-                    where: { id_chain: { id: farmId, chain: networkContext.chain } },
-                    create: {
-                        id: farmId,
-                        chain: networkContext.chain,
-                        poolId: pool.id,
-                        type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
-                        address: isFbeetsFarm ? networkContext.data.fbeets!.address : farm.masterChef.id,
-                    },
-                    update: {},
-                }),
-            );
+            const dbStaking = pool.staking.find((farm) => farm.id === farmId);
 
-            operations.push(
-                prisma.prismaPoolStakingMasterChefFarm.upsert({
-                    where: { id_chain: { id: farmId, chain: networkContext.chain } },
-                    create: { id: farmId, chain: networkContext.chain, stakingId: farmId, beetsPerBlock },
-                    update: { beetsPerBlock },
-                }),
-            );
+            if (!dbStaking) {
+                operations.push(
+                    prisma.prismaPoolStaking.upsert({
+                        where: { id_chain: { id: farmId, chain: networkContext.chain } },
+                        create: {
+                            id: farmId,
+                            chain: networkContext.chain,
+                            poolId: pool.id,
+                            type: isFbeetsFarm ? 'FRESH_BEETS' : 'MASTER_CHEF',
+                            address: isFbeetsFarm ? networkContext.data.fbeets!.address : farm.masterChef.id,
+                        },
+                        update: {},
+                    }),
+                );
+            }
+
+            if (!dbStaking || !dbStaking.farm || dbStaking.farm.beetsPerBlock !== beetsPerBlock)
+                operations.push(
+                    prisma.prismaPoolStakingMasterChefFarm.upsert({
+                        where: { id_chain: { id: farmId, chain: networkContext.chain } },
+                        create: { id: farmId, chain: networkContext.chain, stakingId: farmId, beetsPerBlock },
+                        update: { beetsPerBlock },
+                    }),
+                );
 
             if (farm.rewarder) {
                 for (const rewardToken of farm.rewarder.rewardTokens || []) {
@@ -78,20 +83,26 @@ export class MasterChefStakingService implements PoolStakingService {
                         ? formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals)
                         : '0.0';
 
-                    operations.push(
-                        prisma.prismaPoolStakingMasterChefFarmRewarder.upsert({
-                            where: { id_chain: { id, chain: networkContext.chain } },
-                            create: {
-                                id,
-                                chain: networkContext.chain,
-                                farmId,
-                                tokenAddress: rewardToken.token,
-                                address: farm.rewarder.id,
-                                rewardPerSecond,
-                            },
-                            update: { rewardPerSecond },
-                        }),
-                    );
+                    if (
+                        !dbStaking ||
+                        !dbStaking.farm ||
+                        dbStaking.farm.rewarders.find((rewarder) => rewarder.id === id)?.rewardPerSecond !==
+                            rewardPerSecond
+                    )
+                        operations.push(
+                            prisma.prismaPoolStakingMasterChefFarmRewarder.upsert({
+                                where: { id_chain: { id, chain: networkContext.chain } },
+                                create: {
+                                    id,
+                                    chain: networkContext.chain,
+                                    farmId,
+                                    tokenAddress: rewardToken.token,
+                                    address: farm.rewarder.id,
+                                    rewardPerSecond,
+                                },
+                                update: { rewardPerSecond },
+                            }),
+                        );
                 }
             }
         }
