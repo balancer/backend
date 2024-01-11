@@ -107,7 +107,7 @@ export class PoolSnapshotService {
             operations.push(...poolOperations);
         }
 
-        await prismaBulkExecuteOperations(operations, true);
+        await prismaBulkExecuteOperations(operations);
 
         const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
             where: {

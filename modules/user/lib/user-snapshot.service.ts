@@ -172,7 +172,7 @@ export class UserSnapshotService {
                 }),
             );
         }
-        await prismaBulkExecuteOperations(operations, true);
+        await prismaBulkExecuteOperations(operations);
     }
 
     public async syncUserPoolBalanceSnapshots() {
@@ -269,7 +269,10 @@ export class UserSnapshotService {
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
                                     where: {
-                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: userPoolBalanceSnapshotData.chain },
+                                        id_chain: {
+                                            id: userPoolBalanceSnapshotData.id,
+                                            chain: userPoolBalanceSnapshotData.chain,
+                                        },
                                     },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,
@@ -299,7 +302,10 @@ export class UserSnapshotService {
                             operations.push(
                                 prisma.prismaUserPoolBalanceSnapshot.upsert({
                                     where: {
-                                        id_chain: { id: userPoolBalanceSnapshotData.id, chain: userPoolBalanceSnapshotData.chain },
+                                        id_chain: {
+                                            id: userPoolBalanceSnapshotData.id,
+                                            chain: userPoolBalanceSnapshotData.chain,
+                                        },
                                     },
                                     create: userPoolBalanceSnapshotData,
                                     update: userPoolBalanceSnapshotData,

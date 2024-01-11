@@ -277,9 +277,10 @@ export class SanityContentService implements ContentService {
         `);
             if (data) {
                 featuredPoolGroups.push(
-                    ...data.featuredPoolGroups.map((pool) => ({
+                    ...data.featuredPoolGroups.map((pool, i) => ({
                         ...pool,
                         chain: chain,
+                        primary: i === 0 ? true : false,
                     })),
                 );
             }
