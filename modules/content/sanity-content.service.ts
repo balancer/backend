@@ -166,7 +166,10 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            if ((pool?.type === 'PHANTOM_STABLE' || pool?.type === 'LINEAR') && !tokenTypes.includes('PHANTOM_BPT')) {
+            if (
+                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
+                !tokenTypes.includes('PHANTOM_BPT')
+            ) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: this.chain,

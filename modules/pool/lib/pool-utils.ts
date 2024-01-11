@@ -9,7 +9,7 @@ type PoolWithTypeAndFactory = {
 };
 
 export function isStablePool(poolType: PrismaPoolType) {
-    return poolType === 'STABLE' || poolType === 'META_STABLE' || poolType === 'PHANTOM_STABLE';
+    return poolType === 'STABLE' || poolType === 'META_STABLE' || poolType === 'COMPOSABLE_STABLE';
 }
 
 export function isWeightedPoolV2(pool: PoolWithTypeAndFactory) {

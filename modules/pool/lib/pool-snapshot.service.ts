@@ -112,7 +112,7 @@ export class PoolSnapshotService {
         const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
             where: {
                 OR: [
-                    { type: 'PHANTOM_STABLE', chain: this.chain },
+                    { type: 'COMPOSABLE_STABLE', chain: this.chain },
                     { tokens: { some: { nestedPoolId: { not: null } } }, chain: this.chain },
                 ],
             },
