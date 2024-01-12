@@ -189,7 +189,7 @@ export const arbitrumNetworkData: NetworkData = {
             },
             plsRDNT: {
                 tokenAddress: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
-                sourceUrl: 'https://plutusdao.io/api/getPlsRdntInfo',
+                sourceUrl: 'https://www.plutusdao.io/api/getPlsRdntInfo',
                 path: 'apr',
                 scale: 10000,
                 isIbYield: true,
