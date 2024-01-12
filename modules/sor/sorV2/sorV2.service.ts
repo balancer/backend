@@ -430,7 +430,7 @@ export class SorV2Service implements SwapService {
                 name: 'n/a',
             };
             if (['FX'].includes(rawPool.poolType)) {
-                const data = prismaPool.data as FxData;
+                const data = prismaPool.poolTypeSpecificData as FxData;
                 rawPool = {
                     ...rawPool,
                     ...data,

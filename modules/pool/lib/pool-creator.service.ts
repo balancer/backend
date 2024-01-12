@@ -197,10 +197,25 @@ export class PoolCreatorService {
         nestedPools: { id: string; address: string }[] = [],
     ) {
         const prismaPoolRecordWithAssociations = subgraphToPrismaUpdate(pool, this.chain, blockNumber, nestedPools);
+        const { tokens, ...poolWithoutTokens } = prismaPoolRecordWithAssociations;
 
-        // Update pool record and type specific data
+        // Make sure all tokens are there, for managed pools tokenlist can change
+        for (const token of tokens.update) {
+            await prisma.prismaPoolToken.upsert({
+                where: token.where,
+                create: {
+                    ...token.data,
+                    poolId: pool.id,
+                    chain: this.chain,
+                },
+                update: {
+                    ...token.data,
+                },
+            });
+        }
+
         await prisma.prismaPool.update({
-            data: prismaPoolRecordWithAssociations,
+            data: poolWithoutTokens,
             where: {
                 id_chain: {
                     id: pool.id,

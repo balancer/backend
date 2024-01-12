@@ -14,7 +14,7 @@ export const subgraphToPrismaCreate = (
     const prismaPoolRecordWithAssociations = {
         data: {
             ...dbData.base,
-            data: dbData.data, // DISCUSS: simplify DB schema by migrating from individual tables to a JSON column with types enforced on read. And same with dynamic data.
+            poolTypeSpecificData: dbData.data,
             tokens: {
                 createMany: {
                     data: dbData.tokens,
@@ -86,7 +86,7 @@ export const subgraphToPrismaUpdate = (
 
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
-        data: dbData.data, // DISCUSS: simplify DB schema by migrating from individual tables to a JSON column with types enforced on read. And same with dynamic data.
+        poolTypeSpecificData: dbData.data,
         tokens: {
             update: dbData.tokens.map((token) => ({
                 where: {

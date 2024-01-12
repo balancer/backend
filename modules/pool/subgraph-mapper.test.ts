@@ -79,7 +79,7 @@ describe('subgraphToPrismaCreate', () => {
     it('should return correct object for fx pool', () => {
         const result = subgraphToPrismaCreate(fxPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('FX');
-        expect(result.data.data['alpha']).toBe(gyroPool.alpha);
+        expect(result.data.poolTypeSpecificData['alpha']).toBe(gyroPool.alpha);
     });
 
     describe('nested pools', () => {
