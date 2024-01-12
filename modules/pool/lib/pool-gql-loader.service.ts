@@ -13,6 +13,7 @@ import {
     GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolFeaturedPool,
     GqlPoolGyro,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
@@ -46,6 +47,7 @@ import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } fro
 import { GithubContentService } from '../../content/github-content.service';
 import SanityClientConstructor from '@sanity/client';
 import { SanityContentService } from '../../content/sanity-content.service';
+import { FeaturedPool } from '../../content/content-types';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -160,10 +162,7 @@ export class PoolGqlLoaderService {
 
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
         const featuredPoolGroups = [];
-        if (chains.some((chain) => BalancerChainIds.includes(chainToIdMap[chain]))) {
-            const githubContentService = new GithubContentService();
-            featuredPoolGroups.push(...(await githubContentService.getFeaturedPoolGroups(chains)));
-        } else if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
+        if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
             const sanityContentService = new SanityContentService('FANTOM');
             featuredPoolGroups.push(...(await sanityContentService.getFeaturedPoolGroups(chains)));
         }
@@ -200,6 +199,32 @@ export class PoolGqlLoaderService {
                     }),
             };
         });
+    }
+
+    public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
+        const featuredPoolsFromService: FeaturedPool[] = [];
+        if (chains.some((chain) => BalancerChainIds.includes(chainToIdMap[chain]))) {
+            const githubContentService = new GithubContentService();
+            featuredPoolsFromService.push(...(await githubContentService.getFeaturedPools(chains)));
+        }
+        if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
+            // chain in constructor doesnt matter for this query as we pass the chain in the param
+            const sanityContentService = new SanityContentService('FANTOM');
+            featuredPoolsFromService.push(...(await sanityContentService.getFeaturedPools(chains)));
+        }
+
+        const featuredPools: GqlPoolFeaturedPool[] = [];
+
+        for (const contentPool of featuredPoolsFromService) {
+            const pool = await this.getPool(contentPool.poolId.toLowerCase(), contentPool.chain);
+            featuredPools.push({
+                poolId: contentPool.poolId,
+                primary: contentPool.primary,
+                pool: pool,
+            });
+        }
+
+        return featuredPools;
     }
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
