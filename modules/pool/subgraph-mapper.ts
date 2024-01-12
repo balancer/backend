@@ -1,7 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { AddressZero } from '@ethersproject/constants';
-import * as dataMappers from './pool-data';
+import { fx, gyro, linear, element, stableDynamic, linearDynamic } from './pool-data';
 
 export const subgraphToPrismaCreate = (
     pool: BalancerPoolFragment,
@@ -266,24 +266,24 @@ const mapPoolTypeVersion = (poolType: string, poolTypeVersion: number): number =
 };
 
 const dataMapper = {
-    ELEMENT: dataMappers.element,
-    FX: dataMappers.fx,
-    GYRO: dataMappers.gyro,
-    GYRO3: dataMappers.gyro,
-    GYROE: dataMappers.gyro,
-    LINEAR: dataMappers.linear,
+    ELEMENT: element,
+    FX: fx,
+    GYRO: gyro,
+    GYRO3: gyro,
+    GYROE: gyro,
+    LINEAR: linear,
 };
 
 const dynamicMapper = {
-    STABLE: dataMappers.stableDynamic,
-    COMPOSABLE_STABLE: dataMappers.stableDynamic,
-    META_STABLE: dataMappers.stableDynamic,
-    LINEAR: dataMappers.linearDynamic,
+    STABLE: stableDynamic,
+    COMPOSABLE_STABLE: stableDynamic,
+    META_STABLE: stableDynamic,
+    LINEAR: linearDynamic,
 };
 
-export type FxData = ReturnType<typeof dataMappers['fx']>;
-export type GyroData = ReturnType<typeof dataMappers['gyro']>;
-export type LinearData = ReturnType<typeof dataMappers['linear']>;
-export type ElementData = ReturnType<typeof dataMappers['element']>;
-export type StableDynamicData = ReturnType<typeof dataMappers['stableDynamic']>;
-export type LinearDynamicData = ReturnType<typeof dataMappers['linearDynamic']>;
+export type FxData = ReturnType<typeof fx>;
+export type GyroData = ReturnType<typeof gyro>;
+export type LinearData = ReturnType<typeof linear>;
+export type ElementData = ReturnType<typeof element>;
+export type StableDynamicData = ReturnType<typeof stableDynamic>;
+export type LinearDynamicData = ReturnType<typeof linearDynamic>;
