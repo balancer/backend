@@ -2,7 +2,7 @@ import { BigNumber, Contract } from 'ethers';
 import { abi } from './abis/oErc20';
 import * as Sentry from '@sentry/node';
 
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { networkContext } from '../../../../../network/network-context.service';
 import { OvixAprConfig } from '../../../../../network/apr-config-types';
 

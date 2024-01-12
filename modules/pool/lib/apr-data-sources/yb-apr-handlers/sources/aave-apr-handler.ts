@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as Sentry from '@sentry/node';
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 
 export class AaveAprHandler implements AprHandler {
     tokens: {

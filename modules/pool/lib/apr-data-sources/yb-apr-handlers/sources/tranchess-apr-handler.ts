@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { TranchessAprConfig } from '../../../../../network/apr-config-types';
 import * as Sentry from '@sentry/node';
 
@@ -33,7 +33,7 @@ export class TranchessAprHandler implements AprHandler {
                     {
                         apr: (365 * Number(weeklyAveragePnlPercentage)) / 1e18,
                         isIbYield: isIbYield ?? false,
-                        group: this.group
+                        group: this.group,
                     },
                 ];
             });

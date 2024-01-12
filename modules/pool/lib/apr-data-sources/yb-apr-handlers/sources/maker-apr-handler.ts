@@ -1,4 +1,4 @@
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { MakerAprConfig } from '../../../../../network/apr-config-types';
 import { getContractAt } from '../../../../../web3/contract';
 import { abi as makerPotAbi } from './abis/maker-pot';
@@ -19,7 +19,7 @@ export class MakerAprHandler implements AprHandler {
     }
 
     async getAprs() {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean, group: string } } = {};
+        const aprs: { [p: string]: { apr: number; isIbYield: boolean; group: string } } = {};
         for (const { address, potAddress, isIbYield } of Object.values(this.tokens)) {
             try {
                 const potContract = getContractAt(potAddress, makerPotAbi);
@@ -31,7 +31,7 @@ export class MakerAprHandler implements AprHandler {
                 aprs[address] = {
                     apr: tokenApr,
                     isIbYield: isIbYield ?? false,
-                    group: this.group
+                    group: this.group,
                 };
             } catch (error) {
                 console.error(`Maker APR Failed for token ${address}: `, error);

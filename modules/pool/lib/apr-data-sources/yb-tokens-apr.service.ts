@@ -3,32 +3,32 @@ import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType, PrismaPoolLinearData } from '@prisma/client';
-import { IbLinearAprHandlers as IbTokensAprHandlers, TokenApr } from './ib-linear-apr-handlers/ib-linear-apr-handlers';
+import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';
-import { IbAprConfig } from '../../../network/apr-config-types';
+import { YbAprConfig } from '../../../network/apr-config-types';
 
-export class IbTokensAprService implements PoolAprService {
-    private ibTokensAprHandlers: IbTokensAprHandlers;
+export class YbTokensAprService implements PoolAprService {
+    private ybTokensAprHandlers: YbAprHandlers;
 
     constructor(
-        aprConfig: IbAprConfig,
+        aprConfig: YbAprConfig,
         private chain: Chain,
         private defaultYieldFee: number,
-        private defaultSwapFee: number
+        private defaultSwapFee: number,
     ) {
-        this.ibTokensAprHandlers = new IbTokensAprHandlers(aprConfig, chain);
+        this.ybTokensAprHandlers = new YbAprHandlers(aprConfig, chain);
     }
 
     getAprServiceName(): string {
-        return 'IbTokensAprService';
+        return 'YbTokensAprService';
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const operations: any[] = [];
         const tokenPrices = await tokenService.getTokenPrices();
         const aprs = await this.fetchYieldTokensApr();
-        const poolsWithIbTokens = pools.filter((pool) => {
+        const poolsWithYbTokens = pools.filter((pool) => {
             return pool.tokens.find((token) => {
                 return Array.from(aprs.keys())
                     .map((key) => key.toLowerCase())
@@ -36,8 +36,8 @@ export class IbTokensAprService implements PoolAprService {
             });
         });
 
-        const poolsWithIbTokensExpanded = await prisma.prismaPool.findMany({
-            where: { chain: this.chain, id: { in: poolsWithIbTokens.map((pool) => pool.id) } },
+        const poolsWithYbTokensExpanded = await prisma.prismaPool.findMany({
+            where: { chain: this.chain, id: { in: poolsWithYbTokens.map((pool) => pool.id) } },
             include: {
                 dynamicData: true,
                 tokens: {
@@ -50,7 +50,7 @@ export class IbTokensAprService implements PoolAprService {
             },
         });
 
-        for (const pool of poolsWithIbTokensExpanded) {
+        for (const pool of poolsWithYbTokensExpanded) {
             if (!pool.dynamicData) {
                 continue;
             }
@@ -115,7 +115,7 @@ export class IbTokensAprService implements PoolAprService {
     }
 
     private async fetchYieldTokensApr(): Promise<Map<string, TokenApr>> {
-        const data = await this.ibTokensAprHandlers.fetchAprsFromAllHandlers();
+        const data = await this.ybTokensAprHandlers.fetchAprsFromAllHandlers();
         return new Map<string, TokenApr>(
             data
                 .filter((tokenApr) => {

@@ -1,4 +1,4 @@
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import axios from 'axios';
 import { YearnAprConfig } from '../../../../../network/apr-config-types';
 import * as Sentry from '@sentry/node';
@@ -17,11 +17,14 @@ export class YearnAprHandler implements AprHandler {
             const { data } = await axios.get<YearnVault[]>(this.sourceUrl);
             const aprs = Object.fromEntries(
                 data.map(({ address, apy: { net_apy } }) => {
-                    return [address.toLowerCase(), {
-                        apr: net_apy,
-                        isIbYield: this.isIbYield ?? false,
-                        group: this.group
-                    }];
+                    return [
+                        address.toLowerCase(),
+                        {
+                            apr: net_apy,
+                            isIbYield: this.isIbYield ?? false,
+                            group: this.group,
+                        },
+                    ];
                 }),
             );
             return aprs;

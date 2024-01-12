@@ -16,7 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const gnosisNetworkData: NetworkData = {
@@ -89,7 +89,7 @@ const gnosisNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
@@ -133,8 +133,8 @@ export const gnosisNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: gnosisNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            gnosisNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            gnosisNetworkData.ybAprConfig,
             gnosisNetworkData.chain.prismaId,
             gnosisNetworkData.balancer.yieldProtocolFeePercentage,
             gnosisNetworkData.balancer.swapProtocolFeePercentage,

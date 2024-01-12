@@ -15,7 +15,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
@@ -114,7 +114,7 @@ const data: NetworkData = {
             ],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         aave: {
             v2: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2',
@@ -177,16 +177,6 @@ const data: NetworkData = {
                             stataEthWETH: '0x03928473f25bb2da6bc880b07ecbadc636822264',
                         },
                     },
-                },
-            },
-        },
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrETH: {
-                    address: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
-                    serviceName: 'eth',
-                    isIbYield: true,
                 },
             },
         },
@@ -258,6 +248,8 @@ const data: NetworkData = {
                 },
             },
         },
+        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
         defaultHandlers: {
             vETH: {
                 tokenAddress: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
@@ -331,6 +323,12 @@ const data: NetworkData = {
                 isIbYield: true,
                 scale: 1,
             },
+            ankrETH: {
+                tokenAddress: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
@@ -367,8 +365,8 @@ export const mainnetNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            data.ibAprConfig,
+        new YbTokensAprService(
+            data.ybAprConfig,
             data.chain.prismaId,
             data.balancer.yieldProtocolFeePercentage,
             data.balancer.swapProtocolFeePercentage,

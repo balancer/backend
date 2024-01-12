@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { AprHandler } from '../ib-linear-apr-handlers';
+import { AprHandler } from '..';
 import { SftmxAprConfig } from '../../../../../network/apr-config-types';
 import { BigNumber, ethers } from 'ethers';
 import { getContractAt } from '../../../../../web3/contract';
