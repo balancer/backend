@@ -6,6 +6,7 @@ import { prisma } from '../../prisma/prisma-client';
 import {
     GqlChain,
     GqlPoolBatchSwap,
+    GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
     GqlPoolGyro,
     GqlPoolJoinExit,
@@ -118,6 +119,10 @@ export class PoolService {
 
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
         return this.poolGqlLoaderService.getFeaturedPoolGroups(chains);
+    }
+
+    public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
+        return this.poolGqlLoaderService.getFeaturedPools(chains);
     }
 
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {

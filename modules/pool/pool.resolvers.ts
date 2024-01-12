@@ -58,6 +58,9 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getFeaturedPoolGroups(chains);
         },
+        poolGetFeaturedPools: async (parent, { chains }, context) => {
+            return poolService.getFeaturedPools(chains);
+        },
         poolGetSnapshots: async (parent, { id, chain, range }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
