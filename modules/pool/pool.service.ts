@@ -379,12 +379,7 @@ export class PoolService {
             where: { chain: this.chain, poolId: poolId },
         });
 
-        const poolTokenIds = poolTokens.map((poolToken) => poolToken.id);
         const poolTokenAddresses = poolTokens.map((poolToken) => poolToken.address);
-
-        await prisma.prismaPoolSnapshot.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
 
         await prisma.prismaTokenType.deleteMany({
             where: { chain: this.chain, tokenAddress: pool.address },
@@ -394,48 +389,8 @@ export class PoolService {
             where: { chain: this.chain, poolId: poolId },
         });
 
-        await prisma.prismaPoolTokenDynamicData.deleteMany({
-            where: { chain: this.chain, poolTokenId: { in: poolTokenIds } },
-        });
-
         await prisma.prismaTokenDynamicData.deleteMany({
             where: { chain: this.chain, tokenAddress: { in: poolTokenAddresses } },
-        });
-
-        await prisma.prismaPoolToken.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolDynamicData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolToken.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolLinearData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolGyroData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolExpandedTokens.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolLinearDynamicData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolAprItem.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolSwap.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
         });
 
         const poolStaking = await prisma.prismaPoolStaking.findMany({
