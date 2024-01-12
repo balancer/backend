@@ -31,9 +31,9 @@ async function startServer() {
         enabled: env.NODE_ENV === 'production',
         ignoreErrors: [/.*error: Provide.*chain.*param/],
         integrations: [
-            new Sentry.Integrations.Apollo(),
-            new Sentry.Integrations.GraphQL(),
-            new Sentry.Integrations.Prisma({ client: prisma }),
+            // new Sentry.Integrations.Apollo(),
+            // new Sentry.Integrations.GraphQL(),
+            // new Sentry.Integrations.Prisma({ client: prisma }),
             new Sentry.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
