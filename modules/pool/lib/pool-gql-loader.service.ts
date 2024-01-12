@@ -45,7 +45,6 @@ import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
-import SanityClientConstructor from '@sanity/client';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { FeaturedPool } from '../../content/content-types';
 
