@@ -256,28 +256,10 @@ export class TokenPriceService {
     }
 
     public async purgeOldTokenPricesForAllChains(): Promise<number> {
-        const purgeBeforeTimestamp = moment().startOf('day').subtract(100, 'days').utc().unix();
-        const oldPrices = await prisma.prismaTokenPrice.findMany({
-            where: {
-                timestamp: { lt: purgeBeforeTimestamp },
-            },
-        });
+        const deleted =
+            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '100 days'`;
 
-        // returns all non midnight prices
-        const tobeDeleted = _.uniq(oldPrices.filter((tokenPrice) => tokenPrice.timestamp % secondsPerDay !== 0));
-
-        //apparently prisma has a limitation on delete
-        const chunks = _.chunk(tobeDeleted, 1000);
-
-        for (const chunk of chunks) {
-            await prisma.prismaTokenPrice.deleteMany({
-                where: {
-                    timestamp: { in: chunk.map((tokenPrice) => tokenPrice.timestamp) },
-                },
-            });
-        }
-
-        return tobeDeleted.length;
+        return deleted;
     }
 
     private async updateCandleStickData() {
