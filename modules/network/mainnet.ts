@@ -492,11 +492,11 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-global-coingecko-prices',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
         },
-        {
-            name: 'global-purge-old-tokenprices',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
+        // {
+        //     name: 'global-purge-old-tokenprices',
+        //     interval: every(1, 'days'),
+        //     alarmEvaluationPeriod: 1,
+        //     alarmDatapointsToAlarm: 1,
+        // },
     ],
 };
