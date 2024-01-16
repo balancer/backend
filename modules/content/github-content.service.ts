@@ -151,16 +151,22 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            const linearPool = pools.find(
+            const wrappedLinearPoolToken = pools.find(
                 (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex]?.address === token.address,
             );
 
-            if (linearPool && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
+            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
                     id: `${token.address}-linear-wrapped`,
                     chain: networkContext.chain,
                     type: 'LINEAR_WRAPPED_TOKEN',
                     tokenAddress: token.address,
+                });
+            }
+
+            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
+                prisma.prismaTokenType.delete({
+                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: networkContext.chain } },
                 });
             }
         }
