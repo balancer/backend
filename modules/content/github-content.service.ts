@@ -3,7 +3,7 @@ import { Chain, Prisma } from '@prisma/client';
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
-import { ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import { ContentService, FeaturedPool, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import { chainIdToChain } from '../network/network-config';
 
 const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
@@ -139,7 +139,10 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            if ((pool?.type === 'PHANTOM_STABLE' || pool?.type === 'LINEAR') && !tokenTypes.includes('PHANTOM_BPT')) {
+            if (
+                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
+                !tokenTypes.includes('PHANTOM_BPT')
+            ) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: networkContext.chain,
@@ -165,25 +168,21 @@ export class GithubContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: types });
     }
     async syncPoolContentData(): Promise<void> {}
+
     async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
+        return [];
+    }
+
+    async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
-        return pools.map(({ id, imageUrl, primary, chainId }) => ({
-            id,
-            _type: 'homeScreenFeaturedPoolGroupPoolId',
-            title: 'Popular pools',
-            items: [
-                {
-                    _key: '',
-                    _type: 'homeScreenFeaturedPoolGroupPoolId',
-                    poolId: id,
-                },
-            ],
-            icon: imageUrl,
+        return pools.map(({ id, primary, chainId }) => ({
+            poolId: id,
             chain: chainIdToChain[chainId],
             primary: Boolean(primary),
-        })) as HomeScreenFeaturedPoolGroup[];
+        })) as FeaturedPool[];
     }
+
     async getNewsItems(): Promise<HomeScreenNewsItem[]> {
         return [];
     }

@@ -12,7 +12,7 @@ export class PhantomStableAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
-        const phantomStablePools = pools.filter((pool) => pool.type === 'PHANTOM_STABLE');
+        const phantomStablePools = pools.filter((pool) => pool.type === 'COMPOSABLE_STABLE');
 
         const phantomStablePoolsExpanded = await prisma.prismaPool.findMany({
             ...prismaPoolWithExpandedNesting,

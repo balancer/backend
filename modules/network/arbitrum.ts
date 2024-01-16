@@ -15,11 +15,11 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
-const arbitrumNetworkData: NetworkData = {
+export const arbitrumNetworkData: NetworkData = {
     chain: {
         slug: 'arbitrum',
         id: 42161,
@@ -93,7 +93,7 @@ const arbitrumNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         aave: {
             v3: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-arbitrum',
@@ -175,6 +175,25 @@ const arbitrumNetworkData: NetworkData = {
                 path: 'sfrxethApr',
                 isIbYield: true,
             },
+            sFRAX: {
+                tokenAddress: '0xe3b3fe7bca19ca77ad877a5bebab186becfad906',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            ankrETH: {
+                tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
+            plsRDNT: {
+                tokenAddress: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
+                sourceUrl: 'https://www.plutusdao.io/api/getPlsRdntInfo',
+                path: 'apr',
+                scale: 10000,
+                isIbYield: true,
+            },
         },
     },
     beefy: {
@@ -215,8 +234,8 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: arbitrumNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            arbitrumNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            arbitrumNetworkData.ybAprConfig,
             arbitrumNetworkData.chain.prismaId,
             arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
             arbitrumNetworkData.balancer.swapProtocolFeePercentage,

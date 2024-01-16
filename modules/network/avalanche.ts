@@ -16,7 +16,7 @@ import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 const avalancheNetworkData: NetworkData = {
@@ -91,7 +91,7 @@ const avalancheNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
+    ybAprConfig: {
         aave: {
             v3: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-avalanche',
@@ -141,16 +141,6 @@ const avalancheNetworkData: NetworkData = {
                 },
             },
         },
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrAVAX: {
-                    address: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
-                    serviceName: 'avax',
-                    isIbYield: true,
-                },
-            },
-        },
         defaultHandlers: {
             sAVAX: {
                 tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
@@ -172,6 +162,12 @@ const avalancheNetworkData: NetworkData = {
                 // How this -12 became -8,333? It's because the scale parameter is used to divide the number, and the final apr percentage is in decimal format (1,8% = 0,018), so if:
                 // M * -12 = A (M is monthly rate and A is APR) => (M/x) = (A/100) => (A / -12x) = (A / 100) [replacing M by A/-12] => x = 100/-12 = -8,33333
                 scale: -8.3333,
+            },
+            ankrAVAX: {
+                tokenAddress: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "avax"}.apy',
+                isIbYield: true,
             },
         },
     },
@@ -209,8 +205,8 @@ export const avalancheNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            avalancheNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            avalancheNetworkData.ybAprConfig,
             avalancheNetworkData.chain.prismaId,
             avalancheNetworkData.balancer.yieldProtocolFeePercentage,
             avalancheNetworkData.balancer.swapProtocolFeePercentage,

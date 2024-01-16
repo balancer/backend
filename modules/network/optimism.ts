@@ -16,7 +16,7 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
@@ -102,17 +102,7 @@ const optimismNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrETH: {
-                    address: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
-                    serviceName: 'eth',
-                    isIbYield: true,
-                },
-            },
-        },
+    ybAprConfig: {
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/breakdown?_=',
             tokens: {
@@ -208,6 +198,25 @@ const optimismNetworkData: NetworkData = {
                 path: 'sfrxethApr',
                 isIbYield: true,
             },
+            sFRAX: {
+                tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            stERN: {
+                tokenAddress: '0x3ee6107d9c93955acbb3f39871d32b02f82b78ab',
+                sourceUrl:
+                    'https://2ch9hbg8hh.execute-api.us-east-1.amazonaws.com/dev/api/vault/0x3eE6107d9C93955acBb3f39871D32B02F82B78AB:0xa',
+                path: 'data.yields.apy',
+                isIbYield: true,
+            },
+            ankrETH: {
+                tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
@@ -253,8 +262,8 @@ export const optimismNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(optimismNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            optimismNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            optimismNetworkData.ybAprConfig,
             optimismNetworkData.chain.prismaId,
             optimismNetworkData.balancer.yieldProtocolFeePercentage,
             optimismNetworkData.balancer.swapProtocolFeePercentage,

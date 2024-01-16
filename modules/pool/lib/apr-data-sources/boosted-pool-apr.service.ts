@@ -11,7 +11,7 @@ export class BoostedPoolAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         // need to do multiple queries otherwise the nesting is too deep for many pools. Error: stack depth limit exceeded
-        const boostedPools = pools.filter((pool) => pool.type === 'PHANTOM_STABLE' || pool.type === 'WEIGHTED');
+        const boostedPools = pools.filter((pool) => pool.type === 'COMPOSABLE_STABLE' || pool.type === 'WEIGHTED');
 
         const boostedPoolsWithNestedPool = await prisma.prismaPool.findMany({
             where: { chain: networkContext.chain, id: { in: boostedPools.map((pool) => pool.id) } },
@@ -56,11 +56,11 @@ export class BoostedPoolAprService implements PoolAprService {
                 //for phantom stable pools, the linear apr items have already been set in PhantomStableAprService,
                 //so we're only concerned with finding the apr for phantom stable BPTs nested inside of
                 //this phantom stable
-                if (pool.type === 'PHANTOM_STABLE') {
-                    return token.nestedPool?.type === 'PHANTOM_STABLE';
+                if (pool.type === 'COMPOSABLE_STABLE') {
+                    return token.nestedPool?.type === 'COMPOSABLE_STABLE';
                 }
 
-                return token.nestedPool?.type === 'LINEAR' || token.nestedPool?.type === 'PHANTOM_STABLE';
+                return token.nestedPool?.type === 'LINEAR' || token.nestedPool?.type === 'COMPOSABLE_STABLE';
             });
 
             const poolIds = tokens.map((token) => token.nestedPool?.id || '');
@@ -96,7 +96,7 @@ export class BoostedPoolAprService implements PoolAprService {
                     if (
                         collectsYieldFee(pool) &&
                         //nested phantom stables already have the yield fee removed
-                        token.nestedPool.type !== 'PHANTOM_STABLE' &&
+                        token.nestedPool.type !== 'COMPOSABLE_STABLE' &&
                         // nested tokens/bpts that dont have a rate provider, we don't take any fees
                         token.dynamicData.priceRate !== '1.0'
                     ) {

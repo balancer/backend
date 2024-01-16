@@ -13,8 +13,6 @@ export interface HomeScreenFeaturedPoolGroup {
     id: string;
     items: (HomeScreenFeaturedPoolGroupItemPoolId | HomeScreenFeaturedPoolGroupItemExternalLink)[];
     title: string;
-    primary: boolean;
-    chain: GqlChain;
 }
 
 interface HomeScreenFeaturedPoolGroupItemPoolId {
@@ -32,6 +30,12 @@ interface HomeScreenFeaturedPoolGroupItemExternalLink {
     image: string;
 }
 
+export interface FeaturedPool {
+    poolId: string;
+    primary: boolean;
+    chain: GqlChain;
+}
+
 export interface HomeScreenNewsItem {
     id: string;
     timestamp: string;
@@ -45,5 +49,6 @@ export interface ContentService {
     syncTokenContentData(): Promise<void>;
     syncPoolContentData(): Promise<void>;
     getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]>;
+    getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]>;
     getNewsItems(): Promise<HomeScreenNewsItem[]>;
 }

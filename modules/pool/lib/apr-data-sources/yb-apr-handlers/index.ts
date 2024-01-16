@@ -1,10 +1,9 @@
 import * as sources from './sources';
-import { IbAprConfig } from '../../../../network/apr-config-types';
+import { YbAprConfig } from '../../../../network/apr-config-types';
 import { Chain } from '@prisma/client';
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
-    ankr: sources.AnkrAprHandler,
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
     sftmx: sources.SftmxAprHandler,
@@ -19,19 +18,21 @@ const sourceToHandler = {
     tranchess: sources.TranchessAprHandler,
     yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
+    stakewise: sources.Stakewise,
+    etherfi: sources.Etherfi,
 };
 
-export class IbLinearAprHandlers {
+export class YbAprHandlers {
     private handlers: AprHandler[] = [];
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number; group?: string; isIbYield?: boolean } };
 
-    constructor(aprConfig: IbAprConfig, private chain?: Chain) {
+    constructor(aprConfig: YbAprConfig, private chain?: Chain) {
         const { fixedAprHandler, ...config } = aprConfig;
         this.handlers = this.buildAprHandlers(config);
         this.fixedAprTokens = fixedAprHandler;
     }
 
-    private buildAprHandlers(aprConfig: IbAprConfig) {
+    private buildAprHandlers(aprConfig: YbAprConfig) {
         const handlers: AprHandler[] = [];
 
         // Add handlers from global configuration

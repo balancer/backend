@@ -1,7 +1,13 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { Chain, Prisma, PrismaPoolCategoryType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
-import { ConfigHomeScreen, ContentService, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
+import {
+    ConfigHomeScreen,
+    ContentService,
+    FeaturedPool,
+    HomeScreenFeaturedPoolGroup,
+    HomeScreenNewsItem,
+} from './content-types';
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 import { chainToIdMap } from '../network/network-config';
@@ -166,7 +172,10 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            if ((pool?.type === 'PHANTOM_STABLE' || pool?.type === 'LINEAR') && !tokenTypes.includes('PHANTOM_BPT')) {
+            if (
+                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
+                !tokenTypes.includes('PHANTOM_BPT')
+            ) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: this.chain,
@@ -276,16 +285,51 @@ export class SanityContentService implements ContentService {
             }
         `);
             if (data) {
-                featuredPoolGroups.push(
-                    ...data.featuredPoolGroups.map((pool, i) => ({
-                        ...pool,
-                        chain: chain,
-                        primary: i === 0 ? true : false,
-                    })),
-                );
+                featuredPoolGroups.push(...data.featuredPoolGroups);
             }
         }
         return featuredPoolGroups;
+    }
+
+    public async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
+        const featuredPools: FeaturedPool[] = [];
+        for (const chain of chains) {
+            const data = await this.getSanityClient().fetch<ConfigHomeScreen | null>(`
+            *[_type == "homeScreen" && chainId == ${chainToIdMap[chain]}][0]{
+                ...,
+                "featuredPoolGroups": featuredPoolGroups[]{
+                    ...,
+                    "icon": icon.asset->url + "?w=64",
+                    "items": items[]{
+                        ...,
+                        "image": image.asset->url + "?w=600"
+                    }
+                },
+                "newsItems": newsItems[]{
+                    ...,
+                    "image": image.asset->url + "?w=800"
+                }
+            }
+        `);
+            if (data) {
+                const featuredPoolGroupItems = data.featuredPoolGroups.find(
+                    (group) => group.id === 'popular-pools',
+                )?.items;
+                if (featuredPoolGroupItems) {
+                    for (let i = 0; i < featuredPoolGroupItems.length; i++) {
+                        const group = featuredPoolGroupItems[i];
+                        if (group._type === 'homeScreenFeaturedPoolGroupPoolId') {
+                            featuredPools.push({
+                                poolId: group.poolId,
+                                primary: i === 0 ? true : false,
+                                chain: chain,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return featuredPools;
     }
 
     public async getNewsItems(): Promise<HomeScreenNewsItem[]> {

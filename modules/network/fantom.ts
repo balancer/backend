@@ -24,7 +24,7 @@ import { SanityContentService } from '../content/sanity-content.service';
 import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
-import { IbTokensAprService } from '../pool/lib/apr-data-sources/ib-tokens-apr.service';
+import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
@@ -155,22 +155,7 @@ const fantomNetworkData: NetworkData = {
             poolIdsToExclude: [],
         },
     },
-    ibAprConfig: {
-        ankr: {
-            sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-            tokens: {
-                ankrETH: {
-                    address: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
-                    serviceName: 'eth',
-                    isIbYield: true,
-                },
-                ankrFTM: {
-                    address: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
-                    serviceName: 'ftm',
-                    isIbYield: true,
-                },
-            },
-        },
+    ybAprConfig: {
         // sftmx: {
         //     tokens: {
         //         sftmx: {
@@ -246,6 +231,20 @@ const fantomNetworkData: NetworkData = {
                 isIbYield: true,
             },
         },
+        defaultHandlers: {
+            ankrETH: {
+                tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
+            ankrFTM: {
+                tokenAddress: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
+                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                path: 'services.{serviceName == "ftm"}.apy',
+                isIbYield: true,
+            },
+        },
     },
     copper: {
         proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
@@ -258,10 +257,6 @@ const fantomNetworkData: NetworkData = {
     },
     stader: {
         sFtmxContract: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-    },
-    ankr: {
-        ankrFtmContract: '0xcfc785741dc0e98ad4c9f6394bb9d43cd1ef5179',
-        ankrEthContract: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
     },
     datastudio: {
         main: {
@@ -294,8 +289,8 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new IbTokensAprService(
-            fantomNetworkData.ibAprConfig,
+        new YbTokensAprService(
+            fantomNetworkData.ybAprConfig,
             fantomNetworkData.chain.prismaId,
             fantomNetworkData.balancer.yieldProtocolFeePercentage,
             fantomNetworkData.balancer.swapProtocolFeePercentage,
