@@ -11,6 +11,7 @@ import {
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 import { chainToIdMap } from '../network/network-config';
+import { wrap } from 'module';
 
 interface SanityToken {
     name: string;
@@ -184,16 +185,22 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            const linearPool = pools.find(
+            const wrappedLinearPoolToken = pools.find(
                 (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex].address === token.address,
             );
 
-            if (linearPool && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
+            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
                     id: `${token.address}-linear-wrapped`,
                     chain: this.chain,
                     type: 'LINEAR_WRAPPED_TOKEN',
                     tokenAddress: token.address,
+                });
+            }
+
+            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
+                prisma.prismaTokenType.delete({
+                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: this.chain } },
                 });
             }
         }
