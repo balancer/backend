@@ -24,6 +24,7 @@ extend type Query {
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
+    poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
 }
 
 extend type Mutation {
@@ -48,16 +49,11 @@ extend type Mutation {
     poolUpdateLifetimeValuesForAllPools: String!
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
-    poolReloadPoolNestedTokens(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
-    poolReloadPoolTokenIndexes(poolId: String!): String!
     poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
-    poolSyncAllPoolTypesVersions: String!
-    poolSyncPriceRateProviders: String!
-    poolSyncProtocolYieldFeeExemptions: String!
     poolInitOnChainDataForAllPools: String!
 }
 
@@ -282,6 +278,34 @@ type GqlPoolGyro implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 }
 
+type GqlPoolFx implements GqlPoolBase {
+    alpha: String!
+    beta: String!
+    delta: String!
+    epsilon: String!
+    lambda: String!
+
+    # Base pool
+    id: ID!
+    chain: GqlChain!
+    type: GqlPoolType!
+    version: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    owner: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig!
+    withdrawConfig: GqlPoolWithdrawConfig!
+    displayTokens: [GqlPoolTokenDisplay!]!
+    allTokens: [GqlPoolTokenExpanded!]!
+    dynamicData: GqlPoolDynamicData!
+    staking: GqlPoolStaking
+    userBalance: GqlPoolUserBalance
+}
+
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -495,6 +519,7 @@ union GqlPoolUnion =
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
+    | GqlPoolFx
 union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolComposableStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable | GqlPoolTokenLinear

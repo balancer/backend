@@ -8,6 +8,7 @@ import {
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
+    GqlPoolFx,
     GqlPoolGyro,
     GqlPoolJoinExit,
     GqlPoolLinear,
@@ -85,6 +86,10 @@ export class PoolService {
 
     public async getGqlGyroPools(): Promise<GqlPoolGyro[]> {
         return this.poolGqlLoaderService.getGyroPools();
+    }
+
+    public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
+        return this.poolGqlLoaderService.getFxPools(chains);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -328,76 +333,12 @@ export class PoolService {
         await this.poolSnapshotService.createPoolSnapshotsForPoolsMissingSubgraphData(poolId);
     }
 
-    public async reloadPoolNestedTokens(poolId: string) {
-        await this.poolCreatorService.reloadPoolNestedTokens(poolId);
-    }
-
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
     }
 
-    public async reloadPoolTokenIndexes(poolId: string) {
-        await this.poolCreatorService.reloadPoolTokenIndexes(poolId);
-    }
-
     public async setPoolsWithPreferredGaugesAsIncentivized() {
         await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
-    }
-
-    public async syncPoolTypeAndVersionForAllPools() {
-        await this.poolCreatorService.updatePoolTypesAndVersionForAllPools();
-    }
-
-    public async syncProtocolYieldFeeExemptionsForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        for (const subgraphPool of subgraphPools) {
-            const poolTokens = subgraphPool.tokens || [];
-            for (let i = 0; i < poolTokens.length; i++) {
-                const token = poolTokens[i];
-                try {
-                    await prisma.prismaPoolToken.update({
-                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
-                        data: {
-                            exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
-                                ? token.isExemptFromYieldProtocolFee
-                                : false,
-                        },
-                    });
-                } catch (e) {
-                    console.error('Failed to update token ', token.id, ' error is: ', e);
-                }
-            }
-        }
-    }
-
-    public async syncPriceRateProvidersForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        for (const subgraphPool of subgraphPools) {
-            if (!subgraphPool.priceRateProviders || !subgraphPool.priceRateProviders.length) continue;
-
-            const poolTokens = subgraphPool.tokens || [];
-            for (let i = 0; i < poolTokens.length; i++) {
-                const token = poolTokens[i];
-
-                let priceRateProvider;
-                const data = subgraphPool.priceRateProviders.find(
-                    (provider) => provider.token.address === token.address,
-                );
-                priceRateProvider = data?.address;
-                if (!priceRateProvider) continue;
-
-                try {
-                    await prisma.prismaPoolToken.update({
-                        where: { id_chain: { id: token.id, chain: networkContext.chain } },
-                        data: {
-                            priceRateProvider,
-                        },
-                    });
-                } catch (e) {
-                    console.error('Failed to update token ', token.id, ' error is: ', e);
-                }
-            }
-        }
     }
 
     public async addToBlackList(poolId: string) {
@@ -438,12 +379,7 @@ export class PoolService {
             where: { chain: this.chain, poolId: poolId },
         });
 
-        const poolTokenIds = poolTokens.map((poolToken) => poolToken.id);
         const poolTokenAddresses = poolTokens.map((poolToken) => poolToken.address);
-
-        await prisma.prismaPoolSnapshot.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
 
         await prisma.prismaTokenType.deleteMany({
             where: { chain: this.chain, tokenAddress: pool.address },
@@ -453,48 +389,8 @@ export class PoolService {
             where: { chain: this.chain, poolId: poolId },
         });
 
-        await prisma.prismaPoolTokenDynamicData.deleteMany({
-            where: { chain: this.chain, poolTokenId: { in: poolTokenIds } },
-        });
-
         await prisma.prismaTokenDynamicData.deleteMany({
             where: { chain: this.chain, tokenAddress: { in: poolTokenAddresses } },
-        });
-
-        await prisma.prismaPoolToken.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolDynamicData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolToken.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolLinearData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolGyroData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolExpandedTokens.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolLinearDynamicData.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolAprItem.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
-        });
-
-        await prisma.prismaPoolSwap.deleteMany({
-            where: { chain: this.chain, poolId: poolId },
         });
 
         const poolStaking = await prisma.prismaPoolStaking.findMany({

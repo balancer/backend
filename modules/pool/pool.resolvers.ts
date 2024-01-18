@@ -94,6 +94,16 @@ const balancerResolvers: Resolvers = {
         poolGetGyroPools: async () => {
             return poolService.getGqlGyroPools();
         },
+
+        poolGetFxPools: async (parent, { chains }) => {
+            const currentChain = headerChain();
+            if (!chains && currentChain) {
+                chains = [currentChain];
+            } else if (!chains) {
+                throw new Error('poolGetLinearPools error: Provide "chains" param');
+            }
+            return poolService.getGqlFxPools(chains);
+        },
     },
     Mutation: {
         poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
@@ -255,24 +265,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolReloadPoolNestedTokens: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.reloadPoolNestedTokens(poolId);
-
-            return 'success';
-        },
         poolReloadAllTokenNestedPoolIds: async (parent, {}, context) => {
             isAdminRoute(context);
 
             await poolService.reloadAllTokenNestedPoolIds();
-
-            return 'success';
-        },
-        poolReloadPoolTokenIndexes: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.reloadPoolTokenIndexes(poolId);
 
             return 'success';
         },
@@ -301,27 +297,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.deletePool(poolId);
-
-            return 'success';
-        },
-        poolSyncAllPoolTypesVersions: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncPoolTypeAndVersionForAllPools();
-
-            return 'success';
-        },
-        poolSyncPriceRateProviders: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncPriceRateProvidersForAllPools();
-
-            return 'success';
-        },
-        poolSyncProtocolYieldFeeExemptions: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncProtocolYieldFeeExemptionsForAllPools();
 
             return 'success';
         },

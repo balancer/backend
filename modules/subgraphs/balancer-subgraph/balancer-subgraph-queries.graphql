@@ -198,6 +198,9 @@ fragment BalancerPool on Pool {
     w
     z
     dSq
+    delta
+    epsilon
+
     priceRateProviders {
         address
         token {
