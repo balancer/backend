@@ -594,7 +594,7 @@ export class PoolGqlLoaderService {
                     dSq: pool.gyroData?.dSq || '',
                 };
             case 'FX':
-                const data = pool.poolTypeSpecificData as FxData;
+                const data = pool.staticTypeData as FxData;
                 return {
                     __typename: 'GqlPoolFx',
                     ...mappedData,

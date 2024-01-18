@@ -14,7 +14,7 @@ export const subgraphToPrismaCreate = (
     const prismaPoolRecordWithAssociations = {
         data: {
             ...dbData.base,
-            poolTypeSpecificData: dbData.staticTypeData,
+            staticTypeData: dbData.staticTypeData,
             tokens: {
                 createMany: {
                     data: dbData.tokens,
@@ -86,7 +86,7 @@ export const subgraphToPrismaUpdate = (
 
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
-        poolTypeSpecificData: dbData.staticTypeData,
+        staticTypeData: dbData.staticTypeData,
         tokens: {
             update: dbData.tokens.map((token) => ({
                 where: {
