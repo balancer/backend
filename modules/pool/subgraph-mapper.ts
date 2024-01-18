@@ -14,7 +14,7 @@ export const subgraphToPrismaCreate = (
     const prismaPoolRecordWithAssociations = {
         data: {
             ...dbData.base,
-            poolTypeSpecificData: dbData.data,
+            poolTypeSpecificData: dbData.staticTypeData,
             tokens: {
                 createMany: {
                     data: dbData.tokens,
@@ -31,7 +31,7 @@ export const subgraphToPrismaCreate = (
                     ? {
                           create: {
                               id: dbData.base.id,
-                              ...(dbData.data as ReturnType<typeof dataMapper['LINEAR']>),
+                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
                           },
                       }
                     : undefined,
@@ -40,7 +40,7 @@ export const subgraphToPrismaCreate = (
                     ? {
                           create: {
                               id: dbData.base.id,
-                              ...(dbData.data as ReturnType<typeof dataMapper['ELEMENT']>),
+                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
                           },
                       }
                     : undefined,
@@ -48,7 +48,7 @@ export const subgraphToPrismaCreate = (
                 ? {
                       create: {
                           id: dbData.base.id,
-                          ...(dbData.data as ReturnType<typeof dataMapper['GYRO']>),
+                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
                       },
                   }
                 : undefined,
@@ -57,7 +57,7 @@ export const subgraphToPrismaCreate = (
                     ? {
                           create: {
                               id: dbData.base.id,
-                              ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['LINEAR']>),
+                              ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['LINEAR']>),
                           },
                       }
                     : undefined,
@@ -65,7 +65,7 @@ export const subgraphToPrismaCreate = (
                 ? {
                       create: {
                           id: dbData.base.id,
-                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['STABLE']>),
+                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['STABLE']>),
                       },
                   }
                 : undefined,
@@ -86,7 +86,7 @@ export const subgraphToPrismaUpdate = (
 
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
-        poolTypeSpecificData: dbData.data,
+        poolTypeSpecificData: dbData.staticTypeData,
         tokens: {
             update: dbData.tokens.map((token) => ({
                 where: {
@@ -104,7 +104,7 @@ export const subgraphToPrismaUpdate = (
             dbData.base.type === 'LINEAR'
                 ? {
                       update: {
-                          ...(dbData.data as ReturnType<typeof dataMapper['LINEAR']>),
+                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
                       },
                   }
                 : undefined,
@@ -112,14 +112,14 @@ export const subgraphToPrismaUpdate = (
             dbData.base.type === 'ELEMENT'
                 ? {
                       update: {
-                          ...(dbData.data as ReturnType<typeof dataMapper['ELEMENT']>),
+                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
                       },
                   }
                 : undefined,
         gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
             ? {
                   update: {
-                      ...(dbData.data as ReturnType<typeof dataMapper['GYRO']>),
+                      ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
                   },
               }
             : undefined,
@@ -127,14 +127,14 @@ export const subgraphToPrismaUpdate = (
             dbData.base.type === 'LINEAR'
                 ? {
                       update: {
-                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['LINEAR']>),
+                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['LINEAR']>),
                       },
                   }
                 : undefined,
         stableDynamicData: ['STABLE', 'COMPOSABLE_STABLE', 'META_STABLE'].includes(dbData.base.type)
             ? {
                   update: {
-                      ...(dbData.dynamicTypeData as ReturnType<typeof dynamicMapper['STABLE']>),
+                      ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['STABLE']>),
                   },
               }
             : undefined,
@@ -175,12 +175,14 @@ const subgraphMapper = (
         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
     };
 
-    const data: ReturnType<typeof dataMapper[keyof typeof dataMapper]> | {} = Object.keys(dataMapper).includes(type)
-        ? dataMapper[type as keyof typeof dataMapper](pool)
+    const staticTypeData: ReturnType<typeof staticTypeDataMapper[keyof typeof staticTypeDataMapper]> | {} = Object.keys(
+        staticTypeDataMapper,
+    ).includes(type)
+        ? staticTypeDataMapper[type as keyof typeof staticTypeDataMapper](pool)
         : {};
 
-    const dynamicTypeData = Object.keys(dynamicMapper).includes(type)
-        ? dynamicMapper[type as keyof typeof dynamicMapper](pool, blockNumber)
+    const dynamicTypeData = Object.keys(dynamicTypeDataMapper).includes(type)
+        ? dynamicTypeDataMapper[type as keyof typeof dynamicTypeDataMapper](pool, blockNumber)
         : {};
 
     const tokens =
@@ -211,7 +213,7 @@ const subgraphMapper = (
         base,
         dynamicData,
         tokens,
-        data,
+        staticTypeData,
         dynamicTypeData,
     };
 };
@@ -265,7 +267,7 @@ const mapPoolTypeVersion = (poolType: string, poolTypeVersion: number): number =
     return version;
 };
 
-const dataMapper = {
+const staticTypeDataMapper = {
     ELEMENT: element,
     FX: fx,
     GYRO: gyro,
@@ -274,7 +276,7 @@ const dataMapper = {
     LINEAR: linear,
 };
 
-const dynamicMapper = {
+const dynamicTypeDataMapper = {
     STABLE: stableDynamic,
     COMPOSABLE_STABLE: stableDynamic,
     META_STABLE: stableDynamic,
