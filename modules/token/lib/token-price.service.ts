@@ -184,11 +184,15 @@ export class TokenPriceService {
         //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {
+    public async getDataForRange(
+        tokenAddress: string,
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         return prisma.prismaTokenPrice.findMany({
-            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: networkContext.chain },
+            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: chain },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -197,12 +201,13 @@ export class TokenPriceService {
         tokenIn: string,
         tokenOut: string,
         range: GqlTokenChartDataRange,
+        chain: Chain,
     ): Promise<TokenPriceItem[]> {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         const data = await prisma.prismaTokenPrice.findMany({
             where: {
-                chain: networkContext.chain,
+                chain: chain,
                 tokenAddress: { in: [tokenIn, tokenOut] },
                 timestamp: { gt: startTimestamp },
             },

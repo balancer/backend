@@ -44,8 +44,14 @@ const resolvers: Resolvers = {
                 })),
             }));
         },
-        tokenGetTokenDynamicData: async (parent, { address }, context) => {
-            const data = await tokenService.getTokenDynamicData(address);
+        tokenGetTokenDynamicData: async (parent, { address, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+            }
+            const data = await tokenService.getTokenDynamicData(address, chain);
 
             return data
                 ? {
@@ -68,8 +74,14 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
-        tokenGetPriceChartData: async (parent, { address, range }, context) => {
-            const data = await tokenService.getDataForRange(address, range);
+        tokenGetPriceChartData: async (parent, { address, range, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+            }
+            const data = await tokenService.getDataForRange(address, range, chain);
 
             return data.map((item) => ({
                 id: `${address}-${item.timestamp}`,
@@ -77,8 +89,14 @@ const resolvers: Resolvers = {
                 price: `${item.price}`,
             }));
         },
-        tokenGetRelativePriceChartData: async (parent, { tokenIn, tokenOut, range }, context) => {
-            const data = await tokenService.getRelativeDataForRange(tokenIn, tokenOut, range);
+        tokenGetRelativePriceChartData: async (parent, { tokenIn, tokenOut, range, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+            }
+            const data = await tokenService.getRelativeDataForRange(tokenIn, tokenOut, range, chain);
 
             return data.map((item) => ({
                 id: `${tokenIn}-${tokenOut}-${item.timestamp}`,
@@ -86,8 +104,14 @@ const resolvers: Resolvers = {
                 price: `${item.price}`,
             }));
         },
-        tokenGetCandlestickChartData: async (parent, { address, range }, context) => {
-            const data = await tokenService.getDataForRange(address, range);
+        tokenGetCandlestickChartData: async (parent, { address, range, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetCandlestickChartData error: Provide "chain" param');
+            }
+            const data = await tokenService.getDataForRange(address, range, chain);
 
             return data.map((item) => ({
                 id: `${address}-${item.timestamp}`,
@@ -98,8 +122,14 @@ const resolvers: Resolvers = {
                 close: `${item.close}`,
             }));
         },
-        tokenGetTokenData: async (parent, { address }, context) => {
-            const token = await tokenService.getToken(address);
+        tokenGetTokenData: async (parent, { address, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+            }
+            const token = await tokenService.getToken(address, chain);
             if (token) {
                 return {
                     ...token,

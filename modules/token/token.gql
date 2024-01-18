@@ -3,15 +3,24 @@ extend type Query {
     tokenGetCurrentPrices(chains: [GqlChain!]): [GqlTokenPrice!]!
     tokenGetHistoricalPrices(addresses: [String!]!): [GqlHistoricalTokenPrice!]!
     tokenGetTokensDynamicData(addresses: [String!]!): [GqlTokenDynamicData!]!
-    tokenGetTokenDynamicData(address: String!): GqlTokenDynamicData
+    tokenGetTokenDynamicData(address: String!, chain: GqlChain): GqlTokenDynamicData
     tokenGetRelativePriceChartData(
         tokenIn: String!
         tokenOut: String!
         range: GqlTokenChartDataRange!
+        chain: GqlChain
     ): [GqlTokenPriceChartDataItem!]!
-    tokenGetPriceChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenPriceChartDataItem!]!
-    tokenGetCandlestickChartData(address: String!, range: GqlTokenChartDataRange!): [GqlTokenCandlestickChartDataItem!]!
-    tokenGetTokenData(address: String!): GqlTokenData
+    tokenGetPriceChartData(
+        address: String!
+        range: GqlTokenChartDataRange!
+        chain: GqlChain
+    ): [GqlTokenPriceChartDataItem!]!
+    tokenGetCandlestickChartData(
+        address: String!
+        range: GqlTokenChartDataRange!
+        chain: GqlChain
+    ): [GqlTokenCandlestickChartDataItem!]!
+    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData
     tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
     tokenGetProtocolTokenPrice: AmountHumanReadable!
 }
