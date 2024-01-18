@@ -10,30 +10,49 @@ export class UserBalanceService {
     constructor() {}
 
     public async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
-        const user = await prisma.prismaUser.findUnique({
-            where: { address: address.toLowerCase() },
-            include: {
-                walletBalances: {
-                    where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
-                },
-                stakedBalances: {
-                    where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
-                },
+        // this seems to cause heavy load
+        // const user = await prisma.prismaUser.findUnique({
+        //     where: { address: address.toLowerCase() },
+        //     include: {
+        //         walletBalances: {
+        //             where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
+        //         },
+        //         stakedBalances: {
+        //             where: { chain: { in: chains }, poolId: { not: null }, balanceNum: { gt: 0 } },
+        //         },
+        //     },
+        // });
+
+        const userWalletBalances = await prisma.prismaUserWalletBalance.findMany({
+            where: {
+                userAddress: address.toLowerCase(),
+                chain: { in: chains },
+                poolId: { not: null },
+                balanceNum: { gt: 0 },
             },
         });
 
-        if (!user) {
+        const userStakedBalances = await prisma.prismaUserStakedBalance.findMany({
+            where: {
+                userAddress: address.toLowerCase(),
+                chain: { in: chains },
+                poolId: { not: null },
+                balanceNum: { gt: 0 },
+            },
+        });
+
+        if (userWalletBalances.length === 0 && userStakedBalances.length === 0) {
             return [];
         }
 
         const poolIds = _.uniq([
-            ...user.stakedBalances.map((balance) => balance.poolId),
-            ...user.walletBalances.map((balance) => balance.poolId),
+            ...userStakedBalances.map((balance) => balance.poolId),
+            ...userWalletBalances.map((balance) => balance.poolId),
         ]) as string[];
 
         return poolIds.map((poolId) => {
-            const stakedBalance = user.stakedBalances.find((balance) => balance.poolId === poolId);
-            const walletBalance = user.walletBalances.find((balance) => balance.poolId === poolId);
+            const stakedBalance = userStakedBalances.find((balance) => balance.poolId === poolId);
+            const walletBalance = userWalletBalances.find((balance) => balance.poolId === poolId);
             const stakedNum = parseUnits(stakedBalance?.balance || '0', 18);
             const walletNum = parseUnits(walletBalance?.balance || '0', 18);
 
@@ -52,16 +71,25 @@ export class UserBalanceService {
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
         const fbeetsAddress = networkContext.data.fbeets?.address || '';
 
-        const user = await prisma.prismaUser.findUnique({
-            where: { address: address.toLowerCase() },
-            include: {
-                walletBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
-                stakedBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
-            },
+        const userWalletBalances = await prisma.prismaUserWalletBalance.findMany({
+            where: { userAddress: address.toLowerCase(), chain: networkContext.chain, tokenAddress: fbeetsAddress },
         });
 
-        const stakedBalance = user?.stakedBalances[0];
-        const walletBalance = user?.walletBalances[0];
+        const userStakedBalances = await prisma.prismaUserStakedBalance.findMany({
+            where: { userAddress: address.toLowerCase(), chain: networkContext.chain, tokenAddress: fbeetsAddress },
+        });
+
+        // this seems to cause heavy load
+        // const user = await prisma.prismaUser.findUnique({
+        //     where: { address: address.toLowerCase() },
+        //     include: {
+        //         walletBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
+        //         stakedBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
+        //     },
+        // });
+
+        const stakedBalance = userWalletBalances[0];
+        const walletBalance = userStakedBalances[0];
         const stakedNum = parseUnits(stakedBalance?.balance || '0', 18);
         const walletNum = parseUnits(walletBalance?.balance || '0', 18);
 
