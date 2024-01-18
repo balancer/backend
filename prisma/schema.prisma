@@ -64,7 +64,7 @@ model PrismaPool {
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
     gyroData            PrismaPoolGyroData?
-    staticTypeData Json @default("{}")
+    staticTypeData      Json @default("{}")
 
     tokens              PrismaPoolToken[]
 
