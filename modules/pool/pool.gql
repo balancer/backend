@@ -304,6 +304,7 @@ type GqlPoolFx implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
+    tokens: [GqlPoolTokenUnion!]!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
