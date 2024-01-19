@@ -31,8 +31,9 @@ export class PoolOnChainDataService {
     private get options() {
         return {
             chain: networkContext.chain,
-            vaultAddress: networkContext.data.balancer.vault,
-            yieldProtocolFeePercentage: networkContext.data.balancer.yieldProtocolFeePercentage,
+            vaultAddress: networkContext.data.balancer.vaultV2Address,
+            yieldProtocolFeePercentage: networkContext.data.balancer.v2DefaultYieldFeePercentage,
+            swapProtocolFeePercentage: networkContext.data.balancer.v2DefaultSwapFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
         };
     }
@@ -168,12 +169,18 @@ export class PoolOnChainDataService {
                     onchainData.protocolYieldFeePercentageCache ||
                     String(this.options.yieldProtocolFeePercentage);
 
+                const swapProtocolFeePercentage =
+                    gyroFees[pool.id] ||
+                    onchainData.protocolSwapFeePercentageCache ||
+                    String(this.options.swapProtocolFeePercentage);
+
                 if (
                     pool.dynamicData &&
                     (pool.dynamicData.swapFee !== swapFee ||
                         pool.dynamicData.totalShares !== totalShares ||
                         pool.dynamicData.swapEnabled !== swapEnabled ||
-                        pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage)
+                        pool.dynamicData.protocolYieldFee !== yieldProtocolFeePercentage ||
+                        pool.dynamicData.protocolSwapFee !== swapProtocolFeePercentage)
                 ) {
                     operations.push(
                         prisma.prismaPoolDynamicData.update({
@@ -184,6 +191,7 @@ export class PoolOnChainDataService {
                                 totalSharesNum: parseFloat(totalShares),
                                 swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
                                 protocolYieldFee: yieldProtocolFeePercentage,
+                                protocolSwapFee: swapProtocolFeePercentage
                                 blockNumber,
                             },
                         }),

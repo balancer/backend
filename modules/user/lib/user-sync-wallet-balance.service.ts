@@ -42,7 +42,7 @@ export class UserSyncWalletBalanceService {
     }
 
     get vaultAddress() {
-        return AllNetworkConfigs[this.chainId].data.balancer.vault;
+        return AllNetworkConfigs[this.chainId].data.balancer.vaultV2Address;
     }
 
     get fbeetsAddress() {

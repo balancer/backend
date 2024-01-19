@@ -102,18 +102,13 @@ export interface NetworkData {
         config: string;
     };
     balancer: {
-        v2: {
-            vault: string;
-            tokenAdmin?: string;
-            yieldProtocolFeePercentage: number;
-            swapProtocolFeePercentage: number;
-        };
-        v3: {
-            vault: string;
-            tokenAdmin?: string;
-            yieldProtocolFeePercentage: number;
-            swapProtocolFeePercentage: number;
-        };
+        vaultV2Address: string;
+        v2DefaultSwapFeePercentage: string;
+        v2DefaultYieldFeePercentage: string;
+        vaultV3Address: string;
+        v3DefaultSwapFeePercentage: string;
+        v3DefaultYieldFeePercentage: string;
+        tokenAdmin?: string;
     };
     multicall: string;
     multicall3: string;

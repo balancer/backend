@@ -62,16 +62,12 @@ const baseNetworkData: NetworkData = {
         delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
-        v2: {
-            vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            swapProtocolFeePercentage: 0.5,
-            yieldProtocolFeePercentage: 0.5,
-        },
-        v3: {
-            vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            swapProtocolFeePercentage: 0.5,
-            yieldProtocolFeePercentage: 0.5,
-        },
+        vaultV2Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+        v2DefaultSwapFeePercentage: '0.5',
+        v2DefaultYieldFeePercentage: '0.5',
+        vaultV3Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+        v3DefaultSwapFeePercentage: '0.5',
+        v3DefaultYieldFeePercentage: '0.5',
     },
     ybAprConfig: {
         defaultHandlers: {
@@ -136,14 +132,9 @@ export const baseNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: baseNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            baseNetworkData.ybAprConfig,
-            baseNetworkData.chain.prismaId,
-            baseNetworkData.balancer.v2.yieldProtocolFeePercentage,
-            baseNetworkData.balancer.v2.swapProtocolFeePercentage,
-        ),
+        new YbTokensAprService(baseNetworkData.ybAprConfig, baseNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(baseNetworkData.balancer.v2.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [baseNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, baseNetworkData.bal!.address)],

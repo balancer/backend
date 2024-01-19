@@ -26,7 +26,6 @@ export class DatastudioService {
             networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].compositionTabName;
         const emissionDataTabName =
             networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName;
-        const swapProtocolFeePercentage = networkContext.data.balancer.swapProtocolFeePercentage;
         const chainSlug = networkContext.data.chain.slug;
 
         const sheets = google.sheets({ version: 'v4' });
@@ -136,27 +135,23 @@ export class DatastudioService {
             }
 
             if (pool.dynamicData) {
-                const protocolYieldFeePercentage = pool.dynamicData.protocolYieldFee
-                    ? parseFloat(pool.dynamicData.protocolYieldFee)
-                    : networkContext.data.balancer.yieldProtocolFeePercentage;
+                const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee);
+                const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee);
                 sharesChange = `${
                     parseFloat(pool.dynamicData.totalShares) - parseFloat(pool.dynamicData.totalShares24hAgo)
                 }`;
                 tvlChange = `${pool.dynamicData.totalLiquidity - pool.dynamicData.totalLiquidity24hAgo}`;
-                lpSwapFee = `${pool.dynamicData.fees24h * (1 - swapProtocolFeePercentage)}`;
-                protocolSwapFee = `${pool.dynamicData.fees24h * swapProtocolFeePercentage}`;
+                lpSwapFee = `${pool.dynamicData.fees24h * (1 - protocolSwapFeePercentage)}`;
+                protocolSwapFee = `${pool.dynamicData.fees24h * protocolSwapFeePercentage}`;
 
                 lpYieldCapture =
                     pool.type === 'META_STABLE'
-                        ? `${
-                              pool.dynamicData.yieldCapture24h *
-                              (1 - networkContext.data.balancer.swapProtocolFeePercentage)
-                          }`
+                        ? `${pool.dynamicData.yieldCapture24h * (1 - protocolSwapFeePercentage)}`
                         : `${pool.dynamicData.yieldCapture24h * (1 - protocolYieldFeePercentage)}`;
 
                 protocolYieldCapture =
                     pool.type === 'META_STABLE'
-                        ? `${pool.dynamicData.yieldCapture24h * networkContext.data.balancer.swapProtocolFeePercentage}`
+                        ? `${pool.dynamicData.yieldCapture24h * protocolSwapFeePercentage}`
                         : `${pool.dynamicData.yieldCapture24h * protocolYieldFeePercentage}`;
 
                 if (pool.dynamicData.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {

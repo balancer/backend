@@ -20,7 +20,7 @@ export class PoolSyncService {
     }
 
     get vaultAddress() {
-        return networkContext.data.balancer.vault;
+        return networkContext.data.balancer.vaultV2Address;
     }
 
     get rpcUrl() {
