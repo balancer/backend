@@ -17,7 +17,7 @@ export async function startScheduler() {
 
     try {
         const SEPOLIA_ID = '11155111';
-        let chainIds: string[] = [SEPOLIA_ID];
+        let chainIds: string[] = [SEPOLIA_ID, '1', '10']; // sepolia, mainnet, optimism
 
         if (env.DEPLOYMENT_ENV === 'canary' || env.DEPLOYMENT_ENV === 'main') {
             // use all chains, remove sepolia
