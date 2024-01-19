@@ -61,6 +61,8 @@ model PrismaPool {
     owner               String
     factory             String?
 
+    vaultVersion        Int                 @default(2)
+
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
     gyroData            PrismaPoolGyroData?

@@ -62,9 +62,16 @@ const baseNetworkData: NetworkData = {
         delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            swapProtocolFeePercentage: 0.5,
+            yieldProtocolFeePercentage: 0.5,
+        },
+        v3: {
+            vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            swapProtocolFeePercentage: 0.5,
+            yieldProtocolFeePercentage: 0.5,
+        },
     },
     ybAprConfig: {
         defaultHandlers: {
@@ -132,11 +139,11 @@ export const baseNetworkConfig: NetworkConfig = {
         new YbTokensAprService(
             baseNetworkData.ybAprConfig,
             baseNetworkData.chain.prismaId,
-            baseNetworkData.balancer.yieldProtocolFeePercentage,
-            baseNetworkData.balancer.swapProtocolFeePercentage,
+            baseNetworkData.balancer.v2.yieldProtocolFeePercentage,
+            baseNetworkData.balancer.v2.swapProtocolFeePercentage,
         ),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(baseNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(baseNetworkData.balancer.v2.swapProtocolFeePercentage),
         new GaugeAprService(tokenService, [baseNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, baseNetworkData.bal!.address)],
