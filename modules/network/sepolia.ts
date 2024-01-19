@@ -32,7 +32,7 @@ export const sepoliaNetworkData: NetworkData = {
         startDate: '2021-08-23',
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
         beetsBar: 'https://',
-        blocks: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
         gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia-beta/version/latest',
         // veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
