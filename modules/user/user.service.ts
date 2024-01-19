@@ -1,16 +1,11 @@
 import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { PoolSnapshotService } from '../pool/lib/pool-snapshot.service';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
-import { userSnapshotSubgraphService } from '../subgraphs/user-snapshot-subgraph/user-snapshot-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { UserBalanceService } from './lib/user-balance.service';
-import { UserSnapshotService } from './lib/user-snapshot.service';
 import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
-import { UserPoolBalance, UserPoolSnapshot, UserStakedBalanceService } from './user-types';
+import { UserPoolBalance, UserStakedBalanceService } from './user-types';
 import { networkContext } from '../network/network-context.service';
 
 export class UserService {
@@ -18,7 +13,6 @@ export class UserService {
         private readonly userBalanceService: UserBalanceService,
         private readonly walletSyncService: UserSyncWalletBalanceService,
         private readonly poolSwapService: PoolSwapService,
-        private readonly userSnapshotService: UserSnapshotService,
     ) {}
 
     private get stakedSyncServices(): UserStakedBalanceService[] {
@@ -55,19 +49,6 @@ export class UserService {
 
     public async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
         return this.userBalanceService.getUserStaking(address, chains);
-    }
-
-    public async getUserBalanceSnapshotsForPool(
-        accountAddress: string,
-        poolId: string,
-        chain: Chain,
-        days: GqlUserSnapshotDataRange,
-    ): Promise<UserPoolSnapshot[]> {
-        return this.userSnapshotService.getUserPoolBalanceSnapshotsForPool(accountAddress, poolId, chain, days);
-    }
-
-    public async getUserRelicSnapshots(accountAddress: string, farmId: string, days: GqlUserSnapshotDataRange) {
-        return this.userSnapshotService.getUserRelicSnapshotsForFarm(accountAddress, farmId, days);
     }
 
     public async initWalletBalancesForAllPools() {
@@ -125,27 +106,10 @@ export class UserService {
             );
         }
     }
-
-    public async syncUserBalanceSnapshots() {
-        await this.userSnapshotService.syncUserPoolBalanceSnapshots();
-    }
-
-    public async syncUserRelicSnapshots() {
-        await this.userSnapshotService.syncLatestUserRelicSnapshots();
-    }
-
-    public async loadAllUserRelicSnapshots() {
-        await this.userSnapshotService.loadAllUserRelicSnapshots();
-    }
 }
 
 export const userService = new UserService(
     new UserBalanceService(),
     new UserSyncWalletBalanceService(),
     new PoolSwapService(tokenService),
-    new UserSnapshotService(
-        userSnapshotSubgraphService,
-        reliquarySubgraphService,
-        new PoolSnapshotService(coingeckoService),
-    ),
 );

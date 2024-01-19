@@ -227,15 +227,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-user-snapshots':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => userService.syncUserBalanceSnapshots(),
-                    res,
-                    next,
-                );
-                break;
             case 'feed-data-to-datastudio':
                 await runIfNotAlreadyRunning(job.name, chainId, () => datastudioService.feedPoolData(), res, next);
                 break;
@@ -247,9 +238,6 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
-                break;
-            case 'sync-latest-relic-snapshots':
-                await runIfNotAlreadyRunning(job.name, chainId, () => userService.syncUserRelicSnapshots(), res, next);
                 break;
             case 'global-purge-old-tokenprices':
                 await runIfNotAlreadyRunning(
