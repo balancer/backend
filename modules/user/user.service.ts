@@ -1,6 +1,6 @@
 import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
-import { GqlPoolJoinExit, GqlPoolSwap, GqlUserSnapshotDataRange } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { UserBalanceService } from './lib/user-balance.service';

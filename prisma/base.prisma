@@ -20,6 +20,7 @@ enum Chain {
     MAINNET
     OPTIMISM
     POLYGON
+    SEPOLIA
     ZKEVM
 }
 

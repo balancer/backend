@@ -128,7 +128,7 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
-    protocolYieldFee        String              @default("0")
+    protocolYieldFee        String?             
     protocolSwapFee         String              @default("0")
     swapFee                 String
     swapEnabled             Boolean

@@ -127,10 +127,6 @@ export interface NetworkData {
     beefy?: {
         linearPools: string[];
     };
-    lido?: {
-        wstEthContract: string;
-        wstEthAprEndpoint: string;
-    };
     stader?: {
         sFtmxContract: string;
     };

@@ -135,7 +135,7 @@ export class DatastudioService {
             }
 
             if (pool.dynamicData) {
-                const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee);
+                const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee || '');
                 const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee);
                 sharesChange = `${
                     parseFloat(pool.dynamicData.totalShares) - parseFloat(pool.dynamicData.totalShares24hAgo)
