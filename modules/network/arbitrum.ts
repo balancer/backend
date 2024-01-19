@@ -202,10 +202,6 @@ export const arbitrumNetworkData: NetworkData = {
     beefy: {
         linearPools: [''],
     },
-    lido: {
-        wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '0x5979d7b546e38e414f7e9822514be443a4800529',
-    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
