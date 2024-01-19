@@ -191,7 +191,7 @@ export class PoolOnChainDataService {
                                 totalSharesNum: parseFloat(totalShares),
                                 swapEnabled: typeof swapEnabled !== 'undefined' ? swapEnabled : true,
                                 protocolYieldFee: yieldProtocolFeePercentage,
-                                protocolSwapFee: swapProtocolFeePercentage
+                                protocolSwapFee: swapProtocolFeePercentage,
                                 blockNumber,
                             },
                         }),
