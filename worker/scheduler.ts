@@ -17,11 +17,14 @@ export async function startScheduler() {
 
     try {
         const SEPOLIA_ID = '11155111';
-        let chainIds: string[] = [SEPOLIA_ID, '1', '10']; // sepolia, mainnet, optimism
+        let chainIds = [];
 
         if (env.DEPLOYMENT_ENV === 'canary' || env.DEPLOYMENT_ENV === 'main') {
             // use all chains, remove sepolia
             chainIds = Object.keys(AllNetworkConfigs).filter((chainId) => chainId !== SEPOLIA_ID);
+        } else {
+            // if not canary nor main, must be dev
+            chainIds = [SEPOLIA_ID, '1', '10']; // sepolia, mainnet, optimism
         }
 
         for (const chainId of chainIds) {
