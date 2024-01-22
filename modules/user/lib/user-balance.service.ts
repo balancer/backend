@@ -27,8 +27,6 @@ export class UserBalanceService {
             where: {
                 userAddress: address.toLowerCase(),
                 chain: { in: chains },
-                poolId: { not: null },
-                balanceNum: { gt: 0 },
             },
         });
 
@@ -36,23 +34,24 @@ export class UserBalanceService {
             where: {
                 userAddress: address.toLowerCase(),
                 chain: { in: chains },
-                poolId: { not: null },
-                balanceNum: { gt: 0 },
             },
         });
 
-        if (userWalletBalances.length === 0 && userStakedBalances.length === 0) {
+        const nonZeroUserWalletBalances = userWalletBalances.filter((balance) => balance.balanceNum > 0);
+        const nonZeroUserStakedBalances = userStakedBalances.filter((balance) => balance.balanceNum > 0);
+
+        if (nonZeroUserWalletBalances.length === 0 && nonZeroUserStakedBalances.length === 0) {
             return [];
         }
 
         const poolIds = _.uniq([
-            ...userStakedBalances.map((balance) => balance.poolId),
-            ...userWalletBalances.map((balance) => balance.poolId),
+            ...nonZeroUserWalletBalances.map((balance) => balance.poolId),
+            ...nonZeroUserStakedBalances.map((balance) => balance.poolId),
         ]) as string[];
 
         return poolIds.map((poolId) => {
-            const stakedBalance = userStakedBalances.find((balance) => balance.poolId === poolId);
-            const walletBalance = userWalletBalances.find((balance) => balance.poolId === poolId);
+            const walletBalance = nonZeroUserWalletBalances.find((balance) => balance.poolId === poolId);
+            const stakedBalance = nonZeroUserStakedBalances.find((balance) => balance.poolId === poolId);
             const stakedNum = parseUnits(stakedBalance?.balance || '0', 18);
             const walletNum = parseUnits(walletBalance?.balance || '0', 18);
 
