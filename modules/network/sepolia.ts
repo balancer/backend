@@ -65,12 +65,16 @@ export const sepoliaNetworkData: NetworkData = {
     //     delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     // },
     balancer: {
-        vaultV2Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v2DefaultSwapFeePercentage: '0.5',
-        v2DefaultYieldFeePercentage: '0.5',
-        vaultV3Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v3DefaultSwapFeePercentage: '0.5',
-        v3DefaultYieldFeePercentage: '0.5',
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x80c7dd17b01855a6d2347444a0fcc36136a314de',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

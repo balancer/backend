@@ -1,4 +1,4 @@
-import { BalancerSorService } from './balancer-sor.service';
+import { BalancerSorService } from './sorV1Beets/balancer-sor.service';
 import { tokenService } from '../token/token.service';
 import { poolService } from '../pool/pool.service';
 

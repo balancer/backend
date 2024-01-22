@@ -73,12 +73,16 @@ const optimismNetworkData: NetworkData = {
         config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
     },
     balancer: {
-        vaultV2Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v2DefaultSwapFeePercentage: '0.5',
-        v2DefaultYieldFeePercentage: '0.5',
-        vaultV3Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v3DefaultSwapFeePercentage: '0.5',
-        v3DefaultYieldFeePercentage: '0.5',
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x2dc0e2aa608532da689e89e237df582b783e552c',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

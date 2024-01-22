@@ -31,9 +31,9 @@ export class PoolOnChainDataService {
     private get options() {
         return {
             chain: networkContext.chain,
-            vaultAddress: networkContext.data.balancer.vaultV2Address,
-            yieldProtocolFeePercentage: networkContext.data.balancer.v2DefaultYieldFeePercentage,
-            swapProtocolFeePercentage: networkContext.data.balancer.v2DefaultSwapFeePercentage,
+            vaultAddress: networkContext.data.balancer.v2.vaultAddress,
+            yieldProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
+            swapProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
         };
     }

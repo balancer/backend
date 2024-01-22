@@ -320,7 +320,7 @@ export class BalancerSorService {
 
     private queryBatchSwap(swapType: SwapTypes, swaps: SwapV2[], assets: string[]): Promise<string[]> {
         const vaultContract = new Contract(
-            networkContext.data.balancer.vaultV2Address,
+            networkContext.data.balancer.v2.vaultAddress,
             VaultAbi,
             networkContext.provider,
         );

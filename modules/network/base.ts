@@ -62,12 +62,16 @@ const baseNetworkData: NetworkData = {
         delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
-        vaultV2Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v2DefaultSwapFeePercentage: '0.5',
-        v2DefaultYieldFeePercentage: '0.5',
-        vaultV3Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v3DefaultSwapFeePercentage: '0.5',
-        v3DefaultYieldFeePercentage: '0.5',
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     ybAprConfig: {
         defaultHandlers: {

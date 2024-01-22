@@ -68,12 +68,16 @@ const polygonNetworkData: NetworkData = {
         config: '0xfdc2e9e03f515804744a40d0f8d25c16e93fbe67',
     },
     balancer: {
-        vaultV2Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v2DefaultSwapFeePercentage: '0.5',
-        v2DefaultYieldFeePercentage: '0.5',
-        vaultV3Address: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        v3DefaultSwapFeePercentage: '0.5',
-        v3DefaultYieldFeePercentage: '0.5',
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x275617327c958bd06b5d6b871e7f491d76113dd8',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

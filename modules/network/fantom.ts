@@ -114,12 +114,16 @@ const fantomNetworkData: NetworkData = {
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
     },
     balancer: {
-        vaultV2Address: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-        v2DefaultSwapFeePercentage: '0.25',
-        v2DefaultYieldFeePercentage: '0.25',
-        vaultV3Address: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-        v3DefaultSwapFeePercentage: '0.25',
-        v3DefaultYieldFeePercentage: '0.25',
+        v2: {
+            vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
