@@ -39,7 +39,6 @@ import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 
 export class PoolService {
-    private cache = new Cache<string, any>();
     constructor(
         private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
@@ -459,6 +458,30 @@ export class PoolService {
         await prisma.prismaPool.delete({
             where: { id_chain: { id: poolId, chain: this.chain } },
         });
+    }
+
+    public async syncChangedPoolsV3() {
+        throw new Error('Method not implemented.');
+    }
+
+    public async loadOnChainDataForPoolsWithActiveUpdatesV3() {
+        throw new Error('Method not implemented.');
+    }
+
+    public async syncNewPoolsFromSubgraphV3() {
+        throw new Error('Method not implemented.');
+    }
+
+    public async updateLiquidity24hAgoForAllPoolsV3() {
+        throw new Error('Method not implemented.');
+    }
+
+    public async syncLatestSnapshotsForAllPoolsV3() {
+        throw new Error('Method not implemented.');
+    }
+
+    public async updateLifetimeValuesForAllPoolsV3() {
+        throw new Error('Method not implemented.');
     }
 }
 
