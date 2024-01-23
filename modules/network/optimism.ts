@@ -209,6 +209,7 @@ const optimismNetworkData: NetworkData = {
                 sourceUrl:
                     'https://2ch9hbg8hh.execute-api.us-east-1.amazonaws.com/dev/api/vault/0x3eE6107d9C93955acBb3f39871D32B02F82B78AB:0xa',
                 path: 'data.yields.apy',
+                scale: 1,
                 isIbYield: true,
             },
             ankrETH: {
