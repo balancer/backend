@@ -184,11 +184,15 @@ export class TokenPriceService {
         //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {
+    public async getDataForRange(
+        tokenAddress: string,
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         return prisma.prismaTokenPrice.findMany({
-            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: networkContext.chain },
+            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: chain },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -197,12 +201,13 @@ export class TokenPriceService {
         tokenIn: string,
         tokenOut: string,
         range: GqlTokenChartDataRange,
+        chain: Chain,
     ): Promise<TokenPriceItem[]> {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         const data = await prisma.prismaTokenPrice.findMany({
             where: {
-                chain: networkContext.chain,
+                chain: chain,
                 tokenAddress: { in: [tokenIn, tokenOut] },
                 timestamp: { gt: startTimestamp },
             },
@@ -256,28 +261,11 @@ export class TokenPriceService {
     }
 
     public async purgeOldTokenPricesForAllChains(): Promise<number> {
-        const purgeBeforeTimestamp = moment().startOf('day').subtract(100, 'days').utc().unix();
-        const oldPrices = await prisma.prismaTokenPrice.findMany({
-            where: {
-                timestamp: { lt: purgeBeforeTimestamp },
-            },
-        });
+        // DATE(to_timestamp(timestamp)) will return the midnight timestamp. We'll delete all prices that are not midnight timestamps AND are older than 100 days.
+        const deleted =
+            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '100 days'`;
 
-        // returns all non midnight prices
-        const tobeDeleted = _.uniq(oldPrices.filter((tokenPrice) => tokenPrice.timestamp % secondsPerDay !== 0));
-
-        //apparently prisma has a limitation on delete
-        const chunks = _.chunk(tobeDeleted, 1000);
-
-        for (const chunk of chunks) {
-            await prisma.prismaTokenPrice.deleteMany({
-                where: {
-                    timestamp: { in: chunk.map((tokenPrice) => tokenPrice.timestamp) },
-                },
-            });
-        }
-
-        return tobeDeleted.length;
+        return deleted;
     }
 
     private async updateCandleStickData() {

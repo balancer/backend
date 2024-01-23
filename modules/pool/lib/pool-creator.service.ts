@@ -1,12 +1,12 @@
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../../prisma/prisma-client';
-import { ZERO_ADDRESS } from '@gnosis.pm/safe-core-sdk/dist/src/utils/constants';
 import { PrismaPoolType } from '@prisma/client';
 import _ from 'lodash';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { UserService } from '../../user/user.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { networkContext } from '../../network/network-context.service';
+import { subgraphToPrismaCreate, subgraphToPrismaUpdate } from '../subgraph-mapper';
 
 export class PoolCreatorService {
     constructor(private readonly userService: UserService) {}
@@ -23,6 +23,13 @@ export class PoolCreatorService {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
+        const allNestedTypePools = await prisma.prismaPool.findMany({
+            where: {
+                chain: this.chain,
+                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
+            },
+            select: { id: true, address: true },
+        });
 
         const poolIds: string[] = [];
 
@@ -33,42 +40,11 @@ export class PoolCreatorService {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
             if (!existsInDb) {
-                await this.createPoolRecord(subgraphPool, blockNumber);
+                await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
 
                 poolIds.push(subgraphPool.id);
-            } else if (subgraphPool.poolType?.includes('Gyro')) {
-                await prisma.prismaPool.update({
-                    data: {
-                        gyroData: {
-                            update: {
-                                id: subgraphPool.id,
-                                alpha: subgraphPool.alpha || '',
-                                beta: subgraphPool.beta || '',
-                                sqrtAlpha: subgraphPool.sqrtAlpha || '',
-                                sqrtBeta: subgraphPool.sqrtBeta || '',
-                                root3Alpha: subgraphPool.root3Alpha || '',
-                                c: subgraphPool.c || '',
-                                s: subgraphPool.s || '',
-                                lambda: subgraphPool.lambda || '',
-                                tauAlphaX: subgraphPool.tauAlphaX || '',
-                                tauAlphaY: subgraphPool.tauAlphaY || '',
-                                tauBetaX: subgraphPool.tauBetaX || '',
-                                tauBetaY: subgraphPool.tauBetaY || '',
-                                u: subgraphPool.u || '',
-                                v: subgraphPool.v || '',
-                                w: subgraphPool.w || '',
-                                z: subgraphPool.z || '',
-                                dSq: subgraphPool.dSq || '',
-                            },
-                        },
-                    },
-                    where: {
-                        id_chain: {
-                            id: subgraphPool.id,
-                            chain: this.chain,
-                        },
-                    },
-                });
+            } else {
+                await this.updatePoolRecord(subgraphPool, blockNumber, allNestedTypePools);
             }
         }
 
@@ -92,53 +68,28 @@ export class PoolCreatorService {
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
         const poolIds = new Set<string>();
 
+        const allNestedTypePools = [
+            ...(await prisma.prismaPool.findMany({
+                where: {
+                    chain: this.chain,
+                    type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
+                },
+                select: { id: true, address: true },
+            })),
+            ...sortedSubgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
+        ];
+
         for (const subgraphPool of sortedSubgraphPools) {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
             if (!existsInDb) {
-                await this.createPoolRecord(subgraphPool, blockNumber);
+                await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
 
                 poolIds.add(subgraphPool.id);
             }
         }
 
         return Array.from(poolIds);
-    }
-
-    public async reloadPoolNestedTokens(poolId: string): Promise<void> {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        const poolToLoad = subgraphPools.find((pool) => pool.id === poolId);
-
-        if (!poolToLoad) {
-            throw new Error('Pool with id does not exist');
-        }
-
-        const poolTokens = poolToLoad.tokens || [];
-
-        for (let i = 0; i < poolTokens.length; i++) {
-            const token = poolTokens[i];
-
-            if (token.address === poolToLoad.address) {
-                continue;
-            }
-
-            const nestedPool = subgraphPools.find((nestedPool) => {
-                const poolType = this.mapSubgraphPoolTypeToPoolType(nestedPool.poolType || '');
-
-                return (
-                    nestedPool.address === token.address && (poolType === 'LINEAR' || poolType === 'COMPOSABLE_STABLE')
-                );
-            });
-
-            if (nestedPool) {
-                await prisma.prismaPoolToken.update({
-                    where: { id_chain: { id: token.id, chain: this.chain } },
-                    data: { nestedPoolId: nestedPool.id },
-                });
-            }
-        }
-
-        await this.createAllTokensRelationshipForPool(poolId);
     }
 
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
@@ -192,17 +143,12 @@ export class PoolCreatorService {
         await prismaBulkExecuteOperations(operations);
     }
 
-    private async createPoolRecord(pool: BalancerPoolFragment, blockNumber: number) {
-        const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
+    private async createPoolRecord(
+        pool: BalancerPoolFragment,
+        blockNumber: number,
+        nestedPools: { id: string; address: string }[],
+    ) {
         const poolTokens = pool.tokens || [];
-
-        const allNestedTypePools = await prisma.prismaPool.findMany({
-            where: {
-                chain: this.chain,
-                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
-            },
-            select: { id: true, address: true },
-        });
 
         await prisma.prismaToken.createMany({
             skipDuplicates: true,
@@ -224,136 +170,9 @@ export class PoolCreatorService {
             ],
         });
 
-        // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
-        let poolTypeVersion = pool.poolTypeVersion ? pool.poolTypeVersion : 1;
-        if (pool.poolType === 'StablePhantom') {
-            poolTypeVersion = 0;
-        }
+        const prismaPoolRecordWithAssociations = subgraphToPrismaCreate(pool, this.chain, blockNumber, nestedPools);
 
-        await prisma.prismaPool.create({
-            data: {
-                id: pool.id,
-                chain: this.chain,
-                createTime: pool.createTime,
-                address: pool.address,
-                symbol: pool.symbol || '',
-                name: pool.name || '',
-                decimals: 18,
-                type: poolType,
-                version: poolTypeVersion,
-                owner: pool.owner || ZERO_ADDRESS,
-                factory: pool.factory,
-                tokens: {
-                    createMany: {
-                        data: poolTokens.map((token) => {
-                            const nestedPool = allNestedTypePools.find((nestedPool) => {
-                                return nestedPool.address === token.address;
-                            });
-
-                            let priceRateProvider;
-                            if (pool.priceRateProviders) {
-                                const data = pool.priceRateProviders.find(
-                                    (provider) => provider.token.address === token.address,
-                                );
-                                priceRateProvider = data?.address;
-                            }
-
-                            return {
-                                id: token.id,
-                                address: token.address,
-                                priceRateProvider,
-                                exemptFromProtocolYieldFee: token.isExemptFromYieldProtocolFee
-                                    ? token.isExemptFromYieldProtocolFee
-                                    : false,
-                                nestedPoolId: nestedPool?.id,
-                                index: token.index || pool.tokensList.findIndex((address) => address === token.address),
-                            };
-                        }),
-                    },
-                },
-                linearData:
-                    poolType === 'LINEAR'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  mainIndex: pool.mainIndex || 0,
-                                  wrappedIndex: pool.wrappedIndex || 0,
-                              },
-                          }
-                        : undefined,
-                linearDynamicData:
-                    poolType === 'LINEAR'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  upperTarget: pool.upperTarget || '',
-                                  lowerTarget: pool.lowerTarget || '',
-                                  blockNumber,
-                              },
-                          }
-                        : undefined,
-                elementData:
-                    poolType === 'ELEMENT'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  unitSeconds: pool.unitSeconds || '',
-                                  principalToken: pool.principalToken || '',
-                                  baseToken: pool.baseToken || '',
-                              },
-                          }
-                        : undefined,
-                gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(poolType)
-                    ? {
-                          create: {
-                              id: pool.id,
-                              alpha: pool.alpha || '',
-                              beta: pool.beta || '',
-                              sqrtAlpha: pool.sqrtAlpha || '',
-                              sqrtBeta: pool.sqrtBeta || '',
-                              root3Alpha: pool.root3Alpha || '',
-                              c: pool.c || '',
-                              s: pool.s || '',
-                              lambda: pool.lambda || '',
-                              tauAlphaX: pool.tauAlphaX || '',
-                              tauAlphaY: pool.tauAlphaY || '',
-                              tauBetaX: pool.tauBetaX || '',
-                              tauBetaY: pool.tauBetaY || '',
-                              u: pool.u || '',
-                              v: pool.v || '',
-                              w: pool.w || '',
-                              z: pool.z || '',
-                              dSq: pool.dSq || '',
-                          },
-                      }
-                    : undefined,
-                stableDynamicData:
-                    poolType === 'STABLE' || poolType === 'COMPOSABLE_STABLE' || poolType === 'META_STABLE'
-                        ? {
-                              create: {
-                                  id: pool.id,
-                                  amp: pool.amp || '',
-                                  blockNumber,
-                              },
-                          }
-                        : undefined,
-                dynamicData: {
-                    create: {
-                        id: pool.id,
-                        blockNumber,
-                        swapFee: pool.swapFee,
-                        swapEnabled: pool.swapEnabled,
-                        totalShares: pool.totalShares,
-                        totalSharesNum: parseFloat(pool.totalShares),
-                        totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
-                        volume24h: 0,
-                        fees24h: 0,
-                        volume48h: 0,
-                        fees48h: 0,
-                    },
-                },
-            },
-        });
+        await prisma.prismaPool.create(prismaPoolRecordWithAssociations);
 
         await prisma.prismaPoolTokenDynamicData.createMany({
             data: poolTokens.map((token) => ({
@@ -370,6 +189,42 @@ export class PoolCreatorService {
 
         await this.createAllTokensRelationshipForPool(pool.id);
         await this.userService.initWalletBalancesForPool(pool.id);
+    }
+
+    private async updatePoolRecord(
+        pool: BalancerPoolFragment,
+        blockNumber: number,
+        nestedPools: { id: string; address: string }[] = [],
+    ) {
+        const prismaPoolRecordWithAssociations = subgraphToPrismaUpdate(pool, this.chain, blockNumber, nestedPools);
+        const { tokens, ...poolWithoutTokens } = prismaPoolRecordWithAssociations;
+
+        // Make sure all tokens are there, for managed pools tokenlist can change
+        for (const token of tokens.update) {
+            await prisma.prismaPoolToken.upsert({
+                where: token.where,
+                create: {
+                    ...token.data,
+                    poolId: pool.id,
+                    chain: this.chain,
+                },
+                update: {
+                    ...token.data,
+                },
+            });
+        }
+
+        await prisma.prismaPool.update({
+            data: poolWithoutTokens,
+            where: {
+                id_chain: {
+                    id: pool.id,
+                    chain: this.chain,
+                },
+            },
+        });
+
+        await this.createAllTokensRelationshipForPool(pool.id);
     }
 
     public async createAllTokensRelationshipForPool(poolId: string): Promise<void> {
@@ -407,63 +262,6 @@ export class PoolCreatorService {
                 nestedPoolId: token.nestedPoolId || null,
             })),
         });
-    }
-
-    public async reloadPoolTokenIndexes(poolId: string): Promise<void> {
-        const { pool: subgraphPool } = await this.balancerSubgraphService.getPool({ id: poolId });
-
-        if (!subgraphPool) {
-            throw new Error('Pool with id does not exist');
-        }
-
-        const poolTokens = subgraphPool.tokens || [];
-
-        for (let i = 0; i < poolTokens.length; i++) {
-            const token = poolTokens[i];
-
-            await prisma.prismaPoolToken.update({
-                where: { id_chain: { id: token.id, chain: this.chain } },
-                data: {
-                    index: token.index || subgraphPool.tokensList.findIndex((address) => address === token.address),
-                },
-            });
-        }
-    }
-
-    public async updatePoolTypesAndVersionForAllPools() {
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-
-        for (const subgraphPool of subgraphPools) {
-            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
-            let poolTypeVersion = subgraphPool.poolTypeVersion ? subgraphPool.poolTypeVersion : 1;
-            if (subgraphPool.poolType === 'StablePhantom') {
-                poolTypeVersion = 0;
-            }
-
-            const poolType = this.mapSubgraphPoolTypeToPoolType(subgraphPool.poolType || '');
-
-            try {
-                await prisma.prismaPool.update({
-                    where: { id_chain: { chain: networkContext.chain, id: subgraphPool.id } },
-                    data: {
-                        version: poolTypeVersion,
-                        type: poolType,
-                    },
-                });
-            } catch (e: any) {
-                // Some pools are filtered from the DB, like test pools,
-                // so we just ignore them without breaking the loop
-                const error = e.meta ? e.meta.cause : e;
-                console.error(
-                    'Error in updating pool versions: ',
-                    error,
-                    'Network',
-                    networkContext.chain,
-                    'Pool ID: ',
-                    subgraphPool.id,
-                );
-            }
-        }
     }
 
     private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {

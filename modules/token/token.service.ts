@@ -141,12 +141,12 @@ export class TokenService {
         await this.coingeckoDataService.syncCoingeckoIds();
     }
 
-    public async getTokenDynamicData(tokenAddress: string): Promise<PrismaTokenDynamicData | null> {
+    public async getTokenDynamicData(tokenAddress: string, chain: Chain): Promise<PrismaTokenDynamicData | null> {
         const token = await prisma.prismaToken.findUnique({
             where: {
                 address_chain: {
                     address: tokenAddress.toLowerCase(),
-                    chain: networkContext.chain,
+                    chain: chain,
                 },
             },
             include: {
@@ -183,16 +183,21 @@ export class TokenService {
         return dynamicData;
     }
 
-    public async getDataForRange(tokenAddress: string, range: GqlTokenChartDataRange): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getDataForRange(tokenAddress, range);
+    public async getDataForRange(
+        tokenAddress: string,
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getDataForRange(tokenAddress, range, chain);
     }
 
     public async getRelativeDataForRange(
         tokenIn: string,
         tokenOut: string,
         range: GqlTokenChartDataRange,
+        chain: Chain,
     ): Promise<TokenPriceItem[]> {
-        return this.tokenPriceService.getRelativeDataForRange(tokenIn, tokenOut, range);
+        return this.tokenPriceService.getRelativeDataForRange(tokenIn, tokenOut, range, chain);
     }
 
     public async initChartData(tokenAddress: string) {

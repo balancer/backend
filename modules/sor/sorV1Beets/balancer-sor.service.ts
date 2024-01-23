@@ -14,9 +14,7 @@ import VaultAbi from '../../pool/abi/Vault.json';
 import { env } from '../../../app/env';
 import { networkContext } from '../../network/network-context.service';
 import { DeploymentEnv } from '../../network/network-config-types';
-import * as Sentry from '@sentry/node';
 import _ from 'lodash';
-import { Logger } from '@ethersproject/logger';
 import { SwapInfoRoute } from '@balancer-labs/sor';
 import { NATIVE_ADDRESS, ZERO_ADDRESS } from '@balancer/sdk';
 
@@ -60,61 +58,12 @@ export class BalancerSorService {
             return this.zeroResponse(swapType, tokenIn, tokenOut, swapAmount);
         }
 
-        let deltas: string[] = [];
-
-        try {
-            deltas = await this.queryBatchSwap(
-                swapType === 'EXACT_IN' ? SwapTypes.SwapExactIn : SwapTypes.SwapExactOut,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-            );
-        } catch (error: any) {
-            const poolIds = _.uniq(swapInfo.swaps.map((swap) => swap.poolId));
-            if (error.code === Logger.errors.CALL_EXCEPTION) {
-                // Chances are a 304 means that we missed a pool draining event, and the pool data is stale.
-                // We force an update on any pools inside of the swapInfo
-                if (error.error?.error?.message?.includes('BAL#304')) {
-                    Sentry.captureException(
-                        `Received a BAL#304 during getSwaps, forcing an on-chain refresh for: ${poolIds.join(',')}`,
-                        {
-                            tags: {
-                                tokenIn,
-                                tokenOut,
-                                swapType,
-                                swapAmount,
-                                swapPools: `${poolIds.join(',')}`,
-                            },
-                        },
-                    );
-
-                    const blockNumber = await networkContext.provider.getBlockNumber();
-
-                    poolService.updateOnChainDataForPools(poolIds, blockNumber).catch();
-                } else if (error.error?.error?.message?.includes('BAL#')) {
-                    Sentry.captureException(
-                        `Received an unhandled BAL error during getSwaps: ${error.error?.error?.message}`,
-                        {
-                            tags: {
-                                tokenIn,
-                                tokenOut,
-                                swapType,
-                                swapAmount,
-                                swapPools: `${poolIds.join(',')}`,
-                            },
-                        },
-                    );
-                }
-            }
-
-            throw new Error(error);
-        }
-
         const pools = await poolService.getGqlPools({
             where: { idIn: swapInfo.routes.map((route) => route.hops.map((hop) => hop.poolId)).flat() },
         });
 
-        const tokenInAmount = BigNumber.from(deltas[swapInfo.tokenAddresses.indexOf(tokenIn)]);
-        const tokenOutAmount = BigNumber.from(deltas[swapInfo.tokenAddresses.indexOf(tokenOut)]).abs();
+        const tokenInAmount = swapType === 'EXACT_IN' ? swapAmountScaled : BigNumber.from(swapInfo.returnAmount);
+        const tokenOutAmount = swapType === 'EXACT_IN' ? BigNumber.from(swapInfo.returnAmount) : swapAmountScaled;
 
         return this.formatResponse({
             tokenIn: swapInfo.tokenIn,

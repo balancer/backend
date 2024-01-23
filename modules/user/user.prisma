@@ -14,6 +14,7 @@ model PrismaUser {
 
 model PrismaUserWalletBalance {
     @@id([id, chain])
+    @@index(userAddress)
 
     id                      String
     chain                   Chain               
@@ -26,7 +27,7 @@ model PrismaUserWalletBalance {
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
     poolId                  String?
-    pool                    PrismaPool?         @relation(fields:[poolId, chain], references: [id, chain])
+    pool                    PrismaPool?         @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
 
     tokenAddress            String
     token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
@@ -35,6 +36,7 @@ model PrismaUserWalletBalance {
 
 model PrismaUserStakedBalance {
     @@id([id, chain])
+    @@index(userAddress)
 
     id                      String
     chain                   Chain               
@@ -46,13 +48,13 @@ model PrismaUserStakedBalance {
     user                    PrismaUser          @relation(fields:[userAddress], references: [address])
 
     poolId                  String?
-    pool                    PrismaPool?          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                    PrismaPool?          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
 
     tokenAddress            String
     token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
 
     stakingId               String
-    staking                 PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain])
+    staking                 PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)
 }
 
 model PrismaUserBalanceSyncStatus {

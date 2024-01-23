@@ -2,10 +2,17 @@ version: '3'
 
 services:
     postgres:
-        image: postgres
+        container_name: balancer-backend
+        image: postgres:14-alpine
         ports:
             - '5431:5432'
         environment:
             POSTGRES_USER: backend
             POSTGRES_PASSWORD: let-me-in
             POSTGRES_DB: database
+        networks:
+            - balancer
+
+networks:
+    balancer:
+        name: balancer

@@ -76,7 +76,7 @@ export class SorService {
 
         try {
             // Updates with latest onchain data before returning
-            return swap.getSorSwapResponse(true);
+            return swap.getSorSwapResponse(args.swapOptions.queryBatchSwap ? args.swapOptions.queryBatchSwap : false);
         } catch (err) {
             console.log(`Error Retrieving QuerySwap`, err);
             return emptyResponse;

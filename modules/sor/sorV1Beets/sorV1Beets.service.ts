@@ -29,7 +29,7 @@ class SwapResultV1 implements SwapResult {
 
     async getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse> {
         if (!this.isValid || this.swap === null) throw new Error('No Response - Invalid Swap');
-        // Beets service is already querying onchain
+        // never query onchain for old v1 service
         return this.swap;
     }
 }

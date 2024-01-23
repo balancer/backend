@@ -47,6 +47,7 @@ input GqlSorSwapOptionsInput {
     timestamp: Int #used for caching purposes
     maxPools: Int
     forceRefresh: Boolean #don't use any cached responses
+    queryBatchSwap: Boolean #run queryBatchSwap to update with onchain values
 }
 
 """
