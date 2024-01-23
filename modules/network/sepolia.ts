@@ -71,7 +71,7 @@ export const sepoliaNetworkData: NetworkData = {
             defaultYieldFeePercentage: '0.5',
         },
         v3: {
-            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            vaultAddress: '0x816e90DC85bF016455017a76Bc09CC0451Eeb308',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
