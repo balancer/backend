@@ -214,6 +214,13 @@ const polygonNetworkData: NetworkData = {
                 path: 'data.0.rewardRate',
                 isIbYield: true,
             },
+            truMATIC: {
+                tokenAddress: '0xf33687811f3ad0cd6b48dd4b39f9f977bd7165a2',
+                sourceUrl: 'https://api.trufin.io/staker/apy?staker=MATIC',
+                path: 'apy',
+                scale: 100,
+                isIbYield: true,
+            },
         },
     },
     beefy: {
