@@ -482,9 +482,15 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
+        // this does not work on dev because we don't sync all chains on dev. Hence we only sync it rarely as it produces a lot of errors
         {
             name: 'sync-vebal-voting-gauges',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(5, 'minutes'),
+            interval:
+                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
+                    ? every(20, 'minutes')
+                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+                    ? every(5, 'minutes')
+                    : every(10, 'days'),
         },
         {
             name: 'feed-data-to-datastudio',
@@ -497,7 +503,12 @@ export const mainnetNetworkConfig: NetworkConfig = {
         // The following are multichain jobs and should only run once for all chains.
         {
             name: 'sync-global-coingecko-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
+            interval:
+                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
+                    ? every(10, 'minutes')
+                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+                    ? every(2, 'minutes')
+                    : every(10, 'days'),
         },
         {
             name: 'global-purge-old-tokenprices',
