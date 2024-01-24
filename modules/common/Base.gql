@@ -11,4 +11,5 @@ enum GqlChain {
     OPTIMISM
     POLYGON
     ZKEVM
+    SEPOLIA
 }

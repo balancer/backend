@@ -15,6 +15,8 @@ model PrismaPool {
     owner               String
     factory             String?
 
+    vaultVersion        Int                 @default(2)
+
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
     gyroData            PrismaPoolGyroData?
@@ -126,7 +128,8 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
-    protocolYieldFee        String?
+    protocolYieldFee        String?             
+    protocolSwapFee         String              @default("0")
     swapFee                 String
     swapEnabled             Boolean
     isPaused                Boolean             @default(false)

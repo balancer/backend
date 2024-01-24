@@ -36,21 +36,6 @@ const beetsResolvers: Resolvers = {
                 ...balance,
             };
         },
-        userGetPoolSnapshots: async (parent, { poolId, chain, range }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            return userService.getUserBalanceSnapshotsForPool(
-                accountAddress.toLowerCase(),
-                poolId.toLowerCase(),
-                chain,
-                range,
-            );
-        },
-        userGetRelicSnapshots: async (parent, { farmId, range }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            return userService.getUserRelicSnapshots(accountAddress.toLowerCase(), farmId, range);
-        },
     },
     Mutation: {
         beetsSyncFbeetsRatio: async (parent, {}, context) => {
@@ -64,13 +49,6 @@ const beetsResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.loadReliquarySnapshotsForAllFarms();
-
-            return 'success';
-        },
-        userLoadAllRelicSnapshots: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await userService.loadAllUserRelicSnapshots();
 
             return 'success';
         },

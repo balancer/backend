@@ -68,9 +68,16 @@ const polygonNetworkData: NetworkData = {
         config: '0xfdc2e9e03f515804744a40d0f8d25c16e93fbe67',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x275617327c958bd06b5d6b871e7f491d76113dd8',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -250,18 +257,10 @@ export const polygonNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: polygonNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            polygonNetworkData.ybAprConfig,
-            polygonNetworkData.chain.prismaId,
-            polygonNetworkData.balancer.yieldProtocolFeePercentage,
-            polygonNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(
-            polygonNetworkData.chain.prismaId,
-            polygonNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new YbTokensAprService(polygonNetworkData.ybAprConfig, polygonNetworkData.chain.prismaId),
+        new PhantomStableAprService(polygonNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(polygonNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [polygonNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, polygonNetworkData.bal!.address)],

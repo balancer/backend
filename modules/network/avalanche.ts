@@ -66,9 +66,16 @@ const avalancheNetworkData: NetworkData = {
         delegationProxy: '0x0c6052254551eae3ecac77b01dfcf1025418828f',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -205,18 +212,10 @@ export const avalancheNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            avalancheNetworkData.ybAprConfig,
-            avalancheNetworkData.chain.prismaId,
-            avalancheNetworkData.balancer.yieldProtocolFeePercentage,
-            avalancheNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(
-            avalancheNetworkData.chain.prismaId,
-            avalancheNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new YbTokensAprService(avalancheNetworkData.ybAprConfig, avalancheNetworkData.chain.prismaId),
+        new PhantomStableAprService(avalancheNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(avalancheNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [avalancheNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, avalancheNetworkData.bal!.address)],

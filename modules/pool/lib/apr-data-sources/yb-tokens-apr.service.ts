@@ -11,12 +11,7 @@ import { YbAprConfig } from '../../../network/apr-config-types';
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
 
-    constructor(
-        aprConfig: YbAprConfig,
-        private chain: Chain,
-        private defaultYieldFee: number,
-        private defaultSwapFee: number,
-    ) {
+    constructor(aprConfig: YbAprConfig, private chain: Chain) {
         this.ybTokensAprHandlers = new YbAprHandlers(aprConfig, chain);
     }
 
@@ -78,12 +73,11 @@ export class YbTokensAprService implements PoolAprService {
                 let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
 
                 if (collectsYieldFee(pool) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
-                    const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
-                        ? parseFloat(pool.dynamicData.protocolYieldFee)
-                        : this.defaultYieldFee;
+                    const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee || '0');
+                    const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee || '0');
                     aprInPoolAfterFees =
                         pool.type === 'META_STABLE'
-                            ? aprInPoolAfterFees * (1 - this.defaultSwapFee)
+                            ? aprInPoolAfterFees * (1 - protocolSwapFeePercentage)
                             : aprInPoolAfterFees * (1 - protocolYieldFeePercentage);
                 }
 

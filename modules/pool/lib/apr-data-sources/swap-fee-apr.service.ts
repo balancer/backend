@@ -6,8 +6,6 @@ import { networkContext } from '../../../network/network-context.service';
 
 const MAX_DB_INT = 9223372036854775807;
 export class SwapFeeAprService implements PoolAprService {
-    constructor(private readonly swapProtocolFeePercentage: number) {}
-
     public getAprServiceName(): string {
         return 'SwapFeeAprService';
     }
@@ -29,7 +27,7 @@ export class SwapFeeAprService implements PoolAprService {
                         ? (pool.dynamicData.fees24h * 365) / pool.dynamicData.totalLiquidity
                         : 0;
 
-                let protocolFee = this.swapProtocolFeePercentage;
+                let protocolFee = parseFloat(pool.dynamicData.protocolSwapFee);
                 if (pool.type === 'GYROE') {
                     // Gyro has custom protocol fee structure
                     protocolFee = parseFloat(pool.dynamicData.protocolYieldFee || '0');

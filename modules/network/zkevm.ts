@@ -66,9 +66,16 @@ const zkevmNetworkData: NetworkData = {
         delegationProxy: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -163,18 +170,10 @@ export const zkevmNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            zkevmNetworkData.ybAprConfig,
-            zkevmNetworkData.chain.prismaId,
-            zkevmNetworkData.balancer.yieldProtocolFeePercentage,
-            zkevmNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(
-            zkevmNetworkData.chain.prismaId,
-            zkevmNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new YbTokensAprService(zkevmNetworkData.ybAprConfig, zkevmNetworkData.chain.prismaId),
+        new PhantomStableAprService(zkevmNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(zkevmNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [zkevmNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, zkevmNetworkData.bal!.address)],

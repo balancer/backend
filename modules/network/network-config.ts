@@ -9,6 +9,7 @@ import { zkevmNetworkConfig } from './zkevm';
 import { avalancheNetworkConfig } from './avalanche';
 import { baseNetworkConfig } from './base';
 import { Chain } from '@prisma/client';
+import { sepoliaNetworkConfig } from './sepolia';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
@@ -20,6 +21,7 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '1101': zkevmNetworkConfig,
     '43114': avalancheNetworkConfig,
     '8453': baseNetworkConfig,
+    '11155111': sepoliaNetworkConfig,
 };
 
 export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } = {
@@ -32,6 +34,7 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
     ZKEVM: zkevmNetworkConfig,
     AVALANCHE: avalancheNetworkConfig,
     BASE: baseNetworkConfig,
+    SEPOLIA: sepoliaNetworkConfig,
 };
 
 export const chainIdToChain: { [id: string]: Chain } = {
@@ -44,9 +47,10 @@ export const chainIdToChain: { [id: string]: Chain } = {
     '8453': Chain.BASE,
     '42161': Chain.ARBITRUM,
     '43114': Chain.AVALANCHE,
+    '11155111': Chain.SEPOLIA,
 };
 
-export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453'];
+export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453', '11155111'];
 export const BeethovenChainIds = ['250', '10'];
 
 export const chainToIdMap = Object.values(AllNetworkConfigs).reduce((acc, config) => {

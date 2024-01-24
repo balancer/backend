@@ -45,9 +45,7 @@ export class BoostedPoolAprService implements PoolAprService {
         });
 
         for (const pool of filteredBoostedPoolsExpanded) {
-            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
-                ? parseFloat(pool.dynamicData.protocolYieldFee)
-                : networkContext.data.balancer.yieldProtocolFeePercentage;
+            const protocolYieldFeePercentage = parseFloat(pool.dynamicData?.protocolYieldFee || '0');
             const tokens = pool.tokens.filter((token) => {
                 if (token.address === pool.address) {
                     return false;
