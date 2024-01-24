@@ -37,8 +37,12 @@ export class UserBalanceService {
             },
         });
 
-        const nonZeroUserWalletBalances = userWalletBalances.filter((balance) => balance.balanceNum > 0);
-        const nonZeroUserStakedBalances = userStakedBalances.filter((balance) => balance.balanceNum > 0);
+        const nonZeroUserWalletBalances = userWalletBalances.filter(
+            (balance) => balance.balanceNum > 0 && balance.poolId !== null,
+        );
+        const nonZeroUserStakedBalances = userStakedBalances.filter(
+            (balance) => balance.balanceNum > 0 && balance.poolId !== null,
+        );
 
         if (nonZeroUserWalletBalances.length === 0 && nonZeroUserStakedBalances.length === 0) {
             return [];
