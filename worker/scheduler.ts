@@ -24,7 +24,7 @@ export async function startScheduler() {
             chainIds = Object.keys(AllNetworkConfigs).filter((chainId) => chainId !== SEPOLIA_ID);
         } else {
             // if not canary nor main, must be dev
-            chainIds = [SEPOLIA_ID, '1', '10']; // sepolia, mainnet, optimism
+            chainIds = [SEPOLIA_ID, '10']; // sepolia, optimism
         }
 
         for (const chainId of chainIds) {
