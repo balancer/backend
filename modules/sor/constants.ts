@@ -1,5 +1,5 @@
-import { TokenAmount } from '@balancer/sdk';
-import { GqlCowSwapApiResponse, GqlSorSwapType } from '../../schema';
+import { GqlCowSwapApiResponse } from '../../schema';
+import { TokenAmount } from './sorV2/sor-port/tokenAmount';
 
 export const EMPTY_COWSWAP_RESPONSE = (
     assetIn: string,

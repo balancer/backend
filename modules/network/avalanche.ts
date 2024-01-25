@@ -70,6 +70,7 @@ const avalancheNetworkData: NetworkData = {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
+            balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',

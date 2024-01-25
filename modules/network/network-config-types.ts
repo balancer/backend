@@ -107,6 +107,7 @@ export interface NetworkData {
             defaultSwapFeePercentage: string;
             defaultYieldFeePercentage: string;
             tokenAdmin?: string;
+            balancerQueriesAddress: string;
         };
         v3: {
             vaultAddress: string;

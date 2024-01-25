@@ -68,6 +68,7 @@ const gnosisNetworkData: NetworkData = {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
+            balancerQueriesAddress: '0x0f3e0c4218b7b0108a3643cfe9d3ec0d4f57c54e',
         },
         v3: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
