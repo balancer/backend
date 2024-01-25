@@ -1,17 +1,19 @@
-import { Hex, parseEther } from 'viem';
-import { PoolType, SwapKind } from '../../../types';
-import { Token, TokenAmount } from '../..';
-import { BasePool } from '..';
-import { getPoolAddress, MathSol, WAD } from '../../../utils';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { Chain } from '@prisma/client';
+import { BasePool, SwapKind } from '../../types';
+import { Address, Hex, parseEther, parseUnits } from 'viem';
+import { GqlPoolType } from '../../../../../../schema';
 import { StablePoolToken } from '../stable/stablePool';
-import { RawMetaStablePool } from '../../../data/types';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { MathSol, WAD } from '../../utils/math';
 
 export class MetaStablePool implements BasePool {
-    public readonly chainId: number;
+    public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.MetaStable;
+    public readonly poolType: GqlPoolType = 'META_STABLE';
     public readonly amp: bigint;
     public readonly swapFee: bigint;
     public readonly tokens: StablePoolToken[];
@@ -19,28 +21,47 @@ export class MetaStablePool implements BasePool {
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
-    static fromRawPool(chainId: number, pool: RawMetaStablePool): MetaStablePool {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): MetaStablePool {
         const poolTokens: StablePoolToken[] = [];
 
-        for (const t of pool.tokens) {
-            if (!t.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
-            const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
+        if (!pool.dynamicData || !pool.stableDynamicData) throw new Error('Stable pool has no dynamic data');
 
-            const tokenIndex = t.index ?? pool.tokensList.findIndex((t) => t === token.address);
+        for (const poolToken of pool.tokens) {
+            if (!poolToken.dynamicData?.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
+            const token = new Token(
+                poolToken.address as Address,
+                poolToken.token.decimals,
+                poolToken.token.symbol,
+                poolToken.token.name,
+            );
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
 
-            poolTokens.push(new StablePoolToken(token, tokenAmount.amount, parseEther(t.priceRate), tokenIndex));
+            poolTokens.push(
+                new StablePoolToken(
+                    token,
+                    tokenAmount.amount,
+                    parseEther(poolToken.dynamicData.priceRate),
+                    poolToken.index,
+                ),
+            );
         }
 
-        const amp = BigInt(pool.amp) * 1000n;
+        const amp = parseUnits(pool.stableDynamicData.amp, 3);
 
-        return new MetaStablePool(pool.id, amp, parseEther(pool.swapFee), poolTokens);
+        return new MetaStablePool(
+            pool.id as Hex,
+            pool.address,
+            pool.chain,
+            amp,
+            parseEther(pool.dynamicData.swapFee),
+            poolTokens,
+        );
     }
 
-    constructor(id: Hex, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
-        this.chainId = tokens[0].token.chain;
+    constructor(id: Hex, address: string, chain: Chain, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
         this.id = id;
-        this.address = getPoolAddress(id);
+        this.address = address;
+        this.chain = chain;
         this.amp = amp;
         this.swapFee = swapFee;
 

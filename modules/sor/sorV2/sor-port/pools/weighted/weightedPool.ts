@@ -1,12 +1,11 @@
 import { Token } from '../../token';
 import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { parseUnits } from 'ethers/lib/utils';
 import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
 import { BasePool, SwapKind } from '../../types';
 import { MathSol, WAD } from '../../utils/math';
-import { Address, Hex } from 'viem';
+import { Address, Hex, parseEther } from 'viem';
 
 class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -68,7 +67,7 @@ export class WeightedPool implements BasePool {
                 new WeightedPoolToken(
                     token,
                     tokenAmount.amount,
-                    parseUnits(poolToken.dynamicData.weight, 18).toBigInt(),
+                    parseEther(poolToken.dynamicData.weight),
                     poolToken.index,
                 ),
             );
@@ -79,7 +78,7 @@ export class WeightedPool implements BasePool {
             pool.address,
             pool.chain,
             pool.version,
-            parseUnits(pool.dynamicData.swapFee, 18).toBigInt(),
+            parseEther(pool.dynamicData.swapFee),
             poolTokens,
         );
     }
