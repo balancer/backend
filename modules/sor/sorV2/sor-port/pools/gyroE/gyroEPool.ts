@@ -1,15 +1,15 @@
-import { Hex, parseEther, parseUnits } from 'viem';
-
-import { BasePool } from '../index';
+import { Address, Hex, parseEther, parseUnits } from 'viem';
+import { GqlPoolType } from '../../../../../../schema';
 import { Token } from '../../token';
-import { TokenAmount, BigintIsh } from '../../tokenAmount';
-import { RawGyroEPool } from '../../../data/types';
-import { PoolType, SwapKind } from '../../../types';
-import { MathSol, WAD, getPoolAddress } from '../../../utils';
+import { BigintIsh, TokenAmount } from '../../tokenAmount';
+import { BasePool, SwapKind } from '../../types';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { Chain } from '@prisma/client';
+import { MathSol, WAD } from '../../utils/math';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
+import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 import { balancesFromTokenInOut, virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
-import { calcInGivenOut, calcOutGivenIn, calculateInvariantWithError } from './gyroEMath';
-import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
-import { GyroEParams, Vector2, DerivedGyroEParams } from './types';
+import { calculateInvariantWithError, calcOutGivenIn, calcInGivenOut } from './gyroEMath';
 
 export class GyroEPoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -36,10 +36,10 @@ export class GyroEPoolToken extends TokenAmount {
 }
 
 export class GyroEPool implements BasePool {
-    public readonly chainId: number;
+    public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.GyroE;
+    public readonly poolType: GqlPoolType = 'GYROE';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: GyroEPoolToken[];
@@ -48,45 +48,60 @@ export class GyroEPool implements BasePool {
 
     private readonly tokenMap: Map<string, GyroEPoolToken>;
 
-    static fromRawPool(chainId: number, pool: RawGyroEPool): GyroEPool {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): GyroEPool {
         const poolTokens: GyroEPoolToken[] = [];
 
-        for (const t of pool.tokens) {
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
-            const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
-            const tokenRate = pool.tokenRates ? parseEther(pool.tokenRates[t.index]) : WAD;
+        if (!pool.dynamicData || !pool.gyroData) {
+            throw new Error('No dynamic data for pool');
+        }
 
-            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, tokenRate, t.index));
+        for (const poolToken of pool.tokens) {
+            if (!poolToken.dynamicData) {
+                throw new Error('Gyro pool as no dynamic pool token data');
+            }
+
+            const token = new Token(
+                poolToken.address as Address,
+                poolToken.token.decimals,
+                poolToken.token.symbol,
+                poolToken.token.name,
+            );
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenRate = poolToken.dynamicData.priceRate;
+
+            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, tokenRate, poolToken.index));
         }
 
         const gyroEParams: GyroEParams = {
-            alpha: parseEther(pool.alpha),
-            beta: parseEther(pool.beta),
-            c: parseEther(pool.c),
-            s: parseEther(pool.s),
-            lambda: parseEther(pool.lambda),
+            alpha: parseEther(pool.gyroData.alpha),
+            beta: parseEther(pool.gyroData.beta),
+            c: parseEther(pool.gyroData.c!),
+            s: parseEther(pool.gyroData.s!),
+            lambda: parseEther(pool.gyroData.lambda!),
         };
 
         const derivedGyroEParams: DerivedGyroEParams = {
             tauAlpha: {
-                x: parseUnits(pool.tauAlphaX, 38),
-                y: parseUnits(pool.tauAlphaY, 38),
+                x: parseUnits(pool.gyroData.tauAlphaX!, 38),
+                y: parseUnits(pool.gyroData.tauAlphaY!, 38),
             },
             tauBeta: {
-                x: parseUnits(pool.tauBetaX, 38),
-                y: parseUnits(pool.tauBetaY, 38),
+                x: parseUnits(pool.gyroData.tauBetaX!, 38),
+                y: parseUnits(pool.gyroData.tauBetaY!, 38),
             },
-            u: parseUnits(pool.u, 38),
-            v: parseUnits(pool.v, 38),
-            w: parseUnits(pool.w, 38),
-            z: parseUnits(pool.z, 38),
-            dSq: parseUnits(pool.dSq, 38),
+            u: parseUnits(pool.gyroData.u!, 38),
+            v: parseUnits(pool.gyroData.v!, 38),
+            w: parseUnits(pool.gyroData.w!, 38),
+            z: parseUnits(pool.gyroData.z!, 38),
+            dSq: parseUnits(pool.gyroData.dSq!, 38),
         };
 
         return new GyroEPool(
-            pool.id,
-            pool.poolTypeVersion,
-            parseEther(pool.swapFee),
+            pool.id as Hex,
+            pool.address,
+            pool.chain,
+            pool.version,
+            parseEther(pool.dynamicData.swapFee),
             poolTokens,
             gyroEParams,
             derivedGyroEParams,
@@ -95,17 +110,19 @@ export class GyroEPool implements BasePool {
 
     constructor(
         id: Hex,
+        address: string,
+        chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
         tokens: GyroEPoolToken[],
         gyroEParams: GyroEParams,
         derivedGyroEParams: DerivedGyroEParams,
     ) {
-        this.chainId = tokens[0].token.chain;
         this.id = id;
+        this.address = address;
+        this.chain = chain;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = swapFee;
-        this.address = getPoolAddress(id);
         this.tokens = tokens;
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
         this.gyroEParams = gyroEParams;

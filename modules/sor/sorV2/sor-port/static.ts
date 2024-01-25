@@ -12,6 +12,7 @@ import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
+import { GyroEPool } from './pools/gyroE/gyroEPool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -79,11 +80,11 @@ export function mapToSorSwapsResponse(swap: Swap): GqlSorGetSwapsResponse {
     );
 }
 
-export function mapToCowSwapResponse(swap: Swap): GqlCowSwapApiResponse {
-    return zeroResponse(
-        swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
-        swap.inputAmount.token.address,
-        swap.outputAmount.token.address,
-        swap.inputAmount.amount.toString(),
-    );
+export function mapToCowSwapResponse(swap: Swap) {
+    // return zeroResponse(
+    //     swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
+    //     swap.inputAmount.token.address,
+    //     swap.outputAmount.token.address,
+    //     swap.inputAmount.amount.toString(),
+    // );
 }

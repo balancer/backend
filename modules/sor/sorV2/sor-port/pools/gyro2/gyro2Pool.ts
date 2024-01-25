@@ -51,7 +51,7 @@ export class Gyro2Pool implements BasePool {
         }
 
         for (const poolToken of pool.tokens) {
-            if (!poolToken.dynamicData?.balance) {
+            if (!poolToken.dynamicData) {
                 throw new Error('Gyro pool as no dynamic pool token data');
             }
             const token = new Token(

@@ -7,12 +7,9 @@ import {
     calcYGivenX,
     checkAssetBounds,
 } from './gyroEMathHelpers';
-import {
-    normalizedLiquidityXIn,
-    normalizedLiquidityYIn,
-} from './gyroEMathFunctions';
+import { normalizedLiquidityXIn, normalizedLiquidityYIn } from './gyroEMathFunctions';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
-import { MathGyro, ONE_XP, SMALL } from '../../../utils/gyroHelpers/math';
+import { MathGyro, ONE_XP, SMALL } from '../../utils/gyroHelpers/math';
 
 export function calculateNormalizedLiquidity(
     balances: bigint[],
@@ -50,26 +47,17 @@ export function calculateInvariantWithError(
 
     err = (MathGyro.mulUpMagU(params.lambda, x + y) / ONE_XP + err + 1n) * 20n;
 
-    const mulDenominator = MathGyro.divXpU(
-        ONE_XP,
-        calcAChiAChiInXp(params, derived) - ONE_XP,
-    );
-    const invariant = MathGyro.mulDownXpToNpU(
-        AtAChi + square_root - err,
-        mulDenominator,
-    );
+    const mulDenominator = MathGyro.divXpU(ONE_XP, calcAChiAChiInXp(params, derived) - ONE_XP);
+    const invariant = MathGyro.mulDownXpToNpU(AtAChi + square_root - err, mulDenominator);
     err = MathGyro.mulUpXpToNpU(err, mulDenominator);
 
     err =
         err +
-        (MathGyro.mulUpXpToNpU(invariant, mulDenominator) *
-            ((params.lambda * params.lambda) / 10n ** 36n) *
-            40n) /
+        (MathGyro.mulUpXpToNpU(invariant, mulDenominator) * ((params.lambda * params.lambda) / 10n ** 36n) * 40n) /
             ONE_XP +
         1n;
 
-    if (invariant + err > MAX_INVARIANT)
-        throw new Error('MAX INVARIANT EXCEEDED');
+    if (invariant + err > MAX_INVARIANT) throw new Error('MAX INVARIANT EXCEEDED');
 
     return [invariant, err];
 }
