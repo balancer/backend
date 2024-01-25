@@ -1,11 +1,12 @@
-import { Token } from '../token';
-import { TokenAmount, BigintIsh } from '../tokenAmount';
-import { PrismaPoolWithDynamic } from '../../../../../prisma/prisma-types';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { parseUnits } from 'ethers/lib/utils';
-import { GqlPoolType } from '../../../../../schema';
+import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
-import { BasePool, SwapKind } from '../types';
-import { MathSol, WAD } from '../utils/math';
+import { BasePool, SwapKind } from '../../types';
+import { MathSol, WAD } from '../../utils/math';
+import { Address, Hex } from 'viem';
 
 class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -16,11 +17,23 @@ class WeightedPoolToken extends TokenAmount {
         this.weight = BigInt(weight);
         this.index = index;
     }
+
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = this.amount * this.scalar;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = this.amount * this.scalar;
+        return this;
+    }
 }
 
 export class WeightedPool implements BasePool {
     public readonly chain: Chain;
-    public readonly id: string;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: GqlPoolType = 'WEIGHTED';
     public readonly poolTypeVersion: number;
@@ -44,8 +57,7 @@ export class WeightedPool implements BasePool {
             }
 
             const token = new Token(
-                pool.chain,
-                poolToken.address,
+                poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
@@ -63,7 +75,7 @@ export class WeightedPool implements BasePool {
         }
 
         return new WeightedPool(
-            pool.id,
+            pool.id as Hex,
             pool.address,
             pool.chain,
             pool.version,
@@ -73,7 +85,7 @@ export class WeightedPool implements BasePool {
     }
 
     constructor(
-        id: string,
+        id: Hex,
         address: string,
         chain: Chain,
         poolTypeVersion: number,

@@ -16,10 +16,6 @@ export function checkInputs(
         amount = TokenAmount.fromRawAmount(swapKind === SwapKind.GivenIn ? tokenIn : tokenOut, swapAmount);
     }
 
-    if (tokenIn.chain !== tokenOut.chain || tokenIn.chain !== amount.token.chain) {
-        throw new Error('ChainId mismatch for inputs');
-    }
-
     if (
         (swapKind === SwapKind.GivenIn && !tokenIn.isEqual(amount.token)) ||
         (swapKind === SwapKind.GivenOut && !tokenOut.isEqual(amount.token))

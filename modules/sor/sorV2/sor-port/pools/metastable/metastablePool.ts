@@ -4,7 +4,7 @@ import { Token, TokenAmount } from '../..';
 import { BasePool } from '..';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
-import { StablePoolToken } from '../stablePool';
+import { StablePoolToken } from '../stable/stablePool';
 import { RawMetaStablePool } from '../../../data/types';
 
 export class MetaStablePool implements BasePool {

@@ -1,11 +1,20 @@
-import { Token } from '../token';
-import { TokenAmount, BigintIsh } from '../tokenAmount';
-import { PrismaPoolWithDynamic } from '../../../../../prisma/prisma-types';
-import { parseUnits } from 'ethers/lib/utils';
-import { GqlPoolType } from '../../../../../schema';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
-import { BasePool, SwapKind } from '../types';
-import { MathSol, WAD } from '../utils/math';
+import { BasePool, SwapKind } from '../../types';
+import { MathSol, WAD } from '../../utils/math';
+import { Address, Hex, parseEther, parseUnits } from 'viem';
+import {
+    _calcBptInGivenExactTokensOut,
+    _calcBptOutGivenExactTokensIn,
+    _calcInGivenOut,
+    _calcOutGivenIn,
+    _calcTokenInGivenExactBptOut,
+    _calcTokenOutGivenExactBptIn,
+    _calculateInvariant,
+} from './stableMath';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -17,11 +26,23 @@ export class StablePoolToken extends TokenAmount {
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         this.index = index;
     }
+
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
 }
 
 export class StablePool implements BasePool {
-    public readonly chainId: number;
-    public readonly id: string;
+    public readonly chain: Chain;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: GqlPoolType = 'COMPOSABLE_STABLE';
     public readonly amp: bigint;
@@ -42,8 +63,7 @@ export class StablePool implements BasePool {
         for (const poolToken of pool.tokens) {
             if (!poolToken.dynamicData?.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(
-                pool.chain,
-                poolToken.address,
+                poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
@@ -54,28 +74,38 @@ export class StablePool implements BasePool {
                 new StablePoolToken(
                     token,
                     tokenAmount.amount,
-                    parseUnits(poolToken.dynamicData.priceRate, 18).toBigInt(),
+                    parseEther(poolToken.dynamicData.priceRate),
                     poolToken.index,
                 ),
             );
         }
 
-        const totalShares = parseUnits(pool.dynamicData.totalShares, 18).toBigInt();
+        const totalShares = parseEther(pool.dynamicData.totalShares);
         const amp = parseUnits(pool.stableDynamicData.amp, 3);
 
         return new StablePool(
-            pool.id,
+            pool.id as Hex,
+            pool.address,
+            pool.chain,
             amp,
-            parseUnits(pool.dynamicData.swapFee, 18).toBigInt(),
+            parseEther(pool.dynamicData.swapFee),
             poolTokens,
             totalShares,
         );
     }
 
-    constructor(id: string, amp: bigint, swapFee: bigint, tokens: StablePoolToken[], totalShares: bigint) {
-        this.chainId = tokens[0].token.chain;
+    constructor(
+        id: Hex,
+        address: string,
+        chain: Chain,
+        amp: bigint,
+        swapFee: bigint,
+        tokens: StablePoolToken[],
+        totalShares: bigint,
+    ) {
+        this.chain = chain;
         this.id = id;
-        this.address = getPoolAddress(id);
+        this.address = address;
         this.amp = amp;
         this.swapFee = swapFee;
         this.totalShares = totalShares;

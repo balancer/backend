@@ -18,7 +18,7 @@ import {
     _calcBptInPerWrappedOut,
     _calcBptInPerMainOut,
 } from './linearMath';
-import { StablePoolToken } from '../stablePool';
+import { StablePoolToken } from '../stable/stablePool';
 import { RawLinearPool } from '../../../data/types';
 import { Params } from './types';
 

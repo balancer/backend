@@ -18,7 +18,6 @@ export class Swap {
 
         // Recalculate paths while mutating pool balances
         this.paths = paths.map((path) => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true));
-        this.chainId = paths[0].tokens[0].chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address))];
@@ -31,7 +30,6 @@ export class Swap {
         this.swaps = swaps;
     }
 
-    public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
     public readonly pathsImmutable: PathWithAmount[];

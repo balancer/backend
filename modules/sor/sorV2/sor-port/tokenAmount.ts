@@ -18,7 +18,7 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromHumanAmount(token: Token, humanAmount: `${number}`) {
+    public static fromHumanAmount(token: Token, humanAmount: string) {
         const rawAmount = parseUnits(humanAmount, token.decimals);
         return new TokenAmount(token, rawAmount);
     }

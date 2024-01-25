@@ -1,22 +1,14 @@
 import { Address } from 'viem';
 import { InputToken } from './types';
+import { Chain } from '@prisma/client';
 export class Token {
-    public readonly chainId: number;
     public readonly address: Address;
     public readonly decimals: number;
     public readonly symbol?: string;
     public readonly name?: string;
     public readonly wrapped: Address;
 
-    public constructor(
-        chainId: number,
-        address: Address,
-        decimals: number,
-        symbol?: string,
-        name?: string,
-        wrapped?: Address,
-    ) {
-        this.chainId = chainId;
+    public constructor(address: Address, decimals: number, symbol?: string, name?: string, wrapped?: Address) {
         // Addresses are always lowercased for speed
         this.address = address.toLowerCase() as Address;
         this.decimals = decimals;
@@ -26,11 +18,11 @@ export class Token {
     }
 
     public isEqual(token: Token) {
-        return this.chainId === token.chainId && this.address === token.address;
+        return this.address === token.address;
     }
 
     public isUnderlyingEqual(token: Token) {
-        return this.chainId === token.chainId && this.wrapped === token.wrapped;
+        return this.wrapped === token.wrapped;
     }
 
     public isSameAddress(address: Address) {
