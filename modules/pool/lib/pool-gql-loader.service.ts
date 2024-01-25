@@ -356,6 +356,9 @@ export class PoolGqlLoaderService {
                 in: where?.chainIn || undefined,
                 notIn: where?.chainNotIn || undefined,
             },
+            vaultVersion: {
+                in: where?.vaultVersionIn || undefined,
+            },
             type: {
                 in: where?.poolTypeIn || undefined,
                 notIn: where?.poolTypeNotIn || undefined,

@@ -82,10 +82,18 @@ const data: NetworkData = {
         config: '0xac89cc9d78bbad7eb3a02601b4d65daa1f908aa6',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+            tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+            tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
+        },
     },
     multicall: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -365,15 +373,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            data.ybAprConfig,
-            data.chain.prismaId,
-            data.balancer.yieldProtocolFeePercentage,
-            data.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(data.chain.prismaId, data.balancer.yieldProtocolFeePercentage),
+        new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),
+        new PhantomStableAprService(data.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(data.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [data.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
@@ -407,27 +410,27 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(8, 'minutes') : every(4, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'update-pool-apr',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(7, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-new-pools-from-subgraph',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(12, 'minutes') : every(8, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
             name: 'sync-tokens-from-pool-tokens',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(7, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(15, 'minutes') : every(8, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'cache-average-block-time',
@@ -435,7 +438,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-staking-for-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(15, 'minutes') : every(10, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'sync-latest-snapshots-for-all-pools',
@@ -443,21 +446,25 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-lifetime-values-for-all-pools',
-            interval: every(45, 'minutes'),
+            interval: every(50, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(29, 'minutes') : every(9, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(31, 'minutes') : every(11, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'sync-coingecko-coinids',
@@ -465,19 +472,25 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(75, 'minutes'),
+            interval: every(1, 'hours'),
         },
         {
             name: 'sync-vebal-balances',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(14, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
         },
         {
             name: 'sync-vebal-totalSupply',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(16, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
+        // this does not work on dev because we don't sync all chains on dev. Hence we only sync it rarely as it produces a lot of errors
         {
             name: 'sync-vebal-voting-gauges',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(5, 'minutes'),
+            interval:
+                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
+                    ? every(20, 'minutes')
+                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+                    ? every(5, 'minutes')
+                    : every(10, 'days'),
         },
         {
             name: 'feed-data-to-datastudio',
@@ -490,7 +503,12 @@ export const mainnetNetworkConfig: NetworkConfig = {
         // The following are multichain jobs and should only run once for all chains.
         {
             name: 'sync-global-coingecko-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
+            interval:
+                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
+                    ? every(10, 'minutes')
+                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+                    ? every(2, 'minutes')
+                    : every(10, 'days'),
         },
         {
             name: 'global-purge-old-tokenprices',

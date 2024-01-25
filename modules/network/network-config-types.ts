@@ -102,10 +102,18 @@ export interface NetworkData {
         config: string;
     };
     balancer: {
-        vault: string;
-        tokenAdmin?: string;
-        yieldProtocolFeePercentage: number;
-        swapProtocolFeePercentage: number;
+        v2: {
+            vaultAddress: string;
+            defaultSwapFeePercentage: string;
+            defaultYieldFeePercentage: string;
+            tokenAdmin?: string;
+        };
+        v3: {
+            vaultAddress: string;
+            defaultSwapFeePercentage: string;
+            defaultYieldFeePercentage: string;
+            tokenAdmin?: string;
+        };
     };
     multicall: string;
     multicall3: string;
@@ -123,10 +131,6 @@ export interface NetworkData {
     };
     beefy?: {
         linearPools: string[];
-    };
-    lido?: {
-        wstEthContract: string;
-        wstEthAprEndpoint: string;
     };
     stader?: {
         sFtmxContract: string;

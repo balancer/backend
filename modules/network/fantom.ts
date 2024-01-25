@@ -114,9 +114,16 @@ const fantomNetworkData: NetworkData = {
         poolAddress: '0xcde5a11a4acb4ee4c805352cec57e236bdbc3837',
     },
     balancer: {
-        vault: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-        swapProtocolFeePercentage: 0.25,
-        yieldProtocolFeePercentage: 0.25,
+        v2: {
+            vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -289,19 +296,11 @@ export const fantomNetworkConfig: NetworkConfig = {
     contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            fantomNetworkData.ybAprConfig,
-            fantomNetworkData.chain.prismaId,
-            fantomNetworkData.balancer.yieldProtocolFeePercentage,
-            fantomNetworkData.balancer.swapProtocolFeePercentage,
-        ),
+        new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
         // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new PhantomStableAprService(
-            fantomNetworkData.chain.prismaId,
-            fantomNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new PhantomStableAprService(fantomNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(fantomNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),
         new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
         new BeetswarsGaugeVotingAprService(),

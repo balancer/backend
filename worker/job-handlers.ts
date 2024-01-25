@@ -103,6 +103,10 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-changed-pools':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncChangedPools(), res, next);
                 break;
+
+            case 'sync-changed-pools-v3':
+                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncChangedPoolsV3(), res, next);
+                break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -123,7 +127,6 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'update-token-prices':
                 await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.updateTokenPrices(), res, next);
-
                 break;
             case 'update-liquidity-for-active-pools':
                 await runIfNotAlreadyRunning(
@@ -155,11 +158,29 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
+            case 'load-on-chain-data-for-pools-with-active-updates-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.loadOnChainDataForPoolsWithActiveUpdatesV3(),
+                    res,
+                    next,
+                );
+                break;
             case 'sync-new-pools-from-subgraph':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
                     () => poolService.syncNewPoolsFromSubgraph(),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-new-pools-from-subgraph-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.syncNewPoolsFromSubgraphV3(),
                     res,
                     next,
                 );
@@ -175,6 +196,15 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     chainId,
                     () => poolService.updateLiquidity24hAgoForAllPools(),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-liquidity-24h-ago-for-all-pools-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.updateLiquidity24hAgoForAllPoolsV3(),
                     res,
                     next,
                 );
@@ -218,6 +248,15 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
+            case 'sync-latest-snapshots-for-all-pools-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.syncLatestSnapshotsForAllPoolsV3(),
+                    res,
+                    next,
+                );
+                break;
             case 'update-lifetime-values-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -227,11 +266,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-user-snapshots':
+            case 'update-lifetime-values-for-all-pools-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => userService.syncUserBalanceSnapshots(),
+                    () => poolService.updateLifetimeValuesForAllPoolsV3(),
                     res,
                     next,
                 );
@@ -247,9 +286,6 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
-                break;
-            case 'sync-latest-relic-snapshots':
-                await runIfNotAlreadyRunning(job.name, chainId, () => userService.syncUserRelicSnapshots(), res, next);
                 break;
             case 'global-purge-old-tokenprices':
                 await runIfNotAlreadyRunning(

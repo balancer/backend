@@ -22,6 +22,7 @@ enum Chain {
     MAINNET
     OPTIMISM
     POLYGON
+    SEPOLIA
     ZKEVM
 }
 
@@ -60,6 +61,8 @@ model PrismaPool {
     decimals            Int                 @default(18)
     owner               String
     factory             String?
+
+    vaultVersion        Int                 @default(2)
 
     linearData          PrismaPoolLinearData?
     elementData         PrismaPoolElementData?
@@ -164,6 +167,11 @@ model PrismaPoolGyroData{
 model PrismaPoolDynamicData {
     @@id([id, chain])
     @@unique([poolId, chain])
+    // Indexes used for sorting pools in the UI by different metrics
+    @@index(totalLiquidity)
+    @@index(totalShares)
+    @@index(volume24h)
+    @@index(apr)
 
     id                      String
     poolId                  String
@@ -172,7 +180,8 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
-    protocolYieldFee        String?
+    protocolYieldFee        String?             
+    protocolSwapFee         String              @default("0")
     swapFee                 String
     swapEnabled             Boolean
     isPaused                Boolean             @default(false)

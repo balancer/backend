@@ -5,7 +5,7 @@ import { collectsYieldFee } from '../pool-utils';
 import { Chain } from '@prisma/client';
 
 export class PhantomStableAprService implements PoolAprService {
-    constructor(private chain: Chain, private defaultProtocolFee: number) {}
+    constructor(private chain: Chain) {}
 
     public getAprServiceName(): string {
         return 'PhantomStableAprService';
@@ -20,9 +20,7 @@ export class PhantomStableAprService implements PoolAprService {
         });
 
         for (const pool of phantomStablePoolsExpanded) {
-            const protocolYieldFeePercentage = pool.dynamicData?.protocolYieldFee
-                ? parseFloat(pool.dynamicData.protocolYieldFee)
-                : this.defaultProtocolFee;
+            const protocolYieldFeePercentage = parseFloat(pool.dynamicData?.protocolYieldFee || '0');
             const linearPoolTokens = pool.tokens.filter((token) => token.nestedPool?.type === 'LINEAR');
             const linearPoolIds = linearPoolTokens.map((token) => token.nestedPool?.id || '');
             const aprItems = await prisma.prismaPoolAprItem.findMany({

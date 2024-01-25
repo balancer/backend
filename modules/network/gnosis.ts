@@ -64,9 +64,16 @@ const gnosisNetworkData: NetworkData = {
         delegationProxy: '0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -133,18 +140,10 @@ export const gnosisNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: gnosisNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            gnosisNetworkData.ybAprConfig,
-            gnosisNetworkData.chain.prismaId,
-            gnosisNetworkData.balancer.yieldProtocolFeePercentage,
-            gnosisNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(
-            gnosisNetworkData.chain.prismaId,
-            gnosisNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new YbTokensAprService(gnosisNetworkData.ybAprConfig, gnosisNetworkData.chain.prismaId),
+        new PhantomStableAprService(gnosisNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(gnosisNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [gnosisNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, gnosisNetworkData.bal!.address)],

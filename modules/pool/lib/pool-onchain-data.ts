@@ -35,6 +35,7 @@ interface OnchainData {
     swapFee: BigNumber;
     swapEnabled?: boolean;
     protocolYieldFeePercentageCache?: BigNumber;
+    protocolSwapFeePercentageCache?: BigNumber;
     rate?: BigNumber;
     weights?: BigNumber[];
     targets?: [BigNumber, BigNumber];
@@ -100,6 +101,7 @@ const addDefaultCallsToMulticaller = (
     multicaller.call(`${id}.totalSupply`, address, getTotalSupplyFn(type, version));
     multicaller.call(`${id}.swapFee`, address, getSwapFeeFn(type));
     multicaller.call(`${id}.rate`, address, 'getRate');
+    multicaller.call(`${id}.protocolSwapFeePercentageCache`, address, 'getProtocolFeePercentageCache', [0]);
     multicaller.call(`${id}.protocolYieldFeePercentageCache`, address, 'getProtocolFeePercentageCache', [2]);
 };
 
@@ -192,6 +194,9 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
     swapEnabled: result.swapEnabled,
     protocolYieldFeePercentageCache: result.protocolYieldFeePercentageCache
         ? formatEther(result.protocolYieldFeePercentageCache)
+        : undefined,
+    protocolSwapFeePercentageCache: result.protocolSwapFeePercentageCache
+        ? formatEther(result.protocolSwapFeePercentageCache)
         : undefined,
 });
 

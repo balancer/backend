@@ -68,9 +68,16 @@ export const arbitrumNetworkData: NetworkData = {
         delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     },
     balancer: {
-        vault: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-        swapProtocolFeePercentage: 0.5,
-        yieldProtocolFeePercentage: 0.5,
+        v2: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
+        v3: {
+            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            defaultSwapFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.5',
+        },
     },
     multicall: '0x80c7dd17b01855a6d2347444a0fcc36136a314de',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -199,10 +206,6 @@ export const arbitrumNetworkData: NetworkData = {
     beefy: {
         linearPools: [''],
     },
-    lido: {
-        wstEthAprEndpoint: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-        wstEthContract: '0x5979d7b546e38e414f7e9822514be443a4800529',
-    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
@@ -234,18 +237,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: arbitrumNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(
-            arbitrumNetworkData.ybAprConfig,
-            arbitrumNetworkData.chain.prismaId,
-            arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
-            arbitrumNetworkData.balancer.swapProtocolFeePercentage,
-        ),
-        new PhantomStableAprService(
-            arbitrumNetworkData.chain.prismaId,
-            arbitrumNetworkData.balancer.yieldProtocolFeePercentage,
-        ),
+        new YbTokensAprService(arbitrumNetworkData.ybAprConfig, arbitrumNetworkData.chain.prismaId),
+        new PhantomStableAprService(arbitrumNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(arbitrumNetworkData.balancer.swapProtocolFeePercentage),
+        new SwapFeeAprService(),
         new GaugeAprService(tokenService, [arbitrumNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, arbitrumNetworkData.bal!.address)],
