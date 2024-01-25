@@ -1,13 +1,5 @@
-import {
-    GqlSorSwapType,
-    GqlSwap,
-    GqlSorGetSwapsResponse,
-    GqlPoolMinimal,
-    GqlSorSwapRoute,
-    GqlCowSwapApiResponse,
-    GqlSorSwap,
-} from '../../../schema';
-import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
+import { GqlSorSwapType, GqlSwap, GqlSorGetSwapsResponse, GqlCowSwapApiResponse, GqlSorSwap } from '../../../schema';
+import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsInput, SwapResult, SwapService } from '../types';
@@ -15,21 +7,18 @@ import { poolService } from '../../pool/pool.service';
 import { tokenService } from '../../token/token.service';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
-import { Cache, CacheClass } from 'memory-cache';
 import { BigNumber } from 'ethers';
-import { oldBnum, oldBnumScale } from '../../big-number/old-big-number';
+import { oldBnum } from '../../big-number/old-big-number';
 import { mapRoutes } from './beetsHelpers';
 import { poolsToIgnore } from '../constants';
-import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { getToken } from '../utils';
-import { FxData } from '../../pool/subgraph-mapper';
 import { Swap } from './sor-port/swap';
 import { Address } from 'viem';
 import { BatchSwapStep, SingleSwap, SwapKind } from './sor-port/types';
 import { TokenAmount } from './sor-port/tokenAmount';
 import { formatFixed } from '@ethersproject/bignumber';
-import { NATIVE_ADDRESS, ZERO_ADDRESS } from './sor-port/constants';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { sorGetSwapsWithPools } from './sor-port/static';
 
