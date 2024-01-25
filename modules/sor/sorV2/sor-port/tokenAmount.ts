@@ -1,8 +1,9 @@
 import _Decimal from 'decimal.js-light';
+import { parseUnits } from 'viem';
 import { Token } from './token';
-import { parseUnits } from 'ethers/lib/utils';
-import { DECIMAL_SCALES } from './types';
+import { DECIMAL_SCALES } from './constants';
 import { WAD } from './utils/math';
+import { InputAmount } from './types';
 
 export type BigintIsh = bigint | string | number;
 
@@ -17,8 +18,8 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromHumanAmount(token: Token, humanAmount: string) {
-        const rawAmount = parseUnits(humanAmount, token.decimals).toString();
+    public static fromHumanAmount(token: Token, humanAmount: `${number}`) {
+        const rawAmount = parseUnits(humanAmount, token.decimals);
         return new TokenAmount(token, rawAmount);
     }
 
@@ -70,5 +71,13 @@ export class TokenAmount {
             .div(new _Decimal(this.decimalScale.toString()))
             .toDecimalPlaces(significantDigits)
             .toString();
+    }
+
+    public toInputAmount(): InputAmount {
+        return {
+            address: this.token.address,
+            decimals: this.token.decimals,
+            rawAmount: this.amount,
+        };
     }
 }

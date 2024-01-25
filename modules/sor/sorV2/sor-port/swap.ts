@@ -1,18 +1,12 @@
 import { cloneDeep } from 'lodash';
 import { PathWithAmount } from './pathGraph/path';
-import {
-    BatchSwapStep,
-    DEFAULT_FUND_MANAGMENT,
-    DEFAULT_USERDATA,
-    NATIVE_ADDRESS,
-    SingleSwap,
-    SwapKind,
-    ZERO_ADDRESS,
-} from './types';
-import { Chain } from '@prisma/client';
+import { BatchSwapStep, SingleSwap, SwapKind } from './types';
+import { Address, createPublicClient, encodeFunctionData, getContract, http } from 'viem';
 import { TokenAmount } from './tokenAmount';
-import { abs } from './utils/math';
-import { replaceEthWithZeroAddress } from '../../../web3/addresses';
+import { DEFAULT_FUND_MANAGMENT, DEFAULT_USERDATA, NATIVE_ADDRESS, ZERO_ADDRESS } from './constants';
+import { MathSol, abs } from './utils/math';
+import { PriceImpactAmount } from './priceImpactAmount';
+import { balancerQueriesAbi } from '../../../web3/abi/balancerQueries';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -24,7 +18,7 @@ export class Swap {
 
         // Recalculate paths while mutating pool balances
         this.paths = paths.map((path) => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true));
-        this.chain = paths[0].tokens[0].chain;
+        this.chainId = paths[0].tokens[0].chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address))];
@@ -37,11 +31,11 @@ export class Swap {
         this.swaps = swaps;
     }
 
-    public readonly chain: Chain;
+    public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
     public readonly pathsImmutable: PathWithAmount[];
-    public readonly assets: string[];
+    public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
 
@@ -58,13 +52,13 @@ export class Swap {
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting
-    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+    public async query(rpcUrl: string, balancerQueriesAddress: Address, block?: bigint): Promise<TokenAmount> {
         const client = createPublicClient({
             transport: http(rpcUrl),
         });
 
         const queriesContract = getContract({
-            address: BALANCER_QUERIES[this.chain],
+            address: balancerQueriesAddress,
             abi: balancerQueriesAbi,
             client,
         });
@@ -82,11 +76,19 @@ export class Swap {
                 this.swapKind === SwapKind.GivenIn
                     ? TokenAmount.fromRawAmount(
                           this.outputAmount.token,
-                          abs(result[this.assets.indexOf(replaceEthWithZeroAddress(this.outputAmount.token.address))]),
+                          abs(
+                              result[
+                                  this.assets.indexOf(this.convertNativeAddressToZero(this.outputAmount.token.address))
+                              ],
+                          ),
                       )
                     : TokenAmount.fromRawAmount(
                           this.inputAmount.token,
-                          abs(result[this.assets.indexOf(replaceEthWithZeroAddress(this.inputAmount.token.address))]),
+                          abs(
+                              result[
+                                  this.assets.indexOf(this.convertNativeAddressToZero(this.inputAmount.token.address))
+                              ],
+                          ),
                       );
         } else {
             const { result } = await queriesContract.simulate.querySwap(
@@ -101,6 +103,10 @@ export class Swap {
         }
 
         return amount;
+    }
+
+    private convertNativeAddressToZero(address: Address): Address {
+        return address === NATIVE_ADDRESS ? ZERO_ADDRESS : address;
     }
 
     public queryCallData(): string {
@@ -184,8 +190,8 @@ export class Swap {
         } else {
             const path = this.paths[0];
             const pool = path.pools[0];
-            const assetIn = replaceEthWithZeroAddress(path.tokens[0].address);
-            const assetOut = replaceEthWithZeroAddress(path.tokens[1].address);
+            const assetIn = this.convertNativeAddressToZero(path.tokens[0].address);
+            const assetOut = this.convertNativeAddressToZero(path.tokens[1].address);
             swaps = {
                 poolId: pool.id,
                 kind: this.swapKind,

@@ -1,5 +1,5 @@
 import { parseUnits } from 'ethers/lib/utils';
-import { GqlSorGetSwapsResponse, GqlSorSwapRoute } from '../../../../schema';
+import { GqlCowSwapApiResponse, GqlSorGetSwapsResponse, GqlSorSwapRoute } from '../../../../schema';
 import { Router } from './router';
 import { Token } from './token';
 import { BasePool, SwapKind, SwapOptions, zeroResponse } from './types';
@@ -12,6 +12,7 @@ import { Gyro2Pool } from './pools/gyro2';
 import { Gyro3Pool } from './pools/gyro3';
 import { GyroEPool } from './pools/gyroE';
 import { WeightedPool } from './pools/weightedPool';
+import { Swap } from './swap';
 
 function sorParsePrismaPool(prismaPools: PrismaPoolWithDynamic[]): BasePool[] {
     const pools: BasePool[] = [];
@@ -51,7 +52,7 @@ export async function sorGetSwapsWithPools(
     swapAmountEvm: bigint,
     prismaPools: PrismaPoolWithDynamic[],
     swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
-): Promise<GqlSorGetSwapsResponse> {
+): Promise<Swap | null> {
     const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
     const basePools: BasePool[] = [];
@@ -92,14 +93,31 @@ export async function sorGetSwapsWithPools(
 
     const candidatePaths = router.getCandidatePaths(tokenIn, tokenOut, basePools, swapOptions?.graphTraversalConfig);
 
-    if (candidatePaths.length === 0)
-        return zeroResponse('EXACT_IN', tokenIn.address, tokenOut.address, checkedSwapAmount.amount);
+    if (candidatePaths.length === 0) return null;
 
-    const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount, swapToken);
+    const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);
 
-    if (!bestPaths) return zeroResponse('EXACT_IN', tokenIn.address, tokenOut.address, checkedSwapAmount.amount);
+    if (!bestPaths) return null;
 
     // TODO build response from best paths
-    // return new Swap({ paths: bestPaths, swapKind });
-    return zeroResponse('EXACT_IN', tokenIn.address, tokenOut.address, checkedSwapAmount);
+    return new Swap({ paths: bestPaths, swapKind });
+    // return zeroResponse('EXACT_IN', tokenIn.address, tokenOut.address, checkedSwapAmount);
+}
+
+export function mapToSorSwapsResponse(swap: Swap): GqlSorGetSwapsResponse {
+    return zeroResponse(
+        swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
+        swap.inputAmount.token.address,
+        swap.outputAmount.token.address,
+        swap.inputAmount.amount.toString(),
+    );
+}
+
+export function mapToCowSwapResponse(swap: Swap): GqlCowSwapApiResponse {
+    return zeroResponse(
+        swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
+        swap.inputAmount.token.address,
+        swap.outputAmount.token.address,
+        swap.inputAmount.amount.toString(),
+    );
 }
