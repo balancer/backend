@@ -5,14 +5,12 @@ import { Token } from './token';
 import { BasePool, SwapKind, SwapOptions, zeroResponse } from './types';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
-import { Gyro2Pool } from './pools/gyro2';
-import { Gyro3Pool } from './pools/gyro3';
-import { GyroEPool } from './pools/gyroE';
 import { WeightedPool } from './pools/weighted/weightedPool';
 import { Swap } from './swap';
 import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';
+import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,

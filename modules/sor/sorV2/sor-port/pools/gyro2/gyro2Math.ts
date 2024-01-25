@@ -1,5 +1,5 @@
-import { FOUR_WAD, MathSol, TWO_WAD, WAD } from '../../../utils';
-import { MathGyro } from '../../../utils/gyroHelpers/math';
+import { MathGyro } from '../../utils/gyroHelpers/math';
+import { FOUR_WAD, MathSol, TWO_WAD, WAD } from '../../utils/math';
 
 export function _calcOutGivenIn(
     balanceIn: bigint,
@@ -11,13 +11,9 @@ export function _calcOutGivenIn(
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
     const virtInOver = balanceIn + MathSol.mulUpFixed(virtualParamIn, WAD + 2n);
-    const virtOutUnder =
-        balanceOut + MathSol.mulDownFixed(virtualParamOut, WAD - 1n);
+    const virtOutUnder = balanceOut + MathSol.mulDownFixed(virtualParamOut, WAD - 1n);
 
-    const amountOut = MathSol.divDownFixed(
-        MathSol.mulDownFixed(virtOutUnder, amountIn),
-        virtInOver + amountIn,
-    );
+    const amountOut = MathSol.divDownFixed(MathSol.mulDownFixed(virtOutUnder, amountIn), virtInOver + amountIn);
 
     return amountOut;
 }
@@ -32,26 +28,15 @@ export function _calcInGivenOut(
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
     const virtInOver = balanceIn + MathSol.mulUpFixed(virtualParamIn, WAD + 2n);
-    const virtOutUnder =
-        balanceOut + MathSol.mulDownFixed(virtualParamOut, WAD - 1n);
+    const virtOutUnder = balanceOut + MathSol.mulDownFixed(virtualParamOut, WAD - 1n);
 
-    const amountIn = MathSol.divUpFixed(
-        MathSol.mulUpFixed(virtInOver, amountOut),
-        virtOutUnder - amountOut,
-    );
+    const amountIn = MathSol.divUpFixed(MathSol.mulUpFixed(virtInOver, amountOut), virtOutUnder - amountOut);
 
     return amountIn;
 }
 
-export function _findVirtualParams(
-    invariant: bigint,
-    sqrtAlpha: bigint,
-    sqrtBeta: bigint,
-): [bigint, bigint] {
-    return [
-        MathSol.divDownFixed(invariant, sqrtBeta),
-        MathSol.mulDownFixed(invariant, sqrtAlpha),
-    ];
+export function _findVirtualParams(invariant: bigint, sqrtAlpha: bigint, sqrtBeta: bigint): [bigint, bigint] {
+    return [MathSol.divDownFixed(invariant, sqrtBeta), MathSol.mulDownFixed(invariant, sqrtAlpha)];
 }
 
 export function _calculateInvariant(
@@ -59,11 +44,7 @@ export function _calculateInvariant(
     sqrtAlpha: bigint,
     sqrtBeta: bigint,
 ): bigint {
-    const [a, mb, bSquare, mc] = _calculateQuadraticTerms(
-        balances,
-        sqrtAlpha,
-        sqrtBeta,
-    );
+    const [a, mb, bSquare, mc] = _calculateQuadraticTerms(balances, sqrtAlpha, sqrtBeta);
 
     const invariant = _calculateQuadratic(a, mb, bSquare, mc);
 
@@ -84,20 +65,11 @@ export function _calculateQuadraticTerms(
     // For better fixed point precision, calculate in expanded form w/ re-ordering of multiplications
     // b^2 = x^2 * alpha + x*y*2*sqrt(alpha/beta) + y^2 / beta
     let bSquare = MathSol.mulDownFixed(
-        MathSol.mulDownFixed(
-            MathSol.mulDownFixed(balances[0], balances[0]),
-            sqrtAlpha,
-        ),
+        MathSol.mulDownFixed(MathSol.mulDownFixed(balances[0], balances[0]), sqrtAlpha),
         sqrtAlpha,
     );
     const bSq2 = MathSol.divDownFixed(
-        MathSol.mulDownFixed(
-            MathSol.mulDownFixed(
-                MathSol.mulDownFixed(balances[0], balances[1]),
-                TWO_WAD,
-            ),
-            sqrtAlpha,
-        ),
+        MathSol.mulDownFixed(MathSol.mulDownFixed(MathSol.mulDownFixed(balances[0], balances[1]), TWO_WAD), sqrtAlpha),
         sqrtBeta,
     );
 
@@ -111,12 +83,7 @@ export function _calculateQuadraticTerms(
     return [a, mb, bSquare, mc];
 }
 
-export function _calculateQuadratic(
-    a: bigint,
-    mb: bigint,
-    bSquare: bigint,
-    mc: bigint,
-): bigint {
+export function _calculateQuadratic(a: bigint, mb: bigint, bSquare: bigint, mc: bigint): bigint {
     const denominator = MathSol.mulUpFixed(a, TWO_WAD);
     // order multiplications for fixed point precision
     const addTerm = MathSol.mulDownFixed(MathSol.mulDownFixed(mc, FOUR_WAD), a);
