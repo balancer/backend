@@ -1,6 +1,7 @@
 import { Token } from '../../token';
 import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { parseUnits } from 'ethers/lib/utils';
 import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
 import { BasePool, SwapKind } from '../../types';

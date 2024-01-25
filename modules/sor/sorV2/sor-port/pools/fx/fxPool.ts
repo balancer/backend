@@ -1,14 +1,16 @@
-import { Hex, parseEther, parseUnits } from 'viem';
-import { PoolType, SwapKind } from '../../../types';
+import { Address, Hex, parseEther, parseUnits } from 'viem';
+import { BasePool, SwapKind } from '../../types';
+import { GqlPoolType } from '../../../../../../schema';
+import { FxPoolToken } from './fxPoolToken';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { BasePool } from '..';
-import { RAY, getPoolAddress } from '../../../utils';
-import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
-import { RawFxPool } from '../../../data/types';
 import { MathFx, parseFixedCurveParam } from './helpers';
+import { FxData } from '../../../../../pool/subgraph-mapper';
+import { Chain } from '@prisma/client';
+import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
+import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
-import { FxPoolToken } from './fxPoolToken';
 
 const isUSDC = (address: string): boolean => {
     return (
@@ -18,10 +20,10 @@ const isUSDC = (address: string): boolean => {
 };
 
 export class FxPool implements BasePool {
-    public readonly chainId: number;
+    public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.Fx;
+    public readonly poolType: GqlPoolType = 'FX';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly alpha: bigint;
@@ -33,43 +35,58 @@ export class FxPool implements BasePool {
 
     private readonly tokenMap: Map<string, FxPoolToken>;
 
-    static fromRawPool(chainId: number, pool: RawFxPool): FxPool {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): FxPool {
         const poolTokens: FxPoolToken[] = [];
 
-        for (const t of pool.tokens) {
-            if (!t.token.latestFXPrice) {
+        if (!pool.dynamicData) {
+            throw new Error('No dynamic data for pool');
+        }
+
+        for (const poolToken of pool.tokens) {
+            if (!poolToken.dynamicData?.latestFxPrice) {
                 throw new Error('FX pool token does not have latestFXPrice');
             }
 
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
-            const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
+            const token = new Token(
+                poolToken.address as Address,
+                poolToken.token.decimals,
+                poolToken.token.symbol,
+                poolToken.token.name,
+            );
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
 
             poolTokens.push(
                 new FxPoolToken(
                     token,
                     tokenAmount.amount,
-                    t.token.latestFXPrice,
-                    t.token.fxOracleDecimals || 8,
-                    t.index,
+                    `${poolToken.dynamicData.latestFxPrice}`,
+                    // TODO query fxOracleDecimals
+                    // poolToken.token.fxOracleDecimals || 8,
+                    8,
+                    poolToken.index,
                 ),
             );
         }
 
         return new FxPool(
-            pool.id,
-            pool.poolTypeVersion,
-            parseEther(pool.swapFee),
-            parseFixedCurveParam(pool.alpha),
-            parseFixedCurveParam(pool.beta),
-            parseFixedCurveParam(pool.lambda),
-            parseUnits(pool.delta, 36),
-            parseFixedCurveParam(pool.epsilon),
+            pool.id as Hex,
+            pool.address,
+            pool.chain,
+            pool.version,
+            parseEther(pool.dynamicData.swapFee),
+            parseFixedCurveParam((pool.staticTypeData as FxData).alpha as string),
+            parseFixedCurveParam((pool.staticTypeData as FxData).beta as string),
+            parseFixedCurveParam((pool.staticTypeData as FxData).lambda as string),
+            parseUnits((pool.staticTypeData as FxData).delta as string, 36),
+            parseFixedCurveParam((pool.staticTypeData as FxData).epsilon as string),
             poolTokens,
         );
     }
 
     constructor(
         id: Hex,
+        address: string,
+        chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
         alpha: bigint,
@@ -79,8 +96,9 @@ export class FxPool implements BasePool {
         epsilon: bigint,
         tokens: FxPoolToken[],
     ) {
-        this.chainId = tokens[0].token.chain;
         this.id = id;
+        this.address = address;
+        this.chain = chain;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = swapFee;
         this.alpha = alpha;
@@ -88,7 +106,6 @@ export class FxPool implements BasePool {
         this.lambda = lambda;
         this.delta = delta;
         this.epsilon = epsilon;
-        this.address = getPoolAddress(id);
         this.tokens = tokens;
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
     }

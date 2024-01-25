@@ -1,5 +1,4 @@
 import { parseUnits } from 'viem';
-import { HumanAmount } from '../../../data/types';
 
 export class MathFx {
     static mulDownFixed(a: bigint, b: bigint, decimals = 36): bigint {
@@ -49,11 +48,8 @@ export class MathFx {
  * @param param any of the pool's curve parameters like alpha, beta, lambda, delta, epsilon
  * @returns bigint with the same loss of precision as the smart contract
  */
-export const parseFixedCurveParam = (param: HumanAmount): bigint => {
-    const param64 =
-        ((((BigInt(parseUnits(param, 18)) + 1n) << 64n) / 10n ** 18n) *
-            10n ** 36n) >>
-        64n;
+export const parseFixedCurveParam = (param: string): bigint => {
+    const param64 = ((((BigInt(parseUnits(param, 18)) + 1n) << 64n) / 10n ** 18n) * 10n ** 36n) >> 64n;
     const truncatedParam64 = (param64 / 10n ** 15n + 1n) * 10n ** 15n;
     return truncatedParam64;
 };

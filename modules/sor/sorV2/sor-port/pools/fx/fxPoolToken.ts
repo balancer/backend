@@ -1,14 +1,12 @@
 import { parseUnits } from 'viem';
 import { Token } from '../../token';
-import { TokenAmount, BigintIsh } from '../../tokenAmount';
-import { WAD } from '../../../utils/math';
-import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
-import { HumanAmount } from '../../../data/types';
+import { BigintIsh, TokenAmount } from '../../tokenAmount';
+import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
 
 export class FxPoolToken extends TokenAmount {
     public readonly index: number;
-    public readonly latestFXPrice: HumanAmount;
+    public readonly latestFXPrice: string;
     public readonly fxOracleDecimals: number;
     public numeraire: bigint; // in 36 decimals
     private readonly scalar36 = this.scalar * WAD;
@@ -16,7 +14,7 @@ export class FxPoolToken extends TokenAmount {
     public constructor(
         token: Token,
         amount: BigintIsh,
-        latestFXPrice: HumanAmount,
+        latestFXPrice: string,
         fxOracleDecimals: number,
         index: number,
     ) {
@@ -56,27 +54,17 @@ export class FxPoolToken extends TokenAmount {
         return this;
     }
 
-    public static fromNumeraire(
-        poolToken: FxPoolToken,
-        numeraire: BigintIsh,
-        divUp?: boolean,
-    ): FxPoolToken {
+    public static fromNumeraire(poolToken: FxPoolToken, numeraire: BigintIsh, divUp?: boolean): FxPoolToken {
         const truncatedNumeraire = BigInt(numeraire) / poolToken.scalar36; // loss of precision required to match SC implementation
         const amount = divUp
             ? MathFx.divUpFixed(
                   BigInt(truncatedNumeraire),
-                  parseUnits(
-                      poolToken.latestFXPrice,
-                      poolToken.fxOracleDecimals,
-                  ),
+                  parseUnits(poolToken.latestFXPrice, poolToken.fxOracleDecimals),
                   poolToken.fxOracleDecimals,
               )
             : MathFx.divDownFixed(
                   BigInt(truncatedNumeraire),
-                  parseUnits(
-                      poolToken.latestFXPrice,
-                      poolToken.fxOracleDecimals,
-                  ),
+                  parseUnits(poolToken.latestFXPrice, poolToken.fxOracleDecimals),
                   poolToken.fxOracleDecimals,
               );
         return new FxPoolToken(

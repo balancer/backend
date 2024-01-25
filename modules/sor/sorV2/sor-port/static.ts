@@ -5,7 +5,6 @@ import { Token } from './token';
 import { BasePool, SwapKind, SwapOptions, zeroResponse } from './types';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
-import { FxPool } from './pools/fx';
 import { Gyro2Pool } from './pools/gyro2';
 import { Gyro3Pool } from './pools/gyro3';
 import { GyroEPool } from './pools/gyroE';
@@ -13,37 +12,7 @@ import { WeightedPool } from './pools/weighted/weightedPool';
 import { Swap } from './swap';
 import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
-
-function sorParsePrismaPool(prismaPools: PrismaPoolWithDynamic[]): BasePool[] {
-    const pools: BasePool[] = [];
-
-    for (const prismaPool of prismaPools) {
-        switch (prismaPool.type) {
-            case 'WEIGHTED':
-                pools.push(WeightedPool.fromPrismaPool(prismaPool));
-                break;
-            case 'COMPOSABLE_STABLE':
-            case 'STABLE':
-            case 'PHANTOM_STABLE':
-                break;
-            case 'META_STABLE':
-                break;
-            case 'FX':
-                break;
-            case 'GYRO':
-                break;
-            case 'GYRO3':
-                break;
-            case 'GYROE':
-                break;
-            default:
-                console.log('Unsupported pool type');
-                break;
-        }
-    }
-
-    return pools;
-}
+import { FxPool } from './pools/fx/fxPool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -88,7 +57,6 @@ export async function sorGetSwapsWithPools(
     }
 
     const router = new Router();
-    const swapToken = SwapKind.GivenIn ? tokenIn : tokenOut;
 
     const candidatePaths = router.getCandidatePaths(tokenIn, tokenOut, basePools, swapOptions?.graphTraversalConfig);
 
