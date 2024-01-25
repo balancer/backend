@@ -16,7 +16,7 @@ import { networkContext } from '../../network/network-context.service';
 import { DeploymentEnv } from '../../network/network-config-types';
 import _ from 'lodash';
 import { SwapInfoRoute } from '@balancer-labs/sor';
-import { NATIVE_ADDRESS, ZERO_ADDRESS } from '@balancer/sdk';
+import { NATIVE_ADDRESS, ZERO_ADDRESS } from '../sorV2/sor-port/constants';
 
 interface GetSwapsInput {
     tokenIn: string;
