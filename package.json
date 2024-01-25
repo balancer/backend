@@ -91,7 +91,7 @@
         "testcontainers": "^8.0.0",
         "ts-jest": "^28.0.7",
         "ts-node": "^10.4.0",
-        "typescript": "^5.2.2",
+        "typescript": "^5.3.3",
         "vitest": "^0.32.4",
         "vitest-mock-extended": "^1.1.3"
     }
