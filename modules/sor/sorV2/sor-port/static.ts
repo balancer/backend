@@ -1,8 +1,6 @@
-import { parseUnits } from 'ethers/lib/utils';
-import { GqlCowSwapApiResponse, GqlSorGetSwapsResponse, GqlSorSwapRoute } from '../../../../schema';
 import { Router } from './router';
 import { Token } from './token';
-import { BasePool, SwapKind, SwapOptions, zeroResponse } from './types';
+import { BasePool, SwapKind, SwapOptions } from './types';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { WeightedPool } from './pools/weighted/weightedPool';
@@ -66,25 +64,5 @@ export async function sorGetSwapsWithPools(
 
     if (!bestPaths) return null;
 
-    // TODO build response from best paths
     return new Swap({ paths: bestPaths, swapKind });
-    // return zeroResponse('EXACT_IN', tokenIn.address, tokenOut.address, checkedSwapAmount);
-}
-
-export function mapToSorSwapsResponse(swap: Swap): GqlSorGetSwapsResponse {
-    return zeroResponse(
-        swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
-        swap.inputAmount.token.address,
-        swap.outputAmount.token.address,
-        swap.inputAmount.amount.toString(),
-    );
-}
-
-export function mapToCowSwapResponse(swap: Swap) {
-    // return zeroResponse(
-    //     swap.swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT',
-    //     swap.inputAmount.token.address,
-    //     swap.outputAmount.token.address,
-    //     swap.inputAmount.amount.toString(),
-    // );
 }
