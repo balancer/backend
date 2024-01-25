@@ -374,6 +374,7 @@ export class SorV2Service implements SwapService {
                         'ELEMENT', // not supported by b-sdk
                         'UNKNOWN', // not supported by b-sdk
                         'INVESTMENT', // not supported by b-sdk
+                        'STABLE', // not supported by b-sdk
                     ],
                 },
                 AND: {

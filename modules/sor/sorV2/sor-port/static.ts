@@ -63,7 +63,6 @@ export async function sorGetSwapsWithPools(
                 basePools.push(WeightedPool.fromPrismaPool(prismaPool));
                 break;
             case 'COMPOSABLE_STABLE':
-            case 'STABLE':
             case 'PHANTOM_STABLE':
                 basePools.push(StablePool.fromPrismaPool(prismaPool));
                 break;
