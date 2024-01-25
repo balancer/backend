@@ -11,6 +11,7 @@ import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
+import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,

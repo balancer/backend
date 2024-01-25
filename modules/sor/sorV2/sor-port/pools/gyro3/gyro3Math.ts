@@ -1,12 +1,9 @@
-import {
-    _INVARIANT_MIN_ITERATIONS,
-    _INVARIANT_SHRINKING_FACTOR_PER_STEP,
-} from './constants';
-import { _safeLargePow3ADown } from './helpers';
-import { MathGyro } from '../../../utils/gyroHelpers/math';
-import { WAD } from '../../../utils';
-
 // Invariant Calculation
+
+import { MathGyro } from '../../utils/gyroHelpers/math';
+import { WAD } from '../../utils/math';
+import { _INVARIANT_MIN_ITERATIONS, _INVARIANT_SHRINKING_FACTOR_PER_STEP } from './constants';
+import { _safeLargePow3ADown } from './helpers';
 
 /**
  * Invariant is used to collect protocol swap fees by comparing its value between two times.
@@ -16,10 +13,7 @@ import { WAD } from '../../../utils';
  * Note: all price bounds for the pool are alpha and 1/alpha
  */
 
-export function _calculateInvariant(
-    balances: bigint[],
-    root3Alpha: bigint,
-): bigint {
+export function _calculateInvariant(balances: bigint[], root3Alpha: bigint): bigint {
     const [a, mb, mc, md] = _calculateCubicTerms(balances, root3Alpha);
     return _calculateCubic(a, mb, mc, md, root3Alpha);
 }
@@ -30,27 +24,18 @@ export function _calculateInvariant(
  * terms come from cubic in Section 3.1.1
  * argument root3Alpha = cube root of alpha
  */
-export function _calculateCubicTerms(
-    balances: bigint[],
-    root3Alpha: bigint,
-): [bigint, bigint, bigint, bigint] {
+export function _calculateCubicTerms(balances: bigint[], root3Alpha: bigint): [bigint, bigint, bigint, bigint] {
     const alpha23 = MathGyro.mulDown(root3Alpha, root3Alpha); // alpha to the power of (2/3)
     const alpha = MathGyro.mulDown(alpha23, root3Alpha);
     const a = WAD - alpha;
     const bterm = balances[0] + balances[1] + balances[2];
-    const mb = MathGyro.mulDown(
-        MathGyro.mulDown(bterm, root3Alpha),
-        root3Alpha,
-    );
+    const mb = MathGyro.mulDown(MathGyro.mulDown(bterm, root3Alpha), root3Alpha);
     const cterm =
         MathGyro.mulDown(balances[0], balances[1]) +
         MathGyro.mulDown(balances[1], balances[2]) +
         MathGyro.mulDown(balances[2], balances[0]);
     const mc = MathGyro.mulDown(cterm, root3Alpha);
-    const md = MathGyro.mulDown(
-        MathGyro.mulDown(balances[0], balances[1]),
-        balances[2],
-    );
+    const md = MathGyro.mulDown(MathGyro.mulDown(balances[0], balances[1]), balances[2]);
 
     return [a, mb, mc, md];
 }
@@ -59,13 +44,7 @@ export function _calculateCubicTerms(
  * @dev Calculate the maximal root of the polynomial a L^3 - mb L^2 - mc L - md.
  * This root is always non-negative, and it is the unique positive root unless mb == mc == md == 0.
  */
-export function _calculateCubic(
-    a: bigint,
-    mb: bigint,
-    mc: bigint,
-    md: bigint,
-    root3Alpha: bigint,
-): bigint {
+export function _calculateCubic(a: bigint, mb: bigint, mc: bigint, md: bigint, root3Alpha: bigint): bigint {
     let rootEst = _calculateCubicStartingPoint(a, mb, mc);
     rootEst = _runNewtonIteration(a, mb, mc, md, root3Alpha, rootEst);
     return rootEst;
@@ -75,17 +54,9 @@ export function _calculateCubic(
  * @dev Starting point for Newton iteration. Safe with all cubic polynomials where the coefficients have the appropriate
  * signs, but calibrated to the particular polynomial for computing the invariant.
  */
-export function _calculateCubicStartingPoint(
-    a: bigint,
-    mb: bigint,
-    mc: bigint,
-): bigint {
-    const radic =
-        MathGyro.mulUp(mb, mb) +
-        MathGyro.mulUp(MathGyro.mulUp(a, mc), WAD * 3n);
-    const lmin =
-        MathGyro.divUp(mb, a * 3n) +
-        MathGyro.divUp(MathGyro.sqrt(radic, 5n), a * 3n);
+export function _calculateCubicStartingPoint(a: bigint, mb: bigint, mc: bigint): bigint {
+    const radic = MathGyro.mulUp(mb, mb) + MathGyro.mulUp(MathGyro.mulUp(a, mc), WAD * 3n);
+    const lmin = MathGyro.divUp(mb, a * 3n) + MathGyro.divUp(MathGyro.sqrt(radic, 5n), a * 3n);
     // This formula has been found experimentally. It is exact for alpha -> 1, where the factor is 1.5. All
     // factors > 1 are safe. For small alpha values, it is more efficient to fallback to a larger factor.
     const alpha = WAD - a; // We know that a is in [0, 1].
@@ -114,26 +85,13 @@ export function _runNewtonIteration(
     for (let iteration = 0; iteration < 255; ++iteration) {
         // The delta to the next step can be positive or negative, so we represent a positive and a negative part
         // separately. The signed delta is delta_plus - delta_minus, but we only ever consider its absolute value.
-        const [deltaAbs, deltaIsPos] = _calcNewtonDelta(
-            a,
-            mb,
-            mc,
-            md,
-            root3Alpha,
-            _rootEst,
-        );
+        const [deltaAbs, deltaIsPos] = _calcNewtonDelta(a, mb, mc, md, root3Alpha, _rootEst);
 
         // ^ Note: If we ever set _INVARIANT_MIN_ITERATIONS=0, the following should include `iteration >= 1`.
-        if (
-            deltaAbs <= 1 ||
-            (iteration >= _INVARIANT_MIN_ITERATIONS && deltaIsPos)
-        )
+        if (deltaAbs <= 1 || (iteration >= _INVARIANT_MIN_ITERATIONS && deltaIsPos))
             // This should mathematically never happen. Thus, the numerical error dominates at this point.
             return _rootEst;
-        if (
-            iteration >= _INVARIANT_MIN_ITERATIONS &&
-            deltaAbs >= deltaAbsPrev / _INVARIANT_SHRINKING_FACTOR_PER_STEP
-        ) {
+        if (iteration >= _INVARIANT_MIN_ITERATIONS && deltaAbs >= deltaAbsPrev / _INVARIANT_SHRINKING_FACTOR_PER_STEP) {
             // The iteration has stalled and isn't making significant progress anymore.
             return _rootEst;
         }
@@ -142,9 +100,7 @@ export function _runNewtonIteration(
         else _rootEst = _rootEst - deltaAbs;
     }
 
-    throw new Error(
-        'Gyro3Pool: Newton Method did not converge on required invariant',
-    );
+    throw new Error('Gyro3Pool: Newton Method did not converge on required invariant');
 }
 
 // -f(l)/f'(l), represented as an absolute value and a sign. Require that l is sufficiently large so that f is strictly increasing.
@@ -163,14 +119,7 @@ export function _calcNewtonDelta(
     const rootEst2 = MathGyro.mulDown(rootEst, rootEst);
     dfRootEst = rootEst2 * 3n;
     dfRootEst =
-        dfRootEst -
-        MathGyro.mulDown(
-            MathGyro.mulDown(
-                MathGyro.mulDown(dfRootEst, root3Alpha),
-                root3Alpha,
-            ),
-            root3Alpha,
-        );
+        dfRootEst - MathGyro.mulDown(MathGyro.mulDown(MathGyro.mulDown(dfRootEst, root3Alpha), root3Alpha), root3Alpha);
     dfRootEst = dfRootEst - MathGyro.mulDown(rootEst, mb) * 2n - mc;
 
     const deltaMinus = _safeLargePow3ADown(rootEst, root3Alpha, dfRootEst);
@@ -178,16 +127,11 @@ export function _calcNewtonDelta(
     // NB: We could order the operations here in much the same way we did above to reduce errors. But tests show
     // that this has no significant effect, and it would lead to more complex code.
     let deltaPlus = MathGyro.mulDown(MathGyro.mulDown(rootEst, rootEst), mb);
-    deltaPlus = MathGyro.divDown(
-        deltaPlus + MathGyro.mulDown(rootEst, mc),
-        dfRootEst,
-    );
+    deltaPlus = MathGyro.divDown(deltaPlus + MathGyro.mulDown(rootEst, mc), dfRootEst);
     deltaPlus = deltaPlus + MathGyro.divDown(md, dfRootEst);
 
     const deltaIsPos = deltaPlus >= deltaMinus;
-    const deltaAbs = deltaIsPos
-        ? deltaPlus - deltaMinus
-        : deltaMinus - deltaPlus;
+    const deltaAbs = deltaIsPos ? deltaPlus - deltaMinus : deltaMinus - deltaPlus;
 
     return [deltaAbs, deltaIsPos];
 }
@@ -234,10 +178,7 @@ export function _calcInGivenOut(
     const virtInOver = balanceIn + MathGyro.mulUp(virtualOffset, WAD + 2n);
     const virtOutUnder = balanceOut + MathGyro.mulDown(virtualOffset, WAD - 1n);
 
-    const amountIn = MathGyro.divUp(
-        MathGyro.mulUp(virtInOver, amountOut),
-        virtOutUnder - amountOut,
-    );
+    const amountIn = MathGyro.divUp(MathGyro.mulUp(virtInOver, amountOut), virtOutUnder - amountOut);
 
     return amountIn;
 }
@@ -247,10 +188,7 @@ export function _calcInGivenOut(
  * NB This is the same function as for the 2-CLP because the marginal trading curve of the 3-CLP
  * is a 2-CLP curve. We use different virtual offsets, of course.
  */
-export function _getNormalizedLiquidity(
-    balances: bigint[],
-    virtualParamOut: bigint,
-): bigint {
+export function _getNormalizedLiquidity(balances: bigint[], virtualParamOut: bigint): bigint {
     const virtOut = balances[1] + virtualParamOut;
     return virtOut / 2n;
 }

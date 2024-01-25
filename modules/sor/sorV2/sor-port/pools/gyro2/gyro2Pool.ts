@@ -7,6 +7,7 @@ import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualParams } from './gyro2Math';
 import { MathSol, WAD } from '../../utils/math';
+import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;

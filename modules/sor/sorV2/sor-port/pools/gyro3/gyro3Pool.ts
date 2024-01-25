@@ -1,13 +1,13 @@
-import { Hex, parseEther } from 'viem';
-
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
-import { BasePool } from '..';
+import { Address, Hex, parseEther } from 'viem';
+import { GqlPoolType } from '../../../../../../schema';
 import { Token } from '../../token';
-import { TokenAmount, BigintIsh } from '../../tokenAmount';
-import { RawGyro3Pool } from '../../../data/types';
-import { PoolType, SwapKind } from '../../../types';
-import { getPoolAddress, MathSol, WAD } from '../../../utils';
-import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
+import { BigintIsh, TokenAmount } from '../../tokenAmount';
+import { BasePool, SwapKind } from '../../types';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { Chain } from '@prisma/client';
+import { MathSol, WAD } from '../../utils/math';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
 
 export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;
@@ -31,10 +31,10 @@ export class Gyro3PoolToken extends TokenAmount {
 }
 
 export class Gyro3Pool implements BasePool {
-    public readonly chainId: number;
+    public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.Gyro2;
+    public readonly poolType: GqlPoolType = 'GYRO3';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: Gyro3PoolToken[];
@@ -42,32 +42,53 @@ export class Gyro3Pool implements BasePool {
     private readonly root3Alpha: bigint;
     private readonly tokenMap: Map<string, Gyro3PoolToken>;
 
-    static fromRawPool(chainId: number, pool: RawGyro3Pool): Gyro3Pool {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro3Pool {
         const poolTokens: Gyro3PoolToken[] = [];
 
-        for (const t of pool.tokens) {
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
-            const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
+        if (!pool.dynamicData || !pool.gyroData) {
+            throw new Error('No dynamic data for pool');
+        }
 
-            poolTokens.push(new Gyro3PoolToken(token, tokenAmount.amount, t.index));
+        for (const poolToken of pool.tokens) {
+            if (!poolToken.dynamicData?.balance) {
+                throw new Error('Gyro pool as no dynamic pool token data');
+            }
+            const token = new Token(
+                poolToken.address as Address,
+                poolToken.token.decimals,
+                poolToken.token.symbol,
+                poolToken.token.name,
+            );
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+
+            poolTokens.push(new Gyro3PoolToken(token, tokenAmount.amount, poolToken.index));
         }
 
         return new Gyro3Pool(
-            pool.id,
-            pool.poolTypeVersion,
-            parseEther(pool.swapFee),
-            parseEther(pool.root3Alpha),
+            pool.id as Hex,
+            pool.address,
+            pool.chain,
+            pool.version,
+            parseEther(pool.dynamicData.swapFee),
+            parseEther(pool.gyroData.root3Alpha!),
             poolTokens,
         );
     }
-
-    constructor(id: Hex, poolTypeVersion: number, swapFee: bigint, root3Alpha: bigint, tokens: Gyro3PoolToken[]) {
-        this.chainId = tokens[0].token.chain;
+    constructor(
+        id: Hex,
+        address: string,
+        chain: Chain,
+        poolTypeVersion: number,
+        swapFee: bigint,
+        root3Alpha: bigint,
+        tokens: Gyro3PoolToken[],
+    ) {
         this.id = id;
+        this.address = address;
+        this.chain = chain;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = swapFee;
         this.root3Alpha = root3Alpha;
-        this.address = getPoolAddress(id);
         this.tokens = tokens;
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
     }
