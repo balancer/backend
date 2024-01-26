@@ -4,13 +4,9 @@ import { PrismaToken } from '@prisma/client';
 import { poolService } from '../../pool/pool.service';
 import { oldBnum } from '../../big-number/old-big-number';
 import axios from 'axios';
-import { FundManagement, SwapInfo, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
+import { SwapInfo, SwapV2 } from '@balancer-labs/sdk';
 import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../../web3/addresses';
 import { BigNumber } from 'ethers';
-import { TokenAmountHumanReadable } from '../../common/global-types';
-import { AddressZero } from '@ethersproject/constants';
-import { Contract } from '@ethersproject/contracts';
-import VaultAbi from '../../pool/abi/Vault.json';
 import { env } from '../../../app/env';
 import { networkContext } from '../../network/network-context.service';
 import { DeploymentEnv } from '../../network/network-config-types';
@@ -226,60 +222,6 @@ export class BalancerSorService {
         return swapInfo;
     }
 
-    public async getBatchSwapForTokensIn({
-        tokensIn,
-        tokenOut,
-        swapOptions,
-        tokens,
-    }: {
-        tokensIn: TokenAmountHumanReadable[];
-        tokenOut: string;
-        swapOptions: GqlSorSwapOptionsInput;
-        tokens: PrismaToken[];
-    }): Promise<{ tokenOutAmount: string; swaps: SwapV2[]; assets: string[] }> {
-        const swaps: SwapV2[][] = [];
-        const assetArray: string[][] = [];
-        // get path information for each tokenIn
-        for (let i = 0; i < tokensIn.length; i++) {
-            const response = await this.getSwaps({
-                tokenIn: tokensIn[i].address,
-                swapAmount: tokensIn[i].amount,
-                tokenOut,
-                swapType: 'EXACT_IN',
-                swapOptions,
-                tokens,
-            });
-
-            console.log(tokensIn[i].address, response.swaps);
-            console.log(tokensIn[i].address, response.tokenAddresses);
-
-            swaps.push(response.swaps);
-            assetArray.push(response.tokenAddresses);
-        }
-
-        // Join swaps and assets together correctly
-        const batchedSwaps = this.batchSwaps(assetArray, swaps);
-
-        console.log('batchedSwaps', batchedSwaps);
-
-        let tokenOutAmountScaled = '0';
-        try {
-            // Onchain query
-            const deltas = await this.queryBatchSwap(SwapTypes.SwapExactIn, batchedSwaps.swaps, batchedSwaps.assets);
-            tokenOutAmountScaled = deltas[batchedSwaps.assets.indexOf(tokenOut.toLowerCase())] ?? '0';
-        } catch (err) {
-            console.log(`queryBatchSwapTokensIn error: `, err);
-        }
-
-        const tokenOutAmount = formatFixed(tokenOutAmountScaled, this.getTokenDecimals(tokenOut, tokens));
-
-        return {
-            tokenOutAmount,
-            swaps: batchedSwaps.swaps,
-            assets: batchedSwaps.assets,
-        };
-    }
-
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
         if (
             tokenAddress === ZERO_ADDRESS ||
@@ -299,39 +241,6 @@ export class BalancerSorService {
         }
 
         return decimals;
-    }
-
-    private batchSwaps(assetArray: string[][], swaps: SwapV2[][]): { swaps: SwapV2[]; assets: string[] } {
-        // assest addresses without duplicates
-        const newAssetArray = [...new Set(assetArray.flat())];
-
-        // Update indices of each swap to use new asset array
-        swaps.forEach((swap, i) => {
-            swap.forEach((poolSwap) => {
-                poolSwap.assetInIndex = newAssetArray.indexOf(assetArray[i][poolSwap.assetInIndex]);
-                poolSwap.assetOutIndex = newAssetArray.indexOf(assetArray[i][poolSwap.assetOutIndex]);
-            });
-        });
-
-        // Join Swaps into a single batchSwap
-        const batchedSwaps = swaps.flat();
-        return { swaps: batchedSwaps, assets: newAssetArray };
-    }
-
-    private queryBatchSwap(swapType: SwapTypes, swaps: SwapV2[], assets: string[]): Promise<string[]> {
-        const vaultContract = new Contract(
-            networkContext.data.balancer.v2.vaultAddress,
-            VaultAbi,
-            networkContext.provider,
-        );
-        const funds: FundManagement = {
-            sender: AddressZero,
-            recipient: AddressZero,
-            fromInternalBalance: false,
-            toInternalBalance: false,
-        };
-
-        return vaultContract.queryBatchSwap(swapType, swaps, assets, funds);
     }
 }
 
