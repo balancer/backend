@@ -21,7 +21,7 @@ export class SorService {
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
-        const emptyResponse = zeroResponseV2(args.swapType, args.tokenIn, args.tokenOut, args.swapAmount);
+        const emptyResponse = zeroResponseV2(args.swapType, args.tokenIn, args.tokenOut);
 
         // check if tokens addresses exist
         try {
