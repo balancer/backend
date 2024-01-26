@@ -505,7 +505,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-global-coingecko-prices',
             interval:
                 (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
-                    ? every(10, 'minutes')
+                    ? every(30, 'minutes')
                     : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
                     ? every(2, 'minutes')
                     : every(10, 'days'),
