@@ -1,20 +1,13 @@
-import { WAD } from '../../../utils';
+import { WAD } from '../../utils/math';
 import { _SAFE_LARGE_POW3_THRESHOLD, MIDDECIMAL } from './constants';
 
 // Helpers
-export function _safeLargePow3ADown(
-    l: bigint,
-    root3Alpha: bigint,
-    d: bigint,
-): bigint {
+export function _safeLargePow3ADown(l: bigint, root3Alpha: bigint, d: bigint): bigint {
     let ret = 0n;
     if (l <= _SAFE_LARGE_POW3_THRESHOLD) {
         // Simple case where there is no overflow
         ret = (((l * l) / WAD) * l) / WAD;
-        ret =
-            ret -
-            (((((ret * root3Alpha) / WAD) * root3Alpha) / WAD) * root3Alpha) /
-                WAD;
+        ret = ret - (((((ret * root3Alpha) / WAD) * root3Alpha) / WAD) * root3Alpha) / WAD;
         ret = (ret * WAD) / d;
     } else {
         ret = (l * l) / WAD;
@@ -28,9 +21,7 @@ export function _safeLargePow3ADown(
         let x = ret;
 
         for (let i = 0; i < 3; i++) {
-            x =
-                (x * (root3Alpha / MIDDECIMAL)) / MIDDECIMAL +
-                ((x * root3Alpha) % MIDDECIMAL);
+            x = (x * (root3Alpha / MIDDECIMAL)) / MIDDECIMAL + ((x * root3Alpha) % MIDDECIMAL);
         }
         ret = ret - x;
 

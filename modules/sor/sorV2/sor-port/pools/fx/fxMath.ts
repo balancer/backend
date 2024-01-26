@@ -1,7 +1,7 @@
 import { parseUnits } from 'viem';
-import { RAY } from '../../../utils/math';
 import { FxPoolPairData } from './types';
-import { SwapKind } from '../../../types';
+import { RAY } from '../../utils/math';
+import { SwapKind } from '../../types';
 
 export const CURVEMATH_MAX_DIFF = parseUnits('-0.000001000000000000024', 36);
 export const ONE_TO_THE_THIRTEEN_NUM = parseUnits('10000000000000', 36);
@@ -33,12 +33,7 @@ export function _calcInGivenOut(poolPairData: FxPoolPairData): bigint {
 
 // Curve Math
 // calculations are from CurveMath.sol
-const calculateMicroFee = (
-    _bal: bigint,
-    _ideal: bigint,
-    _beta: bigint,
-    _delta: bigint,
-): bigint => {
+const calculateMicroFee = (_bal: bigint, _ideal: bigint, _beta: bigint, _delta: bigint): bigint => {
     let _threshold: bigint;
     let _feeMargin: bigint;
     let fee_ = 0n;
@@ -79,13 +74,7 @@ const calculateMicroFee = (
     return fee_;
 };
 
-const calculateFee = (
-    _gLiq: bigint,
-    _bals: bigint[],
-    _beta: bigint,
-    _delta: bigint,
-    _weights: bigint[],
-): bigint => {
+const calculateFee = (_gLiq: bigint, _bals: bigint[], _beta: bigint, _delta: bigint, _weights: bigint[]): bigint => {
     const _length = _bals.length;
     let psi = 0n;
 
@@ -100,30 +89,14 @@ const calculateFee = (
 };
 
 // return outputAmount and ngliq
-export const calculateTrade = (
-    poolPairData: FxPoolPairData,
-): [bigint, bigint] => {
-    const {
-        alpha,
-        beta,
-        delta,
-        lambda,
-        _oGLiq,
-        _nGLiq,
-        _oBals,
-        _nBals,
-        givenToken,
-        swapKind,
-    } = poolPairData;
+export const calculateTrade = (poolPairData: FxPoolPairData): [bigint, bigint] => {
+    const { alpha, beta, delta, lambda, _oGLiq, _nGLiq, _oBals, _nBals, givenToken, swapKind } = poolPairData;
 
     const weights_: bigint[] = [RAY / 2n, RAY / 2n]; // const for now since all weights are 0.5
     const omega = calculateFee(_oGLiq, _oBals, beta, delta, weights_);
 
     const _outputIndex = givenToken.index === 0 ? 1 : 0;
-    const _inputAmt =
-        swapKind === SwapKind.GivenIn
-            ? givenToken.numeraire
-            : givenToken.numeraire * -1n;
+    const _inputAmt = swapKind === SwapKind.GivenIn ? givenToken.numeraire : givenToken.numeraire * -1n;
 
     let outputAmt_ = _inputAmt * -1n;
     let _nGLiq_ = _nGLiq;
@@ -135,14 +108,9 @@ export const calculateTrade = (
         const prevAmount = outputAmt_;
 
         outputAmt_ =
-            omega < psi
-                ? (_inputAmt + (omega - psi)) * -1n
-                : (_inputAmt + (lambda * (omega - psi)) / RAY) * -1n;
+            omega < psi ? (_inputAmt + (omega - psi)) * -1n : (_inputAmt + (lambda * (omega - psi)) / RAY) * -1n;
 
-        if (
-            (outputAmt_ * RAY) / ONE_TO_THE_THIRTEEN_NUM ===
-            (prevAmount * RAY) / ONE_TO_THE_THIRTEEN_NUM
-        ) {
+        if ((outputAmt_ * RAY) / ONE_TO_THE_THIRTEEN_NUM === (prevAmount * RAY) / ONE_TO_THE_THIRTEEN_NUM) {
             _nGLiq_ = _oGLiq + _inputAmt + outputAmt_;
 
             _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
@@ -178,8 +146,7 @@ const enforceHalts = (
             const _nHalt = (_nIdeal * _upperAlpha) / RAY;
 
             if (_nBals[i] > _nHalt) {
-                const _oHalt =
-                    (((_oGLiq * _weights[i]) / RAY) * _upperAlpha) / RAY;
+                const _oHalt = (((_oGLiq * _weights[i]) / RAY) * _upperAlpha) / RAY;
 
                 if (_oBals[i] < _oHalt) {
                     throw new Error(CurveMathRevert.UpperHalt);
@@ -209,12 +176,7 @@ const enforceHalts = (
     return true;
 };
 
-const enforceSwapInvariant = (
-    _oGLiq: bigint,
-    _omega: bigint,
-    _nGLiq: bigint,
-    _psi: bigint,
-): boolean => {
+const enforceSwapInvariant = (_oGLiq: bigint, _omega: bigint, _nGLiq: bigint, _psi: bigint): boolean => {
     const _nextUtil = _nGLiq - _psi;
 
     const _prevUtil = _oGLiq - _omega;
