@@ -10,7 +10,7 @@ import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { getToken } from '../utils';
 import { Swap } from './sor-port/swap';
-import { Address } from 'viem';
+import { Address, parseUnits } from 'viem';
 import { BatchSwapStep, SingleSwap, SwapKind } from './sor-port/types';
 import { sorGetSwapsWithPools } from './sor-port/static';
 import { SwapResultV2 } from './swapResultV2';
@@ -144,10 +144,8 @@ export class SorV2Service implements SwapService {
             where: { idIn: poolIds },
         });
 
-        const returnAmount =
-            swap.swapKind === SwapKind.GivenIn ? outputAmount.amount.toString() : inputAmount.amount.toString();
-        const swapAmount =
-            swap.swapKind === SwapKind.GivenIn ? inputAmount.amount.toString() : outputAmount.amount.toString();
+        const returnAmount = swap.swapKind === SwapKind.GivenIn ? outputAmount : inputAmount;
+        const swapAmount = swap.swapKind === SwapKind.GivenIn ? inputAmount : outputAmount;
 
         const routes = mapRoutes(
             swap.swaps,
@@ -173,8 +171,10 @@ export class SorV2Service implements SwapService {
             swapType: this.mapSwapKindToSwapType(swap.swapKind),
             tokenInAmount: inputAmount.amount.toString(),
             tokenOutAmount: outputAmount.amount.toString(),
-            swapAmount: swapAmount,
-            returnAmount: returnAmount,
+            swapAmount: swapAmount.toSignificant(),
+            swapAmountScaled: swapAmount.amount.toString(),
+            returnAmount: returnAmount.toSignificant(),
+            returnAmountScaled: returnAmount.amount.toString(),
             routes: routes.map((route) => ({
                 ...route,
                 hops: route.hops.map((hop) => ({
