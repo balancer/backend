@@ -1,7 +1,7 @@
 import { tokenService } from '../token/token.service';
 import { Chain } from '@prisma/client';
-import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../network/network-config';
-import { GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { GqlSorGetSwaps, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
 import { TokenAmount } from './sorV2/sor-port/tokenAmount';
 import { Token } from './sorV2/sor-port/token';
@@ -33,6 +33,27 @@ export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> 
         if (!prismaToken) throw Error(`Missing token from tokenService ${tokenAddr}`);
         return new Token(prismaToken.address as Address, prismaToken.decimals);
     }
+};
+
+export const zeroResponseV2 = (
+    swapType: GqlSorSwapType,
+    tokenIn: string,
+    tokenOut: string,
+    swapAmount: string,
+): GqlSorGetSwaps => {
+    return {
+        tokenAddresses: [],
+        swaps: [],
+        tokenIn: replaceZeroAddressWithEth(tokenIn),
+        tokenOut: replaceZeroAddressWithEth(tokenOut),
+        swapType,
+        tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : '0',
+        tokenOutAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
+        swapAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
+        returnAmount: '0',
+        routes: [],
+        priceImpact: '0',
+    };
 };
 
 export const zeroResponse = (
