@@ -1,21 +1,3 @@
-import { GqlCowSwapApiResponse } from '../../schema';
-import { TokenAmount } from './sorV2/sor-port/tokenAmount';
-
-export const EMPTY_COWSWAP_RESPONSE = (
-    assetIn: string,
-    assetOut: string,
-    amount: TokenAmount,
-): GqlCowSwapApiResponse => {
-    return {
-        returnAmount: '0',
-        swapAmount: amount.amount.toString(),
-        swaps: [],
-        tokenAddresses: [],
-        tokenIn: assetIn,
-        tokenOut: assetOut,
-    };
-};
-
 // These are pools related to Aug `23 vulnerability/mitigation and should be ignored for swaps
 export const poolsToIgnore = [
     '0x00c2a4be503869fa751c2dbcb7156cc970b5a8da000000000000000000000477',
