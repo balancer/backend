@@ -337,6 +337,12 @@ const data: NetworkData = {
                 path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
+            ezETH: {
+                tokenAddress: '0xbf5495efe5db9ce00f80364c8b423567e58d2110',
+                sourceUrl: 'https://app.renzoprotocol.com/api/apr',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
