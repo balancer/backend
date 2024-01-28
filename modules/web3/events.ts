@@ -51,11 +51,12 @@ export const getEvents = async (
                     return getEvents(from, to, addressChunk, topics, rpcUrl, range[1] - range[0]);
                 }
 
-                // Alchemy / tenderly rate limit
+                // Alchemy / tenderly / gateway.fm rate limit
                 if (
                     e.includes &&
                     (e.includes('Your app has exceeded its compute units per second capacity') ||
-                        e.includes('rate limit exceeded'))
+                        e.includes('rate limit exceeded') ||
+                        e.includes('Total number of requests exceeded'))
                 ) {
                     return new Promise<Event[]>((resolve) => {
                         setTimeout(() => {
@@ -133,6 +134,11 @@ const fetchLogs = async (
         .then((response) => {
             if ('error' in response) {
                 return Promise.reject(response.error.message);
+            }
+
+            // gateway.fm returns errors in results
+            if ('code' in response.result) {
+                return Promise.reject((response.result as any)['message']);
             }
 
             return response.result;
