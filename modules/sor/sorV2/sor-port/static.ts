@@ -1,10 +1,10 @@
 import { Router } from './router';
-import { Token } from './token';
+import { Token } from './entities/token';
 import { BasePool, SwapKind, SwapOptions } from './types';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { WeightedPool } from './pools/weighted/weightedPool';
-import { Swap } from './swap';
+import { Swap } from './entities/swap';
 import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';

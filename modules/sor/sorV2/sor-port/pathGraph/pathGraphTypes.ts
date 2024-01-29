@@ -1,4 +1,4 @@
-import { Token } from '../token';
+import { Token } from '../entities/token';
 import { BasePool } from '../types';
 
 export interface PoolTokenPair {

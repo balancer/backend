@@ -1,5 +1,5 @@
-import { Token } from '../../token';
-import { TokenAmount, BigintIsh } from '../../tokenAmount';
+import { Token } from '../../entities/token';
+import { TokenAmount, BigintIsh } from '../../entities/tokenAmount';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { parseUnits } from 'ethers/lib/utils';
 import { GqlPoolType } from '../../../../../../schema';

@@ -3,8 +3,8 @@ import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GqlSorGetSwaps, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
-import { TokenAmount } from './sorV2/sor-port/tokenAmount';
-import { Token } from './sorV2/sor-port/token';
+import { TokenAmount } from './sorV2/sor-port/entities/tokenAmount';
+import { Token } from './sorV2/sor-port/entities/token';
 import { NATIVE_ADDRESS } from './sorV2/sor-port/constants';
 import { Address } from 'viem';
 

@@ -1,5 +1,5 @@
-import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
+import { Token } from '../entities/token';
+import { TokenAmount } from '../entities/tokenAmount';
 import { BasePool, SwapKind } from '../types';
 import { Path } from './path';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';

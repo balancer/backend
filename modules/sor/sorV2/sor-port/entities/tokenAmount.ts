@@ -1,8 +1,8 @@
 import { parseUnits } from 'viem';
 import { Token } from './token';
-import { DECIMAL_SCALES } from './constants';
-import { WAD } from './utils/math';
-import { InputAmount } from './types';
+import { DECIMAL_SCALES } from '../constants';
+import { WAD } from '../utils/math';
+import { InputAmount } from '../types';
 import _Decimal from 'decimal.js-light';
 
 export type BigintIsh = bigint | string | number;

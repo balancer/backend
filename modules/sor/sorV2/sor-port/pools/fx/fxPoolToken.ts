@@ -1,6 +1,6 @@
 import { parseUnits } from 'viem';
-import { Token } from '../../token';
-import { BigintIsh, TokenAmount } from '../../tokenAmount';
+import { Token } from '../../entities/token';
+import { BigintIsh, TokenAmount } from '../../entities/tokenAmount';
 import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
 

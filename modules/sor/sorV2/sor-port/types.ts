@@ -1,8 +1,8 @@
 import { Address, Hex } from 'viem';
 import { GqlPoolType } from '../../../../schema';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { Token } from './token';
-import { TokenAmount } from './tokenAmount';
+import { Token } from './entities/token';
+import { TokenAmount } from './entities/tokenAmount';
 
 export interface BasePool {
     readonly poolType: GqlPoolType;

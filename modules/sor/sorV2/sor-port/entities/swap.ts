@@ -1,12 +1,12 @@
 import { cloneDeep } from 'lodash';
-import { PathWithAmount } from './pathGraph/path';
-import { BatchSwapStep, SingleSwap, SwapKind } from './types';
+import { PathWithAmount } from '../pathGraph/path';
+import { BatchSwapStep, SingleSwap, SwapKind } from '../types';
 import { Address, createPublicClient, encodeFunctionData, getContract, http } from 'viem';
 import { TokenAmount } from './tokenAmount';
-import { DEFAULT_FUND_MANAGMENT, DEFAULT_USERDATA, NATIVE_ADDRESS, ZERO_ADDRESS } from './constants';
-import { MathSol, abs } from './utils/math';
+import { DEFAULT_FUND_MANAGMENT, DEFAULT_USERDATA, NATIVE_ADDRESS, ZERO_ADDRESS } from '../constants';
+import { MathSol, abs } from '../utils/math';
 import { PriceImpactAmount } from './priceImpactAmount';
-import { balancerQueriesAbi } from '../../../web3/abi/balancerQueries';
+import { balancerQueriesAbi } from '../../../../web3/abi/balancerQueries';
 
 // A Swap can be a single or multiple paths
 export class Swap {

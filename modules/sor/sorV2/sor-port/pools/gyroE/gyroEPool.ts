@@ -1,7 +1,7 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { GqlPoolType } from '../../../../../../schema';
-import { Token } from '../../token';
-import { BigintIsh, TokenAmount } from '../../tokenAmount';
+import { Token } from '../../entities/token';
+import { BigintIsh, TokenAmount } from '../../entities/tokenAmount';
 import { BasePool, SwapKind } from '../../types';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';

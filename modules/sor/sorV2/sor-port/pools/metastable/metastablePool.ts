@@ -4,8 +4,8 @@ import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { GqlPoolType } from '../../../../../../schema';
 import { StablePoolToken } from '../stable/stablePool';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { Token } from '../../token';
-import { TokenAmount } from '../../tokenAmount';
+import { Token } from '../../entities/token';
+import { TokenAmount } from '../../entities/tokenAmount';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
 

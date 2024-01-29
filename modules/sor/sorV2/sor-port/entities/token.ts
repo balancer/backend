@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { InputToken } from './types';
+import { InputToken } from '../types';
 import { Chain } from '@prisma/client';
 export class Token {
     public readonly address: Address;

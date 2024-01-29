@@ -1,8 +1,8 @@
 import { Path, PathWithAmount } from './pathGraph/path';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { Token } from './token';
-import { TokenAmount } from './tokenAmount';
+import { Token } from './entities/token';
+import { TokenAmount } from './entities/tokenAmount';
 import { BasePool, SwapKind } from './types';
 import { WAD } from './utils/math';
 

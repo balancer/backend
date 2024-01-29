@@ -6,10 +6,10 @@ import { BigNumber } from 'ethers';
 import { oldBnum } from '../../big-number/old-big-number';
 import { mapRoutes } from './beetsHelpers';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
-import { Swap } from './sor-port/swap';
+import { Swap } from './sor-port/entities/swap';
 import { Address } from 'viem';
 import { BatchSwapStep, SingleSwap, SwapKind } from './sor-port/types';
-import { TokenAmount } from './sor-port/tokenAmount';
+import { TokenAmount } from './sor-port/entities/tokenAmount';
 import { formatFixed } from '@ethersproject/bignumber';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 
