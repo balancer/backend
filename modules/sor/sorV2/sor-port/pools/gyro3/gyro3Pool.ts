@@ -165,7 +165,8 @@ export class Gyro3Pool implements BasePool {
             const maxAmountInAssetInPool = MathGyro.divDown(MathGyro.mulDown(tIn.scale18 + a, tOut.scale18 + a), a) - a; // (x + a)(y + a) / a - a
             const limitAmountIn = maxAmountInAssetInPool - tIn.scale18;
             const limitAmountInPlusSwapFee = MathGyro.divDown(limitAmountIn, WAD - this.swapFee);
-            return MathGyro.mulDown(limitAmountInPlusSwapFee, SWAP_LIMIT_FACTOR);
+            const limit = TokenAmount.fromScale18Amount(tIn.token, limitAmountInPlusSwapFee);
+            return MathGyro.mulDown(limit.amount, SWAP_LIMIT_FACTOR);
         }
         return MathGyro.mulDown(tOut.amount, SWAP_LIMIT_FACTOR);
     }
