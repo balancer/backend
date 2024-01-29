@@ -58,9 +58,7 @@ const data: NetworkData = {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
         excludedTokenAddresses: [
-            '0xa43a7c62d56df036c187e1966c03e2799d8987ed', // truMatic, has coingecko entry but no price
-            '0x93ef1ea305d11a9b2a3ebb9bb4fcc34695292e7d', // qETH, has coingecko entry but no price
-            '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee', // weEth, has coingekco entry but no price
+            '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has coingekco entry but no price
         ],
     },
     rpcUrl:
