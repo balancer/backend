@@ -786,12 +786,46 @@ type GqlPoolStaking {
     type: GqlPoolStakingType!
     address: String!
     gauge: GqlPoolStakingGauge
+    farm: GqlPoolStakingMasterChefFarm
+    reliquary: GqlPoolStakingReliquaryFarm
 }
 
 enum GqlPoolStakingType {
     GAUGE
+    MASTER_CHEF
+    FRESH_BEETS
+    RELIQUARY
 }
 
+type GqlPoolStakingMasterChefFarm {
+    id: ID!
+    beetsPerBlock: String!
+    rewarders: [GqlPoolStakingFarmRewarder!]
+}
+
+type GqlPoolStakingReliquaryFarm {
+    id: ID!
+    beetsPerSecond: String!
+    totalBalance: String!
+    totalWeightedBalance: String!
+    levels: [GqlPoolStakingReliquaryFarmLevel!]
+}
+
+type GqlPoolStakingReliquaryFarmLevel {
+    id: ID!
+    level: Int!
+    balance: BigDecimal!
+    requiredMaturity: Int!
+    allocationPoints: Int!
+    apr: BigDecimal!
+}
+
+type GqlPoolStakingFarmRewarder {
+    id: ID!
+    address: String!
+    tokenAddress: String!
+    rewardPerSecond: String!
+}
 enum GqlPoolStakingGaugeStatus {
     KILLED
     ACTIVE
@@ -912,6 +946,7 @@ type GqlPoolStakingGauge {
     status: GqlPoolStakingGaugeStatus!
     version: Int!
     workingSupply: String!
+    relativeVotingWeight: String!
     # There can be more than one gauge per pool, but only one preferred. For simplicity of handling, we focus on
     # the primary gauge.
     otherGauges: [GqlPoolStakingOtherGauge!]

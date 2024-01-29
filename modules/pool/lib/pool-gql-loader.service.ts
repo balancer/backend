@@ -696,11 +696,13 @@ export class PoolGqlLoaderService {
             return null;
         }
 
+        let relativeVotingWeight = '0';
         for (const staking of pool.staking) {
             // This is needed to cast type APR type of the reliquary level from prisma (float) to the type of GQL (bigdecimal/string)
             if (staking.reliquary) {
                 return {
                     ...staking,
+                    gauge: null,
                     reliquary: {
                         ...staking.reliquary,
                         levels: staking.reliquary.levels.map((level) => ({
@@ -715,6 +717,16 @@ export class PoolGqlLoaderService {
                     gauge: null,
                     reliquary: null,
                 };
+            }
+            if (staking.gauge) {
+                staking.gauge.votingGauge.forEach((gauge) => {
+                    if (gauge.status === 'ACTIVE') {
+                        relativeVotingWeight = gauge.relativeWeight || '0';
+                    }
+                });
+                if (staking.gauge.votingGauge.length > 0) {
+                    staking.gauge.votingGauge[0].relativeWeight;
+                }
             }
         }
 
@@ -737,6 +749,7 @@ export class PoolGqlLoaderService {
             ...sorted[0],
             gauge: {
                 ...sorted[0].gauge!,
+                relativeVotingWeight: relativeVotingWeight,
                 otherGauges: sorted.slice(1).map((item) => item.gauge!),
             },
             farm: null,
