@@ -1,9 +1,8 @@
-import { parseUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import { Token } from './token';
 import { DECIMAL_SCALES } from '../constants';
 import { WAD } from '../utils/math';
 import { InputAmount } from '../types';
-import _Decimal from 'decimal.js-light';
 
 export type BigintIsh = bigint | string | number;
 
@@ -66,11 +65,8 @@ export class TokenAmount {
         return new TokenAmount(this.token, divided);
     }
 
-    public toSignificant(significantDigits = 6): string {
-        return new _Decimal(this.amount.toString())
-            .div(new _Decimal(this.decimalScale.toString()))
-            .toDecimalPlaces(significantDigits)
-            .toString();
+    public toSignificant(): string {
+        return formatUnits(this.amount, this.token.decimals);
     }
 
     public toInputAmount(): InputAmount {
