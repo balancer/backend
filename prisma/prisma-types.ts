@@ -278,20 +278,34 @@ export const prismaPoolBatchSwapWithSwaps = Prisma.validator<Prisma.PrismaPoolBa
 export type PrismaPoolBatchSwapWithSwaps = Prisma.PrismaPoolBatchSwapGetPayload<typeof prismaPoolBatchSwapWithSwaps>;
 
 export const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolArgs>()({
-              include: {
-                stableDynamicData: true,
+    include: {
+        stableDynamicData: true,
+        dynamicData: true,
+        linearDynamicData: true,
+        linearData: true,
+        gyroData: true,
+        tokens: {
+            orderBy: { index: 'asc' },
+            include: {
+                token: true,
                 dynamicData: true,
-                linearDynamicData: true,
-                linearData: true,
-                gyroData: true,
-                tokens: {
-                    orderBy: { index: 'asc' },
-                    include: {
-                        token: true,
-                        dynamicData: true,
-                    },
-                },
-            }  
+            },
+        },
+    },
 });
 
 export type PrismaPoolWithDynamic = Prisma.PrismaPoolGetPayload<typeof prismaPoolWithDynamic>;
+
+export const prismaUserStakedBalanceWithGauge = Prisma.validator<Prisma.PrismaUserStakedBalanceArgs>()({
+    include: {
+        staking: {
+            include: {
+                gauge: true,
+            },
+        },
+    },
+});
+
+export type PrismaStakedBalanceWithGauge = Prisma.PrismaUserStakedBalanceGetPayload<
+    typeof prismaUserStakedBalanceWithGauge
+>;
