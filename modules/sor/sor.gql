@@ -7,35 +7,30 @@ extend type Query {
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
     ): GqlSorGetSwapsResponse!
-    sorGetCowSwaps(
+    sorV2GetSwaps(
         chain: GqlChain!
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
-        swapAmount: BigDecimal! #expected in raw amount
-    ): GqlCowSwapApiResponse!
-    sorGetBatchSwapForTokensIn(
-        tokensIn: [GqlTokenAmountHumanReadable!]!
-        tokenOut: String!
+        swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
-    ): GqlSorGetBatchSwapForTokensInResponse!
+    ): GqlSorGetSwaps!
 }
 
-type GqlCowSwapApiResponse {
-    tokenAddresses: [String!]!
-    swaps: [GqlSwap!]!
-    swapAmount: String!
-    returnAmount: String!
+type GqlSorGetSwaps {
     tokenIn: String!
     tokenOut: String!
-}
-
-type GqlSwap {
-    poolId: String!
-    assetInIndex: Int!
-    assetOutIndex: Int!
-    amount: String!
-    userData: String!
+    tokenAddresses: [String!]!
+    swapType: GqlSorSwapType!
+    swaps: [GqlSorSwap!]!
+    tokenInAmount: AmountHumanReadable!
+    tokenOutAmount: AmountHumanReadable!
+    swapAmount: AmountHumanReadable!
+    swapAmountScaled: BigDecimal!
+    returnAmount: AmountHumanReadable!
+    returnAmountScaled: BigDecimal!
+    routes: [GqlSorSwapRoute!]!
+    priceImpact: AmountHumanReadable!
 }
 
 enum GqlSorSwapType {
