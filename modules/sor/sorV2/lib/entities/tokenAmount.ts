@@ -65,7 +65,7 @@ export class TokenAmount {
         return new TokenAmount(this.token, divided);
     }
 
-    public toSignificant(): string {
+    public toHuman(): string {
         return formatUnits(this.amount, this.token.decimals);
     }
 

@@ -76,20 +76,6 @@ input GqlGraphTraversalConfigInput {
     poolIdsToInclude: [String]
 }
 
-type GqlSorGetSwaps {
-    tokenIn: String!
-    tokenOut: String!
-    tokenAddresses: [String!]!
-    swapType: GqlSorSwapType!
-    swaps: [GqlSorSwap!]!
-    tokenInAmount: AmountHumanReadable!
-    tokenOutAmount: AmountHumanReadable!
-    swapAmount: AmountHumanReadable!
-    returnAmount: AmountHumanReadable!
-    routes: [GqlSorSwapRoute!]!
-    priceImpact: AmountHumanReadable!
-}
-
 type GqlSorGetSwapsResponse {
     tokenIn: String!
     tokenOut: String!

@@ -12,8 +12,7 @@ import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, getTokenAmountRaw, zeroResponse, zeroResponseV2 } from './utils';
-import { AnyAaaaRecord } from 'dns';
+import { getToken, getTokenAmountHuman, zeroResponse, zeroResponseV2 } from './utils';
 
 export class SorService {
     async getSorV2Swaps(args: QuerySorV2GetSwapsArgs): Promise<GqlSorGetSwaps> {
@@ -45,7 +44,7 @@ export class SorService {
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
 
-        const swap = await sorV2Service.getSwap({
+        return sorV2Service.getSorSwaps({
             chain: args.chain!,
             swapAmount: amount,
             swapOptions: args.swapOptions,
@@ -53,19 +52,6 @@ export class SorService {
             tokenIn: tokenIn,
             tokenOut: tokenOut,
         });
-
-        if (!swap) return emptyResponse;
-
-        try {
-            return sorV2Service.mapToSorSwaps(
-                swap,
-                args.chain,
-                args.swapOptions.queryBatchSwap ? args.swapOptions.queryBatchSwap : false,
-            );
-        } catch (err) {
-            console.log(`Error Retrieving QuerySwap`, err);
-            return emptyResponse;
-        }
     }
 
     async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {

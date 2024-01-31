@@ -8,7 +8,6 @@ import { DeploymentEnv } from '../../network/network-config-types';
 import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
-import { getToken } from '../utils';
 import { Swap } from './lib/entities/swap';
 import { Address, parseUnits } from 'viem';
 import { BatchSwapStep, SingleSwap, SwapKind } from './lib/types';
@@ -18,7 +17,7 @@ import { TokenAmount } from './lib/entities/tokenAmount';
 import { poolService } from '../../pool/pool.service';
 import { mapRoutes } from './beetsHelpers';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
-import { formatFixed } from '@ethersproject/bignumber';
+import { getToken, zeroResponseV2 } from '../utils';
 
 export class SorV2Service implements SwapService {
     public async getSwapResult(
@@ -65,6 +64,36 @@ export class SorV2Service implements SwapService {
                 },
             });
             return new SwapResultV2(null, chain);
+        }
+    }
+
+    public async getSorSwaps(input: GetSwapsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwaps> {
+        const swap = await this.getSwap(input, maxNonBoostedPathDepth);
+        const emptyResponse = zeroResponseV2(input.swapType, input.tokenIn, input.tokenOut);
+
+        if (!swap) {
+            return emptyResponse;
+        }
+
+        try {
+            return this.mapToSorSwaps(
+                swap!,
+                input.chain,
+                input.swapOptions.queryBatchSwap ? input.swapOptions.queryBatchSwap : false,
+            );
+        } catch (err: any) {
+            console.log(`Error Retrieving QuerySwap`, err);
+            Sentry.captureException(err.message, {
+                tags: {
+                    service: 'sorV2 query swap',
+                    tokenIn: input.tokenIn,
+                    tokenOut: input.tokenOut,
+                    swapAmount: input.swapAmount.toHuman(),
+                    swapType: input.swapType,
+                    chain: input.chain,
+                },
+            });
+            return emptyResponse;
         }
     }
 
@@ -171,9 +200,9 @@ export class SorV2Service implements SwapService {
             swapType: this.mapSwapKindToSwapType(swap.swapKind),
             tokenInAmount: inputAmount.amount.toString(),
             tokenOutAmount: outputAmount.amount.toString(),
-            swapAmount: swapAmount.toSignificant(),
+            swapAmount: swapAmount.toHuman(),
             swapAmountScaled: swapAmount.amount.toString(),
-            returnAmount: returnAmount.toSignificant(),
+            returnAmount: returnAmount.toHuman(),
             returnAmountScaled: returnAmount.amount.toString(),
             routes: routes.map((route) => ({
                 ...route,
@@ -234,7 +263,7 @@ export class SorV2Service implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 50,
+                        gt: 1000,
                     },
                 },
                 id: {
