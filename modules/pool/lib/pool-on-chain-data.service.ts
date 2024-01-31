@@ -52,7 +52,7 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, 1024);
+        const state = await fetchOnChainPoolState(filteredPools, networkContext.chain === 'ZKEVM' ? 190 : 1024);
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -98,9 +98,13 @@ export class PoolOnChainDataService {
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
 
         const tokenPrices = await this.tokenService.getTokenPrices();
-        const onchainResults = await fetchOnChainPoolData(filteredPools, this.options.vaultAddress, 1024);
+        const onchainResults = await fetchOnChainPoolData(
+            filteredPools,
+            this.options.vaultAddress,
+            networkContext.chain === 'ZKEVM' ? 190 : 1024,
+        );
         const gyroFees = await (this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, 1024)
+            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, networkContext.chain === 'ZKEVM' ? 190 : 1024)
             : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];
