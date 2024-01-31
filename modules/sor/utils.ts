@@ -3,9 +3,9 @@ import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GqlSorGetSwaps, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
-import { TokenAmount } from './sorV2/sor-port/entities/tokenAmount';
-import { Token } from './sorV2/sor-port/entities/token';
-import { NATIVE_ADDRESS } from './sorV2/sor-port/constants';
+import { TokenAmount } from './sorV2/lib/entities/tokenAmount';
+import { Token } from './sorV2/lib/entities/token';
+import { NATIVE_ADDRESS } from './sorV2/lib/constants';
 import { Address } from 'viem';
 
 export async function getTokenAmountHuman(tokenAddr: string, humanAmount: string, chain: Chain): Promise<TokenAmount> {

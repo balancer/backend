@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../schema';
-import { TokenAmount } from './sorV2/sor-port/entities/tokenAmount';
+import { TokenAmount } from './sorV2/lib/entities/tokenAmount';
 export interface GetSwapsInput {
     chain: Chain;
     tokenIn: string;
