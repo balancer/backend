@@ -36,6 +36,7 @@ export class PoolCreatorService {
         let counter = 1;
         for (const subgraphPool of sortedSubgraphPools) {
             console.log(`Syncing pool ${counter} of ${sortedSubgraphPools.length}`);
+            console.log(`Pool ID: ${subgraphPool.id}`);
             counter = counter + 1;
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
@@ -200,6 +201,27 @@ export class PoolCreatorService {
         const { tokens, ...poolWithoutTokens } = prismaPoolRecordWithAssociations;
 
         // Make sure all tokens are there, for managed pools tokenlist can change
+        // Sometimes the token is not in the DB, so we need to create it
+        await prisma.prismaToken.createMany({
+            skipDuplicates: true,
+            data: [
+                ...pool.tokens!.map((token) => ({
+                    address: token.address,
+                    symbol: token.symbol,
+                    name: token.name,
+                    decimals: token.decimals,
+                    chain: this.chain,
+                })),
+                {
+                    address: pool.address,
+                    symbol: pool.symbol || '',
+                    name: pool.name || '',
+                    decimals: 18,
+                    chain: this.chain,
+                },
+            ],
+        });
+
         for (const token of tokens.update) {
             await prisma.prismaPoolToken.upsert({
                 where: token.where,
