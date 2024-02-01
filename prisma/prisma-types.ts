@@ -14,12 +14,9 @@ export type PrismaPoolTokenWithDynamicData = Prisma.PrismaPoolTokenGetPayload<ty
 
 export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
-        elementData: true,
         dynamicData: true,
         stableDynamicData: true,
         linearDynamicData: true,
-        gyroData: true,
         staking: {
             include: {
                 farm: {
@@ -76,7 +73,6 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                 token: true,
                 nestedPool: {
                     include: {
-                        linearData: true,
                         dynamicData: true,
                         stableDynamicData: true,
                         linearDynamicData: true,
@@ -87,7 +83,6 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                                 dynamicData: true,
                                 nestedPool: {
                                     include: {
-                                        linearData: true,
                                         dynamicData: true,
                                         linearDynamicData: true,
                                         tokens: {
@@ -112,7 +107,6 @@ export type PrismaPoolWithExpandedNesting = Prisma.PrismaPoolGetPayload<typeof p
 
 const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
         dynamicData: true,
         stableDynamicData: true,
         linearDynamicData: true,
@@ -123,7 +117,6 @@ const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>
                 dynamicData: true,
                 nestedPool: {
                     include: {
-                        linearData: true,
                         dynamicData: true,
                         linearDynamicData: true,
                         tokens: {
@@ -146,7 +139,6 @@ export type PrismaNestedPoolWithSingleLayerNesting = Prisma.PrismaPoolGetPayload
 
 const nestedPoolWithNoNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
         dynamicData: true,
         linearDynamicData: true,
         tokens: {
@@ -167,7 +159,6 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
         dynamicData: true,
         nestedPool: {
             include: {
-                linearData: true,
                 dynamicData: true,
                 stableDynamicData: true,
                 linearDynamicData: true,
@@ -178,7 +169,6 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                         dynamicData: true,
                         nestedPool: {
                             include: {
-                                linearData: true,
                                 dynamicData: true,
                                 linearDynamicData: true,
                                 tokens: {
@@ -282,8 +272,6 @@ export const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolArgs>()({
         stableDynamicData: true,
         dynamicData: true,
         linearDynamicData: true,
-        linearData: true,
-        gyroData: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {

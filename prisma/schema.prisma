@@ -64,9 +64,6 @@ model PrismaPool {
 
     vaultVersion        Int                 @default(2)
 
-    linearData          PrismaPoolLinearData?
-    elementData         PrismaPoolElementData?
-    gyroData            PrismaPoolGyroData?
     staticTypeData      Json @default("{}")
 
     tokens              PrismaPoolToken[]
@@ -107,61 +104,6 @@ enum PrismaPoolType {
     GYRO3
     GYROE
     FX
-}
-
-model PrismaPoolLinearData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    mainIndex           Int
-    wrappedIndex        Int
-}
-
-model PrismaPoolElementData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    unitSeconds         String
-    principalToken      String
-    baseToken           String
-}
-
-model PrismaPoolGyroData{
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    alpha               String
-    beta                String
-    sqrtAlpha           String?
-    sqrtBeta            String?
-    root3Alpha          String?
-    c                   String?
-    s                   String?
-    lambda              String?
-    tauAlphaX           String?
-    tauAlphaY           String?
-    tauBetaX            String?
-    tauBetaY            String?
-    u                   String?
-    v                   String?
-    w                   String?
-    z                   String?
-    dSq                 String?
 }
 
 model PrismaPoolDynamicData {
