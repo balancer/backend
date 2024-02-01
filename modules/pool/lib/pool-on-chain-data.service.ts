@@ -9,6 +9,7 @@ import { fetchOnChainPoolState } from './pool-onchain-state';
 import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
+import { LinearData } from '../subgraph-mapper';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -91,7 +92,6 @@ export class PoolOnChainDataService {
                 stableDynamicData: true,
                 dynamicData: true,
                 linearDynamicData: true,
-                linearData: true,
             },
         });
 
@@ -228,7 +228,10 @@ export class PoolOnChainDataService {
                     }
 
                     // linear wrapped token rate
-                    if (onchainData.wrappedTokenRate && pool.linearData?.wrappedIndex === poolToken.index) {
+                    if (
+                        onchainData.wrappedTokenRate &&
+                        (pool.staticTypeData as LinearData)?.wrappedIndex === poolToken.index
+                    ) {
                         priceRate = onchainData.wrappedTokenRate;
                     }
 

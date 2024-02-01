@@ -60,26 +60,26 @@ describe('subgraphToPrismaCreate', () => {
         const result = subgraphToPrismaCreate(linearPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('LINEAR');
         expect(result.data.linearDynamicData?.create.upperTarget).toBe(linearPool.upperTarget);
-        expect(result.data.linearData?.create.wrappedIndex).toBe(linearPool.wrappedIndex);
+        expect(result.data.staticTypeData['wrappedIndex']).toBe(linearPool.wrappedIndex);
     });
 
     it('should return correct object for element pool', () => {
         const result = subgraphToPrismaCreate(elementPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('ELEMENT');
-        expect(result.data.elementData?.create.principalToken).toBe(elementPool.principalToken);
+        expect(result.data.staticTypeData['principalToken']).toBe(elementPool.principalToken);
     });
 
     it('should return correct object for gyro pool', () => {
         const result = subgraphToPrismaCreate(gyroPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('GYROE');
-        expect(result.data.gyroData?.create.alpha).toBe(gyroPool.alpha);
-        expect(result.data.gyroData?.create.tauAlphaX).toBe(gyroPool.tauAlphaX);
+        expect(result.data.staticTypeData['alpha']).toBe(gyroPool.alpha);
+        expect(result.data.staticTypeData['tauAlphaX']).toBe(gyroPool.tauAlphaX);
     });
 
     it('should return correct object for fx pool', () => {
         const result = subgraphToPrismaCreate(fxPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('FX');
-        expect(result.data.poolTypeSpecificData['alpha']).toBe(gyroPool.alpha);
+        expect(result.data.staticTypeData['alpha']).toBe(gyroPool.alpha);
     });
 
     describe('nested pools', () => {

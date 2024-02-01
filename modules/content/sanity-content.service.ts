@@ -12,6 +12,7 @@ import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 import { chainToIdMap } from '../network/network-config';
 import { wrap } from 'module';
+import { LinearData } from '../pool/subgraph-mapper';
 
 interface SanityToken {
     name: string;
@@ -185,9 +186,8 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            const wrappedLinearPoolToken = pools.find(
-                (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex].address === token.address,
-            );
+            const wrappedIndex = (pool?.staticTypeData as LinearData).wrappedIndex;
+            const wrappedLinearPoolToken = pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address);
 
             if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
@@ -216,8 +216,8 @@ export class SanityContentService implements ContentService {
                 symbol: true,
                 name: true,
                 type: true,
+                staticTypeData: true,
                 tokens: { orderBy: { index: 'asc' } },
-                linearData: true,
             },
         });
     }

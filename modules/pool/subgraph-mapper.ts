@@ -26,32 +26,6 @@ export const subgraphToPrismaCreate = (
                     ...dbData.dynamicData,
                 },
             },
-            linearData:
-                dbData.base.type === 'LINEAR'
-                    ? {
-                          create: {
-                              id: dbData.base.id,
-                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
-                          },
-                      }
-                    : undefined,
-            elementData:
-                dbData.base.type === 'ELEMENT'
-                    ? {
-                          create: {
-                              id: dbData.base.id,
-                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
-                          },
-                      }
-                    : undefined,
-            gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
-                ? {
-                      create: {
-                          id: dbData.base.id,
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
-                      },
-                  }
-                : undefined,
             linearDynamicData:
                 dbData.base.type === 'LINEAR'
                     ? {
@@ -100,29 +74,6 @@ export const subgraphToPrismaUpdate = (
                 },
             })),
         },
-        linearData:
-            dbData.base.type === 'LINEAR'
-                ? {
-                      update: {
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
-                      },
-                  }
-                : undefined,
-        elementData:
-            dbData.base.type === 'ELEMENT'
-                ? {
-                      update: {
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
-                      },
-                  }
-                : undefined,
-        gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
-            ? {
-                  update: {
-                      ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
-                  },
-              }
-            : undefined,
         linearDynamicData:
             dbData.base.type === 'LINEAR'
                 ? {

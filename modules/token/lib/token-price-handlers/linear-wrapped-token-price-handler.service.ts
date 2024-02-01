@@ -3,6 +3,7 @@ import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { networkContext } from '../../../network/network-context.service';
+import { LinearData } from '../../../pool/subgraph-mapper';
 
 export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -22,24 +23,29 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
                 chain: networkContext.chain,
                 categories: { none: { category: 'BLACK_LISTED' } },
             },
-            include: { linearData: true, tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } } },
+            include: { tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } } },
         });
         const mainTokenPrices = await prisma.prismaTokenPrice.findMany({
             where: {
                 chain: networkContext.chain,
-                tokenAddress: { in: pools.map((pool) => pool.tokens[pool.linearData?.mainIndex || 0].address) },
+                tokenAddress: {
+                    in: pools.map((pool) => pool.tokens[(pool.staticTypeData as LinearData)?.mainIndex || 0].address),
+                },
                 timestamp,
             },
         });
 
         for (const token of tokens) {
             const pool = pools.find(
-                (pool) => pool.linearData && token.address === pool.tokens[pool.linearData.wrappedIndex].address,
+                (pool) =>
+                    (pool.staticTypeData as LinearData) &&
+                    token.address === pool.tokens[(pool.staticTypeData as LinearData).wrappedIndex].address,
             );
+            const linearData = pool?.staticTypeData as LinearData;
 
-            if (pool && pool.linearData) {
-                const mainToken = pool.tokens[pool.linearData.mainIndex];
-                const wrappedToken = pool.tokens[pool.linearData.wrappedIndex];
+            if (pool && linearData) {
+                const mainToken = pool.tokens[linearData.mainIndex];
+                const wrappedToken = pool.tokens[linearData.wrappedIndex];
                 const mainTokenPrice = mainTokenPrices.find(
                     (tokenPrice) => tokenPrice.tokenAddress == mainToken.address,
                 );

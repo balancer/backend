@@ -5,6 +5,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { TokenService } from '../../../../token/token.service';
 import { networkContext } from '../../../../network/network-context.service';
 import { liquidStakedBaseAprService } from '../liquid-staked-base-apr.service';
+import { LinearData } from '../../../subgraph-mapper';
 
 const BOO_TOKEN_ADDRESS = '0x841FAD6EAe12c286d1Fd18d1d525DFfA75C7EFFE'.toLowerCase();
 
@@ -23,7 +24,6 @@ export class SpookySwapAprService implements PoolAprService {
             where: { chain: networkContext.chain, id: { in: pools.map((pool) => pool.id) } },
             include: {
                 dynamicData: true,
-                linearData: true,
                 tokens: {
                     orderBy: { index: 'asc' },
                     include: {
@@ -38,14 +38,14 @@ export class SpookySwapAprService implements PoolAprService {
 
         for (const pool of expandedSpookyPools) {
             if (
-                !pool.linearData ||
+                !(pool.staticTypeData as LinearData) ||
                 !pool.dynamicData ||
-                pool.tokens[pool.linearData.mainIndex].address !== this.booAddress
+                pool.tokens[(pool.staticTypeData as LinearData).mainIndex].address !== this.booAddress
             ) {
                 continue;
             }
 
-            const linearData = pool.linearData;
+            const linearData = pool.staticTypeData as LinearData;
             const wrappedToken = pool.tokens[linearData.wrappedIndex];
             const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, this.booAddress);
             const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
