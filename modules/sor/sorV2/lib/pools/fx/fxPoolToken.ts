@@ -1,8 +1,7 @@
 import { parseUnits } from 'viem';
-import { Token } from '../../entities/token';
-import { BigintIsh, TokenAmount } from '../../entities/tokenAmount';
 import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
+import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
 
 export class FxPoolToken extends TokenAmount {
     public readonly index: number;
