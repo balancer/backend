@@ -9,6 +9,8 @@ import { fetchOnChainPoolState } from './pool-onchain-state';
 import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
+import { filter } from 'lodash';
+import { fetchNormalizedLiquidity } from './pool-normalized-liquidty';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -32,6 +34,7 @@ export class PoolOnChainDataService {
         return {
             chain: networkContext.chain,
             vaultAddress: networkContext.data.balancer.v2.vaultAddress,
+            balancerQueriesAddress: networkContext.data.balancer.v2.balancerQueriesAddress,
             yieldProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
             swapProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
@@ -101,6 +104,11 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
+            networkContext.chain === 'ZKEVM' ? 190 : 1024,
+        );
+        const normalizedLiquidityResults = await fetchNormalizedLiquidity(
+            filteredPools,
+            this.options.balancerQueriesAddress,
             networkContext.chain === 'ZKEVM' ? 190 : 1024,
         );
         const gyroFees = await (this.options.gyroConfig
