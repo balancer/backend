@@ -131,9 +131,9 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
     }
 
-    public async getGyroPools(): Promise<GqlPoolGyro[]> {
+    public async getGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
         const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: networkContext.chain },
+            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: { in: chains } },
             orderBy: { dynamicData: { totalLiquidity: 'desc' } },
             include: prismaPoolWithExpandedNesting.include,
         });

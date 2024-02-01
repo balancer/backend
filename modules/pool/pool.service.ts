@@ -83,8 +83,8 @@ export class PoolService {
         return this.poolGqlLoaderService.getLinearPools(chains);
     }
 
-    public async getGqlGyroPools(): Promise<GqlPoolGyro[]> {
-        return this.poolGqlLoaderService.getGyroPools();
+    public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
+        return this.poolGqlLoaderService.getGyroPools(chains);
     }
 
     public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
