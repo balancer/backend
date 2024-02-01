@@ -236,6 +236,20 @@ export class PoolCreatorService {
             });
         }
 
+        await prisma.prismaPoolTokenDynamicData.createMany({
+            skipDuplicates: true,
+            data: pool.tokens!.map((token) => ({
+                id: token.id,
+                chain: this.chain,
+                poolTokenId: token.id,
+                blockNumber,
+                priceRate: token.priceRate || '1.0',
+                weight: token.weight,
+                balance: token.balance,
+                balanceUSD: 0,
+            })),
+        });
+
         // TODO: It's just a quick fix. Remove after merging json column replacement for tables
         if (pool.poolType!.includes('Gyro')) {
             await prisma.prismaPoolGyroData.upsert({
