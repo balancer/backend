@@ -1,16 +1,14 @@
 import { Router } from './router';
-import { Token } from './entities/token';
-import { BasePool, SwapKind, SwapOptions } from './types';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { WeightedPool } from './pools/weighted/weightedPool';
-import { Swap } from './entities/swap';
 import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
 import { GyroEPool } from './pools/gyroE/gyroEPool';
+import { BasePool, Swap, SwapKind, SwapOptions, Token } from '@balancer/sdk';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,

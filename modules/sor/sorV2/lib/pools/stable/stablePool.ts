@@ -1,9 +1,5 @@
-import { Token } from '../../entities/token';
-import { TokenAmount, BigintIsh } from '../../entities/tokenAmount';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
-import { BasePool, SwapKind } from '../../types';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import {
@@ -15,6 +11,8 @@ import {
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
 } from './stableMath';
+import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -44,7 +42,7 @@ export class StablePool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: GqlPoolType = 'COMPOSABLE_STABLE';
+    public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
     public readonly bptIndex: number;
@@ -63,12 +61,13 @@ export class StablePool implements BasePool {
         for (const poolToken of pool.tokens) {
             if (!poolToken.dynamicData?.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
                 new StablePoolToken(

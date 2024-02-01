@@ -1,7 +1,6 @@
+import { BatchSwapStep, NATIVE_ADDRESS, SingleSwap, SwapKind, ZERO_ADDRESS } from '@balancer/sdk';
 import { GqlPoolMinimal, GqlSorSwapRoute, GqlSorSwapRouteHop } from '../../../schema';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BatchSwapStep, SingleSwap, SwapKind } from './lib/types';
-import { NATIVE_ADDRESS, ZERO_ADDRESS } from './lib/constants';
 
 export function mapRoutes(
     swaps: BatchSwapStep[] | SingleSwap,

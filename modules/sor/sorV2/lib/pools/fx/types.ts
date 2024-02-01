@@ -1,4 +1,4 @@
-import { SwapKind } from '../../types';
+import { SwapKind } from '@balancer/sdk';
 import { FxPoolToken } from './fxPoolToken';
 
 export type FxPoolPairData = {
