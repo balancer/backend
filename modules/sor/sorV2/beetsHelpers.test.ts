@@ -1,7 +1,7 @@
-import { SingleSwap, SwapKind, BatchSwapStep } from '@balancer/sdk';
 import { GqlPoolMinimal, GqlSorSwapRoute } from '../../../schema';
 import { mapBatchSwap, mapRoutes, splitPaths } from './beetsHelpers';
 import { poolService } from '../../pool/pool.service';
+import { BatchSwapStep, SingleSwap, SwapKind } from './sor-port/types';
 
 // npx jest --testPathPattern=modules/sor/sorV2/beetsHelpers.test.ts
 describe('sorV2 Service - Routes', () => {

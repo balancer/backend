@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
-import { GqlCowSwapApiResponse, GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../schema';
-import { TokenAmount } from '@balancer/sdk';
+import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../schema';
+import { TokenAmount } from './sorV2/lib/entities/tokenAmount';
 export interface GetSwapsInput {
     chain: Chain;
     tokenIn: string;
@@ -19,7 +19,6 @@ export interface GraphTraversalConfig {
 }
 
 export interface SwapResult {
-    getCowSwapResponse(queryFirst: boolean): Promise<GqlCowSwapApiResponse>;
     getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse>;
     isValid: boolean;
     outputAmount: bigint;

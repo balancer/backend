@@ -1,9 +1,9 @@
 import { formatEther } from 'viem';
-import { GqlSorSwapType, GqlCowSwapApiResponse, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../../schema';
+import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../../schema';
 import { GetSwapsInput, SwapService, SwapResult } from '../types';
 import { BalancerSorService } from './balancer-sor.service';
 import { tokenService } from '../../token/token.service';
-import { TokenAmount } from '@balancer/sdk';
+import { TokenAmount } from '../sorV2/lib/entities/tokenAmount';
 
 class SwapResultV1 implements SwapResult {
     public inputAmount: bigint = BigInt(0);
@@ -21,10 +21,6 @@ class SwapResultV1 implements SwapResult {
                 swapType === 'EXACT_IN' ? BigInt(swap.returnAmountScaled) : BigInt(swap.swapAmountScaled);
             this.isValid = swap.swaps.length === 0 ? false : true;
         }
-    }
-
-    async getCowSwapResponse(queryFirst = false): Promise<GqlCowSwapApiResponse> {
-        throw new Error('Use Balancer Service');
     }
 
     async getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse> {

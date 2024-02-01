@@ -49,6 +49,10 @@ export class UserSyncWalletBalanceService {
         return AllNetworkConfigs['250'].data.fbeets!.address;
     }
 
+    get fbeetsPoolId() {
+        return AllNetworkConfigs['250'].data.fbeets!.poolId;
+    }
+
     get provider() {
         return AllNetworkConfigs[this.chainId].provider;
     }
@@ -311,8 +315,9 @@ export class UserSyncWalletBalanceService {
                 tokenAddress: this.fbeetsAddress,
                 balance,
                 balanceNum: parseFloat(balance),
+                poolId: this.fbeetsPoolId,
             },
-            update: { balance: balance, balanceNum: parseFloat(balance) },
+            update: { balance: balance, balanceNum: parseFloat(balance), poolId: this.fbeetsPoolId },
         });
     }
 

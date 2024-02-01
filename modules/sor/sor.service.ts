@@ -1,46 +1,57 @@
 import {
-    GqlCowSwapApiResponse,
     GqlSorSwapType,
     GqlSorGetSwapsResponse,
     QuerySorGetSwapsArgs,
-    QuerySorGetCowSwapsArgs,
+    GqlSorGetSwaps,
+    QuerySorV2GetSwapsArgs,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorV2.service';
 import { GetSwapsInput, SwapResult } from './types';
-import { EMPTY_COWSWAP_RESPONSE } from './constants';
+import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, getTokenAmountRaw, zeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, zeroResponse, zeroResponseV2 } from './utils';
 
 export class SorService {
-    async getCowSwaps(args: QuerySorGetCowSwapsArgs): Promise<GqlCowSwapApiResponse> {
-        console.log('getCowSwaps args', JSON.stringify(args));
-        const amountToken = args.swapType === 'EXACT_IN' ? args.tokenIn : args.tokenOut;
-        // Use TokenAmount to help follow scaling requirements in later logic
-        // args.swapAmount is RawScale, e.g. 1USDC should be passed as 1000000
-        const amount = await getTokenAmountRaw(amountToken, args.swapAmount, args.chain!);
+    async getSorV2Swaps(args: QuerySorV2GetSwapsArgs): Promise<GqlSorGetSwaps> {
+        console.log('getSorSwaps args', JSON.stringify(args));
+        const tokenIn = args.tokenIn.toLowerCase();
+        const tokenOut = args.tokenOut.toLowerCase();
+        const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
+        const emptyResponse = zeroResponseV2(args.swapType, args.tokenIn, args.tokenOut);
 
-        const swap = await sorV2Service.getSwapResult({
-            chain: args.chain!,
-            swapAmount: amount,
-            swapType: args.swapType,
-            tokenIn: args.tokenIn.toLowerCase(),
-            tokenOut: args.tokenOut.toLowerCase(),
-            swapOptions: {},
-        });
-        const emptyResponse = EMPTY_COWSWAP_RESPONSE(args.tokenIn, args.tokenOut, amount);
-
-        if (!swap) return emptyResponse;
-
+        // check if tokens addresses exist
         try {
-            // Updates with latest onchain data before returning
-            return await swap.getCowSwapResponse(true);
-        } catch (err) {
-            console.log(`Error Retrieving QuerySwap`, err);
+            await getToken(tokenIn, args.chain!);
+            await getToken(tokenOut, args.chain!);
+        } catch (e: any) {
+            Sentry.captureException(e.message, {
+                tags: {
+                    service: 'sorV2',
+                    tokenIn,
+                    tokenOut,
+                    swapAmount: args.swapAmount,
+                    swapType: args.swapType,
+                    chain: args.chain,
+                },
+            });
             return emptyResponse;
         }
+
+        // Use TokenAmount to help follow scaling requirements in later logic
+        // args.swapAmount is HumanScale
+        const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
+
+        return sorV2Service.getSorSwaps({
+            chain: args.chain!,
+            swapAmount: amount,
+            swapOptions: args.swapOptions,
+            swapType: args.swapType,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+        });
     }
 
     async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {
