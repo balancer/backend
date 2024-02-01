@@ -1,19 +1,17 @@
 import { Chain } from '@prisma/client';
-import { BasePool, SwapKind } from '../../types';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { GqlPoolType } from '../../../../../../schema';
 import { StablePoolToken } from '../stable/stablePool';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { Token } from '../../entities/token';
-import { TokenAmount } from '../../entities/tokenAmount';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
+import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: GqlPoolType = 'META_STABLE';
+    public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
     public readonly tokens: StablePoolToken[];
@@ -29,12 +27,13 @@ export class MetaStablePool implements BasePool {
         for (const poolToken of pool.tokens) {
             if (!poolToken.dynamicData?.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
                 new StablePoolToken(

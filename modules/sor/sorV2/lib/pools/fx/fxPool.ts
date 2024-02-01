@@ -1,16 +1,14 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { BasePool, SwapKind } from '../../types';
-import { GqlPoolType } from '../../../../../../schema';
 import { FxPoolToken } from './fxPoolToken';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { Token } from '../../entities/token';
-import { TokenAmount } from '../../entities/tokenAmount';
 import { MathFx, parseFixedCurveParam } from './helpers';
 import { FxData } from '../../../../../pool/subgraph-mapper';
 import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
+import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
 
 const isUSDC = (address: string): boolean => {
     return (
@@ -23,7 +21,7 @@ export class FxPool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: GqlPoolType = 'FX';
+    public readonly poolType: PoolType = PoolType.Fx;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly alpha: bigint;
@@ -48,12 +46,13 @@ export class FxPool implements BasePool {
             }
 
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
                 new FxPoolToken(

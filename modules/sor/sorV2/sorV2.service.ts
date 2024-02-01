@@ -8,16 +8,14 @@ import { DeploymentEnv } from '../../network/network-config-types';
 import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
-import { Swap } from './lib/entities/swap';
-import { Address, parseUnits } from 'viem';
-import { BatchSwapStep, SingleSwap, SwapKind } from './lib/types';
+import { Address, formatUnits } from 'viem';
 import { sorGetSwapsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
-import { TokenAmount } from './lib/entities/tokenAmount';
 import { poolService } from '../../pool/pool.service';
 import { mapRoutes } from './beetsHelpers';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, zeroResponseV2 } from '../utils';
+import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
 
 export class SorV2Service implements SwapService {
     public async getSwapResult(
@@ -88,7 +86,7 @@ export class SorV2Service implements SwapService {
                     service: 'sorV2 query swap',
                     tokenIn: input.tokenIn,
                     tokenOut: input.tokenOut,
-                    swapAmount: input.swapAmount.toHuman(),
+                    swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
                     swapType: input.swapType,
                     chain: input.chain,
                 },
@@ -146,7 +144,8 @@ export class SorV2Service implements SwapService {
         else {
             const rpcUrl = AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl;
             const balancerQueriesAddress = AllNetworkConfigsKeyedOnChain[chain].data.balancer.v2.balancerQueriesAddress;
-            const updatedResult = await swap.query(rpcUrl, balancerQueriesAddress as Address);
+            // const updatedResult = await swap.query(rpcUrl, balancerQueriesAddress as Address);
+            const updatedResult = await swap.query(rpcUrl);
 
             const inputAmount = swap.swapKind === SwapKind.GivenIn ? swap.inputAmount : updatedResult;
             const outputAmount = swap.swapKind === SwapKind.GivenIn ? updatedResult : swap.outputAmount;
@@ -200,9 +199,9 @@ export class SorV2Service implements SwapService {
             swapType: this.mapSwapKindToSwapType(swap.swapKind),
             tokenInAmount: inputAmount.amount.toString(),
             tokenOutAmount: outputAmount.amount.toString(),
-            swapAmount: swapAmount.toHuman(),
+            swapAmount: formatUnits(swapAmount.amount, swapAmount.token.decimals),
             swapAmountScaled: swapAmount.amount.toString(),
-            returnAmount: returnAmount.toHuman(),
+            returnAmount: formatUnits(returnAmount.amount, returnAmount.token.decimals),
             returnAmountScaled: returnAmount.amount.toString(),
             routes: routes.map((route) => ({
                 ...route,
@@ -270,13 +269,15 @@ export class SorV2Service implements SwapService {
                     notIn: [...poolIdsToExclude, ...poolsToIgnore],
                 },
                 type: {
-                    notIn: [
-                        'LINEAR', // Linear pools are sunset so ignore to avoid issues related to lack of support
-                        'LIQUIDITY_BOOTSTRAPPING', // not supported by b-sdk
-                        'ELEMENT', // not supported by b-sdk
-                        'UNKNOWN', // not supported by b-sdk
-                        'INVESTMENT', // not supported by b-sdk
-                        'STABLE', // not supported by b-sdk
+                    in: [
+                        'WEIGHTED',
+                        'META_STABLE',
+                        'PHANTOM_STABLE',
+                        'COMPOSABLE_STABLE',
+                        'FX',
+                        'GYRO',
+                        'GYRO3',
+                        'GYROE',
                     ],
                 },
             },

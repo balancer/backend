@@ -6,12 +6,10 @@ import { BigNumber } from 'ethers';
 import { oldBnum } from '../../big-number/old-big-number';
 import { mapRoutes } from './beetsHelpers';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
-import { Swap } from './lib/entities/swap';
 import { Address } from 'viem';
-import { BatchSwapStep, SingleSwap, SwapKind } from './lib/types';
-import { TokenAmount } from './lib/entities/tokenAmount';
 import { formatFixed } from '@ethersproject/bignumber';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
+import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
 
 export class SwapResultV2 implements SwapResult {
     private swap: Swap | null;
@@ -40,9 +38,7 @@ export class SwapResultV2 implements SwapResult {
         if (!queryFirst) return this.mapResultToBeetsSwap(this.swap, this.swap.inputAmount, this.swap.outputAmount);
         else {
             const rpcUrl = AllNetworkConfigsKeyedOnChain[this.chain].data.rpcUrl;
-            const balancerQueriesAddress =
-                AllNetworkConfigsKeyedOnChain[this.chain].data.balancer.v2.balancerQueriesAddress;
-            const updatedResult = await this.swap.query(rpcUrl, balancerQueriesAddress as Address);
+            const updatedResult = await this.swap.query(rpcUrl);
 
             const inputAmount = this.swap.swapKind === SwapKind.GivenIn ? this.swap.inputAmount : updatedResult;
             const outputAmount = this.swap.swapKind === SwapKind.GivenIn ? updatedResult : this.swap.outputAmount;

@@ -1,6 +1,4 @@
-import { Token } from '../entities/token';
-import { BigintIsh, TokenAmount } from '../entities/tokenAmount';
-import { SwapKind } from '../types';
+import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 
 export function checkInputs(
     tokenIn: Token,
