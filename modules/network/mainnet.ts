@@ -342,6 +342,12 @@ const data: NetworkData = {
                 path: 'apr',
                 isIbYield: true,
             },
+            rsETH: {
+                tokenAddress: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
