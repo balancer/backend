@@ -50,6 +50,8 @@ export const zeroResponseV2 = (swapType: GqlSorSwapType, tokenIn: string, tokenO
         swapAmountScaled: '0',
         returnAmount: '0',
         returnAmountScaled: '0',
+        effectivePrice: '0',
+        effectivePriceReversed: '0',
         routes: [],
         priceImpact: '0',
     };

@@ -29,6 +29,8 @@ type GqlSorGetSwaps {
     swapAmountScaled: BigDecimal!
     returnAmount: AmountHumanReadable!
     returnAmountScaled: BigDecimal!
+    effectivePrice: AmountHumanReadable!
+    effectivePriceReversed: AmountHumanReadable!
     routes: [GqlSorSwapRoute!]!
     priceImpact: AmountHumanReadable!
 }
