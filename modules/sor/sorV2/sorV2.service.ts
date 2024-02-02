@@ -8,7 +8,7 @@ import { DeploymentEnv } from '../../network/network-config-types';
 import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
-import { Address, formatUnits } from 'viem';
+import { Address, formatUnits, parseUnits } from 'viem';
 import { sorGetSwapsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
@@ -187,8 +187,11 @@ export class SorV2Service implements SwapService {
         );
 
         for (const route of routes) {
-            route.tokenInAmount = (inputAmount.amount * BigInt(route.share)).toString();
-            route.tokenOutAmount = (outputAmount.amount * BigInt(route.share)).toString();
+            route.tokenInAmount = ((inputAmount.amount * BigInt(parseUnits(`${0.5}`, 6))) / 1000000n).toString();
+            route.tokenOutAmount = (
+                (outputAmount.amount * BigInt(parseUnits(`${route.share}`, 6))) /
+                1000000n
+            ).toString();
         }
 
         return {
