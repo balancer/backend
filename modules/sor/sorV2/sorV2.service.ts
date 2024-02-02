@@ -175,6 +175,12 @@ export class SorV2Service implements SwapService {
         const returnAmount = swap.swapKind === SwapKind.GivenIn ? outputAmount : inputAmount;
         const swapAmount = swap.swapKind === SwapKind.GivenIn ? inputAmount : outputAmount;
 
+        const effectivePrice = inputAmount.divDownFixed(outputAmount.amount);
+        const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.amount);
+
+        console.log(effectivePrice.amount);
+        console.log(effectivePriceReversed.amount);
+
         const routes = mapRoutes(
             swap.swaps,
             inputAmount.amount.toString(),
@@ -206,6 +212,8 @@ export class SorV2Service implements SwapService {
             swapAmountScaled: swapAmount.amount.toString(),
             returnAmount: formatUnits(returnAmount.amount, returnAmount.token.decimals),
             returnAmountScaled: returnAmount.amount.toString(),
+            effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
+            effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: routes.map((route) => ({
                 ...route,
                 hops: route.hops.map((hop) => ({
