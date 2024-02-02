@@ -135,6 +135,12 @@ const zkevmNetworkData: NetworkData = {
                 path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
+            rsETH: {
+                tokenAddress: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
