@@ -188,8 +188,11 @@ export class SorV2Service implements SwapService {
         );
 
         for (const route of routes) {
-            route.tokenInAmount = (inputAmount.amount * BigInt(route.share)).toString();
-            route.tokenOutAmount = (outputAmount.amount * BigInt(route.share)).toString();
+            route.tokenInAmount = ((inputAmount.amount * BigInt(parseUnits(`${0.5}`, 6))) / 1000000n).toString();
+            route.tokenOutAmount = (
+                (outputAmount.amount * BigInt(parseUnits(`${route.share}`, 6))) /
+                1000000n
+            ).toString();
         }
 
         return {
