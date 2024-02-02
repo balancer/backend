@@ -19,13 +19,16 @@ import { JsonFragment } from '@ethersproject/abi';
 interface PoolInput {
     id: string;
     address: string;
-    type: PrismaPoolType | 'COMPOSABLE_STABLE';
+    type: PrismaPoolType;
     tokens: {
         address: string;
         token: {
             decimals: number;
         };
     }[];
+    dynamicData:{
+        totalLiquidity: string;
+    };
     version: number;
 }
 
@@ -46,125 +49,6 @@ interface OnchainData {
     metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
 }
 
-const abi: JsonFragment[] = Object.values(
-    // Remove duplicate entries using their names
-    Object.fromEntries(
-        [
-            ...ElementPoolAbi,
-            ...LinearPoolAbi,
-            ...LiquidityBootstrappingPoolAbi,
-            ...ComposableStablePoolAbi,
-            ...GyroEV2Abi,
-            ...VaultAbi,
-            ...aTokenRateProvider,
-            ...WeightedPoolAbi,
-            ...StablePoolAbi,
-            ...StablePhantomPoolAbi,
-            ...MetaStablePoolAbi,
-            ...ComposableStablePoolAbi,
-            ...FxPoolAbi,
-            //...WeightedPoolV2Abi,
-        ].map((row) => [row.name, row]),
-    ),
-);
-
-const getSwapFeeFn = (type: string) => {
-    if (type === 'ELEMENT') {
-        return 'percentFee';
-    } else if (type === 'FX') {
-        return 'protocolPercentFee';
-    } else {
-        return 'getSwapFeePercentage';
-    }
-};
-
-const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
-    if (['LINEAR'].includes(type) || (type === 'COMPOSABLE_STABLE' && version === 0)) {
-        return 'getVirtualSupply';
-    } else if (
-        type === 'COMPOSABLE_STABLE' ||
-        (type === 'WEIGHTED' && version > 1) ||
-        (type === 'UNKNOWN' && version > 1)
-    ) {
-        return 'getActualSupply';
-    } else {
-        return 'totalSupply';
-    }
-};
-
-const addDefaultCallsToMulticaller = (
-    { id, address, type, version }: PoolInput,
-    vaultAddress: string,
-    multicaller: Multicaller3,
-) => {
-    multicaller.call(`${id}.poolTokens`, vaultAddress, 'getPoolTokens', [id]);
-    multicaller.call(`${id}.totalSupply`, address, getTotalSupplyFn(type, version));
-    multicaller.call(`${id}.swapFee`, address, getSwapFeeFn(type));
-    multicaller.call(`${id}.rate`, address, 'getRate');
-    multicaller.call(`${id}.protocolSwapFeePercentageCache`, address, 'getProtocolFeePercentageCache', [0]);
-    multicaller.call(`${id}.protocolYieldFeePercentageCache`, address, 'getProtocolFeePercentageCache', [2]);
-};
-
-const weightedCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
-};
-
-const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
-    multicaller.call(`${id}.swapEnabled`, address, 'getSwapEnabled');
-};
-
-const linearCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.targets`, address, 'getTargets');
-    multicaller.call(`${id}.wrappedTokenRate`, address, 'getWrappedTokenRate');
-};
-
-const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
-
-    tokens.forEach(({ address: tokenAddress }, i) => {
-        multicaller.call(`${id}.tokenRate[${i}]`, address, 'getTokenRate', [tokenAddress]);
-    });
-};
-
-const metaStableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
-
-    tokens.forEach(({ address: tokenAddress }, i) => {
-        multicaller.call(`${id}.metaPriceRateCache[${i}]`, address, 'getPriceRateCache', [tokenAddress]);
-    });
-};
-
-const gyroECalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.tokenRates`, address, 'getTokenRates');
-};
-
-const addPoolTypeSpecificCallsToMulticaller = (type: PoolInput['type'], version = 1) => {
-    const do_nothing = () => ({});
-    switch (type) {
-        case 'WEIGHTED':
-            return weightedCalls;
-        case 'LIQUIDITY_BOOTSTRAPPING':
-        case 'INVESTMENT':
-            return lbpAndInvestmentCalls;
-        case 'STABLE':
-        case 'PHANTOM_STABLE':
-        case 'COMPOSABLE_STABLE':
-            return stableCalls;
-        case 'META_STABLE':
-            return metaStableCalls;
-        case 'GYROE':
-            if (version === 2) {
-                return gyroECalls;
-            } else {
-                return do_nothing;
-            }
-        case 'LINEAR':
-            return linearCalls;
-        default:
-            return do_nothing;
-    }
-};
 
 const parse = (result: OnchainData, decimalsLookup: { [address: string]: number }) => ({
     amp: result.amp ? formatFixed(result.amp[0], String(result.amp[2]).length - 1) : undefined,
@@ -210,6 +94,8 @@ export const fetchNormalizedLiquidity = async (
     }
 
     const multicaller = new Multicaller3(abi, batchSize);
+
+    for
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
