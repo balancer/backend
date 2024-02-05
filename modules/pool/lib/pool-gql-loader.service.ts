@@ -213,16 +213,8 @@ export class PoolGqlLoaderService {
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
-        const featuredPoolsFromService: FeaturedPool[] = [];
-        if (chains.some((chain) => BalancerChainIds.includes(chainToIdMap[chain]))) {
-            const githubContentService = new GithubContentService();
-            featuredPoolsFromService.push(...(await githubContentService.getFeaturedPools(chains)));
-        }
-        if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
-            // chain in constructor doesnt matter for this query as we pass the chain in the param
-            const sanityContentService = new SanityContentService('FANTOM');
-            featuredPoolsFromService.push(...(await sanityContentService.getFeaturedPools(chains)));
-        }
+        const githubContentService = new GithubContentService();
+        const featuredPoolsFromService = await githubContentService.getFeaturedPools(chains);
 
         const featuredPools: GqlPoolFeaturedPool[] = [];
 
