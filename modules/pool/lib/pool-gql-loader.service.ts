@@ -537,11 +537,7 @@ export class PoolGqlLoaderService {
                     __typename: 'GqlPoolFx',
                     ...poolWithoutStaticTypeData,
                     ...mappedData,
-                    alpha: (staticTypeData as FxData).alpha || '',
-                    beta: (staticTypeData as FxData).beta || '',
-                    delta: (staticTypeData as FxData).delta || '',
-                    epsilon: (staticTypeData as FxData).epsilon || '',
-                    lambda: (staticTypeData as FxData).lambda || '',
+                    ...(staticTypeData as FxData),
                 };
         }
 
