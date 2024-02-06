@@ -1,8 +1,7 @@
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 
-export const stableDynamic = (pool: BalancerPoolFragment, blockNumber: number) => {
+export const stable = (pool: BalancerPoolFragment) => {
     return {
         amp: pool.amp || '',
-        blockNumber,
     };
 };

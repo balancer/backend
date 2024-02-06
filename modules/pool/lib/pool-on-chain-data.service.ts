@@ -2,14 +2,14 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
-import { isComposableStablePool, isStablePool } from './pool-utils';
+import { isStablePool } from './pool-utils';
 import { TokenService } from '../../token/token.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { fetchOnChainPoolState } from './pool-onchain-state';
 import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
-import { LinearData } from '../subgraph-mapper';
+import { LinearData, StableData } from '../subgraph-mapper';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -89,9 +89,7 @@ export class PoolOnChainDataService {
             },
             include: {
                 tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true, token: true } },
-                stableDynamicData: true,
                 dynamicData: true,
-                linearDynamicData: true,
             },
         });
 
@@ -120,12 +118,16 @@ export class PoolOnChainDataService {
                     }
 
                     //only update if amp has changed
-                    if (!pool.stableDynamicData || pool.stableDynamicData.amp !== amp) {
+                    if ((pool.staticTypeData as StableData).amp !== amp) {
                         operations.push(
-                            prisma.prismaPoolStableDynamicData.upsert({
+                            prisma.prismaPool.update({
                                 where: { id_chain: { id: pool.id, chain: this.options.chain } },
-                                create: { id: pool.id, chain: this.options.chain, poolId: pool.id, amp, blockNumber },
-                                update: { amp, blockNumber },
+                                data: {
+                                    staticTypeData: {
+                                        ...(pool.staticTypeData as StableData),
+                                        amp,
+                                    },
+                                },
                             }),
                         );
                     }
@@ -140,22 +142,19 @@ export class PoolOnChainDataService {
                         const upperTarget = formatFixed(onchainData.targets[1], 18);
 
                         if (
-                            !pool.linearDynamicData ||
-                            pool.linearDynamicData.lowerTarget !== lowerTarget ||
-                            pool.linearDynamicData.upperTarget !== upperTarget
+                            (pool.staticTypeData as LinearData).lowerTarget !== lowerTarget ||
+                            (pool.staticTypeData as LinearData).upperTarget !== upperTarget
                         ) {
                             operations.push(
-                                prisma.prismaPoolLinearDynamicData.upsert({
+                                prisma.prismaPool.update({
                                     where: { id_chain: { id: pool.id, chain: this.options.chain } },
-                                    create: {
-                                        id: pool.id,
-                                        chain: this.options.chain,
-                                        poolId: pool.id,
-                                        upperTarget,
-                                        lowerTarget,
-                                        blockNumber,
+                                    data: {
+                                        staticTypeData: {
+                                            ...(pool.staticTypeData as LinearData),
+                                            lowerTarget,
+                                            upperTarget,
+                                        },
                                     },
-                                    update: { upperTarget, lowerTarget, blockNumber },
                                 }),
                             );
                         }

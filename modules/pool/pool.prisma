@@ -22,8 +22,6 @@ model PrismaPool {
     tokens              PrismaPoolToken[]
 
     dynamicData         PrismaPoolDynamicData?
-    stableDynamicData   PrismaPoolStableDynamicData?
-    linearDynamicData   PrismaPoolLinearDynamicData?
 
     snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
@@ -117,35 +115,6 @@ model PrismaPoolDynamicData {
     fees24hAthTimestamp     Int                 @default(0)
     fees24hAtl              Float               @default(0)
     fees24hAtlTimestamp     Int                 @default(0)
-}
-
-model PrismaPoolStableDynamicData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-    blockNumber         Int
-    updatedAt           DateTime            @updatedAt
-
-    amp                 String
-}
-
-model PrismaPoolLinearDynamicData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-    blockNumber         Int
-    updatedAt           DateTime            @updatedAt
-
-    lowerTarget         String
-    upperTarget         String
 }
 
 model PrismaPoolToken {

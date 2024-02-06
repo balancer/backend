@@ -46,20 +46,20 @@ describe('subgraphToPrismaCreate', () => {
     it('should return correct object for stable pool', () => {
         const result = subgraphToPrismaCreate(stablePool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('COMPOSABLE_STABLE');
-        expect(result.data.stableDynamicData?.create.amp).toBe(stablePool.amp);
+        expect(result.data.staticTypeData['amp']).toBe(stablePool.amp);
     });
 
     it('should return correct object for old stable pool', () => {
         const result = subgraphToPrismaCreate(oldStablePool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('COMPOSABLE_STABLE');
         expect(result.data.version).toBe(0);
-        expect(result.data.stableDynamicData?.create.amp).toBe(oldStablePool.amp);
+        expect(result.data.staticTypeData['amp']).toBe(oldStablePool.amp);
     });
 
     it('should return correct object for linear pool', () => {
         const result = subgraphToPrismaCreate(linearPool, 'MAINNET', 1, []);
         expect(result.data.type).toBe('LINEAR');
-        expect(result.data.linearDynamicData?.create.upperTarget).toBe(linearPool.upperTarget);
+        expect(result.data.staticTypeData['upperTarget']).toBe(linearPool.upperTarget);
         expect(result.data.staticTypeData['wrappedIndex']).toBe(linearPool.wrappedIndex);
     });
 

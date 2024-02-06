@@ -48,7 +48,7 @@ import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } fro
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { FeaturedPool } from '../../content/content-types';
-import { ElementData, FxData, GyroData, LinearData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -478,24 +478,24 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolStable',
                     ...poolWithoutStaticTypeData,
+                    ...(staticTypeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'META_STABLE':
                 return {
                     __typename: 'GqlPoolMetaStable',
                     ...poolWithoutStaticTypeData,
+                    ...(staticTypeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'COMPOSABLE_STABLE':
                 return {
                     __typename: 'GqlPoolComposableStable',
                     ...poolWithoutStaticTypeData,
+                    ...(staticTypeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'LINEAR':
@@ -505,8 +505,6 @@ export class PoolGqlLoaderService {
                     ...(staticTypeData as LinearData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    lowerTarget: pool.linearDynamicData?.lowerTarget || '0',
-                    upperTarget: pool.linearDynamicData?.upperTarget || '0',
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'ELEMENT':
@@ -1134,7 +1132,6 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolLinearNested',
             ...pool,
             ...(pool.staticTypeData as LinearData)!,
-            ...pool.linearDynamicData!,
             tokens: pool.tokens
                 .filter((token) => token.address !== pool.address)
                 .map((token) => {
@@ -1166,6 +1163,7 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolComposableStableNested',
             ...pool,
+            ...(pool.staticTypeData as StableData)!,
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => {
                 const nestedPool = token.nestedPool;
@@ -1200,7 +1198,6 @@ export class PoolGqlLoaderService {
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
-            amp: pool.stableDynamicData?.amp || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
         };
     }
