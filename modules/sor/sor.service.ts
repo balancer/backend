@@ -47,10 +47,10 @@ export class SorService {
         return sorV2Service.getSorSwaps({
             chain: args.chain!,
             swapAmount: amount,
-            swapOptions: args.swapOptions,
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
+            queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : true,
         });
     }
 

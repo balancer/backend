@@ -2,7 +2,7 @@ import { GqlSorGetSwaps, GqlSorSwap, GqlSorSwapType } from '../../../schema';
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
-import { GetSwapsInput, SwapResult, SwapService } from '../types';
+import { GetSwapsInput, GetSwapsV2Input, SwapResult, SwapService } from '../types';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
 import { poolsToIgnore } from '../constants';
@@ -16,6 +16,7 @@ import { mapRoutes } from './beetsHelpers';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, zeroResponseV2 } from '../utils';
 import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
+import { Token } from 'graphql';
 
 export class SorV2Service implements SwapService {
     public async getSwapResult(
@@ -65,7 +66,7 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async getSorSwaps(input: GetSwapsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwaps> {
+    public async getSorSwaps(input: GetSwapsV2Input, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwaps> {
         const swap = await this.getSwap(input, maxNonBoostedPathDepth);
         const emptyResponse = zeroResponseV2(input.swapType, input.tokenIn, input.tokenOut);
 
@@ -74,11 +75,7 @@ export class SorV2Service implements SwapService {
         }
 
         try {
-            return this.mapToSorSwaps(
-                swap!,
-                input.chain,
-                input.swapOptions.queryBatchSwap ? input.swapOptions.queryBatchSwap : false,
-            );
+            return this.mapToSorSwaps(swap!, input.chain, input.queryBatchSwap ? input.queryBatchSwap : true);
         } catch (err: any) {
             console.log(`Error Retrieving QuerySwap`, err);
             Sentry.captureException(err.message, {
@@ -96,7 +93,7 @@ export class SorV2Service implements SwapService {
     }
 
     public async getSwap(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
+        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsV2Input,
         maxNonBoostedPathDepth = 4,
     ): Promise<Swap | null> {
         try {
@@ -143,8 +140,6 @@ export class SorV2Service implements SwapService {
         if (!queryFirst) return this.mapSwapToSorGetSwaps(swap, swap.inputAmount, swap.outputAmount);
         else {
             const rpcUrl = AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl;
-            const balancerQueriesAddress = AllNetworkConfigsKeyedOnChain[chain].data.balancer.v2.balancerQueriesAddress;
-            // const updatedResult = await swap.query(rpcUrl, balancerQueriesAddress as Address);
             const updatedResult = await swap.query(rpcUrl);
 
             const inputAmount = swap.swapKind === SwapKind.GivenIn ? swap.inputAmount : updatedResult;

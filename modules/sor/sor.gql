@@ -1,4 +1,7 @@
 extend type Query {
+    """
+    Get swap quote from the SOR, queries both the old and new SOR
+    """
     sorGetSwaps(
         chain: GqlChain
         tokenIn: String!
@@ -7,18 +10,34 @@ extend type Query {
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
     ): GqlSorGetSwapsResponse!
+    """
+    Get swap quote from the SOR v2 for the V2 vault
+    """
     sorV2GetSwaps(
+        """
+        The Chain to query
+        """
         chain: GqlChain!
+        """
+        Token address of the tokenIn
+        """
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
         swapAmount: BigDecimal! #expected in human readable form
-        swapOptions: GqlSorSwapOptionsInput!
+        queryBatchSwap: Boolean #run queryBatchSwap to update with onchain values, default: true
     ): GqlSorGetSwaps!
 }
 
 type GqlSorGetSwaps {
+    vaultVersion: Int!
+    """
+    The token address of the tokenIn provided
+    """
     tokenIn: String!
+    """
+    The token address of the tokenOut provided
+    """
     tokenOut: String!
     tokenAddresses: [String!]!
     swapType: GqlSorSwapType!
