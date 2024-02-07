@@ -13,112 +13,182 @@ import WeightedPoolAbi from '../abi/WeightedPool.json';
 import StablePoolAbi from '../abi/StablePool.json';
 import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
-import FxPoolAbi from '../abi/FxPool.json';
-import { JsonFragment } from '@ethersproject/abi';
+import BalancerQueries from '../abi/BalancerQueries.json';
+import { filter, result } from 'lodash';
+import { ZERO_ADDRESS } from '@balancer/sdk';
+import { parseUnits } from 'viem';
 
 interface PoolInput {
     id: string;
     address: string;
-    type: PrismaPoolType;
     tokens: {
         address: string;
         token: {
             decimals: number;
         };
+        dynamicData: {
+            balance: string;
+            balanceUSD: number;
+        } | null;
     }[];
-    dynamicData:{
-        totalLiquidity: string;
-    };
-    version: number;
+    dynamicData: {
+        totalLiquidity: number;
+    } | null;
+}
+
+interface PoolOutput {
+    id: string;
+    tokenPairs: TokenPair[];
+}
+
+interface TokenPair {
+    poolId: string;
+    tokenA: Token;
+    tokenB: Token;
+    normalizedLiqudity: string;
+    aToBPrice: string;
+    bToAPrice: string;
+    spotPrice: string;
+    effectivePrice: string;
+}
+
+interface Token {
+    address: string;
+    decimals: number;
+    balance: string;
+    balanceUsd: number;
 }
 
 interface OnchainData {
-    poolTokens: [string[], BigNumber[]];
-    totalSupply: BigNumber;
-    swapFee: BigNumber;
-    swapEnabled?: boolean;
-    protocolYieldFeePercentageCache?: BigNumber;
-    protocolSwapFeePercentageCache?: BigNumber;
-    rate?: BigNumber;
-    weights?: BigNumber[];
-    targets?: [BigNumber, BigNumber];
-    wrappedTokenRate?: BigNumber;
-    amp?: [BigNumber, boolean, BigNumber];
-    tokenRates?: [BigNumber, BigNumber];
-    tokenRate?: BigNumber[];
-    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
+    effectivePrice: BigNumber;
+    aToBPrice: BigNumber;
+    bToAPrice: BigNumber;
 }
 
-
-const parse = (result: OnchainData, decimalsLookup: { [address: string]: number }) => ({
-    amp: result.amp ? formatFixed(result.amp[0], String(result.amp[2]).length - 1) : undefined,
-    swapFee: formatEther(result.swapFee ?? '0'),
-    totalShares: formatEther(result.totalSupply || '0'),
-    weights: result.weights?.map(formatEther),
-    targets: result.targets?.map(String),
-    poolTokens: result.poolTokens
-        ? {
-              tokens: result.poolTokens[0].map((token) => token.toLowerCase()),
-              balances: result.poolTokens[1].map((balance, i) =>
-                  formatUnits(balance, decimalsLookup[result.poolTokens[0][i].toLowerCase()]),
-              ),
-              rates: result.poolTokens[0].map((_, i) =>
-                  result.tokenRate && result.tokenRate[i]
-                      ? formatEther(result.tokenRate[i])
-                      : result.tokenRates && result.tokenRates[i]
-                      ? formatEther(result.tokenRates[i])
-                      : result.metaPriceRateCache && result.metaPriceRateCache[i][0].gt(0)
-                      ? formatEther(result.metaPriceRateCache[i][0])
-                      : undefined,
-              ),
-          }
-        : { tokens: [], balances: [], rates: [] },
-    wrappedTokenRate: result.wrappedTokenRate ? formatEther(result.wrappedTokenRate) : '1.0',
-    rate: result.rate ? formatEther(result.rate) : '1.0',
-    swapEnabled: result.swapEnabled,
-    protocolYieldFeePercentageCache: result.protocolYieldFeePercentageCache
-        ? formatEther(result.protocolYieldFeePercentageCache)
-        : undefined,
-    protocolSwapFeePercentageCache: result.protocolSwapFeePercentageCache
-        ? formatEther(result.protocolSwapFeePercentageCache)
-        : undefined,
-});
-
-export const fetchNormalizedLiquidity = async (
-    pools: PoolInput[],
-    balancerQueriesAddress: string,
-    batchSize = 1024,
-) => {
+export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
     if (pools.length === 0) {
         return {};
     }
 
-    const multicaller = new Multicaller3(abi, batchSize);
-
-    for
+    const multicaller = new Multicaller3(BalancerQueries, batchSize);
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, swap $500 amount from a->b
-    // for each pair per pool, swap result of above back b->a
-    // calc normalizedLiquidity
+    // for each pair per pool, create multicall to do a swap with $200 (min liq is $1k, so there should be at least $200 for each token) for effectivePrice calc and a swap with 1% TVL
+    //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
+    // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
-    pools.forEach((pool) => {
-        addDefaultCallsToMulticaller(pool, balancerQueriesAddress, multicaller);
-        addPoolTypeSpecificCallsToMulticaller(pool.type, pool.version)(pool, multicaller);
+    // remove pools that have <$1000 TVL or a token without a balance or USD balance
+    const filteredPools = pools.filter(
+        (pool) =>
+            pool.dynamicData?.totalLiquidity ||
+            0 >= 1000 ||
+            pool.tokens.some((token) => token.dynamicData?.balance || '0' === '0') ||
+            pool.tokens.some((token) => token.dynamicData?.balanceUSD || 0 === 0),
+    );
+    const tokenPairs = generateTokenPairs(filteredPools);
+
+    tokenPairs.forEach((tokenPair) => {
+        addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+        addAToBePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
     });
 
-    const results = (await multicaller.execute()) as {
+    const resultOne = (await multicaller.execute()) as {
         [id: string]: OnchainData;
     };
 
-    const decimalsLookup = Object.fromEntries(
-        pools.flatMap((pool) => pool.tokens.map(({ address, token }) => [address, token.decimals])),
-    );
+    tokenPairs.forEach((tokenPair) => {
+        tokenPair.aToBPrice = getAtoBPriceForPair(tokenPair, resultOne);
+        tokenPair.effectivePrice = getEffectivePriceForPair(tokenPair, resultOne);
+    });
 
-    const parsed = Object.fromEntries(
-        Object.entries(results).map(([key, result]) => [key, parse(result, decimalsLookup)]),
-    );
+    console.log(resultOne);
+}
 
-    return parsed;
-};
+function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
+    const tokenPairs: TokenPair[] = [];
+
+    for (const pool of filteredPools) {
+        // search for and delete phantom BPT if present
+        let index: number | undefined = undefined;
+        pool.tokens.forEach((poolToken, i) => {
+            if (poolToken.address === pool.address) {
+                index = i;
+            }
+        });
+        if (index) {
+            pool.tokens.splice(index, 1);
+        }
+
+        // create all pairs for pool
+        for (let i = 0; i < pool.tokens.length - 1; i++) {
+            for (let j = i + 1; j < pool.tokens.length; j++) {
+                tokenPairs.push({
+                    poolId: pool.id,
+                    tokenA: {
+                        address: pool.tokens[i].address,
+                        decimals: pool.tokens[i].token.decimals,
+                        balance: pool.tokens[i].dynamicData?.balance || '0',
+                        balanceUsd: pool.tokens[i].dynamicData?.balanceUSD || 0,
+                    },
+                    tokenB: {
+                        address: pool.tokens[j].address,
+                        decimals: pool.tokens[j].token.decimals,
+                        balance: pool.tokens[j].dynamicData?.balance || '0',
+                        balanceUsd: pool.tokens[j].dynamicData?.balanceUSD || 0,
+                    },
+                    normalizedLiqudity: '0',
+                    spotPrice: '0',
+                    aToBPrice: '0',
+                    bToAPrice: '0',
+                    effectivePrice: '0',
+                });
+            }
+        }
+    }
+    return tokenPairs;
+}
+
+// call querySwap from tokenA->tokenB with 100USD worth of tokenA
+function addEffectivePriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerQueriesAddress: string,
+    multicaller: Multicaller3,
+) {
+    const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+    const amountScaled = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+
+    multicaller.call(
+        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePrice`,
+        balancerQueriesAddress,
+        'querySwap',
+        [
+            [tokenPair.poolId, 0, tokenPair.tokenA.address, tokenPair.tokenB.address, `${amountScaled}`, ZERO_ADDRESS],
+            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+        ],
+    );
+}
+
+// call querySwap from tokenA->tokenB with 1% of tokenA balance
+function addAToBePriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerQueriesAddress: string,
+    multicaller: Multicaller3,
+) {
+    const amountScaled = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
+
+    multicaller.call(
+        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBPrice`,
+        balancerQueriesAddress,
+        'querySwap',
+        [
+            [tokenPair.poolId, 0, tokenPair.tokenA.address, tokenPair.tokenB.address, `${amountScaled}`, ZERO_ADDRESS],
+            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+        ],
+    );
+}
+function getAtoBPriceForPair(tokenPair: TokenPair, resultOne: { [id: string]: OnchainData }): string {}
+
+function getEffectivePriceForPair(tokenPair: TokenPair, resultOne: { [id: string]: OnchainData }): string {
+    throw new Error('Function not implemented.');
+}
