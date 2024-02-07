@@ -50,7 +50,7 @@ export class GyroEPool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): GyroEPool {
         const poolTokens: GyroEPoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.staticTypeData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -72,7 +72,7 @@ export class GyroEPool implements BasePool {
             poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, parseEther(tokenRate), poolToken.index));
         }
 
-        const gyroData = pool.staticTypeData as GyroData;
+        const gyroData = pool.typeData as GyroData;
 
         const gyroEParams: GyroEParams = {
             alpha: parseEther(gyroData.alpha),

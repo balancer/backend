@@ -29,7 +29,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
             where: {
                 chain: networkContext.chain,
                 tokenAddress: {
-                    in: pools.map((pool) => pool.tokens[(pool.staticTypeData as LinearData)?.mainIndex || 0].address),
+                    in: pools.map((pool) => pool.tokens[(pool.typeData as LinearData)?.mainIndex || 0].address),
                 },
                 timestamp,
             },
@@ -38,10 +38,10 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         for (const token of tokens) {
             const pool = pools.find(
                 (pool) =>
-                    (pool.staticTypeData as LinearData) &&
-                    token.address === pool.tokens[(pool.staticTypeData as LinearData).wrappedIndex].address,
+                    (pool.typeData as LinearData) &&
+                    token.address === pool.tokens[(pool.typeData as LinearData).wrappedIndex].address,
             );
-            const linearData = pool?.staticTypeData as LinearData;
+            const linearData = pool?.typeData as LinearData;
 
             if (pool && linearData) {
                 const mainToken = pool.tokens[linearData.mainIndex];

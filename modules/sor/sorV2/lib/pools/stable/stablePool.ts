@@ -81,7 +81,7 @@ export class StablePool implements BasePool {
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
-        const amp = parseUnits((pool.staticTypeData as StableData).amp, 3);
+        const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
         return new StablePool(
             pool.id as Hex,

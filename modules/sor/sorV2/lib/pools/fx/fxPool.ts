@@ -73,11 +73,11 @@ export class FxPool implements BasePool {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseFixedCurveParam((pool.staticTypeData as FxData).alpha as string),
-            parseFixedCurveParam((pool.staticTypeData as FxData).beta as string),
-            parseFixedCurveParam((pool.staticTypeData as FxData).lambda as string),
-            parseUnits((pool.staticTypeData as FxData).delta as string, 36),
-            parseFixedCurveParam((pool.staticTypeData as FxData).epsilon as string),
+            parseFixedCurveParam((pool.typeData as FxData).alpha as string),
+            parseFixedCurveParam((pool.typeData as FxData).beta as string),
+            parseFixedCurveParam((pool.typeData as FxData).lambda as string),
+            parseUnits((pool.typeData as FxData).delta as string, 36),
+            parseFixedCurveParam((pool.typeData as FxData).epsilon as string),
             poolTokens,
         );
     }

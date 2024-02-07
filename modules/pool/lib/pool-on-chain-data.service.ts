@@ -118,13 +118,13 @@ export class PoolOnChainDataService {
                     }
 
                     //only update if amp has changed
-                    if ((pool.staticTypeData as StableData).amp !== amp) {
+                    if ((pool.typeData as StableData).amp !== amp) {
                         operations.push(
                             prisma.prismaPool.update({
                                 where: { id_chain: { id: pool.id, chain: this.options.chain } },
                                 data: {
-                                    staticTypeData: {
-                                        ...(pool.staticTypeData as StableData),
+                                    typeData: {
+                                        ...(pool.typeData as StableData),
                                         amp,
                                     },
                                 },
@@ -142,15 +142,15 @@ export class PoolOnChainDataService {
                         const upperTarget = formatFixed(onchainData.targets[1], 18);
 
                         if (
-                            (pool.staticTypeData as LinearData).lowerTarget !== lowerTarget ||
-                            (pool.staticTypeData as LinearData).upperTarget !== upperTarget
+                            (pool.typeData as LinearData).lowerTarget !== lowerTarget ||
+                            (pool.typeData as LinearData).upperTarget !== upperTarget
                         ) {
                             operations.push(
                                 prisma.prismaPool.update({
                                     where: { id_chain: { id: pool.id, chain: this.options.chain } },
                                     data: {
-                                        staticTypeData: {
-                                            ...(pool.staticTypeData as LinearData),
+                                        typeData: {
+                                            ...(pool.typeData as LinearData),
                                             lowerTarget,
                                             upperTarget,
                                         },
@@ -229,7 +229,7 @@ export class PoolOnChainDataService {
                     // linear wrapped token rate
                     if (
                         onchainData.wrappedTokenRate &&
-                        (pool.staticTypeData as LinearData)?.wrappedIndex === poolToken.index
+                        (pool.typeData as LinearData)?.wrappedIndex === poolToken.index
                     ) {
                         priceRate = onchainData.wrappedTokenRate;
                     }

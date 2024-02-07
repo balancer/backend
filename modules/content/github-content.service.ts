@@ -117,7 +117,7 @@ export class GithubContentService implements ContentService {
                 symbol: true,
                 name: true,
                 type: true,
-                staticTypeData: true,
+                typeData: true,
                 tokens: { orderBy: { index: 'asc' } },
             },
         });
@@ -152,7 +152,7 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            const wrappedIndex = (pool?.staticTypeData as LinearData).wrappedIndex;
+            const wrappedIndex = (pool?.typeData as LinearData).wrappedIndex;
             const wrappedLinearPoolToken = pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address);
 
             if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {

@@ -14,7 +14,7 @@ export const subgraphToPrismaCreate = (
     const prismaPoolRecordWithAssociations = {
         data: {
             ...dbData.base,
-            staticTypeData: dbData.staticTypeData,
+            typeData: dbData.typeData,
             tokens: {
                 createMany: {
                     data: dbData.tokens,
@@ -43,7 +43,7 @@ export const subgraphToPrismaUpdate = (
 
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
-        staticTypeData: dbData.staticTypeData,
+        typeData: dbData.typeData,
         tokens: {
             update: dbData.tokens.map((token) => ({
                 where: {
@@ -94,10 +94,10 @@ const subgraphMapper = (
         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
     };
 
-    const staticTypeData: ReturnType<typeof staticTypeDataMapper[keyof typeof staticTypeDataMapper]> | {} = Object.keys(
-        staticTypeDataMapper,
+    const typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = Object.keys(
+        typeDataMapper,
     ).includes(type)
-        ? staticTypeDataMapper[type as keyof typeof staticTypeDataMapper](pool)
+        ? typeDataMapper[type as keyof typeof typeDataMapper](pool)
         : {};
 
     const tokens =
@@ -128,7 +128,7 @@ const subgraphMapper = (
         base,
         dynamicData,
         tokens,
-        staticTypeData,
+        typeData,
     };
 };
 
@@ -181,7 +181,7 @@ const mapPoolTypeVersion = (poolType: string, poolTypeVersion: number): number =
     return version;
 };
 
-const staticTypeDataMapper = {
+const typeDataMapper = {
     ELEMENT: element,
     FX: fx,
     GYRO: gyro,

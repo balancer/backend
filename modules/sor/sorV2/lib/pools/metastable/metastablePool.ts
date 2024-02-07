@@ -46,7 +46,7 @@ export class MetaStablePool implements BasePool {
             );
         }
 
-        const amp = parseUnits((pool.staticTypeData as StableData).amp, 3);
+        const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
         return new MetaStablePool(
             pool.id as Hex,

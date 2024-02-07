@@ -455,7 +455,7 @@ export class PoolGqlLoaderService {
         userWalletbalances: PrismaUserWalletBalance[] = [],
         userStakedBalances: PrismaUserStakedBalance[] = [],
     ): GqlPoolUnion {
-        const { staticTypeData, ...poolWithoutStaticTypeData } = pool;
+        const { typeData, ...poolWithoutTypeData } = pool;
 
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
@@ -477,32 +477,32 @@ export class PoolGqlLoaderService {
             case 'STABLE':
                 return {
                     __typename: 'GqlPoolStable',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as StableData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'META_STABLE':
                 return {
                     __typename: 'GqlPoolMetaStable',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as StableData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'COMPOSABLE_STABLE':
                 return {
                     __typename: 'GqlPoolComposableStable',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as StableData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'LINEAR':
                 return {
                     __typename: 'GqlPoolLinear',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as LinearData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as LinearData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
@@ -510,15 +510,15 @@ export class PoolGqlLoaderService {
             case 'ELEMENT':
                 return {
                     __typename: 'GqlPoolElement',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as ElementData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as ElementData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
-                    ...poolWithoutStaticTypeData,
+                    ...poolWithoutTypeData,
                     ...mappedData,
                 };
             case 'GYRO':
@@ -526,22 +526,22 @@ export class PoolGqlLoaderService {
             case 'GYROE':
                 return {
                     __typename: 'GqlPoolGyro',
-                    ...poolWithoutStaticTypeData,
-                    ...(staticTypeData as GyroData),
+                    ...poolWithoutTypeData,
+                    ...(typeData as GyroData),
                     ...mappedData,
                 };
             case 'FX':
                 return {
                     __typename: 'GqlPoolFx',
-                    ...poolWithoutStaticTypeData,
+                    ...poolWithoutTypeData,
                     ...mappedData,
-                    ...(staticTypeData as FxData),
+                    ...(typeData as FxData),
                 };
         }
 
         return {
             __typename: 'GqlPoolWeighted',
-            ...poolWithoutStaticTypeData,
+            ...poolWithoutTypeData,
             ...mappedData,
         };
     }
@@ -973,12 +973,8 @@ export class PoolGqlLoaderService {
         const nestedPool = poolToken.nestedPool;
         const options: GqlPoolInvestOption[] = [];
 
-        if (
-            nestedPool &&
-            nestedPool.type === 'LINEAR' &&
-            (nestedPool.staticTypeData as LinearData).mainIndex !== undefined
-        ) {
-            const mainToken = nestedPool.tokens[(nestedPool.staticTypeData as LinearData).mainIndex];
+        if (nestedPool && nestedPool.type === 'LINEAR' && (nestedPool.typeData as LinearData).mainIndex !== undefined) {
+            const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
             const isWrappedNativeAsset = isSameAddress(mainToken.address, networkContext.data.weth.address);
 
             options.push({
@@ -1016,11 +1012,11 @@ export class PoolGqlLoaderService {
                         tokenOptions:
                             nestedToken.nestedPool &&
                             nestedToken.nestedPool.type === 'LINEAR' &&
-                            (nestedToken.nestedPool.staticTypeData as LinearData).mainIndex !== undefined
+                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
                                 ? [
                                       this.mapPoolTokenToGql(
                                           nestedToken.nestedPool.tokens[
-                                              (nestedToken.nestedPool.staticTypeData as LinearData).mainIndex
+                                              (nestedToken.nestedPool.typeData as LinearData).mainIndex
                                           ],
                                       ),
                                   ]
@@ -1036,11 +1032,11 @@ export class PoolGqlLoaderService {
                         if (
                             nestedToken.nestedPool &&
                             nestedToken.nestedPool.type === 'LINEAR' &&
-                            (nestedToken.nestedPool.staticTypeData as LinearData).mainIndex !== undefined
+                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
                         ) {
                             return this.mapPoolTokenToGql(
                                 nestedToken.nestedPool.tokens[
-                                    (nestedToken.nestedPool.staticTypeData as LinearData).mainIndex
+                                    (nestedToken.nestedPool.typeData as LinearData).mainIndex
                                 ],
                             );
                         }
@@ -1131,7 +1127,7 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolLinearNested',
             ...pool,
-            ...(pool.staticTypeData as LinearData)!,
+            ...(pool.typeData as LinearData)!,
             tokens: pool.tokens
                 .filter((token) => token.address !== pool.address)
                 .map((token) => {
@@ -1163,7 +1159,7 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolComposableStableNested',
             ...pool,
-            ...(pool.staticTypeData as StableData)!,
+            ...(pool.typeData as StableData)!,
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => {
                 const nestedPool = token.nestedPool;
@@ -1223,7 +1219,7 @@ export class PoolGqlLoaderService {
         wrappedTokenBalance: string;
         totalMainTokenBalance: string;
     } {
-        if (!poolToken.dynamicData || !(nestedPool.staticTypeData as LinearData) || !nestedPool.dynamicData) {
+        if (!poolToken.dynamicData || !(nestedPool.typeData as LinearData) || !nestedPool.dynamicData) {
             return {
                 mainTokenBalance: '0',
                 wrappedTokenBalance: '0',
@@ -1234,8 +1230,8 @@ export class PoolGqlLoaderService {
         const percentOfSupplyInPool =
             parseFloat(poolToken.dynamicData.balance) / parseFloat(nestedPool.dynamicData.totalShares);
 
-        const mainToken = nestedPool.tokens[(nestedPool.staticTypeData as LinearData).mainIndex];
-        const wrappedToken = nestedPool.tokens[(nestedPool.staticTypeData as LinearData).wrappedIndex];
+        const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
+        const wrappedToken = nestedPool.tokens[(nestedPool.typeData as LinearData).wrappedIndex];
 
         const wrappedTokenBalance = oldBnum(wrappedToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
         const mainTokenBalance = oldBnum(mainToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);

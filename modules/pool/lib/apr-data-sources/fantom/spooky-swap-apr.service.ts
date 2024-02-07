@@ -38,14 +38,14 @@ export class SpookySwapAprService implements PoolAprService {
 
         for (const pool of expandedSpookyPools) {
             if (
-                !(pool.staticTypeData as LinearData) ||
+                !(pool.typeData as LinearData) ||
                 !pool.dynamicData ||
-                pool.tokens[(pool.staticTypeData as LinearData).mainIndex].address !== this.booAddress
+                pool.tokens[(pool.typeData as LinearData).mainIndex].address !== this.booAddress
             ) {
                 continue;
             }
 
-            const linearData = pool.staticTypeData as LinearData;
+            const linearData = pool.typeData as LinearData;
             const wrappedToken = pool.tokens[linearData.wrappedIndex];
             const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, this.booAddress);
             const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
