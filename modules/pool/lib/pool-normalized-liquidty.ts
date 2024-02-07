@@ -15,7 +15,7 @@ import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { filter, result } from 'lodash';
-import { ZERO_ADDRESS } from '@balancer/sdk';
+import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseUnits } from 'viem';
 
 interface PoolInput {
@@ -36,20 +36,31 @@ interface PoolInput {
     } | null;
 }
 
-interface PoolOutput {
-    id: string;
-    tokenPairs: TokenPair[];
+interface PoolTokenPairsOutput {
+    [poolId: string]: {
+        tokenPairs: {
+            id: string;
+            normalizedLiquidity: string;
+            spotPrice: string;
+        }[];
+    };
 }
 
 interface TokenPair {
     poolId: string;
+    poolTvl: number;
+    valid: boolean;
     tokenA: Token;
     tokenB: Token;
-    normalizedLiqudity: string;
-    aToBPrice: string;
-    bToAPrice: string;
-    spotPrice: string;
-    effectivePrice: string;
+    normalizedLiqudity: bigint;
+    spotPrice: bigint;
+    aToBPrice: bigint;
+    aToBAmountIn: bigint;
+    aToBAmountOut: bigint;
+    bToAPrice: bigint;
+    bToAAmountOut: bigint;
+    effectivePrice: bigint;
+    effectivePriceAmountIn: bigint;
 }
 
 interface Token {
@@ -60,15 +71,17 @@ interface Token {
 }
 
 interface OnchainData {
-    effectivePrice: BigNumber;
-    aToBPrice: BigNumber;
-    bToAPrice: BigNumber;
+    effectivePriceAmountOut: BigNumber;
+    aToBAmountOut: BigNumber;
+    bToAAmountOut: BigNumber;
 }
 
 export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
     if (pools.length === 0) {
         return {};
     }
+
+    const poolsOutput: PoolTokenPairsOutput = {};
 
     const multicaller = new Multicaller3(BalancerQueries, batchSize);
 
@@ -78,19 +91,20 @@ export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueri
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
-    // remove pools that have <$1000 TVL or a token without a balance or USD balance
-    const filteredPools = pools.filter(
-        (pool) =>
-            pool.dynamicData?.totalLiquidity ||
-            0 >= 1000 ||
-            pool.tokens.some((token) => token.dynamicData?.balance || '0' === '0') ||
-            pool.tokens.some((token) => token.dynamicData?.balanceUSD || 0 === 0),
-    );
-    const tokenPairs = generateTokenPairs(filteredPools);
+    const tokenPairs = generateTokenPairs(pools);
 
     tokenPairs.forEach((tokenPair) => {
-        addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
-        addAToBePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+        if (tokenPair.valid) {
+            // prepare swap amounts in
+            // tokenA->tokenB with 1% of tokenA balance
+            tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
+            // tokenA->tokenB with 100USD worth of tokenA
+            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+
+            addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+            addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+        }
     });
 
     const resultOne = (await multicaller.execute()) as {
@@ -98,11 +112,46 @@ export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueri
     };
 
     tokenPairs.forEach((tokenPair) => {
-        tokenPair.aToBPrice = getAtoBPriceForPair(tokenPair, resultOne);
-        tokenPair.effectivePrice = getEffectivePriceForPair(tokenPair, resultOne);
+        if (tokenPair.valid) {
+            getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
+        }
     });
 
-    console.log(resultOne);
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            addBToAPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+        }
+    });
+
+    const resultTwo = (await multicaller.execute()) as {
+        [id: string]: OnchainData;
+    };
+
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            getBToAAmountFromResult(tokenPair, resultTwo);
+            calculateSpotPrice(tokenPair);
+            calculateNormalizedLiquidity(tokenPair);
+        }
+
+        // prepare output
+        pools.forEach((pool) => {
+            if (pool.id === tokenPair.poolId) {
+                if (!poolsOutput[pool.id]) {
+                    poolsOutput[pool.id] = {
+                        tokenPairs: [],
+                    };
+                }
+                poolsOutput[pool.id].tokenPairs.push({
+                    id: `${pool.id}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`,
+                    normalizedLiquidity: tokenPair.normalizedLiqudity.toString(),
+                    spotPrice: tokenPair.spotPrice.toString(),
+                });
+            }
+        });
+    });
+
+    return poolsOutput;
 }
 
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
@@ -125,6 +174,13 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
             for (let j = i + 1; j < pool.tokens.length; j++) {
                 tokenPairs.push({
                     poolId: pool.id,
+                    poolTvl: pool.dynamicData?.totalLiquidity || 0,
+                    // remove pools that have <$1000 TVL or a token without a balance or USD balance
+                    valid:
+                        (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+                        pool.tokens.some((token) => token.dynamicData?.balance || '0' !== '0') &&
+                        pool.tokens.some((token) => token.dynamicData?.balanceUSD || 0 !== 0),
+
                     tokenA: {
                         address: pool.tokens[i].address,
                         decimals: pool.tokens[i].token.decimals,
@@ -137,11 +193,15 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                         balance: pool.tokens[j].dynamicData?.balance || '0',
                         balanceUsd: pool.tokens[j].dynamicData?.balanceUSD || 0,
                     },
-                    normalizedLiqudity: '0',
-                    spotPrice: '0',
-                    aToBPrice: '0',
-                    bToAPrice: '0',
-                    effectivePrice: '0',
+                    normalizedLiqudity: 0n,
+                    spotPrice: 0n,
+                    aToBPrice: 0n,
+                    aToBAmountIn: 0n,
+                    aToBAmountOut: 0n,
+                    bToAPrice: 0n,
+                    bToAAmountOut: 0n,
+                    effectivePrice: 0n,
+                    effectivePriceAmountIn: 0n,
                 });
             }
         }
@@ -155,40 +215,99 @@ function addEffectivePriceCallsToMulticaller(
     balancerQueriesAddress: string,
     multicaller: Multicaller3,
 ) {
-    const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
-    const amountScaled = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
-
     multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePrice`,
+        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
         balancerQueriesAddress,
         'querySwap',
         [
-            [tokenPair.poolId, 0, tokenPair.tokenA.address, tokenPair.tokenB.address, `${amountScaled}`, ZERO_ADDRESS],
+            [
+                tokenPair.poolId,
+                0,
+                tokenPair.tokenA.address,
+                tokenPair.tokenB.address,
+                `${tokenPair.effectivePriceAmountIn}`,
+                ZERO_ADDRESS,
+            ],
             [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
         ],
     );
 }
 
 // call querySwap from tokenA->tokenB with 1% of tokenA balance
-function addAToBePriceCallsToMulticaller(
+function addAToBPriceCallsToMulticaller(
     tokenPair: TokenPair,
     balancerQueriesAddress: string,
     multicaller: Multicaller3,
 ) {
-    const amountScaled = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
-
     multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBPrice`,
+        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
         balancerQueriesAddress,
         'querySwap',
         [
-            [tokenPair.poolId, 0, tokenPair.tokenA.address, tokenPair.tokenB.address, `${amountScaled}`, ZERO_ADDRESS],
+            [
+                tokenPair.poolId,
+                0,
+                tokenPair.tokenA.address,
+                tokenPair.tokenB.address,
+                `${tokenPair.aToBAmountIn}`,
+                ZERO_ADDRESS,
+            ],
             [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
         ],
     );
 }
-function getAtoBPriceForPair(tokenPair: TokenPair, resultOne: { [id: string]: OnchainData }): string {}
 
-function getEffectivePriceForPair(tokenPair: TokenPair, resultOne: { [id: string]: OnchainData }): string {
-    throw new Error('Function not implemented.');
+// call querySwap from tokenA->tokenB with AtoB amount out
+function addBToAPriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerQueriesAddress: string,
+    multicaller: Multicaller3,
+) {
+    multicaller.call(
+        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+        balancerQueriesAddress,
+        'querySwap',
+        [
+            [
+                tokenPair.poolId,
+                0,
+                tokenPair.tokenB.address,
+                tokenPair.tokenA.address,
+                `${tokenPair.aToBAmountOut}`,
+                ZERO_ADDRESS,
+            ],
+            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+        ],
+    );
+}
+
+function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
+    const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
+
+    if (result) {
+        tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
+        tokenPair.effectivePrice = MathSol.divDownFixed(
+            tokenPair.effectivePriceAmountIn,
+            BigInt(result.effectivePriceAmountOut.toString()),
+        );
+    }
+}
+
+function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
+    const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
+
+    if (result) {
+        tokenPair.bToAAmountOut = BigInt(result.bToAAmountOut.toString());
+    }
+}
+function calculateSpotPrice(tokenPair: TokenPair) {
+    const priceAtoB = MathSol.divDownFixed(tokenPair.aToBAmountIn, tokenPair.aToBAmountOut);
+    const priceBtoA = MathSol.divDownFixed(tokenPair.aToBAmountOut, tokenPair.bToAAmountOut);
+    tokenPair.spotPrice = MathSol.powDownFixed(MathSol.divDownFixed(priceAtoB, priceBtoA), WAD / 2n);
+}
+
+function calculateNormalizedLiquidity(tokenPair: TokenPair) {
+    const priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
+    const priceImpact = WAD - priceRatio;
+    tokenPair.normalizedLiqudity = MathSol.divDownFixed(WAD, priceImpact);
 }
