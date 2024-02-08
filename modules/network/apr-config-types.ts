@@ -15,6 +15,7 @@ export interface YbAprConfig {
     yearn?: YearnAprConfig;
     stakewise?: string;
     etherfi?: string;
+    sveth?: boolean;
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }
