@@ -186,8 +186,10 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            const wrappedIndex = (pool?.typeData as LinearData).wrappedIndex;
-            const wrappedLinearPoolToken = pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address);
+            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
+            const wrappedLinearPoolToken = wrappedIndex
+                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
+                : undefined;
 
             if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
