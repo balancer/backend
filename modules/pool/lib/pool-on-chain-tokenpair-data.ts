@@ -25,12 +25,14 @@ interface PoolInput {
 
 interface PoolTokenPairsOutput {
     [poolId: string]: {
-        tokenPairs: {
-            id: string;
-            normalizedLiquidity: string;
-            spotPrice: string;
-        }[];
+        tokenPairs: TokenPairData[];
     };
+}
+
+export interface TokenPairData {
+    id: string;
+    normalizedLiquidity: string;
+    spotPrice: string;
 }
 
 interface TokenPair {
@@ -61,12 +63,12 @@ interface OnchainData {
     bToAAmountOut: BigNumber;
 }
 
-export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
+export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
     if (pools.length === 0) {
         return {};
     }
 
-    const poolsOutput: PoolTokenPairsOutput = {};
+    const tokenPairOutput: PoolTokenPairsOutput = {};
 
     const multicaller = new Multicaller3(BalancerQueries, batchSize);
 
@@ -122,12 +124,12 @@ export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueri
         // prepare output
         pools.forEach((pool) => {
             if (pool.id === tokenPair.poolId) {
-                if (!poolsOutput[pool.id]) {
-                    poolsOutput[pool.id] = {
+                if (!tokenPairOutput[pool.id]) {
+                    tokenPairOutput[pool.id] = {
                         tokenPairs: [],
                     };
                 }
-                poolsOutput[pool.id].tokenPairs.push({
+                tokenPairOutput[pool.id].tokenPairs.push({
                     id: `${pool.id}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`,
                     normalizedLiquidity: tokenPair.normalizedLiqudity.toString(),
                     spotPrice: tokenPair.spotPrice.toString(),
@@ -136,7 +138,7 @@ export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueri
         });
     });
 
-    return poolsOutput;
+    return tokenPairOutput;
 }
 
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {

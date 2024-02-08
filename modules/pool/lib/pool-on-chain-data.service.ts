@@ -10,7 +10,7 @@ import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
 import { LinearData, StableData } from '../subgraph-mapper';
-import { fetchNormalizedLiquidity } from './pool-normalized-liquidty';
+import { TokenPair, TokenPairData, fetchTokenPairData } from './pool-on-chain-tokenpair-data';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -103,7 +103,7 @@ export class PoolOnChainDataService {
             this.options.vaultAddress,
             networkContext.chain === 'ZKEVM' ? 190 : 1024,
         );
-        const normalizedLiquidityResults = await fetchNormalizedLiquidity(
+        const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
             networkContext.chain === 'ZKEVM' ? 190 : 1024,
@@ -115,6 +115,7 @@ export class PoolOnChainDataService {
         const operations = [];
         for (const pool of filteredPools) {
             const onchainData = onchainResults[pool.id];
+            const { tokenPairs } = tokenPairData[pool.id];
             const { amp, poolTokens } = onchainData;
 
             try {
@@ -203,6 +204,7 @@ export class PoolOnChainDataService {
                                 protocolYieldFee: yieldProtocolFeePercentage,
                                 protocolSwapFee: swapProtocolFeePercentage,
                                 blockNumber,
+                                tokenPairsData: tokenPairs,
                             },
                         }),
                     );
