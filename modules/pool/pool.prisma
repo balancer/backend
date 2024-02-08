@@ -17,7 +17,7 @@ model PrismaPool {
 
     vaultVersion        Int                 @default(2)
 
-    typeData            Json @default("{}")  @map("type_data")
+    typeData            Json @default("{}")
 
     tokens              PrismaPoolToken[]
 
