@@ -250,22 +250,6 @@ export class PoolCreatorService {
             })),
         });
 
-        // TODO: It's just a quick fix. Remove after merging json column replacement for tables
-        if (pool.poolType!.includes('Gyro')) {
-            await prisma.prismaPoolGyroData.upsert({
-                where: { poolId_chain: { poolId: pool.id, chain: this.chain } },
-                create: {
-                    id: pool.id,
-                    poolId: pool.id,
-                    chain: this.chain,
-                    ...(poolWithoutTokens.gyroData!.update || {}),
-                },
-                update: {
-                    ...(poolWithoutTokens.gyroData!.update || {}),
-                },
-            });
-        }
-
         await prisma.prismaPool.update({
             data: poolWithoutTokens,
             where: {

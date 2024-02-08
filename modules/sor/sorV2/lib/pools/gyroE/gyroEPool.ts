@@ -8,6 +8,7 @@ import { balancesFromTokenInOut, virtualOffset0, virtualOffset1 } from './gyroEM
 import { calculateInvariantWithError, calcOutGivenIn, calcInGivenOut } from './gyroEMath';
 import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { GyroData } from '../../../../../pool/subgraph-mapper';
 
 export class GyroEPoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -49,7 +50,7 @@ export class GyroEPool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): GyroEPool {
         const poolTokens: GyroEPoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.gyroData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -71,28 +72,30 @@ export class GyroEPool implements BasePool {
             poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, parseEther(tokenRate), poolToken.index));
         }
 
+        const gyroData = pool.typeData as GyroData;
+
         const gyroEParams: GyroEParams = {
-            alpha: parseEther(pool.gyroData.alpha),
-            beta: parseEther(pool.gyroData.beta),
-            c: parseEther(pool.gyroData.c!),
-            s: parseEther(pool.gyroData.s!),
-            lambda: parseEther(pool.gyroData.lambda!),
+            alpha: parseEther(gyroData.alpha),
+            beta: parseEther(gyroData.beta),
+            c: parseEther(gyroData.c!),
+            s: parseEther(gyroData.s!),
+            lambda: parseEther(gyroData.lambda!),
         };
 
         const derivedGyroEParams: DerivedGyroEParams = {
             tauAlpha: {
-                x: parseUnits(pool.gyroData.tauAlphaX!, 38),
-                y: parseUnits(pool.gyroData.tauAlphaY!, 38),
+                x: parseUnits(gyroData.tauAlphaX!, 38),
+                y: parseUnits(gyroData.tauAlphaY!, 38),
             },
             tauBeta: {
-                x: parseUnits(pool.gyroData.tauBetaX!, 38),
-                y: parseUnits(pool.gyroData.tauBetaY!, 38),
+                x: parseUnits(gyroData.tauBetaX!, 38),
+                y: parseUnits(gyroData.tauBetaY!, 38),
             },
-            u: parseUnits(pool.gyroData.u!, 38),
-            v: parseUnits(pool.gyroData.v!, 38),
-            w: parseUnits(pool.gyroData.w!, 38),
-            z: parseUnits(pool.gyroData.z!, 38),
-            dSq: parseUnits(pool.gyroData.dSq!, 38),
+            u: parseUnits(gyroData.u!, 38),
+            v: parseUnits(gyroData.v!, 38),
+            w: parseUnits(gyroData.w!, 38),
+            z: parseUnits(gyroData.z!, 38),
+            dSq: parseUnits(gyroData.dSq!, 38),
         };
 
         return new GyroEPool(

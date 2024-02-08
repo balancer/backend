@@ -48,7 +48,7 @@ import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } fro
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { FeaturedPool } from '../../content/content-types';
-import { FxData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -131,9 +131,9 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
     }
 
-    public async getGyroPools(): Promise<GqlPoolGyro[]> {
+    public async getGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
         const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: networkContext.chain },
+            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: { in: chains } },
             orderBy: { dynamicData: { totalLiquidity: 'desc' } },
             include: prismaPoolWithExpandedNesting.include,
         });
@@ -455,10 +455,11 @@ export class PoolGqlLoaderService {
         userWalletbalances: PrismaUserWalletBalance[] = [],
         userStakedBalances: PrismaUserStakedBalance[] = [],
     ): GqlPoolUnion {
+        const { typeData, ...poolWithoutTypeData } = pool;
+
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
         const mappedData = {
-            ...pool,
             decimals: 18,
             staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
@@ -476,134 +477,71 @@ export class PoolGqlLoaderService {
             case 'STABLE':
                 return {
                     __typename: 'GqlPoolStable',
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'META_STABLE':
                 return {
                     __typename: 'GqlPoolMetaStable',
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'COMPOSABLE_STABLE':
                 return {
                     __typename: 'GqlPoolComposableStable',
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
                     ...mappedData,
-                    amp: pool.stableDynamicData?.amp || '0',
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'LINEAR':
                 return {
                     __typename: 'GqlPoolLinear',
+                    ...poolWithoutTypeData,
+                    ...(typeData as LinearData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    mainIndex: pool.linearData?.mainIndex || 0,
-                    wrappedIndex: pool.linearData?.wrappedIndex || 0,
-                    lowerTarget: pool.linearDynamicData?.lowerTarget || '0',
-                    upperTarget: pool.linearDynamicData?.upperTarget || '0',
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'ELEMENT':
                 return {
                     __typename: 'GqlPoolElement',
+                    ...poolWithoutTypeData,
+                    ...(typeData as ElementData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    baseToken: pool.elementData?.baseToken || '',
-                    unitSeconds: pool.elementData?.unitSeconds || '',
-                    principalToken: pool.elementData?.principalToken || '',
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
+                    ...poolWithoutTypeData,
                     ...mappedData,
                 };
             case 'GYRO':
-                return {
-                    __typename: 'GqlPoolGyro',
-                    ...mappedData,
-                    type: mappedData.type,
-                    alpha: pool.gyroData?.alpha || '',
-                    beta: pool.gyroData?.beta || '',
-                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
-                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
-                    root3Alpha: pool.gyroData?.root3Alpha || '',
-                    c: pool.gyroData?.c || '',
-                    s: pool.gyroData?.s || '',
-                    lambda: pool.gyroData?.lambda || '',
-                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
-                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
-                    tauBetaX: pool.gyroData?.tauBetaX || '',
-                    tauBetaY: pool.gyroData?.tauBetaY || '',
-                    u: pool.gyroData?.u || '',
-                    v: pool.gyroData?.v || '',
-                    w: pool.gyroData?.w || '',
-                    z: pool.gyroData?.z || '',
-                    dSq: pool.gyroData?.dSq || '',
-                };
             case 'GYRO3':
-                return {
-                    __typename: 'GqlPoolGyro',
-                    ...mappedData,
-                    type: mappedData.type,
-                    alpha: pool.gyroData?.alpha || '',
-                    beta: pool.gyroData?.beta || '',
-                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
-                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
-                    root3Alpha: pool.gyroData?.root3Alpha || '',
-                    c: pool.gyroData?.c || '',
-                    s: pool.gyroData?.s || '',
-                    lambda: pool.gyroData?.lambda || '',
-                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
-                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
-                    tauBetaX: pool.gyroData?.tauBetaX || '',
-                    tauBetaY: pool.gyroData?.tauBetaY || '',
-                    u: pool.gyroData?.u || '',
-                    v: pool.gyroData?.v || '',
-                    w: pool.gyroData?.w || '',
-                    z: pool.gyroData?.z || '',
-                    dSq: pool.gyroData?.dSq || '',
-                };
             case 'GYROE':
                 return {
                     __typename: 'GqlPoolGyro',
+                    ...poolWithoutTypeData,
+                    ...(typeData as GyroData),
                     ...mappedData,
-                    type: mappedData.type,
-                    alpha: pool.gyroData?.alpha || '',
-                    beta: pool.gyroData?.beta || '',
-                    sqrtAlpha: pool.gyroData?.sqrtAlpha || '',
-                    sqrtBeta: pool.gyroData?.sqrtBeta || '',
-                    root3Alpha: pool.gyroData?.root3Alpha || '',
-                    c: pool.gyroData?.c || '',
-                    s: pool.gyroData?.s || '',
-                    lambda: pool.gyroData?.lambda || '',
-                    tauAlphaX: pool.gyroData?.tauAlphaX || '',
-                    tauAlphaY: pool.gyroData?.tauAlphaY || '',
-                    tauBetaX: pool.gyroData?.tauBetaX || '',
-                    tauBetaY: pool.gyroData?.tauBetaY || '',
-                    u: pool.gyroData?.u || '',
-                    v: pool.gyroData?.v || '',
-                    w: pool.gyroData?.w || '',
-                    z: pool.gyroData?.z || '',
-                    dSq: pool.gyroData?.dSq || '',
                 };
             case 'FX':
-                const data = pool.staticTypeData as FxData;
                 return {
                     __typename: 'GqlPoolFx',
+                    ...poolWithoutTypeData,
                     ...mappedData,
-                    type: mappedData.type,
-                    alpha: data.alpha || '',
-                    beta: data.beta || '',
-                    delta: data.delta || '',
-                    epsilon: data.epsilon || '',
-                    lambda: data.lambda || '',
+                    ...(typeData as FxData),
                 };
         }
 
         return {
             __typename: 'GqlPoolWeighted',
+            ...poolWithoutTypeData,
             ...mappedData,
         };
     }
@@ -1035,8 +973,8 @@ export class PoolGqlLoaderService {
         const nestedPool = poolToken.nestedPool;
         const options: GqlPoolInvestOption[] = [];
 
-        if (nestedPool && nestedPool.type === 'LINEAR' && nestedPool.linearData) {
-            const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
+        if (nestedPool && nestedPool.type === 'LINEAR' && (nestedPool.typeData as LinearData).mainIndex !== undefined) {
+            const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
             const isWrappedNativeAsset = isSameAddress(mainToken.address, networkContext.data.weth.address);
 
             options.push({
@@ -1074,10 +1012,12 @@ export class PoolGqlLoaderService {
                         tokenOptions:
                             nestedToken.nestedPool &&
                             nestedToken.nestedPool.type === 'LINEAR' &&
-                            nestedToken.nestedPool.linearData
+                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
                                 ? [
                                       this.mapPoolTokenToGql(
-                                          nestedToken.nestedPool.tokens[nestedToken.nestedPool.linearData.mainIndex],
+                                          nestedToken.nestedPool.tokens[
+                                              (nestedToken.nestedPool.typeData as LinearData).mainIndex
+                                          ],
                                       ),
                                   ]
                                 : [this.mapPoolTokenToGql(nestedToken)],
@@ -1092,10 +1032,12 @@ export class PoolGqlLoaderService {
                         if (
                             nestedToken.nestedPool &&
                             nestedToken.nestedPool.type === 'LINEAR' &&
-                            nestedToken.nestedPool.linearData
+                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
                         ) {
                             return this.mapPoolTokenToGql(
-                                nestedToken.nestedPool.tokens[nestedToken.nestedPool.linearData.mainIndex],
+                                nestedToken.nestedPool.tokens[
+                                    (nestedToken.nestedPool.typeData as LinearData).mainIndex
+                                ],
                             );
                         }
 
@@ -1185,8 +1127,7 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolLinearNested',
             ...pool,
-            ...pool.linearData!,
-            ...pool.linearDynamicData!,
+            ...(pool.typeData as LinearData)!,
             tokens: pool.tokens
                 .filter((token) => token.address !== pool.address)
                 .map((token) => {
@@ -1218,6 +1159,7 @@ export class PoolGqlLoaderService {
         return {
             __typename: 'GqlPoolComposableStableNested',
             ...pool,
+            ...(pool.typeData as StableData)!,
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => {
                 const nestedPool = token.nestedPool;
@@ -1252,7 +1194,6 @@ export class PoolGqlLoaderService {
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
-            amp: pool.stableDynamicData?.amp || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
         };
     }
@@ -1278,7 +1219,7 @@ export class PoolGqlLoaderService {
         wrappedTokenBalance: string;
         totalMainTokenBalance: string;
     } {
-        if (!poolToken.dynamicData || !nestedPool.linearData || !nestedPool.dynamicData) {
+        if (!poolToken.dynamicData || !(nestedPool.typeData as LinearData) || !nestedPool.dynamicData) {
             return {
                 mainTokenBalance: '0',
                 wrappedTokenBalance: '0',
@@ -1289,8 +1230,8 @@ export class PoolGqlLoaderService {
         const percentOfSupplyInPool =
             parseFloat(poolToken.dynamicData.balance) / parseFloat(nestedPool.dynamicData.totalShares);
 
-        const mainToken = nestedPool.tokens[nestedPool.linearData.mainIndex];
-        const wrappedToken = nestedPool.tokens[nestedPool.linearData.wrappedIndex];
+        const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
+        const wrappedToken = nestedPool.tokens[(nestedPool.typeData as LinearData).wrappedIndex];
 
         const wrappedTokenBalance = oldBnum(wrappedToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
         const mainTokenBalance = oldBnum(mainToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);

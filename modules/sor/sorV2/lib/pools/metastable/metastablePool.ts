@@ -6,6 +6,7 @@ import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable
 import { MathSol, WAD } from '../../utils/math';
 import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { StableData } from '../../../../../pool/subgraph-mapper';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;
@@ -22,7 +23,7 @@ export class MetaStablePool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): MetaStablePool {
         const poolTokens: StablePoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.stableDynamicData) throw new Error('Stable pool has no dynamic data');
+        if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
         for (const poolToken of pool.tokens) {
             if (!poolToken.dynamicData?.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
@@ -45,7 +46,7 @@ export class MetaStablePool implements BasePool {
             );
         }
 
-        const amp = parseUnits(pool.stableDynamicData.amp, 3);
+        const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
         return new MetaStablePool(
             pool.id as Hex,

@@ -14,12 +14,7 @@ export type PrismaPoolTokenWithDynamicData = Prisma.PrismaPoolTokenGetPayload<ty
 
 export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
-        elementData: true,
         dynamicData: true,
-        stableDynamicData: true,
-        linearDynamicData: true,
-        gyroData: true,
         staking: {
             include: {
                 farm: {
@@ -76,10 +71,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                 token: true,
                 nestedPool: {
                     include: {
-                        linearData: true,
                         dynamicData: true,
-                        stableDynamicData: true,
-                        linearDynamicData: true,
                         tokens: {
                             orderBy: { index: 'asc' },
                             include: {
@@ -87,9 +79,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                                 dynamicData: true,
                                 nestedPool: {
                                     include: {
-                                        linearData: true,
                                         dynamicData: true,
-                                        linearDynamicData: true,
                                         tokens: {
                                             orderBy: { index: 'asc' },
                                             include: {
@@ -112,10 +102,7 @@ export type PrismaPoolWithExpandedNesting = Prisma.PrismaPoolGetPayload<typeof p
 
 const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
         dynamicData: true,
-        stableDynamicData: true,
-        linearDynamicData: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {
@@ -123,9 +110,7 @@ const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>
                 dynamicData: true,
                 nestedPool: {
                     include: {
-                        linearData: true,
                         dynamicData: true,
-                        linearDynamicData: true,
                         tokens: {
                             orderBy: { index: 'asc' },
                             include: {
@@ -146,9 +131,7 @@ export type PrismaNestedPoolWithSingleLayerNesting = Prisma.PrismaPoolGetPayload
 
 const nestedPoolWithNoNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        linearData: true,
         dynamicData: true,
-        linearDynamicData: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {
@@ -167,10 +150,7 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
         dynamicData: true,
         nestedPool: {
             include: {
-                linearData: true,
                 dynamicData: true,
-                stableDynamicData: true,
-                linearDynamicData: true,
                 tokens: {
                     orderBy: { index: 'asc' },
                     include: {
@@ -178,9 +158,7 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                         dynamicData: true,
                         nestedPool: {
                             include: {
-                                linearData: true,
                                 dynamicData: true,
-                                linearDynamicData: true,
                                 tokens: {
                                     orderBy: { index: 'asc' },
                                     include: {
@@ -279,11 +257,7 @@ export type PrismaPoolBatchSwapWithSwaps = Prisma.PrismaPoolBatchSwapGetPayload<
 
 export const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
-        stableDynamicData: true,
         dynamicData: true,
-        linearDynamicData: true,
-        linearData: true,
-        gyroData: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {

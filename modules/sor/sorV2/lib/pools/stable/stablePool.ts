@@ -13,6 +13,7 @@ import {
 } from './stableMath';
 import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { StableData } from '../../../../../pool/subgraph-mapper';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -56,7 +57,7 @@ export class StablePool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
         const poolTokens: StablePoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.stableDynamicData) throw new Error('Stable pool has no dynamic data');
+        if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
         for (const poolToken of pool.tokens) {
             if (!poolToken.dynamicData?.priceRate) throw new Error('Stable pool token does not have a price rate');
@@ -80,7 +81,7 @@ export class StablePool implements BasePool {
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
-        const amp = parseUnits(pool.stableDynamicData.amp, 3);
+        const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
         return new StablePool(
             pool.id as Hex,
