@@ -1,5 +1,5 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { PrismaPoolType } from '@prisma/client';
+import { Prisma, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isStablePool } from './pool-utils';
