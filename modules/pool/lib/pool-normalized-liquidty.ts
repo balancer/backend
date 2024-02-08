@@ -1,22 +1,9 @@
-import { formatEther, formatUnits } from 'ethers/lib/utils';
 import { Multicaller3 } from '../../web3/multicaller3';
-import { PrismaPoolType } from '@prisma/client';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
-import LinearPoolAbi from '../abi/LinearPool.json';
-import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
-import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
-import GyroEV2Abi from '../abi/GyroEV2.json';
-import VaultAbi from '../abi/Vault.json';
-import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
-import WeightedPoolAbi from '../abi/WeightedPool.json';
-import StablePoolAbi from '../abi/StablePool.json';
-import MetaStablePoolAbi from '../abi/MetaStablePool.json';
-import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
+import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
-import { filter, result } from 'lodash';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
-import { parseUnits } from 'viem';
+import { parseEther, parseUnits } from 'viem';
+import * as Sentry from '@sentry/node';
 
 interface PoolInput {
     id: string;
@@ -309,7 +296,15 @@ function calculateSpotPrice(tokenPair: TokenPair) {
 
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // spotPrice and effective price are already scaled to 18 decimals by the MathSol output
-    const priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
+    let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
+    // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
+    // this happens if you get a "bonus" ie positive price impact.
+    if (priceRatio > parseEther('0.999999')) {
+        Sentry.captureException(
+            `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
+        );
+        priceRatio = parseEther('0.999999');
+    }
     const priceImpact = WAD - priceRatio;
     tokenPair.normalizedLiqudity = MathSol.divDownFixed(WAD, priceImpact);
 }
