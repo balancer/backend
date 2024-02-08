@@ -20,7 +20,6 @@ const sourceToHandler = {
     defaultHandlers: sources.DefaultAprHandler,
     stakewise: sources.Stakewise,
     etherfi: sources.Etherfi,
-    sveth: sources.svEthAprHandler,
 };
 
 export class YbAprHandlers {
