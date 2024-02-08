@@ -2,8 +2,8 @@ import {
     GqlSorSwapType,
     GqlSorGetSwapsResponse,
     QuerySorGetSwapsArgs,
-    GqlSorGetSwaps,
-    QuerySorV2GetSwapsArgs,
+    QuerySorGetSwapPathsArgs,
+    GqlSorGetSwapPaths,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorV2.service';
@@ -12,15 +12,15 @@ import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, zeroResponse, zeroResponseV2 } from './utils';
+import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } from './utils';
 
 export class SorService {
-    async getSorV2Swaps(args: QuerySorV2GetSwapsArgs): Promise<GqlSorGetSwaps> {
+    async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
         console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
-        const emptyResponse = zeroResponseV2(args.swapType, args.tokenIn, args.tokenOut);
+        const emptyResponse = swapPathsZeroResponse(args.tokenIn, args.tokenOut);
 
         // check if tokens addresses exist
         try {
@@ -44,7 +44,7 @@ export class SorService {
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
 
-        return sorV2Service.getSorSwaps({
+        return sorV2Service.getSorSwapPaths({
             chain: args.chain!,
             swapAmount: amount,
             swapType: args.swapType,

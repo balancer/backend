@@ -1,4 +1,4 @@
-import { GqlSorGetSwaps, GqlSorSwap, GqlSorSwapType } from '../../../schema';
+import { GqlSorGetSwapPaths, GqlSorSwap, GqlSorSwapType } from '../../../schema';
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
@@ -12,9 +12,9 @@ import { Address, formatUnits, parseUnits } from 'viem';
 import { sorGetSwapsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
-import { mapRoutes } from './beetsHelpers';
+import { mapPaths, mapRoutes } from './beetsHelpers';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
-import { getToken, zeroResponseV2 } from '../utils';
+import { getToken, swapPathsZeroResponse } from '../utils';
 import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
 import { Token } from 'graphql';
 
@@ -66,16 +66,16 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async getSorSwaps(input: GetSwapsV2Input, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwaps> {
+    public async getSorSwapPaths(input: GetSwapsV2Input, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {
         const swap = await this.getSwap(input, maxNonBoostedPathDepth);
-        const emptyResponse = zeroResponseV2(input.swapType, input.tokenIn, input.tokenOut);
+        const emptyResponse = swapPathsZeroResponse(input.tokenIn, input.tokenOut);
 
         if (!swap) {
             return emptyResponse;
         }
 
         try {
-            return this.mapToSorSwaps(swap!, input.chain, input.queryBatchSwap ? input.queryBatchSwap : true);
+            return this.mapToSorSwapPaths(swap!, input.chain, input.queryBatchSwap ? input.queryBatchSwap : true);
         } catch (err: any) {
             console.log(`Error Retrieving QuerySwap`, err);
             Sentry.captureException(err.message, {
@@ -136,7 +136,7 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async mapToSorSwaps(swap: Swap, chain: Chain, queryFirst = false): Promise<GqlSorGetSwaps> {
+    public async mapToSorSwapPaths(swap: Swap, chain: Chain, queryFirst = false): Promise<GqlSorGetSwapPaths> {
         if (!queryFirst) return this.mapSwapToSorGetSwaps(swap, swap.inputAmount, swap.outputAmount);
         else {
             const rpcUrl = AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl;
@@ -153,7 +153,7 @@ export class SorV2Service implements SwapService {
         swap: Swap,
         inputAmount: TokenAmount,
         outputAmount: TokenAmount,
-    ): Promise<GqlSorGetSwaps> {
+    ): Promise<GqlSorGetSwapPaths> {
         const priceImpact = swap.priceImpact.decimal.toFixed(4);
         let poolIds: string[];
         if (swap.isBatchSwap) {
@@ -187,6 +187,8 @@ export class SorV2Service implements SwapService {
             swap.swapKind,
         );
 
+        const paths = mapPaths(swap);
+
         for (const route of routes) {
             route.tokenInAmount = ((inputAmount.amount * BigInt(parseUnits(`${0.5}`, 6))) / 1000000n).toString();
             route.tokenOutAmount = (
@@ -196,11 +198,11 @@ export class SorV2Service implements SwapService {
         }
 
         return {
+            vaultVersion: 2,
+            paths: paths,
             swaps: this.mapSwaps(swap.swaps, swap.assets),
-            tokenAddresses: swap.assets,
             tokenIn: replaceZeroAddressWithEth(inputAmount.token.address),
             tokenOut: replaceZeroAddressWithEth(outputAmount.token.address),
-            swapType: this.mapSwapKindToSwapType(swap.swapKind),
             tokenInAmount: inputAmount.amount.toString(),
             tokenOutAmount: outputAmount.amount.toString(),
             swapAmount: formatUnits(swapAmount.amount, swapAmount.token.decimals),
@@ -222,10 +224,6 @@ export class SorV2Service implements SwapService {
 
     private mapSwapTypeToSwapKind(swapType: GqlSorSwapType): SwapKind {
         return swapType === 'EXACT_IN' ? SwapKind.GivenIn : SwapKind.GivenOut;
-    }
-
-    private mapSwapKindToSwapType(kind: SwapKind): GqlSorSwapType {
-        return kind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT';
     }
 
     private mapSwaps(swaps: BatchSwapStep[] | SingleSwap, assets: string[]): GqlSorSwap[] {

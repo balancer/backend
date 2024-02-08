@@ -1,7 +1,7 @@
 import { tokenService } from '../token/token.service';
 import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../network/network-config';
-import { GqlSorGetSwaps, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
+import { GqlSorGetSwapPaths, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
 import { Address } from 'viem';
 import { NATIVE_ADDRESS, Token, TokenAmount } from '@balancer/sdk';
@@ -37,13 +37,13 @@ export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> 
     }
 };
 
-export const zeroResponseV2 = (swapType: GqlSorSwapType, tokenIn: string, tokenOut: string): GqlSorGetSwaps => {
+export const swapPathsZeroResponse = (tokenIn: string, tokenOut: string): GqlSorGetSwapPaths => {
     return {
-        tokenAddresses: [],
         swaps: [],
+        paths: [],
+        vaultVersion: 2,
         tokenIn: replaceZeroAddressWithEth(tokenIn),
         tokenOut: replaceZeroAddressWithEth(tokenOut),
-        swapType,
         tokenInAmount: '0',
         tokenOutAmount: '0',
         swapAmount: '0',
