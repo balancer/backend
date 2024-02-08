@@ -32,7 +32,7 @@ export class svEthAprHandler implements AprHandler {
 
         return {
             [svETH]: {
-                apr: (parseFloat(formatEther(rate)) * 1095) / parseFloat(formatEther(balance)) / 100,
+                apr: (parseFloat(formatEther(rate)) * 1095) / parseFloat(formatEther(balance)),
                 isIbYield: true,
             },
         };
