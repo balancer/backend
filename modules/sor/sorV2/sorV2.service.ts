@@ -2,7 +2,7 @@ import { GqlSorGetSwapPaths, GqlSorSwap, GqlSorSwapType } from '../../../schema'
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
-import { GetSwapsInput, GetSwapsV2Input, SwapResult, SwapService } from '../types';
+import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult, SwapService } from '../types';
 import { env } from '../../../app/env';
 import { DeploymentEnv } from '../../network/network-config-types';
 import { poolsToIgnore } from '../constants';
@@ -66,7 +66,7 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async getSorSwapPaths(input: GetSwapsV2Input, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {
+    public async getSorSwapPaths(input: GetSwapPathsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {
         const swap = await this.getSwap(input, maxNonBoostedPathDepth);
         const emptyResponse = swapPathsZeroResponse(input.tokenIn, input.tokenOut);
 
@@ -75,7 +75,7 @@ export class SorV2Service implements SwapService {
         }
 
         try {
-            return this.mapToSorSwapPaths(swap!, input.chain, input.queryBatchSwap ? input.queryBatchSwap : true);
+            return this.mapToSorSwapPaths(swap!, input.chain, input.queryBatchSwap);
         } catch (err: any) {
             console.log(`Error Retrieving QuerySwap`, err);
             Sentry.captureException(err.message, {
@@ -92,8 +92,8 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async getSwap(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsV2Input,
+    private async getSwap(
+        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapPathsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<Swap | null> {
         try {
@@ -114,8 +114,9 @@ export class SorV2Service implements SwapService {
                       },
                   };
             const swap = await sorGetSwapsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            // if we dont find a path with depth 4, we try one more level.
             if (!swap && maxNonBoostedPathDepth < 5) {
-                return swap;
+                return this.getSwap(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return swap;
         } catch (err: any) {
