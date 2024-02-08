@@ -64,16 +64,11 @@ model PrismaPool {
 
     vaultVersion        Int                 @default(2)
 
-    linearData          PrismaPoolLinearData?
-    elementData         PrismaPoolElementData?
-    gyroData            PrismaPoolGyroData?
-    staticTypeData      Json @default("{}")
+    typeData           Json @default("{}")
 
     tokens              PrismaPoolToken[]
 
     dynamicData         PrismaPoolDynamicData?
-    stableDynamicData   PrismaPoolStableDynamicData?
-    linearDynamicData   PrismaPoolLinearDynamicData?
 
     snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
@@ -107,61 +102,6 @@ enum PrismaPoolType {
     GYRO3
     GYROE
     FX
-}
-
-model PrismaPoolLinearData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    mainIndex           Int
-    wrappedIndex        Int
-}
-
-model PrismaPoolElementData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    unitSeconds         String
-    principalToken      String
-    baseToken           String
-}
-
-model PrismaPoolGyroData{
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    alpha               String
-    beta                String
-    sqrtAlpha           String?
-    sqrtBeta            String?
-    root3Alpha          String?
-    c                   String?
-    s                   String?
-    lambda              String?
-    tauAlphaX           String?
-    tauAlphaY           String?
-    tauBetaX            String?
-    tauBetaY            String?
-    u                   String?
-    v                   String?
-    w                   String?
-    z                   String?
-    dSq                 String?
 }
 
 model PrismaPoolDynamicData {
@@ -222,35 +162,6 @@ model PrismaPoolDynamicData {
     fees24hAthTimestamp     Int                 @default(0)
     fees24hAtl              Float               @default(0)
     fees24hAtlTimestamp     Int                 @default(0)
-}
-
-model PrismaPoolStableDynamicData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-    blockNumber         Int
-    updatedAt           DateTime            @updatedAt
-
-    amp                 String
-}
-
-model PrismaPoolLinearDynamicData {
-    @@id([id, chain])
-    @@unique([poolId, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-    blockNumber         Int
-    updatedAt           DateTime            @updatedAt
-
-    lowerTarget         String
-    upperTarget         String
 }
 
 model PrismaPoolToken {

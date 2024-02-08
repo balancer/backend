@@ -2,7 +2,7 @@ import { PoolAprService } from '../../pool-types';
 import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType, PrismaPoolLinearData } from '@prisma/client';
+import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType } from '@prisma/client';
 import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';

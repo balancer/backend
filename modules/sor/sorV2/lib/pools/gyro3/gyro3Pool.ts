@@ -6,6 +6,7 @@ import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
 import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { GyroData } from '../../../../../pool/subgraph-mapper';
 
 export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;
@@ -43,7 +44,7 @@ export class Gyro3Pool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro3Pool {
         const poolTokens: Gyro3PoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.gyroData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -69,7 +70,7 @@ export class Gyro3Pool implements BasePool {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseEther(pool.gyroData.root3Alpha!),
+            parseEther((pool.typeData as GyroData).root3Alpha!),
             poolTokens,
         );
     }

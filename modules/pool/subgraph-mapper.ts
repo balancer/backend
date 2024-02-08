@@ -1,7 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { AddressZero } from '@ethersproject/constants';
-import { fx, gyro, linear, element, stableDynamic, linearDynamic } from './pool-data';
+import { fx, gyro, linear, element, stable } from './pool-data';
 
 export const subgraphToPrismaCreate = (
     pool: BalancerPoolFragment,
@@ -14,7 +14,7 @@ export const subgraphToPrismaCreate = (
     const prismaPoolRecordWithAssociations = {
         data: {
             ...dbData.base,
-            staticTypeData: dbData.staticTypeData,
+            typeData: dbData.typeData,
             tokens: {
                 createMany: {
                     data: dbData.tokens,
@@ -26,49 +26,6 @@ export const subgraphToPrismaCreate = (
                     ...dbData.dynamicData,
                 },
             },
-            linearData:
-                dbData.base.type === 'LINEAR'
-                    ? {
-                          create: {
-                              id: dbData.base.id,
-                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
-                          },
-                      }
-                    : undefined,
-            elementData:
-                dbData.base.type === 'ELEMENT'
-                    ? {
-                          create: {
-                              id: dbData.base.id,
-                              ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
-                          },
-                      }
-                    : undefined,
-            gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
-                ? {
-                      create: {
-                          id: dbData.base.id,
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
-                      },
-                  }
-                : undefined,
-            linearDynamicData:
-                dbData.base.type === 'LINEAR'
-                    ? {
-                          create: {
-                              id: dbData.base.id,
-                              ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['LINEAR']>),
-                          },
-                      }
-                    : undefined,
-            stableDynamicData: ['STABLE', 'COMPOSABLE_STABLE', 'META_STABLE'].includes(dbData.base.type)
-                ? {
-                      create: {
-                          id: dbData.base.id,
-                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['STABLE']>),
-                      },
-                  }
-                : undefined,
         },
     };
 
@@ -86,7 +43,7 @@ export const subgraphToPrismaUpdate = (
 
     const prismaPoolRecordWithDataAssociations = {
         ...baseWithoutId,
-        staticTypeData: dbData.staticTypeData,
+        typeData: dbData.typeData,
         tokens: {
             update: dbData.tokens.map((token) => ({
                 where: {
@@ -100,44 +57,6 @@ export const subgraphToPrismaUpdate = (
                 },
             })),
         },
-        linearData:
-            dbData.base.type === 'LINEAR'
-                ? {
-                      update: {
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['LINEAR']>),
-                      },
-                  }
-                : undefined,
-        elementData:
-            dbData.base.type === 'ELEMENT'
-                ? {
-                      update: {
-                          ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['ELEMENT']>),
-                      },
-                  }
-                : undefined,
-        gyroData: ['GYRO', 'GYRO3', 'GYROE'].includes(dbData.base.type)
-            ? {
-                  update: {
-                      ...(dbData.staticTypeData as ReturnType<typeof staticTypeDataMapper['GYRO']>),
-                  },
-              }
-            : undefined,
-        linearDynamicData:
-            dbData.base.type === 'LINEAR'
-                ? {
-                      update: {
-                          ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['LINEAR']>),
-                      },
-                  }
-                : undefined,
-        stableDynamicData: ['STABLE', 'COMPOSABLE_STABLE', 'META_STABLE'].includes(dbData.base.type)
-            ? {
-                  update: {
-                      ...(dbData.dynamicTypeData as ReturnType<typeof dynamicTypeDataMapper['STABLE']>),
-                  },
-              }
-            : undefined,
     };
 
     return prismaPoolRecordWithDataAssociations;
@@ -175,14 +94,10 @@ const subgraphMapper = (
         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
     };
 
-    const staticTypeData: ReturnType<typeof staticTypeDataMapper[keyof typeof staticTypeDataMapper]> | {} = Object.keys(
-        staticTypeDataMapper,
+    const typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = Object.keys(
+        typeDataMapper,
     ).includes(type)
-        ? staticTypeDataMapper[type as keyof typeof staticTypeDataMapper](pool)
-        : {};
-
-    const dynamicTypeData = Object.keys(dynamicTypeDataMapper).includes(type)
-        ? dynamicTypeDataMapper[type as keyof typeof dynamicTypeDataMapper](pool, blockNumber)
+        ? typeDataMapper[type as keyof typeof typeDataMapper](pool)
         : {};
 
     const tokens =
@@ -213,8 +128,7 @@ const subgraphMapper = (
         base,
         dynamicData,
         tokens,
-        staticTypeData,
-        dynamicTypeData,
+        typeData,
     };
 };
 
@@ -267,25 +181,20 @@ const mapPoolTypeVersion = (poolType: string, poolTypeVersion: number): number =
     return version;
 };
 
-const staticTypeDataMapper = {
+const typeDataMapper = {
     ELEMENT: element,
     FX: fx,
     GYRO: gyro,
     GYRO3: gyro,
     GYROE: gyro,
     LINEAR: linear,
-};
-
-const dynamicTypeDataMapper = {
-    STABLE: stableDynamic,
-    COMPOSABLE_STABLE: stableDynamic,
-    META_STABLE: stableDynamic,
-    LINEAR: linearDynamic,
+    STABLE: stable,
+    COMPOSABLE_STABLE: stable,
+    META_STABLE: stable,
 };
 
 export type FxData = ReturnType<typeof fx>;
 export type GyroData = ReturnType<typeof gyro>;
 export type LinearData = ReturnType<typeof linear>;
 export type ElementData = ReturnType<typeof element>;
-export type StableDynamicData = ReturnType<typeof stableDynamic>;
-export type LinearDynamicData = ReturnType<typeof linearDynamic>;
+export type StableData = ReturnType<typeof stable>;

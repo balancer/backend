@@ -6,6 +6,7 @@ import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { GyroData } from '../../../../../pool/subgraph-mapper';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;
@@ -44,7 +45,7 @@ export class Gyro2Pool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro2Pool {
         const poolTokens: Gyro2PoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.gyroData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -64,14 +65,16 @@ export class Gyro2Pool implements BasePool {
             poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index));
         }
 
+        const gyroData = pool.typeData as GyroData;
+
         return new Gyro2Pool(
             pool.id as Hex,
             pool.address,
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseEther(pool.gyroData.sqrtAlpha!),
-            parseEther(pool.gyroData.sqrtBeta!),
+            parseEther(gyroData.sqrtAlpha!),
+            parseEther(gyroData.sqrtBeta!),
             poolTokens,
         );
     }
