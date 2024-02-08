@@ -9,6 +9,7 @@ import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
 import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 const isUSDC = (address: string): boolean => {
     return (
@@ -30,6 +31,7 @@ export class FxPool implements BasePool {
     public readonly delta: bigint;
     public readonly epsilon: bigint;
     public readonly tokens: FxPoolToken[];
+    public readonly tokenPairs: TokenPairData[];
 
     private readonly tokenMap: Map<string, FxPoolToken>;
 
@@ -79,6 +81,7 @@ export class FxPool implements BasePool {
             parseUnits((pool.typeData as FxData).delta as string, 36),
             parseFixedCurveParam((pool.typeData as FxData).epsilon as string),
             poolTokens,
+            pool.dynamicData.tokenPairsData as TokenPairData[],
         );
     }
 
@@ -94,6 +97,7 @@ export class FxPool implements BasePool {
         delta: bigint,
         epsilon: bigint,
         tokens: FxPoolToken[],
+        tokenPairs: TokenPairData[],
     ) {
         this.id = id;
         this.address = address;
@@ -107,6 +111,7 @@ export class FxPool implements BasePool {
         this.epsilon = epsilon;
         this.tokens = tokens;
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
+        this.tokenPairs = tokenPairs;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -114,8 +119,17 @@ export class FxPool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix fx normalized liquidity calc
-        return tOut.amount;
+
+        const tokenPair = this.tokenPairs.find(
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+        );
+
+        if (tokenPair) {
+            return parseEther(tokenPair.normalizedLiquidity);
+        }
+        return 0n;
     }
 
     public swapGivenIn(

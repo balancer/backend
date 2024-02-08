@@ -7,6 +7,7 @@ import { MathSol, WAD } from '../../utils/math';
 import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
+import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;
@@ -16,6 +17,7 @@ export class MetaStablePool implements BasePool {
     public readonly amp: bigint;
     public readonly swapFee: bigint;
     public readonly tokens: StablePoolToken[];
+    public readonly tokenPairs: TokenPairData[];
 
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
@@ -55,10 +57,19 @@ export class MetaStablePool implements BasePool {
             amp,
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
+            pool.dynamicData.tokenPairsData as TokenPairData[],
         );
     }
 
-    constructor(id: Hex, address: string, chain: Chain, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
+    constructor(
+        id: Hex,
+        address: string,
+        chain: Chain,
+        amp: bigint,
+        swapFee: bigint,
+        tokens: StablePoolToken[],
+        tokenPairs: TokenPairData[],
+    ) {
         this.id = id;
         this.address = address;
         this.chain = chain;
@@ -68,6 +79,7 @@ export class MetaStablePool implements BasePool {
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
         this.tokenIndexMap = new Map(this.tokens.map((token) => [token.token.address, token.index]));
+        this.tokenPairs = tokenPairs;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -75,8 +87,17 @@ export class MetaStablePool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix stable normalized liquidity calc
-        return tOut.amount * this.amp;
+
+        const tokenPair = this.tokenPairs.find(
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+        );
+
+        if (tokenPair) {
+            return parseEther(tokenPair.normalizedLiquidity);
+        }
+        return 0n;
     }
 
     public swapGivenIn(

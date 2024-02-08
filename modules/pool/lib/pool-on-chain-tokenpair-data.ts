@@ -29,11 +29,12 @@ interface PoolTokenPairsOutput {
     };
 }
 
-export interface TokenPairData {
-    id: string;
+export type TokenPairData = {
+    tokenA: string;
+    tokenB: string;
     normalizedLiquidity: string;
     spotPrice: string;
-}
+};
 
 interface TokenPair {
     poolId: string;
@@ -130,7 +131,8 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
                     };
                 }
                 tokenPairOutput[pool.id].tokenPairs.push({
-                    id: `${pool.id}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`,
+                    tokenA: tokenPair.tokenA.address,
+                    tokenB: tokenPair.tokenB.address,
                     normalizedLiquidity: tokenPair.normalizedLiqudity.toString(),
                     spotPrice: tokenPair.spotPrice.toString(),
                 });

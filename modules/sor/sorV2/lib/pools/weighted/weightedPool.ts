@@ -5,6 +5,7 @@ import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
 import { BasePool, BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
+import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -37,6 +38,7 @@ export class WeightedPool implements BasePool {
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: WeightedPoolToken[];
+    public readonly tokenPairs: TokenPairData[];
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
     private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
@@ -80,6 +82,7 @@ export class WeightedPool implements BasePool {
             pool.version,
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
+            pool.dynamicData.tokenPairsData as TokenPairData[],
         );
     }
 
@@ -90,6 +93,7 @@ export class WeightedPool implements BasePool {
         poolTypeVersion: number,
         swapFee: bigint,
         tokens: WeightedPoolToken[],
+        tokenPairs: TokenPairData[],
     ) {
         this.chain = chain;
         this.id = id;
@@ -98,12 +102,22 @@ export class WeightedPool implements BasePool {
         this.swapFee = swapFee;
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
+        this.tokenPairs = tokenPairs;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        return (tIn.amount * tOut.weight) / (tIn.weight + tOut.weight);
+        const tokenPair = this.tokenPairs.find(
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+        );
+
+        if (tokenPair) {
+            return parseEther(tokenPair.normalizedLiquidity);
+        }
+        return 0n;
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {

@@ -10,7 +10,7 @@ import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
 import { LinearData, StableData } from '../subgraph-mapper';
-import { TokenPair, TokenPairData, fetchTokenPairData } from './pool-on-chain-tokenpair-data';
+import { fetchTokenPairData } from './pool-on-chain-tokenpair-data';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
