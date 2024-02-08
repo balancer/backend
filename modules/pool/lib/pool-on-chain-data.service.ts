@@ -210,6 +210,18 @@ export class PoolOnChainDataService {
                     );
                 }
 
+                // always update tokenPair data
+                if (pool.dynamicData) {
+                    operations.push(
+                        prisma.prismaPoolDynamicData.update({
+                            where: { id_chain: { id: pool.id, chain: this.options.chain } },
+                            data: {
+                                tokenPairsData: tokenPairs,
+                            },
+                        }),
+                    );
+                }
+
                 for (let i = 0; i < poolTokens.tokens.length; i++) {
                     const tokenAddress = poolTokens.tokens[i];
                     const poolToken = pool.tokens.find((token) => isSameAddress(token.address, tokenAddress));
