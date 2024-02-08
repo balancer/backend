@@ -54,10 +54,8 @@ interface TokenPair {
     tokenB: Token;
     normalizedLiqudity: bigint;
     spotPrice: bigint;
-    aToBPrice: bigint;
     aToBAmountIn: bigint;
     aToBAmountOut: bigint;
-    bToAPrice: bigint;
     bToAAmountOut: bigint;
     effectivePrice: bigint;
     effectivePriceAmountIn: bigint;
@@ -110,7 +108,7 @@ export async function fetchNormalizedLiquidity(pools: PoolInput[], balancerQueri
     const resultOne = (await multicaller.execute()) as {
         [id: string]: OnchainData;
     };
-
+    ``;
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
@@ -195,10 +193,8 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     },
                     normalizedLiqudity: 0n,
                     spotPrice: 0n,
-                    aToBPrice: 0n,
                     aToBAmountIn: 0n,
                     aToBAmountOut: 0n,
-                    bToAPrice: 0n,
                     bToAAmountOut: 0n,
                     effectivePrice: 0n,
                     effectivePriceAmountIn: 0n,
@@ -286,9 +282,10 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
 
     if (result) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
+        // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
-            tokenPair.effectivePriceAmountIn,
-            BigInt(result.effectivePriceAmountOut.toString()),
+            parseUnits(tokenPair.effectivePriceAmountIn.toString(), 18 - tokenPair.tokenA.decimals),
+            parseUnits(result.effectivePriceAmountOut.toString(), 18 - tokenPair.tokenB.decimals),
         );
     }
 }
@@ -301,12 +298,17 @@ function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: st
     }
 }
 function calculateSpotPrice(tokenPair: TokenPair) {
-    const priceAtoB = MathSol.divDownFixed(tokenPair.aToBAmountIn, tokenPair.aToBAmountOut);
-    const priceBtoA = MathSol.divDownFixed(tokenPair.aToBAmountOut, tokenPair.bToAAmountOut);
+    // MathSol expects all values with 18 decimals, need to scale them
+    const aToBAmountInScaled = parseUnits(tokenPair.aToBAmountIn.toString(), 18 - tokenPair.tokenA.decimals);
+    const aToBAmountOutScaled = parseUnits(tokenPair.aToBAmountOut.toString(), 18 - tokenPair.tokenB.decimals);
+    const bToAAmountOutScaled = parseUnits(tokenPair.bToAAmountOut.toString(), 18 - tokenPair.tokenA.decimals);
+    const priceAtoB = MathSol.divDownFixed(aToBAmountInScaled, aToBAmountOutScaled);
+    const priceBtoA = MathSol.divDownFixed(aToBAmountOutScaled, bToAAmountOutScaled);
     tokenPair.spotPrice = MathSol.powDownFixed(MathSol.divDownFixed(priceAtoB, priceBtoA), WAD / 2n);
 }
 
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
+    // spotPrice and effective price are already scaled to 18 decimals by the MathSol output
     const priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
     const priceImpact = WAD - priceRatio;
     tokenPair.normalizedLiqudity = MathSol.divDownFixed(WAD, priceImpact);
