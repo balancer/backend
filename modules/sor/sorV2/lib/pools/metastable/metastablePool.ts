@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { StablePoolToken } from '../stable/stablePool';
+import { ComposableStablePoolToken } from '../composableStable/composableStablePool';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
 import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
@@ -16,14 +16,14 @@ export class MetaStablePool implements BasePool {
     public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
-    public readonly tokens: StablePoolToken[];
+    public readonly tokens: ComposableStablePoolToken[];
     public readonly tokenPairs: TokenPairData[];
 
-    private readonly tokenMap: Map<string, StablePoolToken>;
+    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): MetaStablePool {
-        const poolTokens: StablePoolToken[] = [];
+        const poolTokens: ComposableStablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -39,7 +39,7 @@ export class MetaStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
-                new StablePoolToken(
+                new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
                     parseEther(poolToken.dynamicData.priceRate),
@@ -67,7 +67,7 @@ export class MetaStablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: StablePoolToken[],
+        tokens: ComposableStablePoolToken[],
         tokenPairs: TokenPairData[],
     ) {
         this.id = id;

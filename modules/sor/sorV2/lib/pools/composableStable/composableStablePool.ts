@@ -16,7 +16,7 @@ import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
-export class StablePoolToken extends TokenAmount {
+export class ComposableStablePoolToken extends TokenAmount {
     public readonly rate: bigint;
     public readonly index: number;
 
@@ -40,24 +40,24 @@ export class StablePoolToken extends TokenAmount {
     }
 }
 
-export class StablePool implements BasePool {
+export class ComposableStablePool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.MetaStable;
+    public readonly poolType: PoolType = PoolType.ComposableStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
     public readonly bptIndex: number;
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
-    public tokens: StablePoolToken[];
+    public tokens: ComposableStablePoolToken[];
 
-    private readonly tokenMap: Map<string, StablePoolToken>;
+    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
-    static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
-        const poolTokens: StablePoolToken[] = [];
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): ComposableStablePool {
+        const poolTokens: ComposableStablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -73,7 +73,7 @@ export class StablePool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
-                new StablePoolToken(
+                new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
                     parseEther(poolToken.dynamicData.priceRate),
@@ -85,7 +85,7 @@ export class StablePool implements BasePool {
         const totalShares = parseEther(pool.dynamicData.totalShares);
         const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
-        return new StablePool(
+        return new ComposableStablePool(
             pool.id as Hex,
             pool.address,
             pool.chain,
@@ -103,7 +103,7 @@ export class StablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: StablePoolToken[],
+        tokens: ComposableStablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
     ) {
