@@ -44,10 +44,9 @@ import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BalancerChainIds, BeethovenChainIds, chainIdToChain, chainToIdMap } from '../../network/network-config';
+import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
-import { FeaturedPool } from '../../content/content-types';
 import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
 
 export class PoolGqlLoaderService {
