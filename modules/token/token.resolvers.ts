@@ -32,8 +32,14 @@ const resolvers: Resolvers = {
                 chain: price.chain,
             }));
         },
-        tokenGetHistoricalPrices: async (parent, { addresses }, context) => {
-            const tokenPrices = await tokenService.getHistoricalTokenPrices();
+        tokenGetHistoricalPrices: async (parent, { addresses, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetHistoricalPrices error: Provide "chain" param');
+            }
+            const tokenPrices = await tokenService.getHistoricalTokenPrices(chain);
             const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
 
             return _.map(filtered, (entries, address) => ({
@@ -49,7 +55,7 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+                throw new Error('tokenGetTokenDynamicData error: Provide "chain" param');
             }
             const data = await tokenService.getTokenDynamicData(address, chain);
 
@@ -63,8 +69,14 @@ const resolvers: Resolvers = {
                   }
                 : null;
         },
-        tokenGetTokensDynamicData: async (parent, { addresses }, context) => {
-            const items = await tokenService.getTokensDynamicData(addresses);
+        tokenGetTokensDynamicData: async (parent, { addresses, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+            }
+            const items = await tokenService.getTokensDynamicData(addresses, chain);
 
             return items.map((item) => ({
                 ...item,

@@ -161,11 +161,11 @@ export class TokenService {
         return null;
     }
 
-    public async getTokensDynamicData(tokenAddresses: string[]): Promise<PrismaTokenDynamicData[]> {
+    public async getTokensDynamicData(tokenAddresses: string[], chain: Chain): Promise<PrismaTokenDynamicData[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: {
                 address: { in: tokenAddresses.map((address) => address.toLowerCase()) },
-                chain: networkContext.chain,
+                chain: chain,
             },
             include: {
                 dynamicData: true,
@@ -217,8 +217,8 @@ export class TokenService {
         return tokenPrices24hAgo;
     }
 
-    public async getHistoricalTokenPrices() {
-        return this.tokenPriceService.getHistoricalTokenPrices();
+    public async getHistoricalTokenPrices(chain: Chain) {
+        return this.tokenPriceService.getHistoricalTokenPrices(chain);
     }
 
     public async purgeOldTokenPricesForAllChains() {
