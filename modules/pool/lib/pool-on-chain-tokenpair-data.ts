@@ -147,20 +147,11 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     const tokenPairs: TokenPair[] = [];
 
     for (const pool of filteredPools) {
-        // search for and delete phantom BPT if present
-        let index: number | undefined = undefined;
-        pool.tokens.forEach((poolToken, i) => {
-            if (poolToken.address === pool.address) {
-                index = i;
-            }
-        });
-        if (index) {
-            pool.tokens.splice(index, 1);
-        }
-
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
             for (let j = i + 1; j < pool.tokens.length; j++) {
+                //skip pairs with phantom BPT
+                if (pool.tokens[i].address === pool.address || pool.tokens[j].address === pool.address) continue;
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,

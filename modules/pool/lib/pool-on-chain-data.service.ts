@@ -204,7 +204,6 @@ export class PoolOnChainDataService {
                                 protocolYieldFee: yieldProtocolFeePercentage,
                                 protocolSwapFee: swapProtocolFeePercentage,
                                 blockNumber,
-                                tokenPairsData: tokenPairs,
                             },
                         }),
                     );
