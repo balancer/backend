@@ -1,12 +1,13 @@
 import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { StablePoolToken } from '../stable/stablePool';
+import { ComposableStablePoolToken } from '../composableStable/composableStablePool';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
 import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
+import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;
@@ -15,13 +16,14 @@ export class MetaStablePool implements BasePool {
     public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
-    public readonly tokens: StablePoolToken[];
+    public readonly tokens: ComposableStablePoolToken[];
+    public readonly tokenPairs: TokenPairData[];
 
-    private readonly tokenMap: Map<string, StablePoolToken>;
+    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): MetaStablePool {
-        const poolTokens: StablePoolToken[] = [];
+        const poolTokens: ComposableStablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -37,7 +39,7 @@ export class MetaStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
-                new StablePoolToken(
+                new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
                     parseEther(poolToken.dynamicData.priceRate),
@@ -55,10 +57,19 @@ export class MetaStablePool implements BasePool {
             amp,
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
+            pool.dynamicData.tokenPairsData as TokenPairData[],
         );
     }
 
-    constructor(id: Hex, address: string, chain: Chain, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
+    constructor(
+        id: Hex,
+        address: string,
+        chain: Chain,
+        amp: bigint,
+        swapFee: bigint,
+        tokens: ComposableStablePoolToken[],
+        tokenPairs: TokenPairData[],
+    ) {
         this.id = id;
         this.address = address;
         this.chain = chain;
@@ -68,6 +79,7 @@ export class MetaStablePool implements BasePool {
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
         this.tokenIndexMap = new Map(this.tokens.map((token) => [token.token.address, token.index]));
+        this.tokenPairs = tokenPairs;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -75,8 +87,17 @@ export class MetaStablePool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix stable normalized liquidity calc
-        return tOut.amount * this.amp;
+
+        const tokenPair = this.tokenPairs.find(
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+        );
+
+        if (tokenPair) {
+            return parseEther(tokenPair.normalizedLiquidity);
+        }
+        return 0n;
     }
 
     public swapGivenIn(

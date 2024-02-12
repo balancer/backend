@@ -2,13 +2,13 @@ import { Router } from './router';
 import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { WeightedPool } from './pools/weighted/weightedPool';
-import { StablePool } from './pools/stable/stablePool';
 import { MetaStablePool } from './pools/metastable/metastablePool';
 import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
 import { GyroEPool } from './pools/gyroE/gyroEPool';
 import { BasePool, Swap, SwapKind, SwapOptions, Token } from '@balancer/sdk';
+import { ComposableStablePool } from './pools/composableStable/composableStablePool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -29,7 +29,7 @@ export async function sorGetSwapsWithPools(
                 break;
             case 'COMPOSABLE_STABLE':
             case 'PHANTOM_STABLE':
-                basePools.push(StablePool.fromPrismaPool(prismaPool));
+                basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
                 break;
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));

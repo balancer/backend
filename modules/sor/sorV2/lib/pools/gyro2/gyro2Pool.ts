@@ -7,6 +7,7 @@ import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
+import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;
@@ -37,6 +38,7 @@ export class Gyro2Pool implements BasePool {
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: Gyro2PoolToken[];
+    public readonly tokenPairs: TokenPairData[];
 
     private readonly sqrtAlpha: bigint;
     private readonly sqrtBeta: bigint;
@@ -76,6 +78,7 @@ export class Gyro2Pool implements BasePool {
             parseEther(gyroData.sqrtAlpha!),
             parseEther(gyroData.sqrtBeta!),
             poolTokens,
+            pool.dynamicData.tokenPairsData as TokenPairData[],
         );
     }
 
@@ -88,6 +91,7 @@ export class Gyro2Pool implements BasePool {
         sqrtAlpha: bigint,
         sqrtBeta: bigint,
         tokens: Gyro2PoolToken[],
+        tokenPairs: TokenPairData[],
     ) {
         this.id = id;
         this.address = address;
@@ -98,6 +102,7 @@ export class Gyro2Pool implements BasePool {
         this.sqrtBeta = sqrtBeta;
         this.tokens = tokens;
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
+        this.tokenPairs = tokenPairs;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -105,8 +110,17 @@ export class Gyro2Pool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix gyro normalized liquidity calc
-        return tOut.amount;
+
+        const tokenPair = this.tokenPairs.find(
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+        );
+
+        if (tokenPair) {
+            return parseEther(tokenPair.normalizedLiquidity);
+        }
+        return 0n;
     }
 
     public swapGivenIn(
