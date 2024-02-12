@@ -349,6 +349,12 @@ export const data: NetworkData = {
                 path: 'value',
                 isIbYield: true,
             },
+            sDOLA: {
+                tokenAddress: '0xb45ad160634c528Cc3D2926d9807104FA3157305',
+                sourceUrl: 'https://https://www.inverse.finance/api/dola-staking',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
