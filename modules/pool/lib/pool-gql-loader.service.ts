@@ -1259,13 +1259,36 @@ export class PoolGqlLoaderService {
                     balanceNum: { gt: 0 },
                 },
             },
-            userStakedBalances: {
-                where: {
-                    userAddress: {
-                        equals: userAddress,
-                        mode: 'insensitive' as const,
+            staking: {
+                include: {
+                    farm: {
+                        include: {
+                            rewarders: true,
+                        },
                     },
-                    balanceNum: { gt: 0 },
+                    gauge: {
+                        include: {
+                            rewards: true,
+                        },
+                    },
+                    reliquary: {
+                        include: {
+                            levels: {
+                                orderBy: {
+                                    level: 'asc',
+                                },
+                            },
+                        },
+                    },
+                },
+                userStakedBalances: {
+                    where: {
+                        userAddress: {
+                            equals: userAddress,
+                            mode: 'insensitive' as const,
+                        },
+                        balanceNum: { gt: 0 },
+                    },
                 },
             },
         };
