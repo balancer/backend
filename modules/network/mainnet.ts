@@ -26,7 +26,7 @@ const underlyingTokens = {
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
 };
 
-const data: NetworkData = {
+export const data: NetworkData = {
     chain: {
         slug: 'ethereum',
         id: 1,
@@ -257,6 +257,7 @@ const data: NetworkData = {
         },
         stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+        sveth: true,
         defaultHandlers: {
             vETH: {
                 tokenAddress: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
@@ -340,6 +341,12 @@ const data: NetworkData = {
                 tokenAddress: '0xbf5495efe5db9ce00f80364c8b423567e58d2110',
                 sourceUrl: 'https://app.renzoprotocol.com/api/apr',
                 path: 'apr',
+                isIbYield: true,
+            },
+            rsETH: {
+                tokenAddress: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
                 isIbYield: true,
             },
         },

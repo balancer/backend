@@ -52,9 +52,7 @@ const polygonNetworkData: NetworkData = {
         platformId: 'polygon-pos',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.INFURA_API_KEY
-        ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : 'https://polygon.sakurarpc.io',
+    rpcUrl: env.INFURA_API_KEY ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://1rpc.io/matic',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {

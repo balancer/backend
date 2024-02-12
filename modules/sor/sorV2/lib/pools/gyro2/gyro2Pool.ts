@@ -1,13 +1,12 @@
 import { Address, Hex, parseEther } from 'viem';
-import { GqlPoolType } from '../../../../../../schema';
-import { Token } from '../../entities/token';
-import { BigintIsh, TokenAmount } from '../../entities/tokenAmount';
-import { BasePool, SwapKind } from '../../types';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualParams } from './gyro2Math';
 import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
+import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
+import { GyroData } from '../../../../../pool/subgraph-mapper';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;
@@ -34,7 +33,7 @@ export class Gyro2Pool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: GqlPoolType = 'GYRO';
+    public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: Gyro2PoolToken[];
@@ -46,7 +45,7 @@ export class Gyro2Pool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro2Pool {
         const poolTokens: Gyro2PoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.gyroData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -55,15 +54,18 @@ export class Gyro2Pool implements BasePool {
                 throw new Error('Gyro pool as no dynamic pool token data');
             }
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index));
         }
+
+        const gyroData = pool.typeData as GyroData;
 
         return new Gyro2Pool(
             pool.id as Hex,
@@ -71,8 +73,8 @@ export class Gyro2Pool implements BasePool {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseEther(pool.gyroData.sqrtAlpha!),
-            parseEther(pool.gyroData.sqrtBeta!),
+            parseEther(gyroData.sqrtAlpha!),
+            parseEther(gyroData.sqrtBeta!),
             poolTokens,
         );
     }

@@ -3,7 +3,7 @@ import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '
 import { GetSwapsInput, SwapService, SwapResult } from '../types';
 import { BalancerSorService } from './balancer-sor.service';
 import { tokenService } from '../../token/token.service';
-import { TokenAmount } from '../sorV2/lib/entities/tokenAmount';
+import { TokenAmount } from '@balancer/sdk';
 
 class SwapResultV1 implements SwapResult {
     public inputAmount: bigint = BigInt(0);

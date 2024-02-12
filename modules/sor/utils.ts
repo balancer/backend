@@ -1,12 +1,10 @@
 import { tokenService } from '../token/token.service';
 import { Chain } from '@prisma/client';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../network/network-config';
 import { GqlSorGetSwaps, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
-import { TokenAmount } from './sorV2/lib/entities/tokenAmount';
-import { Token } from './sorV2/lib/entities/token';
-import { NATIVE_ADDRESS } from './sorV2/lib/constants';
 import { Address } from 'viem';
+import { NATIVE_ADDRESS, Token, TokenAmount } from '@balancer/sdk';
 
 export async function getTokenAmountHuman(tokenAddr: string, humanAmount: string, chain: Chain): Promise<TokenAmount> {
     const token = await getToken(tokenAddr, chain);
@@ -27,11 +25,15 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
 export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
     // also check for the polygon native asset
     if (tokenAddr === NATIVE_ADDRESS || tokenAddr === '0x0000000000000000000000000000000000001010') {
-        return new Token(AllNetworkConfigsKeyedOnChain[chain].data.weth.address as Address, 18);
+        return new Token(
+            parseFloat(chainToIdMap[chain]),
+            AllNetworkConfigsKeyedOnChain[chain].data.weth.address as Address,
+            18,
+        );
     } else {
         const prismaToken = await tokenService.getToken(tokenAddr, chain);
         if (!prismaToken) throw Error(`Missing token from tokenService ${tokenAddr}`);
-        return new Token(prismaToken.address as Address, prismaToken.decimals);
+        return new Token(parseFloat(chainToIdMap[chain]), prismaToken.address as Address, prismaToken.decimals);
     }
 };
 
@@ -48,6 +50,8 @@ export const zeroResponseV2 = (swapType: GqlSorSwapType, tokenIn: string, tokenO
         swapAmountScaled: '0',
         returnAmount: '0',
         returnAmountScaled: '0',
+        effectivePrice: '0',
+        effectivePriceReversed: '0',
         routes: [],
         priceImpact: '0',
     };

@@ -5,6 +5,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { ContentService, FeaturedPool, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import { chainIdToChain } from '../network/network-config';
+import { LinearData } from '../pool/subgraph-mapper';
 
 const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
 
@@ -116,8 +117,8 @@ export class GithubContentService implements ContentService {
                 symbol: true,
                 name: true,
                 type: true,
+                typeData: true,
                 tokens: { orderBy: { index: 'asc' } },
-                linearData: true,
             },
         });
         const tokens = await prisma.prismaToken.findMany({
@@ -151,9 +152,10 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            const wrappedLinearPoolToken = pools.find(
-                (pool) => pool.linearData && pool.tokens[pool.linearData.wrappedIndex]?.address === token.address,
-            );
+            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
+            const wrappedLinearPoolToken = wrappedIndex
+                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
+                : undefined;
 
             if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({

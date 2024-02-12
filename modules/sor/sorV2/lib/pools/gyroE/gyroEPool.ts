@@ -1,8 +1,4 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { GqlPoolType } from '../../../../../../schema';
-import { Token } from '../../entities/token';
-import { BigintIsh, TokenAmount } from '../../entities/tokenAmount';
-import { BasePool, SwapKind } from '../../types';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
@@ -10,6 +6,9 @@ import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 import { balancesFromTokenInOut, virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
 import { calculateInvariantWithError, calcOutGivenIn, calcInGivenOut } from './gyroEMath';
+import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
+import { GyroData } from '../../../../../pool/subgraph-mapper';
 
 export class GyroEPoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -39,7 +38,7 @@ export class GyroEPool implements BasePool {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: GqlPoolType = 'GYROE';
+    public readonly poolType: PoolType = PoolType.GyroE;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
     public readonly tokens: GyroEPoolToken[];
@@ -51,7 +50,7 @@ export class GyroEPool implements BasePool {
     static fromPrismaPool(pool: PrismaPoolWithDynamic): GyroEPool {
         const poolTokens: GyroEPoolToken[] = [];
 
-        if (!pool.dynamicData || !pool.gyroData) {
+        if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
         }
 
@@ -61,39 +60,42 @@ export class GyroEPool implements BasePool {
             }
 
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
             const tokenRate = poolToken.dynamicData.priceRate;
 
             poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, parseEther(tokenRate), poolToken.index));
         }
 
+        const gyroData = pool.typeData as GyroData;
+
         const gyroEParams: GyroEParams = {
-            alpha: parseEther(pool.gyroData.alpha),
-            beta: parseEther(pool.gyroData.beta),
-            c: parseEther(pool.gyroData.c!),
-            s: parseEther(pool.gyroData.s!),
-            lambda: parseEther(pool.gyroData.lambda!),
+            alpha: parseEther(gyroData.alpha),
+            beta: parseEther(gyroData.beta),
+            c: parseEther(gyroData.c!),
+            s: parseEther(gyroData.s!),
+            lambda: parseEther(gyroData.lambda!),
         };
 
         const derivedGyroEParams: DerivedGyroEParams = {
             tauAlpha: {
-                x: parseUnits(pool.gyroData.tauAlphaX!, 38),
-                y: parseUnits(pool.gyroData.tauAlphaY!, 38),
+                x: parseUnits(gyroData.tauAlphaX!, 38),
+                y: parseUnits(gyroData.tauAlphaY!, 38),
             },
             tauBeta: {
-                x: parseUnits(pool.gyroData.tauBetaX!, 38),
-                y: parseUnits(pool.gyroData.tauBetaY!, 38),
+                x: parseUnits(gyroData.tauBetaX!, 38),
+                y: parseUnits(gyroData.tauBetaY!, 38),
             },
-            u: parseUnits(pool.gyroData.u!, 38),
-            v: parseUnits(pool.gyroData.v!, 38),
-            w: parseUnits(pool.gyroData.w!, 38),
-            z: parseUnits(pool.gyroData.z!, 38),
-            dSq: parseUnits(pool.gyroData.dSq!, 38),
+            u: parseUnits(gyroData.u!, 38),
+            v: parseUnits(gyroData.v!, 38),
+            w: parseUnits(gyroData.w!, 38),
+            z: parseUnits(gyroData.z!, 38),
+            dSq: parseUnits(gyroData.dSq!, 38),
         };
 
         return new GyroEPool(

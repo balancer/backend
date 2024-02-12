@@ -112,9 +112,9 @@ export class TokenPriceService {
         return tokenPrice?.price || 0;
     }
 
-    public async getHistoricalTokenPrices(): Promise<TokenHistoricalPrices> {
+    public async getHistoricalTokenPrices(chain: Chain): Promise<TokenHistoricalPrices> {
         const memCached = this.cache.get(
-            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
         ) as TokenHistoricalPrices | null;
 
         if (memCached) {
@@ -122,15 +122,15 @@ export class TokenPriceService {
         }
 
         const tokenPrices: TokenHistoricalPrices = await this.cache.get(
-            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
         );
         const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(
-            `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+            `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
         );
 
         if (tokenPrices) {
             this.cache.put(
-                `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${networkContext.chainId}`,
+                `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
                 { ...tokenPrices, ...nestedBptPrices },
                 60000,
             );

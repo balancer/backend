@@ -1,14 +1,12 @@
-import { Token } from '../../entities/token';
-import { TokenAmount, BigintIsh } from '../../entities/tokenAmount';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { parseUnits } from 'ethers/lib/utils';
 import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
-import { BasePool, SwapKind } from '../../types';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
+import { BasePool, BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { chainToIdMap } from '../../../../../network/network-config';
 
-class WeightedPoolToken extends TokenAmount {
+export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
     public readonly index: number;
 
@@ -57,12 +55,13 @@ export class WeightedPool implements BasePool {
             }
 
             const token = new Token(
+                parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
                 new WeightedPoolToken(
