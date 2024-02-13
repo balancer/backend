@@ -4,11 +4,12 @@ import { Cache } from 'memory-cache';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import axios from 'axios';
+import { tokenService } from '../token/token.service';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -110,10 +111,11 @@ export class ProtocolService {
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
 
         const balancerV1Tvl = await this.getBalancerV1Tvl(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
+        const sftmxTvl = await this.getSftmXTVL(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
 
         const protocolData = {
             chainId: `${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`,
-            totalLiquidity: `${totalLiquidity + balancerV1Tvl}`,
+            totalLiquidity: `${totalLiquidity + balancerV1Tvl + sftmxTvl}`,
             totalSwapFee,
             totalSwapVolume,
             poolCount: `${poolCount}`,
@@ -146,6 +148,23 @@ export class ProtocolService {
             userStakeSyncBlock: `${userStakeSyncBlock?.blockNumber}`,
             poolSyncBlock: `${poolSyncBlock?.blockNumber}`,
         };
+    }
+
+    private async getSftmXTVL(chainId: string): Promise<number> {
+        if (chainId !== '250') {
+            return 0;
+        }
+
+        const tokenprices = await tokenService.getTokenPrices(AllNetworkConfigs[chainId].data.chain.prismaId);
+        const ftmPrice = tokenService.getPriceForToken(tokenprices, AllNetworkConfigs[chainId].data.weth.address);
+
+        if (AllNetworkConfigs[chainId].data.sftmx) {
+            const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
+                where: { id: AllNetworkConfigs[chainId].data.sftmx!.stakingContractAddress },
+            });
+            return parseFloat(stakingData.totalFtm) * ftmPrice;
+        }
+        return 0;
     }
 
     private async getBalancerV1Tvl(chainId: string): Promise<number> {
