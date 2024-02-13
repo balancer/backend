@@ -18,12 +18,13 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                     !token.types.includes('BPT') &&
                     !token.types.includes('PHANTOM_BPT') &&
                     !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    !token.coingeckoTokenId &&
+                    // !token.coingeckoTokenId &&
                     !networkContext.data.coingecko.excludedTokenAddresses.includes(token.address),
             )
             .map((token) => token.address);
     }
 
+    // we update based on coingecko ID first, then the rest we try to update via contract address and platform
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
         const timestamp = timestampRoundedUpToNearestHour();
         const tokensUpdated: string[] = [];

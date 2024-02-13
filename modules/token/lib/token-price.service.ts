@@ -1,27 +1,39 @@
 import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
-import _ from 'lodash';
-import { secondsPerDay, timestampRoundedUpToNearestHour } from '../../common/time';
+import _, { chain } from 'lodash';
+import { timestampRoundedUpToNearestHour } from '../../common/time';
 import { Chain, PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
-import { networkContext } from '../../network/network-context.service';
 import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
-import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
+import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
+import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
+import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
+import { FallbackHandlerService } from './token-price-handlers/fallback-price-handler.service';
+import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
+import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
+import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
+import { coingeckoService } from '../../coingecko/coingecko.service';
+import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
+import { chains } from '../../pool/lib/apr-data-sources/yb-apr-handlers/sources/maker-gnosis-apr-handler';
 
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
 const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices`;
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
-
-    constructor() {}
-
-    private get handlers(): TokenPriceHandler[] {
-        return networkContext.config.tokenPriceHandlers;
-    }
+    private readonly priceHandlers: TokenPriceHandler[] = [
+        new FbeetsPriceHandlerService(),
+        new ClqdrPriceHandlerService(),
+        new CoingeckoPriceHandlerService(coingeckoService),
+        new BptPriceHandlerService(),
+        new LinearWrappedTokenPriceHandlerService(),
+        new SwapsPriceHandlerService(),
+        new FallbackHandlerService(),
+    ];
 
     public async getWhiteListedCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -49,69 +61,57 @@ export class TokenPriceService {
         return tokenPrices;
     }
 
-    public async getCurrentTokenPrices(chain = networkContext.chain): Promise<PrismaTokenCurrentPrice[]> {
+    public async getCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-            where: { chain: chain },
+            where: { chain: { in: chains } },
             orderBy: { timestamp: 'desc' },
             distinct: ['tokenAddress'],
         });
 
-        const wethPrice = tokenPrices.find(
-            (tokenPrice) => tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address,
-        );
-
-        if (wethPrice) {
-            tokenPrices.push({
-                ...wethPrice,
-                tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
-            });
-        }
+        // also add ETH price (0xeee..)
+        this.addNativeEthPrice(chains, tokenPrices);
 
         return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
     }
 
-    public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
+    public async getTokenPricesFrom24hAgo(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
         const twoDaysAgo = moment().subtract(48, 'hours').unix();
-        console.time(`TokenPrice load 24hrs ago - ${networkContext.chain}`);
+        console.time(`TokenPrice load 24hrs ago - ${chains}`);
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             orderBy: { timestamp: 'desc' },
-            where: { timestamp: { lte: oneDayAgo, gte: twoDaysAgo }, chain: networkContext.chain },
+            where: { timestamp: { lte: oneDayAgo, gte: twoDaysAgo }, chain: { in: chains } },
         });
 
         const distinctTokenPrices = tokenPrices.filter(
-            (price, i, self) => self.findIndex((t) => t.tokenAddress === price.tokenAddress) === i,
+            (price, i, self) =>
+                self.findIndex((t) => t.tokenAddress === price.tokenAddress && t.chain === price.chain) === i,
         );
 
-        console.timeEnd(`TokenPrice load 24hrs ago - ${networkContext.chain}`);
+        console.timeEnd(`TokenPrice load 24hrs ago - ${chain}`);
 
-        const wethPrice = distinctTokenPrices.find(
-            (tokenPrice) => tokenPrice.tokenAddress === networkContext.data.weth.address,
-        );
-
-        if (wethPrice) {
-            distinctTokenPrices.push({
-                ...wethPrice,
-                tokenAddress: networkContext.data.eth.address,
-            });
-        }
+        // also add ETH price (0xeee..)
+        this.addNativeEthPrice(chains, distinctTokenPrices);
 
         return distinctTokenPrices
             .filter((tokenPrice) => tokenPrice.price > 0.000000001)
             .map((tokenPrice) => ({
                 id: `${tokenPrice.tokenAddress}-${tokenPrice.timestamp}`,
                 ...tokenPrice,
+                updatedBy: null,
             }));
     }
 
-    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string): number {
+    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string, chain: Chain): number {
         const tokenPrice = tokenPrices.find(
-            (tokenPrice) => tokenPrice.tokenAddress.toLowerCase() === tokenAddress.toLowerCase(),
+            (tokenPrice) =>
+                tokenPrice.tokenAddress.toLowerCase() === tokenAddress.toLowerCase() && tokenPrice.chain === chain,
         );
 
         return tokenPrice?.price || 0;
     }
 
+    // TODO redo this to use DB prices for multiple chains
     public async getHistoricalTokenPrices(chain: Chain): Promise<TokenHistoricalPrices> {
         const memCached = this.cache.get(
             `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
@@ -140,9 +140,9 @@ export class TokenPriceService {
         return { ...tokenPrices, ...nestedBptPrices };
     }
 
-    public async updateTokenPrices(): Promise<void> {
+    public async updateTokenPrices(chain: Chain[]): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: { in: chains } },
             include: {
                 types: true,
             },
@@ -153,17 +153,15 @@ export class TokenPriceService {
             types: token.types.map((type) => type.type),
         }));
 
-        for (const handler of this.handlers) {
+        for (const handler of this.priceHandlers) {
             const accepted = await handler.getAcceptedTokens(tokensWithTypes);
-            const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
-            let updated: string[] = [];
+            // const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
+            let updated: PrismaTokenWithTypes[] = [];
 
             try {
-                updated = await handler.updatePricesForTokens(acceptedTokens);
+                updated = await handler.updatePricesForTokens(accepted);
             } catch (e) {
-                console.error(
-                    `TokenPriceHanlder failed. Chain: ${networkContext.chain}, ID: ${handler.id}, Error: ${e}`,
-                );
+                console.error(`TokenPriceHanlder failed. ID: ${handler.id}, Error: ${e}`);
                 Sentry.captureException(e, (scope) => {
                     scope.setTag('handler.exitIfFails', handler.exitIfFails);
                     return scope;
@@ -174,10 +172,16 @@ export class TokenPriceService {
             }
 
             //remove any updated tokens from the list for the next handler
-            tokensWithTypes = tokensWithTypes.filter((token) => !updated.includes(token.address));
+            tokensWithTypes = tokensWithTypes.filter((token) => {
+                return !updated.some((updatedToken) => {
+                    return token.address === updatedToken.address && token.chain === updatedToken.chain;
+                });
+            });
         }
 
-        await this.updateCandleStickData();
+        for (const chain in AllNetworkConfigs) {
+            await this.updateCandleStickData(AllNetworkConfigs[chain].data.chain.prismaId);
+        }
 
         //we only keep token prices for the last 24 hours
         //const yesterday = moment().subtract(1, 'day').unix();
@@ -236,12 +240,14 @@ export class TokenPriceService {
     public async deleteTokenPrice({
         timestamp,
         tokenAddress,
+        chain,
     }: {
         tokenAddress: string;
         timestamp: number;
+        chain: Chain;
     }): Promise<boolean> {
         const response = await prisma.prismaTokenPrice.delete({
-            where: { tokenAddress_timestamp_chain: { tokenAddress, timestamp, chain: networkContext.chain } },
+            where: { tokenAddress_timestamp_chain: { tokenAddress, timestamp, chain: chain } },
         });
 
         return !!response;
@@ -268,10 +274,10 @@ export class TokenPriceService {
         return deleted;
     }
 
-    private async updateCandleStickData() {
+    private async updateCandleStickData(chain: Chain) {
         const timestamp = timestampRoundedUpToNearestHour();
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
-            where: { timestamp, chain: networkContext.chain },
+            where: { timestamp, chain: chain },
         });
         let operations: any[] = [];
 
@@ -282,7 +288,7 @@ export class TokenPriceService {
                         tokenAddress_timestamp_chain: {
                             tokenAddress: tokenPrice.tokenAddress,
                             timestamp,
-                            chain: networkContext.chain,
+                            chain: chain,
                         },
                     },
                     data: {
@@ -294,5 +300,22 @@ export class TokenPriceService {
         }
 
         await Promise.all(operations);
+    }
+
+    private addNativeEthPrice(chains: Chain[], tokenPrices: { tokenAddress: string; chain: Chain }[]) {
+        for (const chain of chains) {
+            const wethPrice = tokenPrices.find(
+                (tokenPrice) =>
+                    tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address &&
+                    tokenPrice.chain === chain,
+            );
+
+            if (wethPrice) {
+                tokenPrices.push({
+                    ...wethPrice,
+                    tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
+                });
+            }
+        }
     }
 }

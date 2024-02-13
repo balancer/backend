@@ -74,7 +74,7 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+                throw new Error('tokenGetTokensDynamicData error: Provide "chain" param');
             }
             const items = await tokenService.getTokensDynamicData(addresses, chain);
 

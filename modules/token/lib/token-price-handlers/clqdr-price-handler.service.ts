@@ -15,11 +15,11 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
     private readonly lqdrAddress = '0x10b620b2dbac4faa7d7ffd71da486f5d44cd86f9';
     private readonly clqdrPriceRateProviderAddress = '0x1a148871bf262451f34f13cbcb7917b4fe59cb32';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return [this.clqdrAddress];
+    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+        return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
 
         const clqdrPriceRateProviderContract = new Contract(
@@ -86,6 +86,6 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
             },
         });
 
-        return [this.clqdrAddress];
+        return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
     }
 }

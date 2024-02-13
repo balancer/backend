@@ -9,14 +9,14 @@ export interface TokenPriceHandler {
      * Determines what tokens this price handler is capable of fetching a price for
      * @param tokens tokens needing prices
      */
-    getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]>;
+    getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]>;
 
     /**
      * Updates prices for the provided tokens, returning an array of addresses of the tokens
      * actually updated.
      * @param tokens tokens needing prices
      */
-    updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]>;
+    updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]>;
 }
 
 export interface TokenDefinition {
