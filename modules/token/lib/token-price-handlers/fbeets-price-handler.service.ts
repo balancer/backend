@@ -1,6 +1,10 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
-import { timestampRoundedUpToNearestHour } from '../../../common/time';
+import {
+    timestampEndOfDayMidnight,
+    timestampRoundedUpToNearestHour,
+    timestampTopOfTheHour,
+} from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import _ from 'lodash';
 import { AllNetworkConfigs } from '../../../network/network-config';
@@ -11,12 +15,15 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
     private readonly fbeetsAddress = AllNetworkConfigs['250'].data.fbeets!.address;
     private readonly fbeetsPoolId = AllNetworkConfigs['250'].data.fbeets!.poolId;
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.fbeetsAddress);
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
         const timestamp = timestampRoundedUpToNearestHour();
+        const timestampTopOfTheOur = timestampTopOfTheHour();
+        const timestampMidnight = timestampEndOfDayMidnight();
         const fbeets = await prisma.prismaFbeets.findFirst({});
         const pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id: this.fbeetsPoolId, chain: 'FANTOM' } },
@@ -72,6 +79,50 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             },
         });
 
-        return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.fbeetsAddress);
+        await prisma.prismaTokenHourlyPrice.upsert({
+            where: {
+                tokenAddress_timestamp_chain: {
+                    tokenAddress: this.fbeetsAddress,
+                    timestamp: timestampTopOfTheOur,
+                    chain: 'FANTOM',
+                },
+            },
+            update: { price: fbeetsPrice, close: fbeetsPrice },
+            create: {
+                tokenAddress: this.fbeetsAddress,
+                chain: 'FANTOM',
+                timestamp: timestampTopOfTheOur,
+                updatedBy: this.id,
+                price: fbeetsPrice,
+                high: fbeetsPrice,
+                low: fbeetsPrice,
+                open: fbeetsPrice,
+                close: fbeetsPrice,
+            },
+        });
+
+        await prisma.prismaTokenDailyPrice.upsert({
+            where: {
+                tokenAddress_timestamp_chain: {
+                    tokenAddress: this.fbeetsAddress,
+                    timestamp: timestampMidnight,
+                    chain: 'FANTOM',
+                },
+            },
+            update: { price: fbeetsPrice, close: fbeetsPrice },
+            create: {
+                tokenAddress: this.fbeetsAddress,
+                chain: 'FANTOM',
+                timestamp: timestampMidnight,
+                updatedBy: this.id,
+                price: fbeetsPrice,
+                high: fbeetsPrice,
+                low: fbeetsPrice,
+                open: fbeetsPrice,
+                close: fbeetsPrice,
+            },
+        });
+
+        return acceptedTokens;
     }
 }

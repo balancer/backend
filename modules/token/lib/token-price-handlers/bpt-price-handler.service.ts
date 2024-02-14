@@ -8,13 +8,12 @@ export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'BptPriceHandlerService';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens
-            .filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'))
-            .map((token) => token.address);
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        return tokens.filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'));
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
         const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
             where: { dynamicData: { totalLiquidity: { gt: 0.1 } }, chain: networkContext.chain },

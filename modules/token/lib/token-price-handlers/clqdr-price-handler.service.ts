@@ -15,12 +15,15 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
     private readonly lqdrAddress = '0x10b620b2dbac4faa7d7ffd71da486f5d44cd86f9';
     private readonly clqdrPriceRateProviderAddress = '0x1a148871bf262451f34f13cbcb7917b4fe59cb32';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
+
+        const acceptedTokens = this.getAcceptedTokens(tokens);
+        const updatedTokens: PrismaTokenWithTypes[] = [];
 
         const clqdrPriceRateProviderContract = new Contract(
             this.clqdrPriceRateProviderAddress,
@@ -54,38 +57,41 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
 
         const clqdrPrice = lqdrPrice.price * clqdrRate;
 
-        await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress_chain: { tokenAddress: this.clqdrAddress, chain: networkContext.chain } },
-            update: { price: clqdrPrice },
-            create: {
-                tokenAddress: this.clqdrAddress,
-                chain: networkContext.chain,
-                timestamp,
-                price: clqdrPrice,
-            },
-        });
-
-        await prisma.prismaTokenPrice.upsert({
-            where: {
-                tokenAddress_timestamp_chain: {
-                    tokenAddress: this.clqdrAddress,
+        for (const token of acceptedTokens) {
+            await prisma.prismaTokenCurrentPrice.upsert({
+                where: { tokenAddress_chain: { tokenAddress: token.address, chain: token.chain } },
+                update: { price: clqdrPrice },
+                create: {
+                    tokenAddress: token.address,
+                    chain: token.chain,
                     timestamp,
-                    chain: networkContext.chain,
+                    price: clqdrPrice,
                 },
-            },
-            update: { price: clqdrPrice, close: clqdrPrice },
-            create: {
-                tokenAddress: this.clqdrAddress,
-                chain: networkContext.chain,
-                timestamp,
-                price: clqdrPrice,
-                high: clqdrPrice,
-                low: clqdrPrice,
-                open: clqdrPrice,
-                close: clqdrPrice,
-            },
-        });
+            });
 
-        return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
+            await prisma.prismaTokenPrice.upsert({
+                where: {
+                    tokenAddress_timestamp_chain: {
+                        tokenAddress: token.address,
+                        timestamp,
+                        chain: token.chain,
+                    },
+                },
+                update: { price: clqdrPrice, close: clqdrPrice },
+                create: {
+                    tokenAddress: token.address,
+                    chain: token.chain,
+                    timestamp,
+                    price: clqdrPrice,
+                    high: clqdrPrice,
+                    low: clqdrPrice,
+                    open: clqdrPrice,
+                    close: clqdrPrice,
+                },
+            });
+            updatedTokens.push(token);
+        }
+
+        return updatedTokens;
     }
 }

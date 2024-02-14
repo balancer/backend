@@ -60,6 +60,11 @@ model PrismaTokenHourlyPrice {
     updatedBy           String
     timestamp           Int
     price               Float
+
+    high                Float
+    low                 Float
+    open                Float
+    close               Float
 }
 
 
@@ -73,7 +78,6 @@ model PrismaTokenDailyPrice {
     updatedBy           String
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 
     high                Float
     low                 Float

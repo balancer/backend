@@ -18,7 +18,6 @@ import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { coingeckoService } from '../../coingecko/coingecko.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
-import { chains } from '../../pool/lib/apr-data-sources/yb-apr-handlers/sources/maker-gnosis-apr-handler';
 
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
 const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices`;
@@ -140,7 +139,7 @@ export class TokenPriceService {
         return { ...tokenPrices, ...nestedBptPrices };
     }
 
-    public async updateTokenPrices(chain: Chain[]): Promise<void> {
+    public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             where: { chain: { in: chains } },
             include: {
@@ -154,12 +153,12 @@ export class TokenPriceService {
         }));
 
         for (const handler of this.priceHandlers) {
-            const accepted = await handler.getAcceptedTokens(tokensWithTypes);
+            // const accepted = await handler.getAcceptedTokens(tokensWithTypes);
             // const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
             let updated: PrismaTokenWithTypes[] = [];
 
             try {
-                updated = await handler.updatePricesForTokens(accepted);
+                updated = await handler.updatePricesForTokens(tokensWithTypes);
             } catch (e) {
                 console.error(`TokenPriceHanlder failed. ID: ${handler.id}, Error: ${e}`);
                 Sentry.captureException(e, (scope) => {

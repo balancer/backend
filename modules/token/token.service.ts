@@ -82,7 +82,7 @@ export class TokenService {
     }
 
     public async updateTokenPrices(): Promise<void> {
-        return this.tokenPriceService.updateTokenPrices();
+        return this.tokenPriceService.updateAllTokenPrices();
     }
 
     public async getTokenPrices(chain = networkContext.chain): Promise<PrismaTokenCurrentPrice[]> {
