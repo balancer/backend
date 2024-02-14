@@ -101,12 +101,12 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            networkContext.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' ? 190 : 1024,
         );
         const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
-            networkContext.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' ? 190 : 1024,
         );
         const gyroFees = await (this.options.gyroConfig
             ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, networkContext.chain === 'ZKEVM' ? 190 : 1024)
