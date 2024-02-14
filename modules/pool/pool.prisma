@@ -115,6 +115,8 @@ model PrismaPoolDynamicData {
     fees24hAthTimestamp     Int                 @default(0)
     fees24hAtl              Float               @default(0)
     fees24hAtlTimestamp     Int                 @default(0)
+
+    tokenPairsData          Json @default("[]")
 }
 
 model PrismaPoolToken {

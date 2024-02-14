@@ -11,6 +11,16 @@ export interface GetSwapsInput {
     graphTraversalConfig?: GraphTraversalConfig;
 }
 
+export interface GetSwapsV2Input {
+    chain: Chain;
+    tokenIn: string;
+    tokenOut: string;
+    swapType: GqlSorSwapType;
+    swapAmount: TokenAmount;
+    queryBatchSwap: boolean;
+    graphTraversalConfig?: GraphTraversalConfig;
+}
+
 export interface GraphTraversalConfig {
     approxPathsToReturn?: number;
     maxDepth?: number;

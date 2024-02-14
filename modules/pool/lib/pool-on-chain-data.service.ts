@@ -1,5 +1,5 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { PrismaPoolType } from '@prisma/client';
+import { Prisma, PrismaPoolType } from '@prisma/client';
 import { isSameAddress } from '@balancer-labs/sdk';
 import { prisma } from '../../../prisma/prisma-client';
 import { isStablePool } from './pool-utils';
@@ -10,6 +10,7 @@ import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
 import { LinearData, StableData } from '../subgraph-mapper';
+import { fetchTokenPairData } from './pool-on-chain-tokenpair-data';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -33,6 +34,7 @@ export class PoolOnChainDataService {
         return {
             chain: networkContext.chain,
             vaultAddress: networkContext.data.balancer.v2.vaultAddress,
+            balancerQueriesAddress: networkContext.data.balancer.v2.balancerQueriesAddress,
             yieldProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
             swapProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
             gyroConfig: networkContext.data.gyro?.config,
@@ -99,7 +101,12 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            networkContext.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' ? 190 : 1024,
+        );
+        const tokenPairData = await fetchTokenPairData(
+            filteredPools,
+            this.options.balancerQueriesAddress,
+            this.options.chain === 'ZKEVM' ? 190 : 1024,
         );
         const gyroFees = await (this.options.gyroConfig
             ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, networkContext.chain === 'ZKEVM' ? 190 : 1024)
@@ -108,6 +115,7 @@ export class PoolOnChainDataService {
         const operations = [];
         for (const pool of filteredPools) {
             const onchainData = onchainResults[pool.id];
+            const { tokenPairs } = tokenPairData[pool.id];
             const { amp, poolTokens } = onchainData;
 
             try {
@@ -196,6 +204,18 @@ export class PoolOnChainDataService {
                                 protocolYieldFee: yieldProtocolFeePercentage,
                                 protocolSwapFee: swapProtocolFeePercentage,
                                 blockNumber,
+                            },
+                        }),
+                    );
+                }
+
+                // always update tokenPair data
+                if (pool.dynamicData) {
+                    operations.push(
+                        prisma.prismaPoolDynamicData.update({
+                            where: { id_chain: { id: pool.id, chain: this.options.chain } },
+                            data: {
+                                tokenPairsData: tokenPairs,
                             },
                         }),
                     );

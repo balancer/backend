@@ -349,6 +349,17 @@ export const data: NetworkData = {
                 path: 'value',
                 isIbYield: true,
             },
+            sDOLA: {
+                tokenAddress: '0xb45ad160634c528cc3d2926d9807104fa3157305',
+                sourceUrl: 'https://www.inverse.finance/api/dola-staking',
+                path: 'apr',
+                isIbYield: true,
+            },
+            rswETH: {
+                tokenAddress: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0',
+                sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {

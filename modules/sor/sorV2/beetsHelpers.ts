@@ -1,6 +1,7 @@
-import { BatchSwapStep, NATIVE_ADDRESS, SingleSwap, SwapKind, ZERO_ADDRESS } from '@balancer/sdk';
-import { GqlPoolMinimal, GqlSorSwapRoute, GqlSorSwapRouteHop } from '../../../schema';
+import { BatchSwapStep, NATIVE_ADDRESS, SingleSwap, Swap, SwapKind, ZERO_ADDRESS } from '@balancer/sdk';
+import { GqlPoolMinimal, GqlSorPath, GqlSorSwapRoute, GqlSorSwapRouteHop } from '../../../schema';
 import { formatFixed } from '@ethersproject/bignumber';
+import path from 'path';
 
 export function mapRoutes(
     swaps: BatchSwapStep[] | SingleSwap,
@@ -20,6 +21,25 @@ export function mapRoutes(
     }
     const paths = splitPaths(swaps, assetIn, assetOut, assets, kind);
     return paths.map((p) => mapBatchSwap(p, amountIn, amountOut, kind, assets, pools));
+}
+
+export function mapPaths(swap: Swap): GqlSorPath[] {
+    const paths: GqlSorPath[] = [];
+
+    for (const path of swap.paths) {
+        paths.push({
+            vaultVersion: 2,
+            inputAmountRaw: path.inputAmount.amount.toString(),
+            outputAmountRaw: path.outputAmount.amount.toString(),
+            tokens: path.tokens.map((token) => ({
+                address: token.address,
+                decimals: token.decimals,
+            })),
+            pools: path.pools.map((pool) => pool.id),
+        });
+    }
+
+    return paths;
 }
 
 export function mapBatchSwap(

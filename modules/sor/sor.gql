@@ -1,4 +1,7 @@
 extend type Query {
+    """
+    Get swap quote from the SOR, queries both the old and new SOR
+    """
     sorGetSwaps(
         chain: GqlChain
         tokenIn: String!
@@ -7,22 +10,38 @@ extend type Query {
         swapAmount: BigDecimal! #expected in human readable form
         swapOptions: GqlSorSwapOptionsInput!
     ): GqlSorGetSwapsResponse!
-    sorV2GetSwaps(
+    """
+    Get swap quote from the SOR v2 for the V2 vault
+    """
+    sorGetSwapPaths(
+        """
+        The Chain to query
+        """
         chain: GqlChain!
+        """
+        Token address of the tokenIn
+        """
         tokenIn: String!
         tokenOut: String!
         swapType: GqlSorSwapType!
         swapAmount: BigDecimal! #expected in human readable form
-        swapOptions: GqlSorSwapOptionsInput!
-    ): GqlSorGetSwaps!
+        queryBatchSwap: Boolean #run queryBatchSwap to update with onchain values, default: true
+        useVaultVersion: Int #defaults that it gets the best swap from v2 and v3, can force to use only one vault version
+    ): GqlSorGetSwapPaths!
 }
 
-type GqlSorGetSwaps {
+type GqlSorGetSwapPaths {
+    vaultVersion: Int!
+    """
+    The token address of the tokenIn provided
+    """
     tokenIn: String!
+    """
+    The token address of the tokenOut provided
+    """
     tokenOut: String!
-    tokenAddresses: [String!]!
-    swapType: GqlSorSwapType!
-    swaps: [GqlSorSwap!]!
+    swaps: [GqlSorSwap!]! #used by cowswap
+    paths: [GqlSorPath!]! #used by b-sdk
     tokenInAmount: AmountHumanReadable!
     tokenOutAmount: AmountHumanReadable!
     swapAmount: AmountHumanReadable!
@@ -33,6 +52,19 @@ type GqlSorGetSwaps {
     effectivePriceReversed: AmountHumanReadable!
     routes: [GqlSorSwapRoute!]!
     priceImpact: AmountHumanReadable!
+}
+
+type GqlSorPath {
+    vaultVersion: Int!
+    pools: [String]! #list of pool Ids
+    tokens: [Token]!
+    outputAmountRaw: String!
+    inputAmountRaw: String!
+}
+
+type Token {
+    address: String!
+    decimals: Int!
 }
 
 enum GqlSorSwapType {
@@ -100,6 +132,7 @@ type GqlSorGetSwapsResponse {
     priceImpact: AmountHumanReadable!
 }
 
+#used by cowswap
 type GqlSorSwap {
     poolId: String!
     assetInIndex: Int!

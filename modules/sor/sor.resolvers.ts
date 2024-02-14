@@ -16,8 +16,8 @@ const balancerSdkResolvers: Resolvers = {
 
             return sorService.getSorSwaps(args);
         },
-        sorV2GetSwaps: async (parent, args, context) => {
-            return sorService.getSorV2Swaps(args);
+        sorGetSwapPaths: async (parent, args, context) => {
+            return sorService.getSorSwapPaths(args);
         },
     },
 };
