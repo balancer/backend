@@ -53,7 +53,9 @@ const gnosisNetworkData: NetworkData = {
         excludedTokenAddresses: [],
     },
     rpcUrl:
-        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.gnosis.gateway.fm` : 'https://gnosis.drpc.org',
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+            ? `https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet`
+            : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
