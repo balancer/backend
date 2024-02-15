@@ -53,7 +53,9 @@ const zkevmNetworkData: NetworkData = {
         excludedTokenAddresses: [],
     },
     rpcUrl:
-        env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+        env.GROVE_CITY
+        ? `https://polygon-zkevm-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
+        : env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
             : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
@@ -198,10 +200,10 @@ export const zkevmNetworkConfig: NetworkConfig = {
         ),
     },
     /*
-    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
 
-    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
