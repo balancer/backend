@@ -8,13 +8,14 @@
     "private": true,
     "scripts": {
         "start": "node dist/app.js",
-        "start:local": "ts-node -r dotenv/config app",
+        "start:local": "ts-node -r dotenv/config -r tsconfig-paths/register app",
         "watch": "concurrently \"nodemon app\" \"yarn generate --watch\"",
-        "build": "tsc",
+        "build": "tsc -p tsconfig.build.json",
         "generate": "graphql-codegen --config codegen.yml -r dotenv/config",
         "prisma-merge": "ts-node prisma/prisma-merge.ts",
         "test": "jest",
-        "vitest": "vitest"
+        "vitest": "vitest",
+        "task": "ts-node -r tsconfig-paths/register -r dotenv/config tasks/index.ts"
     },
     "dependencies": {
         "@aws-sdk/client-cloudwatch": "^3.388.0",
@@ -33,6 +34,7 @@
         "@sentry/node": "^7.0.0",
         "@sentry/profiling-node": "^1.2.6",
         "@sentry/tracing": "^7.56.0",
+        "abitype": "^1.0.0",
         "apollo-server-core": "^3.5.0",
         "apollo-server-express": "^3.5.0",
         "axios": "^0.24.0",
@@ -92,6 +94,7 @@
         "testcontainers": "^8.0.0",
         "ts-jest": "^28.0.7",
         "ts-node": "^10.4.0",
+        "tsconfig-paths": "^4.2.0",
         "typescript": "^5.3.3",
         "vitest": "^0.32.4",
         "vitest-mock-extended": "^1.1.3"

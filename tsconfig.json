@@ -10,7 +10,13 @@
         "resolveJsonModule": true,
         "outDir": "./dist",
         "skipLibCheck": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "baseUrl": ".",
+        "paths": {
+            "@app/*": ["app/*"],
+            "@config/*": ["config/*"],
+            "@modules/*": ["modules/*"]
+        }
     },
-    "exclude": ["node_modules", "debug", "**/*.spec.ts", "**/*.test.ts"]
+    "exclude": ["node_modules"]
 }
