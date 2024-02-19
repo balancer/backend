@@ -1,0 +1,35 @@
+fragment Swap on Swap {
+    id
+    pool
+    tokenIn
+    tokenOut
+    tokenAmountIn
+    tokenAmountOut
+    swapFeeAmount
+    user {
+        id
+    }
+    blockNumber
+    blockTimestamp
+    transactionHash
+}
+
+query Swaps(
+    $skip: Int
+    $first: Int
+    $orderBy: Swap_orderBy
+    $orderDirection: OrderDirection
+    $where: Swap_filter
+    $block: Block_height
+) {
+    swaps(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...Swap
+    }
+}

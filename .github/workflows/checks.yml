@@ -6,6 +6,7 @@ on:
 jobs:
     Build:
         env:
+            V3_SUBGRAPH: https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest
             BALANCER_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx
             MASTERCHEF_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2
             BLOCKS_SUBGRAPH: https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks
