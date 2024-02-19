@@ -1,10 +1,6 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
-import {
-    timestampTopOfTheHour,
-    timestampEndOfDayMidnight,
-    timestampRoundedUpToNearestHour,
-} from '../../../common/time';
+import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import { FundManagement, SwapTypes, SwapV2 } from '@balancer-labs/sdk';
 import { fp } from '../../../big-number/big-number';
@@ -34,7 +30,6 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const updatedTokens: PrismaTokenWithTypes[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampTopOfTheOur = timestampTopOfTheHour();
         const timestampMidnight = timestampEndOfDayMidnight();
         const beetsFtmAddress = '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e';
         const wftmFtmAddress = '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83';
@@ -119,29 +114,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
                 },
             });
 
-            await prisma.prismaTokenHourlyPrice.upsert({
-                where: {
-                    tokenAddress_timestamp_chain: {
-                        tokenAddress: token.address,
-                        timestamp: timestampTopOfTheOur,
-                        chain: token.chain,
-                    },
-                },
-                update: { price: beetsPrice, close: beetsPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp: timestampTopOfTheOur,
-                    updatedBy: this.id,
-                    price: beetsPrice,
-                    high: beetsPrice,
-                    low: beetsPrice,
-                    open: beetsPrice,
-                    close: beetsPrice,
-                },
-            });
-
-            await prisma.prismaTokenDailyPrice.upsert({
+            await prisma.prismaTokenPrice.upsert({
                 where: {
                     tokenAddress_timestamp_chain: {
                         tokenAddress: token.address,
@@ -154,7 +127,6 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
                     tokenAddress: token.address,
                     chain: token.chain,
                     timestamp: timestampMidnight,
-                    updatedBy: this.id,
                     price: beetsPrice,
                     high: beetsPrice,
                     low: beetsPrice,

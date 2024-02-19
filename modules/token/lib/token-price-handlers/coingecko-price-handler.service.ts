@@ -1,9 +1,12 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import { CoingeckoService } from '../../../coingecko/coingecko.service';
 import { networkContext } from '../../../network/network-context.service';
+import { AllNetworkConfigs } from '../../../network/network-config';
+import { Chain } from '@prisma/client';
+import { add } from 'lodash';
 
 export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
@@ -11,25 +14,34 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
 
     constructor(private readonly coingeckoService: CoingeckoService) {}
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens
-            .filter(
-                (token) =>
-                    !token.types.includes('BPT') &&
-                    !token.types.includes('PHANTOM_BPT') &&
-                    !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    // !token.coingeckoTokenId &&
-                    !networkContext.data.coingecko.excludedTokenAddresses.includes(token.address),
-            )
-            .map((token) => token.address);
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        const excludedFromCoingecko: { address: string; chain: Chain }[] = [];
+        for (const chain in AllNetworkConfigs) {
+            const config = AllNetworkConfigs[chain];
+            config.data.coingecko.excludedTokenAddresses.forEach((address) =>
+                excludedFromCoingecko.push({ address: address, chain: config.data.chain.prismaId }),
+            );
+        }
+        return tokens.filter(
+            (token) =>
+                !token.types.includes('BPT') &&
+                !token.types.includes('PHANTOM_BPT') &&
+                !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
+                !excludedFromCoingecko.find(
+                    (excluded) => excluded.address === token.address && excluded.chain === token.chain,
+                ) &&
+                !token.excludedFromCoingecko,
+        );
     }
 
     // we update based on coingecko ID first, then the rest we try to update via contract address and platform
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+        const accepedTokens = this.getAcceptedTokens(tokens);
         const timestamp = timestampRoundedUpToNearestHour();
-        const tokensUpdated: string[] = [];
+        const timestampMidnight = timestampEndOfDayMidnight();
+        const tokensUpdated: PrismaTokenWithTypes[] = [];
 
-        const tokenAddresses = tokens.map((item) => item.address);
+        const tokenAddresses = accepedTokens.map((item) => item.address);
 
         const tokenPricesByAddress = await this.coingeckoService.getTokenPrices(tokenAddresses);
 
