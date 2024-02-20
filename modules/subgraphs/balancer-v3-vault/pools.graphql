@@ -1,6 +1,9 @@
 fragment Pool on Pool {
     id
     factory
+    address
+    name
+    symbol
     totalShares
     pauseWindowEndTime
     pauseManager
@@ -8,14 +11,21 @@ fragment Pool on Pool {
     blockTimestamp
     transactionHash
     tokens {
+        id
         address
         index
+        name
+        symbol
+        decimals
         balance
         totalProtocolSwapFee
         totalProtocolYieldFee
     }
     rateProviders {
         address
+        token {
+            address
+        }
     }
 }
 

@@ -1,8 +1,9 @@
-import * as actions from '@modules/actions/jobs-actions';
-import * as subgraphV3Vault from '@modules/subgraphs/balancer-v3-vault';
 import config from '@config/index';
 import { chainIdToChain } from '@modules/network/chain-id-to-chain';
 import { getViemClient } from '@modules/sources/viem-client';
+import { syncMissingPools } from '@modules/actions/jobs-actions/sync-pools';
+import { getVaultSubgraphClient } from '@modules/subgraphs/balancer-v3-vault';
+import { getPoolsSubgraphClient } from '@modules/subgraphs/balancer-v3-pools';
 
 /**
  * Controller responsible for matching job requests to configured job handlers
@@ -15,13 +16,10 @@ export function JobsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        syncPools(chainId: string) {
+        addMissingPools(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
-                subgraphs: { balancerV3 },
-                balancer: {
-                    v3: { vaultAddress },
-                },
+                subgraphs: { balancerV3, balancerPoolsV3 },
             } = config[chain];
 
             // Guard against unconfigured chains
@@ -29,13 +27,13 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = subgraphV3Vault.getClient(balancerV3);
-            const viemClient = getViemClient(chain);
+            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
+            const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3!);
 
             // TODO: add syncing v2 pools as well by splitting the poolService into separate
             // actions with extracted configuration
 
-            return actions.syncPools(subgraphClient, viemClient, vaultAddress, chain);
+            return syncMissingPools(vaultSubgraphClient, poolSubgraphClient, chain);
         },
     };
 }

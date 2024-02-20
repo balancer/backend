@@ -1,9 +1,10 @@
-import { syncPools } from './sync-pools';
+import { syncMissingPools } from './sync-pools';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPool } from '@prisma/client';
-import { PoolFragment } from '@modules/subgraphs/balancer-v3-vault/generated/types';
+import { PoolFragment as VaultSubgraphPoolFragment } from '@modules/subgraphs/balancer-v3-vault/generated/types';
 import { fetchErc20Headers } from '@modules/sources/contracts';
 import { getViemClient } from '@modules/sources/viem-client';
+import { PoolFragment as PoolSubgraphPoolFragment } from '@modules/subgraphs/balancer-v3-pools/generated/types';
 
 // Mock the module dependencies
 jest.mock('@modules/sources/contracts', () => ({
@@ -33,22 +34,29 @@ jest.mock('../../../prisma/prisma-client', () => ({
 }));
 
 describe('syncPools', () => {
-    const subgraphClient = {
-        Pools: jest.fn().mockResolvedValue({ pools: [{ id: '1' }, { id: '2' }] as PoolFragment[] }),
+    const vaultSubgraphClient = {
+        Pools: jest.fn().mockResolvedValue({ pools: [{ id: '1' }, { id: '2' }] as VaultSubgraphPoolFragment[] }),
     };
-    const viemClient = jest.mocked(getViemClient('SEPOLIA'));
+    const poolSubgraphClient = {
+        Pools: jest.fn().mockResolvedValue({
+            pools: [
+                { id: '1', factory: { id: '1' } },
+                { id: '2', factory: { id: '1' } },
+            ] as PoolSubgraphPoolFragment[],
+        }),
+    };
 
     beforeEach(() => {
         jest.clearAllMocks();
-        return syncPools(subgraphClient, viemClient, 'vaultAddress', 'SEPOLIA');
+        return syncMissingPools(vaultSubgraphClient, poolSubgraphClient, 'SEPOLIA');
     });
 
-    it('should fetch pools from subgraph', async () => {
-        expect(subgraphClient.Pools).toHaveBeenCalled();
+    it('should fetch pools from vault subgraph', async () => {
+        expect(vaultSubgraphClient.Pools).toHaveBeenCalled();
     });
 
-    it('should fetch additional data from contracts for missing pools', async () => {
-        expect(fetchErc20Headers).toHaveBeenCalledWith(['2'], expect.anything());
+    it('should fetch pools from pools subgraph', async () => {
+        expect(poolSubgraphClient.Pools).toHaveBeenCalled();
     });
 
     it('should store missing pools in the database', async () => {

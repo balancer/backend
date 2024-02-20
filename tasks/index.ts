@@ -6,7 +6,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     console.log('Running job', job, chain);
 
     if (job === 'sync-changed-pools-v3') {
-        return jobsController.syncPools(chain);
+        return jobsController.addMissingPools(chain);
     }
 
     return Promise.reject(new Error(`Unknown job: ${job}`));

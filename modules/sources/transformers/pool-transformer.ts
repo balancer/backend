@@ -1,24 +1,43 @@
 import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
-import { PoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { PoolFragment as PoolSubgraphPoolFragment, PoolType } from '../../subgraphs/balancer-v3-pools/generated/types';
+import { StableData } from '@modules/pool/subgraph-mapper';
 
 export const poolTransformer = (
-    subgraphPool: PoolFragment,
-    contractData: { name?: string; symbol?: string },
+    vaultSubgraphPool: VaultSubgraphPoolFragment,
+    poolSubgraphPool: PoolSubgraphPoolFragment,
     chain: Chain,
 ): PrismaPool => {
+    let type: PrismaPoolType;
+    let typeData = {};
+
+    switch (poolSubgraphPool.factory.type) {
+        case PoolType.Weighted:
+            type = PrismaPoolType.WEIGHTED;
+            break;
+        case PoolType.Stable:
+            type = PrismaPoolType.STABLE;
+            typeData = {
+                amp: '10', // TODO just a place holder
+            } as StableData;
+            break;
+        default:
+            type = PrismaPoolType.UNKNOWN;
+    }
+
     return {
-        id: subgraphPool.id.toLowerCase(),
+        id: vaultSubgraphPool.id.toLowerCase(),
         chain: chain,
         vaultVersion: 3,
-        address: subgraphPool.id.toLowerCase(),
+        address: vaultSubgraphPool.id.toLowerCase(),
         decimals: 18,
-        symbol: contractData.symbol || '',
-        name: contractData.name || '',
+        symbol: vaultSubgraphPool.symbol,
+        name: vaultSubgraphPool.name,
         owner: '',
-        factory: (subgraphPool.factory && subgraphPool.factory.toLowerCase()) || '',
-        type: PrismaPoolType.WEIGHTED,
-        typeData: {},
-        version: 1,
-        createTime: Number(subgraphPool.blockTimestamp),
+        factory: poolSubgraphPool.factory.id.toLowerCase(),
+        type: type,
+        typeData: typeData,
+        version: poolSubgraphPool.factory.version,
+        createTime: Number(vaultSubgraphPool.blockTimestamp),
     };
 };

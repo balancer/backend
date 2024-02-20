@@ -108,7 +108,13 @@ export function configureWorkerRoutes(app: Express) {
                 break;
 
             case 'sync-changed-pools-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools(chainId), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.addMissingPools(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(

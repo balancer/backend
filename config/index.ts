@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { NetworkData } from '@modules/network/network-config-types';
-import sepolia from './sepolia';
+import { sepoliaConfig } from './sepolia';
 
 export default {
     [Chain.ARBITRUM]: {} as NetworkData,
@@ -11,6 +11,6 @@ export default {
     [Chain.MAINNET]: {} as NetworkData,
     [Chain.OPTIMISM]: {} as NetworkData,
     [Chain.POLYGON]: {} as NetworkData,
-    [Chain.SEPOLIA]: sepolia,
+    [Chain.SEPOLIA]: sepoliaConfig,
     [Chain.ZKEVM]: {} as NetworkData,
 };

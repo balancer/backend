@@ -2,7 +2,7 @@ import { env } from '@app/env';
 import { NetworkData } from '@modules/network/network-config-types';
 import { BigNumber } from 'ethers';
 
-export default <NetworkData>{
+export const sepoliaConfig: NetworkData = {
     chain: {
         slug: 'sepolia',
         id: 11155111,
@@ -15,6 +15,7 @@ export default <NetworkData>{
         startDate: '2023-05-03',
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
         balancerV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest',
+        balancerPoolsV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
         gauge: 'https://api.studio.thegraph.com/proxy/24660/balancer-gauges-sepolia/version/latest',
@@ -58,7 +59,7 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0x816e90DC85bF016455017a76Bc09CC0451Eeb308',
+            vaultAddress: '0xdaa273aeec06e9ccb7428a77e2abb1e4659b16d2',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
