@@ -15,7 +15,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { sepoliaConfig as sepoliaNetworkData } from '@config/sepolia';
+import { sepoliaConfig as sepoliaNetworkData } from '../../config/sepolia';
 
 export { sepoliaNetworkData };
 

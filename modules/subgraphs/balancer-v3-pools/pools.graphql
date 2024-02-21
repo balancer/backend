@@ -9,7 +9,7 @@ fragment Factory on Factory {
     }
 }
 
-fragment Pool on Pool {
+fragment TypePool on Pool {
     id
     address
     factory {
@@ -37,6 +37,6 @@ query Pools(
         where: $where
         block: $block
     ) {
-        ...Pool
+        ...TypePool
     }
 }

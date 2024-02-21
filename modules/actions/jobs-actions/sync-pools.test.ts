@@ -2,7 +2,7 @@ import { addMissingPoolsFromSubgraph } from './sync-pools';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPool } from '@prisma/client';
 import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
-import { PoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
+import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
 
 // Mock the module dependencies
 jest.mock('@modules/sources/contracts', () => ({

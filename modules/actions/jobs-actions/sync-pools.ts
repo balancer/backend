@@ -1,8 +1,22 @@
-import { Chain } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { poolTransformer, poolTokensTransformer, poolTokensDynamicDataTransformer } from '../../sources/transformers';
+import {
+    poolTransformer,
+    poolTokensTransformer,
+    poolTokensDynamicDataTransformer,
+    poolExpandedTokensTransformer,
+} from '../../sources/transformers';
 import { V3PoolsSubgraphClient } from '../../subgraphs/balancer-v3-pools';
 import { V3SubgraphClient } from '../../subgraphs/balancer-v3-vault';
+import { PoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { PoolType, TypePoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
+import _ from 'lodash';
+
+type PoolDbEntry = {
+    pool: Prisma.PrismaPoolCreateInput;
+    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
+    poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
+};
 /**
  * Makes sure that all pools are synced in the database
  *
@@ -27,10 +41,6 @@ export async function addMissingPoolsFromSubgraph(
     const dbPools = await prisma.prismaPool.findMany({ where: { chain, vaultVersion: 3 } });
     const dbPoolIds = new Set(dbPools.map((pool) => pool.id.toLowerCase()));
     const missingPools = vaultSubgraphPools.filter((pool) => !dbPoolIds.has(pool.id));
-
-    if (missingPools.length === 0) {
-        return true;
-    }
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     try {
@@ -65,15 +75,17 @@ export async function addMissingPoolsFromSubgraph(
     }
 
     // Transform pool data for the database
-    const dbPoolEntries = missingPools
-        .map((missingPool) => {
-            const vaultSubgraphPool = vaultSubgraphPools.find((pool) => pool.id === missingPool.id);
-            const poolSubgraphPool = poolSubgraphPools.find((pool) => pool.id === missingPool.id);
-            if (!vaultSubgraphPool || !poolSubgraphPool) {
-                // That won't happen, but TS doesn't know that
-                return null;
-            }
-            return {
+    const dbEntries: PoolDbEntry[] = [];
+
+    missingPools.forEach((missingPool) => {
+        const vaultSubgraphPool = vaultSubgraphPools.find((pool) => pool.id === missingPool.id);
+        const poolSubgraphPool = poolSubgraphPools.find((pool) => pool.id === missingPool.id);
+        if (!vaultSubgraphPool || !poolSubgraphPool) {
+            // That won't happen, but TS doesn't know that
+            return null;
+        }
+        const dbEntry: PoolDbEntry = {
+            pool: {
                 ...poolTransformer(vaultSubgraphPool, poolSubgraphPool, chain),
                 typeData: JSON.stringify({}),
                 tokens: {
@@ -84,6 +96,7 @@ export async function addMissingPoolsFromSubgraph(
                         data: poolTokensTransformer(vaultSubgraphPool),
                     },
                 },
+                // placeholder data, will be updated with onchain values
                 dynamicData: {
                     create: {
                         id: vaultSubgraphPool.id,
@@ -95,37 +108,34 @@ export async function addMissingPoolsFromSubgraph(
                         totalSharesNum: parseFloat(vaultSubgraphPool.totalShares),
                     },
                 },
-                poolTokenDynamicData: poolTokensDynamicDataTransformer(vaultSubgraphPool, poolSubgraphPool, chain),
-            };
-        })
-        .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+            },
+            poolTokenDynamicData: poolTokensDynamicDataTransformer(vaultSubgraphPool, poolSubgraphPool, chain),
+            poolExpandedTokens: poolExpandedTokensTransformer(vaultSubgraphPool, chain),
+        };
+        dbEntries.push(dbEntry);
+    });
 
     // Store missing pools in the database
     let allOk = true;
-    for (const data of dbPoolEntries) {
+    for (const entry of dbEntries) {
         try {
-            await prisma.prismaPool.create({ data });
-            // Create pool tokens dynamic data
+            await prisma.prismaPool.create({ data: entry.pool });
+
             await prisma.prismaPoolTokenDynamicData.createMany({
-                data: data.poolTokenDynamicData,
+                skipDuplicates: true,
+                data: entry.poolTokenDynamicData,
+            });
+
+            // TODO deal with nested pools
+            await prisma.prismaPoolExpandedTokens.createMany({
+                skipDuplicates: true,
+                data: entry.poolExpandedTokens,
             });
         } catch (e) {
             // TODO: handle errors
-            console.error(`Error creating pool ${data.id}`, e);
+            console.error(`Error creating pool ${entry.pool.id}`, e);
             allOk = false;
         }
-
-        // Create pool tokens – something to talk about if we want to do it here on write, or on read
-        // Pool queries fail without excplicitly creating the nested tokens relation
-        await prisma.prismaPoolExpandedTokens.createMany({
-            skipDuplicates: true,
-            data: data.tokens.createMany.data.map((token) => ({
-                poolId: data.id,
-                chain: chain,
-                tokenAddress: token.address,
-                nestedPoolId: token.nestedPoolId || null,
-            })),
-        });
     }
 
     return allOk;

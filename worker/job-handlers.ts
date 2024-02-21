@@ -17,7 +17,7 @@ import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-m
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
-import { JobsController } from '@modules/controllers/jobs-controller';
+import { JobsController } from '../modules/controllers/jobs-controller';
 
 const runningJobs: Set<string> = new Set();
 

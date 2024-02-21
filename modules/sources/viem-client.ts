@@ -12,7 +12,7 @@ import {
     sepolia,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
-import config from '@config/index';
+import config from '../../config';
 
 export type ViemClient = ReturnType<typeof getViemClient>;
 

@@ -1,5 +1,6 @@
-import { JobsController } from '@modules/controllers/jobs-controller';
+import { JobsController } from '../modules/controllers/jobs-controller';
 
+// TODO needed?
 const jobsController = JobsController();
 
 async function run(job: string = process.argv[2], chain: string = process.argv[3]) {
