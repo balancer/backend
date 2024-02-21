@@ -1,4 +1,3 @@
-import { parseAbi } from 'viem';
 import { ViemClient } from '../types';
 import { vaultV3Abi } from './abis/VaultV3';
 
@@ -8,13 +7,10 @@ type PoolTokenInfo = {
     balancesRaw: bigint[];
     decimalScalingFactors: bigint[];
     rateProviders: `0x${string}`[];
+    tokenRates: bigint[];
 };
 
-const abi = parseAbi([
-    'function getPoolTokenInfo(address pool) view returns (address[] tokens, uint8[] tokenTypes, uint[] balancesRaw, uint[] decimalScalingFactors, address[] rateProviders)',
-]);
-
-export async function fetchPoolTokens(vault: string, pools: string[], client: ViemClient) {
+export async function fetchPoolTokenInfo(vault: string, pools: string[], client: ViemClient) {
     const contracts = pools
         .map((pool) => [
             {
@@ -22,18 +18,17 @@ export async function fetchPoolTokens(vault: string, pools: string[], client: Vi
                 abi: vaultV3Abi,
                 functionName: 'getPoolTokenInfo',
                 args: [pool as `0x${string}`],
-            },
+            } as const,
+            {
+                address: vault as `0x${string}`,
+                abi: vaultV3Abi,
+                functionName: 'getPoolTokenRates',
+                args: [pool as `0x${string}`],
+            } as const,
         ])
         .flat();
 
     const results = await client.multicall({ contracts });
-
-    const data = await client.readContract({
-        address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-        abi: vaultV3Abi,
-        functionName: 'getPoolTokenInfo' as 'getPoolTokenInfo',
-        args: ['0xa5cc3c03994DB5b0d9A5eEdD10CabaB0813678AC'],
-    });
 
     // Parse the results
     const parsedResults = results
@@ -46,6 +41,7 @@ export async function fetchPoolTokens(vault: string, pools: string[], client: Vi
                     balancesRaw: result.result[2],
                     decimalScalingFactors: result.result[3],
                     rateProviders: result.result[4],
+                    tokenRates: result.result[5],
                 } as PoolTokenInfo;
 
                 return [pools[i], poolTokens];
