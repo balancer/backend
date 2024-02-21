@@ -1,16 +1,8 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { V3SubgraphClient } from '@modules/subgraphs/balancer-v3-vault';
-import {
-    poolTransformer,
-    poolTokensTransformer,
-    poolTokensDynamicDataTransformer,
-} from '@modules/sources/transformers';
-import { fetchErc20Headers, fetchWeightedPoolData, fetchPoolTokens } from '@modules/sources/contracts';
-import type { ViemClient } from 'modules/sources/types';
-import { V3PoolsSubgraphClient } from '@modules/subgraphs/balancer-v3-pools';
-import { decimal } from '@modules/big-number/big-number';
-
+import { poolTransformer, poolTokensTransformer, poolTokensDynamicDataTransformer } from '../../sources/transformers';
+import { V3PoolsSubgraphClient } from '../../subgraphs/balancer-v3-pools';
+import { V3SubgraphClient } from '../../subgraphs/balancer-v3-vault';
 /**
  * Makes sure that all pools are synced in the database
  *
@@ -19,7 +11,7 @@ import { decimal } from '@modules/big-number/big-number';
  * @param chain
  * @returns syncedPools - the pools that were synced
  */
-export async function syncMissingPools(
+export async function addMissingPoolsFromSubgraph(
     vaultSubgraphClient: Pick<V3SubgraphClient, 'Pools'>,
     poolSubgraphClient: V3PoolsSubgraphClient,
     // viemClient: ViemClient,

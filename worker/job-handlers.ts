@@ -111,7 +111,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.addMissingPools(chainId),
+                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
                     res,
                     next,
                 );

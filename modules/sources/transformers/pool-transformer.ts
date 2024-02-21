@@ -1,7 +1,7 @@
 import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
 import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
 import { PoolFragment as PoolSubgraphPoolFragment, PoolType } from '../../subgraphs/balancer-v3-pools/generated/types';
-import { StableData } from '@modules/pool/subgraph-mapper';
+import { StableData } from '../../pool/subgraph-mapper';
 
 export const poolTransformer = (
     vaultSubgraphPool: VaultSubgraphPoolFragment,

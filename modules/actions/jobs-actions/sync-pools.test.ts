@@ -1,10 +1,8 @@
-import { syncMissingPools } from './sync-pools';
+import { addMissingPoolsFromSubgraph } from './sync-pools';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPool } from '@prisma/client';
-import { PoolFragment as VaultSubgraphPoolFragment } from '@modules/subgraphs/balancer-v3-vault/generated/types';
-import { fetchErc20Headers } from '@modules/sources/contracts';
-import { getViemClient } from '@modules/sources/viem-client';
-import { PoolFragment as PoolSubgraphPoolFragment } from '@modules/subgraphs/balancer-v3-pools/generated/types';
+import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { PoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
 
 // Mock the module dependencies
 jest.mock('@modules/sources/contracts', () => ({
@@ -48,7 +46,7 @@ describe('syncPools', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        return syncMissingPools(vaultSubgraphClient, poolSubgraphClient, 'SEPOLIA');
+        return addMissingPoolsFromSubgraph(vaultSubgraphClient, poolSubgraphClient, 'SEPOLIA');
     });
 
     it('should fetch pools from vault subgraph', async () => {
