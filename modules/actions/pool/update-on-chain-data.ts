@@ -13,6 +13,7 @@ const SUPPORTED_POOL_TYPES: PrismaPoolType[] = ['WEIGHTED', 'STABLE'];
 export async function updateOnchainDataForAllPools(
     vaultAddress: string,
     viemClient: ViemClient,
+    blockNumber: bigint,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {
     const allPools = await prisma.prismaPool.findMany({
@@ -27,6 +28,7 @@ export async function updateOnchainDataForAllPools(
         '123',
         allPools.map((pool) => pool.id),
         viemClient,
+        blockNumber,
         chain,
     );
 }
@@ -44,6 +46,7 @@ export async function updateOnChainDataForPools(
     balancerQueriesAddress: string,
     poolIds: string[],
     viemClient: ViemClient,
+    blockNumber: bigint,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {
     if (poolIds.length === 0) {
@@ -70,8 +73,6 @@ export async function updateOnChainDataForPools(
         type: pool.type,
         version: pool.version,
     }));
-
-    const blockNumber = await viemClient.getBlockNumber();
 
     const tokenPricesForCurrentChain = await tokenService.getTokenPrices(chain);
     const poolTokenData = await fetchPoolTokenInfo(vaultAddress, filteredPoolIds, viemClient, blockNumber);

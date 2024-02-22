@@ -11,43 +11,28 @@ const event = {
         },
         {
             indexed: true,
-            internalType: 'contract IERC20',
-            name: 'tokenIn',
-            type: 'address',
-        },
-        {
-            indexed: true,
-            internalType: 'contract IERC20',
-            name: 'tokenOut',
+            internalType: 'address',
+            name: 'liquidityProvider',
             type: 'address',
         },
         {
             indexed: false,
-            internalType: 'uint256',
-            name: 'amountIn',
-            type: 'uint256',
+            internalType: 'contract IERC20[]',
+            name: 'tokens',
+            type: 'address[]',
         },
         {
             indexed: false,
-            internalType: 'uint256',
-            name: 'amountOut',
-            type: 'uint256',
-        },
-        {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'swapFeeAmount',
-            type: 'uint256',
+            internalType: 'int256[]',
+            name: 'deltas',
+            type: 'int256[]',
         },
     ],
-    name: 'Swap',
+    name: 'PoolBalanceChanged',
     type: 'event',
 } as const;
 
-/**
- * Extract balances from the contract
- */
-export const getSwaps = async (
+export const getPoolBalanceChanged = async (
     vaultAddress: string,
     client: ViemClient,
     fromBlock: bigint,

@@ -114,25 +114,17 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'user-sync-staked-balances',
             interval: every(5, 'minutes'),
         },
-        // {
-        //     name: 'sync-coingecko-coinids',
-        //     interval: every(2, 'hours'),
-        // },
         {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
-        // {
-        //     name: 'sync-vebal-balances',
-        //     interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
-        // },
-        // {
-        //     name: 'sync-vebal-totalSupply',
-        //     interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
-        // },
-        // {
-        //     name: 'feed-data-to-datastudio',
-        //     interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
-        // },
+        {
+            name: 'sync-changed-pools-v3',
+            interval: every(15, 'minutes'),
+        },
+        {
+            name: 'sync-new-pools-from-subgraph-v3',
+            interval: every(20, 'minutes'),
+        },
     ],
 };

@@ -27,8 +27,9 @@ export function PoolsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
             const viemClient = getViemClient(chain);
+            const latestBlockNumber = await viemClient.getBlockNumber();
 
-            const updated = updateOnchainDataForAllPools(vaultAddress, viemClient, chain);
+            const updated = updateOnchainDataForAllPools(vaultAddress, viemClient, latestBlockNumber, chain);
             return updated;
         },
     };

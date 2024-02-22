@@ -1,5 +1,7 @@
+import { update } from 'lodash';
 import config from '../../config';
 import { addMissingPoolsFromSubgraph } from '../actions/pool/add-pools-from-subgraph';
+import { getChangedPools } from '../actions/pool/get-changed-pools';
 import { updateOnChainDataForPools } from '../actions/pool/update-on-chain-data';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
@@ -34,17 +36,57 @@ export function JobsController(tracer?: any) {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
             const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3!);
             const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
 
             // TODO: add syncing v2 pools as well by splitting the poolService into separate
             // actions with extracted configuration
 
+            // find all missing pools and add them to the DB
             const added = await addMissingPoolsFromSubgraph(vaultSubgraphClient, poolSubgraphClient, chain);
 
-            //required steps:
-            // update onchain data and status
-            const updated = updateOnChainDataForPools(vaultAddress, '123', added, viemClient);
-            // sync swaps
-            // updateVolumeAndFeeValues
+            // update with latest on-chain data
+            const updated = await updateOnChainDataForPools(vaultAddress, '123', added, viemClient, latestBlock);
+
+            // also sync swaps and volumeAndFee values
+            // const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
+            // await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
+
+            return updated;
+        },
+        async updateOnChainDataChangedPools(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!vaultAddress) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+            const viemClient = getViemClient(chain);
+
+            const blockNumber = await viemClient.getBlockNumber();
+
+            const changedPools = await getChangedPools(vaultAddress, viemClient, blockNumber, chain);
+            if (changedPools.length === 0) {
+                return [];
+            }
+
+            const updated = updateOnChainDataForPools(
+                vaultAddress,
+                '123',
+                changedPools,
+                viemClient,
+                blockNumber,
+                chain,
+            );
+            // also sync swaps and volumeAndFee values
+            // const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
+            // await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
+
+            return updated;
         },
     };
 }

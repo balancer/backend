@@ -111,7 +111,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
+                    () => jobsController.updateOnChainDataChangedPools(chainId),
                     res,
                     next,
                 );
@@ -189,7 +189,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.syncNewPoolsFromSubgraphV3(),
+                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
                     res,
                     next,
                 );
