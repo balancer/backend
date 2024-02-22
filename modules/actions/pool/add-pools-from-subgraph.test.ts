@@ -1,4 +1,4 @@
-import { addMissingPoolsFromSubgraph } from './sync-pools';
+import { addMissingPoolsFromSubgraph } from './add-pools-from-subgraph';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPool } from '@prisma/client';
 import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';

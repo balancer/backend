@@ -31,7 +31,7 @@ export async function addMissingPoolsFromSubgraph(
     // viemClient: ViemClient,
     // vaultAddress: string,
     chain = 'SEPOLIA' as Chain,
-) {
+): Promise<string[]> {
     // Fetch pools from subgraph
     // TODO this needs paging
     const { pools: vaultSubgraphPools } = await vaultSubgraphClient.Pools();
@@ -116,7 +116,7 @@ export async function addMissingPoolsFromSubgraph(
     });
 
     // Store missing pools in the database
-    let allOk = true;
+    const added: string[] = [];
     for (const entry of dbEntries) {
         try {
             await prisma.prismaPool.create({ data: entry.pool });
@@ -131,12 +131,13 @@ export async function addMissingPoolsFromSubgraph(
                 skipDuplicates: true,
                 data: entry.poolExpandedTokens,
             });
+
+            added.push(entry.pool.id);
         } catch (e) {
             // TODO: handle errors
             console.error(`Error creating pool ${entry.pool.id}`, e);
-            allOk = false;
         }
     }
 
-    return allOk;
+    return added;
 }

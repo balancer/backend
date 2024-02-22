@@ -1,4 +1,4 @@
-import { addMissingPoolsFromSubgraph } from '../actions/jobs-actions/sync-pools';
+import { addMissingPoolsFromSubgraph } from '../actions/pool/add-pools-from-subgraph';
 import { JobsController } from './jobs-controller';
 // Mock the actions
 jest.mock('@modules/actions/jobs_actions', () => ({
