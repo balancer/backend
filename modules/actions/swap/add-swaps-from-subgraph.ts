@@ -64,9 +64,9 @@ export async function syncSwapsFromSubgraph(
                 poolId: swap.pool,
                 userAddress: '0x000', //swap.user.id,
                 tokenIn: swap.tokenIn,
-                tokenInSym: swap.tokenIn,
+                tokenInSym: swap.tokenIn, // TODO add symbol
                 tokenOut: swap.tokenOut,
-                tokenOutSym: swap.tokenOut,
+                tokenOutSym: swap.tokenOut, // TODO add symbol
                 tokenAmountIn: swap.tokenAmountIn,
                 tokenAmountOut: swap.tokenAmountOut,
                 tx: swap.transactionHash,
