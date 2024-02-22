@@ -6,6 +6,7 @@ import { ViemClient } from '../../sources/viem-client';
 import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
 import { formatEther, formatUnits, parseUnits } from 'viem';
 import { isSameAddress } from '@balancer-labs/sdk';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 const SUPPORTED_POOL_TYPES: PrismaPoolType[] = ['WEIGHTED', 'STABLE'];
 
@@ -214,6 +215,7 @@ export async function updateOnChainDataForPools(
             console.log('error syncing on chain data', e);
         }
     }
+    await prismaBulkExecuteOperations(operations, false);
 
     return updated;
 }
