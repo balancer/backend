@@ -1,4 +1,4 @@
-import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
 import { Chain, Prisma } from '@prisma/client';
 

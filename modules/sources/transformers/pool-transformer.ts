@@ -1,5 +1,5 @@
 import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
-import { PoolFragment as VaultSubgraphPoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
+import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import {
     TypePoolFragment as PoolSubgraphPoolFragment,
     PoolType,
@@ -36,7 +36,7 @@ export const poolTransformer = (
         decimals: 18,
         symbol: vaultSubgraphPool.symbol,
         name: vaultSubgraphPool.name,
-        owner: '',
+        owner: '', //TODO
         factory: poolSubgraphPool.factory.id.toLowerCase(),
         type: type,
         typeData: typeData,

@@ -7,9 +7,7 @@ import {
     poolExpandedTokensTransformer,
 } from '../../sources/transformers';
 import { V3PoolsSubgraphClient } from '../../subgraphs/balancer-v3-pools';
-import { V3SubgraphClient } from '../../subgraphs/balancer-v3-vault';
-import { PoolFragment } from '../../subgraphs/balancer-v3-vault/generated/types';
-import { PoolType, TypePoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
+import { BalancerVaultSubgraphSource } from '../../sources/subgraphs/balancer-v3-vault';
 import _ from 'lodash';
 
 type PoolDbEntry = {
@@ -26,7 +24,7 @@ type PoolDbEntry = {
  * @returns syncedPools - the pools that were synced
  */
 export async function addMissingPoolsFromSubgraph(
-    vaultSubgraphClient: Pick<V3SubgraphClient, 'Pools'>,
+    vaultSubgraphClient: BalancerVaultSubgraphSource,
     poolSubgraphClient: V3PoolsSubgraphClient,
     // viemClient: ViemClient,
     // vaultAddress: string,
@@ -34,7 +32,7 @@ export async function addMissingPoolsFromSubgraph(
 ): Promise<string[]> {
     // Fetch pools from subgraph
     // TODO this needs paging
-    const { pools: vaultSubgraphPools } = await vaultSubgraphClient.Pools();
+    const vaultSubgraphPools = await vaultSubgraphClient.getAllPools();
     const { pools: poolSubgraphPools } = await poolSubgraphClient.Pools();
 
     // Find pools missing from the database

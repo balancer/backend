@@ -352,6 +352,15 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-sftmx-withdrawal-requests':
                 await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
                 break;
+            case 'update-swaps-volume-and-fees-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSwapsUpdateVolumeAndFees(chainId),
+                    res,
+                    next,
+                );
+                break;
             default:
                 res.sendStatus(400);
                 throw new Error(`Unhandled job type ${job.name}`);

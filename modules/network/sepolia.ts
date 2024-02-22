@@ -126,5 +126,9 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'sync-new-pools-from-subgraph-v3',
             interval: every(20, 'minutes'),
         },
+        {
+            name: 'supdate-swaps-volume-and-fees-v3',
+            interval: every(20, 'minutes'),
+        },
     ],
 };

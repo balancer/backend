@@ -1,4 +1,4 @@
-fragment Pool on Pool {
+fragment VaultPool on Pool {
     id
     factory
     address
@@ -45,6 +45,6 @@ query Pools(
         where: $where
         block: $block
     ) {
-        ...Pool
+        ...VaultPool
     }
 }
