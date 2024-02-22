@@ -6,9 +6,10 @@ fragment Swap on Swap {
     tokenAmountIn
     tokenAmountOut
     swapFeeAmount
-    user {
-        id
-    }
+    # TODO BUG: user null for non-nullable
+    # user {
+    #     id
+    # }
     blockNumber
     blockTimestamp
     transactionHash

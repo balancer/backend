@@ -6,7 +6,9 @@ import { updateOnChainDataForPools } from '../actions/pool/update-on-chain-data'
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getPoolsSubgraphClient } from '../subgraphs/balancer-v3-pools';
-import { getVaultSubgraphClient } from '../subgraphs/balancer-v3-vault';
+import { BalancerVaultSubgraphSource } from '../sources/subgraphs/balancer-v3-vault';
+import { syncSwapsFromSubgraph } from '../actions/swap/add-swaps-from-subgraph';
+import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 
 /**
  * Controller responsible for matching job requests to configured job handlers
@@ -33,7 +35,7 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
+            const vaultSubgraphClient = new BalancerVaultSubgraphSource(balancerV3);
             const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3!);
             const viemClient = getViemClient(chain);
             const latestBlock = await viemClient.getBlockNumber();
@@ -44,12 +46,8 @@ export function JobsController(tracer?: any) {
             // find all missing pools and add them to the DB
             const added = await addMissingPoolsFromSubgraph(vaultSubgraphClient, poolSubgraphClient, chain);
 
-            // update with latest on-chain data
+            // update with latest on-chain data (needed?)
             const updated = await updateOnChainDataForPools(vaultAddress, '123', added, viemClient, latestBlock);
-
-            // also sync swaps and volumeAndFee values
-            // const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
-            // await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
 
             return updated;
         },
@@ -82,11 +80,28 @@ export function JobsController(tracer?: any) {
                 blockNumber,
                 chain,
             );
-            // also sync swaps and volumeAndFee values
-            // const poolsWithNewSwaps = await poolService.syncSwapsForLast48Hours();
-            // await poolService.updateVolumeAndFeeValuesForPools(poolsWithNewSwaps);
 
             return updated;
+        },
+
+        // TODO also update yieldfee
+        // TODO maybe update fee from onchain instead of swap?
+        async syncSwapsUpdateVolumeAndFees(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3 },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancerV3) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const vaultSubgraphClient = new BalancerVaultSubgraphSource(balancerV3);
+
+            const poolsWithNewSwaps = await syncSwapsFromSubgraph(vaultSubgraphClient, chain);
+            await updateVolumeAndFees(poolsWithNewSwaps);
+            return poolsWithNewSwaps;
         },
     };
 }
