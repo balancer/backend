@@ -1,0 +1,50 @@
+fragment Pool on Pool {
+    id
+    factory
+    address
+    name
+    symbol
+    totalShares
+    pauseWindowEndTime
+    pauseManager
+    blockNumber
+    blockTimestamp
+    transactionHash
+    tokens {
+        id
+        address
+        index
+        name
+        symbol
+        decimals
+        balance
+        totalProtocolSwapFee
+        totalProtocolYieldFee
+    }
+    rateProviders {
+        address
+        token {
+            address
+        }
+    }
+}
+
+query Pools(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    pools(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...Pool
+    }
+}
