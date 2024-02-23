@@ -46,7 +46,7 @@ export function JobsController(tracer?: any) {
             // find all missing pools and add them to the DB
             const added = await addMissingPoolsFromSubgraph(vaultSubgraphClient, poolSubgraphClient, chain);
 
-            // update with latest on-chain data (needed?)
+            // update with latest on-chain data (needed? this will run on a separate job anyway)
             const updated = await updateOnChainDataForPools(vaultAddress, '123', added, viemClient, latestBlock);
 
             return updated;

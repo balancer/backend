@@ -5,14 +5,15 @@ import {
     PoolType,
 } from '../../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
+import { fx, gyro, linear, element, stable } from '../../pool/pool-data';
 
 export const poolTransformer = (
     vaultSubgraphPool: VaultSubgraphPoolFragment,
     poolSubgraphPool: PoolSubgraphPoolFragment,
     chain: Chain,
-): PrismaPool => {
+) => {
     let type: PrismaPoolType;
-    let typeData = {};
+    let typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = {};
 
     switch (poolSubgraphPool.factory.type) {
         case PoolType.Weighted:
@@ -36,11 +37,23 @@ export const poolTransformer = (
         decimals: 18,
         symbol: vaultSubgraphPool.symbol,
         name: vaultSubgraphPool.name,
-        owner: '', //TODO
+        owner: vaultSubgraphPool.id.toLowerCase(), //TODO
         factory: poolSubgraphPool.factory.id.toLowerCase(),
         type: type,
         typeData: typeData,
         version: poolSubgraphPool.factory.version,
         createTime: Number(vaultSubgraphPool.blockTimestamp),
     };
+};
+
+const typeDataMapper = {
+    ELEMENT: element,
+    FX: fx,
+    GYRO: gyro,
+    GYRO3: gyro,
+    GYROE: gyro,
+    LINEAR: linear,
+    STABLE: stable,
+    COMPOSABLE_STABLE: stable,
+    META_STABLE: stable,
 };

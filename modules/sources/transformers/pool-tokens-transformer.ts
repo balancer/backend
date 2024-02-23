@@ -1,16 +1,16 @@
 import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
-import { Chain, Prisma } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolToken } from '@prisma/client';
 
-export function poolTokensTransformer(
-    vaultSubgraphPool: VaultSubgraphPoolFragment,
-): Prisma.PrismaPoolTokenCreateManyPoolInput[] {
+export function poolTokensTransformer(vaultSubgraphPool: VaultSubgraphPoolFragment, chain: Chain): PrismaPoolToken[] {
     const tokens = vaultSubgraphPool.tokens ?? [];
     return tokens.map((token, i) => ({
         id: `${vaultSubgraphPool.id}-${token.address}`.toLowerCase(),
+        poolId: vaultSubgraphPool.id.toLowerCase(),
+        chain: chain,
         address: token.address.toLowerCase(),
         index: token.index,
-        nestedPoolId: null,
+        nestedPoolId: token.nestedPool?.id.toLowerCase() ?? null,
         priceRateProvider: vaultSubgraphPool.rateProviders![i].address.toLowerCase(),
         exemptFromProtocolYieldFee: token.totalProtocolYieldFee === '0' ? true : false,
     }));
@@ -29,22 +29,20 @@ export function poolTokensDynamicDataTransformer(
         blockNumber: parseFloat(vaultSubgraphPool.blockNumber),
         balance: token.balance,
         balanceUSD: 0,
-        priceRate: '0',
+        priceRate: '1',
         weight: poolSubgraphPool.weights[token.index] ?? null,
-        // latestFxPrice: poolSubgraphPool.latestFxPrice,
     }));
 }
 
-// TODO deal with nested pools
 export function poolExpandedTokensTransformer(
     vaultSubgraphPool: VaultSubgraphPoolFragment,
     chain: Chain,
 ): Prisma.PrismaPoolExpandedTokensCreateManyInput[] {
     const tokens = vaultSubgraphPool.tokens ?? [];
     return tokens.map((token, i) => ({
-        poolId: vaultSubgraphPool.id,
+        poolId: vaultSubgraphPool.id.toLowerCase(),
         chain: chain,
-        tokenAddress: token.address,
-        nestedPoolId: null,
+        tokenAddress: token.address.toLowerCase(),
+        nestedPoolId: token.nestedPool?.id.toLowerCase(),
     }));
 }

@@ -1,12 +1,16 @@
 import { addMissingPoolsFromSubgraph } from './add-pools-from-subgraph';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPool } from '@prisma/client';
-import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
+import {
+    SwapFragment,
+    VaultPoolFragment as VaultSubgraphPoolFragment,
+} from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
+import { GraphQLClient } from 'graphql-request';
 
 // Mock the module dependencies
-jest.mock('@modules/sources/contracts', () => ({
-    ...jest.requireActual('@modules/sources/contracts'),
+jest.mock('../../sources/contracts', () => ({
+    ...jest.requireActual('../../sources/contracts'),
     fetchErc20Headers: jest.fn().mockResolvedValue({ '2': { name: 'name', symbol: 'symbol' } }),
     fetchWeightedPoolData: jest.fn().mockResolvedValue({}),
     fetchPoolTokens: jest.fn().mockResolvedValue({}),
@@ -33,7 +37,8 @@ jest.mock('../../../prisma/prisma-client', () => ({
 
 // describe('syncPools', () => {
 //     const vaultSubgraphClient = {
-//         getAllPools: jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }] as VaultSubgraphPoolFragment[]),
+//         getAllInitializedPools: jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }] as VaultSubgraphPoolFragment[]),
+//         getSwapsSince: jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }] as SwapFragment[]),
 //     };
 //     const poolSubgraphClient = {
 //         Pools: jest.fn().mockResolvedValue({
@@ -50,7 +55,7 @@ jest.mock('../../../prisma/prisma-client', () => ({
 //     });
 
 //     it('should fetch pools from vault subgraph', async () => {
-//         expect(vaultSubgraphClient.getAllPools).toHaveBeenCalled();
+//         expect(vaultSubgraphClient.getAllInitializedPools).toHaveBeenCalled();
 //     });
 
 //     it('should fetch pools from pools subgraph', async () => {

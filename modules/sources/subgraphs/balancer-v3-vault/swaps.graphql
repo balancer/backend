@@ -2,14 +2,15 @@ fragment Swap on Swap {
     id
     pool
     tokenIn
+    tokenInSymbol
     tokenOut
+    tokenOutSymbol
     tokenAmountIn
     tokenAmountOut
     swapFeeAmount
-    # TODO BUG: user null for non-nullable
-    # user {
-    #     id
-    # }
+    user {
+        id
+    }
     blockNumber
     blockTimestamp
     transactionHash

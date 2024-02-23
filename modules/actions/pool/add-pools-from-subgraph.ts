@@ -9,6 +9,7 @@ import {
 import { V3PoolsSubgraphClient } from '../../subgraphs/balancer-v3-pools';
 import { BalancerVaultSubgraphSource } from '../../sources/subgraphs/balancer-v3-vault';
 import _ from 'lodash';
+import { tokensTransformer } from '../../sources/transformers/tokens-transformer';
 
 type PoolDbEntry = {
     pool: Prisma.PrismaPoolCreateInput;
@@ -26,13 +27,10 @@ type PoolDbEntry = {
 export async function addMissingPoolsFromSubgraph(
     vaultSubgraphClient: BalancerVaultSubgraphSource,
     poolSubgraphClient: V3PoolsSubgraphClient,
-    // viemClient: ViemClient,
-    // vaultAddress: string,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {
     // Fetch pools from subgraph
-    // TODO this needs paging
-    const vaultSubgraphPools = await vaultSubgraphClient.getAllPools();
+    const vaultSubgraphPools = await vaultSubgraphClient.getAllInitializedPools();
     const { pools: poolSubgraphPools } = await poolSubgraphClient.Pools();
 
     // Find pools missing from the database
@@ -42,28 +40,7 @@ export async function addMissingPoolsFromSubgraph(
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     try {
-        const allTokens: { address: string; name: string; decimals: number; symbol: string; chain: Chain }[] = [];
-        missingPools.forEach((pool) => {
-            allTokens.push({
-                address: pool.address,
-                decimals: 18,
-                name: pool.name,
-                symbol: pool.symbol,
-                chain: chain,
-            });
-            if (pool.tokens) {
-                for (const poolToken of pool.tokens) {
-                    allTokens.push({
-                        address: poolToken.address,
-                        decimals: poolToken.decimals,
-                        name: poolToken.name,
-                        symbol: poolToken.symbol,
-                        chain: chain,
-                    });
-                }
-            }
-        });
-
+        const allTokens = tokensTransformer(missingPools, chain);
         await prisma.prismaToken.createMany({
             data: allTokens,
             skipDuplicates: true,
@@ -91,7 +68,7 @@ export async function addMissingPoolsFromSubgraph(
                         // TODO: Will be great to create all the token data here, including dynamic data
                         // but for now we can only store static data, because prisma doesn't support nested createMany
                         // to create dynamic data tabels as well. One solution is to move "dynamicData" to the tokens table
-                        data: poolTokensTransformer(vaultSubgraphPool),
+                        data: poolTokensTransformer(vaultSubgraphPool, chain),
                     },
                 },
                 // placeholder data, will be updated with onchain values
@@ -124,7 +101,6 @@ export async function addMissingPoolsFromSubgraph(
                 data: entry.poolTokenDynamicData,
             });
 
-            // TODO deal with nested pools
             await prisma.prismaPoolExpandedTokens.createMany({
                 skipDuplicates: true,
                 data: entry.poolExpandedTokens,
