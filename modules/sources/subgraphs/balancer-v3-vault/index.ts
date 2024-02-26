@@ -1,13 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import {
-    OrderDirection,
-    Pool_OrderBy,
-    PoolsQuery,
-    SwapFragment,
-    Swap_OrderBy,
-    VaultPoolFragment,
-    getSdk,
-} from './generated/types';
+import { OrderDirection, Pool_OrderBy, SwapFragment, Swap_OrderBy, VaultPoolFragment, getSdk } from './generated/types';
 
 export class BalancerVaultSubgraphSource {
     private sdk: ReturnType<typeof getSdk>;
@@ -20,7 +12,7 @@ export class BalancerVaultSubgraphSource {
         this.sdk = getSdk(new GraphQLClient(subgraphUrl));
     }
 
-    public async getAllPools(): Promise<VaultPoolFragment[]> {
+    public async getAllInitializedPools(): Promise<VaultPoolFragment[]> {
         const limit = 1000;
         let hasMore = true;
         let id = `0x`;
@@ -28,7 +20,7 @@ export class BalancerVaultSubgraphSource {
 
         while (hasMore) {
             const response = await this.sdk.Pools({
-                where: { id_gt: id },
+                where: { id_gt: id, isInitialized: true },
                 orderBy: Pool_OrderBy.Id,
                 orderDirection: OrderDirection.Asc,
                 first: limit,
