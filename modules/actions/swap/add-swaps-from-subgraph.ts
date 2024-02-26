@@ -11,15 +11,16 @@ type PoolDbEntry = {
     poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
     poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
 };
+
 /**
- * Makes sure that all pools are synced in the database
+ * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
  *
  * @param vaultSubgraphClient
- * @param poolSubgraphClient
  * @param chain
- * @returns syncedPools - the pools that were synced
+ * @param daysToSync
+ * @returns
  */
-export async function syncSwapsFromSubgraph(
+export async function addSwapsFromSubgraph(
     vaultSubgraphClient: BalancerVaultSubgraphSource,
     chain = 'SEPOLIA' as Chain,
     daysToSync = 30,

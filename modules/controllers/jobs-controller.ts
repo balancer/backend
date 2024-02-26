@@ -7,7 +7,7 @@ import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getPoolsSubgraphClient } from '../subgraphs/balancer-v3-pools';
 import { BalancerVaultSubgraphSource } from '../sources/subgraphs/balancer-v3-vault';
-import { syncSwapsFromSubgraph } from '../actions/swap/add-swaps-from-subgraph';
+import { addSwapsFromSubgraph } from '../actions/swap/add-swaps-from-subgraph';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 
 /**
@@ -99,7 +99,7 @@ export function JobsController(tracer?: any) {
 
             const vaultSubgraphClient = new BalancerVaultSubgraphSource(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwapsFromSubgraph(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await addSwapsFromSubgraph(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },

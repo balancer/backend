@@ -1,7 +1,7 @@
 import config from '../../config';
 import { updateOnchainDataForAllPools } from '../actions/pool/update-on-chain-data';
 import { updatePoolsFromSubgraph } from '../actions/pool/update-pools-from-subgraph';
-import { syncSwapsFromSubgraph } from '../actions/swap/add-swaps-from-subgraph';
+import { addSwapsFromSubgraph } from '../actions/swap/add-swaps-from-subgraph';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { BalancerVaultSubgraphSource } from '../sources/subgraphs/balancer-v3-vault';
@@ -75,7 +75,7 @@ export function PoolsController(tracer?: any) {
 
             const vaultSubgraphClient = new BalancerVaultSubgraphSource(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwapsFromSubgraph(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await addSwapsFromSubgraph(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },

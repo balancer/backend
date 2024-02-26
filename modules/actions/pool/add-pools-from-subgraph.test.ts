@@ -35,6 +35,7 @@ jest.mock('../../../prisma/prisma-client', () => ({
     },
 }));
 
+//TODO cant mock properly
 // describe('syncPools', () => {
 //     const vaultSubgraphClient = {
 //         getAllInitializedPools: jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }] as VaultSubgraphPoolFragment[]),
