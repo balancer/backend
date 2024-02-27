@@ -32,6 +32,41 @@ interface WhitelistedToken {
     logoURI: string;
 }
 
+const sepoliaTokens: Record<string, { symbol: string; coingeckoTokenId: string }> = {
+    '0xb19382073c7a0addbb56ac6af1808fa49e377b75': {
+        symbol: 'BAL',
+        coingeckoTokenId: 'balancer',
+    },
+    '0xf04378a3ff97b3f979a46f91f9b2d5a1d2394773': {
+        symbol: 'DAI',
+        coingeckoTokenId: 'dai',
+    },
+    '0x7b79995e5f793a07bc00c21412e50ecae098e7f9': {
+        symbol: 'WETH',
+        coingeckoTokenId: 'weth',
+    },
+    '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a': {
+        symbol: 'USDC',
+        coingeckoTokenId: 'usd-coin',
+    },
+    '0x6bf294b80c7d8dc72dee762af5d01260b756a051': {
+        symbol: 'USDT',
+        coingeckoTokenId: 'tether',
+    },
+    '0x23bad11f1543503cb1fb5dad05fdaf93f42d30f3': {
+        symbol: 'EURS',
+        coingeckoTokenId: 'stasis-eurs',
+    },
+    '0x0f409e839a6a790aecb737e4436293be11717f95': {
+        symbol: 'BEETS',
+        coingeckoTokenId: 'beethoven-x',
+    },
+    '0xc3745bce4b5d0977dc874832bc99108d416dce8f': {
+        symbol: 'WBTC',
+        coingeckoTokenId: 'wrapped-bitcoin',
+    },
+};
+
 //TODO implement other content functions
 export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
@@ -48,6 +83,13 @@ export class GithubContentService implements ContentService {
 
         for (const githubToken of filteredTokenList) {
             const tokenAddress = githubToken.address.toLowerCase();
+            let coingeckoTokenId = null;
+
+            if (networkContext.chain === 'SEPOLIA') {
+                if (sepoliaTokens[tokenAddress]) {
+                    coingeckoTokenId = sepoliaTokens[tokenAddress].coingeckoTokenId;
+                }
+            }
 
             await prisma.prismaToken.upsert({
                 where: {
@@ -62,7 +104,7 @@ export class GithubContentService implements ContentService {
                     logoURI: githubToken.logoURI,
                     coingeckoPlatformId: null,
                     coingeckoContractAddress: null,
-                    coingeckoTokenId: null,
+                    coingeckoTokenId: coingeckoTokenId,
                     description: null,
                     websiteUrl: null,
                     discordUrl: null,
@@ -73,6 +115,7 @@ export class GithubContentService implements ContentService {
                     name: githubToken.name,
                     symbol: githubToken.symbol,
                     logoURI: { set: githubToken.logoURI || null },
+                    coingeckoTokenId: coingeckoTokenId,
                 },
             });
         }
