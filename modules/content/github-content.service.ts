@@ -32,6 +32,21 @@ interface WhitelistedToken {
     logoURI: string;
 }
 
+const sepoliaTokens: Record<string, { symbol: string; coingeckoTokenId: string }> = {
+    '0xb19382073c7a0addbb56ac6af1808fa49e377b75': {
+        symbol: 'BAL',
+        coingeckoTokenId: 'balancer',
+    },
+    '0xf04378a3ff97b3f979a46f91f9b2d5a1d2394773': {
+        symbol: 'DAI',
+        coingeckoTokenId: 'dai',
+    },
+    '0x7b79995e5f793a07bc00c21412e50ecae098e7f9': {
+        symbol: 'WETH',
+        coingeckoTokenId: 'weth',
+    },
+};
+
 //TODO implement other content functions
 export class GithubContentService implements ContentService {
     async syncTokenContentData(): Promise<void> {
@@ -48,6 +63,13 @@ export class GithubContentService implements ContentService {
 
         for (const githubToken of filteredTokenList) {
             const tokenAddress = githubToken.address.toLowerCase();
+            let coingeckoTokenId = null;
+
+            if (networkContext.chain === 'SEPOLIA') {
+                if (sepoliaTokens[tokenAddress]) {
+                    coingeckoTokenId = sepoliaTokens[tokenAddress].coingeckoTokenId;
+                }
+            }
 
             await prisma.prismaToken.upsert({
                 where: {
@@ -62,7 +84,7 @@ export class GithubContentService implements ContentService {
                     logoURI: githubToken.logoURI,
                     coingeckoPlatformId: null,
                     coingeckoContractAddress: null,
-                    coingeckoTokenId: null,
+                    coingeckoTokenId: coingeckoTokenId,
                     description: null,
                     websiteUrl: null,
                     discordUrl: null,
