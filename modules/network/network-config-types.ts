@@ -148,14 +148,16 @@ export interface NetworkData {
         aprEndpoint: string;
     };
     avgBlockSpeed: number;
-    sor: {
-        [key in DeploymentEnv]: {
-            url: string;
-            maxPools: number;
-            forceRefresh: boolean;
-            gasPrice: BigNumber;
-            swapGas: BigNumber;
-            poolIdsToExclude: string[];
+    sor?: {
+        poolIdsToExclude?: string[];
+        env?: {
+            [key in DeploymentEnv]?: {
+                url: string;
+                maxPools: number;
+                forceRefresh: boolean;
+                gasPrice: BigNumber;
+                swapGas: BigNumber;
+            };
         };
     };
     datastudio?: {

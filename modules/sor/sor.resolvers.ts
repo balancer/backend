@@ -1,6 +1,4 @@
 import { Resolvers } from '../../schema';
-import { balancerSorService } from './sorV1Beets/balancer-sor.service';
-import { tokenService } from '../token/token.service';
 import { sorService } from './sor.service';
 import { headerChain } from '../context/header-chain';
 

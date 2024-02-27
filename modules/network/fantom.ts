@@ -146,21 +146,21 @@ const fantomNetworkData: NetworkData = {
     },
     avgBlockSpeed: 1,
     sor: {
-        main: {
-            url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
+        env: {
+            main: {
+                url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
+            canary: {
+                url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
         },
     },
     ybAprConfig: {

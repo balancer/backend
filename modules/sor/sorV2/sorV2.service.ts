@@ -262,7 +262,7 @@ export class SorV2Service implements SwapService {
      * @returns
      */
     private async getBasePoolsFromDb(chain: Chain): Promise<PrismaPoolWithDynamic[]> {
-        const { poolIdsToExclude } = AllNetworkConfigsKeyedOnChain[chain].data.sor[env.DEPLOYMENT_ENV as DeploymentEnv];
+        const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 chain,
