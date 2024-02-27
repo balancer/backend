@@ -58,7 +58,8 @@ export class SorV1BeetsService implements SwapService {
     private async querySorV1(
         input: GetSwapsInput & { swapOptions: GqlSorSwapOptionsInput },
     ): Promise<GqlSorGetSwapsResponse> {
-        const tokens = await tokenService.getTokens();
+        // Explicitly pass chain to getTokens to avoid using the default chain
+        const tokens = await tokenService.getTokens(undefined, input.chain);
         return await this.sorService.getSwaps({ ...input, tokens, swapAmount: formatEther(input.swapAmount.scale18) });
     }
 }
