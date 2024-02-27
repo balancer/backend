@@ -45,6 +45,26 @@ const sepoliaTokens: Record<string, { symbol: string; coingeckoTokenId: string }
         symbol: 'WETH',
         coingeckoTokenId: 'weth',
     },
+    '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a': {
+        symbol: 'USDC',
+        coingeckoTokenId: 'usd-coin',
+    },
+    '0x6bf294b80c7d8dc72dee762af5d01260b756a051': {
+        symbol: 'USDT',
+        coingeckoTokenId: 'tether',
+    },
+    '0x23bad11f1543503cb1fb5dad05fdaf93f42d30f3': {
+        symbol: 'EURS',
+        coingeckoTokenId: 'stasis-eurs',
+    },
+    '0x0f409e839a6a790aecb737e4436293be11717f95': {
+        symbol: 'BEETS',
+        coingeckoTokenId: 'beethoven-x',
+    },
+    '0xc3745bce4b5d0977dc874832bc99108d416dce8f': {
+        symbol: 'WBTC',
+        coingeckoTokenId: 'wrapped-bitcoin',
+    },
 };
 
 //TODO implement other content functions
@@ -95,6 +115,7 @@ export class GithubContentService implements ContentService {
                     name: githubToken.name,
                     symbol: githubToken.symbol,
                     logoURI: { set: githubToken.logoURI || null },
+                    coingeckoTokenId: coingeckoTokenId,
                 },
             });
         }
