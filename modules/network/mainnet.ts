@@ -58,7 +58,8 @@ export const data: NetworkData = {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
         excludedTokenAddresses: [
-            '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has coingekco entry but no price
+            '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has Coingecko entry but no price
+            '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
     rpcUrl:
