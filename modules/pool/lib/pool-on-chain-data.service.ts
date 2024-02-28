@@ -274,8 +274,11 @@ export class PoolOnChainDataService {
                                     balanceUSD:
                                         poolToken.address === pool.address
                                             ? 0
-                                            : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                              parseFloat(balance),
+                                            : this.tokenService.getPriceForToken(
+                                                  tokenPrices,
+                                                  poolToken.address,
+                                                  this.options.chain,
+                                              ) * parseFloat(balance),
                                 },
                                 update: {
                                     blockNumber,
@@ -285,8 +288,11 @@ export class PoolOnChainDataService {
                                     balanceUSD:
                                         poolToken.address === pool.address
                                             ? 0
-                                            : this.tokenService.getPriceForToken(tokenPrices, poolToken.address) *
-                                              parseFloat(balance),
+                                            : this.tokenService.getPriceForToken(
+                                                  tokenPrices,
+                                                  poolToken.address,
+                                                  this.options.chain,
+                                              ) * parseFloat(balance),
                                 },
                             }),
                         );

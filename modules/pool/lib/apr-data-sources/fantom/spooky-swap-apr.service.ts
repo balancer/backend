@@ -47,7 +47,7 @@ export class SpookySwapAprService implements PoolAprService {
 
             const linearData = pool.typeData as LinearData;
             const wrappedToken = pool.tokens[linearData.wrappedIndex];
-            const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, this.booAddress);
+            const tokenPrice = this.tokenService.getPriceForToken(tokenPrices, this.booAddress, networkContext.chain);
             const wrappedTokens = parseFloat(wrappedToken.dynamicData?.balance || '0');
             const priceRate = parseFloat(wrappedToken.dynamicData?.priceRate || '1.0');
             const poolWrappedLiquidity = wrappedTokens * priceRate * tokenPrice;

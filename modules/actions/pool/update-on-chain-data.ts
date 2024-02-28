@@ -205,8 +205,11 @@ export async function updateOnChainDataForPools(
                                 balanceUSD:
                                     poolToken.address === pool.address
                                         ? 0
-                                        : tokenService.getPriceForToken(tokenPricesForCurrentChain, poolToken.address) *
-                                          parseFloat(balance),
+                                        : tokenService.getPriceForToken(
+                                              tokenPricesForCurrentChain,
+                                              poolToken.address,
+                                              chain,
+                                          ) * parseFloat(balance),
                             },
                         }),
                     );

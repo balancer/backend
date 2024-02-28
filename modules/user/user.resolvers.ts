@@ -19,7 +19,11 @@ const resolvers: Resolvers = {
 
             return balances.map((balance) => ({
                 ...balance,
-                tokenPrice: tokenService.getPriceForToken(tokenPrices[balance.chain] || [], balance.tokenAddress),
+                tokenPrice: tokenService.getPriceForToken(
+                    tokenPrices[balance.chain] || [],
+                    balance.tokenAddress,
+                    balance.chain,
+                ),
             }));
         },
         userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
