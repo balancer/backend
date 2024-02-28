@@ -7,7 +7,6 @@ import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
-import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
 import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
 import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
@@ -16,7 +15,6 @@ import { FallbackHandlerService } from './token-price-handlers/fallback-price-ha
 import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { coingeckoService } from '../../coingecko/coingecko.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 
 const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
@@ -27,7 +25,7 @@ export class TokenPriceService {
     private readonly priceHandlers: TokenPriceHandler[] = [
         new FbeetsPriceHandlerService(),
         new ClqdrPriceHandlerService(),
-        new CoingeckoPriceHandlerService(coingeckoService),
+        new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
@@ -111,34 +109,36 @@ export class TokenPriceService {
     }
 
     // TODO redo this to use DB prices for multiple chains
-    public async getHistoricalTokenPrices(chain: Chain): Promise<TokenHistoricalPrices> {
-        const memCached = this.cache.get(
-            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-        ) as TokenHistoricalPrices | null;
+    // public async getHistoricalTokenPrices(chain: Chain): Promise<TokenHistoricalPrices> {
+    //     const memCached = this.cache.get(
+    //         `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
+    //     ) as TokenHistoricalPrices | null;
 
-        if (memCached) {
-            return memCached;
-        }
+    //     if (memCached) {
+    //         return memCached;
+    //     }
 
-        const tokenPrices: TokenHistoricalPrices = await this.cache.get(
-            `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-        );
-        const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(
-            `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-        );
+    //     const tokenPrices: TokenHistoricalPrices = await this.cache.get(
+    //         `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
+    //     );
+    //     const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(
+    //         `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
+    //     );
 
-        if (tokenPrices) {
-            this.cache.put(
-                `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-                { ...tokenPrices, ...nestedBptPrices },
-                60000,
-            );
-        }
+    //     if (tokenPrices) {
+    //         this.cache.put(
+    //             `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
+    //             { ...tokenPrices, ...nestedBptPrices },
+    //             60000,
+    //         );
+    //     }
 
-        //don't try to refetch the cache, it takes way too long
-        return { ...tokenPrices, ...nestedBptPrices };
-    }
+    //     //don't try to refetch the cache, it takes way too long
+    //     return { ...tokenPrices, ...nestedBptPrices };
+    // }
 
+    // should this be called for all chains in general?
+    // thinking about coingecko requests as we should update those prices once for all chains
     public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             where: { chain: { in: chains } },

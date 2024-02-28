@@ -6,15 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -52,12 +47,11 @@ const zkevmNetworkData: NetworkData = {
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl:
-        env.GROVE_CITY
+    rpcUrl: env.GROVE_CITY
         ? `https://polygon-zkevm-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
         : env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://zkevm-rpc.com',
+        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -186,12 +180,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [zkevmNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, zkevmNetworkData.bal!.address)],
-    tokenPriceHandlers: [
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(

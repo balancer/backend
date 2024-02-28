@@ -16,7 +16,6 @@ export interface NetworkConfig {
     poolStakingServices: PoolStakingService[];
     poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];
-    tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
     services: NetworkServices;

@@ -13,7 +13,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         return tokens.filter((token) => token.types.includes('LINEAR_WRAPPED_TOKEN')).map((token) => token.address);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         let operations: any[] = [];
         const tokensUpdated: string[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
@@ -96,6 +96,6 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
 
         await Promise.all(operations);
 
-        return tokensUpdated;
+        return [];
     }
 }

@@ -23,7 +23,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             .map((token) => token.address);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         let operations: any[] = [];
         const tokensUpdated: string[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
@@ -113,6 +113,6 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
 
         await Promise.all(operations);
 
-        return tokensUpdated;
+        return [];
     }
 }

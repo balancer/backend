@@ -2,17 +2,15 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
-import { CoingeckoService } from '../../../coingecko/coingecko.service';
 import { networkContext } from '../../../network/network-context.service';
 import { AllNetworkConfigs } from '../../../network/network-config';
 import { Chain } from '@prisma/client';
-import { add } from 'lodash';
+import _ from 'lodash';
+import { coingeckoDataService } from '../coingecko-data.service';
 
 export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
     public readonly id = 'CoingeckoPriceHandlerService';
-
-    constructor(private readonly coingeckoService: CoingeckoService) {}
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         const excludedFromCoingecko: { address: string; chain: Chain }[] = [];
@@ -30,76 +28,18 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                 !excludedFromCoingecko.find(
                     (excluded) => excluded.address === token.address && excluded.chain === token.chain,
                 ) &&
-                !token.excludedFromCoingecko,
+                !token.excludedFromCoingecko &&
+                token.coingeckoTokenId,
         );
     }
 
-    // we update based on coingecko ID first, then the rest we try to update via contract address and platform
+    // we update based on coingecko ID
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const accepedTokens = this.getAcceptedTokens(tokens);
-        const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
-        const tokensUpdated: PrismaTokenWithTypes[] = [];
 
-        const tokenAddresses = accepedTokens.map((item) => item.address);
+        const tokensWithCoingeckoIds = accepedTokens.filter((item) => item.coingeckoTokenId);
+        const updated = await coingeckoDataService.updatePricesForTokensWithCoingeckoIds(tokensWithCoingeckoIds);
 
-        const tokenPricesByAddress = await this.coingeckoService.getTokenPrices(tokenAddresses);
-
-        let operations: any[] = [];
-        for (let tokenAddress of Object.keys(tokenPricesByAddress)) {
-            const priceUsd = tokenPricesByAddress[tokenAddress].usd;
-            const normalizedTokenAddress = tokenAddress.toLowerCase();
-            const exists = tokenAddresses.includes(normalizedTokenAddress);
-            if (!exists) {
-                console.log('skipping token', normalizedTokenAddress);
-            }
-            if (exists && priceUsd) {
-                operations.push(
-                    prisma.prismaTokenPrice.upsert({
-                        where: {
-                            tokenAddress_timestamp_chain: {
-                                tokenAddress: normalizedTokenAddress,
-                                timestamp,
-                                chain: networkContext.chain,
-                            },
-                        },
-                        update: { price: priceUsd, close: priceUsd },
-                        create: {
-                            tokenAddress: normalizedTokenAddress,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price: priceUsd,
-                            high: priceUsd,
-                            low: priceUsd,
-                            open: priceUsd,
-                            close: priceUsd,
-                            coingecko: true,
-                        },
-                    }),
-                );
-
-                operations.push(
-                    prisma.prismaTokenCurrentPrice.upsert({
-                        where: {
-                            tokenAddress_chain: { tokenAddress: normalizedTokenAddress, chain: networkContext.chain },
-                        },
-                        update: { price: priceUsd },
-                        create: {
-                            tokenAddress: normalizedTokenAddress,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price: priceUsd,
-                            coingecko: true,
-                        },
-                    }),
-                );
-
-                tokensUpdated.push(normalizedTokenAddress);
-            }
-        }
-
-        await Promise.all(operations);
-
-        return tokensUpdated;
+        return updated;
     }
 }

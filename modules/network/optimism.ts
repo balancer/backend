@@ -6,16 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -278,16 +272,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [optimismNetworkData.beets!.address, optimismNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
-    tokenPriceHandlers: [
-        new BeetsPriceHandlerService(
-            optimismNetworkData.beets!.address,
-            optimismNetworkData.beets!.beetsPriceProviderRpcUrl,
-        ),
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(

@@ -22,16 +22,13 @@ extend type Query {
     ): [GqlTokenCandlestickChartDataItem!]!
     tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData
     tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
-    tokenGetProtocolTokenPrice: AmountHumanReadable!
+    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
 }
 
 extend type Mutation {
-    tokenReloadTokenPrices: Boolean
+    tokenReloadTokenPrices(chains: [GqlChain!]!): Boolean
     tokenSyncTokenDefinitions: String!
-    tokenSyncTokenDynamicData: String!
     tokenSyncLatestFxPrices(chain: GqlChain!): String!
-    tokenInitChartData(tokenAddress: String!): String!
-    tokenDeletePrice(tokenAddress: String!, timestamp: Int!): Boolean!
     tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
     tokenReloadAllTokenTypes: String!
 }

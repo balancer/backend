@@ -231,7 +231,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => tokenService.syncCoingeckoPricesForAllChains(),
+                    () => tokenService.updatePricesForTokensWithCoingeckoIds(),
                     res,
                     next,
                 );

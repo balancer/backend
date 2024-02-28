@@ -32,23 +32,25 @@ const resolvers: Resolvers = {
                 chain: price.chain,
             }));
         },
+        // TODO
         tokenGetHistoricalPrices: async (parent, { addresses, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new Error('tokenGetHistoricalPrices error: Provide "chain" param');
-            }
-            const tokenPrices = await tokenService.getHistoricalTokenPrices(chain);
-            const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
+            return [];
+            // const currentChain = headerChain();
+            // if (!chain && currentChain) {
+            //     chain = currentChain;
+            // } else if (!chain) {
+            //     throw new Error('tokenGetHistoricalPrices error: Provide "chain" param');
+            // }
+            // const tokenPrices = await tokenService.getHistoricalTokenPrices(chain);
+            // const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
 
-            return _.map(filtered, (entries, address) => ({
-                address,
-                prices: entries.map((entry) => ({
-                    timestamp: `${entry.timestamp}`,
-                    price: entry.price,
-                })),
-            }));
+            // return _.map(filtered, (entries, address) => ({
+            //     address,
+            //     prices: entries.map((entry) => ({
+            //         timestamp: `${entry.timestamp}`,
+            //         price: entry.price,
+            //     })),
+            // }));
         },
         tokenGetTokenDynamicData: async (parent, { address, chain }, context) => {
             const currentChain = headerChain();
@@ -155,15 +157,21 @@ const resolvers: Resolvers = {
             const tokens = await tokenService.getTokens(addresses);
             return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
         },
-        tokenGetProtocolTokenPrice: async (parent, {}, context) => {
-            return tokenService.getProtocolTokenPrice();
+        tokenGetProtocolTokenPrice: async (parent, { chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('tokenGetProtocolTokenPrice error: Provide "chain" param');
+            }
+            return tokenService.getProtocolTokenPrice(chain);
         },
     },
     Mutation: {
-        tokenReloadTokenPrices: async (parent, {}, context) => {
+        tokenReloadTokenPrices: async (parent, { chains }, context) => {
             isAdminRoute(context);
 
-            await tokenService.updateTokenPrices();
+            await tokenService.updateTokenPrices(chains);
 
             return true;
         },
@@ -174,13 +182,6 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        tokenSyncTokenDynamicData: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await tokenService.syncCoingeckoPricesForAllChains();
-
-            return 'success';
-        },
         tokenSyncLatestFxPrices: async (parent, { chain }, context) => {
             isAdminRoute(context);
             const subgraphUrl = AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer;
@@ -188,18 +189,6 @@ const resolvers: Resolvers = {
             await syncLatestFXPrices(subgraphUrl, chain);
 
             return 'success';
-        },
-        tokenInitChartData: async (parent, { tokenAddress }, context) => {
-            isAdminRoute(context);
-
-            await tokenService.initChartData(tokenAddress);
-
-            return 'success';
-        },
-        tokenDeletePrice: async (parent, args, context) => {
-            isAdminRoute(context);
-
-            return tokenService.deleteTokenPrice(args);
         },
         tokenDeleteTokenType: async (parent, args, context) => {
             isAdminRoute(context);
