@@ -58,7 +58,8 @@ export const data: NetworkData = {
         nativeAssetId: 'ethereum',
         platformId: 'ethereum',
         excludedTokenAddresses: [
-            '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has coingekco entry but no price
+            '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has Coingecko entry but no price
+            '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
     rpcUrl:
@@ -350,9 +351,14 @@ export const data: NetworkData = {
                 isIbYield: true,
             },
             sDOLA: {
-                tokenAddress: '0xb45ad160634c528Cc3D2926d9807104FA3157305',
-                sourceUrl: 'https://https://www.inverse.finance/api/dola-staking',
+                tokenAddress: '0xb45ad160634c528cc3d2926d9807104fa3157305',
+                sourceUrl: 'https://www.inverse.finance/api/dola-staking',
                 path: 'apr',
+                isIbYield: true,
+            },
+            rswETH: {
+                tokenAddress: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0',
+                sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
                 isIbYield: true,
             },
         },

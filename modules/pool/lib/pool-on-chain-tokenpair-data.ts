@@ -98,7 +98,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
     const resultOne = (await multicaller.execute()) as {
         [id: string]: OnchainData;
     };
-    ``;
+
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);

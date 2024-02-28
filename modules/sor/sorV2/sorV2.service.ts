@@ -201,6 +201,7 @@ export class SorV2Service implements SwapService {
         return {
             vaultVersion: 2,
             paths: paths,
+            swapType: this.mapSwapKindToSwapType(swap.swapKind),
             swaps: this.mapSwaps(swap.swaps, swap.assets),
             tokenIn: replaceZeroAddressWithEth(inputAmount.token.address),
             tokenOut: replaceZeroAddressWithEth(outputAmount.token.address),
@@ -225,6 +226,10 @@ export class SorV2Service implements SwapService {
 
     private mapSwapTypeToSwapKind(swapType: GqlSorSwapType): SwapKind {
         return swapType === 'EXACT_IN' ? SwapKind.GivenIn : SwapKind.GivenOut;
+    }
+
+    private mapSwapKindToSwapType(swapKind: SwapKind): GqlSorSwapType {
+        return swapKind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT';
     }
 
     private mapSwaps(swaps: BatchSwapStep[] | SingleSwap, assets: string[]): GqlSorSwap[] {

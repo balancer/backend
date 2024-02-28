@@ -40,6 +40,7 @@ type GqlSorGetSwapPaths {
     The token address of the tokenOut provided
     """
     tokenOut: String!
+    swapType: GqlSorSwapType!
     swaps: [GqlSorSwap!]! #used by cowswap
     paths: [GqlSorPath!]! #used by b-sdk
     tokenInAmount: AmountHumanReadable!

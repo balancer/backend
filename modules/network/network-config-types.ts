@@ -65,6 +65,8 @@ export interface NetworkData {
     subgraphs: {
         startDate: string;
         balancer: string;
+        balancerV3?: string;
+        balancerPoolsV3?: string;
         blocks: string;
         masterchef?: string;
         reliquary?: string;

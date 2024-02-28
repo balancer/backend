@@ -63,7 +63,8 @@ export class WeightedPool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
+            const balance = parseFloat(poolToken.dynamicData.balance).toFixed(18);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
 
             poolTokens.push(
                 new WeightedPoolToken(

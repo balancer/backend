@@ -3,6 +3,40 @@ hooks:
     afterAllFileWrite:
         - prettier --write
 generates:
+    modules/sources/subgraphs/balancer-v3-vault/generated/types.ts:
+        schema: ${V3_SUBGRAPH}
+        documents: 'modules/sources/subgraphs/balancer-v3-vault/*.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            skipTypename: true
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/sources/subgraphs/balancer-v3-vault/generated/balancer-v3-schema.graphql:
+        schema: ${V3_SUBGRAPH}
+        plugins:
+            - schema-ast
+    modules/subgraphs/balancer-v3-pools/generated/types.ts:
+        schema: ${V3_POOLS_SUBGRAPH}
+        documents: 'modules/subgraphs/balancer-v3-pools/*.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            skipTypename: true
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/subgraphs/balancer-v3-pools/generated/balancer-v3-pools-schema.graphql:
+        schema: ${V3_POOLS_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types.ts:
         schema: ${BALANCER_SUBGRAPH}
         documents: 'modules/subgraphs/balancer-subgraph/balancer-subgraph-queries.graphql'

@@ -1,0 +1,42 @@
+fragment User on User {
+    id
+    swaps(first: 1000) {
+        id
+        pool
+        tokenIn
+        tokenOut
+        tokenAmountIn
+        tokenAmountOut
+        swapFeeAmount
+        blockNumber
+        blockTimestamp
+        transactionHash
+    }
+    shares(first: 1000) {
+        id
+        pool {
+            id
+        }
+        balance
+    }
+}
+
+query Users(
+    $skip: Int
+    $first: Int
+    $orderBy: User_orderBy
+    $orderDirection: OrderDirection
+    $where: User_filter
+    $block: Block_height
+) {
+    users(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...User
+    }
+}

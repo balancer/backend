@@ -10,4 +10,9 @@ module.exports = {
             isolatedModules: true,
         },
     },
+    moduleNameMapper: {
+        '^@app/(.*)$': '<rootDir>/app/$1',
+        '^@config/(.*)$': '<rootDir>/config/$1',
+        '^@modules/(.*)$': '<rootDir>/modules/$1',
+    },
 };
