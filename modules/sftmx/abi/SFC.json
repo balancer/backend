@@ -1,0 +1,1085 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SFCMock",
+  "sourceName": "contracts/mock/SFCMock.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_isLockedUp",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_isSlashed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_pendingRewards",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_slashingRefundRatio",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_stashedRewardsUntilEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "claimRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentSealedEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "delegate",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "epochAccumulatedRewardPerToken",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "validatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "getEpochAccumulatedRewardPerToken",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getEpochSnapshot",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "epochFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalBaseRewardWeight",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalTxRewardWeight",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "baseRewardPerSecond",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalSupply",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "getLockedStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getLockupInfo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockedStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "fromEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getStashedLockupRewards",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockupExtraReward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lockupBaseReward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "unlockedReward",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getValidator",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "status",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deactivatedTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deactivatedEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "receivedStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "createdEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "createdTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "auth",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "wrID",
+          "type": "uint256"
+        }
+      ],
+      "name": "getWithdrawalRequest",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "isLockedUp",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSlashed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "lockStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "pendingRewards",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "relockStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "restakeRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "__currentEpoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "setCurrentEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "__currentSealedEpoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "setCurrentSealedEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "validatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        }
+      ],
+      "name": "setEpochAccumulatedRewardPerToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "epochFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalBaseRewardWeight",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalTxRewardWeight",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "baseRewardPerSecond",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalSupply",
+          "type": "uint256"
+        }
+      ],
+      "name": "setEpochSnapshot",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "__isLockedUp",
+          "type": "bool"
+        }
+      ],
+      "name": "setIsLockedUp",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "__isSlashed",
+          "type": "bool"
+        }
+      ],
+      "name": "setIsSlashed",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lockedStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "setLockedStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lockedStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "fromEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "setLockupInfo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "rewards",
+          "type": "uint256"
+        }
+      ],
+      "name": "setPendingRewards",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "ratio",
+          "type": "uint256"
+        }
+      ],
+      "name": "setSlashingRefundRatio",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "stake",
+          "type": "uint256"
+        }
+      ],
+      "name": "setStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lockupExtraReward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lockupBaseReward",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "unlockedReward",
+          "type": "uint256"
+        }
+      ],
+      "name": "setStashedLockupRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "stashedRewards",
+          "type": "uint256"
+        }
+      ],
+      "name": "setStashedRewardsUntilEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "status",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deactivatedTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deactivatedEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "receivedStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "createdEpoch",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "createdTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "auth",
+          "type": "address"
+        }
+      ],
+      "name": "setValidator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "slashingRefundRatio",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        }
+      ],
+      "name": "stashedRewardsUntilEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "wrID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "undelegate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "unlockStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "toValidatorID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "wrID",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506111fd806100206000396000f3fe60806040526004361061028c5760003560e01c80637667180811610164578063c3de580e116100c6578063cfdbb7cd1161008a578063e243ae4c11610064578063e243ae4c14610c44578063f68e40a514610c7c578063fc69ddde14610cd357600080fd5b8063cfdbb7cd14610bc6578063d61807fa14610c0c578063de67f215146109e757600080fd5b8063c3de580e14610ae3578063c65ee0e114610b13578063cd660a1914610b40578063ce0ec0b614610b53578063cfd4766314610b8e57600080fd5b8063a8d502fc11610128578063b810e41111610102578063b810e411146109a0578063bd14d907146109e7578063bd2889af14610a2457600080fd5b8063a8d502fc14610883578063b5d89627146108b0578063b7e3990f1461095057600080fd5b8063766718081461077d5780637cacb1d61461079257806396c7ee46146107a75780639fa6dd3514610814578063a86a056f1461084057600080fd5b806335362ab11161020d57806353f10914116101d157806361e53fcc116101ab57806361e53fcc146106c7578063670322f8146106ff5780637351b5861461074257600080fd5b806353f10914146105f05780635c091ed6146106315780636099ecb21461068457600080fd5b806335362ab1146104be57806339b80c00146104de578063441a3e7014610570578063449fefd1146105905780634f864df4146105d057600080fd5b80631b21db54116102545780631b21db54146103a35780631bbfbe5a146103ee5780631d3ac42c1461042f5780631dd6b9b11461044f5780631f2701521461046f57600080fd5b806301d449e51461029157806305a72e3d146102ca57806308c368741461030b5780630962ef791461032b5780630d48dfd31461034b575b600080fd5b34801561029d57600080fd5b506102c86102ac366004611091565b6000928352600b60209081526040808520938552929052912055565b005b3480156102d657600080fd5b506102c86102e5366004610f6b565b6001600160a01b0390921660009081526007602090815260408083209383529290522055565b34801561031757600080fd5b506102c861032636600461102a565b610d00565b34801561033757600080fd5b506102c861034636600461102a565b610d4b565b34801561035757600080fd5b506102c8610366366004610fe0565b6001600160a01b03959095166000908152600760209081526040808320968352959052939093209182556001820155600281019190915560030155565b3480156103af57600080fd5b506103db6103be36600461106f565b600b60209081526000928352604080842090915290825290205481565b6040519081526020015b60405180910390f35b3480156103fa57600080fd5b506102c8610409366004610f6b565b6001600160a01b0390921660009081526005602090815260408083209383529290522055565b34801561043b57600080fd5b506103db61044a36600461106f565b610d9c565b34801561045b57600080fd5b506102c861046a36600461102a565b600055565b34801561047b57600080fd5b506104a361048a366004610f6b565b6000908152600260205260408120549093849350909150565b604080519384526020840192909252908201526060016103e5565b3480156104ca57600080fd5b506102c86104d936600461102a565b600155565b3480156104ea57600080fd5b5061053b6104f936600461102a565b600460205280600052604060002060009150905080600701549080600801549080600901549080600a01549080600b01549080600c01549080600d0154905087565b604080519788526020880196909652948601939093526060850191909152608084015260a083015260c082015260e0016103e5565b34801561057c57600080fd5b506102c861058b36600461106f565b610dd6565b34801561059c57600080fd5b506105c06105ab36600461102a565b600d6020526000908152604090205460ff1681565b60405190151581526020016103e5565b3480156105dc57600080fd5b506102c86105eb366004611091565b610e1e565b3480156105fc57600080fd5b506102c861060b366004610f6b565b6001600160a01b039092166000908152600a602090815260408083209383529290522055565b34801561063d57600080fd5b506102c861064c366004610f9e565b6001600160a01b0394909416600090815260066020908152604080832095835294905292909220908155600181019190915560020155565b34801561069057600080fd5b506103db61069f366004610f05565b6001600160a01b03919091166000908152600860209081526040808320938352929052205490565b3480156106d357600080fd5b506103db6106e236600461106f565b6000918252600b6020908152604080842092845291905290205490565b34801561070b57600080fd5b506103db61071a366004610f05565b6001600160a01b03919091166000908152600760209081526040808320938352929052205490565b34801561074e57600080fd5b506105c061075d366004610f05565b600960209081526000928352604080842090915290825290205460ff1681565b34801561078957600080fd5b506000546103db565b34801561079e57600080fd5b506001546103db565b3480156107b357600080fd5b506107f46107c2366004610f05565b600760209081526000928352604080842090915290825290208054600182015460028301546003909301549192909184565b6040805194855260208501939093529183015260608201526080016103e5565b6102c861082236600461102a565b33600090815260056020908152604080832093835292905220349055565b34801561084c57600080fd5b506103db61085b366004610f05565b6001600160a01b03919091166000908152600a60209081526040808320938352929052205490565b34801561088f57600080fd5b506102c861089e36600461106f565b6000918252600c602052604090912055565b3480156108bc57600080fd5b506109126108cb36600461102a565b60036020819052600091825260409091208054600182015460028301549383015460048401546005850154600690950154939592949293919290916001600160a01b031687565b604080519788526020880196909652948601939093526060850191909152608084015260a08301526001600160a01b031660c082015260e0016103e5565b34801561095c57600080fd5b506102c861096b366004610f2f565b6001600160a01b0392909216600090815260096020908152604080832093835292905220805460ff1916911515919091179055565b3480156109ac57600080fd5b506104a36109bb366004610f05565b600660209081526000928352604080842090915290825290208054600182015460029092015490919083565b3480156109f357600080fd5b506102c8610a02366004611091565b3360009081526007602090815260408083208684529091529020819055505050565b348015610a3057600080fd5b506102c8610a3f366004611112565b6040805160e0810182529788526020808901978852888201968752606089019586526080890194855260a089019384526001600160a01b0392831660c08a0190815260009b8c5260039182905291909a209751885595516001880155935160028701559151968501969096559451600484015593516005830155516006909101805473ffffffffffffffffffffffffffffffffffffffff1916919093161790915550565b348015610aef57600080fd5b506105c0610afe36600461102a565b6000908152600d602052604090205460ff1690565b348015610b1f57600080fd5b506103db610b2e36600461102a565b6000908152600c602052604090205490565b6102c8610b4e366004610f6b565b610e60565b348015610b5f57600080fd5b506102c8610b6e366004611043565b6000918252600d6020526040909120805460ff1916911515919091179055565b348015610b9a57600080fd5b506103db610ba9366004610f05565b600560209081526000928352604080842090915290825290205481565b348015610bd257600080fd5b506105c0610be1366004610f05565b6001600160a01b03919091166000908152600960209081526040808320938352929052205460ff1690565b348015610c1857600080fd5b506103db610c27366004610f05565b600860209081526000928352604080842090915290825290205481565b348015610c5057600080fd5b506103db610c5f366004610f05565b600a60209081526000928352604080842090915290825290205481565b348015610c8857600080fd5b506102c8610c973660046110bd565b600097885260046020526040909720600781019690965560088601949094556009850192909255600a840155600b830155600c820155600d0155565b348015610cdf57600080fd5b506103db610cee36600461102a565b600c6020526000908152604090205481565b33600081815260086020908152604080832085845282528083208054908490559383526007825280832085845290915281208054839290610d42908490611182565b90915550505050565b33600081815260086020908152604080832085845290915280822080549083905590519092916108fc841502918491818181858888f19350505050158015610d97573d6000803e3d6000fd5b505050565b336000908152600760209081526040808320858452909152812080548391908390610dc890849061119a565b909155506000949350505050565b60008181526002602052604080822080549083905590519091339183156108fc0291849190818181858888f19350505050158015610e18573d6000803e3d6000fd5b50505050565b33600090815260056020908152604080832086845290915281208054839290610e4890849061119a565b90915550506000918252600260205260409091205550565b803414610eb35760405162461bcd60e51b815260206004820152601760248201527f496e73756666696369656e742066756e64732073656e74000000000000000000604482015260640160405180910390fd5b6001600160a01b0390921660009081526008602090815260408083209383529290522055565b80356001600160a01b0381168114610ef057600080fd5b919050565b80358015158114610ef057600080fd5b60008060408385031215610f1857600080fd5b610f2183610ed9565b946020939093013593505050565b600080600060608486031215610f4457600080fd5b610f4d84610ed9565b925060208401359150610f6260408501610ef5565b90509250925092565b600080600060608486031215610f8057600080fd5b610f8984610ed9565b95602085013595506040909401359392505050565b600080600080600060a08688031215610fb657600080fd5b610fbf86610ed9565b97602087013597506040870135966060810135965060800135945092505050565b60008060008060008060c08789031215610ff957600080fd5b61100287610ed9565b9860208801359850604088013597606081013597506080810135965060a00135945092505050565b60006020828403121561103c57600080fd5b5035919050565b6000806040838503121561105657600080fd5b8235915061106660208401610ef5565b90509250929050565b6000806040838503121561108257600080fd5b50508035926020909101359150565b6000806000606084860312156110a657600080fd5b505081359360208301359350604090920135919050565b600080600080600080600080610100898b0312156110da57600080fd5b505086359860208801359850604088013597606081013597506080810135965060a0810135955060c0810135945060e0013592509050565b60008060008060008060008060006101208a8c03121561113157600080fd5b8935985060208a0135975060408a0135965060608a0135955060808a0135945060a08a0135935060c08a0135925060e08a013591506111736101008b01610ed9565b90509295985092959850929598565b60008219821115611195576111956111b1565b500190565b6000828210156111ac576111ac6111b1565b500390565b634e487b7160e01b600052601160045260246000fdfea264697066735822122056ce8189f1933f4e4e385fe73b9dde45db57a4793f45fdf80d4326b2632e50f164736f6c63430008070033",
+  "deployedBytecode": "0x60806040526004361061028c5760003560e01c80637667180811610164578063c3de580e116100c6578063cfdbb7cd1161008a578063e243ae4c11610064578063e243ae4c14610c44578063f68e40a514610c7c578063fc69ddde14610cd357600080fd5b8063cfdbb7cd14610bc6578063d61807fa14610c0c578063de67f215146109e757600080fd5b8063c3de580e14610ae3578063c65ee0e114610b13578063cd660a1914610b40578063ce0ec0b614610b53578063cfd4766314610b8e57600080fd5b8063a8d502fc11610128578063b810e41111610102578063b810e411146109a0578063bd14d907146109e7578063bd2889af14610a2457600080fd5b8063a8d502fc14610883578063b5d89627146108b0578063b7e3990f1461095057600080fd5b8063766718081461077d5780637cacb1d61461079257806396c7ee46146107a75780639fa6dd3514610814578063a86a056f1461084057600080fd5b806335362ab11161020d57806353f10914116101d157806361e53fcc116101ab57806361e53fcc146106c7578063670322f8146106ff5780637351b5861461074257600080fd5b806353f10914146105f05780635c091ed6146106315780636099ecb21461068457600080fd5b806335362ab1146104be57806339b80c00146104de578063441a3e7014610570578063449fefd1146105905780634f864df4146105d057600080fd5b80631b21db54116102545780631b21db54146103a35780631bbfbe5a146103ee5780631d3ac42c1461042f5780631dd6b9b11461044f5780631f2701521461046f57600080fd5b806301d449e51461029157806305a72e3d146102ca57806308c368741461030b5780630962ef791461032b5780630d48dfd31461034b575b600080fd5b34801561029d57600080fd5b506102c86102ac366004611091565b6000928352600b60209081526040808520938552929052912055565b005b3480156102d657600080fd5b506102c86102e5366004610f6b565b6001600160a01b0390921660009081526007602090815260408083209383529290522055565b34801561031757600080fd5b506102c861032636600461102a565b610d00565b34801561033757600080fd5b506102c861034636600461102a565b610d4b565b34801561035757600080fd5b506102c8610366366004610fe0565b6001600160a01b03959095166000908152600760209081526040808320968352959052939093209182556001820155600281019190915560030155565b3480156103af57600080fd5b506103db6103be36600461106f565b600b60209081526000928352604080842090915290825290205481565b6040519081526020015b60405180910390f35b3480156103fa57600080fd5b506102c8610409366004610f6b565b6001600160a01b0390921660009081526005602090815260408083209383529290522055565b34801561043b57600080fd5b506103db61044a36600461106f565b610d9c565b34801561045b57600080fd5b506102c861046a36600461102a565b600055565b34801561047b57600080fd5b506104a361048a366004610f6b565b6000908152600260205260408120549093849350909150565b604080519384526020840192909252908201526060016103e5565b3480156104ca57600080fd5b506102c86104d936600461102a565b600155565b3480156104ea57600080fd5b5061053b6104f936600461102a565b600460205280600052604060002060009150905080600701549080600801549080600901549080600a01549080600b01549080600c01549080600d0154905087565b604080519788526020880196909652948601939093526060850191909152608084015260a083015260c082015260e0016103e5565b34801561057c57600080fd5b506102c861058b36600461106f565b610dd6565b34801561059c57600080fd5b506105c06105ab36600461102a565b600d6020526000908152604090205460ff1681565b60405190151581526020016103e5565b3480156105dc57600080fd5b506102c86105eb366004611091565b610e1e565b3480156105fc57600080fd5b506102c861060b366004610f6b565b6001600160a01b039092166000908152600a602090815260408083209383529290522055565b34801561063d57600080fd5b506102c861064c366004610f9e565b6001600160a01b0394909416600090815260066020908152604080832095835294905292909220908155600181019190915560020155565b34801561069057600080fd5b506103db61069f366004610f05565b6001600160a01b03919091166000908152600860209081526040808320938352929052205490565b3480156106d357600080fd5b506103db6106e236600461106f565b6000918252600b6020908152604080842092845291905290205490565b34801561070b57600080fd5b506103db61071a366004610f05565b6001600160a01b03919091166000908152600760209081526040808320938352929052205490565b34801561074e57600080fd5b506105c061075d366004610f05565b600960209081526000928352604080842090915290825290205460ff1681565b34801561078957600080fd5b506000546103db565b34801561079e57600080fd5b506001546103db565b3480156107b357600080fd5b506107f46107c2366004610f05565b600760209081526000928352604080842090915290825290208054600182015460028301546003909301549192909184565b6040805194855260208501939093529183015260608201526080016103e5565b6102c861082236600461102a565b33600090815260056020908152604080832093835292905220349055565b34801561084c57600080fd5b506103db61085b366004610f05565b6001600160a01b03919091166000908152600a60209081526040808320938352929052205490565b34801561088f57600080fd5b506102c861089e36600461106f565b6000918252600c602052604090912055565b3480156108bc57600080fd5b506109126108cb36600461102a565b60036020819052600091825260409091208054600182015460028301549383015460048401546005850154600690950154939592949293919290916001600160a01b031687565b604080519788526020880196909652948601939093526060850191909152608084015260a08301526001600160a01b031660c082015260e0016103e5565b34801561095c57600080fd5b506102c861096b366004610f2f565b6001600160a01b0392909216600090815260096020908152604080832093835292905220805460ff1916911515919091179055565b3480156109ac57600080fd5b506104a36109bb366004610f05565b600660209081526000928352604080842090915290825290208054600182015460029092015490919083565b3480156109f357600080fd5b506102c8610a02366004611091565b3360009081526007602090815260408083208684529091529020819055505050565b348015610a3057600080fd5b506102c8610a3f366004611112565b6040805160e0810182529788526020808901978852888201968752606089019586526080890194855260a089019384526001600160a01b0392831660c08a0190815260009b8c5260039182905291909a209751885595516001880155935160028701559151968501969096559451600484015593516005830155516006909101805473ffffffffffffffffffffffffffffffffffffffff1916919093161790915550565b348015610aef57600080fd5b506105c0610afe36600461102a565b6000908152600d602052604090205460ff1690565b348015610b1f57600080fd5b506103db610b2e36600461102a565b6000908152600c602052604090205490565b6102c8610b4e366004610f6b565b610e60565b348015610b5f57600080fd5b506102c8610b6e366004611043565b6000918252600d6020526040909120805460ff1916911515919091179055565b348015610b9a57600080fd5b506103db610ba9366004610f05565b600560209081526000928352604080842090915290825290205481565b348015610bd257600080fd5b506105c0610be1366004610f05565b6001600160a01b03919091166000908152600960209081526040808320938352929052205460ff1690565b348015610c1857600080fd5b506103db610c27366004610f05565b600860209081526000928352604080842090915290825290205481565b348015610c5057600080fd5b506103db610c5f366004610f05565b600a60209081526000928352604080842090915290825290205481565b348015610c8857600080fd5b506102c8610c973660046110bd565b600097885260046020526040909720600781019690965560088601949094556009850192909255600a840155600b830155600c820155600d0155565b348015610cdf57600080fd5b506103db610cee36600461102a565b600c6020526000908152604090205481565b33600081815260086020908152604080832085845282528083208054908490559383526007825280832085845290915281208054839290610d42908490611182565b90915550505050565b33600081815260086020908152604080832085845290915280822080549083905590519092916108fc841502918491818181858888f19350505050158015610d97573d6000803e3d6000fd5b505050565b336000908152600760209081526040808320858452909152812080548391908390610dc890849061119a565b909155506000949350505050565b60008181526002602052604080822080549083905590519091339183156108fc0291849190818181858888f19350505050158015610e18573d6000803e3d6000fd5b50505050565b33600090815260056020908152604080832086845290915281208054839290610e4890849061119a565b90915550506000918252600260205260409091205550565b803414610eb35760405162461bcd60e51b815260206004820152601760248201527f496e73756666696369656e742066756e64732073656e74000000000000000000604482015260640160405180910390fd5b6001600160a01b0390921660009081526008602090815260408083209383529290522055565b80356001600160a01b0381168114610ef057600080fd5b919050565b80358015158114610ef057600080fd5b60008060408385031215610f1857600080fd5b610f2183610ed9565b946020939093013593505050565b600080600060608486031215610f4457600080fd5b610f4d84610ed9565b925060208401359150610f6260408501610ef5565b90509250925092565b600080600060608486031215610f8057600080fd5b610f8984610ed9565b95602085013595506040909401359392505050565b600080600080600060a08688031215610fb657600080fd5b610fbf86610ed9565b97602087013597506040870135966060810135965060800135945092505050565b60008060008060008060c08789031215610ff957600080fd5b61100287610ed9565b9860208801359850604088013597606081013597506080810135965060a00135945092505050565b60006020828403121561103c57600080fd5b5035919050565b6000806040838503121561105657600080fd5b8235915061106660208401610ef5565b90509250929050565b6000806040838503121561108257600080fd5b50508035926020909101359150565b6000806000606084860312156110a657600080fd5b505081359360208301359350604090920135919050565b600080600080600080600080610100898b0312156110da57600080fd5b505086359860208801359850604088013597606081013597506080810135965060a0810135955060c0810135945060e0013592509050565b60008060008060008060008060006101208a8c03121561113157600080fd5b8935985060208a0135975060408a0135965060608a0135955060808a0135945060a08a0135935060c08a0135925060e08a013591506111736101008b01610ed9565b90509295985092959850929598565b60008219821115611195576111956111b1565b500190565b6000828210156111ac576111ac6111b1565b500390565b634e487b7160e01b600052601160045260246000fdfea264697066735822122056ce8189f1933f4e4e385fe73b9dde45db57a4793f45fdf80d4326b2632e50f164736f6c63430008070033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

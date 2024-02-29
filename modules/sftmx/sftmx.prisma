@@ -17,6 +17,20 @@ model PrismaSftmxStakingData {
     maintenancePaused       Boolean
 
     withdrawalRequests      PrismaSftmxWithdrawalRequest[]
+    vaults                  PrismaSftmxVault[]
+}
+
+model PrismaSftmxVault {
+    id                      String          @id
+    vaultIndex              Int
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    ftmStaked               String
+    matured                 Boolean
+    unlockTimestamp         Int
+    validatorId             String
+    validatorAddress        String
 }
 
 model PrismaSftmxWithdrawalRequest {
