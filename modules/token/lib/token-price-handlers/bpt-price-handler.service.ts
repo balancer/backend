@@ -1,14 +1,9 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
-import {
-    timestampEndOfDayMidnight,
-    timestampRoundedUpToNearestHour,
-    timestampTopOfTheHour,
-} from '../../../common/time';
+import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import { Chain } from '@prisma/client';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
-import { time } from 'console';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -18,12 +13,15 @@ export class BptPriceHandlerService implements TokenPriceHandler {
         return tokens.filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'));
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
         const pools = await prisma.prismaPool.findMany({
-            where: { dynamicData: { totalLiquidity: { gt: 0.1 } } },
+            where: { dynamicData: { totalLiquidity: { gt: 0.1 } }, chain: { in: chains } },
             include: { dynamicData: true },
         });
         const updated: PrismaTokenWithTypes[] = [];

@@ -313,7 +313,8 @@ export class DatastudioService {
                         }
                         const rewardsPerDay = parseFloat(reward.rewardPerSecond) * secondsPerDay;
                         const rewardsValuePerDay =
-                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress) * rewardsPerDay;
+                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress, networkContext.chain) *
+                            rewardsPerDay;
                         if (rewardsPerDay > 0) {
                             allEmissionDataRows.push([
                                 endOfYesterday.format('DD MMM YYYY'),

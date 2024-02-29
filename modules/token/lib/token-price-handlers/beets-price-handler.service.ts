@@ -9,39 +9,42 @@ import { AddressZero } from '@ethersproject/constants';
 import VaultAbi from '../../../pool/abi/Vault.json';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
-import { AllNetworkConfigs } from '../../../network/network-config';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { Chain } from '@prisma/client';
 
 export class BeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'BeetsPriceHandlerService';
-    private readonly beetsAddressFantom = AllNetworkConfigs['250'].data.beets!.address;
-    private readonly beetsAddressOptimism = AllNetworkConfigs['10'].data.beets!.address;
-    private readonly beetsRpcProvider = AllNetworkConfigs['250'].data.beets!.beetsPriceProviderRpcUrl;
+
+    private readonly beetsFtmAddress = '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e';
+    private readonly wftmFtmAddress = '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83';
+    private readonly freshBeetsPoolId = '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec';
+    private readonly VaultFtmAddress = '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce';
+    private readonly beetsAddressOptimism = '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0';
+    private readonly beetsRpcProvider = 'https://rpc.ftm.tools';
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         return tokens.filter(
             (token) =>
-                (token.chain === 'FANTOM' && token.address === this.beetsAddressFantom) ||
+                (token.chain === 'FANTOM' && token.address === this.beetsFtmAddress) ||
                 (token.chain === 'OPTIMISM' && token.address === this.beetsAddressOptimism),
         );
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const updatedTokens: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
-        const beetsFtmAddress = '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e';
-        const wftmFtmAddress = '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83';
-        const freshBeetsPoolId = '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec';
-        const VaultFtmAddress = '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce';
 
-        const assets: string[] = [beetsFtmAddress, wftmFtmAddress];
+        const assets: string[] = [this.beetsFtmAddress, this.wftmFtmAddress];
         const swaps: SwapV2[] = [
             {
-                poolId: freshBeetsPoolId,
+                poolId: this.freshBeetsPoolId,
                 assetInIndex: 0,
                 assetOutIndex: 1,
                 amount: fp(1).toString(),
@@ -50,7 +53,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         ];
 
         const vaultContract = new Contract(
-            VaultFtmAddress,
+            this.VaultFtmAddress,
             VaultAbi,
             new ethers.providers.JsonRpcProvider(this.beetsRpcProvider),
         );
@@ -64,7 +67,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         let tokenOutAmountScaled = '0';
         try {
             const deltas = await vaultContract.queryBatchSwap(SwapTypes.SwapExactIn, swaps, assets, funds);
-            tokenOutAmountScaled = deltas[assets.indexOf(wftmFtmAddress)] ?? '0';
+            tokenOutAmountScaled = deltas[assets.indexOf(this.wftmFtmAddress)] ?? '0';
         } catch (err) {
             console.log(`queryBatchSwapTokensIn error: `, err);
         }
@@ -75,7 +78,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
 
         const ftmPrice = await prisma.prismaTokenCurrentPrice.findUniqueOrThrow({
             where: {
-                tokenAddress_chain: { tokenAddress: wftmFtmAddress.toLowerCase(), chain: 'FANTOM' },
+                tokenAddress_chain: { tokenAddress: this.wftmFtmAddress.toLowerCase(), chain: 'FANTOM' },
             },
         });
 

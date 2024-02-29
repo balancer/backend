@@ -2,19 +2,24 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
-import { networkContext } from '../../../network/network-context.service';
 import { LinearData } from '../../../pool/subgraph-mapper';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { Chain } from '@prisma/client';
 
 export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'LinearWrappedTokenPriceHandlerService';
 
-    private async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens.filter((token) => token.types.includes('LINEAR_WRAPPED_TOKEN')).map((token) => token.address);
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        return tokens.filter((token) => token.types.includes('LINEAR_WRAPPED_TOKEN'));
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
+
         const tokensUpdated: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
@@ -23,14 +28,14 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         const pools = await prisma.prismaPool.findMany({
             where: {
                 type: 'LINEAR',
-                chain: networkContext.chain,
+                chain: { in: chains },
                 categories: { none: { category: 'BLACK_LISTED' } },
             },
             include: { tokens: { orderBy: { index: 'asc' }, include: { dynamicData: true } } },
         });
         const mainTokenPrices = await prisma.prismaTokenPrice.findMany({
             where: {
-                chain: networkContext.chain,
+                chain: { in: chains },
                 tokenAddress: {
                     in: pools.map((pool) => pool.tokens[(pool.typeData as LinearData)?.mainIndex || 0].address),
                 },
@@ -38,7 +43,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
             },
         });
 
-        for (const token of tokens) {
+        for (const token of acceptedTokens) {
             const pool = pools.find(
                 (pool) =>
                     (pool.typeData as LinearData) &&

@@ -8,6 +8,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import PriceRateProviderAbi from '../../abi/CLQDRPerpetualEscrowTokenRateProvider.json';
 import { networkContext } from '../../../network/network-context.service';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { Chain } from '@prisma/client';
 
 export class ClqdrPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -20,7 +21,10 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
 

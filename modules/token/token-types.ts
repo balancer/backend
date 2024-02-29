@@ -12,8 +12,9 @@ export interface TokenPriceHandler {
      * - Hourly price as an entry in the TokenPrice table with timestamp rounded to the nearest hour
      * - Daily price as an entry in the TokenPrice table with timestamp at midnight today (closing price)
      * @param tokens tokens needing prices
+     * @param chains all the chains that the tokens are from
      */
-    updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]>;
+    updatePricesForTokens(tokens: PrismaTokenWithTypes[], chains: Chain[]): Promise<PrismaTokenWithTypes[]>;
 }
 
 export interface TokenDefinition {

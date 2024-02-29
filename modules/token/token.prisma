@@ -45,7 +45,6 @@ model PrismaTokenCurrentPrice {
     updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 }
 
 model PrismaTokenPrice {
@@ -58,7 +57,6 @@ model PrismaTokenPrice {
     updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 
     high                Float
     low                 Float

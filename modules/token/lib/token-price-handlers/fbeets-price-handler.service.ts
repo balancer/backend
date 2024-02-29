@@ -5,6 +5,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import _ from 'lodash';
 import { AllNetworkConfigs } from '../../../network/network-config';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { Chain } from '@prisma/client';
 
 export class FbeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -16,10 +17,11 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
         return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.fbeetsAddress);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
-
-        const updated: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
 
         const timestamp = timestampRoundedUpToNearestHour();

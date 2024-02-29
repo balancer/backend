@@ -135,7 +135,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-token-prices':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.updateTokenPrices(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => tokenService.updateTokenPrices([chainId]),
+                    res,
+                    next,
+                );
                 break;
             case 'update-liquidity-for-active-pools':
                 await runIfNotAlreadyRunning(
@@ -223,15 +229,6 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     chainId,
                     () => blocksSubgraphService.cacheAverageBlockTime(),
-                    res,
-                    next,
-                );
-                break;
-            case 'sync-global-coingecko-prices':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => tokenService.updatePricesForTokensWithCoingeckoIds(),
                     res,
                     next,
                 );

@@ -2,7 +2,6 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
-import { networkContext } from '../../../network/network-context.service';
 import { AllNetworkConfigs } from '../../../network/network-config';
 import { Chain } from '@prisma/client';
 import _ from 'lodash';
@@ -36,17 +35,18 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     }
 
     // we update based on coingecko ID
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
-        const accepedTokens = this.getAcceptedTokens(tokens);
-
-        const tokensWithCoingeckoIds = accepedTokens.filter((item) => item.coingeckoTokenId);
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
 
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
         const updated: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
 
-        const uniqueTokensWithIds = _.uniqBy(tokensWithCoingeckoIds, 'coingeckoTokenId');
+        const uniqueTokensWithIds = _.uniqBy(acceptedTokens, 'coingeckoTokenId');
 
         const chunks = _.chunk(uniqueTokensWithIds, 250); //max page size is 250
 
@@ -57,7 +57,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
             let operations: any[] = [];
 
             for (const item of response) {
-                const tokensToUpdate = tokensWithCoingeckoIds.filter((token) => token.coingeckoTokenId === item.id);
+                const tokensToUpdate = acceptedTokens.filter((token) => token.coingeckoTokenId === item.id);
                 for (const tokenToUpdate of tokensToUpdate) {
                     // if we have a price at all
                     if (item.current_price) {

@@ -8,6 +8,7 @@ import { GqlTokenChartDataRange, MutationTokenDeleteTokenTypeArgs } from '../../
 import { networkContext } from '../network/network-context.service';
 import { Dictionary } from 'lodash';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { chainIdToChain } from '../network/chain-id-to-chain';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -80,7 +81,11 @@ export class TokenService {
         }));
     }
 
-    public async updateTokenPrices(chains: Chain[]): Promise<void> {
+    public async updateTokenPrices(chainIds: string[]): Promise<void> {
+        const chains: Chain[] = [];
+        for (const chainId of chainIds) {
+            chains.push(chainIdToChain[chainId]);
+        }
         return this.tokenPriceService.updateAllTokenPrices(chains);
     }
 

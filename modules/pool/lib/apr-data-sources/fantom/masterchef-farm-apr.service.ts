@@ -122,7 +122,11 @@ export class MasterchefFarmAprService implements PoolAprService {
                         },
                     },
                 });
-                const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
+                const rewardTokenPrice = tokenService.getPriceForToken(
+                    tokenPrices,
+                    rewardToken.token,
+                    networkContext.chain,
+                );
                 const rewardTokenPerYear = parseFloat(farmRewarder.rewardPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;

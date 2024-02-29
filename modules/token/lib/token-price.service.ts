@@ -158,7 +158,7 @@ export class TokenPriceService {
             let updated: PrismaTokenWithTypes[] = [];
 
             try {
-                updated = await handler.updatePricesForTokens(tokensWithTypes);
+                updated = await handler.updatePricesForTokens(tokensWithTypes, chains);
             } catch (e) {
                 console.error(`TokenPriceHanlder failed. ID: ${handler.id}, Error: ${e}`);
                 Sentry.captureException(e, (scope) => {

@@ -350,8 +350,8 @@ export class PoolSwapService {
                                 tokenAmountOut: endSwap.tokenAmountOut,
                                 tx: startSwap.tx,
                                 valueUSD: endSwap.valueUSD,
-                                tokenInPrice: tokenService.getPriceForToken(tokenPrices, startSwap.tokenIn),
-                                tokenOutPrice: tokenService.getPriceForToken(tokenPrices, endSwap.tokenOut),
+                                tokenInPrice: tokenService.getPriceForToken(tokenPrices, startSwap.tokenIn, this.chain),
+                                tokenOutPrice: tokenService.getPriceForToken(tokenPrices, endSwap.tokenOut, this.chain),
                             },
                         }),
                         ...batchSwaps.map((swap, index) =>

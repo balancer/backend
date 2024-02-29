@@ -193,18 +193,9 @@ export class PoolSnapshotService {
                     },
                 });
                 if (priceForDays.length === 0) {
-                    try {
-                        tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
-                            token.address,
-                            numDays,
-                        );
-                        await sleep(5000);
-                    } catch (error: any) {
-                        console.error(
-                            `Error getting historical prices form coingecko, skipping token ${token.address}. Error:`,
-                            error.message,
-                        );
-                    }
+                    console.error(
+                        `No historical price in DB for to create pool snapshots. Skipping token ${token.address}.`,
+                    );
                 } else {
                     tokenPriceMap[token.address] = priceForDays;
                 }
