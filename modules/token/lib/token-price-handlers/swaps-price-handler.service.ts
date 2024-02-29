@@ -1,33 +1,37 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import moment from 'moment-timezone';
 import { networkContext } from '../../../network/network-context.service';
 import _ from 'lodash';
+import { tokenAndPrice } from './price-handler-helper';
 
 export class SwapsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'SwapsPriceHandlerService';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens
-            .filter(
-                (token) =>
-                    !token.types.includes('BPT') &&
-                    !token.types.includes('PHANTOM_BPT') &&
-                    !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    (!token.coingeckoTokenId ||
-                        networkContext.data.coingecko.excludedTokenAddresses.includes(token.address)),
-            )
-            .map((token) => token.address);
+    private async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
+        return tokens.filter(
+            (token) =>
+                !token.types.includes('BPT') &&
+                !token.types.includes('PHANTOM_BPT') &&
+                !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
+                (!token.coingeckoTokenId ||
+                    networkContext.data.coingecko.excludedTokenAddresses.includes(token.address)),
+        );
     }
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
-        let operations: any[] = [];
-        const tokensUpdated: string[] = [];
+        const acceptedTokens = await this.getAcceptedTokens(tokens);
+
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
+
         const timestamp = timestampRoundedUpToNearestHour();
-        const tokenAddresses = tokens.map((token) => token.address);
+        const timestampMidnight = timestampEndOfDayMidnight();
+        const tokenAddresses = acceptedTokens.map((token) => token.address);
+
         const swaps = await prisma.prismaPoolSwap.findMany({
             where: {
                 chain: networkContext.chain,
@@ -44,7 +48,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             where: { chain: networkContext.chain, timestamp, tokenAddress: { in: otherTokenAddresses } },
         });
 
-        for (const token of tokens) {
+        for (const token of acceptedTokens) {
             const tokenSwaps = swaps.filter(
                 (swap) => swap.tokenIn === token.address || swap.tokenOut === token.address,
             );
