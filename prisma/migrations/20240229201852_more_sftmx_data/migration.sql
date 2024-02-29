@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE "PrismaSftmxVault" (
     "id" TEXT NOT NULL,
+    "vaultIndex" INTEGER NOT NULL,
     "ftmStakingId" TEXT NOT NULL,
     "ftmStaked" TEXT NOT NULL,
     "matured" BOOLEAN NOT NULL,

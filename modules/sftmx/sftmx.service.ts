@@ -10,6 +10,7 @@ import SFC from './abi/SFC.json';
 import { BigNumber } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { getContractAt } from '../web3/contract';
+import { validateTypedData } from 'viem';
 
 export class SftmxService {
     private readonly SFC_ADDRESS = '0xFC00FACE00000000000000000000000000000000';
@@ -31,6 +32,9 @@ export class SftmxService {
     public async getStakingData(): Promise<GqlSftmxStakingData> {
         const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
             where: { id: this.stakingContractAddress },
+            include: {
+                vaults: true,
+            },
         });
         return {
             totalFtmAmountInPool: stakingData.totalFtmInPool,
@@ -45,6 +49,15 @@ export class SftmxService {
             stakingApr: stakingData.stakingApr,
             exchangeRate: stakingData.exchangeRate,
             withdrawalDelay: stakingData.withdrawalDelay,
+            vaults: stakingData.vaults.map((vault) => ({
+                vaultAddress: vault.id,
+                ftmAmountStaked: vault.ftmStaked,
+                isMatured: vault.matured,
+                unlockTimestamp: vault.unlockTimestamp,
+                validatorAddress: vault.validatorAddress,
+                validatorId: vault.validatorId,
+                vaultIndex: vault.vaultIndex,
+            })),
         };
     }
 
