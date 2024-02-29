@@ -4,6 +4,7 @@ import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../.
 import { prisma } from '../../../../prisma/prisma-client';
 import _ from 'lodash';
 import { AllNetworkConfigs } from '../../../network/network-config';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
 
 export class FbeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -17,6 +18,10 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
+
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
+
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
         const fbeets = await prisma.prismaFbeets.findFirst({});
@@ -46,54 +51,13 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             }),
         );
 
-        await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress_chain: { tokenAddress: this.fbeetsAddress, chain: 'FANTOM' } },
-            update: { price: fbeetsPrice },
-            create: {
-                tokenAddress: this.fbeetsAddress,
-                chain: 'FANTOM',
-                timestamp,
-                price: fbeetsPrice,
-            },
+        tokenAndPrices.push({
+            address: this.fbeetsAddress,
+            chain: 'FANTOM',
+            price: fbeetsPrice,
         });
 
-        await prisma.prismaTokenPrice.upsert({
-            where: {
-                tokenAddress_timestamp_chain: { tokenAddress: this.fbeetsAddress, timestamp, chain: 'FANTOM' },
-            },
-            update: { price: fbeetsPrice, close: fbeetsPrice },
-            create: {
-                tokenAddress: this.fbeetsAddress,
-                chain: 'FANTOM',
-                timestamp,
-                price: fbeetsPrice,
-                high: fbeetsPrice,
-                low: fbeetsPrice,
-                open: fbeetsPrice,
-                close: fbeetsPrice,
-            },
-        });
-
-        await prisma.prismaTokenPrice.upsert({
-            where: {
-                tokenAddress_timestamp_chain: {
-                    tokenAddress: this.fbeetsAddress,
-                    timestamp: timestampMidnight,
-                    chain: 'FANTOM',
-                },
-            },
-            update: { price: fbeetsPrice, close: fbeetsPrice },
-            create: {
-                tokenAddress: this.fbeetsAddress,
-                chain: 'FANTOM',
-                timestamp: timestampMidnight,
-                price: fbeetsPrice,
-                high: fbeetsPrice,
-                low: fbeetsPrice,
-                open: fbeetsPrice,
-                close: fbeetsPrice,
-            },
-        });
+        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
 
         return acceptedTokens;
     }

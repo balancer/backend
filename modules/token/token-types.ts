@@ -7,7 +7,10 @@ export interface TokenPriceHandler {
 
     /**
      * Updates prices for the provided tokens, returning an array of the tokens
-     * actually updated.
+     * actually updated. It create three updates:
+     * - current price in the TokenCurrentPrice Table
+     * - Hourly price as an entry in the TokenPrice table with timestamp rounded to the nearest hour
+     * - Daily price as an entry in the TokenPrice table with timestamp at midnight today (closing price)
      * @param tokens tokens needing prices
      */
     updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]>;

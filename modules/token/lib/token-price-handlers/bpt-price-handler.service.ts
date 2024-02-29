@@ -6,6 +6,9 @@ import {
     timestampTopOfTheHour,
 } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
+import { Chain } from '@prisma/client';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { time } from 'console';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -23,8 +26,8 @@ export class BptPriceHandlerService implements TokenPriceHandler {
             where: { dynamicData: { totalLiquidity: { gt: 0.1 } } },
             include: { dynamicData: true },
         });
-        let updated: PrismaTokenWithTypes[] = [];
-        let operations: any[] = [];
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
 
         for (const token of acceptedTokens) {
             const pool = pools.find((pool) => pool.address === token.address && pool.chain === token.chain);
@@ -35,70 +38,12 @@ export class BptPriceHandlerService implements TokenPriceHandler {
                 parseFloat(pool.dynamicData.totalShares) !== 0
             ) {
                 const price = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
-
-                operations.push(
-                    await prisma.prismaTokenPrice.upsert({
-                        where: {
-                            tokenAddress_timestamp_chain: {
-                                tokenAddress: token.address,
-                                timestamp,
-                                chain: token.chain,
-                            },
-                        },
-                        update: { price: price, close: price },
-                        create: {
-                            tokenAddress: token.address,
-                            chain: token.chain,
-                            timestamp,
-                            price,
-                            high: price,
-                            low: price,
-                            open: price,
-                            close: price,
-                        },
-                    }),
-                );
-
-                operations.push(
-                    await prisma.prismaTokenPrice.upsert({
-                        where: {
-                            tokenAddress_timestamp_chain: {
-                                tokenAddress: token.address,
-                                timestamp: timestampMidnight,
-                                chain: token.chain,
-                            },
-                        },
-                        update: { price: price, close: price },
-                        create: {
-                            tokenAddress: token.address,
-                            chain: token.chain,
-                            timestamp: timestampMidnight,
-                            price,
-                            high: price,
-                            low: price,
-                            open: price,
-                            close: price,
-                        },
-                    }),
-                );
-
-                operations.push(
-                    prisma.prismaTokenCurrentPrice.upsert({
-                        where: { tokenAddress_chain: { tokenAddress: token.address, chain: token.chain } },
-                        update: { price: price },
-                        create: {
-                            tokenAddress: token.address,
-                            chain: token.chain,
-                            timestamp,
-                            price,
-                        },
-                    }),
-                );
+                tokenAndPrices.push({ address: token.address, chain: token.chain, price: price });
+                updated.push(token);
             }
-            updated.push(token);
         }
 
-        await Promise.all(operations);
+        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
 
         return updated;
     }

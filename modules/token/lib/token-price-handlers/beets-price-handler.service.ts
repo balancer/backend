@@ -10,6 +10,7 @@ import VaultAbi from '../../../pool/abi/Vault.json';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { AllNetworkConfigs } from '../../../network/network-config';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
 
 export class BeetsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -29,6 +30,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const updatedTokens: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
         const timestampMidnight = timestampEndOfDayMidnight();
         const beetsFtmAddress = '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e';
@@ -80,63 +82,12 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const beetsPrice = ftmPrice.price * Math.abs(parseFloat(formatFixed(tokenOutAmountScaled, 18)));
 
         for (const token of acceptedTokens) {
-            await prisma.prismaTokenCurrentPrice.upsert({
-                where: {
-                    tokenAddress_chain: { tokenAddress: token.address, chain: token.chain },
-                },
-                update: { price: beetsPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp,
-                    price: beetsPrice,
-                },
-            });
-
-            await prisma.prismaTokenPrice.upsert({
-                where: {
-                    tokenAddress_timestamp_chain: {
-                        tokenAddress: token.address,
-                        timestamp,
-                        chain: token.chain,
-                    },
-                },
-                update: { price: beetsPrice, close: beetsPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp,
-                    price: beetsPrice,
-                    high: beetsPrice,
-                    low: beetsPrice,
-                    open: beetsPrice,
-                    close: beetsPrice,
-                },
-            });
-
-            await prisma.prismaTokenPrice.upsert({
-                where: {
-                    tokenAddress_timestamp_chain: {
-                        tokenAddress: token.address,
-                        timestamp: timestampMidnight,
-                        chain: token.chain,
-                    },
-                },
-                update: { price: beetsPrice, close: beetsPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp: timestampMidnight,
-                    price: beetsPrice,
-                    high: beetsPrice,
-                    low: beetsPrice,
-                    open: beetsPrice,
-                    close: beetsPrice,
-                },
-            });
+            tokenAndPrices.push({ address: token.address, chain: token.chain, price: beetsPrice });
 
             updatedTokens.push(token);
         }
+
+        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
 
         return updatedTokens;
     }

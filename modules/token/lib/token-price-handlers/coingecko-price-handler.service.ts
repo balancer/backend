@@ -7,6 +7,8 @@ import { AllNetworkConfigs } from '../../../network/network-config';
 import { Chain } from '@prisma/client';
 import _ from 'lodash';
 import { coingeckoDataService } from '../coingecko-data.service';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
@@ -38,8 +40,74 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
         const accepedTokens = this.getAcceptedTokens(tokens);
 
         const tokensWithCoingeckoIds = accepedTokens.filter((item) => item.coingeckoTokenId);
-        const updated = await coingeckoDataService.updatePricesForTokensWithCoingeckoIds(tokensWithCoingeckoIds);
 
+        const timestamp = timestampRoundedUpToNearestHour();
+        const timestampMidnight = timestampEndOfDayMidnight();
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
+
+        const uniqueTokensWithIds = _.uniqBy(tokensWithCoingeckoIds, 'coingeckoTokenId');
+
+        const chunks = _.chunk(uniqueTokensWithIds, 250); //max page size is 250
+
+        for (const chunk of chunks) {
+            const response = await coingeckoDataService.getMarketDataForTokenIds(
+                chunk.map((item) => item.coingeckoTokenId || ''),
+            );
+            let operations: any[] = [];
+
+            for (const item of response) {
+                const tokensToUpdate = tokensWithCoingeckoIds.filter((token) => token.coingeckoTokenId === item.id);
+                for (const tokenToUpdate of tokensToUpdate) {
+                    // if we have a price at all
+                    if (item.current_price) {
+                        const data = {
+                            price: item.current_price,
+                            ath: item.ath ?? undefined,
+                            atl: item.atl ?? undefined,
+                            marketCap: item.market_cap ?? undefined,
+                            fdv: item.fully_diluted_valuation ?? undefined,
+                            high24h: item.high_24h ?? undefined,
+                            low24h: item.low_24h ?? undefined,
+                            priceChange24h: item.price_change_24h ?? undefined,
+                            priceChangePercent24h: item.price_change_percentage_24h ?? undefined,
+                            priceChangePercent7d: item.price_change_percentage_7d_in_currency ?? undefined,
+                            priceChangePercent14d: item.price_change_percentage_14d_in_currency ?? undefined,
+                            priceChangePercent30d: item.price_change_percentage_30d_in_currency ?? undefined,
+                            updatedAt: item.last_updated,
+                        };
+
+                        operations.push(
+                            prisma.prismaTokenDynamicData.upsert({
+                                where: {
+                                    tokenAddress_chain: {
+                                        tokenAddress: tokenToUpdate.address,
+                                        chain: tokenToUpdate.chain,
+                                    },
+                                },
+                                update: data,
+                                create: {
+                                    coingeckoId: item.id,
+                                    tokenAddress: tokenToUpdate.address,
+                                    chain: tokenToUpdate.chain,
+                                    ...data,
+                                },
+                            }),
+                        );
+
+                        tokenAndPrices.push({
+                            address: tokenToUpdate.address,
+                            chain: tokenToUpdate.chain,
+                            price: item.current_price,
+                        });
+                        updated.push(tokenToUpdate);
+                    }
+                }
+            }
+            await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+
+            await prismaBulkExecuteOperations(operations);
+        }
         return updated;
     }
 }

@@ -1,12 +1,13 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
-import { timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import { Contract } from '@ethersproject/contracts';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import PriceRateProviderAbi from '../../abi/CLQDRPerpetualEscrowTokenRateProvider.json';
 import { networkContext } from '../../../network/network-context.service';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
 
 export class ClqdrPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -21,9 +22,11 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
 
     public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
+        const timestampMidnight = timestampEndOfDayMidnight();
 
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const updatedTokens: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
 
         const clqdrPriceRateProviderContract = new Contract(
             this.clqdrPriceRateProviderAddress,
@@ -58,39 +61,11 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         const clqdrPrice = lqdrPrice.price * clqdrRate;
 
         for (const token of acceptedTokens) {
-            await prisma.prismaTokenCurrentPrice.upsert({
-                where: { tokenAddress_chain: { tokenAddress: token.address, chain: token.chain } },
-                update: { price: clqdrPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp,
-                    price: clqdrPrice,
-                },
-            });
-
-            await prisma.prismaTokenPrice.upsert({
-                where: {
-                    tokenAddress_timestamp_chain: {
-                        tokenAddress: token.address,
-                        timestamp,
-                        chain: token.chain,
-                    },
-                },
-                update: { price: clqdrPrice, close: clqdrPrice },
-                create: {
-                    tokenAddress: token.address,
-                    chain: token.chain,
-                    timestamp,
-                    price: clqdrPrice,
-                    high: clqdrPrice,
-                    low: clqdrPrice,
-                    open: clqdrPrice,
-                    close: clqdrPrice,
-                },
-            });
+            tokenAndPrices.push({ address: token.address, chain: token.chain, price: clqdrPrice });
             updatedTokens.push(token);
         }
+
+        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
 
         return updatedTokens;
     }
