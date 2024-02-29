@@ -38,8 +38,12 @@ export class SorV1BeetsService implements SwapService {
 
     public async getSwapResult(input: GetSwapsInput & { swapOptions: GqlSorSwapOptionsInput }): Promise<SwapResult> {
         try {
-            const swap = await this.querySorV1(input);
-            return new SwapResultV1(swap, input.swapType);
+            if (['OPTIMISM', 'FANTOM'].includes(input.chain)) {
+                const swap = await this.querySorV1(input);
+                return new SwapResultV1(swap, input.swapType);
+            } else {
+                return new SwapResultV1(null, input.swapType);
+            }
         } catch (err) {
             console.log(`sorV1 Service Error`, err);
             return new SwapResultV1(null, input.swapType);
