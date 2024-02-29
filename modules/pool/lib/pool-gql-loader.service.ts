@@ -55,7 +55,6 @@ import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
-import { PoolUsdDataService } from './pool-usd-data.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -78,7 +77,7 @@ export class PoolGqlLoaderService {
         return this.mapPoolToGqlPool(
             pool,
             pool.userWalletBalances,
-            pool.staking.map((staking) => staking.userStakedBalances).flat(),
+            userAddress ? pool.staking.map((staking) => staking.userStakedBalances).flat() : [],
         );
     }
 
