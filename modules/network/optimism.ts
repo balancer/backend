@@ -93,21 +93,21 @@ const optimismNetworkData: NetworkData = {
     },
     avgBlockSpeed: 1,
     sor: {
-        main: {
-            url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
+        env: {
+            main: {
+                url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
+            canary: {
+                url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
         },
     },
     ybAprConfig: {
@@ -370,10 +370,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

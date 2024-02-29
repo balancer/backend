@@ -17,8 +17,11 @@ import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-m
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
+import { JobsController } from '../modules/controllers/jobs-controller';
 
 const runningJobs: Set<string> = new Set();
+
+const jobsController = JobsController();
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -105,7 +108,13 @@ export function configureWorkerRoutes(app: Express) {
                 break;
 
             case 'sync-changed-pools-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncChangedPoolsV3(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.updateOnChainDataChangedPools(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
@@ -180,7 +189,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.syncNewPoolsFromSubgraphV3(),
+                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
                     res,
                     next,
                 );
@@ -296,9 +305,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-coingecko-coinids':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), res, next);
-                break;
             case 'update-fee-volume-yield-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -342,6 +348,15 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-sftmx-withdrawal-requests':
                 await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
+                break;
+            case 'update-swaps-volume-and-fees-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSwapsUpdateVolumeAndFees(chainId),
+                    res,
+                    next,
+                );
                 break;
             default:
                 res.sendStatus(400);

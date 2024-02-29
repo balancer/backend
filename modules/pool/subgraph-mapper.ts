@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolType } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { AddressZero } from '@ethersproject/constants';
 import { fx, gyro, linear, element, stable } from './pool-data';
