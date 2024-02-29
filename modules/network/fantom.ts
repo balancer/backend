@@ -91,7 +91,6 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     sftmx: {
         stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',

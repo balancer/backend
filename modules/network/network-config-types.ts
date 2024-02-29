@@ -78,7 +78,6 @@ export interface NetworkData {
     protocolToken: 'beets' | 'bal';
     beets?: {
         address: string;
-        beetsPriceProviderRpcUrl: string;
     };
     fbeets?: {
         address: string;
