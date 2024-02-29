@@ -52,12 +52,11 @@ const zkevmNetworkData: NetworkData = {
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl:
-        env.GROVE_CITY
+    rpcUrl: env.GROVE_CITY
         ? `https://polygon-zkevm-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
         : env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://zkevm-rpc.com',
+        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -274,10 +273,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

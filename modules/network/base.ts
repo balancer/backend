@@ -233,10 +233,6 @@ export const baseNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
-        },
-        {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },

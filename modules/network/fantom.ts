@@ -417,10 +417,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
-        },
-        {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
