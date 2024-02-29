@@ -130,5 +130,9 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'supdate-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
         },
+        {
+            name: 'sync-global-coingecko-prices',
+            interval: every(12, 'hours'),
+        },
     ],
 };
