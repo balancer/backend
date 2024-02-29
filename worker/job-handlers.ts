@@ -302,9 +302,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-coingecko-coinids':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), res, next);
-                break;
             case 'update-fee-volume-yield-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,

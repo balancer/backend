@@ -111,17 +111,15 @@ export class CoingeckoDataService {
                 }
             });
 
-            if (coinId && token.coingeckoTokenId !== coinId.id) {
-                await prisma.prismaToken.update({
-                    where: {
-                        address_chain: { address: token.address, chain: networkContext.chain },
-                    },
-                    data: {
-                        coingeckoTokenId: coinId.id,
-                        coingeckoPlatformId: networkContext.data.coingecko.platformId,
-                    },
-                });
-            }
+            await prisma.prismaToken.update({
+                where: {
+                    address_chain: { address: token.address, chain: networkContext.chain },
+                },
+                data: {
+                    coingeckoTokenId: coinId ? coinId.id : null,
+                    coingeckoPlatformId: networkContext.data.coingecko.platformId,
+                },
+            });
         }
     }
 

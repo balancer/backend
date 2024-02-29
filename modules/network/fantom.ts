@@ -136,32 +136,32 @@ const fantomNetworkData: NetworkData = {
     },
     avgBlockSpeed: 1,
     sor: {
-        main: {
-            url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
+        env: {
+            main: {
+                url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
+            canary: {
+                url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
         },
     },
     ybAprConfig: {
-        // sftmx: {
-        //     tokens: {
-        //         sftmx: {
-        //             address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-        //             ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
-        //         },
-        //     },
-        // },
+        sftmx: {
+            tokens: {
+                sftmx: {
+                    address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+                    ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+                },
+            },
+        },
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
@@ -222,13 +222,6 @@ const fantomNetworkData: NetworkData = {
         yearn: {
             sourceUrl: 'https://api.yexporter.io/v1/chains/250/vaults/all',
         },
-        fixedAprHandler: {
-            sFTMx: {
-                address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-                apr: 0.046,
-                isIbYield: true,
-            },
-        },
         defaultHandlers: {
             ankrETH: {
                 tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
@@ -252,9 +245,6 @@ const fantomNetworkData: NetworkData = {
     },
     spooky: {
         xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
-    },
-    stader: {
-        sFtmxContract: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
     },
     datastudio: {
         main: {
@@ -403,10 +393,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-reliquary-snapshots',
             interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

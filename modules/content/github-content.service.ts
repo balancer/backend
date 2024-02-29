@@ -91,6 +91,23 @@ export class GithubContentService implements ContentService {
                 }
             }
 
+            // only override coingecko ID if it's present
+            let update = {};
+            if (coingeckoTokenId) {
+                update = {
+                    name: githubToken.name,
+                    symbol: githubToken.symbol,
+                    logoURI: { set: githubToken.logoURI || null },
+                    coingeckoTokenId: coingeckoTokenId,
+                };
+            } else {
+                update = {
+                    name: githubToken.name,
+                    symbol: githubToken.symbol,
+                    logoURI: { set: githubToken.logoURI || null },
+                };
+            }
+
             await prisma.prismaToken.upsert({
                 where: {
                     address_chain: { address: tokenAddress, chain: networkContext.chain },
@@ -111,12 +128,7 @@ export class GithubContentService implements ContentService {
                     telegramUrl: null,
                     twitterUsername: null,
                 },
-                update: {
-                    name: githubToken.name,
-                    symbol: githubToken.symbol,
-                    logoURI: { set: githubToken.logoURI || null },
-                    coingeckoTokenId: coingeckoTokenId,
-                },
+                update: update,
             });
         }
 

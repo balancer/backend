@@ -94,28 +94,10 @@ export const data: NetworkData = {
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 10,
     sor: {
-        main: {
-            url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [
-                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
-                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
-            ],
-        },
-        canary: {
-            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [
-                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
-                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
-            ],
-        },
+        poolIdsToExclude: [
+            '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+            '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
+        ],
     },
     ybAprConfig: {
         aave: {
@@ -478,10 +460,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

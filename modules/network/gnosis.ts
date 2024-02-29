@@ -76,24 +76,6 @@ const gnosisNetworkData: NetworkData = {
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
-    sor: {
-        main: {
-            url: '',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: '',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-    },
     ybAprConfig: {
         defaultHandlers: {
             wstETH: {
@@ -227,10 +209,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

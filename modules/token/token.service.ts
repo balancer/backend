@@ -24,6 +24,8 @@ export class TokenService {
     }
 
     public async syncTokenContentData() {
+        //sync coingecko Ids first, then override Ids from the content service
+        await this.coingeckoDataService.syncCoingeckoIds();
         await networkContext.config.contentService.syncTokenContentData();
     }
 
@@ -135,10 +137,6 @@ export class TokenService {
 
     public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string, chain: Chain): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress, chain);
-    }
-
-    public async syncCoingeckoIds(): Promise<void> {
-        await this.coingeckoDataService.syncCoingeckoIds();
     }
 
     public async getTokenDynamicData(tokenAddress: string, chain: Chain): Promise<PrismaTokenDynamicData | null> {
