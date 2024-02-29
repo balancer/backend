@@ -37,7 +37,14 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
+import {
+    Chain,
+    Prisma,
+    PrismaPoolAprType,
+    PrismaPoolStaking,
+    PrismaUserStakedBalance,
+    PrismaUserWalletBalance,
+} from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
@@ -48,6 +55,7 @@ import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
+import { PoolUsdDataService } from './pool-usd-data.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -55,8 +63,7 @@ export class PoolGqlLoaderService {
         pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id, chain: chain } },
             include: {
-                ...prismaPoolWithExpandedNesting.include,
-                ...this.getUserBalancesInclude(userAddress),
+                ...this.getPoolInclude(userAddress),
             },
         });
 
@@ -68,7 +75,11 @@ export class PoolGqlLoaderService {
             throw new Error('Pool exists, but has an unknown type');
         }
 
-        return this.mapPoolToGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances);
+        return this.mapPoolToGqlPool(
+            pool,
+            pool.userWalletBalances,
+            pool.staking.map((staking) => staking.userStakedBalances).flat(),
+        );
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -83,16 +94,20 @@ export class PoolGqlLoaderService {
                 args.first = undefined;
                 args.skip = undefined;
             }
+            // const includeQuery = args.where.userAddress ? prismaPoolMinimal.include.staking.include.
             const pools = await prisma.prismaPool.findMany({
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
-                    ...prismaPoolMinimal.include,
-                    ...this.getUserBalancesInclude(args.where.userAddress),
+                    ...this.getPoolInclude(args.where.userAddress),
                 },
             });
 
             const gqlPools = pools.map((pool) =>
-                this.mapToMinimalGqlPool(pool, pool.userWalletBalances, pool.userStakedBalances),
+                this.mapToMinimalGqlPool(
+                    pool,
+                    pool.userWalletBalances,
+                    pool.staking.map((staking) => staking.userStakedBalances).flat(),
+                ),
             );
 
             if (args.orderBy === 'userbalanceUsd') {
@@ -458,9 +473,11 @@ export class PoolGqlLoaderService {
 
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
+        const stakingData = this.getStakingData(pool);
+
         const mappedData = {
             decimals: 18,
-            staking: this.getStakingData(pool),
+            staking: stakingData,
             dynamicData: this.getPoolDynamicData(pool),
             investConfig: this.getPoolInvestConfig(pool),
             withdrawConfig: this.getPoolWithdrawConfig(pool),
@@ -647,7 +664,21 @@ export class PoolGqlLoaderService {
             }
         }
 
-        const sorted = _.sortBy(pool.staking, (staking) => {
+        const sorted = this.getSortedGauges(pool);
+
+        return {
+            ...sorted[0],
+            gauge: {
+                ...sorted[0].gauge!,
+                otherGauges: sorted.slice(1).map((item) => item.gauge!),
+            },
+            farm: null,
+            reliquary: null,
+        };
+    }
+
+    private getSortedGauges(pool: PrismaPoolMinimal) {
+        return _.sortBy(pool.staking, (staking) => {
             if (staking.gauge) {
                 switch (staking.gauge.status) {
                     case 'PREFERRED':
@@ -661,16 +692,6 @@ export class PoolGqlLoaderService {
 
             return 100;
         }).filter((staking) => staking.gauge);
-
-        return {
-            ...sorted[0],
-            gauge: {
-                ...sorted[0].gauge!,
-                otherGauges: sorted.slice(1).map((item) => item.gauge!),
-            },
-            farm: null,
-            reliquary: null,
-        };
     }
 
     private getUserBalance(
@@ -683,14 +704,24 @@ export class PoolGqlLoaderService {
             bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
         }
 
+        let activeStakingId = userStakedBalances.at(0)?.id;
+        if (pool.staking.length > 1) {
+            const sortedGauges = this.getSortedGauges(pool);
+            activeStakingId = sortedGauges[0].id;
+        }
+
+        const activeUserStakedBalance = userStakedBalances.find(
+            (userStakedBalance) => userStakedBalance.id === activeStakingId,
+        );
+
         const walletBalance = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
-        const stakedBalance = parseUnits(userStakedBalances.at(0)?.balance || '0', 18);
+        const stakedBalance = parseUnits(activeUserStakedBalance?.balance || '0', 18);
         const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
-        const stakedBalanceNum = userStakedBalances.at(0)?.balanceNum || 0;
+        const stakedBalanceNum = activeUserStakedBalance?.balanceNum || 0;
 
         return {
             walletBalance: userWalletBalances.at(0)?.balance || '0',
-            stakedBalance: userStakedBalances.at(0)?.balance || '0',
+            stakedBalance: activeUserStakedBalance?.balance || '0',
             totalBalance: formatFixed(stakedBalance.add(walletBalance), 18),
             walletBalanceUsd: walletBalanceNum * bptPrice,
             stakedBalanceUsd: stakedBalanceNum * bptPrice,
@@ -1244,21 +1275,37 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private getUserBalancesInclude(userAddress?: string) {
+    private getPoolInclude(userAddress?: string) {
         if (!userAddress) {
-            return {};
-        }
-        return {
-            userWalletBalances: {
-                where: {
-                    userAddress: {
-                        equals: userAddress,
-                        mode: 'insensitive' as const,
+            return {
+                ...prismaPoolWithExpandedNesting.include,
+                staking: {
+                    include: {
+                        ...prismaPoolWithExpandedNesting.include.staking.include,
+                        userStakedBalances: false,
                     },
-                    balanceNum: { gt: 0 },
+                },
+                userWalletBalances: false,
+            };
+        }
+
+        return {
+            ...prismaPoolWithExpandedNesting.include,
+            staking: {
+                include: {
+                    ...prismaPoolWithExpandedNesting.include.staking.include,
+                    userStakedBalances: {
+                        where: {
+                            userAddress: {
+                                equals: userAddress,
+                                mode: 'insensitive' as const,
+                            },
+                            balanceNum: { gt: 0 },
+                        },
+                    },
                 },
             },
-            userStakedBalances: {
+            userWalletBalances: {
                 where: {
                     userAddress: {
                         equals: userAddress,
