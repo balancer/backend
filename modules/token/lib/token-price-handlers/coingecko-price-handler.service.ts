@@ -14,6 +14,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly id = 'CoingeckoPriceHandlerService';
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        // excluded via network config
         const excludedFromCoingecko: { address: string; chain: Chain }[] = [];
         for (const chain in AllNetworkConfigs) {
             const config = AllNetworkConfigs[chain];
@@ -23,12 +24,10 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
         }
         return tokens.filter(
             (token) =>
-                !token.types.includes('BPT') &&
-                !token.types.includes('PHANTOM_BPT') &&
-                !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
                 !excludedFromCoingecko.find(
                     (excluded) => excluded.address === token.address && excluded.chain === token.chain,
                 ) &&
+                //excluded via content service
                 !token.excludedFromCoingecko &&
                 token.coingeckoTokenId,
         );
@@ -63,14 +62,14 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                     if (item.current_price) {
                         const data = {
                             price: item.current_price,
-                            ath: item.ath ?? undefined,
-                            atl: item.atl ?? undefined,
+                            ath: item.ath ?? item.current_price,
+                            atl: item.atl ?? item.current_price,
                             marketCap: item.market_cap ?? undefined,
                             fdv: item.fully_diluted_valuation ?? undefined,
-                            high24h: item.high_24h ?? undefined,
-                            low24h: item.low_24h ?? undefined,
-                            priceChange24h: item.price_change_24h ?? undefined,
-                            priceChangePercent24h: item.price_change_percentage_24h ?? undefined,
+                            high24h: item.high_24h ?? item.current_price,
+                            low24h: item.low_24h ?? item.current_price,
+                            priceChange24h: item.price_change_24h ?? 0,
+                            priceChangePercent24h: item.price_change_percentage_24h ?? 0,
                             priceChangePercent7d: item.price_change_percentage_7d_in_currency ?? undefined,
                             priceChangePercent14d: item.price_change_percentage_14d_in_currency ?? undefined,
                             priceChangePercent30d: item.price_change_percentage_30d_in_currency ?? undefined,

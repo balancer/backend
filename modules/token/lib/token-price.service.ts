@@ -178,8 +178,8 @@ export class TokenPriceService {
             });
         }
 
-        for (const chain in AllNetworkConfigs) {
-            await this.updateCandleStickData(AllNetworkConfigs[chain].data.chain.prismaId);
+        for (const chain in chains) {
+            await this.updateCandleStickData(chain as Chain);
         }
 
         //we only keep token prices for the last 24 hours
