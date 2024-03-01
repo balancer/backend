@@ -163,7 +163,16 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-pool-apr':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updatePoolAprs(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return poolService.updatePoolAprs(chain);
+                    },
+                    res,
+                    next,
+                );
                 break;
             case 'load-on-chain-data-for-pools-with-active-updates':
                 await runIfNotAlreadyRunning(

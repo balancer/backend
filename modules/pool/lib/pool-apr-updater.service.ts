@@ -5,6 +5,7 @@ import { PoolAprService } from '../pool-types';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { networkContext } from '../../network/network-context.service';
+import { Chain } from '@prisma/client';
 
 export class PoolAprUpdaterService {
     constructor() {}
@@ -13,10 +14,10 @@ export class PoolAprUpdaterService {
         return networkContext.config.poolAprServices;
     }
 
-    public async updatePoolAprs() {
+    public async updatePoolAprs(chain: Chain) {
         const pools = await prisma.prismaPool.findMany({
             ...poolWithTokens,
-            where: { chain: networkContext.chain },
+            where: { chain: chain },
         });
 
         const failedAprServices = [];
@@ -31,7 +32,7 @@ export class PoolAprUpdaterService {
         }
 
         const aprItems = await prisma.prismaPoolAprItem.findMany({
-            where: { chain: networkContext.chain },
+            where: { chain: chain },
             select: { poolId: true, apr: true },
         });
 
@@ -42,7 +43,7 @@ export class PoolAprUpdaterService {
         for (const poolId in grouped) {
             operations.push(
                 prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: poolId, chain: networkContext.chain } },
+                    where: { id_chain: { id: poolId, chain: chain } },
                     data: { apr: _.sumBy(grouped[poolId], (item) => item.apr) },
                 }),
             );
@@ -54,9 +55,9 @@ export class PoolAprUpdaterService {
         }
     }
 
-    public async reloadAllPoolAprs() {
-        await prisma.prismaPoolAprRange.deleteMany({ where: { chain: networkContext.chain } });
-        await prisma.prismaPoolAprItem.deleteMany({ where: { chain: networkContext.chain } });
-        await this.updatePoolAprs();
+    public async reloadAllPoolAprs(chain: Chain) {
+        await prisma.prismaPoolAprRange.deleteMany({ where: { chain: chain } });
+        await prisma.prismaPoolAprItem.deleteMany({ where: { chain: chain } });
+        await this.updatePoolAprs(chain);
     }
 }

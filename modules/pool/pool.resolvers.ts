@@ -163,10 +163,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolUpdateAprs: async (parent, {}, context) => {
+        poolUpdateAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            await poolService.updatePoolAprs();
+            await poolService.updatePoolAprs(chain);
 
             return 'success';
         },
@@ -177,10 +177,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolReloadAllPoolAprs: async (parent, {}, context) => {
+        poolReloadAllPoolAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            await poolService.reloadAllPoolAprs();
+            await poolService.reloadAllPoolAprs(chain);
 
             return 'success';
         },
