@@ -1,13 +1,13 @@
 import { TokenPriceHandler, TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
-import _, { chain } from 'lodash';
+import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
 import { Chain, PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client';
 import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
 import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
 import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
@@ -16,9 +16,6 @@ import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/li
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
-
-const TOKEN_HISTORICAL_PRICES_CACHE_KEY = `token-historical-prices`;
-const NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY = `nested-bpt-historical-prices`;
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
@@ -85,7 +82,7 @@ export class TokenPriceService {
                 self.findIndex((t) => t.tokenAddress === price.tokenAddress && t.chain === price.chain) === i,
         );
 
-        console.timeEnd(`TokenPrice load 24hrs ago - ${chain}`);
+        console.timeEnd(`TokenPrice load 24hrs ago - ${chains}`);
 
         // also add ETH price (0xeee..)
         this.addNativeEthPrice(chains, distinctTokenPrices);
@@ -178,8 +175,8 @@ export class TokenPriceService {
             });
         }
 
-        for (const chain in chains) {
-            await this.updateCandleStickData(chain as Chain);
+        for (const chain of chains) {
+            await this.updateCandleStickData(chain);
         }
 
         //we only keep token prices for the last 24 hours
