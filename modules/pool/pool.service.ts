@@ -254,16 +254,16 @@ export class PoolService {
         await Promise.all(this.poolStakingServices.map((stakingService) => stakingService.syncStakingForPools()));
     }
 
-    public async updatePoolAprs() {
-        await this.poolAprUpdaterService.updatePoolAprs();
+    public async updatePoolAprs(chain: Chain) {
+        await this.poolAprUpdaterService.updatePoolAprs(chain);
     }
 
     public async syncChangedPools() {
         await this.poolSyncService.syncChangedPools();
     }
 
-    public async reloadAllPoolAprs() {
-        await this.poolAprUpdaterService.reloadAllPoolAprs();
+    public async reloadAllPoolAprs(chain: Chain) {
+        await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
     }
 
     public async updateLiquidity24hAgoForAllPools() {
