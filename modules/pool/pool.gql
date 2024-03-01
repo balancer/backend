@@ -145,6 +145,9 @@ type GqlPoolDynamicData {
     yieldCapture24h: BigDecimal!
     apr: GqlPoolApr!
 
+    isInRecoveryMode: Boolean!
+    isPaused: Boolean!
+
     totalLiquidity24hAgo: BigDecimal!
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
