@@ -12,11 +12,12 @@ import { oneDayInSeconds, secondsPerDay } from '../common/time';
 import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';
+import { Chain } from '@prisma/client';
 
 export class DatastudioService {
     constructor(private readonly secretsManager: SecretsManager, private readonly jwtClientHelper: GoogleJwtClient) {}
 
-    public async feedPoolData() {
+    public async feedPoolData(chain: Chain) {
         const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
         const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
 
@@ -89,7 +90,7 @@ export class DatastudioService {
                 dynamicData: {
                     totalLiquidity: { gte: 5000 },
                 },
-                chain: networkContext.chain,
+                chain: chain,
             },
             include: {
                 dynamicData: true,
@@ -265,11 +266,8 @@ export class DatastudioService {
                             }
                             const rewardsPerDay = parseFloat(rewarder.rewardPerSecond) * secondsPerDay;
                             const rewardsValuePerDay =
-                                tokenService.getPriceForToken(
-                                    tokenPrices,
-                                    rewarder.tokenAddress,
-                                    networkContext.chain,
-                                ) * rewardsPerDay;
+                                tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress, chain) *
+                                rewardsPerDay;
                             if (rewardsPerDay > 0) {
                                 allEmissionDataRows.push([
                                     endOfYesterday.format('DD MMM YYYY'),
@@ -313,8 +311,7 @@ export class DatastudioService {
                         }
                         const rewardsPerDay = parseFloat(reward.rewardPerSecond) * secondsPerDay;
                         const rewardsValuePerDay =
-                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress, networkContext.chain) *
-                            rewardsPerDay;
+                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress, chain) * rewardsPerDay;
                         if (rewardsPerDay > 0) {
                             allEmissionDataRows.push([
                                 endOfYesterday.format('DD MMM YYYY'),

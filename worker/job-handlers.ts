@@ -18,6 +18,7 @@ import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 const runningJobs: Set<string> = new Set();
 
@@ -282,7 +283,16 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'feed-data-to-datastudio':
-                await runIfNotAlreadyRunning(job.name, chainId, () => datastudioService.feedPoolData(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return datastudioService.feedPoolData(chain);
+                    },
+                    res,
+                    next,
+                );
                 break;
             case 'sync-latest-reliquary-snapshots':
                 await runIfNotAlreadyRunning(
