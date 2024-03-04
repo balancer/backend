@@ -3,7 +3,7 @@
  */
 import { GqlPoolJoinExit, QueryPoolGetJoinExitsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
-import { Chain } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export function QueriesController(tracer?: any) {
     return {
@@ -13,11 +13,11 @@ export function QueriesController(tracer?: any) {
             first = first ?? 5;
             skip = skip ?? 0;
             where = where ?? {};
-            let { chainIn, poolIdIn } = where;
+            let { chainIn, poolIdIn, userAddress } = where;
             chainIn = chainIn ?? []; // 🤔 when no chain, shouldn't we be returning all the chains?
             poolIdIn = poolIdIn ?? [];
 
-            const conditions: { poolId?: { in: string[] }; chain?: { in: Chain[] } } = {};
+            const conditions: Prisma.PoolEventWhereInput = {};
             if (chainIn.length) {
                 conditions.chain = {
                     in: chainIn,
@@ -26,6 +26,13 @@ export function QueriesController(tracer?: any) {
             if (poolIdIn.length) {
                 conditions.poolId = {
                     in: poolIdIn,
+                    mode: 'insensitive',
+                };
+            }
+            if (userAddress) {
+                conditions.userAddress = {
+                    equals: userAddress,
+                    mode: 'insensitive',
                 };
             }
 

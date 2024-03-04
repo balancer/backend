@@ -50,7 +50,7 @@ const balancerResolvers: Resolvers = {
             }
             const v2events = await poolService.getPoolJoinExits(args);
             const v3events = await QueriesController().getJoinExits(args);
-            return [...v2events, ...v3events];
+            return [...v2events, ...v3events].sort((a, b) => b.timestamp - a.timestamp);
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

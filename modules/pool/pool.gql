@@ -801,6 +801,7 @@ enum GqlPoolStakingGaugeStatus {
 input GqlPoolJoinExitFilter {
     poolIdIn: [String!]
     chainIn: [GqlChain!]
+    userAddress: String
 }
 
 type GqlPoolJoinExit {
