@@ -76,8 +76,6 @@ export async function fetchPoolData(
         const poolTokenRates =
             results[pointer + 3].status === 'success' ? (results[pointer + 3].result as any) : undefined;
 
-        console.log('poolTokens', poolTokens, poolTokenRates);
-        // Dont we want to store all config params?
         return [
             pool.toLowerCase(),
             {

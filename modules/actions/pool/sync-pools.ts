@@ -5,7 +5,6 @@ import { tokensTransformer } from '../../sources/transformers/tokens-transformer
 import { poolTransformer, poolTokensTransformer, poolTokensDynamicDataTransformer } from '../../sources/transformers';
 import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
 import { ViemClient } from '../../sources/viem-client';
-import { formatUnits } from 'viem';
 
 interface CompletePoolDbEntry {
     pool: Prisma.PrismaPoolCreateInput;
@@ -15,6 +14,18 @@ interface CompletePoolDbEntry {
     poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
 }
 
+/**
+ * Gets and syncs all the pools state with the database
+ *
+ * TODO: simplify the schema by merging the pool and poolDynamicData tables and the poolToken, poolTokenDynamicData, expandedToken tables
+ *
+ * @param vaultSubgraphClient
+ * @param poolSubgraphClient
+ * @param viemClient
+ * @param vaultAddress
+ * @param chain
+ * @param blockNumber
+ */
 export const syncPools = async (
     vaultSubgraphClient: V3VaultSubgraphClient,
     poolSubgraphClient: V3PoolsSubgraphClient,

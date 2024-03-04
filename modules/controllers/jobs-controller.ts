@@ -11,7 +11,14 @@ import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 /**
- * Controller responsible for matching job requests to configured job handlers
+ * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
+ *
+ * @example
+ * ```ts
+ * const jobsController = JobsController();
+ * await jobsController.syncPools('1');
+ * await jobsController.syncJoinExits('1');
+ * ```
  *
  * @param name - the name of the job
  * @param chain - the chain to run the job on
@@ -21,50 +28,56 @@ export function JobsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        async syncJoinExits(chainIds: string[]) {
-            for (const chainId of chainIds) {
-                const chain = chainIdToChain[chainId];
-                const {
-                    subgraphs: { balancerV3, balancer },
-                } = config[chain];
+        async syncJoinExitsV2(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
 
-                // Guard against unconfigured chains
-                if (!balancerV3) {
-                    throw new Error(`Chain not configured: ${chain}`);
-                }
-
-                const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-                const entries = await syncJoinExits(vaultSubgraphClient, chain);
-
-                // Sync from V2 – can be moved to a separate job, because it might not be available on new chains
-                const v2Client = new BalancerSubgraphService(balancer, Number(chainId));
-                await syncJoinExitsV2(v2Client, chain);
-                return entries;
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
             }
+
+            const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
+            const entries = await syncJoinExitsV2(subgraphClient, chain);
+            return entries;
         },
-        async syncPools(chainIds: string[]) {
-            const updatedPools: string[] = [];
-            for (const chainId of chainIds) {
-                const chain = chainIdToChain[chainId];
-                const {
-                    subgraphs: { balancerV3, balancerPoolsV3 },
-                    balancer: {
-                        v3: { vaultAddress },
-                    },
-                } = config[chain];
+        async syncJoinExitsV3(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3 },
+            } = config[chain];
 
-                // Guard against unconfigured chains
-                if (!vaultAddress || !balancerV3 || !balancerPoolsV3) {
-                    throw new Error(`Chain not configured: ${chain}`);
-                }
-
-                const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-                const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3);
-                const viemClient = getViemClient(chain);
-                const latestBlock = await viemClient.getBlockNumber();
-
-                await syncPools(vaultSubgraphClient, poolSubgraphClient, viemClient, vaultAddress, chain, latestBlock);
+            // Guard against unconfigured chains
+            if (!balancerV3) {
+                throw new Error(`Chain not configured: ${chain}`);
             }
+
+            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
+            const entries = await syncJoinExits(vaultSubgraphClient, chain);
+            return entries;
+        },
+        async syncPools(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3, balancerPoolsV3 },
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!vaultAddress || !balancerV3 || !balancerPoolsV3) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
+            const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3);
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            await syncPools(vaultSubgraphClient, poolSubgraphClient, viemClient, vaultAddress, chain, latestBlock);
         },
         // TODO: add this later, once we have bunch of pools and syncs become slower than a few secs
         async updateOnChainDataChangedPools(chainId: string) {},

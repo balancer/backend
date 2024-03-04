@@ -1,6 +1,5 @@
 import { Chain, PoolEventType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { formatUnits } from 'viem';
 import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 
@@ -8,9 +7,6 @@ import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgr
  * Time helper to round timestamp to the nearest hour
  */
 const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) * 3600;
-
-const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
-    input.status === 'fulfilled';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
@@ -31,14 +27,21 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
         },
     });
 
+    // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
+    const sevenDaysAgo = Math.floor(+new Date(Date.now() - 100 * 24 * 60 * 60 * 1000) / 1000);
+    const syncSince =
+        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > sevenDaysAgo
+            ? latestEvent.blockTimestamp
+            : sevenDaysAgo;
+
     // Get events
     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
         first: 1000,
         where: {
-            timestamp_gte: Number(latestEvent?.blockTimestamp || 0),
+            timestamp_gte: syncSince,
         },
         orderBy: JoinExit_OrderBy.Timestamp,
-        orderDirection: OrderDirection.Desc,
+        orderDirection: OrderDirection.Asc,
     });
 
     // Store only the events that are not already in the DB
@@ -53,53 +56,51 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
     const events = joinExits.filter((event) => !existingEvents.some((existing) => existing.id === event.id));
 
     // Prepare DB entries
-    const dbEntries = (
-        await Promise.allSettled(
-            events.map(async (event) => {
-                // TODO: Calculate USD amounts with token prices at the time of the event
-                // 🚨 Reading from the DB in a loop – will get slow with a large events volume
-                const prices = await prisma.prismaTokenPrice.findMany({
-                    where: {
-                        tokenAddress: { in: event.pool.tokensList },
-                        timestamp: roundToHour(Number(event.timestamp)), // 🚨 Assuming all prices are available hourly
-                        chain: chain,
-                    },
-                    include: {
-                        token: true,
-                    },
-                });
-
-                const usd = event.pool.tokensList.map((address, index) => {
-                    const price = prices.find((price) => price.tokenAddress === address);
-                    return {
-                        address: address,
-                        amount: event.amounts[index],
-                        amountUsd:
-                            Number(formatUnits(BigInt(event.amounts[index]), price?.token?.decimals ?? 18)) *
-                            (price?.price || 0), // TODO: check USD amount
-                    };
-                });
-
-                return {
-                    id: event.id, // tx + logIndex
-                    tx: event.tx,
-                    type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,
-                    poolId: event.pool.id,
+    const dbEntries = await Promise.all(
+        events.map(async (event) => {
+            // TODO: Calculate USD amounts with token prices at the time of the event
+            // 🚨 Reading from the DB in a loop – will get slow with a large events volume
+            // But we need prices based on the event timestamp, so batching this should be based on timestamp ranges
+            const prices = await prisma.prismaTokenPrice.findMany({
+                where: {
+                    tokenAddress: { in: event.pool.tokensList },
+                    timestamp: roundToHour(Number(event.timestamp)), // 🚨 Assuming all prices are available hourly
                     chain: chain,
-                    userAddress: event.sender,
-                    blockNumber: Number(event.block),
-                    blockTimestamp: Number(event.timestamp),
-                    logPosition: Number(event.id.substring(66)),
-                    amountUsd: usd.reduce((acc, token) => acc + Number(token.amountUsd), 0),
-                    payload: {
-                        tokens: usd,
-                    },
+                },
+                include: {
+                    token: true,
+                },
+            });
+
+            const usd = event.pool.tokensList.map((address, index) => {
+                const price = prices.find((price) => price.tokenAddress === address);
+                return {
+                    address: address,
+                    amount: event.amounts[index],
+                    amountUsd: Number(event.amounts[index]) * (price?.price || 0), // TODO: check USD amount
                 };
-            }),
-        )
-    )
-        .filter(isFulfilled)
-        .map((result) => result.value);
+            });
+
+            return {
+                id: event.id, // tx + logIndex
+                tx: event.tx,
+                type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,
+                poolId: event.pool.id,
+                chain: chain,
+                userAddress: event.sender,
+                blockNumber: Number(event.block),
+                blockTimestamp: Number(event.timestamp),
+                logPosition: Number(event.id.substring(66)),
+                amountUsd: usd.reduce((acc, token) => acc + Number(token.amountUsd), 0),
+                payload: {
+                    tokens: usd,
+                },
+            };
+        }),
+    ).catch((e) => {
+        console.error('Error preparing DB entries', e);
+        return [];
+    });
 
     // Create entries and skip duplicates
     await prisma.poolEvent.createMany({

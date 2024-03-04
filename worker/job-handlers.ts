@@ -177,7 +177,25 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-pools-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools([chainId]), res, next);
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools(chainId), res, next);
+                break;
+            case 'sync-join-exits-v2':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncJoinExitsV2(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-join-exits-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncJoinExitsV3(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);

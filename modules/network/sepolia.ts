@@ -119,15 +119,19 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-changed-pools-v3',
-            interval: every(15, 'minutes'),
-        },
-        {
-            name: 'sync-new-pools-from-subgraph-v3',
+            name: 'sync-pools-v3',
             interval: every(20, 'minutes'),
         },
         {
-            name: 'supdate-swaps-volume-and-fees-v3',
+            name: 'sync-join-exits-v2',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'sync-join-exits-v3',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
         },
     ],
