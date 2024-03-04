@@ -5,7 +5,6 @@ import type { ViemClient } from '../../sources/viem-client';
 import type { V3VaultSubgraphClient } from '../../sources/subgraphs/balancer-v3-vault';
 import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
-import { GraphQLClient } from 'graphql-request';
 
 // Mock the module dependencies
 jest.mock('../../sources/contracts/fetch-pool-data', () => ({
