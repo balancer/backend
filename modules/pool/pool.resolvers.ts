@@ -42,15 +42,15 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolBatchSwaps(args);
         },
         poolGetJoinExits: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
-            }
-            const v2events = await poolService.getPoolJoinExits(args);
-            const v3events = await QueriesController().getJoinExits(args);
-            return [...v2events, ...v3events].sort((a, b) => b.timestamp - a.timestamp);
+            // TODO: is default header safe to remove?
+            // const currentChain = headerChain();
+            // if (!args.where?.chainIn && currentChain) {
+            //     args.where = { ...args.where, chainIn: [currentChain] };
+            // } else if (!args.where?.chainIn) {
+            //     throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
+            // }
+            const events = await QueriesController().getJoinExits(args);
+            return events;
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

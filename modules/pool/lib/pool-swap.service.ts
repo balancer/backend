@@ -32,6 +32,7 @@ export class PoolSwapService {
         return networkContext.chain;
     }
 
+    // TODO: remove this
     public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         const first = !args.first || args.first > 100 ? 10 : args.first;
 
@@ -67,6 +68,7 @@ export class PoolSwapService {
         return allChainsJoinExits;
     }
 
+    // TODO: remove this
     public async getUserJoinExitsForPool(
         userAddress: string,
         poolId: string,

@@ -10,7 +10,7 @@ export function QueriesController(tracer?: any) {
         // TODO: I'd like to merge it with the swaps and return all as pool events
         getJoinExits: async ({ first, skip, where }: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> => {
             // Setting default values
-            first = first ?? 5;
+            first = first ?? 1000;
             skip = skip ?? 0;
             where = where ?? {};
             let { chainIn, poolIdIn, userAddress } = where;

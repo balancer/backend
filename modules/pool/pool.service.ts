@@ -117,6 +117,7 @@ export class PoolService {
         }));
     }
 
+    // TODO: This can be removed in favour of fetching the data directly from the database in the QueriesController
     public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         return this.poolSwapService.getJoinExits(args);
     }
