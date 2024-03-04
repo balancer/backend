@@ -1,8 +1,16 @@
-import { addMissingPoolsFromSubgraph } from '../actions/pool/add-pools-from-subgraph';
+import { syncPools } from '../actions/pool/sync-pools';
 import { JobsController } from './jobs-controller';
-// Mock the actions
-jest.mock('@modules/actions/jobs_actions', () => ({
+
+// Mock the action
+jest.mock('../actions/pool/sync-pools', () => ({
     syncPools: jest.fn(),
+}));
+
+// Mock the clients
+jest.mock('../sources/viem-client', () => ({
+    getViemClient: jest.fn().mockReturnValue({
+        getBlockNumber: jest.fn().mockResolvedValue(1),
+    }),
 }));
 
 describe('jobsController', () => {
@@ -12,9 +20,9 @@ describe('jobsController', () => {
         jest.clearAllMocks();
     });
 
-    it('should call getClient with correct chain', () => {
-        jobsController.addMissingPoolsFromSubgraph('11155111');
+    it('should call syncPools', async () => {
+        await jobsController.syncPools(['11155111']);
 
-        expect(addMissingPoolsFromSubgraph).toHaveBeenCalled();
+        expect(syncPools).toHaveBeenCalled();
     });
 });

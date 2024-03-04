@@ -107,15 +107,6 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncChangedPools(), res, next);
                 break;
 
-            case 'sync-changed-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => jobsController.updateOnChainDataChangedPools(chainId),
-                    res,
-                    next,
-                );
-                break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -185,14 +176,8 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-new-pools-from-subgraph-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
-                    res,
-                    next,
-                );
+            case 'sync-pools-v3':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools([chainId]), res, next);
                 break;
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);

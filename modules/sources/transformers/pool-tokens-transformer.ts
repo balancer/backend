@@ -1,8 +1,11 @@
 import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
-import { TypePoolFragment as PoolSubgraphPoolFragment } from '../../subgraphs/balancer-v3-pools/generated/types';
-import { Chain, Prisma, PrismaPoolToken } from '@prisma/client';
+import { TypePoolFragment as PoolSubgraphPoolFragment } from '../subgraphs/balancer-v3-pools/generated/types';
+import { OnchainPoolData } from '../types';
+import { Chain, Prisma } from '@prisma/client';
+import { formatUnits } from 'viem';
 
-export function poolTokensTransformer(vaultSubgraphPool: VaultSubgraphPoolFragment, chain: Chain): PrismaPoolToken[] {
+// Comment: removing return type, because prisma doesn't export 'PrismaPoolTokenCreateManyPoolInput' type
+export function poolTokensTransformer(vaultSubgraphPool: VaultSubgraphPoolFragment, chain: Chain) {
     const tokens = vaultSubgraphPool.tokens ?? [];
     return tokens.map((token, i) => ({
         id: `${vaultSubgraphPool.id}-${token.address}`.toLowerCase(),
@@ -19,19 +22,31 @@ export function poolTokensTransformer(vaultSubgraphPool: VaultSubgraphPoolFragme
 export function poolTokensDynamicDataTransformer(
     vaultSubgraphPool: VaultSubgraphPoolFragment,
     poolSubgraphPool: PoolSubgraphPoolFragment,
+    onchainTokensData: { [address: string]: { balance: bigint; rate: bigint } },
+    decimals: { [address: string]: number },
+    prices: { [address: string]: number },
     chain: Chain,
 ): Prisma.PrismaPoolTokenDynamicDataCreateManyInput[] {
     const tokens = vaultSubgraphPool.tokens ?? [];
-    return tokens.map((token, i) => ({
-        id: `${vaultSubgraphPool.id}-${token.address}`.toLowerCase(),
-        poolTokenId: `${vaultSubgraphPool.id}-${token.address}`.toLowerCase(),
-        chain,
-        blockNumber: parseFloat(vaultSubgraphPool.blockNumber),
-        balance: token.balance,
-        balanceUSD: 0,
-        priceRate: '1',
-        weight: poolSubgraphPool.weights[token.index] ?? null,
-    }));
+
+    return tokens.map((token, i) => {
+        const id = `${vaultSubgraphPool.id}-${token.address}`.toLowerCase();
+        const onchainTokenData = onchainTokensData[token.address];
+        const balance = onchainTokenData?.balance ?? 0n;
+        const rate = onchainTokenData?.rate ?? 0n;
+        const price = prices[token.address] ?? 0;
+
+        return {
+            id,
+            poolTokenId: id,
+            chain,
+            blockNumber: Number(vaultSubgraphPool.blockNumber),
+            balance: String(balance),
+            balanceUSD: Number(formatUnits(balance, decimals[token.address])) * price,
+            priceRate: String(rate),
+            weight: poolSubgraphPool.weights[token.index] ?? null,
+        };
+    });
 }
 
 export function poolExpandedTokensTransformer(

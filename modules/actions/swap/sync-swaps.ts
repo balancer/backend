@@ -1,9 +1,8 @@
 import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { BalancerVaultSubgraphSource } from '../../sources/subgraphs/balancer-v3-vault';
+import { V3VaultSubgraphClient } from '../../sources/subgraphs';
 import _ from 'lodash';
 import moment from 'moment';
-import { tokenService } from '../../token/token.service';
 import { swapsTransformer } from '../../sources/transformers/swaps-transformer';
 
 type PoolDbEntry = {
@@ -20,8 +19,8 @@ type PoolDbEntry = {
  * @param daysToSync
  * @returns
  */
-export async function addSwapsFromSubgraph(
-    vaultSubgraphClient: BalancerVaultSubgraphSource,
+export async function syncSwaps(
+    vaultSubgraphClient: V3VaultSubgraphClient,
     chain = 'SEPOLIA' as Chain,
     daysToSync = 30,
 ): Promise<string[]> {

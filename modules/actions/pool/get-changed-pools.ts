@@ -1,16 +1,9 @@
-import { Chain, Prisma, PrismaLastBlockSyncedCategory, PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { tokenService } from '../../token/token.service';
-import { fetchPoolTokenInfo, fetchPoolTokenRates } from '../../sources/contracts';
-import { ViemClient } from '../../sources/viem-client';
-import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
-import { formatEther, formatUnits, parseUnits } from 'viem';
-import { isSameAddress } from '@balancer-labs/sdk';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { getPoolBalanceChanged } from '../../sources/logs/get-pool-balance-changed';
-import { start } from 'repl';
 import { getSwaps } from '../../sources/logs';
 import _ from 'lodash';
+import { ViemClient } from '../../sources/types';
 
 /**
  * Get all pool IDs of pools that have emitted a poolBalanceChanged event

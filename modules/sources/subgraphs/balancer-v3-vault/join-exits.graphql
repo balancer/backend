@@ -6,6 +6,7 @@ fragment JoinExit on JoinExit {
     pool {
         id
         tokens {
+            index
             address
         }
     }

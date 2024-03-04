@@ -1,9 +1,6 @@
 import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
 import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
-import {
-    TypePoolFragment as PoolSubgraphPoolFragment,
-    PoolType,
-} from '../../subgraphs/balancer-v3-pools/generated/types';
+import { TypePoolFragment as PoolSubgraphPoolFragment, PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, linear, element, stable } from '../../pool/pool-data';
 

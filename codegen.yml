@@ -20,9 +20,9 @@ generates:
         schema: ${V3_SUBGRAPH}
         plugins:
             - schema-ast
-    modules/subgraphs/balancer-v3-pools/generated/types.ts:
+    modules/sources/subgraphs/balancer-v3-pools/generated/types.ts:
         schema: ${V3_POOLS_SUBGRAPH}
-        documents: 'modules/subgraphs/balancer-v3-pools/*.graphql'
+        documents: 'modules/sources/subgraphs/balancer-v3-pools/*.graphql'
         plugins:
             - typescript
             - typescript-operations
@@ -33,7 +33,7 @@ generates:
                 BigInt: string
                 Bytes: string
                 BigDecimal: string
-    modules/subgraphs/balancer-v3-pools/generated/balancer-v3-pools-schema.graphql:
+    modules/sources/subgraphs/balancer-v3-pools/generated/balancer-v3-pools-schema.graphql:
         schema: ${V3_POOLS_SUBGRAPH}
         plugins:
             - schema-ast

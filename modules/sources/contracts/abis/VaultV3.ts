@@ -1,4 +1,4 @@
-export const vaultV3Abi = [
+export default [
     {
         inputs: [
             {

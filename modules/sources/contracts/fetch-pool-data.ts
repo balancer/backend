@@ -1,95 +1,99 @@
-import { PrismaPoolType } from '@prisma/client';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
-import { vaultV3Abi } from './abis/VaultV3';
-import { fetchPoolTokenInfo } from './fetch-pool-tokens';
+import vaultV3Abi from './abis/VaultV3';
 
-interface PoolInput {
-    id: string;
-    address: string;
-    type: PrismaPoolType;
-    version: number;
-}
+// TODO: Find out if we need to do that,
+// or can somehow get the correct type infered automatically from the viem's result set?
+type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof vaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
 
-interface PoolData {
+export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
-    protocolSwapFeePercentage: bigint;
-    // protocolYieldFeePercentage: bigint;
     // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
     isPoolInRecoveryMode: boolean;
+    tokens: {
+        address: string;
+        balance: bigint;
+        rateProvider: string;
+        rate: bigint;
+    }[];
 }
 
 export async function fetchPoolData(
     vault: string,
-    pools: PoolInput[],
+    pools: string[],
     client: ViemClient,
-    blockNumber: bigint,
-): Promise<Record<string, PoolData>> {
-    const totalSupplyContracts = pools
+    blockNumber?: bigint,
+): Promise<{ [address: string]: OnchainPoolData }> {
+    const contracts = pools
         .map((pool) => [
             {
                 address: vault as `0x${string}`,
                 abi: vaultV3Abi,
                 functionName: 'totalSupply',
-                args: [pool.address as `0x${string}`],
-            } as const,
-        ])
-        .flat();
-
-    const configContracts = pools
-        .map((pool) => [
+                args: [pool as `0x${string}`],
+            },
             {
                 address: vault as `0x${string}`,
                 abi: vaultV3Abi,
                 functionName: 'getPoolConfig',
-                args: [pool.address as `0x${string}`],
-            } as const,
-        ])
-        .flat();
-
-    const protocolSwapFeeContracts = pools
-        .map((pool) => [
+                args: [pool as `0x${string}`],
+            },
             {
                 address: vault as `0x${string}`,
                 abi: vaultV3Abi,
-                functionName: 'getProtocolSwapFeePercentage',
-            } as const,
+                functionName: 'getPoolTokenInfo',
+                args: [pool as `0x${string}`],
+            },
+            {
+                address: vault as `0x${string}`,
+                abi: vaultV3Abi,
+                functionName: 'getPoolTokenRates',
+                args: [pool as `0x${string}`],
+            },
         ])
         .flat();
 
-    // TODO combine into one call
-    const totalSupplyResult = await client.multicall({ contracts: totalSupplyContracts, blockNumber: blockNumber });
-    const configResult = await client.multicall({ contracts: configContracts, blockNumber: blockNumber });
-    const protocolSwapFeeResult = await client.multicall({
-        contracts: protocolSwapFeeContracts,
-        blockNumber: blockNumber,
-    });
+    const results = await client.multicall({ contracts, blockNumber: blockNumber });
 
     // Parse the results
-    const parsedResults: Record<string, PoolData> = {};
-    pools.forEach((result, i) => {
-        if (
-            totalSupplyResult[i].status === 'success' &&
-            totalSupplyResult[i].result !== undefined &&
-            configResult[i].status === 'success' &&
-            configResult[i].result !== undefined &&
-            protocolSwapFeeResult[i].status === 'success' &&
-            protocolSwapFeeResult[i].result !== undefined
-        ) {
-            // parse the result here using the abi
-            const poolData = {
-                totalSupply: totalSupplyResult[i].result!,
-                swapFee: configResult[i].result!.staticSwapFeePercentage,
-                protocolSwapFeePercentage: 0n, // TODO can this be added to config?
-                isPoolPaused: configResult[i].result!.isPoolPaused,
-                isPoolInRecoveryMode: configResult[i].result!.isPoolInRecoveryMode,
-            } as PoolData;
+    const parsedResults = pools.map((pool, i) => {
+        const pointer = i * 4;
+        const config =
+            results[pointer + 1].status === 'success'
+                ? (results[pointer + 1].result as unknown as PoolConfig)
+                : undefined;
+        const poolTokens =
+            results[pointer + 2].status === 'success'
+                ? {
+                      tokens: (results[pointer + 2].result as any)[0],
+                      balancesRaw: (results[pointer + 2].result as any)[2],
+                      rateProviders: (results[pointer + 2].result as any)[4],
+                  }
+                : undefined;
+        const poolTokenRates =
+            results[pointer + 3].status === 'success' ? (results[pointer + 3].result as any) : undefined;
 
-            parsedResults[result.id] = poolData;
-        }
-        // Handle the error
+        console.log('poolTokens', poolTokens, poolTokenRates);
+        // Dont we want to store all config params?
+        return [
+            pool.toLowerCase(),
+            {
+                totalSupply: results[pointer].status === 'success' ? (results[pointer].result as bigint) : undefined,
+                swapFee: config?.staticSwapFeePercentage,
+                isPoolPaused: config?.isPoolPaused,
+                isPoolInRecoveryMode: config?.isPoolInRecoveryMode,
+                tokens: poolTokens?.tokens.map((token: string, i: number) => ({
+                    address: token.toLowerCase(),
+                    balance: poolTokens.balancesRaw[i],
+                    rateProvider: poolTokens.rateProviders[i],
+                    rate: poolTokenRates[i],
+                })),
+            },
+        ];
     });
-    return parsedResults;
+
+    return Object.fromEntries(parsedResults);
 }

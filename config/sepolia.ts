@@ -2,7 +2,7 @@ import { BigNumber } from 'ethers';
 import { env } from '../app/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
-export const sepoliaConfig: NetworkData = {
+export default <NetworkData>{
     chain: {
         slug: 'sepolia',
         id: 11155111,

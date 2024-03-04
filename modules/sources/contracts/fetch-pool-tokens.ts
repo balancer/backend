@@ -1,5 +1,5 @@
 import { ViemClient } from '../types';
-import { vaultV3Abi } from './abis/VaultV3';
+import vaultV3Abi from './abis/VaultV3';
 
 type PoolTokenInfo = {
     tokens: `0x${string}`[];
@@ -17,7 +17,7 @@ export async function fetchPoolTokenInfo(
     vault: string,
     pools: string[],
     client: ViemClient,
-    blockNumber: bigint,
+    blockNumber?: bigint,
 ): Promise<Record<string, PoolTokenInfo>> {
     const contracts = pools
         .map((pool) => [
@@ -59,7 +59,7 @@ export async function fetchPoolTokenRates(
     vault: string,
     pools: string[],
     client: ViemClient,
-    blockNumber: bigint,
+    blockNumber?: bigint,
 ): Promise<Record<string, bigint[]>> {
     const contracts = pools
         .map((pool) => [

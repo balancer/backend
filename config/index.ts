@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { sepoliaConfig } from './sepolia';
+import sepoliaConfig from './sepolia';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default {

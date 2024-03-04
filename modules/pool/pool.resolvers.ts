@@ -4,6 +4,7 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
+import { QueriesController } from '../controllers/queries-controller';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -47,7 +48,9 @@ const balancerResolvers: Resolvers = {
             } else if (!args.where?.chainIn) {
                 throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
             }
-            return poolService.getPoolJoinExits(args);
+            const v2events = await poolService.getPoolJoinExits(args);
+            const v3events = await QueriesController().getJoinExits(args);
+            return [...v2events, ...v3events];
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

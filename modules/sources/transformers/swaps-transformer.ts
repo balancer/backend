@@ -1,6 +1,14 @@
 import { SwapFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain, PrismaPoolSwap } from '@prisma/client';
-import { tokenService } from '../../token/token.service';
+
+const tokenService = {
+    async getTokenPrices(chain: Chain): Promise<Record<string, number>> {
+        return {};
+    },
+    getPriceForToken(tokenPrices: Record<string, number>, token: string): number {
+        return 0;
+    },
+};
 
 export async function swapsTransformer(swaps: SwapFragment[], chain: Chain): Promise<PrismaPoolSwap[]> {
     const tokenPrices = await tokenService.getTokenPrices(chain);
