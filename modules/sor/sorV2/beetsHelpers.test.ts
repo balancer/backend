@@ -1,7 +1,7 @@
 import { GqlPoolMinimal, GqlSorSwapRoute } from '../../../schema';
-import { mapBatchSwap, mapRoutes, splitPaths } from './beetsHelpers';
+import { mapBatchSwapOld, mapRoutesOld, splitPaths } from './beetsHelpers';
 import { poolService } from '../../pool/pool.service';
-import { BatchSwapStep, SingleSwap, SwapKind } from './sor-port/types';
+import { SingleSwap, SwapKind, BatchSwapStep } from '@balancer/sdk';
 
 // npx jest --testPathPattern=modules/sor/sorV2/beetsHelpers.test.ts
 describe('sorV2 Service - Routes', () => {
@@ -54,7 +54,7 @@ describe('sorV2 Service - Routes', () => {
             expectedRoute[0].tokenOutAmount = amountOut;
             expectedRoute[0].hops[0].tokenInAmount = amountIn;
             expectedRoute[0].hops[0].tokenOutAmount = amountOut;
-            const mappedRoute = mapRoutes(
+            const mappedRoute = mapRoutesOld(
                 singleSwap,
                 amountIn,
                 amountOut,
@@ -75,7 +75,7 @@ describe('sorV2 Service - Routes', () => {
             expectedRoute[0].tokenOutAmount = amountOut;
             expectedRoute[0].hops[0].tokenInAmount = amountIn;
             expectedRoute[0].hops[0].tokenOutAmount = amountOut;
-            const mappedRoute = mapRoutes(
+            const mappedRoute = mapRoutesOld(
                 singleSwap,
                 amountIn,
                 amountOut,
@@ -167,11 +167,11 @@ describe('sorV2 Service - Routes', () => {
                     expect(paths[0].length).toEqual(2);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(paths[0], amountIn, amountOut, SwapKind.GivenIn, assets, pools);
+                    const route = mapBatchSwapOld(paths[0], amountIn, amountOut, SwapKind.GivenIn, assets, pools);
                     expect(route).toEqual(expectedRoute[0]);
                 });
                 test('GivenIn', () => {
-                    const mappedRoute = mapRoutes(
+                    const mappedRoute = mapRoutesOld(
                         batchSwap,
                         amountIn,
                         amountOut,
@@ -222,7 +222,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(paths[1].length).toEqual(1);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(
+                    const route = mapBatchSwapOld(
                         paths[0],
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),
@@ -233,7 +233,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(route).toEqual(expectedRoute[0]);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(
+                    const route = mapBatchSwapOld(
                         paths[1],
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),
@@ -244,7 +244,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(route).toEqual(expectedRoute[1]);
                 });
                 test('GivenIn', () => {
-                    const mappedRoute = mapRoutes(
+                    const mappedRoute = mapRoutesOld(
                         batchSwap,
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),
@@ -337,11 +337,11 @@ describe('sorV2 Service - Routes', () => {
                     expect(paths[0].length).toEqual(2);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(paths[0], amountIn, amountOut, SwapKind.GivenOut, assets, pools);
+                    const route = mapBatchSwapOld(paths[0], amountIn, amountOut, SwapKind.GivenOut, assets, pools);
                     expect(route).toEqual(expectedRoute[0]);
                 });
                 test('GivenOut', () => {
-                    const mappedRoute = mapRoutes(
+                    const mappedRoute = mapRoutesOld(
                         batchSwap,
                         amountIn,
                         amountOut,
@@ -392,7 +392,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(paths[1].length).toEqual(2);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(
+                    const route = mapBatchSwapOld(
                         paths[0],
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),
@@ -403,7 +403,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(route).toEqual(expectedRoute[0]);
                 });
                 test('mapBatchSwap', () => {
-                    const route = mapBatchSwap(
+                    const route = mapBatchSwapOld(
                         paths[1],
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),
@@ -414,7 +414,7 @@ describe('sorV2 Service - Routes', () => {
                     expect(route).toEqual(expectedRoute[1]);
                 });
                 test('GivenOut', () => {
-                    const mappedRoute = mapRoutes(
+                    const mappedRoute = mapRoutesOld(
                         batchSwap,
                         (BigInt(amountIn) * BigInt(2)).toString(),
                         (BigInt(amountOut) * BigInt(2)).toString(),

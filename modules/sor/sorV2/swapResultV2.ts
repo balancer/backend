@@ -1,24 +1,30 @@
-import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwap } from '../../../schema';
+import {
+    GqlSorSwapType,
+    GqlSorGetSwapsResponse,
+    GqlSorSwap,
+    GqlPoolMinimal,
+    GqlSorSwapRoute,
+    GqlSorSwapRouteHop,
+} from '../../../schema';
 import { Chain } from '@prisma/client';
 import { SwapResult } from '../types';
 import { poolService } from '../../pool/pool.service';
 import { BigNumber } from 'ethers';
 import { oldBnum } from '../../big-number/old-big-number';
-import { mapRoutes } from './beetsHelpers';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
-import { Address } from 'viem';
 import { formatFixed } from '@ethersproject/bignumber';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
-import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
+import { BatchSwapStep, SingleSwap, SwapKind, TokenAmount, ZERO_ADDRESS } from '@balancer/sdk';
+import { SwapLocal } from './lib/swapLocal';
 
 export class SwapResultV2 implements SwapResult {
-    private swap: Swap | null;
+    private swap: SwapLocal | null;
     private chain: Chain;
     public inputAmount: bigint = BigInt(0);
     public outputAmount: bigint = BigInt(0);
     public isValid: boolean;
 
-    constructor(swap: Swap | null, chain: Chain) {
+    constructor(swap: SwapLocal | null, chain: Chain) {
         if (swap === null) {
             this.isValid = false;
             this.swap = null;
@@ -48,7 +54,7 @@ export class SwapResultV2 implements SwapResult {
     }
 
     private async mapResultToBeetsSwap(
-        swap: Swap,
+        swap: SwapLocal,
         inputAmount: TokenAmount,
         outputAmount: TokenAmount,
     ): Promise<GqlSorGetSwapsResponse> {
@@ -83,7 +89,7 @@ export class SwapResultV2 implements SwapResult {
         const effectivePrice = oldBnum(tokenInAmountFixed).div(tokenOutAmountFixed);
         const effectivePriceReversed = oldBnum(tokenOutAmountFixed).div(tokenInAmountFixed);
 
-        const routes = mapRoutes(
+        const routes = this.mapRoutes(
             swap.swaps,
             inputAmount.amount.toString(),
             outputAmount.amount.toString(),
@@ -161,6 +167,132 @@ export class SwapResultV2 implements SwapResult {
 
     private mapSwapKind(kind: SwapKind): GqlSorSwapType {
         return kind === SwapKind.GivenIn ? 'EXACT_IN' : 'EXACT_OUT';
+    }
+
+    private mapRoutes(
+        swaps: BatchSwapStep[] | SingleSwap,
+        amountIn: string,
+        amountOut: string,
+        pools: GqlPoolMinimal[],
+        assetIn: string,
+        assetOut: string,
+        assets: string[],
+        kind: SwapKind,
+    ): GqlSorSwapRoute[] {
+        const isBatchSwap = Array.isArray(swaps);
+        if (!isBatchSwap) {
+            const pool = pools.find((p) => p.id === swaps.poolId);
+            if (!pool) throw new Error('Pool not found while mapping route');
+            return [this.mapSingleSwap(swaps, amountIn, amountOut, pool)];
+        }
+        const paths = this.splitPaths(swaps, assetIn, assetOut, assets, kind);
+        return paths.map((p) => this.mapBatchSwap(p, amountIn, amountOut, kind, assets, pools));
+    }
+
+    private mapBatchSwap(
+        swaps: BatchSwapStep[],
+        amountIn: string,
+        amountOut: string,
+        kind: SwapKind,
+        assets: string[],
+        pools: GqlPoolMinimal[],
+    ): GqlSorSwapRoute {
+        const exactIn = kind === SwapKind.GivenIn;
+        const first = swaps[0];
+        const last = swaps[swaps.length - 1];
+        let tokenInAmount: string;
+        let tokenOutAmount: string;
+        let share: bigint;
+        const one = BigInt(1e18);
+        if (exactIn) {
+            tokenInAmount = first.amount.toString();
+            share = (BigInt(tokenInAmount) * one) / BigInt(amountIn);
+            tokenOutAmount = ((BigInt(amountOut) * share) / one).toString();
+        } else {
+            tokenOutAmount = last.amount.toString();
+            share = (BigInt(tokenOutAmount) * one) / BigInt(amountOut);
+            tokenInAmount = ((BigInt(amountIn) * share) / one).toString();
+        }
+
+        return {
+            tokenIn: assets[Number(first.assetInIndex)],
+            tokenOut: assets[Number(last.assetOutIndex)],
+            tokenInAmount,
+            tokenOutAmount,
+            share: Number(formatFixed(share.toString(), 18)),
+            hops: swaps.map((swap, i) => {
+                return {
+                    tokenIn: assets[Number(swap.assetInIndex)],
+                    tokenOut: assets[Number(swap.assetOutIndex)],
+                    tokenInAmount: i === 0 ? tokenInAmount : '0',
+                    tokenOutAmount: i === swaps.length - 1 ? tokenOutAmount : '0',
+                    poolId: swap.poolId,
+                    pool: pools.find((p) => p.id === swap.poolId) as GqlPoolMinimal,
+                };
+            }),
+        };
+    }
+
+    private splitPaths(
+        swaps: BatchSwapStep[],
+        assetIn: string,
+        assetOut: string,
+        assets: string[],
+        kind: SwapKind,
+    ): BatchSwapStep[][] {
+        const swapsCopy = [...swaps];
+        if (kind === SwapKind.GivenOut) {
+            swapsCopy.reverse();
+        }
+        const assetInIndex = BigInt(
+            assets.indexOf(
+                assetIn === AllNetworkConfigsKeyedOnChain[this.chain].data.eth.address ? ZERO_ADDRESS : assetIn,
+            ),
+        );
+        const assetOutIndex = BigInt(
+            assets.indexOf(
+                assetOut === AllNetworkConfigsKeyedOnChain[this.chain].data.eth.address ? ZERO_ADDRESS : assetOut,
+            ),
+        );
+        let path: BatchSwapStep[];
+        let paths: BatchSwapStep[][] = [];
+        swapsCopy.forEach((swap) => {
+            if (swap.assetInIndex === assetInIndex && swap.assetOutIndex === assetOutIndex) {
+                paths.push([swap]);
+            } else if (swap.assetInIndex === assetInIndex) {
+                path = [swap];
+            } else if (swap.assetOutIndex === assetOutIndex) {
+                path.push(swap);
+                paths.push(path);
+            } else {
+                path.push(swap);
+            }
+        });
+        return paths;
+    }
+
+    private mapSingleSwap(
+        swap: SingleSwap,
+        amountIn: string,
+        amountOut: string,
+        pool: GqlPoolMinimal,
+    ): GqlSorSwapRoute {
+        const hop: GqlSorSwapRouteHop = {
+            pool,
+            poolId: swap.poolId,
+            tokenIn: swap.assetIn,
+            tokenInAmount: amountIn,
+            tokenOut: swap.assetOut,
+            tokenOutAmount: amountOut,
+        };
+        return {
+            share: 1,
+            tokenIn: swap.assetIn,
+            tokenOut: swap.assetOut,
+            tokenInAmount: amountIn,
+            tokenOutAmount: amountOut,
+            hops: [hop],
+        } as GqlSorSwapRoute;
     }
 
     // /**

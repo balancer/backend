@@ -4,7 +4,7 @@ import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../network/network-
 import { GqlSorGetSwapPaths, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
 import { Address } from 'viem';
-import { NATIVE_ADDRESS, Token, TokenAmount } from '@balancer/sdk';
+import { Token, TokenAmount } from '@balancer/sdk';
 
 export async function getTokenAmountHuman(tokenAddr: string, humanAmount: string, chain: Chain): Promise<TokenAmount> {
     const token = await getToken(tokenAddr, chain);
@@ -23,8 +23,7 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
  * @returns
  */
 export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
-    // also check for the polygon native asset
-    if (tokenAddr === NATIVE_ADDRESS || tokenAddr === '0x0000000000000000000000000000000000001010') {
+    if (tokenAddr === AllNetworkConfigsKeyedOnChain[chain].data.eth.address) {
         return new Token(
             parseFloat(chainToIdMap[chain]),
             AllNetworkConfigsKeyedOnChain[chain].data.weth.address as Address,
