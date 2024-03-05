@@ -25,6 +25,9 @@ extend type Query {
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
+    """
+    Getting swap, join and exit events
+    """
     poolGetEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
 }
 
