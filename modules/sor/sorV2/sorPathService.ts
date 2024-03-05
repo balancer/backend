@@ -222,9 +222,6 @@ class SorPathService implements SwapService {
         const effectivePrice = inputAmount.divDownFixed(outputAmount.scale18);
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
-        // routes are used for displaying on the UI
-        const routes = this.mapRoutes(paths, pools);
-
         return {
             vaultVersion: 2,
             paths: sorPaths,
@@ -241,7 +238,7 @@ class SorPathService implements SwapService {
             returnAmountScaled: returnAmount.amount.toString(),
             effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
-            routes: routes,
+            routes: this.mapRoutes(paths, pools);,
             priceImpact: priceImpact,
         };
     }
