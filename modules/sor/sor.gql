@@ -108,17 +108,17 @@ type GqlSorGetSwapPaths {
     """
     swapAmount: AmountHumanReadable!
     """
-    The swap amount in a scaled form
+    The swap amount in a raw form
     """
-    swapAmountScaled: BigDecimal!
+    swapAmountRaw: BigDecimal!
     """
     The return amount in human form. Return amount is either tokenOutAmount (if swapType is exactIn) or tokenInAmount (if swapType is exactOut)
     """
     returnAmount: AmountHumanReadable!
     """
-    The return amount in a scaled form
+    The return amount in a raw form
     """
-    returnAmountScaled: BigDecimal!
+    returnAmountRaw: BigDecimal!
     """
     The price of tokenOut in tokenIn.
     """
@@ -270,7 +270,7 @@ type GqlSorSwapRoute {
     """
     Amount of the tokenIn in human form
     """
-    tokenInAmount: BigDecimal!
+    tokenInAmount: AmountHumanReadable!
     """
     Address of the tokenOut
     """
@@ -278,7 +278,7 @@ type GqlSorSwapRoute {
     """
     Amount of the tokenOut in human form
     """
-    tokenOutAmount: BigDecimal!
+    tokenOutAmount: AmountHumanReadable!
     """
     Share of this route of the total swap
     """
@@ -300,7 +300,7 @@ type GqlSorSwapRouteHop {
     """
     Amount of the tokenIn in human form
     """
-    tokenInAmount: BigDecimal!
+    tokenInAmount: AmountHumanReadable!
     """
     Address of the tokenOut
     """
@@ -308,7 +308,7 @@ type GqlSorSwapRouteHop {
     """
     Amount of the tokenOut in human form
     """
-    tokenOutAmount: BigDecimal!
+    tokenOutAmount: AmountHumanReadable!
     """
     The pool id of this hop.
     """

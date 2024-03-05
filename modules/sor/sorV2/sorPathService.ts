@@ -238,7 +238,7 @@ class SorPathService implements SwapService {
             returnAmountScaled: returnAmount.amount.toString(),
             effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
-            routes: this.mapRoutes(paths, pools);,
+            routes: this.mapRoutes(paths, pools),
             priceImpact: priceImpact,
         };
     }
