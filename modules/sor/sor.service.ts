@@ -6,7 +6,7 @@ import {
     GqlSorGetSwapPaths,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
-import { sorV2Service } from './sorV2/sorV2.service';
+import { sorV2Service } from './sorV2/sorPathService';
 import { GetSwapsInput, SwapResult } from './types';
 import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';

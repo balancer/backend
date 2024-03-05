@@ -1,8 +1,6 @@
-import { TokenAmount, SwapKind, Token } from '@balancer/sdk';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { BasePool } from './pools/basePool';
 
-export interface FundManagement {
+interface FundManagement {
     sender: string;
     fromInternalBalance: boolean;
     recipient: string;
