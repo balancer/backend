@@ -1,5 +1,5 @@
 import { poolService } from './pool.service';
-import { GqlPoolSwap, Resolvers } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
@@ -42,6 +42,14 @@ const balancerResolvers: Resolvers = {
                 throw new Error('poolGetBatchSwaps error: Provide "where.chainIn" param');
             }
             return poolService.getPoolBatchSwaps(args);
+        },
+        // TODO: Deprecate in favor of poolGetEvents
+        poolGetJoinExits: async (parent, args, context) => {
+            const events = await QueriesController().getEvents({
+                ...args,
+                where: { ...args.where, typeIn: ['JOIN', 'EXIT'] },
+            });
+            return events as GqlPoolJoinExit[];
         },
         poolGetEvents: async (parent, args, context) => {
             // TODO: is default header safe to remove?

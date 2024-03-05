@@ -726,25 +726,6 @@ type GqlPoolTokenExpanded {
     isMainToken: Boolean!
 }
 
-type GqlPoolSwap {
-    id: ID!
-    chain: GqlChain!
-    poolId: String!
-    userAddress: String!
-    tokenIn: String!
-    tokenOut: String!
-    tokenAmountIn: String!
-    tokenAmountOut: String!
-    tokenInData: GqlPoolEventAmount!
-    tokenOutData: GqlPoolEventAmount!
-    timestamp: Int!
-    tx: String!
-    blockNumber: Int!
-    logIndex: Int!
-    valueUSD: Float!
-    type: GqlPoolEventType!
-}
-
 type GqlPoolBatchSwap {
     id: ID!
     chain: GqlChain!
@@ -823,19 +804,56 @@ input GqlPoolEventsFilter {
     userAddress: String
 }
 
-union GqlPoolEvent = GqlPoolJoinExit | GqlPoolSwap
-
-type GqlPoolJoinExit {
-    id: ID!
+interface GqlPoolEvent {
     chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
     type: GqlPoolEventType!
     sender: String!
     userAddress: String!
     poolId: String!
     timestamp: Int!
     valueUSD: Float!
+}
+
+type GqlPoolJoinExit implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
     tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
     amounts: [GqlPoolEventAmount!]!
+}
+
+type GqlPoolSwap implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+    tokenIn: String!
+    tokenOut: String!
+    tokenAmountIn: String!
+    tokenAmountOut: String!
+    tokenInData: GqlPoolEventAmount!
+    tokenOutData: GqlPoolEventAmount!
 }
 
 type GqlPoolEventAmount {

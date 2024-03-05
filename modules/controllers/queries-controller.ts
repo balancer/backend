@@ -1,12 +1,12 @@
 /**
  * Responsible for handling all the queries – can be split based on models
  */
-import { GqlPoolEvent, QueryPoolGetEventsArgs } from '../../schema';
+import { GqlPoolEvent, GqlPoolJoinExit, GqlPoolSwap, QueryPoolGetEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
 
-const parseJoinExit = (event: JoinExitEvent): GqlPoolEvent => {
+const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExit => {
     return {
         __typename: 'GqlPoolJoinExit',
         amounts: event.payload.tokens.map((token: any) => ({
@@ -20,10 +20,11 @@ const parseJoinExit = (event: JoinExitEvent): GqlPoolEvent => {
     };
 };
 
-const parseSwap = (event: SwapEvent): GqlPoolEvent => {
+const parseSwap = (event: SwapEvent): GqlPoolSwap => {
     return {
         __typename: 'GqlPoolSwap',
         ...event,
+        sender: event.userAddress,
         timestamp: event.blockTimestamp,
         tokenIn: event.payload.tokenIn.address,
         tokenAmountIn: event.payload.tokenIn.amount,
@@ -40,7 +41,11 @@ const parseSwap = (event: SwapEvent): GqlPoolEvent => {
 
 export function QueriesController(tracer?: any) {
     return {
-        getEvents: async ({ first, skip, where }: QueryPoolGetEventsArgs): Promise<GqlPoolEvent[]> => {
+        getEvents: async ({
+            first,
+            skip,
+            where,
+        }: QueryPoolGetEventsArgs): Promise<(GqlPoolSwap | GqlPoolJoinExit)[]> => {
             // Setting default values
             first = first ?? 1000;
             skip = skip ?? 0;
@@ -86,7 +91,7 @@ export function QueriesController(tracer?: any) {
                 ],
             });
 
-            const results: GqlPoolEvent[] = dbEvents.map((event) =>
+            const results = dbEvents.map((event) =>
                 event.type === 'SWAP' ? parseSwap(event as SwapEvent) : parseJoinExit(event as JoinExitEvent),
             );
 

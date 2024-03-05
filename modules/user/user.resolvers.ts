@@ -23,6 +23,7 @@ const resolvers: Resolvers = {
                 tokenPrice: tokenService.getPriceForToken(tokenPrices[balance.chain] || [], balance.tokenAddress),
             }));
         },
+        // TODO: Deprecated in favor of poolGetEvents
         userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -39,6 +40,7 @@ const resolvers: Resolvers = {
             });
             return swaps as GqlPoolJoinExit[];
         },
+        // TODO: Deprecated in favor of poolGetEvents
         userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {

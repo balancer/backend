@@ -5,9 +5,6 @@ import { formatUnits } from 'viem';
 import { JoinExit_OrderBy, OrderDirection } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { roundToHour } from '../../common/time';
 
-const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> =>
-    input.status === 'fulfilled';
-
 /**
  * Get the join and exit events from the subgraph and store them in the database
  *

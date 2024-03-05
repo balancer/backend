@@ -2,11 +2,7 @@ import { Chain, PoolEventType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-
-/**
- * Time helper to round timestamp to the nearest hour
- */
-const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) * 3600;
+import { roundToHour } from '../../common/time';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
