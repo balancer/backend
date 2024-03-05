@@ -41,6 +41,14 @@ const parseSwap = (event: SwapEvent): GqlPoolSwap => {
 
 export function QueriesController(tracer?: any) {
     return {
+        /**
+         * Getting pool events, with pagination and filtering
+         *
+         * @param param.first - number of items to return
+         * @param param.skip - number of items to skip
+         * @param param.where - filtering conditions
+         * @returns
+         */
         getEvents: async ({
             first,
             skip,
