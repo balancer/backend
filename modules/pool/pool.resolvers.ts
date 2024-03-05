@@ -1,5 +1,5 @@
 import { poolService } from './pool.service';
-import { Resolvers } from '../../schema';
+import { GqlPoolSwap, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
@@ -23,6 +23,7 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
+        // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
@@ -30,7 +31,8 @@ const balancerResolvers: Resolvers = {
             } else if (!args.where?.chainIn) {
                 throw new Error('poolGetSwaps error: Provide "where.chainIn" param');
             }
-            return poolService.getPoolSwaps(args);
+            const swaps = await QueriesController().getEvents({ ...args, where: { ...args.where, typeIn: ['SWAP'] } });
+            return swaps as GqlPoolSwap[];
         },
         poolGetBatchSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
@@ -41,7 +43,7 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolBatchSwaps(args);
         },
-        poolGetJoinExits: async (parent, args, context) => {
+        poolGetEvents: async (parent, args, context) => {
             // TODO: is default header safe to remove?
             // const currentChain = headerChain();
             // if (!args.where?.chainIn && currentChain) {
@@ -49,7 +51,7 @@ const balancerResolvers: Resolvers = {
             // } else if (!args.where?.chainIn) {
             //     throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
             // }
-            const events = await QueriesController().getJoinExits(args);
+            const events = await QueriesController().getEvents(args);
             return events;
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
