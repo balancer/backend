@@ -42,6 +42,7 @@ type GqlSorGetSwapPaths {
     tokenOut: String!
     swapType: GqlSorSwapType!
     swaps: [GqlSorSwap!]! #used by cowswap
+    tokenAddresses: [String!]! #used by cowswap
     paths: [GqlSorPath!]! #used by b-sdk
     tokenInAmount: AmountHumanReadable!
     tokenOutAmount: AmountHumanReadable!

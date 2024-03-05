@@ -150,6 +150,7 @@ export class SorV2Service implements SwapService {
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
+        // TODO for v3 we need to update per swap path
         let updatedAmount;
         if (queryFirst) {
             const sdkSwap = new Swap({
@@ -222,6 +223,7 @@ export class SorV2Service implements SwapService {
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),
+            tokenAddresses: [...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address))],
             tokenIn: replaceZeroAddressWithEth(inputAmount.token.address),
             tokenOut: replaceZeroAddressWithEth(outputAmount.token.address),
             tokenInAmount: inputAmount.amount.toString(),

@@ -40,6 +40,7 @@ export const swapPathsZeroResponse = (tokenIn: string, tokenOut: string): GqlSor
     return {
         swaps: [],
         paths: [],
+        tokenAddresses: [],
         swapType: 'EXACT_IN',
         vaultVersion: 2,
         tokenIn: replaceZeroAddressWithEth(tokenIn),
