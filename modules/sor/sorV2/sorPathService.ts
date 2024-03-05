@@ -1,4 +1,12 @@
-import { GqlSorGetSwapPaths, GqlSorPath, GqlSorSwap, GqlSorSwapRoute, GqlSorSwapType } from '../../../schema';
+import {
+    GqlPoolMinimal,
+    GqlSorGetSwapPaths,
+    GqlSorPath,
+    GqlSorSwap,
+    GqlSorSwapRoute,
+    GqlSorSwapRouteHop,
+    GqlSorSwapType,
+} from '../../../schema';
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
@@ -10,17 +18,15 @@ import { Address, formatUnits } from 'viem';
 import { sorGetSwapsWithPools as sorGetPathsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
-import { mapRoutes } from './beetsHelpers';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, swapPathsZeroResponse } from '../utils';
-import { BatchSwapStep, SingleSwap, Swap, SwapKind, TokenAmount } from '@balancer/sdk';
+import { BatchSwapStep, DEFAULT_USERDATA, SingleSwap, Swap, SwapKind } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
-import { calculatePriceImpact, getInputAmount, getOutputAmount, getSwaps } from './lib/utils/helpers';
+import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
-import { query } from 'express';
-import { update } from 'lodash';
 
-export class SorV2Service implements SwapService {
+export class SorPathService implements SwapService {
+    // This is only used for the old SOR service
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
         maxNonBoostedPathDepth = 4,
@@ -71,6 +77,7 @@ export class SorV2Service implements SwapService {
         }
     }
 
+    // The new SOR service
     public async getSorSwapPaths(input: GetSwapPathsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {
         const paths = await this.getSwapPathsFromSor(input, maxNonBoostedPathDepth);
         const emptyResponse = swapPathsZeroResponse(input.tokenIn, input.tokenOut);
@@ -142,7 +149,8 @@ export class SorV2Service implements SwapService {
         }
     }
 
-    public async mapToSorSwapPaths(
+    // map the SOR output to the required response type
+    private async mapToSorSwapPaths(
         paths: PathWithAmount[],
         swapType: GqlSorSwapType,
         chain: Chain,
@@ -184,19 +192,18 @@ export class SorV2Service implements SwapService {
         // price impact does not take the updatedAmount into account
         const priceImpact = calculatePriceImpact(paths, swapKind).decimal.toFixed(4);
 
+        // get all affected pools
         let poolIds: string[] = [];
-
         for (const path of paths) {
             poolIds.push(...path.pools.map((pool) => pool.id));
         }
-
         const pools = await poolService.getGqlPools({
             where: { idIn: poolIds },
         });
 
         const sorPaths: GqlSorPath[] = [];
         for (const path of paths) {
-            // map paths used as input for b-sdk for client
+            // paths used as input for b-sdk for client
             sorPaths.push({
                 vaultVersion: 2,
                 inputAmountRaw: path.inputAmount.amount.toString(),
@@ -216,7 +223,7 @@ export class SorV2Service implements SwapService {
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         // routes are used for displaying on the UI
-        const routes = mapRoutes(paths, pools);
+        const routes = this.mapRoutes(paths, pools);
 
         return {
             vaultVersion: 2,
@@ -250,7 +257,7 @@ export class SorV2Service implements SwapService {
     }
 
     private mapSwaps(paths: PathWithAmount[], swapKind: SwapKind): GqlSorSwap[] {
-        const swaps = getSwaps(paths, swapKind);
+        const swaps = this.getSwaps(paths, swapKind);
         const assets = [...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address))];
 
         if (Array.isArray(swaps)) {
@@ -275,6 +282,56 @@ export class SorV2Service implements SwapService {
                 },
             ];
         }
+    }
+
+    private getSwaps(paths: PathWithAmount[], swapKind: SwapKind) {
+        const isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
+        const assets = [...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address))];
+
+        let swaps: BatchSwapStep[] | SingleSwap;
+        if (isBatchSwap) {
+            swaps = [] as BatchSwapStep[];
+            if (swapKind === SwapKind.GivenIn) {
+                paths.map((p) => {
+                    p.pools.map((pool, i) => {
+                        (swaps as BatchSwapStep[]).push({
+                            poolId: pool.id,
+                            assetInIndex: BigInt(assets.indexOf(p.tokens[i].address)),
+                            assetOutIndex: BigInt(assets.indexOf(p.tokens[i + 1].address)),
+                            amount: i === 0 ? p.inputAmount.amount : 0n,
+                            userData: DEFAULT_USERDATA,
+                        });
+                    });
+                });
+            } else {
+                paths.map((p) => {
+                    // Vault expects given out swaps to be in reverse order
+                    const reversedPools = [...p.pools].reverse();
+                    const reversedTokens = [...p.tokens].reverse();
+                    reversedPools.map((pool, i) => {
+                        (swaps as BatchSwapStep[]).push({
+                            poolId: pool.id,
+                            assetInIndex: BigInt(assets.indexOf(reversedTokens[i + 1].address)),
+                            assetOutIndex: BigInt(assets.indexOf(reversedTokens[i].address)),
+                            amount: i === 0 ? p.outputAmount.amount : 0n,
+                            userData: DEFAULT_USERDATA,
+                        });
+                    });
+                });
+            }
+        } else {
+            const path = paths[0];
+            const pool = path.pools[0];
+            swaps = {
+                poolId: pool.id,
+                kind: swapKind,
+                assetIn: path.tokens[0].address,
+                assetOut: path.tokens[1].address,
+                amount: path.swapAmount.amount,
+                userData: DEFAULT_USERDATA,
+            } as SingleSwap;
+        }
+        return swaps;
     }
 
     /**
@@ -316,9 +373,65 @@ export class SorV2Service implements SwapService {
         return pools;
     }
 
-    private getSwapFromPaths(paths: PathWithAmount[] | null): Swap {
-        throw new Error('Function not implemented.');
+    private mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {
+        const isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
+
+        if (!isBatchSwap) {
+            const pool = pools.find((p) => p.id === paths[0].pools[0].id);
+            if (!pool) throw new Error('Pool not found while mapping route');
+            return [this.mapSingleSwap(paths[0], pool)];
+        }
+        return paths.map((path) => this.mapBatchSwap(path, pools));
+    }
+
+    private mapBatchSwap(path: PathWithAmount, pools: GqlPoolMinimal[]): GqlSorSwapRoute {
+        const tokenIn = path.tokens[0].address;
+        const tokenOut = path.tokens[path.tokens.length - 1].address;
+        const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
+        const tokenOutAmount = formatUnits(path.inputAmount.amount, path.tokens[path.tokens.length - 1].decimals);
+
+        return {
+            tokenIn,
+            tokenOut,
+            tokenInAmount,
+            tokenOutAmount,
+            share: 0, // TODO needed?
+            hops: path.pools.map((pool, i) => {
+                return {
+                    tokenIn: `${path.tokens[i].address}`,
+                    tokenOut: `${path.tokens[i + 1]}`,
+                    tokenInAmount: i === 0 ? tokenInAmount : '0',
+                    tokenOutAmount: i === pools.length - 1 ? tokenOutAmount : '0',
+                    poolId: pool.id,
+                    pool: pools.find((p) => p.id === pool.id) as GqlPoolMinimal,
+                };
+            }),
+        };
+    }
+
+    private mapSingleSwap(path: PathWithAmount, pool: GqlPoolMinimal): GqlSorSwapRoute {
+        const tokenIn = path.tokens[0].address;
+        const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
+        const tokenOut = path.tokens[1].address;
+        const tokenOutAmount = formatUnits(path.inputAmount.amount, path.tokens[1].decimals);
+
+        const hop: GqlSorSwapRouteHop = {
+            pool,
+            poolId: pool.id,
+            tokenIn,
+            tokenInAmount,
+            tokenOut,
+            tokenOutAmount,
+        };
+        return {
+            share: 1,
+            tokenIn,
+            tokenOut,
+            tokenInAmount,
+            tokenOutAmount,
+            hops: [hop],
+        } as GqlSorSwapRoute;
     }
 }
 
-export const sorV2Service = new SorV2Service();
+export const sorV2Service = new SorPathService();
