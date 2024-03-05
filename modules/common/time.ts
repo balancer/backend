@@ -142,3 +142,13 @@ export function timestampRoundedUpToNearestHour(m: moment.Moment = moment()): nu
 
     return roundUp.unix();
 }
+
+/**
+ * Time helper to round timestamp to the nearest hour
+ */
+export const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) * 3600;
+
+/**
+ * Time helper to round timestamp to the nearest midnight
+ */
+export const roundToMidnight = (timestamp: number) => Math.floor(timestamp / 86400) * 86400;

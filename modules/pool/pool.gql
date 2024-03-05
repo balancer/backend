@@ -25,6 +25,7 @@ extend type Query {
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
+    poolGetEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -734,9 +735,14 @@ type GqlPoolSwap {
     tokenOut: String!
     tokenAmountIn: String!
     tokenAmountOut: String!
+    tokenInData: GqlPoolEventAmount!
+    tokenOutData: GqlPoolEventAmount!
     timestamp: Int!
     tx: String!
+    blockNumber: Int!
+    logIndex: Int!
     valueUSD: Float!
+    type: GqlPoolEventType!
 }
 
 type GqlPoolBatchSwap {
@@ -804,26 +810,38 @@ input GqlPoolJoinExitFilter {
     userAddress: String
 }
 
+enum GqlPoolEventType {
+    JOIN
+    EXIT
+    SWAP
+}
+
+input GqlPoolEventsFilter {
+    typeIn: [GqlPoolEventType!]
+    poolIdIn: [String!]
+    chainIn: [GqlChain!]
+    userAddress: String
+}
+
+union GqlPoolEvent = GqlPoolJoinExit | GqlPoolSwap
+
 type GqlPoolJoinExit {
     id: ID!
     chain: GqlChain!
-    type: GqlPoolJoinExitType!
+    type: GqlPoolEventType!
     sender: String!
+    userAddress: String!
     poolId: String!
     timestamp: Int!
-    valueUSD: String
+    valueUSD: Float!
     tx: String!
-    amounts: [GqlPoolJoinExitAmount!]!
+    amounts: [GqlPoolEventAmount!]!
 }
 
-enum GqlPoolJoinExitType {
-    Join
-    Exit
-}
-
-type GqlPoolJoinExitAmount {
+type GqlPoolEventAmount {
     address: String!
     amount: String!
+    valueUSD: Float!
 }
 
 type GqlBalancePoolAprItem {

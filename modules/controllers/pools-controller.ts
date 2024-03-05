@@ -1,6 +1,6 @@
 import config from '../../config';
 import { updatePoolOnchainData } from '../actions/pool/update-on-chain-data';
-import { syncSwaps } from '../actions/swap/sync-swaps';
+import { syncSwaps } from '../actions/pool/sync-swaps';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getVaultSubgraphClient } from '../sources/subgraphs';

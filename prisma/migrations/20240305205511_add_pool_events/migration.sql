@@ -11,9 +11,9 @@ CREATE TABLE "PoolEvent" (
     "userAddress" TEXT NOT NULL,
     "blockNumber" INTEGER NOT NULL,
     "blockTimestamp" INTEGER NOT NULL,
-    "logPosition" INTEGER NOT NULL,
+    "logIndex" INTEGER NOT NULL,
     "vaultVersion" INTEGER NOT NULL DEFAULT 2,
-    "amountUsd" DOUBLE PRECISION NOT NULL,
+    "valueUSD" DOUBLE PRECISION NOT NULL,
     "payload" JSONB NOT NULL,
 
     CONSTRAINT "PoolEvent_pkey" PRIMARY KEY ("id")
@@ -35,4 +35,4 @@ CREATE INDEX "PoolEvent_userAddress_idx" ON "PoolEvent"("userAddress");
 CREATE INDEX "PoolEvent_blockNumber_idx" ON "PoolEvent"("blockNumber");
 
 -- CreateIndex
-CREATE INDEX "PoolEvent_logPosition_idx" ON "PoolEvent"("logPosition");
+CREATE INDEX "PoolEvent_logIndex_idx" ON "PoolEvent"("logIndex");

@@ -1,29 +1,65 @@
 /**
  * Responsible for handling all the queries – can be split based on models
  */
-import { GqlPoolJoinExit, QueryPoolGetJoinExitsArgs } from '../../schema';
+import { GqlPoolEvent, QueryPoolGetEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
+import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
+
+const parseJoinExit = (event: JoinExitEvent): GqlPoolEvent => {
+    return {
+        __typename: 'GqlPoolJoinExit',
+        amounts: event.payload.tokens.map((token: any) => ({
+            address: token.address,
+            amount: token.amount,
+            valueUSD: token.amountUsd,
+        })),
+        ...event,
+        timestamp: event.blockTimestamp,
+        sender: event.userAddress,
+    };
+};
+
+const parseSwap = (event: SwapEvent): GqlPoolEvent => {
+    return {
+        __typename: 'GqlPoolSwap',
+        ...event,
+        timestamp: event.blockTimestamp,
+        tokenIn: event.payload.tokenIn.address,
+        tokenAmountIn: event.payload.tokenIn.amount,
+        tokenInData: {
+            ...event.payload.tokenIn,
+        },
+        tokenOut: event.payload.tokenOut.address,
+        tokenAmountOut: event.payload.tokenOut.amount,
+        tokenOutData: {
+            ...event.payload.tokenOut,
+        },
+    };
+};
 
 export function QueriesController(tracer?: any) {
     return {
-        // TODO: I'd like to merge it with the swaps and return all as pool events
-        getJoinExits: async ({ first, skip, where }: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> => {
+        getEvents: async ({ first, skip, where }: QueryPoolGetEventsArgs): Promise<GqlPoolEvent[]> => {
             // Setting default values
             first = first ?? 1000;
             skip = skip ?? 0;
             where = where ?? {};
-            let { chainIn, poolIdIn, userAddress } = where;
-            chainIn = chainIn ?? []; // 🤔 when no chain, shouldn't we be returning all the chains?
-            poolIdIn = poolIdIn ?? [];
+            let { chainIn, poolIdIn, userAddress, typeIn } = where;
 
             const conditions: Prisma.PoolEventWhereInput = {};
-            if (chainIn.length) {
+
+            if (typeIn && typeIn.length) {
+                conditions.type = {
+                    in: typeIn,
+                };
+            }
+            if (chainIn && chainIn.length) {
                 conditions.chain = {
                     in: chainIn,
                 };
             }
-            if (poolIdIn.length) {
+            if (poolIdIn && poolIdIn.length) {
                 conditions.poolId = {
                     in: poolIdIn,
                     mode: 'insensitive',
@@ -36,7 +72,7 @@ export function QueriesController(tracer?: any) {
                 };
             }
 
-            const dbJoinExists = await prisma.poolEvent.findMany({
+            const dbEvents = await prisma.poolEvent.findMany({
                 where: conditions,
                 take: first,
                 skip,
@@ -45,33 +81,14 @@ export function QueriesController(tracer?: any) {
                         blockNumber: 'desc',
                     },
                     {
-                        logPosition: 'desc',
+                        logIndex: 'desc',
                     },
                 ],
             });
 
-            const results: GqlPoolJoinExit[] = dbJoinExists.map((joinExit) => {
-                const payload = joinExit.payload as {
-                    tokens: { address: string; amount: string; amountUsd: string }[];
-                };
-
-                return {
-                    __typename: 'GqlPoolJoinExit',
-                    amounts: payload.tokens.map((token: any) => ({
-                        address: token.address,
-                        amount: token.amount,
-                        valueUsd: token.amountUsd,
-                    })),
-                    chain: joinExit.chain,
-                    id: joinExit.id,
-                    poolId: joinExit.poolId,
-                    sender: joinExit.userAddress,
-                    timestamp: joinExit.blockTimestamp,
-                    tx: joinExit.tx,
-                    type: joinExit.type === 'JOIN' ? 'Join' : 'Exit',
-                    valueUSD: String(joinExit.amountUsd),
-                };
-            });
+            const results: GqlPoolEvent[] = dbEvents.map((event) =>
+                event.type === 'SWAP' ? parseSwap(event as SwapEvent) : parseJoinExit(event as JoinExitEvent),
+            );
 
             return results;
         },

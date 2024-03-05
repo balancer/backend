@@ -12,6 +12,7 @@ fragment Swap on Swap {
         id
     }
     blockNumber
+    logIndex
     blockTimestamp
     transactionHash
 }

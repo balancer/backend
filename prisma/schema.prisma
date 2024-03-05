@@ -557,9 +557,9 @@ model PoolEvent {
     userAddress         String
     blockNumber         Int
     blockTimestamp      Int
-    logPosition         Int
+    logIndex            Int
     vaultVersion        Int @default(2)
-    amountUsd           Float
+    valueUSD            Float
     payload             Json
 
     @@index([type])
@@ -567,7 +567,7 @@ model PoolEvent {
     @@index([chain, poolId])
     @@index([userAddress])
     @@index([blockNumber])
-    @@index([logPosition])
+    @@index([logIndex])
 }
 
 

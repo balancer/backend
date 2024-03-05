@@ -13,33 +13,34 @@ const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) * 3600;
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain) => {
+export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
     const vaultVersion = 2;
 
     // Get latest event from the DB
     const latestEvent = await prisma.poolEvent.findFirst({
         where: {
+            type: {
+                in: ['JOIN', 'EXIT'],
+            },
             chain: chain,
             vaultVersion,
         },
         orderBy: {
-            blockTimestamp: 'desc',
+            blockNumber: 'desc',
         },
     });
 
     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
-    const sevenDaysAgo = Math.floor(+new Date(Date.now() - 100 * 24 * 60 * 60 * 1000) / 1000);
-    const syncSince =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > sevenDaysAgo
-            ? latestEvent.blockTimestamp
-            : sevenDaysAgo;
+    const hundredDaysAgo = Math.floor(+new Date(Date.now() - 100 * 24 * 60 * 60 * 1000) / 1000);
+    const where =
+        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > hundredDaysAgo
+            ? { block_gte: String(latestEvent.blockNumber) }
+            : { timestamp_gte: hundredDaysAgo };
 
     // Get events
     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
         first: 1000,
-        where: {
-            timestamp_gte: syncSince,
-        },
+        where: where,
         orderBy: JoinExit_OrderBy.Timestamp,
         orderDirection: OrderDirection.Asc,
     });
@@ -48,6 +49,9 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
     const existingEvents = await prisma.poolEvent.findMany({
         where: {
             id: { in: joinExits.map((event) => event.id) },
+            type: {
+                in: ['JOIN', 'EXIT'],
+            },
             chain: chain,
             vaultVersion,
         },
@@ -77,7 +81,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
                 return {
                     address: address,
                     amount: event.amounts[index],
-                    amountUsd: Number(event.amounts[index]) * (price?.price || 0), // TODO: check USD amount
+                    valueUSD: Number(event.amounts[index]) * (price?.price || 0), // TODO: check USD amount
                 };
             });
 
@@ -90,8 +94,8 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
                 userAddress: event.sender,
                 blockNumber: Number(event.block),
                 blockTimestamp: Number(event.timestamp),
-                logPosition: Number(event.id.substring(66)),
-                amountUsd: usd.reduce((acc, token) => acc + Number(token.amountUsd), 0),
+                logIndex: Number(event.id.substring(66)),
+                valueUSD: usd.reduce((acc, token) => acc + Number(token.valueUSD), 0),
                 payload: {
                     tokens: usd,
                 },
@@ -110,5 +114,5 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
 
     // TODO: do we need a separate function to update prices? If so, we should be syncing events first, then running a price on them
 
-    return 'ok';
+    return dbEntries.map((entry) => entry.id);
 };

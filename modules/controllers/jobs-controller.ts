@@ -6,7 +6,7 @@ import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getPoolsSubgraphClient } from '../sources/subgraphs/balancer-v3-pools';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
-import { syncSwaps } from '../actions/swap/sync-swaps';
+import { syncSwaps } from '../actions/pool/sync-swaps';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
@@ -78,6 +78,21 @@ export function JobsController(tracer?: any) {
             const latestBlock = await viemClient.getBlockNumber();
 
             await syncPools(vaultSubgraphClient, poolSubgraphClient, viemClient, vaultAddress, chain, latestBlock);
+        },
+        async syncSwapsV3(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3 },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancerV3) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
+            const entries = await syncSwaps(vaultSubgraphClient, chain);
+            return entries;
         },
         // TODO: add this later, once we have bunch of pools and syncs become slower than a few secs
         async updateOnChainDataChangedPools(chainId: string) {},
