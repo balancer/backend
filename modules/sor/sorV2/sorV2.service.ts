@@ -211,8 +211,8 @@ export class SorV2Service implements SwapService {
         const returnAmount = swapKind === SwapKind.GivenIn ? outputAmount : inputAmount;
         const swapAmount = swapKind === SwapKind.GivenIn ? inputAmount : outputAmount;
 
-        const effectivePrice = inputAmount.divDownFixed(outputAmount.amount);
-        const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.amount);
+        const effectivePrice = inputAmount.divDownFixed(outputAmount.scale18);
+        const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         // routes are used for displaying on the UI
         const routes = mapRoutes(paths, pools);

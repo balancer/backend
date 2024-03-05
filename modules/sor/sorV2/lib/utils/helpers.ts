@@ -10,7 +10,6 @@ import {
 } from '@balancer/sdk';
 import { PathWithAmount } from '../path';
 import { MathSol, abs } from './math';
-import { Swap } from '@balancer-labs/sdk';
 
 export function checkInputs(
     tokenIn: Token,
