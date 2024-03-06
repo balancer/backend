@@ -118,9 +118,14 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
+        // V3 jobs
+        {
+            name: 'add-pools-v3',
+            interval: every(5, 'minutes'),
+        },
         {
             name: 'sync-pools-v3',
-            interval: every(20, 'minutes'),
+            interval: every(1, 'minutes'),
         },
         {
             name: 'sync-join-exits-v2',
@@ -128,7 +133,11 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-join-exits-v3',
-            interval: every(10, 'minutes'),
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-swaps-v3',
+            interval: every(1, 'minutes'),
         },
         {
             name: 'update-swaps-volume-and-fees-v3',

@@ -21,7 +21,7 @@ describe('jobsController', () => {
     });
 
     it('should call syncPools', async () => {
-        await jobsController.syncPools(['11155111']);
+        await jobsController.syncPools('11155111');
 
         expect(syncPools).toHaveBeenCalled();
     });

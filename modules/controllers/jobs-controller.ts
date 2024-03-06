@@ -1,14 +1,17 @@
 import config from '../../config';
 import { syncPools } from '../actions/pool/sync-pools';
+import { upsertPools } from '../actions/pool/upsert-pools';
 import { syncJoinExits } from '../actions/pool/sync-join-exits';
 import { syncJoinExitsV2 } from '../actions/pool/sync-join-exits-v2';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
-import { getPoolsSubgraphClient } from '../sources/subgraphs/balancer-v3-pools';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
 import { syncSwaps } from '../actions/pool/sync-swaps';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { getV3JoinedSubgraphClient } from '../sources/subgraphs';
+import { prisma } from '../../prisma/prisma-client';
+import { getChangedPools } from '../sources/logs/get-changed-pools';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -58,7 +61,12 @@ export function JobsController(tracer?: any) {
             const entries = await syncJoinExits(vaultSubgraphClient, chain);
             return entries;
         },
-        async syncPools(chainId: string) {
+        /**
+         * Adds new pools found in subgraph to the database
+         *
+         * @param chainId
+         */
+        async addPools(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
@@ -68,16 +76,92 @@ export function JobsController(tracer?: any) {
             } = config[chain];
 
             // Guard against unconfigured chains
-            if (!vaultAddress || !balancerV3 || !balancerPoolsV3) {
+            if (!balancerV3 || !balancerPoolsV3 || !vaultAddress) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-            const poolSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3);
+            const pools = await prisma.prismaPool.findMany();
+            const ids = pools.map((pool) => pool.id);
+            const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
+            const newPools = await client.getAllInitializedPools({ id_not_in: ids });
+
             const viemClient = getViemClient(chain);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await syncPools(vaultSubgraphClient, poolSubgraphClient, viemClient, vaultAddress, chain, latestBlock);
+            await upsertPools(newPools, viemClient, vaultAddress, chain, latestBlock);
+        },
+        /**
+         * Syncs database pools state with the onchain state
+         *
+         * @param chainId
+         */
+        async syncPools(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!vaultAddress) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const fromBlock = (
+                await prisma.prismaPoolDynamicData.findFirst({
+                    orderBy: { blockNumber: 'desc' },
+                })
+            )?.blockNumber;
+
+            // Sepolia vault deployment block, uncomment to test from the beginning
+            // const fromBlock = 5274748n;
+
+            // Guard against unsynced pools
+            if (!fromBlock) {
+                throw new Error(`No synced pools found for chain: ${chain}`);
+            }
+
+            const pools = await prisma.prismaPool.findMany();
+            const dbIds = pools.map((pool) => pool.id.toLowerCase());
+            const viemClient = getViemClient(chain);
+
+            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
+            if (ids.length === 0 || !latestBlock) {
+                return [];
+            }
+            return syncPools(ids, viemClient, vaultAddress, chain, latestBlock + 1n);
+        },
+        /**
+         * Updates database pools with the subgraph and onchain state.
+         * Usually used only when database schema changes and new data needs to be added to the pools.
+         * Most likely used only together with migrations.
+         * Alternatively, it can be run as a new pools job, because it can be slow then.
+         *
+         * @param chainId
+         */
+        async updatePools(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3, balancerPoolsV3 },
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancerV3 || !balancerPoolsV3 || !vaultAddress) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
+            const allPools = await client.getAllInitializedPools();
+
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            await upsertPools(allPools, viemClient, vaultAddress, chain, latestBlock);
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
@@ -94,9 +178,6 @@ export function JobsController(tracer?: any) {
             const entries = await syncSwaps(vaultSubgraphClient, chain);
             return entries;
         },
-        // TODO: add this later, once we have bunch of pools and syncs become slower than a few secs
-        async updateOnChainDataChangedPools(chainId: string) {},
-
         // TODO also update yieldfee
         // TODO maybe update fee from onchain instead of swap?
         async syncSwapsUpdateVolumeAndFees(chainId: string) {
