@@ -1,12 +1,20 @@
 import { GraphQLClient } from 'graphql-request';
-import { OrderDirection, Pool_OrderBy, SwapFragment, Swap_OrderBy, VaultPoolFragment, getSdk } from './generated/types';
+import {
+    OrderDirection,
+    Pool_OrderBy,
+    PoolsQueryVariables,
+    SwapFragment,
+    Swap_OrderBy,
+    VaultPoolFragment,
+    getSdk,
+} from './generated/types';
 
 export function getVaultSubgraphClient(url: string) {
     const sdk = getSdk(new GraphQLClient(url));
 
     return {
         ...sdk,
-        async getAllInitializedPools(): Promise<VaultPoolFragment[]> {
+        async getAllInitializedPools(where: PoolsQueryVariables['where']): Promise<VaultPoolFragment[]> {
             const limit = 1000;
             let hasMore = true;
             let id = `0x`;
@@ -14,7 +22,7 @@ export function getVaultSubgraphClient(url: string) {
 
             while (hasMore) {
                 const response = await sdk.Pools({
-                    where: { id_gt: id, isInitialized: true },
+                    where: { ...where, id_gt: id, isInitialized: true },
                     orderBy: Pool_OrderBy.Id,
                     orderDirection: OrderDirection.Asc,
                     first: limit,

@@ -1,6 +1,5 @@
 fragment VaultPool on Pool {
     id
-    factory
     address
     name
     symbol
