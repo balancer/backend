@@ -95,7 +95,7 @@ export function JobsController(tracer?: any) {
          *
          * @param chainId
          */
-        async upsertPools(chainId: string) {
+        async reloadPools(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
