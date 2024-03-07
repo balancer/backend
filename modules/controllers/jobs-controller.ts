@@ -91,6 +91,33 @@ export function JobsController(tracer?: any) {
             await upsertPools(newPools, viemClient, vaultAddress, chain, latestBlock);
         },
         /**
+         * Adds new pools found in subgraph to the database
+         *
+         * @param chainId
+         */
+        async upsertPools(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancerV3, balancerPoolsV3 },
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancerV3 || !balancerPoolsV3 || !vaultAddress) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
+            const allPools = await client.getAllInitializedPools();
+
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            await upsertPools(allPools, viemClient, vaultAddress, chain, latestBlock);
+        },
+        /**
          * Syncs database pools state with the onchain state
          *
          * @param chainId
