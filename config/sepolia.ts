@@ -39,6 +39,8 @@ export default <NetworkData>{
     },
     rpcUrl: env.GROVE_CITY
         ? `https://sepolia.rpc.grove.city/v1/${env.GROVE_CITY}`
+        : env.ALCHEMY_API_KEY
+        ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : env.INFURA_API_KEY
         ? `https://sepolia.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',

@@ -5,6 +5,7 @@ import { poolTransformer, poolTokensTransformer, poolTokensDynamicDataTransforme
 import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
 import { ViemClient } from '../../sources/viem-client';
 import { JoinedSubgraphPool } from '../../sources/subgraphs';
+import { formatUnits } from 'viem';
 
 interface CompletePoolDbEntry {
     pool: Prisma.PrismaPoolCreateInput;
@@ -74,7 +75,8 @@ export const upsertPools = async (
                 id: poolData.id,
                 poolId: poolData.id,
                 chain: chain,
-                totalShares: poolData.totalShares,
+                totalShares: String(onchainPoolData.totalSupply),
+                totalSharesNum: Number(formatUnits(onchainPoolData.totalSupply, 18)),
                 blockNumber: Number(blockNumber),
                 swapFee: String(onchainPoolData.swapFee ?? '0'),
                 swapEnabled: true,
