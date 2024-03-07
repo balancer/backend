@@ -35,7 +35,7 @@ const resolvers: Resolvers = {
         tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
             const data = await tokenService.getTokenPricesForRange(addresses, range, chain);
 
-            const grouped = _.groupBy(data, 'address');
+            const grouped = _.groupBy(data, 'tokenAddress');
 
             const result: GqlHistoricalTokenPrice[] = [];
             for (const address in grouped) {
