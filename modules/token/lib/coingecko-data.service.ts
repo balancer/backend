@@ -1,23 +1,11 @@
 import { prisma } from '../../../prisma/prisma-client';
-import _, { update } from 'lodash';
-import moment from 'moment-timezone';
-import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour, twentyFourHoursInSecs } from '../../common/time';
+import _ from 'lodash';
 import { networkContext } from '../../network/network-context.service';
-import { AllNetworkConfigs } from '../../network/network-config';
-import { PrismaToken } from '.prisma/client';
 import { env } from '../../../app/env';
-import { isAddress } from 'viem';
 import { RateLimiter } from 'limiter';
-import { tokenService } from '../token.service';
-import { TokenDefinition } from '../token-types';
 import axios, { AxiosError } from 'axios';
-import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 
 type Price = { usd: number };
-type CoingeckoPriceResponse = { [id: string]: Price };
-type TokenPrices = { [address: string]: Price };
-
 interface HistoricalPriceResponse {
     market_caps: number[][];
     prices: number[][];
@@ -26,12 +14,6 @@ interface HistoricalPriceResponse {
 
 type HistoricalPrice = { timestamp: number; price: number };
 export type TokenHistoricalPrices = { [address: string]: HistoricalPrice[] };
-
-interface MappedToken {
-    platform: string;
-    address: string;
-    originalAddress?: string;
-}
 
 interface CoingeckoTokenMarketData {
     id: string;

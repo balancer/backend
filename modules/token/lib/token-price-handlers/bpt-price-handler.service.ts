@@ -1,6 +1,6 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
-import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import { Chain } from '@prisma/client';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';

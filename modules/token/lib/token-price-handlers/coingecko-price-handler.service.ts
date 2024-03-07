@@ -1,7 +1,7 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { AllNetworkConfigs } from '../../../network/network-config';
 import { Chain } from '@prisma/client';
 import _ from 'lodash';

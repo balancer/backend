@@ -1,9 +1,8 @@
 import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
+import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { Chain } from '@prisma/client';
-import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 export class FallbackHandlerService implements TokenPriceHandler {
