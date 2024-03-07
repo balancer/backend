@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { swapTransformer } from '../../sources/transformers/swap-transformer';
 import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
+import { daysAgo } from '../../common/time';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -34,7 +35,7 @@ export async function syncSwaps(
     });
 
     // Get events since the latest event or limit to number or days we want to keep them in the DB
-    const since = Math.floor(+new Date(Date.now() - daysToSync * 24 * 60 * 60 * 1000) / 1000);
+    const since = daysAgo(daysToSync);
     const where =
         latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > since
             ? { blockNumber_gte: String(latestEvent.blockNumber) }

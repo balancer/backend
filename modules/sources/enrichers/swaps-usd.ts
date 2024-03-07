@@ -29,7 +29,7 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
         const tokenPrices = await prisma.prismaTokenPrice.findMany({
             where: {
                 timestamp: {
-                    gte: parseInt(timestamp),
+                    equals: parseInt(timestamp),
                 },
                 chain,
             },

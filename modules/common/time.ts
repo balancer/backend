@@ -152,3 +152,13 @@ export const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) *
  * Time helper to round timestamp to the nearest midnight
  */
 export const roundToMidnight = (timestamp: number) => Math.floor(timestamp / 86400) * 86400;
+
+/**
+ * Returns the timestamp for the days ago
+ *
+ * @param daysAgo
+ * @returns
+ */
+export const daysAgo = (daysAgo: number): number => {
+    return Math.floor(+new Date(Date.now() - daysAgo * secondsPerDay * 1000) / 1000);
+};
