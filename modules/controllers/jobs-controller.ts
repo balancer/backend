@@ -91,7 +91,7 @@ export function JobsController(tracer?: any) {
             await upsertPools(newPools, viemClient, vaultAddress, chain, latestBlock);
         },
         /**
-         * Adds new pools found in subgraph to the database
+         * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
          *
          * @param chainId
          */
