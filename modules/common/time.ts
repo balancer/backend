@@ -142,11 +142,3 @@ export function timestampRoundedUpToNearestHour(m: moment.Moment = moment()): nu
 
     return roundUp.unix();
 }
-
-export function timestampTopOfTheHour(): number {
-    return moment().utc().endOf('hour').unix() + 1;
-}
-
-export function timestampEndOfDayMidnight(): number {
-    return moment().utc().endOf('day').unix() + 1;
-}

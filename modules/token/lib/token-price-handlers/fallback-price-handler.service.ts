@@ -4,6 +4,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { timestampEndOfDayMidnight, timestampRoundedUpToNearestHour } from '../../../common/time';
 import { Chain } from '@prisma/client';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 export class FallbackHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -14,10 +15,9 @@ export class FallbackHandlerService implements TokenPriceHandler {
         chains: Chain[],
     ): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
         const updated: PrismaTokenWithTypes[] = [];
-        const tokenAndPrices: tokenAndPrice[] = [];
 
+        const operations: any[] = [];
         for (const chain of chains) {
             const acceptedTokensForChain = tokens.filter((token) => token.chain === chain);
             const tokenAddresses = acceptedTokensForChain.map((token) => token.address);
@@ -28,19 +28,40 @@ export class FallbackHandlerService implements TokenPriceHandler {
 
             for (const token of acceptedTokensForChain) {
                 const price = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === token.address);
-                // TODO or shall we do 0 as price?
                 if (price) {
-                    tokenAndPrices.push({
-                        address: token.address,
-                        chain: token.chain,
-                        price: price.price,
-                    });
+                    operations.push(
+                        prisma.prismaTokenPrice.upsert({
+                            where: {
+                                tokenAddress_timestamp_chain: {
+                                    tokenAddress: token.address,
+                                    timestamp: timestamp,
+                                    chain: token.chain,
+                                },
+                            },
+                            update: {
+                                price: price.price,
+                                close: price.price,
+                                updatedBy: this.id,
+                            },
+                            create: {
+                                tokenAddress: token.address,
+                                chain: token.chain,
+                                timestamp: timestamp,
+                                price: price.price,
+                                high: price.price,
+                                low: price.price,
+                                open: price.price,
+                                close: price.price,
+                                updatedBy: this.id,
+                            },
+                        }),
+                    );
                     updated.push(token);
                 }
             }
         }
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        prismaBulkExecuteOperations(operations);
 
         return updated;
     }

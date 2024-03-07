@@ -25,7 +25,6 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
         const tokenAndPrices: tokenAndPrice[] = [];
 
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
         const fbeets = await prisma.prismaFbeets.findFirst({});
         const pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id: this.fbeetsPoolId, chain: 'FANTOM' } },
@@ -59,7 +58,7 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             price: fbeetsPrice,
         });
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return acceptedTokens;
     }

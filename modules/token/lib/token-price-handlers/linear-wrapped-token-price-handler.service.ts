@@ -23,7 +23,6 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
         const tokensUpdated: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
 
         const pools = await prisma.prismaPool.findMany({
             where: {
@@ -68,7 +67,7 @@ export class LinearWrappedTokenPriceHandlerService implements TokenPriceHandler 
             }
         }
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return tokensUpdated;
     }

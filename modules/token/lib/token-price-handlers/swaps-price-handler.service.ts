@@ -30,7 +30,6 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
         const tokenAndPrices: tokenAndPrice[] = [];
 
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
 
         for (const chain of chains) {
             const acceptedTokensForChain = acceptedTokens.filter((token) => token.chain === chain);
@@ -85,7 +84,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             }
         }
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return updated;
     }

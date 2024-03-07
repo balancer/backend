@@ -39,7 +39,6 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
         const updatedTokens: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
 
         const assets: string[] = [this.beetsFtmAddress, this.wftmFtmAddress];
         const swaps: SwapV2[] = [
@@ -90,7 +89,7 @@ export class BeetsPriceHandlerService implements TokenPriceHandler {
             updatedTokens.push(token);
         }
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return updatedTokens;
     }

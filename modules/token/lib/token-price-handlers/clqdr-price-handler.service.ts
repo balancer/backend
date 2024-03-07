@@ -26,7 +26,6 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         chains: Chain[],
     ): Promise<PrismaTokenWithTypes[]> {
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
 
         const acceptedTokens = this.getAcceptedTokens(tokens);
         const updatedTokens: PrismaTokenWithTypes[] = [];
@@ -69,7 +68,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
             updatedTokens.push(token);
         }
 
-        await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return updatedTokens;
     }

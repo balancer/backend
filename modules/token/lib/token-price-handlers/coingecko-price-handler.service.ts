@@ -41,7 +41,6 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         const timestamp = timestampRoundedUpToNearestHour();
-        const timestampMidnight = timestampEndOfDayMidnight();
         const updated: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
 
@@ -103,7 +102,7 @@ export class CoingeckoPriceHandlerService implements TokenPriceHandler {
                     }
                 }
             }
-            await updatePrices(this.id, tokenAndPrices, timestamp, timestampMidnight);
+            await updatePrices(this.id, tokenAndPrices, timestamp);
 
             await prismaBulkExecuteOperations(operations);
         }
