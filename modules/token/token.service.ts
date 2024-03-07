@@ -181,12 +181,20 @@ export class TokenService {
         return dynamicData;
     }
 
-    public async getDataForRange(
+    public async getTokenPricesForRange(
+        tokenAddress: string[],
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getTokenPricesForRange(tokenAddress, range, chain);
+    }
+
+    public async getTokenPriceForRange(
         tokenAddress: string,
         range: GqlTokenChartDataRange,
         chain: Chain,
     ): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getDataForRange(tokenAddress, range, chain);
+        return this.tokenPriceService.getTokenPricesForRange([tokenAddress], range, chain);
     }
 
     public async getRelativeDataForRange(

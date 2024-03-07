@@ -105,35 +105,6 @@ export class TokenPriceService {
         return tokenPrice?.price || 0;
     }
 
-    // TODO redo this to use DB prices for multiple chains
-    // public async getHistoricalTokenPrices(chain: Chain): Promise<TokenHistoricalPrices> {
-    //     const memCached = this.cache.get(
-    //         `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-    //     ) as TokenHistoricalPrices | null;
-
-    //     if (memCached) {
-    //         return memCached;
-    //     }
-
-    //     const tokenPrices: TokenHistoricalPrices = await this.cache.get(
-    //         `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-    //     );
-    //     const nestedBptPrices: TokenHistoricalPrices = await this.cache.get(
-    //         `${NESTED_BPT_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-    //     );
-
-    //     if (tokenPrices) {
-    //         this.cache.put(
-    //             `${TOKEN_HISTORICAL_PRICES_CACHE_KEY}:${chain}`,
-    //             { ...tokenPrices, ...nestedBptPrices },
-    //             60000,
-    //         );
-    //     }
-
-    //     //don't try to refetch the cache, it takes way too long
-    //     return { ...tokenPrices, ...nestedBptPrices };
-    // }
-
     // should this be called for all chains in general?
     // thinking about coingecko requests as we should update those prices once for all chains
     public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
@@ -178,23 +149,27 @@ export class TokenPriceService {
         for (const chain of chains) {
             await this.updateCandleStickData(chain);
         }
-
-        //we only keep token prices for the last 24 hours
-        //const yesterday = moment().subtract(1, 'day').unix();
-        //await prisma.prismaTokenPrice.deleteMany({ where: { timestamp: { lt: yesterday } } });
     }
 
-    public async getDataForRange(
-        tokenAddress: string,
+    public async getTokenPricesForRange(
+        tokenAddresses: string[],
         range: GqlTokenChartDataRange,
         chain: Chain,
     ): Promise<PrismaTokenPrice[]> {
         const startTimestamp = this.getStartTimestampFromRange(range);
 
         return prisma.prismaTokenPrice.findMany({
-            where: { tokenAddress, timestamp: { gt: startTimestamp }, chain: chain },
+            where: { tokenAddress: { in: tokenAddresses }, timestamp: { gt: startTimestamp }, chain: chain },
             orderBy: { timestamp: 'asc' },
         });
+    }
+
+    public async getTokenPriceForRange(
+        tokenAddress: string,
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
+        return this.getTokenPricesForRange([tokenAddress], range, chain);
     }
 
     public async getRelativeDataForRange(
@@ -257,6 +232,10 @@ export class TokenPriceService {
                 return moment().subtract(30, 'days').unix();
             case 'NINETY_DAY':
                 return moment().subtract(90, 'days').unix();
+            case 'ONE_HUNDRED_EIGHTY_DAY':
+                return moment().subtract(180, 'days').unix();
+            case 'ONE_YEAR':
+                return moment().subtract(365, 'days').unix();
             default:
                 return moment().subtract(7, 'days').unix();
         }

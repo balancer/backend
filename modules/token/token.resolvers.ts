@@ -1,4 +1,4 @@
-import { Resolvers } from '../../schema';
+import { GqlHistoricalTokenPrice, Resolvers } from '../../schema';
 import _ from 'lodash';
 import { isAdminRoute } from '../auth/auth-context';
 import { tokenService } from './token.service';
@@ -32,25 +32,23 @@ const resolvers: Resolvers = {
                 chain: price.chain,
             }));
         },
-        // TODO
-        tokenGetHistoricalPrices: async (parent, { addresses, chain }, context) => {
-            return [];
-            // const currentChain = headerChain();
-            // if (!chain && currentChain) {
-            //     chain = currentChain;
-            // } else if (!chain) {
-            //     throw new Error('tokenGetHistoricalPrices error: Provide "chain" param');
-            // }
-            // const tokenPrices = await tokenService.getHistoricalTokenPrices(chain);
-            // const filtered = _.pickBy(tokenPrices, (entries, address) => addresses.includes(address));
+        tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
+            const data = await tokenService.getTokenPricesForRange(addresses, range, chain);
 
-            // return _.map(filtered, (entries, address) => ({
-            //     address,
-            //     prices: entries.map((entry) => ({
-            //         timestamp: `${entry.timestamp}`,
-            //         price: entry.price,
-            //     })),
-            // }));
+            const grouped = _.groupBy(data, 'address');
+
+            const result: GqlHistoricalTokenPrice[] = [];
+            for (const address in grouped) {
+                result.push({
+                    address: address,
+                    chain: grouped[address][0].chain,
+                    prices: grouped[address].map((entry) => ({
+                        timestamp: `${entry.timestamp}`,
+                        price: entry.price,
+                    })),
+                });
+            }
+            return result;
         },
         tokenGetTokenDynamicData: async (parent, { address, chain }, context) => {
             const currentChain = headerChain();
@@ -93,9 +91,9 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+                throw new Error('tokenGetPriceChartData error: Provide "chain" param');
             }
-            const data = await tokenService.getDataForRange(address, range, chain);
+            const data = await tokenService.getTokenPriceForRange(address, range, chain);
 
             return data.map((item) => ({
                 id: `${address}-${item.timestamp}`,
@@ -125,7 +123,7 @@ const resolvers: Resolvers = {
             } else if (!chain) {
                 throw new Error('tokenGetCandlestickChartData error: Provide "chain" param');
             }
-            const data = await tokenService.getDataForRange(address, range, chain);
+            const data = await tokenService.getTokenPriceForRange(address, range, chain);
 
             return data.map((item) => ({
                 id: `${address}-${item.timestamp}`,
@@ -141,7 +139,7 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('tokenGetRelativePriceChartData error: Provide "chain" param');
+                throw new Error('tokenGetTokenData error: Provide "chain" param');
             }
             const token = await tokenService.getToken(address, chain);
             if (token) {
