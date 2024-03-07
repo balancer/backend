@@ -8,6 +8,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
 
     if (job === 'add-pools-v3') {
         return jobsController.addPools(chain);
+    } else if (job === 'reload-pools-v3') {
+        return jobsController.reloadPools(chain);
     } else if (job === 'sync-pools-v3') {
         return jobsController.syncPools(chain);
     } else if (job === 'sync-join-exits-v3') {
