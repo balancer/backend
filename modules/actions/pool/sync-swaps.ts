@@ -38,7 +38,7 @@ export async function syncSwaps(
     const since = daysAgo(daysToSync);
     const where =
         latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > since
-            ? { blockNumber_gte: String(latestEvent.blockNumber) }
+            ? { blockNumber_gt: String(latestEvent.blockNumber) }
             : { blockTimestamp_gte: String(since) };
 
     // Get events
@@ -49,19 +49,7 @@ export async function syncSwaps(
         orderDirection: OrderDirection.Asc,
     });
 
-    // Store only the events that are not already in the DB
-    const existingEvents = await prisma.poolEvent.findMany({
-        where: {
-            id: { in: swaps.map((event) => event.id) },
-            type: 'SWAP',
-            chain: chain,
-            vaultVersion,
-        },
-    });
-
-    const newSwaps = swaps.filter((event) => !existingEvents.some((existing) => existing.id === event.id));
-
-    const dbSwaps = newSwaps.map((swap) => swapTransformer(swap, chain));
+    const dbSwaps = swaps.map((swap) => swapTransformer(swap, chain));
 
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
