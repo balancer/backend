@@ -3,9 +3,10 @@ import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { BasePool, BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { BasePool } from '../basePool';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;

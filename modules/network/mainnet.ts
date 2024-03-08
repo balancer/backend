@@ -65,7 +65,7 @@ export const data: NetworkData = {
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+            : 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
