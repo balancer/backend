@@ -160,36 +160,6 @@ export function JobsController(tracer?: any) {
             }
             return syncPools(ids, viemClient, vaultAddress, chain, latestBlock + 1n);
         },
-        /**
-         * Updates database pools with the subgraph and onchain state.
-         * Usually used only when database schema changes and new data needs to be added to the pools.
-         * Most likely used only together with migrations.
-         * Alternatively, it can be run as a new pools job, because it can be slow then.
-         *
-         * @param chainId
-         */
-        async updatePools(chainId: string) {
-            const chain = chainIdToChain[chainId];
-            const {
-                subgraphs: { balancerV3, balancerPoolsV3 },
-                balancer: {
-                    v3: { vaultAddress },
-                },
-            } = config[chain];
-
-            // Guard against unconfigured chains
-            if (!balancerV3 || !balancerPoolsV3 || !vaultAddress) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
-            const allPools = await client.getAllInitializedPools();
-
-            const viemClient = getViemClient(chain);
-            const latestBlock = await viemClient.getBlockNumber();
-
-            await upsertPools(allPools, viemClient, vaultAddress, chain, latestBlock);
-        },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
