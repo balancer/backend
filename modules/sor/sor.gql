@@ -6,7 +6,7 @@ extend type Query {
         """
         The Chain to query
         """
-        chain: GqlChain!
+        chain: GqlChain
         """
         Token address of the tokenIn
         """
