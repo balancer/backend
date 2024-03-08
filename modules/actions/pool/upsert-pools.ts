@@ -53,7 +53,7 @@ export const upsertPools = async (
     }
 
     // Get the token prices needed for calculating token balances and total liquidity
-    const dbPrices = await prisma.prismaTokenPrice.findMany({
+    const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {
             tokenAddress: { in: allTokens.map((token) => token.address) },
             chain: chain,
