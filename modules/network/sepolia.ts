@@ -44,10 +44,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     */
     workerJobs: [
         {
-            name: 'update-token-prices',
-            interval: every(15, 'minutes'),
-        },
-        {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
@@ -120,10 +116,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         {
             name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
-        },
-        {
-            name: 'sync-global-coingecko-prices',
-            interval: every(12, 'hours'),
         },
     ],
 };

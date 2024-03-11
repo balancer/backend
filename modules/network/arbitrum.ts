@@ -238,10 +238,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     */
     workerJobs: [
         {
-            name: 'update-token-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
-        },
-        {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
