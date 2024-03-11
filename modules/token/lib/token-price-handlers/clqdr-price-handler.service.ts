@@ -6,7 +6,6 @@ import { Contract } from '@ethersproject/contracts';
 import { ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 import PriceRateProviderAbi from '../../abi/CLQDRPerpetualEscrowTokenRateProvider.json';
-import { networkContext } from '../../../network/network-context.service';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { Chain } from '@prisma/client';
 
@@ -16,6 +15,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
     private readonly clqdrAddress = '0x814c66594a22404e101fecfecac1012d8d75c156';
     private readonly lqdrAddress = '0x10b620b2dbac4faa7d7ffd71da486f5d44cd86f9';
     private readonly clqdrPriceRateProviderAddress = '0x1a148871bf262451f34f13cbcb7917b4fe59cb32';
+    private readonly rpcProvider = 'https://rpc.ftm.tools';
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         return tokens.filter((token) => token.chain === 'FANTOM' && token.address === this.clqdrAddress);
@@ -34,7 +34,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         const clqdrPriceRateProviderContract = new Contract(
             this.clqdrPriceRateProviderAddress,
             PriceRateProviderAbi,
-            new ethers.providers.JsonRpcProvider(networkContext.data.rpcUrl),
+            new ethers.providers.JsonRpcProvider(this.rpcProvider),
         );
 
         let clqdrRate = 0;
@@ -52,7 +52,7 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
 
         const lqdrPrice = await prisma.prismaTokenCurrentPrice.findFirst({
             orderBy: { timestamp: 'desc' },
-            where: { tokenAddress: this.lqdrAddress, chain: networkContext.chain },
+            where: { tokenAddress: this.lqdrAddress, chain: 'FANTOM' },
         });
 
         if (!lqdrPrice) {
