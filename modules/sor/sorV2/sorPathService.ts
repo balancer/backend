@@ -391,7 +391,7 @@ class SorPathService implements SwapService {
             tokenOut,
             tokenInAmount,
             tokenOutAmount,
-            share: 0, // TODO needed?
+            share: 0.5, // TODO needed?
             hops: path.pools.map((pool, i) => {
                 return {
                     tokenIn: `${path.tokens[i].address}`,
