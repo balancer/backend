@@ -7,6 +7,7 @@ import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
+import { networkContext } from '../../../network/network-context.service';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
@@ -60,7 +61,7 @@ export class YbTokensAprService implements PoolAprService {
                     continue;
                 }
 
-                const tokenPrice = tokenService.getPriceForToken(tokenPrices, token.address);
+                const tokenPrice = tokenService.getPriceForToken(tokenPrices, token.address, networkContext.chain);
                 const tokenBalance = token.dynamicData?.balance;
 
                 const tokenLiquidity = tokenPrice * parseFloat(tokenBalance || '0');

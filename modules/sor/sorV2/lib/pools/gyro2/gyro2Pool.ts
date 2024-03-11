@@ -4,10 +4,11 @@ import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualParams } from './gyro2Math';
 import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
-import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { BasePool } from '../basePool';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;

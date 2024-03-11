@@ -6,16 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -60,7 +54,6 @@ const optimismNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
         address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
@@ -93,21 +86,21 @@ const optimismNetworkData: NetworkData = {
     },
     avgBlockSpeed: 1,
     sor: {
-        main: {
-            url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
+        env: {
+            main: {
+                url: 'https://nplks2oknz5lhxn6kpgxbfrxgm0hzicm.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
+            canary: {
+                url: 'https://svlitjilcr5qtp7iolimlrlg7e0ipupj.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
         },
     },
     ybAprConfig: {
@@ -278,16 +271,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [optimismNetworkData.beets!.address, optimismNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
-    tokenPriceHandlers: [
-        new BeetsPriceHandlerService(
-            optimismNetworkData.beets!.address,
-            optimismNetworkData.beets!.beetsPriceProviderRpcUrl,
-        ),
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
@@ -370,10 +353,6 @@ export const optimismNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

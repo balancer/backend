@@ -1,6 +1,6 @@
 import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType, GqlPoolMinimal } from '../../../schema';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { PrismaToken } from '@prisma/client';
+import { Chain, PrismaToken } from '@prisma/client';
 import { poolService } from '../../pool/pool.service';
 import { oldBnum } from '../../big-number/old-big-number';
 import axios from 'axios';
@@ -8,11 +8,11 @@ import { SwapInfo, SwapV2 } from '@balancer-labs/sdk';
 import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../../web3/addresses';
 import { BigNumber } from 'ethers';
 import { env } from '../../../app/env';
-import { networkContext } from '../../network/network-context.service';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { DeploymentEnv } from '../../network/network-config-types';
 import _ from 'lodash';
 import { SwapInfoRoute } from '@balancer-labs/sor';
-import { NATIVE_ADDRESS, ZERO_ADDRESS } from '@balancer/sdk';
+import { ZERO_ADDRESS } from '@balancer/sdk';
 
 interface GetSwapsInput {
     tokenIn: string;
@@ -21,6 +21,7 @@ interface GetSwapsInput {
     swapAmount: string;
     swapOptions: GqlSorSwapOptionsInput;
     tokens: PrismaToken[];
+    chain: Chain;
 }
 
 export class BalancerSorService {
@@ -31,6 +32,7 @@ export class BalancerSorService {
         swapOptions,
         swapAmount,
         tokens,
+        chain,
     }: GetSwapsInput): Promise<GqlSorGetSwapsResponse> {
         tokenIn = replaceEthWithZeroAddress(tokenIn);
         tokenOut = replaceEthWithZeroAddress(tokenOut);
@@ -48,7 +50,7 @@ export class BalancerSorService {
             throw new Error('SOR: invalid swap amount input');
         }
 
-        let swapInfo = await this.querySor(swapType, tokenIn, tokenOut, swapAmountScaled, swapOptions);
+        let swapInfo = await this.querySor(swapType, tokenIn, tokenOut, swapAmountScaled, swapOptions, chain);
         // no swaps found, return 0
         if (swapInfo.swaps.length === 0) {
             return this.zeroResponse(swapType, tokenIn, tokenOut, swapAmount);
@@ -201,23 +203,24 @@ export class BalancerSorService {
         tokenOut: string,
         swapAmountScaled: BigNumber,
         swapOptions: GqlSorSwapOptionsInput,
+        chain: Chain,
     ) {
-        const { data } = await axios.post<{ swapInfo: SwapInfo }>(
-            networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].url,
-            {
-                swapType,
-                tokenIn,
-                tokenOut,
-                swapAmountScaled,
-                swapOptions: {
-                    maxPools:
-                        swapOptions.maxPools || networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].maxPools,
-                    forceRefresh:
-                        swapOptions.forceRefresh ||
-                        networkContext.data.sor[env.DEPLOYMENT_ENV as DeploymentEnv].forceRefresh,
-                },
+        const sorConfig = AllNetworkConfigsKeyedOnChain[chain].data.sor;
+        const config = sorConfig?.env && sorConfig.env[env.DEPLOYMENT_ENV as DeploymentEnv];
+        if (!config) {
+            throw new Error('SOR: no config');
+        }
+        const url = config.url;
+        const { data } = await axios.post<{ swapInfo: SwapInfo }>(url, {
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmountScaled,
+            swapOptions: {
+                maxPools: swapOptions.maxPools || config.maxPools,
+                forceRefresh: swapOptions.forceRefresh || config.forceRefresh,
             },
-        );
+        });
         const swapInfo = data.swapInfo;
         return swapInfo;
     }
@@ -225,7 +228,7 @@ export class BalancerSorService {
     private getTokenDecimals(tokenAddress: string, tokens: PrismaToken[]): number {
         if (
             tokenAddress === ZERO_ADDRESS ||
-            tokenAddress === NATIVE_ADDRESS ||
+            tokenAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' ||
             tokenAddress === '0x0000000000000000000000000000000000001010'
         ) {
             return 18;

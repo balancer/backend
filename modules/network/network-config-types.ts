@@ -16,7 +16,6 @@ export interface NetworkConfig {
     poolStakingServices: PoolStakingService[];
     poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];
-    tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
     services: NetworkServices;
@@ -79,7 +78,6 @@ export interface NetworkData {
     protocolToken: 'beets' | 'bal';
     beets?: {
         address: string;
-        beetsPriceProviderRpcUrl: string;
     };
     fbeets?: {
         address: string;
@@ -148,14 +146,16 @@ export interface NetworkData {
         aprEndpoint: string;
     };
     avgBlockSpeed: number;
-    sor: {
-        [key in DeploymentEnv]: {
-            url: string;
-            maxPools: number;
-            forceRefresh: boolean;
-            gasPrice: BigNumber;
-            swapGas: BigNumber;
-            poolIdsToExclude: string[];
+    sor?: {
+        poolIdsToExclude?: string[];
+        env?: {
+            [key in DeploymentEnv]?: {
+                url: string;
+                maxPools: number;
+                forceRefresh: boolean;
+                gasPrice: BigNumber;
+                swapGas: BigNumber;
+            };
         };
     };
     datastudio?: {

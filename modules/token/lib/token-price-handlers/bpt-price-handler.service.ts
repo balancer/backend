@@ -2,29 +2,32 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
-import { networkContext } from '../../../network/network-context.service';
+import { Chain } from '@prisma/client';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
 
 export class BptPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'BptPriceHandlerService';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens
-            .filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'))
-            .map((token) => token.address);
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        return tokens.filter((token) => token.types.includes('BPT') || token.types.includes('PHANTOM_BPT'));
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
         const timestamp = timestampRoundedUpToNearestHour();
         const pools = await prisma.prismaPool.findMany({
-            where: { dynamicData: { totalLiquidity: { gt: 0.1 } }, chain: networkContext.chain },
+            where: { dynamicData: { totalLiquidity: { gt: 0.1 } }, chain: { in: chains } },
             include: { dynamicData: true },
         });
-        let updated: string[] = [];
-        let operations: any[] = [];
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
 
-        for (const token of tokens) {
-            const pool = pools.find((pool) => pool.address === token.address);
+        for (const token of acceptedTokens) {
+            const pool = pools.find((pool) => pool.address === token.address && pool.chain === token.chain);
 
             if (
                 pool?.dynamicData &&
@@ -32,48 +35,12 @@ export class BptPriceHandlerService implements TokenPriceHandler {
                 parseFloat(pool.dynamicData.totalShares) !== 0
             ) {
                 const price = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
-
-                updated.push(token.address);
-
-                operations.push(
-                    await prisma.prismaTokenPrice.upsert({
-                        where: {
-                            tokenAddress_timestamp_chain: {
-                                tokenAddress: token.address,
-                                timestamp,
-                                chain: networkContext.chain,
-                            },
-                        },
-                        update: { price: price, close: price },
-                        create: {
-                            tokenAddress: token.address,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price,
-                            high: price,
-                            low: price,
-                            open: price,
-                            close: price,
-                        },
-                    }),
-                );
-
-                operations.push(
-                    prisma.prismaTokenCurrentPrice.upsert({
-                        where: { tokenAddress_chain: { tokenAddress: token.address, chain: networkContext.chain } },
-                        update: { price: price },
-                        create: {
-                            tokenAddress: token.address,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price,
-                        },
-                    }),
-                );
+                tokenAndPrices.push({ address: token.address, chain: token.chain, price: price });
+                updated.push(token);
             }
         }
 
-        await Promise.all(operations);
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
         return updated;
     }

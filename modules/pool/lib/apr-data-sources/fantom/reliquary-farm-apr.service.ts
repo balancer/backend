@@ -58,7 +58,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const pricePerShare = totalLiquidity / totalShares;
 
-            const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress);
+            const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress, networkContext.chain);
             const farmBeetsPerYear = parseFloat(farm.beetsPerSecond) * secondsPerYear;
             const beetsValuePerYear = beetsPrice * farmBeetsPerYear;
 

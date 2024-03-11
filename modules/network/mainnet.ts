@@ -6,15 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -65,7 +60,7 @@ export const data: NetworkData = {
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+            : 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -99,28 +94,10 @@ export const data: NetworkData = {
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 10,
     sor: {
-        main: {
-            url: 'https://uu6cfghhd5lqa7py3nojxkivd40zuugb.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [
-                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
-                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
-            ],
-        },
-        canary: {
-            url: 'https://ksa66wlkjbvteijxmflqjehsay0jmekw.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [
-                '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
-                '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
-            ],
-        },
+        poolIdsToExclude: [
+            '0xbfa413a2ff0f20456d57b643746133f54bfe0cd20000000000000000000004c3',
+            '0xdc063deafce952160ec112fa382ac206305657e60000000000000000000004c4', // Linear pools that cause issues with new b-sdk
+        ],
     },
     ybAprConfig: {
         aave: {
@@ -206,7 +183,7 @@ export const data: NetworkData = {
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
@@ -404,12 +381,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [data.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
-    tokenPriceHandlers: [
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
@@ -489,10 +460,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

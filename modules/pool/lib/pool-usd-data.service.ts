@@ -57,7 +57,7 @@ export class PoolUsdDataService {
                     token.address === pool.address
                         ? 0
                         : parseFloat(token.dynamicData?.balance || '0') *
-                          this.tokenService.getPriceForToken(tokenPrices, token.address),
+                          this.tokenService.getPriceForToken(tokenPrices, token.address, this.chain),
             }));
             const totalLiquidity = _.sumBy(balanceUSDs, (item) => item.balanceUSD);
 
@@ -115,7 +115,7 @@ export class PoolUsdDataService {
 
     public async updateLiquidity24hAgoForAllPools() {
         const block24hAgo = await this.blockSubgraphService.getBlockFrom24HoursAgo();
-        const tokenPrices24hAgo = await this.tokenService.getTokenPriceFrom24hAgo();
+        const tokenPrices24hAgo = await this.tokenService.getTokenPriceFrom24hAgo(this.chain);
 
         const subgraphPools = await this.balancerSubgraphService.getAllPools(
             { block: { number: parseInt(block24hAgo.number) } },
@@ -131,7 +131,7 @@ export class PoolUsdDataService {
                     token.address === pool.address
                         ? 0
                         : parseFloat(token.balance || '0') *
-                          this.tokenService.getPriceForToken(tokenPrices24hAgo, token.address),
+                          this.tokenService.getPriceForToken(tokenPrices24hAgo, token.address, this.chain),
             }));
             const totalLiquidity = Math.max(
                 _.sumBy(balanceUSDs, (item) => item.balanceUSD),

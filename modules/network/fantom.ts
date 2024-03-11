@@ -1,7 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { SpookySwapAprService } from '../pool/lib/apr-data-sources/fantom/spooky-swap-apr.service';
-import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
@@ -11,18 +9,10 @@ import { MasterChefStakingService } from '../pool/lib/staking/master-chef-stakin
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { ReliquaryStakingService } from '../pool/lib/staking/reliquary-staking.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { FbeetsPriceHandlerService } from '../token/lib/token-price-handlers/fbeets-price-handler.service';
-import { ClqdrPriceHandlerService } from '../token/lib/token-price-handlers/clqdr-price-handler.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
@@ -101,7 +91,6 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     sftmx: {
         stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
@@ -146,32 +135,32 @@ const fantomNetworkData: NetworkData = {
     },
     avgBlockSpeed: 1,
     sor: {
-        main: {
-            url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
-        },
-        canary: {
-            url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
-            maxPools: 8,
-            forceRefresh: false,
-            gasPrice: BigNumber.from(10),
-            swapGas: BigNumber.from('1000000'),
-            poolIdsToExclude: [],
+        env: {
+            main: {
+                url: 'https://2bz6hsr2y54svqgow7tbwwsrta0icouy.lambda-url.ca-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
+            canary: {
+                url: 'https://mep53ds2noe6rhicd67q7raqhq0dkupc.lambda-url.eu-central-1.on.aws/',
+                maxPools: 8,
+                forceRefresh: false,
+                gasPrice: BigNumber.from(10),
+                swapGas: BigNumber.from('1000000'),
+            },
         },
     },
     ybAprConfig: {
-        // sftmx: {
-        //     tokens: {
-        //         sftmx: {
-        //             address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-        //             ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
-        //         },
-        //     },
-        // },
+        sftmx: {
+            tokens: {
+                sftmx: {
+                    address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
+                    ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
+                },
+            },
+        },
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-fantom',
@@ -232,13 +221,6 @@ const fantomNetworkData: NetworkData = {
         yearn: {
             sourceUrl: 'https://api.yexporter.io/v1/chains/250/vaults/all',
         },
-        fixedAprHandler: {
-            sFTMx: {
-                address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-                apr: 0.046,
-                isIbYield: true,
-            },
-        },
         defaultHandlers: {
             ankrETH: {
                 tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
@@ -262,9 +244,6 @@ const fantomNetworkData: NetworkData = {
     },
     spooky: {
         xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
-    },
-    stader: {
-        sFtmxContract: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
     },
     datastudio: {
         main: {
@@ -309,18 +288,6 @@ export const fantomNetworkConfig: NetworkConfig = {
     poolStakingServices: [
         new MasterChefStakingService(masterchefService, fantomNetworkData.masterchef!.excludedFarmIds),
         new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
-    ],
-    tokenPriceHandlers: [
-        new BeetsPriceHandlerService(
-            fantomNetworkData.beets!.address,
-            fantomNetworkData.beets!.beetsPriceProviderRpcUrl,
-        ),
-        new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
-        new ClqdrPriceHandlerService(),
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
     ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
@@ -425,10 +392,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-latest-reliquary-snapshots',
             interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-coingecko-coinids',
-            interval: every(2, 'hours'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',

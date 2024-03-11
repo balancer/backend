@@ -1,5 +1,7 @@
-import { BasePool, Path, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
+import { BasePool } from '../pools/basePool';
+import { PathLocal } from '../path';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
@@ -61,7 +63,7 @@ export class PathGraph {
         tokenIn: Token;
         tokenOut: Token;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
-    }): Path[] {
+    }): PathLocal[] {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 6,

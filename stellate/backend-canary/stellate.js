@@ -73,8 +73,6 @@ const config = {
             enabled: false,
             auth: false,
         },
-        rateLimits:
-            "(req) => {\n    if (req.headers['stellate-api-token'] &&\n        req.headers['stellate-api-token'] ===\n            'stl8_bcebb2b60910a55e58a82c8e83825034dc763e294582447118fab0a6a1225ebb') {\n        return [\n            {\n                name: 'Specific API Token based limits',\n                state: 'dryRun',\n                group: req.headers['stellate-api-token'],\n                limit: {\n                    type: 'RequestCount',\n                    budget: 20,\n                    window: '1m',\n                },\n            },\n        ];\n    }\n    if (req.headers['stellate-api-token']) {\n        return [\n            {\n                name: 'General API Token based limits',\n                state: 'dryRun',\n                group: req.headers['stellate-api-token'],\n                limit: {\n                    type: 'RequestCount',\n                    budget: 10,\n                    window: '1m',\n                },\n            },\n        ];\n    }\n    const xForwardedFor = Array.isArray(req.headers['x-forwarded-for'])\n        ? req.headers['x-forwarded-for'][0]\n        : req.headers['x-forwarded-for'];\n    return [\n        {\n            name: 'IP based limits',\n            state: 'dryRun',\n            group: xForwardedFor ? xForwardedFor.split(',')[0] : req.ip,\n            limit: {\n                type: 'RequestCount',\n                budget: 5,\n                window: '1m',\n            },\n        },\n    ];\n}",
     },
 };
 

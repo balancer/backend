@@ -11,10 +11,11 @@ import {
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
 } from './stableMath';
-import { BasePool, BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { BasePool } from '../basePool';
 
 export class ComposableStablePoolToken extends TokenAmount {
     public readonly rate: bigint;

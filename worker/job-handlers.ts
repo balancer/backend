@@ -18,6 +18,7 @@ import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 const runningJobs: Set<string> = new Set();
 
@@ -126,7 +127,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-token-prices':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.updateTokenPrices(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => tokenService.updateTokenPrices([chainId]),
+                    res,
+                    next,
+                );
                 break;
             case 'update-liquidity-for-active-pools':
                 await runIfNotAlreadyRunning(
@@ -147,7 +154,16 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-pool-apr':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updatePoolAprs(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return poolService.updatePoolAprs(chain);
+                    },
+                    res,
+                    next,
+                );
                 break;
             case 'load-on-chain-data-for-pools-with-active-updates':
                 await runIfNotAlreadyRunning(
@@ -200,15 +216,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-global-coingecko-prices':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => tokenService.syncCoingeckoPricesForAllChains(),
-                    res,
-                    next,
-                );
-                break;
             case 'sync-staking-for-pools':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncStakingForPools(), res, next);
                 break;
@@ -240,7 +247,16 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'feed-data-to-datastudio':
-                await runIfNotAlreadyRunning(job.name, chainId, () => datastudioService.feedPoolData(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return datastudioService.feedPoolData(chain);
+                    },
+                    res,
+                    next,
+                );
                 break;
             case 'sync-latest-reliquary-snapshots':
                 await runIfNotAlreadyRunning(
@@ -259,9 +275,6 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
-                break;
-            case 'sync-coingecko-coinids':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncCoingeckoIds(), res, next);
                 break;
             case 'update-fee-volume-yield-all-pools':
                 await runIfNotAlreadyRunning(

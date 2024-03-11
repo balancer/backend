@@ -10,14 +10,13 @@ import _ from 'lodash';
 import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
-import { CoingeckoService } from '../../coingecko/coingecko.service';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { sleep } from '../../common/promise';
 import { networkContext } from '../../network/network-context.service';
-import { TokenHistoricalPrices } from '../../coingecko/coingecko-types';
+import { CoingeckoDataService, TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
 
 export class PoolSnapshotService {
-    constructor(private readonly coingeckoService: CoingeckoService) {}
+    constructor(private readonly coingeckoService: CoingeckoDataService) {}
 
     private get balancerSubgraphService() {
         return networkContext.config.services.balancerSubgraphService;
@@ -194,18 +193,9 @@ export class PoolSnapshotService {
                     },
                 });
                 if (priceForDays.length === 0) {
-                    try {
-                        tokenPriceMap[token.address] = await this.coingeckoService.getTokenHistoricalPrices(
-                            token.address,
-                            numDays,
-                        );
-                        await sleep(5000);
-                    } catch (error: any) {
-                        console.error(
-                            `Error getting historical prices form coingecko, skipping token ${token.address}. Error:`,
-                            error.message,
-                        );
-                    }
+                    console.error(
+                        `No historical price in DB for to create pool snapshots. Skipping token ${token.address}.`,
+                    );
                 } else {
                     tokenPriceMap[token.address] = priceForDays;
                 }

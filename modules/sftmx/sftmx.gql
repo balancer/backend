@@ -1,5 +1,11 @@
 extend type Query {
+    """
+    Retrieve the withdrawalrequests from a user
+    """
     sftmxGetWithdrawalRequests(user: String!): [GqlSftmxWithdrawalRequests!]!
+    """
+    Get the staking data and status for sFTMx
+    """
     sftmxGetStakingData: GqlSftmxStakingData!
 }
 
@@ -7,27 +13,113 @@ extend type Mutation {
     sftmxSyncWithdrawalRequests: String!
     sftmxSyncStakingData: String!
 }
-
-# TODO provide more info such as how much is staked on which validator
 type GqlSftmxStakingData {
+    """
+    Total amount of FTM in custody of sFTMx. Staked FTM plus free pool FTM.
+    """
     totalFtmAmount: AmountHumanReadable!
+
+    """
+    Total amount of FTM staked/delegated to validators.
+    """
     totalFtmAmountStaked: AmountHumanReadable!
+    """
+    Total amount of FTM in the free pool.
+    """
     totalFtmAmountInPool: AmountHumanReadable!
+    """
+    Number of vaults that delegated to validators.
+    """
     numberOfVaults: Int!
+    """
+    Whether undelegation is paused. Undelegate is the first step to redeem sFTMx.
+    """
     undelegatePaused: Boolean!
+    """
+    Whether withdrawals are paused. Withdraw is the second and final step to redeem sFTMx.
+    """
     withdrawPaused: Boolean!
+    """
+    Whether maintenance is paused. This pauses reward claiming or harvesting and withdrawing from matured vaults.
+    """
     maintenancePaused: Boolean!
+    """
+    The minimum FTM amount to deposit.
+    """
     minDepositLimit: AmountHumanReadable!
+    """
+    The maximum FTM amount to depost.
+    """
     maxDepositLimit: AmountHumanReadable!
+    """
+    Current exchange rate for sFTMx -> FTM
+    """
     exchangeRate: String!
+    """
+    The current rebasing APR for sFTMx.
+    """
     stakingApr: String!
+    """
+    Delay to wait between undelegate (1st step) and withdraw (2nd step).
+    """
     withdrawalDelay: Int!
+
+    """
+    A list of all the vaults that delegated to validators.
+    """
+    vaults: [GqlSftmxStakingVault!]!
+}
+
+type GqlSftmxStakingVault {
+    """
+    The contract address of the vault.
+    """
+    vaultAddress: String!
+    """
+    The internal index of the vault.
+    """
+    vaultIndex: Int!
+    """
+    The amount of FTM that has been delegated via this vault.
+    """
+    ftmAmountStaked: AmountHumanReadable!
+    """
+    Whether the vault is matured, meaning whether unlock time has passed.
+    """
+    isMatured: Boolean!
+    """
+    Timestamp when the delegated FTM unlocks, matures.
+    """
+    unlockTimestamp: Int!
+    """
+    The ID of the validator that the vault has delegated to.
+    """
+    validatorId: String!
+    """
+    The address of the validator that the vault has delegated to.
+    """
+    validatorAddress: String!
 }
 
 type GqlSftmxWithdrawalRequests {
+    """
+    The Withdrawal ID, used for interactions.
+    """
     id: String!
+    """
+    The user address that this request belongs to.
+    """
     user: String!
+    """
+    Amount of sFTMx that is being redeemed.
+    """
     amountSftmx: AmountHumanReadable!
+    """
+    The timestamp when the request was placed. There is a delay until the user can withdraw. See withdrawalDelay.
+    """
     requestTimestamp: Int!
+    """
+    Whether the requests is finished and the user has withdrawn.
+    """
     isWithdrawn: Boolean!
 }
