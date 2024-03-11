@@ -491,16 +491,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
         },
-        // The following are multichain jobs and should only run once for all chains.
-        {
-            name: 'sync-global-coingecko-prices',
-            interval:
-                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
-                    ? every(30, 'minutes')
-                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-                    ? every(2, 'minutes')
-                    : every(10, 'days'),
-        },
         {
             name: 'global-purge-old-tokenprices',
             interval: every(1, 'days'),
