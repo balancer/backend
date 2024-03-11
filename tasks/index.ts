@@ -3,6 +3,13 @@ import { JobsController } from '../modules/controllers/jobs-controller';
 // TODO needed?
 const jobsController = JobsController();
 
+/**
+ * Used to run jobs locally from the command line
+ *
+ * @param job
+ * @param chain
+ * @returns
+ */
 async function run(job: string = process.argv[2], chain: string = process.argv[3]) {
     console.log('Running job', job, chain);
 

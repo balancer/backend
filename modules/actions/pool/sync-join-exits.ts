@@ -31,7 +31,7 @@ export const syncJoinExits = async (vaultSubgraphClient: V3VaultSubgraphClient, 
     const { joinExits } = await vaultSubgraphClient.JoinExits({
         first: 1000,
         where: {
-            blockNumber_gte: String(latestEvent?.blockNumber || 0),
+            blockNumber_gt: String(latestEvent?.blockNumber || 0),
         },
         orderBy: JoinExit_OrderBy.BlockNumber,
         orderDirection: OrderDirection.Asc,

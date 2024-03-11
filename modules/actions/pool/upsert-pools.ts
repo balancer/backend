@@ -1,19 +1,11 @@
-import { Chain, Prisma } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { tokensTransformer } from '../../sources/transformers/tokens-transformer';
-import { poolTransformer, poolTokensTransformer, poolTokensDynamicDataTransformer } from '../../sources/transformers';
 import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
 import { ViemClient } from '../../sources/viem-client';
 import { JoinedSubgraphPool } from '../../sources/subgraphs';
-import { formatUnits } from 'viem';
-
-interface CompletePoolDbEntry {
-    pool: Prisma.PrismaPoolCreateInput;
-    poolDynamicData: Prisma.PrismaPoolDynamicDataUncheckedCreateInput;
-    poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
-    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
-    poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
-}
+import { subgraphPoolUpsert } from '../../sources/transformers/subgraph-pool-upsert';
+import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -52,87 +44,51 @@ export const upsertPools = async (
         console.error('Error creating tokens', e);
     }
 
-    // Get the token prices needed for calculating token balances and total liquidity
-    const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
-        where: {
-            tokenAddress: { in: allTokens.map((token) => token.address) },
-            chain: chain,
-        },
-    });
-
-    // Build helper maps for token prices and decimals
-    const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
-    const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
-
     // Get the data for the tables about pools
-    const dbPools: CompletePoolDbEntry[] = subgraphPools.map((poolData) => {
-        const onchainPoolData = onchainData[poolData.id];
-        const onchainTokensData = Object.fromEntries(onchainPoolData.tokens.map((token) => [token.address, token]));
+    const dbPools = subgraphPools.map((poolData) =>
+        subgraphPoolUpsert(poolData, onchainData[poolData.id], chain, Number(blockNumber)),
+    );
 
-        return {
-            pool: poolTransformer(poolData, chain),
-            poolDynamicData: {
-                id: poolData.id,
-                poolId: poolData.id,
-                chain: chain,
-                totalShares: String(onchainPoolData.totalSupply),
-                totalSharesNum: Number(formatUnits(onchainPoolData.totalSupply, 18)),
-                blockNumber: Number(blockNumber),
-                swapFee: String(onchainPoolData.swapFee ?? '0'),
-                swapEnabled: true,
-                totalLiquidity: 0,
-            },
-            poolToken: poolTokensTransformer(poolData, chain),
-            poolTokenDynamicData: poolTokensDynamicDataTransformer(
-                poolData,
-                onchainTokensData,
-                decimals,
-                prices,
-                chain,
-            ),
-            poolExpandedTokens: poolData.tokens.map(({ address, nestedPool }) => ({
-                tokenAddress: address,
-                poolId: poolData.id,
-                chain: chain,
-                nestedPoolId: nestedPool?.id,
-            })),
-        };
-    });
+    // Enrich updates with USD values
+    const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);
 
     // Upsert pools to the database
-    for (const { pool, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of dbPools) {
+    for (const { pool, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of poolsWithUSD) {
+        console.log(poolDynamicData);
         try {
-            await prisma.prismaPool.upsert({
-                where: { id_chain: { id: pool.id, chain: pool.chain } },
-                create: pool,
-                update: pool,
-            });
+            await prisma.$transaction([
+                prisma.prismaPool.upsert({
+                    where: { id_chain: { id: pool.id, chain: pool.chain } },
+                    create: pool,
+                    update: pool,
+                }),
 
-            await prisma.prismaPoolDynamicData.upsert({
-                where: { poolId_chain: { poolId: pool.id, chain: pool.chain } },
-                create: poolDynamicData,
-                update: poolDynamicData,
-            });
+                prisma.prismaPoolDynamicData.upsert({
+                    where: { poolId_chain: { poolId: pool.id, chain: pool.chain } },
+                    create: poolDynamicData,
+                    update: poolDynamicData,
+                }),
 
-            // First nullify the pool tokens and then insert them again
-            await prisma.prismaPoolToken.deleteMany({ where: { poolId: pool.id } });
-            await prisma.prismaPoolTokenDynamicData.deleteMany({ where: { poolTokenId: { startsWith: pool.id } } });
-            await prisma.prismaPoolExpandedTokens.deleteMany({ where: { poolId: pool.id } });
+                // First nullify the pool tokens and then insert them again
+                prisma.prismaPoolToken.deleteMany({ where: { poolId: pool.id } }),
+                prisma.prismaPoolTokenDynamicData.deleteMany({ where: { poolTokenId: { startsWith: pool.id } } }),
+                prisma.prismaPoolExpandedTokens.deleteMany({ where: { poolId: pool.id } }),
 
-            await prisma.prismaPoolToken.createMany({
-                data: poolToken,
-                skipDuplicates: true,
-            });
+                prisma.prismaPoolToken.createMany({
+                    data: poolToken,
+                    skipDuplicates: true,
+                }),
 
-            await prisma.prismaPoolTokenDynamicData.createMany({
-                data: poolTokenDynamicData,
-                skipDuplicates: true,
-            });
+                prisma.prismaPoolTokenDynamicData.createMany({
+                    data: poolTokenDynamicData,
+                    skipDuplicates: true,
+                }),
 
-            await prisma.prismaPoolExpandedTokens.createMany({
-                data: poolExpandedTokens,
-                skipDuplicates: true,
-            });
+                prisma.prismaPoolExpandedTokens.createMany({
+                    data: poolExpandedTokens,
+                    skipDuplicates: true,
+                }),
+            ]);
         } catch (e) {
             console.error('Error upserting pool', e);
         }

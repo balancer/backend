@@ -20,10 +20,8 @@ export function poolTokensTransformer(poolData: JoinedSubgraphPool, chain: Chain
 export function poolTokensDynamicDataTransformer(
     poolData: JoinedSubgraphPool,
     onchainTokensData: { [address: string]: { balance: bigint; rate: bigint } },
-    decimals: { [address: string]: number },
-    prices: { [address: string]: number },
     chain: Chain,
-): Prisma.PrismaPoolTokenDynamicDataCreateManyInput[] {
+) {
     const tokens = poolData.tokens ?? [];
 
     return tokens.map((token, i) => {
@@ -31,7 +29,6 @@ export function poolTokensDynamicDataTransformer(
         const onchainTokenData = onchainTokensData[token.address];
         const balance = onchainTokenData?.balance ?? 0n;
         const rate = onchainTokenData?.rate ?? 0n;
-        const price = prices[token.address] ?? 0;
 
         return {
             id,
@@ -39,7 +36,6 @@ export function poolTokensDynamicDataTransformer(
             chain,
             blockNumber: Number(poolData.blockNumber),
             balance: String(balance),
-            balanceUSD: Number(formatUnits(balance, decimals[token.address])) * price,
             priceRate: String(rate),
             weight: poolData.weights[token.index] ?? null,
         };

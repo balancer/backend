@@ -2,6 +2,8 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchPoolData } from '../../sources/contracts/fetch-pool-data';
 import { ViemClient } from '../../sources/viem-client';
+import { onchainPoolUpdate } from '../../sources/transformers/onchain-pool-update';
+import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -25,64 +27,43 @@ export const syncPools = async (
     const onchainData = await fetchPoolData(vaultAddress, ids, viemClient, blockNumber);
 
     // Get the data for the tables about pools
-    const dbUpdates = Object.keys(onchainData).map((id) => {
-        const onchainPoolData = onchainData[id];
-
-        return {
-            poolDynamicData: {
-                where: { poolId_chain: { poolId: id.toLowerCase(), chain } },
-                data: {
-                    isPaused: onchainPoolData.isPoolPaused,
-                    isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
-                    totalShares: String(onchainPoolData.totalSupply),
-                    blockNumber: Number(blockNumber),
-                    swapFee: String(onchainPoolData.swapFee ?? '0'),
-                },
-            },
-            poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
-                where: {
-                    id_chain: {
-                        id: `${id}-${tokenData.address.toLowerCase()}`,
-                        chain,
-                    },
-                },
-                data: {
-                    balance: String(tokenData.balance),
-                    priceRate: String(tokenData.rate),
-                    blockNumber: Number(blockNumber),
-                },
-            })),
-        };
-    });
-
-    /** TODO: enrich updates with USD values
-    const tokenAddresses = Array.from(
-        new Set(Object.values(onchainData).flatMap((pool) => pool.tokens.map((token) => token.address))),
+    const dbUpdates = Object.keys(onchainData).map((id) =>
+        onchainPoolUpdate(onchainData[id], Number(blockNumber), chain, id),
     );
 
-    // Get the token prices needed for calculating token balances and total liquidity
-    const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
+    // Needed to get the token decimals for the USD calculations,
+    // Keeping it external, because we fetch these tokens in the upsert pools function
+    const allTokens = await prisma.prismaToken.findMany({
         where: {
-            tokenAddress: { in: tokenAddresses },
             chain: chain,
-        },
-        include: {
-            token: true,
         },
     });
 
-    // Build helper maps for token prices and decimals
-    const decimals = Object.fromEntries(dbPrices.map(({ token }) => [token.address, token.decimals]));
-    const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
-    */
+    const poolsWithUSD = await poolUpsertsUsd(dbUpdates, chain, allTokens);
 
     // Update pools data to the database
-    for (const { poolDynamicData, poolTokenDynamicData } of dbUpdates) {
+    for (const { poolDynamicData, poolTokenDynamicData } of poolsWithUSD) {
         try {
-            await prisma.prismaPoolDynamicData.update(poolDynamicData);
+            await prisma.prismaPoolDynamicData.update({
+                where: {
+                    poolId_chain: {
+                        poolId: poolDynamicData.poolId,
+                        chain: poolDynamicData.chain,
+                    },
+                },
+                data: poolDynamicData,
+            });
 
             for (const tokenUpdate of poolTokenDynamicData) {
-                await prisma.prismaPoolTokenDynamicData.update(tokenUpdate);
+                await prisma.prismaPoolTokenDynamicData.update({
+                    where: {
+                        id_chain: {
+                            id: tokenUpdate.id,
+                            chain: tokenUpdate.chain,
+                        },
+                    },
+                    data: tokenUpdate,
+                });
             }
         } catch (e) {
             console.error('Error upserting pool', e);
