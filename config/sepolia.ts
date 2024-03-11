@@ -2,7 +2,7 @@ import { BigNumber } from 'ethers';
 import { env } from '../app/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
-export const sepoliaConfig: NetworkData = {
+export default <NetworkData>{
     chain: {
         slug: 'sepolia',
         id: 11155111,
@@ -39,6 +39,8 @@ export const sepoliaConfig: NetworkData = {
     },
     rpcUrl: env.GROVE_CITY
         ? `https://sepolia.rpc.grove.city/v1/${env.GROVE_CITY}`
+        : env.ALCHEMY_API_KEY
+        ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : env.INFURA_API_KEY
         ? `https://sepolia.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',

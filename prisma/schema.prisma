@@ -542,6 +542,34 @@ model PrismaReliquaryTokenBalanceSnapshot {
     balance             String
 }
 
+enum PoolEventType {
+    JOIN
+    EXIT
+    SWAP
+}
+
+model PoolEvent {
+    id                  String @id
+    tx                  String
+    type                PoolEventType
+    chain               Chain
+    poolId              String
+    userAddress         String
+    blockNumber         Int
+    blockTimestamp      Int
+    logIndex            Int
+    vaultVersion        Int @default(2)
+    valueUSD            Float
+    payload             Json
+
+    @@index([type])
+    @@index([chain])
+    @@index([chain, poolId])
+    @@index([userAddress])
+    @@index([blockNumber])
+    @@index([logIndex])
+}
+
 
 
 model PrismaSftmxStakingData {

@@ -1,21 +1,14 @@
-import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
-import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
-import {
-    TypePoolFragment as PoolSubgraphPoolFragment,
-    PoolType,
-} from '../../subgraphs/balancer-v3-pools/generated/types';
+import { Chain, PrismaPoolType } from '@prisma/client';
+import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, linear, element, stable } from '../../pool/pool-data';
+import { JoinedSubgraphPool } from '../subgraphs';
 
-export const poolTransformer = (
-    vaultSubgraphPool: VaultSubgraphPoolFragment,
-    poolSubgraphPool: PoolSubgraphPoolFragment,
-    chain: Chain,
-) => {
+export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
     let type: PrismaPoolType;
     let typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = {};
 
-    switch (poolSubgraphPool.factory.type) {
+    switch (poolData.factory.type) {
         case PoolType.Weighted:
             type = PrismaPoolType.WEIGHTED;
             break;
@@ -30,19 +23,19 @@ export const poolTransformer = (
     }
 
     return {
-        id: vaultSubgraphPool.id.toLowerCase(),
+        id: poolData.id.toLowerCase(),
         chain: chain,
         vaultVersion: 3,
-        address: vaultSubgraphPool.id.toLowerCase(),
+        address: poolData.id.toLowerCase(),
         decimals: 18,
-        symbol: vaultSubgraphPool.symbol,
-        name: vaultSubgraphPool.name,
-        owner: vaultSubgraphPool.id.toLowerCase(), //TODO
-        factory: poolSubgraphPool.factory.id.toLowerCase(),
+        symbol: poolData.symbol,
+        name: poolData.name,
+        owner: poolData.id.toLowerCase(), //TODO
+        factory: poolData.factory.id.toLowerCase(),
         type: type,
         typeData: typeData,
-        version: poolSubgraphPool.factory.version,
-        createTime: Number(vaultSubgraphPool.blockTimestamp),
+        version: poolData.factory.version,
+        createTime: Number(poolData.blockTimestamp),
     };
 };
 

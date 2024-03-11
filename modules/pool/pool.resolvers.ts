@@ -1,9 +1,10 @@
 import { poolService } from './pool.service';
-import { Resolvers } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
+import { QueriesController } from '../controllers/queries-controller';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -22,14 +23,17 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
-        poolGetSwaps: async (parent, args, context) => {
+        // TODO: Deprecate in favor of poolGetEvents
+        poolGetSwaps: (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
             } else if (!args.where?.chainIn) {
                 throw new Error('poolGetSwaps error: Provide "where.chainIn" param');
             }
-            return poolService.getPoolSwaps(args);
+            return QueriesController().getEvents({ ...args, where: { ...args.where, typeIn: ['SWAP'] } }) as Promise<
+                GqlPoolSwap[]
+            >;
         },
         poolGetBatchSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
@@ -40,14 +44,15 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolBatchSwaps(args);
         },
-        poolGetJoinExits: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
-            }
-            return poolService.getPoolJoinExits(args);
+        // TODO: Deprecate in favor of poolGetEvents
+        poolGetJoinExits: (parent, args, context) => {
+            return QueriesController().getEvents({
+                ...args,
+                where: { ...args.where, typeIn: ['JOIN', 'EXIT'] },
+            }) as Promise<GqlPoolJoinExit[]>;
+        },
+        poolGetEvents: (parent, args, context) => {
+            return QueriesController().getEvents(args);
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

@@ -1,4 +1,31 @@
-import { Prisma, PrismaToken, PrismaTokenPrice, PrismaTokenTypeOption } from '@prisma/client';
+import { Prisma, PrismaToken, PrismaTokenTypeOption, PoolEvent } from '@prisma/client';
+
+export type SwapEvent = PoolEvent & {
+    type: 'SWAP';
+    payload: {
+        tokenIn: {
+            address: string;
+            amount: string;
+            valueUSD: number;
+        };
+        tokenOut: {
+            address: string;
+            amount: string;
+            valueUSD: number;
+        };
+    };
+};
+
+export type JoinExitEvent = PoolEvent & {
+    type: 'JOIN' | 'EXIT';
+    payload: {
+        tokens: {
+            address: string;
+            amount: string;
+            valueUSD: number;
+        }[];
+    };
+};
 
 export const poolWithTokens = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: { tokens: true },

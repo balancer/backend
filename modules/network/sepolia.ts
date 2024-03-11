@@ -12,7 +12,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { sepoliaConfig as sepoliaNetworkData } from '../../config/sepolia';
+import sepoliaNetworkData from '../../config/sepolia';
 
 export { sepoliaNetworkData };
 
@@ -105,13 +105,26 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
+        // V3 jobs
         {
-            name: 'sync-changed-pools-v3',
-            interval: every(15, 'minutes'),
+            name: 'add-pools-v3',
+            interval: every(5, 'minutes'),
         },
         {
-            name: 'sync-new-pools-from-subgraph-v3',
-            interval: every(20, 'minutes'),
+            name: 'sync-pools-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-join-exits-v2',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'sync-join-exits-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-swaps-v3',
+            interval: every(1, 'minutes'),
         },
         {
             name: 'update-swaps-volume-and-fees-v3',
