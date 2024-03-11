@@ -92,7 +92,7 @@ export class MasterchefFarmAprService implements PoolAprService {
             return [];
         }
 
-        const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress);
+        const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress, networkContext.chain);
         const beetsPerBlock = Number(parseInt(farm.masterChef.beetsPerBlock) / 1e18) * FARM_EMISSIONS_PERCENT;
         const beetsPerYear = beetsPerBlock * blocksPerYear;
         const farmBeetsPerYear = (parseInt(farm.allocPoint) / parseInt(farm.masterChef.totalAllocPoint)) * beetsPerYear;
@@ -122,7 +122,11 @@ export class MasterchefFarmAprService implements PoolAprService {
                         },
                     },
                 });
-                const rewardTokenPrice = tokenService.getPriceForToken(tokenPrices, rewardToken.token);
+                const rewardTokenPrice = tokenService.getPriceForToken(
+                    tokenPrices,
+                    rewardToken.token,
+                    networkContext.chain,
+                );
                 const rewardTokenPerYear = parseFloat(farmRewarder.rewardPerSecond) * secondsPerYear;
                 const rewardTokenValuePerYear = rewardTokenPrice * rewardTokenPerYear;
                 const rewardApr = rewardTokenValuePerYear / farmTvl > 0 ? rewardTokenValuePerYear / farmTvl : 0;

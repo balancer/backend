@@ -224,8 +224,8 @@ export class PoolSwapService {
                 skipDuplicates: true,
                 data: swaps.map((swap) => {
                     let valueUSD = 0;
-                    const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn);
-                    const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut);
+                    const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn, this.chain);
+                    const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut, this.chain);
 
                     if (tokenInPrice > 0) {
                         valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);
@@ -350,8 +350,8 @@ export class PoolSwapService {
                                 tokenAmountOut: endSwap.tokenAmountOut,
                                 tx: startSwap.tx,
                                 valueUSD: endSwap.valueUSD,
-                                tokenInPrice: tokenService.getPriceForToken(tokenPrices, startSwap.tokenIn),
-                                tokenOutPrice: tokenService.getPriceForToken(tokenPrices, endSwap.tokenOut),
+                                tokenInPrice: tokenService.getPriceForToken(tokenPrices, startSwap.tokenIn, this.chain),
+                                tokenOutPrice: tokenService.getPriceForToken(tokenPrices, endSwap.tokenOut, this.chain),
                             },
                         }),
                         ...batchSwaps.map((swap, index) =>

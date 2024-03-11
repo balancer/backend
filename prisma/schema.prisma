@@ -610,10 +610,12 @@ model PrismaToken {
     coingeckoPlatformId String?
     coingeckoContractAddress String?
     coingeckoTokenId    String?
+    excludedFromCoingecko Boolean           @default(false)
 
-    dynamicData         PrismaTokenDynamicData?
     currentPrice        PrismaTokenCurrentPrice?
+    dynamicData         PrismaTokenDynamicData?
     prices              PrismaTokenPrice[]
+
     types               PrismaTokenType[]
 
     expandedPools       PrismaPoolExpandedTokens[]
@@ -632,9 +634,9 @@ model PrismaTokenCurrentPrice {
     chain               Chain                
 
     updatedAt           DateTime             @updatedAt
+    updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 }
 
 model PrismaTokenPrice {
@@ -644,9 +646,9 @@ model PrismaTokenPrice {
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
     chain               Chain               
     updatedAt           DateTime            @updatedAt
+    updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 
     high                Float
     low                 Float

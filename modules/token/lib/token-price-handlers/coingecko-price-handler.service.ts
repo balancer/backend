@@ -2,91 +2,110 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
-import { CoingeckoService } from '../../../coingecko/coingecko.service';
-import { networkContext } from '../../../network/network-context.service';
+import { AllNetworkConfigs } from '../../../network/network-config';
+import { Chain } from '@prisma/client';
+import _ from 'lodash';
+import { coingeckoDataService } from '../coingecko-data.service';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 export class CoingeckoPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = true;
     public readonly id = 'CoingeckoPriceHandlerService';
 
-    constructor(private readonly coingeckoService: CoingeckoService) {}
-
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return tokens
-            .filter(
-                (token) =>
-                    !token.types.includes('BPT') &&
-                    !token.types.includes('PHANTOM_BPT') &&
-                    !token.types.includes('LINEAR_WRAPPED_TOKEN') &&
-                    !token.coingeckoTokenId &&
-                    !networkContext.data.coingecko.excludedTokenAddresses.includes(token.address),
-            )
-            .map((token) => token.address);
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        // excluded via network config
+        const excludedFromCoingecko: { address: string; chain: Chain }[] = [];
+        for (const chain in AllNetworkConfigs) {
+            const config = AllNetworkConfigs[chain];
+            config.data.coingecko.excludedTokenAddresses.forEach((address) =>
+                excludedFromCoingecko.push({ address: address, chain: config.data.chain.prismaId }),
+            );
+        }
+        return tokens.filter(
+            (token) =>
+                !excludedFromCoingecko.find(
+                    (excluded) => excluded.address === token.address && excluded.chain === token.chain,
+                ) &&
+                //excluded via content service
+                !token.excludedFromCoingecko &&
+                token.coingeckoTokenId,
+        );
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    // we update based on coingecko ID
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
+        const acceptedTokens = this.getAcceptedTokens(tokens);
+
         const timestamp = timestampRoundedUpToNearestHour();
-        const tokensUpdated: string[] = [];
+        const updated: PrismaTokenWithTypes[] = [];
+        const tokenAndPrices: tokenAndPrice[] = [];
 
-        const tokenAddresses = tokens.map((item) => item.address);
+        const uniqueTokensWithIds = _.uniqBy(acceptedTokens, 'coingeckoTokenId');
 
-        const tokenPricesByAddress = await this.coingeckoService.getTokenPrices(tokenAddresses);
+        const chunks = _.chunk(uniqueTokensWithIds, 250); //max page size is 250
 
-        let operations: any[] = [];
-        for (let tokenAddress of Object.keys(tokenPricesByAddress)) {
-            const priceUsd = tokenPricesByAddress[tokenAddress].usd;
-            const normalizedTokenAddress = tokenAddress.toLowerCase();
-            const exists = tokenAddresses.includes(normalizedTokenAddress);
-            if (!exists) {
-                console.log('skipping token', normalizedTokenAddress);
+        for (const chunk of chunks) {
+            const response = await coingeckoDataService.getMarketDataForTokenIds(
+                chunk.map((item) => item.coingeckoTokenId || ''),
+            );
+            let operations: any[] = [];
+
+            for (const item of response) {
+                const tokensToUpdate = acceptedTokens.filter((token) => token.coingeckoTokenId === item.id);
+                for (const tokenToUpdate of tokensToUpdate) {
+                    // if we have a price at all
+                    if (item.current_price) {
+                        const data = {
+                            price: item.current_price,
+                            ath: item.ath ?? item.current_price,
+                            atl: item.atl ?? item.current_price,
+                            marketCap: item.market_cap ?? undefined,
+                            fdv: item.fully_diluted_valuation ?? undefined,
+                            high24h: item.high_24h ?? item.current_price,
+                            low24h: item.low_24h ?? item.current_price,
+                            priceChange24h: item.price_change_24h ?? 0,
+                            priceChangePercent24h: item.price_change_percentage_24h ?? 0,
+                            priceChangePercent7d: item.price_change_percentage_7d_in_currency ?? undefined,
+                            priceChangePercent14d: item.price_change_percentage_14d_in_currency ?? undefined,
+                            priceChangePercent30d: item.price_change_percentage_30d_in_currency ?? undefined,
+                            updatedAt: item.last_updated,
+                        };
+
+                        operations.push(
+                            prisma.prismaTokenDynamicData.upsert({
+                                where: {
+                                    tokenAddress_chain: {
+                                        tokenAddress: tokenToUpdate.address,
+                                        chain: tokenToUpdate.chain,
+                                    },
+                                },
+                                update: data,
+                                create: {
+                                    coingeckoId: item.id,
+                                    tokenAddress: tokenToUpdate.address,
+                                    chain: tokenToUpdate.chain,
+                                    ...data,
+                                },
+                            }),
+                        );
+
+                        tokenAndPrices.push({
+                            address: tokenToUpdate.address,
+                            chain: tokenToUpdate.chain,
+                            price: item.current_price,
+                        });
+                        updated.push(tokenToUpdate);
+                    }
+                }
             }
-            if (exists && priceUsd) {
-                operations.push(
-                    prisma.prismaTokenPrice.upsert({
-                        where: {
-                            tokenAddress_timestamp_chain: {
-                                tokenAddress: normalizedTokenAddress,
-                                timestamp,
-                                chain: networkContext.chain,
-                            },
-                        },
-                        update: { price: priceUsd, close: priceUsd },
-                        create: {
-                            tokenAddress: normalizedTokenAddress,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price: priceUsd,
-                            high: priceUsd,
-                            low: priceUsd,
-                            open: priceUsd,
-                            close: priceUsd,
-                            coingecko: true,
-                        },
-                    }),
-                );
+            await updatePrices(this.id, tokenAndPrices, timestamp);
 
-                operations.push(
-                    prisma.prismaTokenCurrentPrice.upsert({
-                        where: {
-                            tokenAddress_chain: { tokenAddress: normalizedTokenAddress, chain: networkContext.chain },
-                        },
-                        update: { price: priceUsd },
-                        create: {
-                            tokenAddress: normalizedTokenAddress,
-                            chain: networkContext.chain,
-                            timestamp,
-                            price: priceUsd,
-                            coingecko: true,
-                        },
-                    }),
-                );
-
-                tokensUpdated.push(normalizedTokenAddress);
-            }
+            await prismaBulkExecuteOperations(operations);
         }
-
-        await Promise.all(operations);
-
-        return tokensUpdated;
+        return updated;
     }
 }

@@ -4,11 +4,11 @@ import { TokenPriceService } from './lib/token-price.service';
 import { Chain, PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { GqlTokenChartDataRange, MutationTokenDeletePriceArgs, MutationTokenDeleteTokenTypeArgs } from '../../schema';
-import { coingeckoService } from '../coingecko/coingecko.service';
+import { GqlTokenChartDataRange, MutationTokenDeleteTokenTypeArgs } from '../../schema';
 import { networkContext } from '../network/network-context.service';
 import { Dictionary } from 'lodash';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { chainIdToChain } from '../network/chain-id-to-chain';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -83,14 +83,18 @@ export class TokenService {
         }));
     }
 
-    public async updateTokenPrices(): Promise<void> {
-        return this.tokenPriceService.updateTokenPrices();
+    public async updateTokenPrices(chainIds: string[]): Promise<void> {
+        const chains: Chain[] = [];
+        for (const chainId of chainIds) {
+            chains.push(chainIdToChain[chainId]);
+        }
+        return this.tokenPriceService.updateAllTokenPrices(chains);
     }
 
     public async getTokenPrices(chain = networkContext.chain): Promise<PrismaTokenCurrentPrice[]> {
         let tokenPrices = this.cache.get(`${TOKEN_PRICES_CACHE_KEY}:${chain}`);
         if (!tokenPrices) {
-            tokenPrices = await this.tokenPriceService.getCurrentTokenPrices(chain);
+            tokenPrices = await this.tokenPriceService.getCurrentTokenPrices([chain]);
             this.cache.put(`${TOKEN_PRICES_CACHE_KEY}:${chain}`, tokenPrices, 30 * 1000);
         }
         return tokenPrices;
@@ -121,22 +125,18 @@ export class TokenService {
         return this.tokenPriceService.getWhiteListedCurrentTokenPrices(chains);
     }
 
-    public async getProtocolTokenPrice(): Promise<string> {
+    public async getProtocolTokenPrice(chain: Chain): Promise<string> {
         const tokenPrices = await tokenService.getTokenPrices();
 
         if (networkContext.data.protocolToken === 'bal') {
-            return tokenService.getPriceForToken(tokenPrices, networkContext.data.bal!.address).toString();
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.bal!.address, chain).toString();
         } else {
-            return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets!.address).toString();
+            return tokenService.getPriceForToken(tokenPrices, networkContext.data.beets!.address, chain).toString();
         }
     }
 
-    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string): number {
-        return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress);
-    }
-
-    public async syncCoingeckoPricesForAllChains(): Promise<void> {
-        await this.coingeckoDataService.syncCoingeckoPricesForAllChains();
+    public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string, chain: Chain): number {
+        return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress, chain);
     }
 
     public async getTokenDynamicData(tokenAddress: string, chain: Chain): Promise<PrismaTokenDynamicData | null> {
@@ -181,12 +181,20 @@ export class TokenService {
         return dynamicData;
     }
 
-    public async getDataForRange(
+    public async getTokenPricesForRange(
+        tokenAddress: string[],
+        range: GqlTokenChartDataRange,
+        chain: Chain,
+    ): Promise<PrismaTokenPrice[]> {
+        return this.tokenPriceService.getTokenPricesForRange(tokenAddress, range, chain);
+    }
+
+    public async getTokenPriceForRange(
         tokenAddress: string,
         range: GqlTokenChartDataRange,
         chain: Chain,
     ): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getDataForRange(tokenAddress, range, chain);
+        return this.tokenPriceService.getTokenPricesForRange([tokenAddress], range, chain);
     }
 
     public async getRelativeDataForRange(
@@ -198,33 +206,17 @@ export class TokenService {
         return this.tokenPriceService.getRelativeDataForRange(tokenIn, tokenOut, range, chain);
     }
 
-    public async initChartData(tokenAddress: string) {
-        await this.coingeckoDataService.initChartData(tokenAddress);
-    }
-
-    public async getTokenPriceFrom24hAgo(): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chain}`);
+    public async getTokenPriceFrom24hAgo(chain: Chain): Promise<PrismaTokenCurrentPrice[]> {
+        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${chain}`);
         if (!tokenPrices24hAgo) {
-            tokenPrices24hAgo = await this.tokenPriceService.getTokenPriceFrom24hAgo();
-            this.cache.put(
-                `${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${networkContext.chain}`,
-                tokenPrices24hAgo,
-                60 * 15 * 1000,
-            );
+            tokenPrices24hAgo = await this.tokenPriceService.getTokenPricesFrom24hAgo([chain]);
+            this.cache.put(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${chain}`, tokenPrices24hAgo, 60 * 15 * 1000);
         }
         return tokenPrices24hAgo;
     }
 
-    public async getHistoricalTokenPrices(chain: Chain) {
-        return this.tokenPriceService.getHistoricalTokenPrices(chain);
-    }
-
     public async purgeOldTokenPricesForAllChains() {
         return this.tokenPriceService.purgeOldTokenPricesForAllChains();
-    }
-
-    public async deleteTokenPrice(args: MutationTokenDeletePriceArgs) {
-        return this.tokenPriceService.deleteTokenPrice(args);
     }
 
     public async deleteTokenType({ tokenAddress, type }: MutationTokenDeleteTokenTypeArgs) {
@@ -246,4 +238,4 @@ export class TokenService {
     }
 }
 
-export const tokenService = new TokenService(new TokenPriceService(), new CoingeckoDataService(coingeckoService));
+export const tokenService = new TokenService(new TokenPriceService(), new CoingeckoDataService());

@@ -7,8 +7,8 @@ export async function swapsTransformer(swaps: SwapFragment[], chain: Chain): Pro
 
     return swaps.map((swap) => {
         let valueUSD = 0;
-        const tokenInPrice = tokenService.getPriceForToken(tokenPrices, swap.tokenIn); // TODO need to get price close to swap timestamp
-        const tokenOutPrice = tokenService.getPriceForToken(tokenPrices, swap.tokenOut); // TODO need to get price close to swap timestamp
+        const tokenInPrice = tokenService.getPriceForToken(tokenPrices, swap.tokenIn, chain); // TODO need to get price close to swap timestamp
+        const tokenOutPrice = tokenService.getPriceForToken(tokenPrices, swap.tokenOut, chain); // TODO need to get price close to swap timestamp
 
         if (tokenInPrice > 0) {
             valueUSD = tokenInPrice * parseFloat(swap.tokenAmountIn);

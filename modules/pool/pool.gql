@@ -36,9 +36,9 @@ extend type Mutation {
     poolUpdateVolumeAndFeeValuesForAllPools: String!
     poolSyncSwapsForLast48Hours: String!
     poolSyncSanityPoolData: String!
-    poolUpdateAprs: String!
+    poolUpdateAprs(chain: GqlChain!): String!
     poolSyncPoolAllTokensRelationship: String!
-    poolReloadAllPoolAprs: String!
+    poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolSyncTotalShares: String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
     poolSyncStakingForPools: String!

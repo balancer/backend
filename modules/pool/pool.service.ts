@@ -20,7 +20,6 @@ import {
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
 } from '../../schema';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
@@ -37,6 +36,7 @@ import { networkContext } from '../network/network-context.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
+import { coingeckoDataService } from '../token/lib/coingecko-data.service';
 
 export class PoolService {
     constructor(
@@ -254,16 +254,16 @@ export class PoolService {
         await Promise.all(this.poolStakingServices.map((stakingService) => stakingService.syncStakingForPools()));
     }
 
-    public async updatePoolAprs() {
-        await this.poolAprUpdaterService.updatePoolAprs();
+    public async updatePoolAprs(chain: Chain) {
+        await this.poolAprUpdaterService.updatePoolAprs(chain);
     }
 
     public async syncChangedPools() {
         await this.poolSyncService.syncChangedPools();
     }
 
-    public async reloadAllPoolAprs() {
-        await this.poolAprUpdaterService.reloadAllPoolAprs();
+    public async reloadAllPoolAprs(chain: Chain) {
+        await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
     }
 
     public async updateLiquidity24hAgoForAllPools() {
@@ -493,6 +493,6 @@ export const poolService = new PoolService(
     new PoolAprUpdaterService(),
     new PoolSyncService(),
     new PoolSwapService(tokenService),
-    new PoolSnapshotService(coingeckoService),
+    new PoolSnapshotService(coingeckoDataService),
     new ReliquarySnapshotService(reliquarySubgraphService),
 );

@@ -16,7 +16,6 @@ export interface NetworkConfig {
     poolStakingServices: PoolStakingService[];
     poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];
-    tokenPriceHandlers: TokenPriceHandler[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
     services: NetworkServices;
@@ -79,7 +78,6 @@ export interface NetworkData {
     protocolToken: 'beets' | 'bal';
     beets?: {
         address: string;
-        beetsPriceProviderRpcUrl: string;
     };
     fbeets?: {
         address: string;
