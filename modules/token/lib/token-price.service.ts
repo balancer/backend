@@ -121,8 +121,6 @@ export class TokenPriceService {
         }));
 
         for (const handler of this.priceHandlers) {
-            // const accepted = await handler.getAcceptedTokens(tokensWithTypes);
-            // const acceptedTokens = tokensWithTypes.filter((token) => accepted.includes(token.address));
             let updated: PrismaTokenWithTypes[] = [];
 
             try {
