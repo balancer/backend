@@ -68,18 +68,6 @@ const config = {
         ],
         name: 'test-api-v3',
         originUrl: 'https://test-api-v3-origin.balancer.fi/graphql',
-        getConsumerIdentifiers:
-            "(() => {\n  function getIp(req) {\n    const { ip } = req;\n    // const allowedIps = []\n    // if (allowedIps.includes(ip)) {\n    //   return null\n    // }\n    if (req.headers['X-Forwarded-For']) {\n        return req.headers['X-Forwarded-For'].split(',')[0];\n    }\n    return ip;\n}\n  return (req) => ({\n    ip: getIp(req),\n})\n})()",
-        rateLimit: {
-            name: 'IP Limit',
-            consumerIdentifier: 'ip',
-            allowList: [],
-            limit: {
-                type: 'QueryComplexity',
-                budget: 5000,
-                window: '5m',
-            },
-        },
     },
 };
 
