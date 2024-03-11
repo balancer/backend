@@ -45,12 +45,12 @@ export function calculatePriceImpact(paths: PathWithAmount[], swapKind: SwapKind
             ),
     );
 
-    const amountInitial = swapKind === SwapKind.GivenIn ? getInputAmount(paths).amount : getOutputAmount(paths).amount;
+    const amountInitial = swapKind === SwapKind.GivenIn ? getInputAmount(paths).amount : getInputAmount(pathsReverse).amount;
 
     const amountFinal =
-        swapKind === SwapKind.GivenIn ? getOutputAmount(pathsReverse).amount : getInputAmount(pathsReverse).amount;
+        swapKind === SwapKind.GivenIn ? getOutputAmount(pathsReverse).amount : getOutputAmount(paths).amount;
 
-    const priceImpact = MathSol.divDownFixed(abs(amountInitial - amountFinal), amountInitial * 2n);
+    const priceImpact = MathSol.divDownFixed(amountInitial - amountFinal, amountInitial * 2n);
     return PriceImpactAmount.fromRawAmount(priceImpact);
 }
 
