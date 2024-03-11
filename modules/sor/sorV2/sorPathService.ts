@@ -190,11 +190,11 @@ class SorPathService implements SwapService {
         }
 
         // price impact does not take the updatedAmount into account
-        let priceImpact: string = '0';
+        let priceImpact: string | undefined;
         try {
             priceImpact = calculatePriceImpact(paths, swapKind).decimal.toFixed(4);
         } catch (error) {
-            priceImpact = 'undefined';
+            priceImpact = undefined;
         }
 
         // get all affected pools
