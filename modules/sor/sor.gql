@@ -134,7 +134,7 @@ type GqlSorGetSwapPaths {
     """
     Price impact in percent. 0.01 -> 0.01%
     """
-    priceImpact: AmountHumanReadable!
+    priceImpact: AmountHumanReadable
 }
 
 """
