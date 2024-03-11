@@ -139,7 +139,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => tokenService.updateTokenPrices([chainId]),
+                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigs)),
                     res,
                     next,
                 );
