@@ -122,9 +122,19 @@ export class PoolUsdDataService {
             false,
         );
 
+        // Do we have all the pools in the db?
+        const dbPools = await prisma.prismaPoolDynamicData.findMany({
+            where: { chain: this.chain },
+        });
+        const exitingPoolIds = dbPools.map((pool) => pool.id);
+
         let updates: any[] = [];
 
         for (const pool of subgraphPools) {
+            if (!exitingPoolIds.includes(pool.id)) {
+                continue;
+            }
+
             const balanceUSDs = (pool.tokens || []).map((token) => ({
                 id: token.id,
                 balanceUSD:
@@ -139,6 +149,7 @@ export class PoolUsdDataService {
             );
 
             updates.push(
+                // we use upsert here, as we might not have the pool in the db yet
                 prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: this.chain } },
                     data: { totalLiquidity24hAgo: totalLiquidity, totalShares24hAgo: pool.totalShares },
