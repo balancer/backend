@@ -187,13 +187,13 @@ export const data: NetworkData = {
                 eFRAX: { address: '0x5484451a88a35cd0878a1be177435ca8a0e4054e' },
             },
         },
-        gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
-            tokens: {
-                dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
-                dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
-            },
-        },
+        // gearbox: {
+        //     sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+        //     tokens: {
+        //         dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
+        //         dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
+        //     },
+        // },
         idle: {
             sourceUrl: 'https://api.idle.finance/junior-rates/',
             authorizationHeader:

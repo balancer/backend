@@ -127,7 +127,7 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(20, 'minutes'),
         },
         {
-            name: 'supdate-swaps-volume-and-fees-v3',
+            name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
         },
         {
