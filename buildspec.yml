@@ -3,7 +3,7 @@ env:
     variables:
         V3_SUBGRAPH: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest'
         V3_POOLS_SUBGRAPH: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest'
-        BALANCER_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-optimism'
+        BALANCER_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2'
         MASTERCHEF_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2'
         RELIQUARY_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary'
         BLOCKS_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks'
