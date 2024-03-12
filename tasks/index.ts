@@ -5,6 +5,7 @@ const jobsController = JobsController();
 
 /**
  * Used to run jobs locally from the command line
+ * e.g. `yarn task sync-pools-v3 11155111`
  *
  * @param job
  * @param chain
@@ -31,6 +32,6 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
 }
 
 run()
-    .then((r) => console.log)
+    .then((r) => console.log(r))
     .then(() => process.exit(0))
-    .catch((e) => console.error);
+    .catch((e) => console.error(e));
