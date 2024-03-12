@@ -99,6 +99,10 @@ export class PoolService {
         return prisma.prismaPoolFilter.findMany({ where: { chain: this.chain } });
     }
 
+    public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
+        return this.poolSwapService.getSwaps(args);
+    }
+
     public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
         const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
 
@@ -111,6 +115,10 @@ export class PoolService {
                 };
             }),
         }));
+    }
+
+    public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
+        return this.poolSwapService.getJoinExits(args);
     }
 
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
