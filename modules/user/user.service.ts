@@ -23,6 +23,26 @@ export class UserService {
         return this.userBalanceService.getUserPoolBalances(address, chains);
     }
 
+    public async getUserPoolInvestments(
+        address: string,
+        poolId: string,
+        chain: Chain,
+        first?: number,
+        skip?: number,
+    ): Promise<GqlPoolJoinExit[]> {
+        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, chain, first, skip);
+    }
+
+    public async getUserSwaps(
+        address: string,
+        poolId: string,
+        chain: Chain,
+        first?: number,
+        skip?: number,
+    ): Promise<GqlPoolSwap[]> {
+        return this.poolSwapService.getUserSwapsForPool(address, poolId, chain, first, skip);
+    }
+
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
         return this.userBalanceService.getUserFbeetsBalance(address);
     }
