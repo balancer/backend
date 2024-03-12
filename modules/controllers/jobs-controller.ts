@@ -80,8 +80,11 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const pools = await prisma.prismaPool.findMany();
+            const pools = await prisma.prismaPool.findMany({
+                where: { chain },
+            });
             const ids = pools.map((pool) => pool.id);
+            if (ids.length === 0) ids.push('');
             const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
             const newPools = await client.getAllInitializedPools({ id_not_in: ids });
 
@@ -137,6 +140,7 @@ export function JobsController(tracer?: any) {
 
             const fromBlock = (
                 await prisma.prismaPoolDynamicData.findFirst({
+                    where: { chain: chain },
                     orderBy: { blockNumber: 'desc' },
                 })
             )?.blockNumber;
@@ -149,7 +153,9 @@ export function JobsController(tracer?: any) {
                 throw new Error(`No synced pools found for chain: ${chain}`);
             }
 
-            const pools = await prisma.prismaPool.findMany();
+            const pools = await prisma.prismaPool.findMany({
+                where: { chain },
+            });
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
 
