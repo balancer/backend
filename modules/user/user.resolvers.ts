@@ -1,9 +1,8 @@
-import { GqlPoolJoinExit, GqlPoolSwap, Resolvers } from '../../schema';
+import { Resolvers } from '../../schema';
 import { userService } from './user.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { tokenService } from '../token/token.service';
 import { headerChain } from '../context/header-chain';
-import { QueriesController } from '../controllers/queries-controller';
 
 const resolvers: Resolvers = {
     Query: {
@@ -27,7 +26,6 @@ const resolvers: Resolvers = {
                 ),
             }));
         },
-        // TODO: Deprecated in favor of poolGetEvents
         userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -37,14 +35,8 @@ const resolvers: Resolvers = {
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 
-            const swaps = await QueriesController().getEvents({
-                first,
-                skip,
-                where: { typeIn: ['JOIN', 'EXIT'], poolIdIn: [poolId], chainIn: [chain], userAddress: accountAddress },
-            });
-            return swaps as GqlPoolJoinExit[];
+            return userService.getUserPoolInvestments(accountAddress, poolId, chain, first, skip);
         },
-        // TODO: Deprecated in favor of poolGetEvents
         userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -53,12 +45,7 @@ const resolvers: Resolvers = {
                 throw new Error('userGetSwaps error: Provide "chain" param');
             }
             const accountAddress = address || getRequiredAccountAddress(context);
-            const swaps = await QueriesController().getEvents({
-                first,
-                skip,
-                where: { typeIn: ['SWAP'], poolIdIn: [poolId], chainIn: [chain], userAddress: accountAddress },
-            });
-            return swaps as GqlPoolSwap[];
+            return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
         },
         userGetStaking: async (parent, { chains, address }, context) => {
             const currentChain = headerChain();
