@@ -54,6 +54,8 @@ export async function syncSwaps(
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
 
+    console.log(dbEntries);
+
     await prisma.poolEvent.createMany({
         skipDuplicates: true,
         data: dbEntries,

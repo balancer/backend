@@ -26,6 +26,7 @@ const resolvers: Resolvers = {
                 ),
             }));
         },
+        // TODO: Deprecate in favor of poolGetEvents
         userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -37,6 +38,7 @@ const resolvers: Resolvers = {
 
             return userService.getUserPoolInvestments(accountAddress, poolId, chain, first, skip);
         },
+        // TODO: Deprecate in favor of poolGetEvents
         userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
