@@ -25,10 +25,6 @@ extend type Query {
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
-    """
-    Getting swap, join and exit events
-    """
-    poolGetEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -732,6 +728,20 @@ type GqlPoolTokenExpanded {
     isMainToken: Boolean!
 }
 
+type GqlPoolSwap {
+    id: ID!
+    chain: GqlChain!
+    poolId: String!
+    userAddress: String!
+    tokenIn: String!
+    tokenOut: String!
+    tokenAmountIn: String!
+    tokenAmountOut: String!
+    timestamp: Int!
+    tx: String!
+    valueUSD: Float!
+}
+
 type GqlPoolBatchSwap {
     id: ID!
     chain: GqlChain!
@@ -794,78 +804,28 @@ enum GqlPoolStakingGaugeStatus {
 input GqlPoolJoinExitFilter {
     poolIdIn: [String!]
     chainIn: [GqlChain!]
-    userAddress: String
 }
 
-enum GqlPoolEventType {
-    JOIN
-    EXIT
-    SWAP
-}
-
-input GqlPoolEventsFilter {
-    typeIn: [GqlPoolEventType!]
-    poolIdIn: [String!]
-    chainIn: [GqlChain!]
-    userAddress: String
-}
-
-interface GqlPoolEvent {
-    chain: GqlChain!
+type GqlPoolJoinExit {
     id: ID!
-    tx: String!
-    logIndex: Int!
-    blockNumber: Int!
-    blockTimestamp: Int!
-    type: GqlPoolEventType!
+    chain: GqlChain!
+    type: GqlPoolJoinExitType!
     sender: String!
-    userAddress: String!
     poolId: String!
     timestamp: Int!
-    valueUSD: Float!
-}
-
-type GqlPoolJoinExit implements GqlPoolEvent {
-    chain: GqlChain!
-    id: ID!
+    valueUSD: String
     tx: String!
-    logIndex: Int!
-    blockNumber: Int!
-    blockTimestamp: Int!
-    type: GqlPoolEventType!
-    sender: String!
-    userAddress: String!
-    poolId: String!
-    timestamp: Int!
-    valueUSD: Float!
-    amounts: [GqlPoolEventAmount!]!
+    amounts: [GqlPoolJoinExitAmount!]!
 }
 
-type GqlPoolSwap implements GqlPoolEvent {
-    chain: GqlChain!
-    id: ID!
-    tx: String!
-    logIndex: Int!
-    blockNumber: Int!
-    blockTimestamp: Int!
-    type: GqlPoolEventType!
-    sender: String!
-    userAddress: String!
-    poolId: String!
-    timestamp: Int!
-    valueUSD: Float!
-    tokenIn: String!
-    tokenOut: String!
-    tokenAmountIn: String!
-    tokenAmountOut: String!
-    tokenInData: GqlPoolEventAmount!
-    tokenOutData: GqlPoolEventAmount!
+enum GqlPoolJoinExitType {
+    Join
+    Exit
 }
 
-type GqlPoolEventAmount {
+type GqlPoolJoinExitAmount {
     address: String!
     amount: String!
-    valueUSD: Float!
 }
 
 type GqlBalancePoolAprItem {
