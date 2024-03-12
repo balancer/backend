@@ -6,16 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -60,7 +54,6 @@ const optimismNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     bal: {
         address: '0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921',
@@ -278,16 +271,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [optimismNetworkData.beets!.address, optimismNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, optimismNetworkData.bal!.address)],
-    tokenPriceHandlers: [
-        new BeetsPriceHandlerService(
-            optimismNetworkData.beets!.address,
-            optimismNetworkData.beets!.beetsPriceProviderRpcUrl,
-        ),
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
@@ -303,10 +286,6 @@ export const optimismNetworkConfig: NetworkConfig = {
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
-        {
-            name: 'update-token-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
-        },
         {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
@@ -385,7 +364,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
         },
         {
             name: 'sync-sanity-pool-data',

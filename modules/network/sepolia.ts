@@ -6,16 +6,13 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { sepoliaConfig as sepoliaNetworkData } from '../../config/sepolia';
+import sepoliaNetworkData from '../../config/sepolia';
 
 export { sepoliaNetworkData };
 
@@ -31,12 +28,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [sepoliaNetworkData.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, sepoliaNetworkData.bal!.address)],
-    tokenPriceHandlers: [
-        // new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
@@ -52,10 +43,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
-        {
-            name: 'update-token-prices',
-            interval: every(15, 'minutes'),
-        },
         {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
@@ -118,21 +105,30 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(1, 'hours'),
         },
+        // V3 jobs
         {
-            name: 'sync-changed-pools-v3',
-            interval: every(15, 'minutes'),
+            name: 'add-pools-v3',
+            interval: every(5, 'minutes'),
         },
         {
-            name: 'sync-new-pools-from-subgraph-v3',
+            name: 'sync-pools-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-join-exits-v2',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'sync-join-exits-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-swaps-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
-        },
-        {
-            name: 'supdate-swaps-volume-and-fees-v3',
-            interval: every(20, 'minutes'),
-        },
-        {
-            name: 'sync-global-coingecko-prices',
-            interval: every(12, 'hours'),
         },
     ],
 };

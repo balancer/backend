@@ -7,8 +7,11 @@ import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
 import { GyroEPool } from './pools/gyroE/gyroEPool';
-import { BasePool, Swap, SwapKind, SwapOptions, Token } from '@balancer/sdk';
+import { Swap, SwapKind, Token } from '@balancer/sdk';
 import { ComposableStablePool } from './pools/composableStable/composableStablePool';
+import { BasePool } from './pools/basePool';
+import { SorSwapOptions } from './types';
+import { PathWithAmount } from './path';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -16,8 +19,8 @@ export async function sorGetSwapsWithPools(
     swapKind: SwapKind,
     swapAmountEvm: bigint,
     prismaPools: PrismaPoolWithDynamic[],
-    swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
-): Promise<Swap | null> {
+    swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
+): Promise<PathWithAmount[] | null> {
     const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
     const basePools: BasePool[] = [];
@@ -62,5 +65,5 @@ export async function sorGetSwapsWithPools(
 
     if (!bestPaths) return null;
 
-    return new Swap({ paths: bestPaths, swapKind });
+    return bestPaths;
 }

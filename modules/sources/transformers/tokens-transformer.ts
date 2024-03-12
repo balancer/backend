@@ -1,35 +1,31 @@
 import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain } from '@prisma/client';
 
-type DbToken = {
-    address: string;
-    name: string;
-    decimals: number;
-    symbol: string;
-    chain: Chain;
-};
-
-export function tokensTransformer(vaultSubgraphPools: VaultSubgraphPoolFragment[], chain: Chain): DbToken[] {
-    const allTokens: DbToken[] = [];
-    vaultSubgraphPools.forEach((pool) => {
-        allTokens.push({
-            address: pool.address,
-            decimals: 18,
-            name: pool.name,
-            symbol: pool.symbol,
-            chain: chain,
-        });
-        if (pool.tokens) {
-            for (const poolToken of pool.tokens) {
-                allTokens.push({
-                    address: poolToken.address,
-                    decimals: poolToken.decimals,
-                    name: poolToken.name,
-                    symbol: poolToken.symbol,
-                    chain: chain,
-                });
-            }
-        }
+/**
+ * Extracts pool tokens from the vault subgraph pools and adds the BPT token as well.
+ * Return value is used to store all the token definitions in the database.
+ *
+ * @param vaultSubgraphPools
+ * @param chain
+ * @returns All tokens from the pools including the BPT token
+ */
+export function tokensTransformer(vaultSubgraphPools: VaultSubgraphPoolFragment[], chain: Chain) {
+    return vaultSubgraphPools.flatMap((pool) => {
+        return [
+            ...pool.tokens.map((token) => ({
+                address: token.address,
+                decimals: token.decimals,
+                name: token.name,
+                symbol: token.symbol,
+                chain: chain,
+            })),
+            {
+                address: pool.address,
+                decimals: 18,
+                name: pool.name,
+                symbol: pool.symbol,
+                chain: chain,
+            },
+        ];
     });
-    return allTokens;
 }

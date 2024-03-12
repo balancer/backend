@@ -6,15 +6,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -65,7 +60,7 @@ export const data: NetworkData = {
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+            : 'https://eth.llamarpc.com',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -188,7 +183,7 @@ export const data: NetworkData = {
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
@@ -386,12 +381,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [data.bal!.address]),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
-    tokenPriceHandlers: [
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
@@ -496,21 +485,11 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
         },
         {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
-        },
-        // The following are multichain jobs and should only run once for all chains.
-        {
-            name: 'sync-global-coingecko-prices',
-            interval:
-                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
-                    ? every(30, 'minutes')
-                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-                    ? every(2, 'minutes')
-                    : every(10, 'days'),
         },
         {
             name: 'global-purge-old-tokenprices',

@@ -7,9 +7,10 @@ import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
-import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { BasePool } from '../basePool';
 
 const isUSDC = (address: string): boolean => {
     return (

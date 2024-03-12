@@ -1,7 +1,9 @@
-import { BasePool, Path, PathWithAmount, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { WAD } from './utils/math';
+import { BasePool } from './pools/basePool';
+import { PathLocal, PathWithAmount } from './path';
 
 export class Router {
     private readonly pathGraph: PathGraph;
@@ -15,7 +17,7 @@ export class Router {
         tokenOut: Token,
         pools: BasePool[],
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
-    ): Path[] {
+    ): PathLocal[] {
         this.pathGraph.buildGraph({ pools });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
@@ -27,7 +29,7 @@ export class Router {
         return candidatePaths;
     }
 
-    public getBestPaths(paths: Path[], swapKind: SwapKind, swapAmount: TokenAmount): PathWithAmount[] | null {
+    public getBestPaths(paths: PathLocal[], swapKind: SwapKind, swapAmount: TokenAmount): PathWithAmount[] | null {
         if (paths.length === 0) {
             throw new Error('No potential swap paths provided');
         }

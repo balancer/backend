@@ -1,5 +1,6 @@
 import { Chain } from '@prisma/client';
-import { sepoliaConfig } from './sepolia';
+import sepoliaConfig from './sepolia';
+import mainnetConfig from './mainnet';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default {
@@ -8,7 +9,7 @@ export default {
     [Chain.BASE]: {} as NetworkData,
     [Chain.FANTOM]: {} as NetworkData,
     [Chain.GNOSIS]: {} as NetworkData,
-    [Chain.MAINNET]: {} as NetworkData,
+    [Chain.MAINNET]: mainnetConfig,
     [Chain.OPTIMISM]: {} as NetworkData,
     [Chain.POLYGON]: {} as NetworkData,
     [Chain.SEPOLIA]: sepoliaConfig,

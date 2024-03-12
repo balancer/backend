@@ -1,7 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { SpookySwapAprService } from '../pool/lib/apr-data-sources/fantom/spooky-swap-apr.service';
-import { tokenService } from '../token/token.service';
 import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
@@ -11,18 +9,10 @@ import { MasterChefStakingService } from '../pool/lib/staking/master-chef-stakin
 import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { ReliquaryStakingService } from '../pool/lib/staking/reliquary-staking.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
-import { BeetsPriceHandlerService } from '../token/lib/token-price-handlers/beets-price-handler.service';
-import { FbeetsPriceHandlerService } from '../token/lib/token-price-handlers/fbeets-price-handler.service';
-import { ClqdrPriceHandlerService } from '../token/lib/token-price-handlers/clqdr-price-handler.service';
-import { BptPriceHandlerService } from '../token/lib/token-price-handlers/bpt-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from '../token/lib/token-price-handlers/linear-wrapped-token-price-handler.service';
-import { SwapsPriceHandlerService } from '../token/lib/token-price-handlers/swaps-price-handler.service';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { every } from '../../worker/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
-import { CoingeckoPriceHandlerService } from '../token/lib/token-price-handlers/coingecko-price-handler.service';
-import { coingeckoService } from '../coingecko/coingecko.service';
 import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
@@ -101,7 +91,6 @@ const fantomNetworkData: NetworkData = {
     protocolToken: 'beets',
     beets: {
         address: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e',
-        beetsPriceProviderRpcUrl: 'https://rpc.ftm.tools',
     },
     sftmx: {
         stakingContractAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
@@ -300,18 +289,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         new MasterChefStakingService(masterchefService, fantomNetworkData.masterchef!.excludedFarmIds),
         new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
     ],
-    tokenPriceHandlers: [
-        new BeetsPriceHandlerService(
-            fantomNetworkData.beets!.address,
-            fantomNetworkData.beets!.beetsPriceProviderRpcUrl,
-        ),
-        new FbeetsPriceHandlerService(fantomNetworkData.fbeets!.address, fantomNetworkData.fbeets!.poolId),
-        new ClqdrPriceHandlerService(),
-        new CoingeckoPriceHandlerService(coingeckoService),
-        new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-    ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
             fantomNetworkData.fbeets!.address,
@@ -336,10 +313,6 @@ export const fantomNetworkConfig: NetworkConfig = {
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
-        {
-            name: 'update-token-prices',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(2, 'minutes'),
-        },
         {
             name: 'update-liquidity-for-inactive-pools',
             interval: every(1, 'days'),
@@ -422,7 +395,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         {
             name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(5, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
         },
         {
             name: 'sync-sftmx-staking-data',

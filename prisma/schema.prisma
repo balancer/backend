@@ -542,6 +542,34 @@ model PrismaReliquaryTokenBalanceSnapshot {
     balance             String
 }
 
+enum PoolEventType {
+    JOIN
+    EXIT
+    SWAP
+}
+
+model PoolEvent {
+    id                  String @id
+    tx                  String
+    type                PoolEventType
+    chain               Chain
+    poolId              String
+    userAddress         String
+    blockNumber         Int
+    blockTimestamp      Int
+    logIndex            Int
+    vaultVersion        Int @default(2)
+    valueUSD            Float
+    payload             Json
+
+    @@index([type])
+    @@index([chain])
+    @@index([chain, poolId])
+    @@index([userAddress])
+    @@index([blockNumber])
+    @@index([logIndex])
+}
+
 
 
 model PrismaSftmxStakingData {
@@ -610,10 +638,12 @@ model PrismaToken {
     coingeckoPlatformId String?
     coingeckoContractAddress String?
     coingeckoTokenId    String?
+    excludedFromCoingecko Boolean           @default(false)
 
-    dynamicData         PrismaTokenDynamicData?
     currentPrice        PrismaTokenCurrentPrice?
+    dynamicData         PrismaTokenDynamicData?
     prices              PrismaTokenPrice[]
+
     types               PrismaTokenType[]
 
     expandedPools       PrismaPoolExpandedTokens[]
@@ -632,9 +662,9 @@ model PrismaTokenCurrentPrice {
     chain               Chain                
 
     updatedAt           DateTime             @updatedAt
+    updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 }
 
 model PrismaTokenPrice {
@@ -644,9 +674,9 @@ model PrismaTokenPrice {
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
     chain               Chain               
     updatedAt           DateTime            @updatedAt
+    updatedBy           String?
     timestamp           Int
     price               Float
-    coingecko           Boolean?
 
     high                Float
     low                 Float

@@ -58,7 +58,7 @@ export class GaugeAprService implements PoolAprService {
             // Get token rewards per year with data needed for the DB
             const rewards = await Promise.allSettled(
                 gauge.rewards.map(async ({ tokenAddress, rewardPerSecond }) => {
-                    const price = this.tokenService.getPriceForToken(tokenPrices, tokenAddress);
+                    const price = this.tokenService.getPriceForToken(tokenPrices, tokenAddress, networkContext.chain);
                     if (!price) {
                         return Promise.reject(`Price not found for ${tokenAddress}`);
                     }

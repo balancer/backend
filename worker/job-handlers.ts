@@ -18,6 +18,7 @@ import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
 import { sftmxService } from '../modules/sftmx/sftmx.service';
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 const runningJobs: Set<string> = new Set();
 
@@ -107,15 +108,6 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncChangedPools(), res, next);
                 break;
 
-            case 'sync-changed-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => jobsController.updateOnChainDataChangedPools(chainId),
-                    res,
-                    next,
-                );
-                break;
             case 'user-sync-wallet-balances-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -135,7 +127,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-token-prices':
-                await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.updateTokenPrices(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigs)),
+                    res,
+                    next,
+                );
                 break;
             case 'update-liquidity-for-active-pools':
                 await runIfNotAlreadyRunning(
@@ -156,22 +154,22 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'update-pool-apr':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.updatePoolAprs(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return poolService.updatePoolAprs(chain);
+                    },
+                    res,
+                    next,
+                );
                 break;
             case 'load-on-chain-data-for-pools-with-active-updates':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
                     () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
-                    res,
-                    next,
-                );
-                break;
-            case 'load-on-chain-data-for-pools-with-active-updates-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => poolService.loadOnChainDataForPoolsWithActiveUpdatesV3(),
                     res,
                     next,
                 );
@@ -185,11 +183,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-new-pools-from-subgraph-v3':
+            case 'sync-join-exits-v2':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.addMissingPoolsFromSubgraph(chainId),
+                    () => jobsController.syncJoinExitsV2(chainId),
                     res,
                     next,
                 );
@@ -209,29 +207,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'update-liquidity-24h-ago-for-all-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => poolService.updateLiquidity24hAgoForAllPoolsV3(),
-                    res,
-                    next,
-                );
-                break;
             case 'cache-average-block-time':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
                     () => blocksSubgraphService.cacheAverageBlockTime(),
-                    res,
-                    next,
-                );
-                break;
-            case 'sync-global-coingecko-prices':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => tokenService.syncCoingeckoPricesForAllChains(),
                     res,
                     next,
                 );
@@ -257,15 +237,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-latest-snapshots-for-all-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => poolService.syncLatestSnapshotsForAllPoolsV3(),
-                    res,
-                    next,
-                );
-                break;
             case 'update-lifetime-values-for-all-pools':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -275,17 +246,17 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'update-lifetime-values-for-all-pools-v3':
+            case 'feed-data-to-datastudio':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.updateLifetimeValuesForAllPoolsV3(),
+                    () => {
+                        const chain = chainIdToChain[chainId];
+                        return datastudioService.feedPoolData(chain);
+                    },
                     res,
                     next,
                 );
-                break;
-            case 'feed-data-to-datastudio':
-                await runIfNotAlreadyRunning(job.name, chainId, () => datastudioService.feedPoolData(), res, next);
                 break;
             case 'sync-latest-reliquary-snapshots':
                 await runIfNotAlreadyRunning(
@@ -348,6 +319,52 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-sftmx-withdrawal-requests':
                 await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
+                break;
+            // V3 Jobs
+            case 'add-pools-v3':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.addPools(chainId), res, next);
+                break;
+            case 'sync-pools-v3':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools(chainId), res, next);
+                break;
+            case 'sync-swaps-v3':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV3(chainId), res, next);
+                break;
+            case 'sync-join-exits-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncJoinExitsV3(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-liquidity-24h-ago-for-all-pools-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.updateLiquidity24hAgoForAllPoolsV3(),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-latest-snapshots-for-all-pools-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.syncLatestSnapshotsForAllPoolsV3(),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-lifetime-values-for-all-pools-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.updateLifetimeValuesForAllPoolsV3(),
+                    res,
+                    next,
+                );
                 break;
             case 'update-swaps-volume-and-fees-v3':
                 await runIfNotAlreadyRunning(

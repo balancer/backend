@@ -1,7 +1,11 @@
 extend type Query {
     tokenGetTokens(chains: [GqlChain!]): [GqlToken!]!
     tokenGetCurrentPrices(chains: [GqlChain!]): [GqlTokenPrice!]!
-    tokenGetHistoricalPrices(addresses: [String!]!, chain: GqlChain): [GqlHistoricalTokenPrice!]!
+    tokenGetHistoricalPrices(
+        addresses: [String!]!
+        chain: GqlChain!
+        range: GqlTokenChartDataRange!
+    ): [GqlHistoricalTokenPrice!]!
     tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
     tokenGetTokenDynamicData(address: String!, chain: GqlChain): GqlTokenDynamicData
     tokenGetRelativePriceChartData(
@@ -22,16 +26,13 @@ extend type Query {
     ): [GqlTokenCandlestickChartDataItem!]!
     tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData
     tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
-    tokenGetProtocolTokenPrice: AmountHumanReadable!
+    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
 }
 
 extend type Mutation {
-    tokenReloadTokenPrices: Boolean
+    tokenReloadTokenPrices(chains: [GqlChain!]!): Boolean
     tokenSyncTokenDefinitions: String!
-    tokenSyncTokenDynamicData: String!
     tokenSyncLatestFxPrices(chain: GqlChain!): String!
-    tokenInitChartData(tokenAddress: String!): String!
-    tokenDeletePrice(tokenAddress: String!, timestamp: Int!): Boolean!
     tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
     tokenReloadAllTokenTypes: String!
 }
@@ -44,6 +45,7 @@ type GqlTokenPrice {
 
 type GqlHistoricalTokenPrice {
     address: String!
+    chain: GqlChain!
     prices: [GqlHistoricalTokenPriceEntry!]!
 }
 
@@ -92,6 +94,8 @@ enum GqlTokenChartDataRange {
     SEVEN_DAY
     THIRTY_DAY
     NINETY_DAY
+    ONE_HUNDRED_EIGHTY_DAY
+    ONE_YEAR
 }
 
 type GqlTokenCandlestickChartDataItem {

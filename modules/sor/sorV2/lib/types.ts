@@ -1,16 +1,16 @@
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
-export interface SwapOptions {
+interface FundManagement {
+    sender: string;
+    fromInternalBalance: boolean;
+    recipient: string;
+    toInternalBalance: boolean;
+}
+
+export interface SorSwapOptions {
     block?: bigint;
     slippage?: bigint;
     funds?: FundManagement;
     deadline?: bigint;
     graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
-}
-
-export interface FundManagement {
-    sender: string;
-    fromInternalBalance: boolean;
-    recipient: string;
-    toInternalBalance: boolean;
 }

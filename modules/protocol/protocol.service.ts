@@ -156,7 +156,11 @@ export class ProtocolService {
         }
 
         const tokenprices = await tokenService.getTokenPrices(AllNetworkConfigs[chainId].data.chain.prismaId);
-        const ftmPrice = tokenService.getPriceForToken(tokenprices, AllNetworkConfigs[chainId].data.weth.address);
+        const ftmPrice = tokenService.getPriceForToken(
+            tokenprices,
+            AllNetworkConfigs[chainId].data.weth.address,
+            AllNetworkConfigs[chainId].data.chain.prismaId,
+        );
 
         if (AllNetworkConfigs[chainId].data.sftmx) {
             const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({

@@ -4,10 +4,11 @@ import { ComposableStablePoolToken } from '../composableStable/composableStableP
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
-import { BasePool, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { BasePool } from '../basePool';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;

@@ -12,11 +12,15 @@ import { oneDayInSeconds, secondsPerDay } from '../common/time';
 import { isComposableStablePool, isWeightedPoolV2 } from '../pool/lib/pool-utils';
 import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';
+import { Chain } from '@prisma/client';
 
 export class DatastudioService {
     constructor(private readonly secretsManager: SecretsManager, private readonly jwtClientHelper: GoogleJwtClient) {}
 
-    public async feedPoolData() {
+    public async feedPoolData(chain: Chain) {
+        if ((env.DEPLOYMENT_ENV as DeploymentEnv) !== 'canary' && (env.DEPLOYMENT_ENV as DeploymentEnv) !== 'main') {
+            return;
+        }
         const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
         const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
 
@@ -74,7 +78,7 @@ export class DatastudioService {
             }
         }
 
-        const now = moment.tz('GMT').unix();
+        const now = moment.utc().unix();
 
         if (lastRun > now - oneDayInSeconds) {
             // 24 hours did not pass since the last run
@@ -89,7 +93,7 @@ export class DatastudioService {
                 dynamicData: {
                     totalLiquidity: { gte: 5000 },
                 },
-                chain: networkContext.chain,
+                chain: chain,
             },
             include: {
                 dynamicData: true,
@@ -114,7 +118,7 @@ export class DatastudioService {
             },
         });
 
-        const endOfYesterday = moment.tz('GMT').endOf('day').subtract(1, 'day');
+        const endOfYesterday = moment.utc().endOf('day').subtract(1, 'day');
 
         for (const pool of pools) {
             let sharesChange = `0`;
@@ -126,9 +130,13 @@ export class DatastudioService {
             let protocolYieldCapture = `0`;
 
             let yesterdaySwapsCount = `0`;
-            //find last entry of pool in currentSheet for the correct chain and get total swaps. If no previous value present, set previous value to 0
+            //find yesterdays entry of pool in currentSheet for the correct chain and get total swaps. If no previous value present, set previous value to 0
             for (let i = poolAddressValues.length - 1; i >= 0; i--) {
-                if (chainValues[i][0] === chainSlug && poolAddressValues[i][0] === pool.address) {
+                if (
+                    chainValues[i][0] === chainSlug &&
+                    poolAddressValues[i][0] === pool.address &&
+                    timestampValues[i][0] === endOfYesterday.unix()
+                ) {
                     yesterdaySwapsCount = totalSwapValues[i][0];
                     break;
                 }
@@ -265,7 +273,8 @@ export class DatastudioService {
                             }
                             const rewardsPerDay = parseFloat(rewarder.rewardPerSecond) * secondsPerDay;
                             const rewardsValuePerDay =
-                                tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress) * rewardsPerDay;
+                                tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress, chain) *
+                                rewardsPerDay;
                             if (rewardsPerDay > 0) {
                                 allEmissionDataRows.push([
                                     endOfYesterday.format('DD MMM YYYY'),
@@ -309,7 +318,7 @@ export class DatastudioService {
                         }
                         const rewardsPerDay = parseFloat(reward.rewardPerSecond) * secondsPerDay;
                         const rewardsValuePerDay =
-                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress) * rewardsPerDay;
+                            tokenService.getPriceForToken(tokenPrices, reward.tokenAddress, chain) * rewardsPerDay;
                         if (rewardsPerDay > 0) {
                             allEmissionDataRows.push([
                                 endOfYesterday.format('DD MMM YYYY'),

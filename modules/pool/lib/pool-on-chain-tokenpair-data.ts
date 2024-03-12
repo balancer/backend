@@ -75,7 +75,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, create multicall to do a swap with $200 (min liq is $1k, so there should be at least $200 for each token) for effectivePrice calc and a swap with 1% TVL
+    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
@@ -158,8 +158,8 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     // remove pools that have <$1000 TVL or a token without a balance or USD balance
                     valid:
                         (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
-                        !pool.tokens.some((token) => token.dynamicData?.balance || '0' === '0') &&
-                        !pool.tokens.some((token) => token.dynamicData?.balanceUSD || 0 === 0),
+                        !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
+                        !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
 
                     tokenA: {
                         address: pool.tokens[i].address,
@@ -262,12 +262,12 @@ function addBToAPriceCallsToMulticaller(
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result) {
+    if (result.effectivePriceAmountOut && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
             parseUnits(tokenPair.effectivePriceAmountIn.toString(), 18 - tokenPair.tokenA.decimals),
-            parseUnits(result.effectivePriceAmountOut.toString(), 18 - tokenPair.tokenB.decimals),
+            parseUnits(result.effectivePriceAmountOut?.toString(), 18 - tokenPair.tokenB.decimals),
         );
     }
 }
@@ -275,7 +275,7 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
 function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result) {
+    if (result.bToAAmountOut) {
         tokenPair.bToAAmountOut = BigInt(result.bToAAmountOut.toString());
     }
 }
@@ -284,9 +284,14 @@ function calculateSpotPrice(tokenPair: TokenPair) {
     const aToBAmountInScaled = parseUnits(tokenPair.aToBAmountIn.toString(), 18 - tokenPair.tokenA.decimals);
     const aToBAmountOutScaled = parseUnits(tokenPair.aToBAmountOut.toString(), 18 - tokenPair.tokenB.decimals);
     const bToAAmountOutScaled = parseUnits(tokenPair.bToAAmountOut.toString(), 18 - tokenPair.tokenA.decimals);
-    const priceAtoB = MathSol.divDownFixed(aToBAmountInScaled, aToBAmountOutScaled);
-    const priceBtoA = MathSol.divDownFixed(aToBAmountOutScaled, bToAAmountOutScaled);
-    tokenPair.spotPrice = MathSol.powDownFixed(MathSol.divDownFixed(priceAtoB, priceBtoA), WAD / 2n);
+    if (aToBAmountInScaled !== 0n && aToBAmountOutScaled !== 0n && bToAAmountOutScaled !== 0n) {
+        const priceAtoB = MathSol.divDownFixed(aToBAmountInScaled, aToBAmountOutScaled);
+        const priceBtoA = MathSol.divDownFixed(aToBAmountOutScaled, bToAAmountOutScaled);
+        tokenPair.spotPrice = MathSol.powDownFixed(MathSol.divDownFixed(priceAtoB, priceBtoA), WAD / 2n);
+    } else {
+        // this happens if any of the swaps reverted on-chain. Either the tokenBalance in the pool was <100 USD or RPC failed.
+        tokenPair.spotPrice = 0n;
+    }
 }
 
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
@@ -300,6 +305,12 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
         );
         priceRatio = parseEther('0.999999');
     }
-    const priceImpact = WAD - priceRatio;
-    tokenPair.normalizedLiqudity = MathSol.divDownFixed(WAD, priceImpact);
+    if (priceRatio !== 0n) {
+        const priceImpact = WAD - priceRatio;
+        tokenPair.normalizedLiqudity = MathSol.divDownFixed(WAD, priceImpact);
+    } else {
+        // can happen if the pair could not be priced on-chain and everything is 0 (aToBAmount, effectivePrice, etc) and hence the spotPrice is 0.
+        // if that happens, normalizedLiquidity should be 0 as well.
+        tokenPair.normalizedLiqudity = 0n;
+    }
 }

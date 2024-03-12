@@ -6,7 +6,7 @@ import {
     GqlSorGetSwapPaths,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
-import { sorV2Service } from './sorV2/sorV2.service';
+import { sorV2Service } from './sorV2/sorPathService';
 import { GetSwapsInput, SwapResult } from './types';
 import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
@@ -74,7 +74,7 @@ export class SorService {
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
 
-        const swap = await this.getComparingSwap({
+        const swapResult = await this.getComparingSwap({
             chain: args.chain!,
             swapAmount: amount,
             swapOptions: args.swapOptions,
@@ -83,11 +83,13 @@ export class SorService {
             tokenOut: tokenOut,
         });
 
-        if (!swap) return emptyResponse;
+        if (!swapResult) return emptyResponse;
 
         try {
             // Updates with latest onchain data before returning
-            return swap.getSorSwapResponse(args.swapOptions.queryBatchSwap ? args.swapOptions.queryBatchSwap : false);
+            return swapResult.getSorSwapResponse(
+                args.swapOptions.queryBatchSwap ? args.swapOptions.queryBatchSwap : false,
+            );
         } catch (err) {
             console.log(`Error Retrieving QuerySwap`, err);
             return emptyResponse;

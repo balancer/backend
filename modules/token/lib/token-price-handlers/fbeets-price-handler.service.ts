@@ -3,27 +3,36 @@ import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
 import { prisma } from '../../../../prisma/prisma-client';
 import _ from 'lodash';
-import { networkContext } from '../../../network/network-context.service';
+import { AllNetworkConfigs } from '../../../network/network-config';
+import { tokenAndPrice, updatePrices } from './price-handler-helper';
+import { Chain } from '@prisma/client';
 
 export class FbeetsPriceHandlerService implements TokenPriceHandler {
-    constructor(private readonly fbeetsAddress: string, private readonly fbeetsPoolId: string) {}
     public readonly exitIfFails = false;
     public readonly id = 'FbeetsPriceHandlerService';
 
-    public async getAcceptedTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
-        return [this.fbeetsAddress];
+    private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
+        const fbeetsAddress = AllNetworkConfigs['250'].data.fbeets!.address;
+        return tokens.filter((token) => token.chain === 'FANTOM' && token.address === fbeetsAddress);
     }
 
-    public async updatePricesForTokens(tokens: PrismaTokenWithTypes[]): Promise<string[]> {
+    public async updatePricesForTokens(
+        tokens: PrismaTokenWithTypes[],
+        chains: Chain[],
+    ): Promise<PrismaTokenWithTypes[]> {
+        const fbeetsAddress = AllNetworkConfigs['250'].data.fbeets!.address;
+        const fbeetsPoolId = AllNetworkConfigs['250'].data.fbeets!.poolId;
+        const acceptedTokens = this.getAcceptedTokens(tokens);
+        const tokenAndPrices: tokenAndPrice[] = [];
+
         const timestamp = timestampRoundedUpToNearestHour();
-        const fbeetsAddress = this.fbeetsAddress;
         const fbeets = await prisma.prismaFbeets.findFirst({});
         const pool = await prisma.prismaPool.findUnique({
-            where: { id_chain: { id: this.fbeetsPoolId, chain: networkContext.chain } },
+            where: { id_chain: { id: fbeetsPoolId, chain: 'FANTOM' } },
             include: { dynamicData: true, tokens: { include: { dynamicData: true, token: true } } },
         });
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-            where: { tokenAddress: { in: pool?.tokens.map((token) => token.address) }, chain: networkContext.chain },
+            where: { tokenAddress: { in: pool?.tokens.map((token) => token.address) }, chain: 'FANTOM' },
         });
 
         if (!fbeets || !pool || tokenPrices.length !== pool.tokens.length) {
@@ -44,34 +53,14 @@ export class FbeetsPriceHandlerService implements TokenPriceHandler {
             }),
         );
 
-        await prisma.prismaTokenCurrentPrice.upsert({
-            where: { tokenAddress_chain: { tokenAddress: fbeetsAddress, chain: networkContext.chain } },
-            update: { price: fbeetsPrice },
-            create: {
-                tokenAddress: fbeetsAddress,
-                chain: networkContext.chain,
-                timestamp,
-                price: fbeetsPrice,
-            },
+        tokenAndPrices.push({
+            address: fbeetsAddress,
+            chain: 'FANTOM',
+            price: fbeetsPrice,
         });
 
-        await prisma.prismaTokenPrice.upsert({
-            where: {
-                tokenAddress_timestamp_chain: { tokenAddress: fbeetsAddress, timestamp, chain: networkContext.chain },
-            },
-            update: { price: fbeetsPrice, close: fbeetsPrice },
-            create: {
-                tokenAddress: fbeetsAddress,
-                chain: networkContext.chain,
-                timestamp,
-                price: fbeetsPrice,
-                high: fbeetsPrice,
-                low: fbeetsPrice,
-                open: fbeetsPrice,
-                close: fbeetsPrice,
-            },
-        });
+        await updatePrices(this.id, tokenAndPrices, timestamp);
 
-        return [this.fbeetsAddress];
+        return acceptedTokens;
     }
 }
