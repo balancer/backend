@@ -981,7 +981,7 @@ interface GqlPoolEvent {
     valueUSD: Float!
 }
 
-type GqlPoolJoinExitV3 implements GqlPoolEvent {
+type GqlPoolJoinExitEventV3 implements GqlPoolEvent {
     chain: GqlChain!
     id: ID!
     tx: String!
@@ -997,7 +997,7 @@ type GqlPoolJoinExitV3 implements GqlPoolEvent {
     tokens: [GqlPoolEventAmount!]!
 }
 
-type GqlPoolSwapV3 implements GqlPoolEvent {
+type GqlPoolSwapEventV3 implements GqlPoolEvent {
     chain: GqlChain!
     id: ID!
     tx: String!

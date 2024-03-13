@@ -1,4 +1,4 @@
-import { Chain, Prisma } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { V3VaultSubgraphClient } from '../../sources/subgraphs';
 import _ from 'lodash';
@@ -51,10 +51,10 @@ export async function syncSwaps(
 
     const dbSwaps = swaps.map((swap) => swapTransformer(swap, chain));
 
+    // TODO: parse batchSwaps, if needed
+
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
-
-    console.log(dbEntries);
 
     await prisma.poolEvent.createMany({
         skipDuplicates: true,
