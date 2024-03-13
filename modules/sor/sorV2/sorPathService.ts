@@ -1,11 +1,13 @@
 import {
     GqlPoolMinimal,
+    GqlSorCallData,
     GqlSorGetSwapPaths,
     GqlSorPath,
     GqlSorSwap,
     GqlSorSwapRoute,
     GqlSorSwapRouteHop,
     GqlSorSwapType,
+    GqlSwapCallDataInput,
 } from '../../../schema';
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
@@ -20,7 +22,16 @@ import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, swapPathsZeroResponse } from '../utils';
-import { BatchSwapStep, DEFAULT_USERDATA, SingleSwap, Swap, SwapKind } from '@balancer/sdk';
+import {
+    BatchSwapStep,
+    DEFAULT_USERDATA,
+    SingleSwap,
+    Slippage,
+    Swap,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+    SwapKind,
+} from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
@@ -87,7 +98,13 @@ class SorPathService implements SwapService {
         }
 
         try {
-            return this.mapToSorSwapPaths(paths!, input.swapType, input.chain, input.queryBatchSwap);
+            return this.mapToSorSwapPaths(
+                paths!,
+                input.swapType,
+                input.chain,
+                input.queryBatchSwap,
+                input.callDataInput,
+            );
         } catch (err: any) {
             console.log(`Error Retrieving QuerySwap`, err);
             Sentry.captureException(err.message, {
@@ -155,27 +172,27 @@ class SorPathService implements SwapService {
         swapType: GqlSorSwapType,
         chain: Chain,
         queryFirst = false,
+        callDataInput: GqlSwapCallDataInput | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
         let updatedAmount;
-        if (queryFirst) {
-            const sdkSwap = new Swap({
-                chainId: parseFloat(chainToIdMap[chain]),
-                paths: paths.map((path) => ({
-                    vaultVersion: 2 as 2 | 3,
-                    inputAmountRaw: path.inputAmount.amount,
-                    outputAmountRaw: path.outputAmount.amount,
-                    tokens: path.tokens.map((token) => ({
-                        address: token.address,
-                        decimals: token.decimals,
-                    })),
-                    pools: path.pools.map((pool) => pool.id),
+        const sdkSwap = new Swap({
+            chainId: parseFloat(chainToIdMap[chain]),
+            paths: paths.map((path) => ({
+                vaultVersion: 2 as 2 | 3,
+                inputAmountRaw: path.inputAmount.amount,
+                outputAmountRaw: path.outputAmount.amount,
+                tokens: path.tokens.map((token) => ({
+                    address: token.address,
+                    decimals: token.decimals,
                 })),
-                swapKind,
-            });
-
+                pools: path.pools.map((pool) => pool.id),
+            })),
+            swapKind,
+        });
+        if (queryFirst) {
             updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
         }
 
@@ -187,6 +204,43 @@ class SorPathService implements SwapService {
         if (updatedAmount) {
             inputAmount = swapKind === SwapKind.GivenIn ? inputAmount : updatedAmount;
             outputAmount = swapKind === SwapKind.GivenIn ? updatedAmount : outputAmount;
+        }
+
+        let callData: GqlSorCallData | undefined = undefined;
+        if (callDataInput) {
+            if (swapKind === SwapKind.GivenIn) {
+                const callDataExactIn = sdkSwap.buildCall({
+                    ...callDataInput,
+                    deadline: BigInt(callDataInput.deadline),
+                    expectedAmountOut: outputAmount,
+                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                }) as SwapBuildOutputExactIn;
+                callData = {
+                    callData: callDataExactIn.callData,
+                    to: callDataExactIn.to,
+                    value: callDataExactIn.value.toString(),
+                    minAmountOutRaw: formatUnits(
+                        callDataExactIn.minAmountOut.amount,
+                        callDataExactIn.minAmountOut.token.decimals,
+                    ),
+                };
+            } else {
+                const callDataExactOut = sdkSwap.buildCall({
+                    ...callDataInput,
+                    deadline: BigInt(callDataInput.deadline),
+                    expectedAmountIn: inputAmount,
+                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                }) as SwapBuildOutputExactOut;
+                callData = {
+                    callData: callDataExactOut.callData,
+                    to: callDataExactOut.to,
+                    value: callDataExactOut.value.toString(),
+                    maxAmountInRaw: formatUnits(
+                        callDataExactOut.maxAmountIn.amount,
+                        callDataExactOut.maxAmountIn.token.decimals,
+                    ),
+                };
+            }
         }
 
         // price impact does not take the updatedAmount into account
@@ -245,6 +299,7 @@ class SorPathService implements SwapService {
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: this.mapRoutes(paths, pools),
             priceImpact: priceImpact,
+            callData: callData,
         };
     }
 

@@ -51,6 +51,7 @@ export class SorService {
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : true,
+            callDataInput: args.callDataInput ? args.callDataInput : undefined,
         });
     }
 

@@ -60,6 +60,10 @@ extend type Query {
         Which vault version to use. If none provided, will chose the better return from either version
         """
         useVaultVersion: Int
+        """
+        Input data to create and return transaction data. If this config is given, call data is added to the response.
+        """
+        callDataInput: GqlSwapCallDataInput
     ): GqlSorGetSwapPaths!
 }
 
@@ -135,6 +139,10 @@ type GqlSorGetSwapPaths {
     Price impact in percent. 0.01 -> 0.01%
     """
     priceImpact: AmountHumanReadable
+    """
+    Transaction data that can be posted to an RPC to execute the swap.
+    """
+    callData: GqlSorCallData
 }
 
 """
@@ -171,6 +179,55 @@ type Token {
 enum GqlSorSwapType {
     EXACT_IN
     EXACT_OUT
+}
+
+type GqlSorCallData {
+    """
+    The call data that needs to be sent to the RPC
+    """
+    callData: String!
+    """
+    The target contract to send the call data to
+    """
+    to: String!
+    """
+    Value in ETH that needs to be sent for native swaps
+    """
+    value: BigDecimal!
+    """
+    Minimum amount received for exact in orders
+    """
+    minAmountOutRaw: String
+    """
+    Maximum amount to be sent for exact out orders
+    """
+    maxAmountInRaw: String
+}
+
+"""
+Inputs for the call data to create the swap transaction. If this input is given, call data is added to the response.
+"""
+input GqlSwapCallDataInput {
+    """
+    The max slippage in percent.
+    """
+    slippagePercentage: String!
+    """
+    How long the swap should be valid, provide a timestamp. "999999999999999999" for infinite.
+    """
+    deadline: Int!
+    """
+    Who sends the input amount.
+    """
+    sender: String!
+    """
+    Who receives the output amount.
+    """
+    receiver: String!
+    """
+    If a native token is either input or output token.
+    """
+    wethIsEth: Boolean!
 }
 
 input GqlSorSwapOptionsInput {
