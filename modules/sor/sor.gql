@@ -238,10 +238,6 @@ input GqlSwapCallDataInput {
     Who receives the output amount.
     """
     receiver: String!
-    """
-    If a native token is either input or output token.
-    """
-    wethIsEth: Boolean!
 }
 
 input GqlSorSwapOptionsInput {

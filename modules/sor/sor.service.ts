@@ -13,6 +13,7 @@ import { Chain } from '@prisma/client';
 import { parseUnits, formatUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
 import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } from './utils';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
@@ -21,6 +22,14 @@ export class SorService {
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = swapPathsZeroResponse(args.tokenIn, args.tokenOut);
+
+        let wethIsEth = false;
+        if (
+            tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address ||
+            tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address
+        ) {
+            wethIsEth = true;
+        }
 
         // check if tokens addresses exist
         try {
@@ -51,7 +60,15 @@ export class SorService {
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : true,
-            callDataInput: args.callDataInput ? args.callDataInput : undefined,
+            callDataInput: args.callDataInput
+                ? {
+                      receiver: args.callDataInput.receiver,
+                      sender: args.callDataInput.sender,
+                      slippagePercentage: args.callDataInput.slippagePercentage,
+                      deadline: args.callDataInput.deadline,
+                      wethIsEth: wethIsEth,
+                  }
+                : undefined,
         });
     }
 
