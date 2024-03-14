@@ -210,10 +210,12 @@ class SorPathService implements SwapService {
         if (callDataInput) {
             if (swapKind === SwapKind.GivenIn) {
                 const callDataExactIn = sdkSwap.buildCall({
-                    ...callDataInput,
-                    deadline: BigInt(callDataInput.deadline),
+                    sender: callDataInput.sender as `0x${string}`,
+                    recipient: callDataInput.receiver as `0x${string}`,
+                    wethIsEth: callDataInput.wethIsEth,
                     expectedAmountOut: outputAmount,
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactIn;
                 callData = {
                     callData: callDataExactIn.callData,
@@ -226,10 +228,12 @@ class SorPathService implements SwapService {
                 };
             } else {
                 const callDataExactOut = sdkSwap.buildCall({
-                    ...callDataInput,
-                    deadline: BigInt(callDataInput.deadline),
+                    sender: callDataInput.sender as `0x${string}`,
+                    recipient: callDataInput.receiver as `0x${string}`,
+                    wethIsEth: callDataInput.wethIsEth,
                     expectedAmountIn: inputAmount,
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactOut;
                 callData = {
                     callData: callDataExactOut.callData,

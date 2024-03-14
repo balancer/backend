@@ -213,9 +213,9 @@ input GqlSwapCallDataInput {
     """
     slippagePercentage: String!
     """
-    How long the swap should be valid, provide a timestamp. "999999999999999999" for infinite.
+    How long the swap should be valid, provide a timestamp. "999999999999999999" for infinite. Default: infinite
     """
-    deadline: Int!
+    deadline: Int
     """
     Who sends the input amount.
     """
