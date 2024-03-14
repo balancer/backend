@@ -17,8 +17,6 @@ export const upsertBptBalancesV3 = async (vaultSubgraphClient: V3VaultSubgraphCl
     const operations = dbEntries.map((dbEntry) => {
         const { id, ...data } = dbEntry;
 
-        console.log('upserting', dbEntry);
-
         return prisma.prismaUserWalletBalance.upsert({
             where: {
                 id_chain: {
