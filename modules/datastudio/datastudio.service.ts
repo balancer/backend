@@ -135,7 +135,7 @@ export class DatastudioService {
                 if (
                     chainValues[i][0] === chainSlug &&
                     poolAddressValues[i][0] === pool.address &&
-                    timestampValues[i][0] === endOfYesterday.unix()
+                    // timestampValues[i][0] === endOfYesterday.unix()
                 ) {
                     yesterdaySwapsCount = totalSwapValues[i][0];
                     break;
