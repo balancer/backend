@@ -136,9 +136,9 @@ type GqlSorGetSwapPaths {
     """
     routes: [GqlSorSwapRoute!]!
     """
-    Price impact in percent. 0.01 -> 0.01%
+    Price impact of the path
     """
-    priceImpact: AmountHumanReadable
+    priceImpact: GqlPriceImpact
     """
     Transaction data that can be posted to an RPC to execute the swap.
     """
@@ -169,6 +169,20 @@ type GqlSorPath {
     Input amount of this path in scaled form
     """
     inputAmountRaw: String!
+}
+
+"""
+Returns the price impact of the path. If there is an error in the price impact calculation, priceImpact will be undefined but the error string is populated.
+"""
+type GqlPriceImpact {
+    """
+    Price impact in percent 0.01 -> 0.01%; undefined if an error happened.
+    """
+    priceImpact: AmountHumanReadable
+    """
+    If priceImpact cant be calculated and is returned as undefined, the error string will be populated.
+    """
+    error: String
 }
 
 type Token {

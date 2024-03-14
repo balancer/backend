@@ -249,10 +249,13 @@ class SorPathService implements SwapService {
 
         // price impact does not take the updatedAmount into account
         let priceImpact: string | undefined;
+        let priceImpactError: string | undefined;
         try {
             priceImpact = calculatePriceImpact(paths, swapKind).decimal.toFixed(4);
         } catch (error) {
             priceImpact = undefined;
+            priceImpactError =
+                'Price impact could not be calculated for this path. The swap path is still valid and can be executed.';
         }
 
         // get all affected pools
@@ -302,7 +305,10 @@ class SorPathService implements SwapService {
             effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: this.mapRoutes(paths, pools),
-            priceImpact: priceImpact,
+            priceImpact: {
+                priceImpact: priceImpact,
+                error: priceImpactError,
+            },
             callData: callData,
         };
     }
