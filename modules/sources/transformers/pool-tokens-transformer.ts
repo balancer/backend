@@ -37,7 +37,7 @@ export function poolTokensDynamicDataTransformer(
             blockNumber: Number(poolData.blockNumber),
             balance: String(balance),
             priceRate: String(rate),
-            weight: poolData.weights[token.index] ?? null,
+            weight: poolData.weights ? poolData.weights[token.index] : null,
         };
     });
 }

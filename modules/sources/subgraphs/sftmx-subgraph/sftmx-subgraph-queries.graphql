@@ -18,6 +18,27 @@ query WithdrawalRequests(
     }
 }
 
+query ftmStakingSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: FtmStakingSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: FtmStakingSnapshot_filter
+    $block: Block_height
+) {
+    ftmStakingSnapshots {
+        ...FtmStakingSnapshot
+    }
+}
+
+fragment FtmStakingSnapshot on FtmStakingSnapshot {
+    id
+    snapshotTimestamp
+    freePoolFtmAmount
+    lockedFtmAmount
+    totalFtmAmount
+}
+
 fragment WithdrawalRequest on WithdrawalRequest {
     id
     amount

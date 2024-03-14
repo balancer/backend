@@ -26,6 +26,10 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         //     return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
+    } else if (job === 'sync-sftmx-staking') {
+        return jobsController.syncSftmxStakingData(chain);
+    } else if (job === 'sync-sftmx-withdrawal') {
+        return jobsController.syncSftmxWithdrawalrequests(chain);
     }
 
     return Promise.reject(new Error(`Unknown job: ${job}`));
