@@ -13,7 +13,11 @@ export const JOIN_EXIT_HISTORY_DAYS = 100;
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExits = async (vaultSubgraphClient: V3VaultSubgraphClient, chain: Chain): Promise<string[]> => {
+export const syncJoinExits = async (
+    vaultSubgraphClient: V3VaultSubgraphClient,
+    chain: Chain,
+    daysToSync = JOIN_EXIT_HISTORY_DAYS,
+): Promise<string[]> => {
     const vaultVersion = 3;
 
     // Get latest event from the DB
@@ -30,11 +34,11 @@ export const syncJoinExits = async (vaultSubgraphClient: V3VaultSubgraphClient, 
         },
     });
 
-    const hundredDaysAgo = daysAgo(JOIN_EXIT_HISTORY_DAYS);
+    const syncSince = daysAgo(daysToSync);
     const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > hundredDaysAgo
+        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
             ? { blockNumber_gt: String(latestEvent.blockNumber || 0) }
-            : { blockTimestamp_gte: String(hundredDaysAgo) };
+            : { blockTimestamp_gte: String(syncSince) };
 
     // Get events
     const { joinExits } = await vaultSubgraphClient.JoinExits({

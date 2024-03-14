@@ -12,7 +12,11 @@ import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-t
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
+export const syncJoinExitsV2 = async (
+    v2SubgraphClient: BalancerSubgraphService,
+    chain: Chain,
+    daysToSync = JOIN_EXIT_HISTORY_DAYS,
+): Promise<string[]> => {
     const vaultVersion = 2;
 
     // Get latest event from the DB
@@ -30,11 +34,11 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
     });
 
     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
-    const hundredDaysAgo = daysAgo(JOIN_EXIT_HISTORY_DAYS);
+    const syncSince = daysAgo(daysToSync);
     const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > hundredDaysAgo
+        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
             ? { block_gt: String(latestEvent.blockNumber) }
-            : { timestamp_gte: hundredDaysAgo };
+            : { timestamp_gte: syncSince };
 
     // Get events
     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({

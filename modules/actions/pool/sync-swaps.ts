@@ -7,18 +7,19 @@ import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/balancer-v
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
 import { daysAgo } from '../../common/time';
 
+export const SWAPS_HISTORY_DAYS = 30;
+
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
  *
  * @param vaultSubgraphClient
  * @param chain
- * @param daysToSync
  * @returns
  */
 export async function syncSwaps(
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain = 'SEPOLIA' as Chain,
-    daysToSync = 30,
+    daysToSync = SWAPS_HISTORY_DAYS,
 ): Promise<string[]> {
     const vaultVersion = 3;
 
@@ -35,11 +36,11 @@ export async function syncSwaps(
     });
 
     // Get events since the latest event or limit to number or days we want to keep them in the DB
-    const since = daysAgo(daysToSync);
+    const syncSince = daysAgo(daysToSync);
     const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > since
+        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
             ? { blockNumber_gt: String(latestEvent.blockNumber) }
-            : { blockTimestamp_gte: String(since) };
+            : { blockTimestamp_gte: String(syncSince) };
 
     // Get events
     const { swaps } = await vaultSubgraphClient.Swaps({
