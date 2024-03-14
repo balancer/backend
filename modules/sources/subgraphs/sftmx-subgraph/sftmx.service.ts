@@ -41,6 +41,32 @@ export class SftmxSubgraphService {
         return withdrawalRequests;
     }
 
+    public async getAllWithdrawalRequestsAfter(timestamp: number): Promise<WithdrawalRequestFragment[]> {
+        const limit = 1000;
+        let hasMore = true;
+        let withdrawalRequests: WithdrawalRequestFragment[] = [];
+        let id = '0';
+
+        while (hasMore) {
+            const response = await this.sdk.WithdrawalRequests({
+                where: { id_gt: id, requestTime_gt: timestamp },
+                orderBy: WithdrawalRequest_OrderBy.id,
+                orderDirection: OrderDirection.asc,
+                first: limit,
+            });
+
+            withdrawalRequests = [...withdrawalRequests, ...response.withdrawalRequests];
+
+            if (response.withdrawalRequests.length < limit) {
+                hasMore = false;
+            } else {
+                id = response.withdrawalRequests[response.withdrawalRequests.length - 1].id;
+            }
+        }
+
+        return withdrawalRequests;
+    }
+
     public async getAllStakingSnapshots(): Promise<FtmStakingSnapshotFragment[]> {
         const limit = 1000;
         let hasMore = true;

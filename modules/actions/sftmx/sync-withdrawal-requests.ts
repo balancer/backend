@@ -7,7 +7,15 @@ export async function syncWithdrawalRequests(
     stakingContractAddress: Address,
     sftmxSubgraphClient: SftmxSubgraphService,
 ) {
-    const allWithdrawalRequests = await sftmxSubgraphClient.getAllWithdrawawlRequestsWithPaging();
+    const latestSyncedRequest = await prisma.prismaSftmxWithdrawalRequest.findFirst({
+        orderBy: {
+            requestTimestamp: 'desc',
+        },
+    });
+
+    const allWithdrawalRequests = await sftmxSubgraphClient.getAllWithdrawalRequestsAfter(
+        latestSyncedRequest?.requestTimestamp ?? 0,
+    );
 
     const operations = [];
     for (const request of allWithdrawalRequests) {
