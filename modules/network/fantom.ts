@@ -105,14 +105,14 @@ const fantomNetworkData: NetworkData = {
     balancer: {
         v2: {
             vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-            defaultSwapFeePercentage: '0.5',
-            defaultYieldFeePercentage: '0.5',
+            defaultSwapFeePercentage: '0.25',
+            defaultYieldFeePercentage: '0.25',
             balancerQueriesAddress: '0x1b0a42663df1edea171cd8732d288a81efff6d23',
         },
         v3: {
             vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
-            defaultSwapFeePercentage: '0.5',
-            defaultYieldFeePercentage: '0.5',
+            defaultSwapFeePercentage: '0.25',
+            defaultYieldFeePercentage: '0.25',
         },
     },
     multicall: '0x66335d7ad8011f6aa3f48aadcb523b62b38ed961',
