@@ -13,7 +13,7 @@ export async function syncSftmxStakingSnapshots(
         },
     });
 
-    const allSnapshots = await sftmxSubgraphClient.getStakingSnapshotsAfter(latestSyncedRequest?.timestamp ?? 0);
+    const allSnapshots = await sftmxSubgraphClient.getStakingSnapshotsAfter(latestSyncedRequest?.timestamp || 0);
 
     const operations = [];
     for (const snapshot of allSnapshots) {

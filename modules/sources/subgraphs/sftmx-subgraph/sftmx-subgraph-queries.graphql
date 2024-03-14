@@ -26,7 +26,14 @@ query ftmStakingSnapshots(
     $where: FtmStakingSnapshot_filter
     $block: Block_height
 ) {
-    ftmStakingSnapshots {
+    ftmStakingSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
         ...FtmStakingSnapshot
     }
 }
@@ -37,6 +44,7 @@ fragment FtmStakingSnapshot on FtmStakingSnapshot {
     freePoolFtmAmount
     lockedFtmAmount
     totalFtmAmount
+    exchangeRate
 }
 
 fragment WithdrawalRequest on WithdrawalRequest {
