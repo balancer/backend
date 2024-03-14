@@ -134,7 +134,7 @@ export class DatastudioService {
             for (let i = poolAddressValues.length - 1; i >= 0; i--) {
                 if (
                     chainValues[i][0] === chainSlug &&
-                    poolAddressValues[i][0] === pool.address &&
+                    poolAddressValues[i][0] === pool.address
                     // timestampValues[i][0] === endOfYesterday.unix()
                 ) {
                     yesterdaySwapsCount = totalSwapValues[i][0];
