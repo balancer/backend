@@ -19,7 +19,7 @@ export class SftmxSubgraphService {
         const limit = 1000;
         let hasMore = true;
         let withdrawalRequests: WithdrawalRequestFragment[] = [];
-        let id = '0';
+        let id = '0x';
 
         while (hasMore) {
             const response = await this.sdk.WithdrawalRequests({
@@ -45,7 +45,7 @@ export class SftmxSubgraphService {
         const limit = 1000;
         let hasMore = true;
         let withdrawalRequests: WithdrawalRequestFragment[] = [];
-        let id = '0';
+        let id = '0x';
 
         while (hasMore) {
             const response = await this.sdk.WithdrawalRequests({
@@ -71,7 +71,7 @@ export class SftmxSubgraphService {
         const limit = 1000;
         let hasMore = true;
         let ftmStakingSnapshots: FtmStakingSnapshotFragment[] = [];
-        let id = '0';
+        let id = '0x';
 
         while (hasMore) {
             const response = await this.sdk.ftmStakingSnapshots({
