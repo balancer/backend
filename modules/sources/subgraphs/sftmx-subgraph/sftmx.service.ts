@@ -93,7 +93,7 @@ export class SftmxSubgraphService {
         return ftmStakingSnapshots;
     }
 
-    public async getStakingSnapshotsSince(timestamp: number): Promise<FtmStakingSnapshotFragment[]> {
+    public async getStakingSnapshotsAfter(timestamp: number): Promise<FtmStakingSnapshotFragment[]> {
         const limit = 1000;
         let hasMore = true;
         let ftmStakingSnapshots: FtmStakingSnapshotFragment[] = [];
@@ -101,7 +101,7 @@ export class SftmxSubgraphService {
 
         while (hasMore) {
             const response = await this.sdk.ftmStakingSnapshots({
-                where: { snapshotTimestamp_gte: queryTimestamp },
+                where: { snapshotTimestamp_gt: queryTimestamp },
                 orderBy: FtmStakingSnapshot_OrderBy.snapshotTimestamp,
                 orderDirection: OrderDirection.asc,
                 first: limit,

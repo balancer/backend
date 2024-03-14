@@ -14,6 +14,7 @@ import { syncStakingData as syncSftmxStakingData } from '../actions/sftmx/sync-s
 import { Address } from 'viem';
 import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../actions/sftmx/sync-withdrawal-requests';
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
+import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -222,12 +223,26 @@ export function JobsController(tracer?: any) {
 
             // Guard against unconfigured chains
             if (!sftmxSubgraphUrl || !stakingContractAddress) {
-                throw new Error(`Chain not configured: ${chain}`);
+                throw new Error(`Chain not configured for job syncSftmxWithdrawalrequests: ${chain}`);
             }
 
             const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
 
             await syncSftmxWithdrawalRequests(stakingContractAddress as Address, sftmxSubgraphClient);
+        },
+        async syncSftmxStakingSnapshots(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const sftmxSubgraphUrl = config[chain].subgraphs.sftmx;
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!sftmxSubgraphUrl || !stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxStakingSnapshots: ${chain}`);
+            }
+
+            const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
+
+            await syncSftmxStakingSnapshots(stakingContractAddress as Address, sftmxSubgraphClient);
         },
     };
 }

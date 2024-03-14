@@ -403,5 +403,9 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-sftmx-withdrawal-requests',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(5, 'minutes'),
         },
+        {
+            name: 'sync-sftmx-staking-snapshots',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
+        },
     ],
 };

@@ -3,24 +3,34 @@ import { SftmxSubgraphService } from '../../sources/subgraphs/sftmx-subgraph/sft
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
-export async function syncStakingSnapshots(stakingContractAddress: Address, sftmxSubgraphClient: SftmxSubgraphService) {
-    const allWithdrawalRequests = await sftmxSubgraphClient.getAllWithdrawawlRequestsWithPaging();
+export async function syncSftmxStakingSnapshots(
+    stakingContractAddress: Address,
+    sftmxSubgraphClient: SftmxSubgraphService,
+) {
+    const latestSyncedRequest = await prisma.prismaSftmxStakingDataSnapshot.findFirst({
+        orderBy: {
+            timestamp: 'desc',
+        },
+    });
+
+    const allSnapshots = await sftmxSubgraphClient.getStakingSnapshotsAfter(latestSyncedRequest?.timestamp ?? 0);
 
     const operations = [];
-    for (const request of allWithdrawalRequests) {
-        const requestData = {
-            id: request.id,
+    for (const snapshot of allSnapshots) {
+        const snapshotData = {
+            id: snapshot.id,
+            timestamp: snapshot.snapshotTimestamp,
+            freePoolFtmAmount: snapshot.freePoolFtmAmount,
+            lockedFtmAmount: snapshot.lockedFtmAmount,
+            totalFtmAmount: snapshot.totalFtmAmount,
+            exchangeRate: snapshot.exchangeRate,
             ftmStakingId: stakingContractAddress,
-            user: request.user.id,
-            amountSftmx: request.amount,
-            isWithdrawn: request.isWithdrawn,
-            requestTimestamp: request.requestTime,
         };
         operations.push(
-            prisma.prismaSftmxWithdrawalRequest.upsert({
-                where: { id: requestData.id },
-                create: requestData,
-                update: requestData,
+            prisma.prismaSftmxStakingDataSnapshot.upsert({
+                where: { id: snapshotData.id },
+                create: snapshotData,
+                update: snapshotData,
             }),
         );
     }

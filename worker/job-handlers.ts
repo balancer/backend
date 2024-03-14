@@ -330,6 +330,15 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
+            case 'sync-sftmx-staking-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSftmxStakingSnapshots(chainId),
+                    res,
+                    next,
+                );
+                break;
             // V3 Jobs
             case 'add-pools-v3':
                 await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.addPools(chainId), res, next);
