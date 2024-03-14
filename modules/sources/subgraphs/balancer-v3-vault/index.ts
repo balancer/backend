@@ -6,6 +6,8 @@ import {
     SwapFragment,
     Swap_OrderBy,
     VaultPoolFragment,
+    PoolShareFragment,
+    PoolShare_OrderBy,
     getSdk,
 } from './generated/types';
 
@@ -63,6 +65,31 @@ export function getVaultSubgraphClient(url: string) {
             }
 
             return swaps;
+        },
+        async getAllPoolShares(): Promise<PoolShareFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let poolShares: PoolShareFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.PoolShares({
+                    where: { id_gt: id, user_not: '0x0000000000000000000000000000000000000000' },
+                    orderBy: PoolShare_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                poolShares = [...poolShares, ...response.poolShares];
+
+                if (response.poolShares.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = response.poolShares[response.poolShares.length - 1].id;
+                }
+            }
+
+            return poolShares;
         },
     };
 }
