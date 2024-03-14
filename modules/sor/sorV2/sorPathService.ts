@@ -172,7 +172,7 @@ class SorPathService implements SwapService {
         swapType: GqlSorSwapType,
         chain: Chain,
         queryFirst = false,
-        callDataInput: GqlSwapCallDataInput | undefined,
+        callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 

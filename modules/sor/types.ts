@@ -19,7 +19,7 @@ export interface GetSwapsV2Input {
     swapAmount: TokenAmount;
     queryBatchSwap: boolean;
     graphTraversalConfig?: GraphTraversalConfig;
-    callDataInput?: GqlSwapCallDataInput | undefined;
+    callDataInput?: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined;
 }
 
 export interface GraphTraversalConfig {
