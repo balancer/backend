@@ -1,13 +1,15 @@
 import { Multicaller3 } from '../../web3/multicaller3';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
 import * as Sentry from '@sentry/node';
+import BalancerRouter from "../abi/BalancerRouter.json";
 
 interface PoolInput {
     id: string;
     address: string;
+    vaultVersion: number;
     tokens: {
         address: string;
         token: {
@@ -38,6 +40,7 @@ export type TokenPairData = {
 
 interface TokenPair {
     poolId: string;
+    poolVaultVersion: number;
     poolTvl: number;
     valid: boolean;
     tokenA: Token;
@@ -155,11 +158,18 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,
+                    poolVaultVersion: pool.vaultVersion,
                     // remove pools that have <$1000 TVL or a token without a balance or USD balance
                     valid:
-                        (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+                        //V3 Pool Validation (Without balanceUsd and pool liquidity for test purpose only)
+                        //TODO: Change this when V3 pools have balanceUsd and liquidity
+                       (pool.vaultVersion === 3 && 
+                         !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') )
+                      || 
+                      // V2 Validation
+                      ((pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
                         !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
-                        !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
+                        !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0)),
 
                     tokenA: {
                         address: pool.tokens[i].address,
@@ -313,4 +323,145 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
         // if that happens, normalizedLiquidity should be 0 as well.
         tokenPair.normalizedLiqudity = 0n;
     }
+}
+
+
+/*   \/ Fetch Token Pair Data from V3 Logic \/ */
+
+export async function fetchTokenPairDataV3Router(pools: PoolInput[], balancerRouterAddress?: string, batchSize = 1024) {
+    if (pools.length === 0) {
+        return {};
+    }
+    if(!balancerRouterAddress){
+        return {};
+    }
+
+    const tokenPairOutput: PoolTokenPairsOutput = {};
+
+    const multicallerRouter = new Multicaller3(BalancerRouter, batchSize);
+    // only inlcude pools with TVL >=$1000
+    // for each pool, get pairs
+    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
+    //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
+    // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
+
+    let tokenPairs = generateTokenPairs(pools);
+
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            // prepare swap amounts in
+            // tokenA->tokenB with 0.01% of tokenA balance
+            tokenPair.aToBAmountIn = BigInt(tokenPair.tokenA.balance) / 100n;
+            //const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            // TODO: tokenA->tokenB with 100USD worth of tokenA, No test token presents balance in USD for now
+            const oneUsdOfTokenA = 0.001
+              tokenPair.effectivePriceAmountIn = parseUnits(`${oneUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            addEffectivePriceCallsToMulticallerV3(tokenPair, balancerRouterAddress, multicallerRouter);
+            console.log(tokenPair);
+            addAToBPriceCallsToMulticallerV3(tokenPair, balancerRouterAddress, multicallerRouter);
+        }
+    });
+    const resultOne = (await multicallerRouter.execute()) as {
+        [id: string]: OnchainData;
+    };
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
+        }
+    });
+
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            addBToAPriceCallsToMulticallerV3(tokenPair, balancerRouterAddress, multicallerRouter);
+        }
+    });
+
+    const resultTwo = (await multicallerRouter.execute()) as {
+        [id: string]: OnchainData;
+    };
+    tokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            getBToAAmountFromResult(tokenPair, resultTwo);
+            calculateSpotPrice(tokenPair);
+            calculateNormalizedLiquidity(tokenPair);
+        }
+
+        // prepare output
+        pools.forEach((pool) => {
+            if (pool.id === tokenPair.poolId) {
+                if (!tokenPairOutput[pool.id]) {
+                    tokenPairOutput[pool.id] = {
+                        tokenPairs: [],
+                    };
+                }
+                tokenPairOutput[pool.id].tokenPairs.push({
+                    tokenA: tokenPair.tokenA.address,
+                    tokenB: tokenPair.tokenB.address,
+                    normalizedLiquidity: tokenPair.normalizedLiqudity.toString(),
+                    spotPrice: tokenPair.spotPrice.toString(),
+                });
+            }
+        });
+    });
+
+    return tokenPairOutput;
+}
+
+
+function addEffectivePriceCallsToMulticallerV3(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: Multicaller3,
+) {
+    multicaller.call(
+      `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
+      balancerRouterAddress,
+      'querySwapSingleTokenExactIn',
+      [
+          tokenPair.poolId,
+          tokenPair.tokenA.address,
+          tokenPair.tokenB.address,
+          `${tokenPair.effectivePriceAmountIn}`,
+          ZERO_ADDRESS,
+      ],
+    );
+}
+
+function addAToBPriceCallsToMulticallerV3(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: Multicaller3,
+) {
+
+    multicaller.call(
+      `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
+      balancerRouterAddress,
+      'querySwapSingleTokenExactIn',
+      [
+          tokenPair.poolId,
+          tokenPair.tokenA.address,
+          tokenPair.tokenB.address,
+          `${tokenPair.aToBAmountIn}`,
+          ZERO_ADDRESS,
+      ],
+    );
+}
+
+function addBToAPriceCallsToMulticallerV3(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: Multicaller3,
+) {
+    multicaller.call(
+      `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+      balancerRouterAddress,
+      'querySwapSingleTokenExactIn',
+      [
+          tokenPair.poolId,
+          tokenPair.tokenB.address,
+          tokenPair.tokenA.address,
+          `${tokenPair.aToBAmountOut}`,
+          ZERO_ADDRESS,
+      ],
+    );
 }

@@ -11,6 +11,7 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import { getV3JoinedSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { getChangedPools } from '../sources/logs/get-changed-pools';
+import { updateOnChainDataV3 } from "../actions/pool/update-on-chain-data-v3";
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -126,6 +127,8 @@ export function JobsController(tracer?: any) {
          */
         async syncPools(chainId: string) {
             const chain = chainIdToChain[chainId];
+            console.log(chain);
+            console.log(config[chain]);
             const {
                 balancer: {
                     v3: { vaultAddress },
@@ -199,5 +202,10 @@ export function JobsController(tracer?: any) {
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
+        async updateOnChainDataV3(chainId: string){
+            const chain = chainIdToChain[chainId];
+            await updateOnChainDataV3(chain);
+            return 
+        }
     };
 }
