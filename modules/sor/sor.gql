@@ -223,7 +223,7 @@ Inputs for the call data to create the swap transaction. If this input is given,
 """
 input GqlSwapCallDataInput {
     """
-    The max slippage in percent.
+    The max slippage in percent 0.01 -> 0.01%
     """
     slippagePercentage: String!
     """
