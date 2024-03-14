@@ -12,7 +12,7 @@ import { networkContext } from '../../network/network-context.service';
 import { LinearData, StableData } from '../subgraph-mapper';
 import { fetchTokenPairData } from './pool-on-chain-tokenpair-data';
 
-const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
+export const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
     'STABLE',
     'META_STABLE',
