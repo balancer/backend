@@ -17,7 +17,6 @@ import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 import config from '../../config';
 
 const fantomNetworkData: NetworkData = config.FANTOM;

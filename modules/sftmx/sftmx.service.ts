@@ -1,6 +1,13 @@
+import moment from 'moment';
 import { prisma } from '../../prisma/prisma-client';
-import { GqlSftmxStakingData, GqlSftmxWithdrawalRequests } from '../../schema';
+import {
+    GqlSftmxStakingData,
+    GqlSftmxStakingSnapshot,
+    GqlSftmxStakingSnapshotDataRange,
+    GqlSftmxWithdrawalRequests,
+} from '../../schema';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { snapshot } from 'viem/_types/actions/test/snapshot';
 
 export class SftmxService {
     constructor(private readonly stakingContractAddress: string) {}
@@ -44,6 +51,39 @@ export class SftmxService {
                 vaultIndex: vault.vaultIndex,
             })),
         };
+    }
+
+    public async getStakingSnapshots(range: GqlSftmxStakingSnapshotDataRange): Promise<GqlSftmxStakingSnapshot[]> {
+        const timestamp = this.getTimestampForRange(range);
+
+        const stakingSnapshots = await prisma.prismaSftmxStakingDataSnapshot.findMany({
+            where: { timestamp: { gte: timestamp } },
+            orderBy: { timestamp: 'asc' },
+        });
+
+        return stakingSnapshots.map((snapshot) => ({
+            id: snapshot.id,
+            timestamp: snapshot.timestamp,
+            totalFtmAmount: snapshot.totalFtmAmount,
+            totalFtmAmountStaked: snapshot.totalFtmAmount,
+            totalFtmAmountInPool: snapshot.freePoolFtmAmount,
+            exchangeRate: snapshot.exchangeRate,
+        }));
+    }
+
+    private getTimestampForRange(range: GqlSftmxStakingSnapshotDataRange): number {
+        switch (range) {
+            case 'THIRTY_DAYS':
+                return moment().startOf('day').subtract(30, 'days').unix();
+            case 'NINETY_DAYS':
+                return moment().startOf('day').subtract(90, 'days').unix();
+            case 'ONE_HUNDRED_EIGHTY_DAYS':
+                return moment().startOf('day').subtract(180, 'days').unix();
+            case 'ONE_YEAR':
+                return moment().startOf('day').subtract(365, 'days').unix();
+            case 'ALL_TIME':
+                return 0;
+        }
     }
 }
 

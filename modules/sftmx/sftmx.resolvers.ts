@@ -9,6 +9,9 @@ const resolvers: Resolvers = {
         sftmxGetStakingData: async (parent, {}, context) => {
             return sftmxService.getStakingData();
         },
+        sftmxGetStakingSnapshots: async (parent, { range }, context) => {
+            return sftmxService.getStakingSnapshots(range);
+        },
     },
 };
 
