@@ -12,9 +12,9 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import sepoliaNetworkData from '../../config/sepolia';
+import config from '../../config';
 
-export { sepoliaNetworkData };
+export const sepoliaNetworkData = config.SEPOLIA;
 
 export const sepoliaNetworkConfig: NetworkConfig = {
     data: sepoliaNetworkData,
@@ -113,10 +113,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         {
             name: 'sync-pools-v3',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-join-exits-v2',
-            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-join-exits-v3',

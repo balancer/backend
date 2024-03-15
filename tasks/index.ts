@@ -22,8 +22,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncPools(chain);
     } else if (job === 'sync-join-exits-v3') {
         return jobsController.syncJoinExitsV3(chain);
-        // } else if (job === 'sync-join-exits-v2') {
-        //     return jobsController.syncJoinExitsV2(chain);
+    } else if (job === 'sync-join-exits-v2') {
+        return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
     }
