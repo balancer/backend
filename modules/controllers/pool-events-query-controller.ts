@@ -1,6 +1,3 @@
-/**
- * Responsible for handling all the queries – can be split based on models
- */
 import { GqlPoolJoinExitEventV3, GqlPoolSwapEventV3, QueryPoolGetEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
@@ -36,7 +33,7 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
     };
 };
 
-export function QueriesController(tracer?: any) {
+export function EventsQueryController(tracer?: any) {
     return {
         /**
          * Getting pool events, with pagination and filtering

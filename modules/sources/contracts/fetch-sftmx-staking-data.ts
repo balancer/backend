@@ -42,7 +42,19 @@ export async function fetchSftmxStakingData(
         abi: FTMStaking,
     };
 
-    const results = await client.multicall({
+    const [
+        currentVaultCount,
+        currentVaultPtr,
+        poolBalance,
+        totalFtm,
+        maxDeposit,
+        minDeposit,
+        maintenancePaused,
+        undelegatePaused,
+        withdrawPaused,
+        exchangeRate,
+        withdrawalDelay,
+    ] = await client.multicall({
         contracts: [
             {
                 ...stakingContractArgs,
@@ -89,23 +101,8 @@ export async function fetchSftmxStakingData(
                 functionName: 'withdrawalDelay',
             },
         ],
+        allowFailure: false,
     });
-
-    if (results.some((result) => result.status === 'failure')) {
-        throw Error('Sftmx staking data multicall failed.');
-    }
-
-    const currentVaultCount = results[0].result as bigint;
-    const currentVaultPtr = results[1].result as bigint;
-    const poolBalance = results[2].result as bigint;
-    const totalFtm = results[3].result as bigint;
-    const maxDeposit = results[4].result as bigint;
-    const minDeposit = results[5].result as bigint;
-    const maintenancePaused = results[6].result as boolean;
-    const undelegatePaused = results[7].result as boolean;
-    const withdrawPaused = results[8].result as boolean;
-    const exchangeRate = results[9].result as bigint;
-    const withdrawalDelay = results[10].result as bigint;
 
     const totalFtmStaked = totalFtm - poolBalance;
 
