@@ -16,6 +16,7 @@ import { Address } from 'viem';
 import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../actions/sftmx/sync-withdrawal-requests';
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
