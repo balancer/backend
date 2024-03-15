@@ -2,6 +2,7 @@ import config from '../../config';
 import { syncPools } from '../actions/pool/sync-pools';
 import { upsertPools } from '../actions/pool/upsert-pools';
 import { syncJoinExits } from '../actions/pool/sync-join-exits';
+import { syncJoinExitsV2 } from '../actions/pool/sync-join-exits-v2';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
@@ -34,21 +35,23 @@ export function JobsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        // async syncJoinExitsV2(chainId: string) {
-        //     const chain = chainIdToChain[chainId];
-        //     const {
-        //         subgraphs: { balancer },
-        //     } = config[chain];
+        async syncJoinExitsV2(chainId: string) {
+            return true; // TODO: disable syncing because of high DB usage, probably due to USD pricing fetching
 
-        //     // Guard against unconfigured chains
-        //     if (!balancer) {
-        //         throw new Error(`Chain not configured: ${chain}`);
-        //     }
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
 
-        //     const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
-        //     const entries = await syncJoinExitsV2(subgraphClient, chain);
-        //     return entries;
-        // },
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
+            const entries = await syncJoinExitsV2(subgraphClient, chain);
+            return entries;
+        },
         async syncJoinExitsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
