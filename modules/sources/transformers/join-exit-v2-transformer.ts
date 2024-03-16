@@ -21,7 +21,7 @@ export function joinExitV2Transformer(events: BalancerJoinExitFragment[], chain:
         poolId: event.pool.id,
         chain: chain,
         userAddress: event.sender,
-        blockNumber: 0, // TODO: fix fantom subgraph to include blocknumber // Number(event.block),
+        blockNumber: Number(event.block),
         blockTimestamp: Number(event.timestamp),
         logIndex: Number(event.id.substring(66)),
         valueUSD: 0,
