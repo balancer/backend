@@ -1,4 +1,5 @@
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { UserBalancesController } from '../modules/controllers/user-balances-controller';
 
 // TODO needed?
 const jobsController = JobsController();
@@ -26,6 +27,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
+    } else if (job === 'sync-user-balances-v3') {
+        return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     }
 
     return Promise.reject(new Error(`Unknown job: ${job}`));
