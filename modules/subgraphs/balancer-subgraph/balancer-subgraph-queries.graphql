@@ -379,6 +379,7 @@ fragment BalancerJoinExit on JoinExit {
     amounts
     id
     sender
+    block
     timestamp
     tx
     type

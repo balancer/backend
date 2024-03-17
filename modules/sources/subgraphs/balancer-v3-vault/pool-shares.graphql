@@ -1,0 +1,24 @@
+fragment PoolShare on PoolShare {
+    id
+    balance
+}
+
+query PoolShares(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolShare_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolShare_filter
+    $block: Block_height
+) {
+    poolShares(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...PoolShare
+    }
+}

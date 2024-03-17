@@ -1,4 +1,5 @@
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { UserBalancesController } from '../modules/controllers/user-balances-controller';
 
 // TODO needed?
 const jobsController = JobsController();
@@ -32,6 +33,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-sftmx-staking-snapshots') {
         return jobsController.syncSftmxStakingSnapshots(chain);
+    } else if (job === 'sync-user-balances-v3') {
+        return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     }
 
     return Promise.reject(new Error(`Unknown job: ${job}`));

@@ -37,8 +37,6 @@ export function JobsController(tracer?: any) {
     // ...
     return {
         async syncJoinExitsV2(chainId: string) {
-            return true; // TODO: disable syncing because of high DB usage, probably due to USD pricing fetching
-
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancer },
