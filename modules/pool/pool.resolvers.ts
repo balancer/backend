@@ -4,7 +4,7 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { QueriesController } from '../controllers/queries-controller';
+import { EventsQueryController } from '../controllers/pool-events-query-controller';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -54,7 +54,7 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: (parent, args, context) => {
-            return QueriesController().getEvents(args);
+            return EventsQueryController().getEvents(args);
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

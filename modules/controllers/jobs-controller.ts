@@ -8,10 +8,15 @@ import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
 import { syncSwaps } from '../actions/pool/sync-swaps';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
-import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { getV3JoinedSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { getChangedPools } from '../sources/logs/get-changed-pools';
+import { syncStakingData as syncSftmxStakingData } from '../actions/sftmx/sync-staking-data';
+import { Address } from 'viem';
+import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../actions/sftmx/sync-withdrawal-requests';
+import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
+import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
+import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -199,6 +204,47 @@ export function JobsController(tracer?: any) {
             const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
+        },
+        async syncSftmxStakingData(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxStakingData: ${chain}`);
+            }
+
+            const viemClient = getViemClient(chain);
+
+            await syncSftmxStakingData(stakingContractAddress as Address, viemClient);
+        },
+        async syncSftmxWithdrawalrequests(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const sftmxSubgraphUrl = config[chain].subgraphs.sftmx;
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!sftmxSubgraphUrl || !stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxWithdrawalrequests: ${chain}`);
+            }
+
+            const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
+
+            await syncSftmxWithdrawalRequests(stakingContractAddress as Address, sftmxSubgraphClient);
+        },
+        async syncSftmxStakingSnapshots(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const sftmxSubgraphUrl = config[chain].subgraphs.sftmx;
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!sftmxSubgraphUrl || !stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxStakingSnapshots: ${chain}`);
+            }
+
+            const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
+
+            await syncSftmxStakingSnapshots(stakingContractAddress as Address, sftmxSubgraphClient);
         },
     };
 }

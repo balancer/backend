@@ -17,7 +17,6 @@ import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
 import config from '../../config';
 
 const fantomNetworkData: NetworkData = config.FANTOM;
@@ -54,7 +53,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             fantomNetworkData.subgraphs.balancer,
             fantomNetworkData.chain.id,
         ),
-        sftmxSubgraphService: new SftmxSubgraphService(fantomNetworkData.subgraphs.sftmx!),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
@@ -155,6 +153,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-sftmx-withdrawal-requests',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(5, 'minutes'),
+        },
+        {
+            name: 'sync-sftmx-staking-snapshots',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
         },
         // V3 Jobs
         {
