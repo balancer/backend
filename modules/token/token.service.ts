@@ -55,7 +55,7 @@ export class TokenService {
     public async getTokenDefinitions(chains: Chain[]): Promise<TokenDefinition[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: { types: { some: { type: 'WHITE_LISTED' } }, chain: { in: chains } },
-            include: { types: true },
+            include: { types: true, dynamicData: true },
             orderBy: { priority: 'desc' },
         });
 
@@ -75,6 +75,22 @@ export class TokenService {
                 });
             }
         }
+
+        tokens.sort((a, b) => {
+            if (!a.dynamicData?.marketCap) {
+                return 1;
+            }
+            if (!b.dynamicData?.marketCap) {
+                return -1;
+            }
+            if (a.dynamicData.marketCap > b.dynamicData.marketCap) {
+                return -1;
+            }
+            if (a.dynamicData.marketCap < b.dynamicData.marketCap) {
+                return 1;
+            }
+            return 0;
+        });
 
         return tokens.map((token) => ({
             ...token,
