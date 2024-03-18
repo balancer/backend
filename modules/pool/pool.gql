@@ -37,7 +37,13 @@ extend type Query {
     """
     Getting swap, join and exit events
     """
-    poolGetEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
+    poolGetEvents(
+        range: GqlPoolEventsDataRange!
+        poolId: String!
+        chain: GqlChain!
+        typeIn: [GqlPoolEventType!]!
+        userAddress: String
+    ): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -885,6 +891,12 @@ type GqlFeaturePoolGroupItemExternalLink {
     image: String!
     buttonText: String!
     buttonUrl: String!
+}
+
+enum GqlPoolEventsDataRange {
+    SEVEN_DAYS
+    THIRTY_DAYS
+    NINETY_DAYS
 }
 
 enum GqlPoolSnapshotDataRange {

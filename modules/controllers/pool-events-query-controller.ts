@@ -1,9 +1,15 @@
-import { GqlPoolJoinExitEventV3, GqlPoolSwapEventV3, QueryPoolGetEventsArgs } from '../../schema';
+import {
+    GqlPoolEventsDataRange,
+    GqlPoolJoinExitEventV3 as GqlPoolJoinExitEvent,
+    GqlPoolSwapEventV3 as GqlPoolSwapEvent,
+    QueryPoolGetEventsArgs,
+} from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
+import moment from 'moment';
 
-const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEventV3 => {
+const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEvent => {
     return {
         __typename: 'GqlPoolJoinExitEventV3',
         tokens: event.payload.tokens.map((token) => ({
@@ -18,7 +24,7 @@ const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEventV3 => {
     };
 };
 
-const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
+const parseSwap = (event: SwapEvent): GqlPoolSwapEvent => {
     return {
         __typename: 'GqlPoolSwapEventV3',
         ...event,
@@ -33,6 +39,17 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
     };
 };
 
+const getTimestampForRange = (range: GqlPoolEventsDataRange): number => {
+    switch (range) {
+        case 'SEVEN_DAYS':
+            return moment().startOf('day').subtract(7, 'days').unix();
+        case 'THIRTY_DAYS':
+            return moment().startOf('day').subtract(30, 'days').unix();
+        case 'NINETY_DAYS':
+            return moment().startOf('day').subtract(90, 'days').unix();
+    }
+};
+
 export function EventsQueryController(tracer?: any) {
     return {
         /**
@@ -44,34 +61,16 @@ export function EventsQueryController(tracer?: any) {
          * @returns
          */
         getEvents: async ({
-            first,
-            skip,
-            where,
-        }: QueryPoolGetEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolJoinExitEventV3)[]> => {
+            range,
+            poolId,
+            chain,
+            typeIn,
+            userAddress,
+        }: QueryPoolGetEventsArgs): Promise<(GqlPoolSwapEvent | GqlPoolJoinExitEvent)[]> => {
             // Setting default values
-            first = first ?? 1000;
-            skip = skip ?? 0;
-            where = where ?? {};
-            let { chainIn, poolIdIn, userAddress, typeIn } = where;
 
             const conditions: Prisma.PoolEventWhereInput = {};
 
-            if (typeIn && typeIn.length) {
-                conditions.type = {
-                    in: typeIn,
-                };
-            }
-            if (chainIn && chainIn.length) {
-                conditions.chain = {
-                    in: chainIn,
-                };
-            }
-            if (poolIdIn && poolIdIn.length) {
-                conditions.poolId = {
-                    in: poolIdIn,
-                    mode: 'insensitive',
-                };
-            }
             if (userAddress) {
                 conditions.userAddress = {
                     equals: userAddress,
@@ -79,10 +78,23 @@ export function EventsQueryController(tracer?: any) {
                 };
             }
 
+            const since = getTimestampForRange(range);
+            conditions.blockTimestamp = {
+                gte: since,
+            };
+
             const dbEvents = await prisma.poolEvent.findMany({
-                where: conditions,
-                take: first,
-                skip,
+                where: {
+                    ...conditions,
+                    poolId: poolId,
+                    chain: chain,
+                    type: {
+                        in: typeIn,
+                    },
+                    blockTimestamp: {
+                        gte: since,
+                    },
+                },
                 orderBy: [
                     {
                         blockNumber: 'desc',
