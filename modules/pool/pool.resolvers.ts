@@ -53,8 +53,8 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
-        poolGetEvents: (parent, args, context) => {
-            return EventsQueryController().getEvents(args);
+        poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
+            return EventsQueryController().getEvents({ range, poolId, chain, typeIn, userAddress });
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();
