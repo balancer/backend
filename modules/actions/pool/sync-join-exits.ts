@@ -6,7 +6,7 @@ import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { daysAgo } from '../../common/time';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
 
-export const JOIN_EXIT_HISTORY_DAYS = 100;
+export const JOIN_EXIT_HISTORY_DAYS = 90;
 
 /**
  * Get the join and exit events from the subgraph and store them in the database

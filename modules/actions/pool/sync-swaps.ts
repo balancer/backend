@@ -7,7 +7,7 @@ import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/balancer-v
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
 import { daysAgo } from '../../common/time';
 
-export const SWAPS_HISTORY_DAYS = 30;
+export const SWAPS_HISTORY_DAYS = 90;
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
