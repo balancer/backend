@@ -501,7 +501,7 @@ enum PoolEventType {
     SWAP
 }
 
-model PoolEvent {
+model PrismaPoolEvent {
     id                  String @id
     tx                  String
     type                PoolEventType

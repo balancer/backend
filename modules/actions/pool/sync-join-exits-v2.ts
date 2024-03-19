@@ -20,7 +20,7 @@ export const syncJoinExitsV2 = async (
     const vaultVersion = 2;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.poolEvent.findFirst({
+    const latestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
             type: {
                 in: ['JOIN', 'EXIT'],
@@ -49,13 +49,13 @@ export const syncJoinExitsV2 = async (
     });
 
     // Prepare DB entries
-    const dbEntries = joinExitV2Transformer(joinExits, chain);
+    const dbEntries = await joinExitV2Transformer(joinExits, chain);
 
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
     // Create entries and skip duplicates
-    await prisma.poolEvent.createMany({
+    await prisma.prismaPoolEvent.createMany({
         data: dbEntriesWithUsd,
         skipDuplicates: true,
     });

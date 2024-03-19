@@ -21,7 +21,7 @@ export const syncJoinExits = async (
     const vaultVersion = 3;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.poolEvent.findFirst({
+    const latestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
             type: {
                 in: ['JOIN', 'EXIT'],
@@ -57,7 +57,7 @@ export const syncJoinExits = async (
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
     // Create entries and skip duplicates
-    await prisma.poolEvent
+    await prisma.prismaPoolEvent
         .createMany({
             data: dbEntriesWithUsd,
             skipDuplicates: true,
