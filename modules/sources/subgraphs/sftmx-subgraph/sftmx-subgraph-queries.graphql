@@ -1,0 +1,58 @@
+query WithdrawalRequests(
+    $skip: Int
+    $first: Int
+    $orderBy: WithdrawalRequest_orderBy
+    $orderDirection: OrderDirection
+    $where: WithdrawalRequest_filter
+    $block: Block_height
+) {
+    withdrawalRequests(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...WithdrawalRequest
+    }
+}
+
+query ftmStakingSnapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: FtmStakingSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: FtmStakingSnapshot_filter
+    $block: Block_height
+) {
+    ftmStakingSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...FtmStakingSnapshot
+    }
+}
+
+fragment FtmStakingSnapshot on FtmStakingSnapshot {
+    id
+    snapshotTimestamp
+    freePoolFtmAmount
+    lockedFtmAmount
+    totalFtmAmount
+    exchangeRate
+}
+
+fragment WithdrawalRequest on WithdrawalRequest {
+    id
+    amount
+    isWithdrawn
+    requestTime
+    user {
+        id
+    }
+}

@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput } from '../../schema';
+import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSwapCallDataInput } from '../../schema';
 import { TokenAmount } from '@balancer/sdk';
 export interface GetSwapsInput {
     chain: Chain;
@@ -19,6 +19,7 @@ export interface GetSwapsV2Input {
     swapAmount: TokenAmount;
     queryBatchSwap: boolean;
     graphTraversalConfig?: GraphTraversalConfig;
+    callDataInput?: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined;
 }
 
 export interface GraphTraversalConfig {

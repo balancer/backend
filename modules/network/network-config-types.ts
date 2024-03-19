@@ -8,7 +8,7 @@ import type { GqlChain } from '../../schema';
 import type { ContentService } from '../content/content-types';
 import type { YbAprConfig } from './apr-config-types';
 import type { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import type { SftmxSubgraphService } from '../subgraphs/sftmx-subgraph/sftmx.service';
+import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 
 export interface NetworkConfig {
     data: NetworkData;

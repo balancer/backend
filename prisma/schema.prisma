@@ -591,6 +591,8 @@ model PrismaSftmxStakingData {
 
     withdrawalRequests      PrismaSftmxWithdrawalRequest[]
     vaults                  PrismaSftmxVault[]
+
+    snapshots               PrismaSftmxStakingDataSnapshot[]
 }
 
 model PrismaSftmxVault {
@@ -617,6 +619,17 @@ model PrismaSftmxWithdrawalRequest {
     isWithdrawn             Boolean
 }
 
+model PrismaSftmxStakingDataSnapshot {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    timestamp               Int
+    freePoolFtmAmount       String
+    lockedFtmAmount         String
+    totalFtmAmount          String
+    exchangeRate            String
+}
 
 model PrismaToken {
     @@id([address, chain])
@@ -682,6 +695,9 @@ model PrismaTokenPrice {
     low                 Float
     open                Float
     close               Float
+
+    @@index([timestamp, chain])
+    @@index(tokenAddress)
 }
 
 model PrismaTokenDynamicData {

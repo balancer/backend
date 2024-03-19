@@ -2456,10 +2456,10 @@
     graphology "^0.24.1"
     isomorphic-fetch "^2.2.1"
 
-"@balancer/sdk@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@balancer/sdk/-/sdk-0.11.0.tgz#42062328bf7277553fbb476a25b662db4c1890fe"
-  integrity sha512-L1bHra1euk4amRCqdtfKs4AX4IXDHWGIpqupQAnjo4ce7fLWMHKeruy/DaCiP+sGMf3wIsAn6AP3USq1QPnfgA==
+"@balancer/sdk@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@balancer/sdk/-/sdk-0.12.0.tgz#670886f0f10d5e78c21aebd4cfcb7d39c27be9f5"
+  integrity sha512-tp0s2/enC+hkXczcENSOY5Vxbz4vfsvCNroO7EmZzE4hgVMdfHcz+whUQp2iFAIdXSbrYNge+3oYewV5f0btQA==
   dependencies:
     decimal.js-light "^2.5.1"
     lodash.clonedeep "^4.5.0"

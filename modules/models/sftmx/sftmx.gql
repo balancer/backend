@@ -7,6 +7,10 @@ extend type Query {
     Get the staking data and status for sFTMx
     """
     sftmxGetStakingData: GqlSftmxStakingData!
+    """
+    Get snapshots for sftmx staking for a specific range
+    """
+    sftmxGetStakingSnapshots(range: GqlSftmxStakingSnapshotDataRange!): [GqlSftmxStakingSnapshot!]!
 }
 
 extend type Mutation {
@@ -122,4 +126,36 @@ type GqlSftmxWithdrawalRequests {
     Whether the requests is finished and the user has withdrawn.
     """
     isWithdrawn: Boolean!
+}
+
+enum GqlSftmxStakingSnapshotDataRange {
+    THIRTY_DAYS
+    NINETY_DAYS
+    ONE_HUNDRED_EIGHTY_DAYS
+    ONE_YEAR
+    ALL_TIME
+}
+
+type GqlSftmxStakingSnapshot {
+    id: ID!
+    """
+    The timestamp of the snapshot. Timestamp is end of day midnight.
+    """
+    timestamp: Int!
+    """
+    Total amount of FTM in custody of sFTMx. Staked FTM plus free pool FTM.
+    """
+    totalFtmAmount: AmountHumanReadable!
+    """
+    Total amount of FTM staked/delegated to validators.
+    """
+    totalFtmAmountStaked: AmountHumanReadable!
+    """
+    Total amount of FTM in the free pool.
+    """
+    totalFtmAmountInPool: AmountHumanReadable!
+    """
+    Current exchange rate for sFTMx -> FTM
+    """
+    exchangeRate: String!
 }
