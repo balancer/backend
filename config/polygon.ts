@@ -111,7 +111,7 @@ export default <NetworkData>{
                     },
                     USDT: {
                         underlyingAssetAddress: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
-                        aTokenAddress: '0x6ab707Aca953eDAeFBc4fD23bA73294241490620',
+                        aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
                         wrappedTokens: {
                             stataPolUSDT: '0x31f5ac91804a4c0b54c0243789df5208993235a1',
                             stataPolUSDT2: '0x87a1fdc4c726c459f597282be639a045062c0e46',
