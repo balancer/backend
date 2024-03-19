@@ -1,9 +1,15 @@
 import { Chain } from '@prisma/client';
-import { OnchainPoolData } from '../contracts';
+import { OnchainPoolData, TokenPairData } from '../contracts';
 
 export type OnchainPoolUpdateData = ReturnType<typeof onchainPoolUpdate>;
 
-export const onchainPoolUpdate = (onchainPoolData: OnchainPoolData, blockNumber: number, chain: Chain, id: string) => {
+export const onchainPoolUpdate = (
+    onchainPoolData: OnchainPoolData,
+    onChainTokenPairData: TokenPairData[],
+    blockNumber: number,
+    chain: Chain,
+    id: string,
+) => {
     return {
         poolDynamicData: {
             poolId: id.toLowerCase(),
@@ -13,6 +19,7 @@ export const onchainPoolUpdate = (onchainPoolData: OnchainPoolData, blockNumber:
             totalShares: String(onchainPoolData.totalSupply),
             blockNumber: blockNumber,
             swapFee: String(onchainPoolData.swapFee ?? '0'),
+            tokenPairsData: onChainTokenPairData,
         },
         poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
             id: `${id}-${tokenData.address.toLowerCase()}`,
