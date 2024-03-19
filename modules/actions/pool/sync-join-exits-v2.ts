@@ -49,7 +49,7 @@ export const syncJoinExitsV2 = async (
     });
 
     // Prepare DB entries
-    const dbEntries = joinExitV2Transformer(joinExits, chain);
+    const dbEntries = await joinExitV2Transformer(joinExits, chain);
 
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
