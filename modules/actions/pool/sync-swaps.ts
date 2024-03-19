@@ -24,7 +24,7 @@ export async function syncSwaps(
     const vaultVersion = 3;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.poolEvent.findFirst({
+    const latestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
             type: 'SWAP',
             chain: chain,
@@ -57,7 +57,7 @@ export async function syncSwaps(
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
 
-    await prisma.poolEvent.createMany({
+    await prisma.prismaPoolEvent.createMany({
         skipDuplicates: true,
         data: dbEntries,
     });
