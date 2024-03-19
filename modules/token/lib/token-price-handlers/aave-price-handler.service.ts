@@ -71,8 +71,8 @@ const aaveTokens = {
         {
             // stataArbUSDCn - USD Coin (Arb1)
             wrappedToken: '0xbde67e089886ec0e615d6f054bc6f746189a3d56',
-            aToken: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
-            underlying: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+            aToken: '0x724dc807b04555b71ed48a6896b6f41593b8c637',
+            underlying: '0xaf88d065e77c8cc2239327c5edb3a432268e5831',
         },
         {
             // stataArbUSDC - USD Coin (Arb1) - different wrapping

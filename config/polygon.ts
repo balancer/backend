@@ -94,6 +94,13 @@ export default <NetworkData>{
             v3: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-polygon',
                 tokens: {
+                    USDCn: {
+                        underlyingAssetAddress: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
+                        aTokenAddress: '0xa4d94019934d8333ef880abffbf2fdd611c762bd',
+                        wrappedTokens: {
+                            stataPolUSDCn: '0x2dca80061632f3f87c9ca28364d1d0c30cd79a19',
+                        },
+                    },
                     USDC: {
                         underlyingAssetAddress: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
                         aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
@@ -103,11 +110,11 @@ export default <NetworkData>{
                         },
                     },
                     USDT: {
-                        underlyingAssetAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-                        aTokenAddress: '0x23878914efe38d27c4d67ab83ed1b93a74d4086a',
+                        underlyingAssetAddress: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+                        aTokenAddress: '0x6ab707Aca953eDAeFBc4fD23bA73294241490620',
                         wrappedTokens: {
-                            waUSDT: '0x715d73a88f2f0115d87cfe5e0f25d756b2f9679f',
                             stataPolUSDT: '0x31f5ac91804a4c0b54c0243789df5208993235a1',
+                            stataPolUSDT2: '0x87a1fdc4c726c459f597282be639a045062c0e46',
                         },
                     },
                     DAI: {
