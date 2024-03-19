@@ -678,6 +678,9 @@ model PrismaTokenCurrentPrice {
     updatedBy           String?
     timestamp           Int
     price               Float
+
+    @@index(tokenAddress)
+    @@index(chain)
 }
 
 model PrismaTokenPrice {
@@ -696,7 +699,8 @@ model PrismaTokenPrice {
     open                Float
     close               Float
 
-    @@index([timestamp, chain])
+    @@index(timestamp)
+    @@index(chain)
     @@index(tokenAddress)
 }
 
