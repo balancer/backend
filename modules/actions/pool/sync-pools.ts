@@ -23,10 +23,9 @@ export const syncPools = async (
     vaultAddress: string,
     routerAddress: string,
     chain = 'SEPOLIA' as Chain,
-    blockNumber: bigint, // TODO: deprecate since we are using always the latest block
 ) => {
     // Enrich with onchain data for all the pools
-    const onchainData = await fetchPoolData(vaultAddress, ids, viemClient, blockNumber);
+    const onchainData = await fetchPoolData(vaultAddress, ids, viemClient);
 
     // Enrich with onchain tokenpair data for all the pools
     const tokenPairInputPools = await prisma.prismaPool.findMany({
@@ -43,7 +42,7 @@ export const syncPools = async (
 
     // Get the data for the tables about pools
     const dbUpdates = Object.keys(onchainData).map((id) =>
-        onchainPoolUpdate(onchainData[id], tokenPairData[id].tokenPairs, Number(blockNumber), chain, id),
+        onchainPoolUpdate(onchainData[id], tokenPairData[id].tokenPairs, chain, id),
     );
 
     // Needed to get the token decimals for the USD calculations,

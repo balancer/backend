@@ -25,7 +25,6 @@ export async function fetchPoolData(
     vault: string,
     pools: string[],
     client: ViemClient,
-    blockNumber?: bigint,
 ): Promise<{ [address: string]: OnchainPoolData }> {
     const contracts = pools
         .map((pool) => [
@@ -56,7 +55,7 @@ export async function fetchPoolData(
         ])
         .flat();
 
-    const results = await client.multicall({ contracts, blockNumber: blockNumber });
+    const results = await client.multicall({ contracts });
 
     // Parse the results
     const parsedResults = pools.map((pool, i) => {

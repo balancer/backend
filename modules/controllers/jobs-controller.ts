@@ -94,9 +94,8 @@ export function JobsController(tracer?: any) {
             const newPools = await client.getAllInitializedPools({ id_not_in: ids });
 
             const viemClient = getViemClient(chain);
-            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, viemClient, vaultAddress, chain, latestBlock);
+            await upsertPools(newPools, viemClient, vaultAddress, chain);
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -121,9 +120,8 @@ export function JobsController(tracer?: any) {
             const allPools = await client.getAllInitializedPools();
 
             const viemClient = getViemClient(chain);
-            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(allPools, viemClient, vaultAddress, chain, latestBlock);
+            await upsertPools(allPools, viemClient, vaultAddress, chain);
         },
         /**
          * Syncs database pools state with the onchain state
@@ -164,12 +162,12 @@ export function JobsController(tracer?: any) {
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
 
-            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
             const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
-            if (ids.length === 0 || !latestBlock) {
+            if (ids.length === 0) {
                 return [];
             }
-            return syncPools(ids, viemClient, vaultAddress, routerAddress, chain, latestBlock + 1n);
+            return syncPools(ids, viemClient, vaultAddress, routerAddress, chain);
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];

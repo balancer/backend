@@ -6,7 +6,6 @@ export type OnchainPoolUpdateData = ReturnType<typeof onchainPoolUpdate>;
 export const onchainPoolUpdate = (
     onchainPoolData: OnchainPoolData,
     onChainTokenPairData: TokenPairData[],
-    blockNumber: number,
     chain: Chain,
     id: string,
 ) => {
@@ -17,7 +16,7 @@ export const onchainPoolUpdate = (
             isPaused: onchainPoolData.isPoolPaused,
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: String(onchainPoolData.totalSupply),
-            blockNumber: blockNumber,
+            blockNumber: 0,
             swapFee: String(onchainPoolData.swapFee ?? '0'),
             tokenPairsData: onChainTokenPairData,
         },
@@ -26,7 +25,7 @@ export const onchainPoolUpdate = (
             chain: chain,
             balance: String(tokenData.balance),
             priceRate: String(tokenData.rate),
-            blockNumber: blockNumber,
+            blockNumber: 0,
         })),
     };
 };
