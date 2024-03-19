@@ -3,7 +3,8 @@ import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
 import * as Sentry from '@sentry/node';
 import { ViemClient } from '../types';
-import RouterAbi from './abis/BalancerRouter';
+import { ViemMulticallCall, multicallViem } from '../../web3/multicaller-viem';
+import BalancerRouterAbi from './abis/BalancerRouter';
 
 interface PoolInput {
     id: string;
@@ -70,18 +71,14 @@ export async function fetchTokenPairData(
     routerAddress: string,
     pools: PoolInput[],
     client: ViemClient,
-    batchSize = 1024,
 ): Promise<PoolTokenPairsOutput> {
     if (pools.length === 0) {
-        return {};
-    }
-    if (!routerAddress) {
         return {};
     }
 
     const tokenPairOutput: PoolTokenPairsOutput = {};
 
-    // const multicallerRouter = new Multicaller3(BalancerRouter, batchSize);
+    let multicallerRouter: ViemMulticallCall[] = [];
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
     // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
@@ -89,55 +86,24 @@ export async function fetchTokenPairData(
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
     let tokenPairs = generateTokenPairs(pools);
-    const contracts: {
-        address: `0x${string}`;
-        abi: any;
-        functionName: string;
-        args: (`0x${string}` | bigint)[];
-    }[] = [];
 
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             // prepare swap amounts in
-            // tokenA->tokenB with 0.01% of tokenA balance
-            tokenPair.aToBAmountIn = BigInt(tokenPair.tokenA.balance) / 100n;
-            //const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
-            // TODO: tokenA->tokenB with 100USD worth of tokenA, No test token presents balance in USD for now
-            const oneUsdOfTokenA = 0.001;
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneUsdOfTokenA}`, tokenPair.tokenA.decimals);
-            // addEffectivePriceCallsToMulticallerV3(tokenPair, routerAddress, multicallerRouter);
-            contracts.push({
-                address: routerAddress as `0x${string}`,
-                abi: RouterAbi,
-                functionName: `querySwapSingleTokenExactIn`,
-                args: [
-                    tokenPair.poolId as `0x${string}`,
-                    tokenPair.tokenA.address as `0x${string}`,
-                    tokenPair.tokenB.address as `0x${string}`,
-                    tokenPair.effectivePriceAmountIn,
-                    ZERO_ADDRESS,
-                ],
-            });
-            // addAToBPriceCallsToMulticallerV3(tokenPair, routerAddress, multicallerRouter);
-            contracts.push({
-                address: routerAddress as `0x${string}`,
-                abi: RouterAbi,
-                functionName: `querySwapSingleTokenExactIn`,
-                args: [
-                    tokenPair.poolId as `0x${string}`,
-                    tokenPair.tokenA.address as `0x${string}`,
-                    tokenPair.tokenB.address as `0x${string}`,
-                    tokenPair.aToBAmountIn,
-                    ZERO_ADDRESS,
-                ],
-            });
+            // tokenA->tokenB with 1% of tokenA balance
+            tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
+            // tokenA->tokenB with 100USD worth of tokenA
+            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+
+            addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
-    // const resultOne = (await multicallerRouter.execute()) as {
-    //     [id: string]: OnchainData;
-    // };
 
-    const resultOne = await client.multicall({ contracts });
+    const resultOne = (await multicallViem(client, multicallerRouter)) as {
+        [id: string]: OnchainData;
+    };
 
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
@@ -145,15 +111,17 @@ export async function fetchTokenPairData(
         }
     });
 
+    multicallerRouter = [];
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             addBToAPriceCallsToMulticallerV3(tokenPair, routerAddress, multicallerRouter);
         }
     });
 
-    const resultTwo = (await multicallerRouter.execute()) as {
+    const resultTwo = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
+
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             getBToAAmountFromResult(tokenPair, resultTwo);
@@ -182,61 +150,64 @@ export async function fetchTokenPairData(
     return tokenPairOutput;
 }
 
-// function addEffectivePriceCallsToMulticallerV3(
-//     tokenPair: TokenPair,
-//     balancerRouterAddress: string,
-//     multicaller: Multicaller3,
-// ) {
-//     multicaller.call(
-//         `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
-//         balancerRouterAddress,
-//         'querySwapSingleTokenExactIn',
-//         [
-//             tokenPair.poolId,
-//             tokenPair.tokenA.address,
-//             tokenPair.tokenB.address,
-//             `${tokenPair.effectivePriceAmountIn}`,
-//             ZERO_ADDRESS,
-//         ],
-//     );
-// }
+function addEffectivePriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.effectivePriceAmountIn,
+            ZERO_ADDRESS,
+        ],
+    });
+}
 
-// function addAToBPriceCallsToMulticallerV3(
-//     tokenPair: TokenPair,
-//     balancerRouterAddress: string,
-//     multicaller: Multicaller3,
-// ) {
-//     multicaller.call(
-//         `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
-//         balancerRouterAddress,
-//         'querySwapSingleTokenExactIn',
-//         [
-//             tokenPair.poolId,
-//             tokenPair.tokenA.address,
-//             tokenPair.tokenB.address,
-//             `${tokenPair.aToBAmountIn}`,
-//             ZERO_ADDRESS,
-//         ],
-//     );
-// }
+function addAToBPriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.aToBAmountIn,
+            ZERO_ADDRESS,
+        ],
+    });
+}
 
 function addBToAPriceCallsToMulticallerV3(
     tokenPair: TokenPair,
     balancerRouterAddress: string,
-    multicaller: Multicaller3,
+    multicaller: ViemMulticallCall[],
 ) {
-    multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
-        balancerRouterAddress,
-        'querySwapSingleTokenExactIn',
-        [
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
             tokenPair.poolId,
             tokenPair.tokenB.address,
             tokenPair.tokenA.address,
             `${tokenPair.aToBAmountOut}`,
             ZERO_ADDRESS,
         ],
-    );
+    });
 }
 
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {

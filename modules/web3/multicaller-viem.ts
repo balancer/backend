@@ -1,7 +1,7 @@
 import { ContractFunctionParameters } from 'viem';
 import { ViemClient } from '../../modules/sources/types';
 
-type Call = { path: string } & ContractFunctionParameters;
+export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
 
 /**
  * Wrapper for multicall that takes an array of calls and returns an object with the results mapped by the path
@@ -10,7 +10,7 @@ type Call = { path: string } & ContractFunctionParameters;
  * @param calls
  * @returns
  */
-export const multicallViem = async (client: ViemClient, calls: Call[]) => {
+export const multicallViem = async (client: ViemClient, calls: ViemMulticallCall[]) => {
     const results = await client.multicall({ contracts: calls });
 
     const parsedResults = calls.map((call, i) => [
