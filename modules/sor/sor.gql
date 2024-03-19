@@ -138,7 +138,7 @@ type GqlSorGetSwapPaths {
     """
     Price impact of the path
     """
-    priceImpact: GqlPriceImpact
+    priceImpact: GqlPriceImpact!
     """
     Transaction data that can be posted to an RPC to execute the swap.
     """
