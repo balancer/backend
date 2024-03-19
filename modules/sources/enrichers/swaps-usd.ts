@@ -3,6 +3,7 @@ import { roundToHour, roundToMidnight } from '../../common/time';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { SwapEvent } from '../../../prisma/prisma-types';
+import { formatUnits } from 'viem';
 
 /**
  * Takes swaps events and enriches them with USD values
@@ -33,35 +34,38 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
                 },
                 chain,
             },
+            include: {
+                token: true,
+            },
         });
 
         for (const swap of swaps) {
-            let amountUsd = 0;
-            const tokenInPrice =
-                tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenIn.address)?.price || 0;
-            const tokenOutPrice =
-                tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenOut.address)?.price || 0;
+            const tokenIn = tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenIn.address);
+            const tokenOut = tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenOut.address);
 
-            // Taking all the chances to get the token price
-            if (tokenInPrice > 0) {
-                amountUsd = tokenInPrice * parseFloat(swap.payload.tokenIn.amount);
-            } else {
-                amountUsd = tokenOutPrice * parseFloat(swap.payload.tokenOut.amount);
-            }
+            console.log('tokenIn', tokenIn);
+            console.log('tokenOut', tokenOut);
+
+            const payload = {
+                tokenIn: {
+                    ...swap.payload.tokenIn,
+                    valueUSD:
+                        (tokenIn?.price || 0) *
+                        parseFloat(formatUnits(BigInt(swap.payload.tokenIn.amount), tokenIn?.token.decimals || 18)),
+                },
+                tokenOut: {
+                    ...swap.payload.tokenOut,
+                    valueUSD:
+                        (tokenOut?.price || 0) *
+                        parseFloat(formatUnits(BigInt(swap.payload.tokenOut.amount), tokenOut?.token.decimals || 18)),
+                },
+            };
 
             dbEntries.push({
                 ...swap,
-                valueUSD: amountUsd,
-                payload: {
-                    tokenIn: {
-                        ...swap.payload.tokenIn,
-                        valueUSD: tokenInPrice * parseFloat(swap.payload.tokenIn.amount),
-                    },
-                    tokenOut: {
-                        ...swap.payload.tokenOut,
-                        valueUSD: tokenOutPrice * parseFloat(swap.payload.tokenOut.amount),
-                    },
-                },
+                // Taking all the chances to get the token price
+                valueUSD: payload.tokenIn.valueUSD || payload.tokenOut.valueUSD || 0,
+                payload,
             });
         }
     }

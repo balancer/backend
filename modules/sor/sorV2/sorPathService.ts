@@ -1,11 +1,13 @@
 import {
     GqlPoolMinimal,
+    GqlSorCallData,
     GqlSorGetSwapPaths,
     GqlSorPath,
     GqlSorSwap,
     GqlSorSwapRoute,
     GqlSorSwapRouteHop,
     GqlSorSwapType,
+    GqlSwapCallDataInput,
 } from '../../../schema';
 import { Chain } from '@prisma/client';
 import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
@@ -20,7 +22,16 @@ import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, swapPathsZeroResponse } from '../utils';
-import { BatchSwapStep, DEFAULT_USERDATA, SingleSwap, Swap, SwapKind } from '@balancer/sdk';
+import {
+    BatchSwapStep,
+    DEFAULT_USERDATA,
+    SingleSwap,
+    Slippage,
+    Swap,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+    SwapKind,
+} from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
@@ -87,7 +98,13 @@ class SorPathService implements SwapService {
         }
 
         try {
-            return this.mapToSorSwapPaths(paths!, input.swapType, input.chain, input.queryBatchSwap);
+            return this.mapToSorSwapPaths(
+                paths!,
+                input.swapType,
+                input.chain,
+                input.queryBatchSwap,
+                input.callDataInput,
+            );
         } catch (err: any) {
             console.log(`Error Retrieving QuerySwap`, err);
             Sentry.captureException(err.message, {
@@ -155,27 +172,27 @@ class SorPathService implements SwapService {
         swapType: GqlSorSwapType,
         chain: Chain,
         queryFirst = false,
+        callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
         let updatedAmount;
-        if (queryFirst) {
-            const sdkSwap = new Swap({
-                chainId: parseFloat(chainToIdMap[chain]),
-                paths: paths.map((path) => ({
-                    vaultVersion: 2 as 2 | 3,
-                    inputAmountRaw: path.inputAmount.amount,
-                    outputAmountRaw: path.outputAmount.amount,
-                    tokens: path.tokens.map((token) => ({
-                        address: token.address,
-                        decimals: token.decimals,
-                    })),
-                    pools: path.pools.map((pool) => pool.id),
+        const sdkSwap = new Swap({
+            chainId: parseFloat(chainToIdMap[chain]),
+            paths: paths.map((path) => ({
+                vaultVersion: 2 as 2 | 3,
+                inputAmountRaw: path.inputAmount.amount,
+                outputAmountRaw: path.outputAmount.amount,
+                tokens: path.tokens.map((token) => ({
+                    address: token.address,
+                    decimals: token.decimals,
                 })),
-                swapKind,
-            });
-
+                pools: path.pools.map((pool) => pool.id),
+            })),
+            swapKind,
+        });
+        if (queryFirst) {
             updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
         }
 
@@ -189,12 +206,56 @@ class SorPathService implements SwapService {
             outputAmount = swapKind === SwapKind.GivenIn ? updatedAmount : outputAmount;
         }
 
+        let callData: GqlSorCallData | undefined = undefined;
+        if (callDataInput) {
+            if (swapKind === SwapKind.GivenIn) {
+                const callDataExactIn = sdkSwap.buildCall({
+                    sender: callDataInput.sender as `0x${string}`,
+                    recipient: callDataInput.receiver as `0x${string}`,
+                    wethIsEth: callDataInput.wethIsEth,
+                    expectedAmountOut: outputAmount,
+                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
+                }) as SwapBuildOutputExactIn;
+                callData = {
+                    callData: callDataExactIn.callData,
+                    to: callDataExactIn.to,
+                    value: callDataExactIn.value.toString(),
+                    minAmountOutRaw: formatUnits(
+                        callDataExactIn.minAmountOut.amount,
+                        callDataExactIn.minAmountOut.token.decimals,
+                    ),
+                };
+            } else {
+                const callDataExactOut = sdkSwap.buildCall({
+                    sender: callDataInput.sender as `0x${string}`,
+                    recipient: callDataInput.receiver as `0x${string}`,
+                    wethIsEth: callDataInput.wethIsEth,
+                    expectedAmountIn: inputAmount,
+                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
+                }) as SwapBuildOutputExactOut;
+                callData = {
+                    callData: callDataExactOut.callData,
+                    to: callDataExactOut.to,
+                    value: callDataExactOut.value.toString(),
+                    maxAmountInRaw: formatUnits(
+                        callDataExactOut.maxAmountIn.amount,
+                        callDataExactOut.maxAmountIn.token.decimals,
+                    ),
+                };
+            }
+        }
+
         // price impact does not take the updatedAmount into account
         let priceImpact: string | undefined;
+        let priceImpactError: string | undefined;
         try {
             priceImpact = calculatePriceImpact(paths, swapKind).decimal.toFixed(4);
         } catch (error) {
             priceImpact = undefined;
+            priceImpactError =
+                'Price impact could not be calculated for this path. The swap path is still valid and can be executed.';
         }
 
         // get all affected pools
@@ -244,7 +305,11 @@ class SorPathService implements SwapService {
             effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: this.mapRoutes(paths, pools),
-            priceImpact: priceImpact,
+            priceImpact: {
+                priceImpact: priceImpact,
+                error: priceImpactError,
+            },
+            callData: callData,
         };
     }
 

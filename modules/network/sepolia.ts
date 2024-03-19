@@ -12,9 +12,9 @@ import { GithubContentService } from '../content/github-content.service';
 import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import sepoliaNetworkData from '../../config/sepolia';
+import config from '../../config';
 
-export { sepoliaNetworkData };
+export const sepoliaNetworkData = config.SEPOLIA;
 
 export const sepoliaNetworkConfig: NetworkConfig = {
     data: sepoliaNetworkData,
@@ -43,68 +43,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
-        {
-            name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'update-pool-apr',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-new-pools-from-subgraph',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-tokens-from-pool-tokens',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-staking-for-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(90, 'minutes'),
-        },
-        {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
-            name: 'sync-changed-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'user-sync-staked-balances',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
-        },
         // V3 jobs
         {
             name: 'add-pools-v3',
@@ -113,10 +51,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         {
             name: 'sync-pools-v3',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-join-exits-v2',
-            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-join-exits-v3',

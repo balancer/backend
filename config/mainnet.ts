@@ -150,6 +150,7 @@ export default <NetworkData>{
                         wrappedTokens: {
                             waUSDT: '0xa7e0e66f38b8ad8343cff67118c1f33e827d1455',
                             stataEthUSDT: '0x65799b9fd4206cdaa4a1db79254fcbc2fd2ffee6',
+                            stataEthUSDT2: '0x862c57d48becb45583aeba3f489696d22466ca1b',
                         },
                     },
                     DAI: {

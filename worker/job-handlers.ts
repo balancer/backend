@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import { Express, NextFunction } from 'express';
 import { tokenService } from '../modules/token/token.service';
 import { poolService } from '../modules/pool/pool.service';
-import { beetsService } from '../modules/beets/beets.service';
 import { blocksSubgraphService } from '../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../modules/user/user.service';
 import { protocolService } from '../modules/protocol/protocol.service';
@@ -16,7 +15,6 @@ import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs } from '../modules/network/network-config';
-import { sftmxService } from '../modules/sftmx/sftmx.service';
 import { JobsController } from '../modules/controllers/jobs-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -184,13 +182,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-join-exits-v2':
-                // await runIfNotAlreadyRunning(
-                //     job.name,
-                //     chainId,
-                //     () => jobsController.syncJoinExitsV2(chainId),
-                //     res,
-                //     next,
-                // );
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncJoinExitsV2(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);
@@ -315,10 +313,31 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-sftmx-staking-data':
-                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncStakingData(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSftmxStakingData(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-sftmx-withdrawal-requests':
-                await runIfNotAlreadyRunning(job.name, chainId, () => sftmxService.syncWithdrawalRequests(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSftmxWithdrawalrequests(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-sftmx-staking-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => jobsController.syncSftmxStakingSnapshots(chainId),
+                    res,
+                    next,
+                );
                 break;
             // V3 Jobs
             case 'add-pools-v3':
