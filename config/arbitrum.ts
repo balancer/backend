@@ -179,6 +179,9 @@ export default <NetworkData>{
     beefy: {
         linearPools: [''],
     },
+    gyro: {
+        config: '0x9b683ca24b0e013512e2566b68704dbe9677413c',
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
