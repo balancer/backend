@@ -76,7 +76,14 @@ export default <NetworkData>{
                         wrappedTokens: {
                             waUSDC: '0xe719aef17468c7e10c0c205be62c990754dff7e5',
                             stataArbUSDC: '0x3a301e7917689b8e8a19498b8a28fc912583490c',
+                        },
+                    },
+                    USDCn: {
+                        underlyingAssetAddress: '0xaf88d065e77c8cc2239327c5edb3a432268e5831',
+                        aTokenAddress: '0x724dc807b04555b71ed48a6896b6f41593b8c637',
+                        wrappedTokens: {
                             stataArbUSDCn: '0xbde67e089886ec0e615d6f054bc6f746189a3d56',
+                            stataArbUSDCn2: '0x7cfadfd5645b50be87d546f42699d863648251ad',
                         },
                     },
                     USDT: {
@@ -85,6 +92,7 @@ export default <NetworkData>{
                         wrappedTokens: {
                             waUSDT: '0x3c7680dfe7f732ca0279c39ff30fe2eafdae49db',
                             stataArbUSDT: '0x8b5541b773dd781852940490b0c3dc1a8cdb6a87',
+                            stataArbUSDT2: '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140',
                         },
                     },
                     DAI: {
