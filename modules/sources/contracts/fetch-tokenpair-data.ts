@@ -259,7 +259,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.effectivePriceAmountOut && result.aToBAmountOut) {
+    if (result && result.effectivePriceAmountOut && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
@@ -272,7 +272,7 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
 function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.bToAAmountOut) {
+    if (result && result.bToAAmountOut) {
         tokenPair.bToAAmountOut = BigInt(result.bToAAmountOut.toString());
     }
 }
