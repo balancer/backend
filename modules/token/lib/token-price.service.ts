@@ -23,8 +23,8 @@ export class TokenPriceService {
     private readonly priceHandlers: TokenPriceHandler[] = [
         new FbeetsPriceHandlerService(),
         new ClqdrPriceHandlerService(),
-        new CoingeckoPriceHandlerService(),
         new AavePriceHandlerService(),
+        new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),

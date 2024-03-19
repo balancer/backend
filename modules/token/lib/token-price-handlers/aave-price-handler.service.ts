@@ -161,6 +161,7 @@ export class AavePriceHandlerService implements TokenPriceHandler {
         // Group tokens by chain
         const tokensByChain = _.groupBy(acceptedTokens, 'chain');
 
+        const updatedTokens: PrismaTokenWithTypes[] = [];
         for (const chain in tokensByChain) {
             const aaveChain = chain as keyof typeof aaveTokens;
             // Fetch rates for aave tokens
@@ -188,8 +189,6 @@ export class AavePriceHandlerService implements TokenPriceHandler {
                 underlyingPrices,
             );
 
-            console.log('underlyingMap', underlyingPrices);
-
             for (const token of tokensByChain[chain]) {
                 const underlying = aaveTokens[aaveChain].find((t) => t.wrappedToken === token.address)?.underlying;
                 if (!underlying) {
@@ -197,6 +196,7 @@ export class AavePriceHandlerService implements TokenPriceHandler {
                 }
                 const price = Number((rateMap[token.address] * underlyingMap[underlying].price).toFixed(2));
 
+                updatedTokens.push(token);
                 tokenAndPrices.push({
                     address: token.address,
                     chain: token.chain,
@@ -207,6 +207,6 @@ export class AavePriceHandlerService implements TokenPriceHandler {
 
         await updatePrices(this.id, tokenAndPrices, timestamp);
 
-        return acceptedTokens;
+        return updatedTokens;
     }
 }
