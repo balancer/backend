@@ -7,6 +7,7 @@ import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 import { getViemClient } from '../sources/viem-client';
+import { getVaultClient } from '../sources/contracts';
 
 /**
  * Controller responsible for matching job requests to configured job handlers
@@ -54,8 +55,10 @@ export function PoolsMutationController(tracer?: any) {
             });
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
+            const vaultClient = getVaultClient(viemClient, vaultAddress);
+            const blockNumber = await viemClient.getBlockNumber();
 
-            await syncPools(dbIds, viemClient, vaultAddress, chain);
+            await syncPools(dbIds, vaultClient, chain, blockNumber);
             await syncTokenPairs(dbIds, viemClient, routerAddress, chain);
             return dbIds;
         },

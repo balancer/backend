@@ -17,7 +17,7 @@ import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../action
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
+import { getVaultClient } from '../sources/contracts';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -95,8 +95,10 @@ export function JobsController(tracer?: any) {
             const newPools = await client.getAllInitializedPools({ id_not_in: ids });
 
             const viemClient = getViemClient(chain);
+            const vaultClient = getVaultClient(viemClient, vaultAddress);
+            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, viemClient, vaultAddress, chain);
+            await upsertPools(newPools, vaultClient, chain, latestBlock);
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -121,8 +123,10 @@ export function JobsController(tracer?: any) {
             const allPools = await client.getAllInitializedPools();
 
             const viemClient = getViemClient(chain);
+            const vaultClient = getVaultClient(viemClient, vaultAddress);
+            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(allPools, viemClient, vaultAddress, chain);
+            await upsertPools(allPools, vaultClient, chain, latestBlock);
         },
         /**
          * Syncs database pools state with the onchain state
@@ -162,15 +166,15 @@ export function JobsController(tracer?: any) {
             });
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
+            const vaultClient = getVaultClient(viemClient, vaultAddress);
 
             const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
             const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
             if (ids.length === 0) {
                 return [];
             }
-            await syncPools(ids, viemClient, vaultAddress, chain);
-            await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            return ids;
+            const latestBlock = await viemClient.getBlockNumber();
+            return syncPools(ids, vaultClient, chain, latestBlock + 1n);
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
