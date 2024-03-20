@@ -1,12 +1,11 @@
 import { Chain } from '@prisma/client';
-import { OnchainPoolData, TokenPairData } from '../contracts';
-import { formatEther, formatUnits, parseEther } from 'viem';
+import { OnchainPoolData } from '../contracts';
+import { formatEther, formatUnits } from 'viem';
 
 export type OnchainPoolUpdateData = ReturnType<typeof onchainPoolUpdate>;
 
 export const onchainPoolUpdate = (
     onchainPoolData: OnchainPoolData,
-    onChainTokenPairData: TokenPairData[],
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
     id: string,
@@ -21,7 +20,6 @@ export const onchainPoolUpdate = (
             totalShares: formatEther(onchainPoolData.totalSupply),
             blockNumber: 0,
             swapFee: String(onchainPoolData.swapFee ?? '0'),
-            tokenPairsData: onChainTokenPairData,
         },
         poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
             id: `${id}-${tokenData.address.toLowerCase()}`,

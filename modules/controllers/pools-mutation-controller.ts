@@ -2,6 +2,7 @@ import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { syncPools } from '../actions/pool/sync-pools';
 import { syncSwaps } from '../actions/pool/sync-swaps';
+import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
@@ -54,7 +55,9 @@ export function PoolsMutationController(tracer?: any) {
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
 
-            return syncPools(dbIds, viemClient, vaultAddress, routerAddress, chain);
+            await syncPools(dbIds, viemClient, vaultAddress, chain);
+            await syncTokenPairs(dbIds, viemClient, routerAddress, chain);
+            return dbIds;
         },
     };
 }

@@ -17,6 +17,7 @@ import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../action
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -167,7 +168,9 @@ export function JobsController(tracer?: any) {
             if (ids.length === 0) {
                 return [];
             }
-            return syncPools(ids, viemClient, vaultAddress, routerAddress, chain);
+            await syncPools(ids, viemClient, vaultAddress, chain);
+            await syncTokenPairs(ids, viemClient, routerAddress, chain);
+            return ids;
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
