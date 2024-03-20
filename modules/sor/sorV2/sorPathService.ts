@@ -176,9 +176,7 @@ class SorPathService implements SwapService {
                 })),
                 swapKind,
             });
-            console.log("here")
             updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
-            console.log("here2")
         }
 
         let inputAmount = getInputAmount(paths);
