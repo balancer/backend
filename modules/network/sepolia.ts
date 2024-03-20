@@ -43,68 +43,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
-        {
-            name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'update-pool-apr',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-new-pools-from-subgraph',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-tokens-from-pool-tokens',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
-        },
-        {
-            name: 'sync-staking-for-pools',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'sync-latest-snapshots-for-all-pools',
-            interval: every(90, 'minutes'),
-        },
-        {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
-            name: 'sync-changed-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'user-sync-staked-balances',
-            interval: every(5, 'minutes'),
-        },
-        {
-            name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
-        },
         // V3 jobs
         {
             name: 'add-pools-v3',

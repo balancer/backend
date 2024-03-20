@@ -69,7 +69,7 @@ export function EventsQueryController(tracer?: any) {
         }: QueryPoolGetEventsArgs): Promise<(GqlPoolSwapEvent | GqlPoolJoinExitEvent)[]> => {
             // Setting default values
 
-            const conditions: Prisma.PoolEventWhereInput = {};
+            const conditions: Prisma.PrismaPoolEventWhereInput = {};
 
             if (userAddress) {
                 conditions.userAddress = {
@@ -83,7 +83,7 @@ export function EventsQueryController(tracer?: any) {
                 gte: since,
             };
 
-            const dbEvents = await prisma.poolEvent.findMany({
+            const dbEvents = await prisma.prismaPoolEvent.findMany({
                 where: {
                     ...conditions,
                     poolId: poolId,

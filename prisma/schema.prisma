@@ -45,6 +45,66 @@ model PrismaFbeets {
     ratio               String
 }
 
+
+model PrismaSftmxStakingData {
+    id                      String              @id
+    totalFtm                String
+    totalFtmStaked          String
+    totalFtmInPool          String
+    numberOfVaults          Int
+    stakingApr              String
+    exchangeRate            String
+
+    maxDepositLimit         String
+    minDepositLimit         String
+    withdrawalDelay         Int
+
+    undelegatePaused        Boolean
+    withdrawPaused          Boolean
+    maintenancePaused       Boolean
+
+    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
+    vaults                  PrismaSftmxVault[]
+
+    snapshots               PrismaSftmxStakingDataSnapshot[]
+}
+
+model PrismaSftmxVault {
+    id                      String          @id
+    vaultIndex              Int
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    ftmStaked               String
+    matured                 Boolean
+    unlockTimestamp         Int
+    validatorId             String
+    validatorAddress        String
+}
+
+model PrismaSftmxWithdrawalRequest {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    user                    String
+    amountSftmx             String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
+}
+
+model PrismaSftmxStakingDataSnapshot {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    timestamp               Int
+    freePoolFtmAmount       String
+    lockedFtmAmount         String
+    totalFtmAmount          String
+    exchangeRate            String
+}
+
 model PrismaPool {
     @@id([id, chain])
     @@unique([address, chain])
@@ -548,7 +608,7 @@ enum PoolEventType {
     SWAP
 }
 
-model PoolEvent {
+model PrismaPoolEvent {
     id                  String @id
     tx                  String
     type                PoolEventType
@@ -567,69 +627,10 @@ model PoolEvent {
     @@index([chain, poolId])
     @@index([userAddress])
     @@index([blockNumber])
+    @@index([blockTimestamp])
     @@index([logIndex])
 }
 
-
-
-model PrismaSftmxStakingData {
-    id                      String              @id
-    totalFtm                String
-    totalFtmStaked          String
-    totalFtmInPool          String
-    numberOfVaults          Int
-    stakingApr              String
-    exchangeRate            String
-
-    maxDepositLimit         String
-    minDepositLimit         String
-    withdrawalDelay         Int
-
-    undelegatePaused        Boolean
-    withdrawPaused          Boolean
-    maintenancePaused       Boolean
-
-    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
-    vaults                  PrismaSftmxVault[]
-
-    snapshots               PrismaSftmxStakingDataSnapshot[]
-}
-
-model PrismaSftmxVault {
-    id                      String          @id
-    vaultIndex              Int
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    ftmStaked               String
-    matured                 Boolean
-    unlockTimestamp         Int
-    validatorId             String
-    validatorAddress        String
-}
-
-model PrismaSftmxWithdrawalRequest {
-    id                      String                  @id
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    user                    String
-    amountSftmx             String
-    requestTimestamp        Int
-    isWithdrawn             Boolean
-}
-
-model PrismaSftmxStakingDataSnapshot {
-    id                      String                  @id
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    timestamp               Int
-    freePoolFtmAmount       String
-    lockedFtmAmount         String
-    totalFtmAmount          String
-    exchangeRate            String
-}
 
 model PrismaToken {
     @@id([address, chain])
@@ -678,6 +679,9 @@ model PrismaTokenCurrentPrice {
     updatedBy           String?
     timestamp           Int
     price               Float
+
+    @@index(tokenAddress)
+    @@index(chain)
 }
 
 model PrismaTokenPrice {
@@ -696,7 +700,8 @@ model PrismaTokenPrice {
     open                Float
     close               Float
 
-    @@index([timestamp, chain])
+    @@index(timestamp)
+    @@index(chain)
     @@index(tokenAddress)
 }
 

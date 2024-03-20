@@ -20,7 +20,7 @@ export const syncJoinExitsV2 = async (
     const vaultVersion = 2;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.poolEvent.findFirst({
+    const latestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
             type: {
                 in: ['JOIN', 'EXIT'],
@@ -35,27 +35,39 @@ export const syncJoinExitsV2 = async (
 
     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
     const syncSince = daysAgo(daysToSync);
+
+    // We need to use gte, because of pagination.
+    // We don't have a guarantee that we get all the events from a specific block in one request.
     const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-            ? { block_gt: String(latestEvent.blockNumber) }
+        chain === Chain.FANTOM
+            ? latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+                ? { timestamp_gte: latestEvent?.blockTimestamp }
+                : { timestamp_gte: syncSince }
+            : latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+            ? { block_gte: String(latestEvent.blockNumber) }
             : { timestamp_gte: syncSince };
 
     // Get events
-    const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
+    const getterFn =
+        chain === Chain.FANTOM
+            ? v2SubgraphClient.getFantomPoolJoinExits.bind(v2SubgraphClient)
+            : v2SubgraphClient.getPoolJoinExits.bind(v2SubgraphClient);
+
+    const { joinExits } = await getterFn({
         first: 1000,
         where: where,
-        orderBy: JoinExit_OrderBy.Block,
+        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
         orderDirection: OrderDirection.Asc,
     });
 
     // Prepare DB entries
-    const dbEntries = joinExitV2Transformer(joinExits, chain);
+    const dbEntries = await joinExitV2Transformer(joinExits, chain);
 
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
     // Create entries and skip duplicates
-    await prisma.poolEvent.createMany({
+    await prisma.prismaPoolEvent.createMany({
         data: dbEntriesWithUsd,
         skipDuplicates: true,
     });

@@ -93,6 +93,34 @@ export default <NetworkData>{
         },
     },
     ybAprConfig: {
+        aave: {
+            v3: {
+                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-optimism',
+                tokens: {
+                    USDCe: {
+                        underlyingAssetAddress: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+                        aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
+                        wrappedTokens: {
+                            stataOptUSDC: '0x9f281eb58fd98ad98ede0fc4c553ad4d73e7ca2c',
+                        },
+                    },
+                    USDCn: {
+                        underlyingAssetAddress: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
+                        aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
+                        wrappedTokens: {
+                            stataOptUSDCn: '0x4dd03dfd36548c840b563745e3fbec320f37ba7e',
+                        },
+                    },
+                    USDT: {
+                        underlyingAssetAddress: '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
+                        aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
+                        wrappedTokens: {
+                            stataOptUSDT: '0x035c93db04e5aaea54e6cd0261c492a3e0638b37',
+                        },
+                    },
+                },
+            },
+        },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/breakdown?_=',
             tokens: {
