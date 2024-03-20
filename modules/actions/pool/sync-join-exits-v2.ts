@@ -35,13 +35,16 @@ export const syncJoinExitsV2 = async (
 
     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
     const syncSince = daysAgo(daysToSync);
+
+    // We need to use gte, because of pagination.
+    // We don't have a guarantee that we get all the events from a specific block in one request.
     const where =
         chain === Chain.FANTOM
             ? latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-                ? { timestamp_gt: latestEvent?.blockTimestamp }
+                ? { timestamp_gte: latestEvent?.blockTimestamp }
                 : { timestamp_gte: syncSince }
             : latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-            ? { block_gt: String(latestEvent.blockNumber) }
+            ? { block_gte: String(latestEvent.blockNumber) }
             : { timestamp_gte: syncSince };
 
     // Get events
