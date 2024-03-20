@@ -40,11 +40,6 @@ export const syncPools = async (
     });
     const tokenPairData = await fetchTokenPairData(routerAddress, tokenPairInputPools, viemClient);
 
-    // Get the data for the tables about pools
-    const dbUpdates = Object.keys(onchainData).map((id) =>
-        onchainPoolUpdate(onchainData[id], tokenPairData[id].tokenPairs, chain, id),
-    );
-
     // Needed to get the token decimals for the USD calculations,
     // Keeping it external, because we fetch these tokens in the upsert pools function
     const allTokens = await prisma.prismaToken.findMany({
@@ -52,6 +47,11 @@ export const syncPools = async (
             chain: chain,
         },
     });
+
+    // Get the data for the tables about pools
+    const dbUpdates = Object.keys(onchainData).map((id) =>
+        onchainPoolUpdate(onchainData[id], tokenPairData[id].tokenPairs, allTokens, chain, id),
+    );
 
     const poolsWithUSD = await poolUpsertsUsd(dbUpdates, chain, allTokens);
 
