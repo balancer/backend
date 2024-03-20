@@ -217,7 +217,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
             for (let j = i + 1; j < pool.tokens.length; j++) {
-                //skip pairs with phantom BPT
+                //we only want pairs of the tokens in the pool, not pairing with its own phantom bpt
                 if (pool.tokens[i].address === pool.address || pool.tokens[j].address === pool.address) continue;
                 tokenPairs.push({
                     poolId: pool.id,
