@@ -72,7 +72,7 @@ export async function joinExitV2Transformer(
                 poolId: event.pool.id,
                 chain: chain,
                 userAddress: event.sender,
-                blockNumber: Number(event.block),
+                blockNumber: Number(event.block ?? 0),
                 blockTimestamp: Number(event.timestamp),
                 logIndex: Number(event.id.substring(66)),
                 valueUSD: 0,

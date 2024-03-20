@@ -36,15 +36,24 @@ export const syncJoinExitsV2 = async (
     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
     const syncSince = daysAgo(daysToSync);
     const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+        chain === Chain.FANTOM
+            ? latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+                ? { timestamp_gt: latestEvent?.blockTimestamp }
+                : { timestamp_gte: syncSince }
+            : latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
             ? { block_gt: String(latestEvent.blockNumber) }
             : { timestamp_gte: syncSince };
 
     // Get events
-    const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
+    const getterFn =
+        chain === Chain.FANTOM
+            ? v2SubgraphClient.getFantomPoolJoinExits.bind(v2SubgraphClient)
+            : v2SubgraphClient.getPoolJoinExits.bind(v2SubgraphClient);
+
+    const { joinExits } = await getterFn({
         first: 1000,
         where: where,
-        orderBy: JoinExit_OrderBy.Block,
+        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
         orderDirection: OrderDirection.Asc,
     });
 
