@@ -1,5 +1,6 @@
 import { ContractFunctionParameters } from 'viem';
 import { ViemClient } from '../../modules/sources/types';
+import { set } from 'lodash';
 
 export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
 
@@ -10,13 +11,18 @@ export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
  * @param calls
  * @returns
  */
-export const multicallViem = async (client: ViemClient, calls: ViemMulticallCall[]) => {
+export async function multicallViem<T extends Record<string, any>>(
+    client: ViemClient,
+    calls: ViemMulticallCall[],
+): Promise<T> {
     const results = await client.multicall({ contracts: calls });
 
-    const parsedResults = calls.map((call, i) => [
-        call.path,
-        results[i].status === 'success' ? results[i].result : undefined,
-    ]);
-
-    return Object.fromEntries(parsedResults);
-};
+    const returnObject = {};
+    let i = 0;
+    for (const call of calls) {
+        const resultValue = results[i].status === 'success' ? results[i].result : undefined;
+        set(returnObject, call.path, resultValue);
+        i++;
+    }
+    return returnObject as T;
+}

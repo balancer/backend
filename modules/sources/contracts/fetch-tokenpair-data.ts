@@ -300,6 +300,9 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
         Sentry.captureException(
             `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
         );
+        console.log(
+            `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
+        );
         priceRatio = parseEther('0.999999');
     }
     if (priceRatio !== 0n) {
