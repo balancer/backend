@@ -16,6 +16,9 @@ import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } fr
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
+        if(!!args.useVaultVersion && args.useVaultVersion!==2 && args.useVaultVersion!==3){
+            throw new Error("Vault Version must be 2 or 3");
+        }
         console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
@@ -50,6 +53,7 @@ export class SorService {
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
+            vaultVersion: args.useVaultVersion ?? 2,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : true,
         });
     }
