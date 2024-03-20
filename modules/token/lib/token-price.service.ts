@@ -16,12 +16,14 @@ import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/li
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
+import { AavePriceHandlerService } from './token-price-handlers/aave-price-handler.service';
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
     private readonly priceHandlers: TokenPriceHandler[] = [
         new FbeetsPriceHandlerService(),
         new ClqdrPriceHandlerService(),
+        new AavePriceHandlerService(),
         new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
         new LinearWrappedTokenPriceHandlerService(),

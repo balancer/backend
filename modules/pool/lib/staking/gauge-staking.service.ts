@@ -24,8 +24,6 @@ import type { JsonFragment } from '@ethersproject/abi';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
-import { FtmStaking_OrderBy } from '../../../subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types';
-import { total } from './bal-emissions';
 
 interface GaugeRate {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */

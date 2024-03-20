@@ -4,6 +4,7 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
+import { EventsQueryController } from '../controllers/pool-events-query-controller';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -22,6 +23,7 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
+        // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
@@ -31,6 +33,7 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolSwaps(args);
         },
+        // TODO: Deprecate in favor of poolGetEvents
         poolGetBatchSwaps: async (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
@@ -40,6 +43,7 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolBatchSwaps(args);
         },
+        // TODO: Deprecate in favor of poolGetEvents
         poolGetJoinExits: async (parent, args, context) => {
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
@@ -48,6 +52,9 @@ const balancerResolvers: Resolvers = {
                 throw new Error('poolGetJoinExits error: Provide "where.chainIn" param');
             }
             return poolService.getPoolJoinExits(args);
+        },
+        poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
+            return EventsQueryController().getEvents({ range, poolId, chain, typeIn, userAddress });
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();

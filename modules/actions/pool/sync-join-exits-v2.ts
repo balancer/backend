@@ -1,114 +1,76 @@
-// import { Chain, PoolEventType } from '@prisma/client';
-// import { prisma } from '../../../prisma/prisma-client';
-// import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
-// import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-// import { roundToHour } from '../../common/time';
+import { Chain } from '@prisma/client';
+import { prisma } from '../../../prisma/prisma-client';
+import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { daysAgo } from '../../common/time';
+import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
+import { JOIN_EXIT_HISTORY_DAYS } from './sync-join-exits';
+import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
 
-// /**
-//  * Get the join and exit events from the subgraph and store them in the database
-//  *
-//  * @param vaultSubgraphClient
-//  */
-// export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
-//     const vaultVersion = 2;
+/**
+ * Get the join and exit events from the subgraph and store them in the database
+ *
+ * @param vaultSubgraphClient
+ */
+export const syncJoinExitsV2 = async (
+    v2SubgraphClient: BalancerSubgraphService,
+    chain: Chain,
+    daysToSync = JOIN_EXIT_HISTORY_DAYS,
+): Promise<string[]> => {
+    const vaultVersion = 2;
 
-//     // Get latest event from the DB
-//     const latestEvent = await prisma.poolEvent.findFirst({
-//         where: {
-//             type: {
-//                 in: ['JOIN', 'EXIT'],
-//             },
-//             chain: chain,
-//             vaultVersion,
-//         },
-//         orderBy: {
-//             blockNumber: 'desc',
-//         },
-//     });
+    // Get latest event from the DB
+    const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        where: {
+            type: {
+                in: ['JOIN', 'EXIT'],
+            },
+            chain: chain,
+            vaultVersion,
+        },
+        orderBy: {
+            blockNumber: 'desc',
+        },
+    });
 
-//     // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
-//     const hundredDaysAgo = Math.floor(+new Date(Date.now() - 100 * 24 * 60 * 60 * 1000) / 1000);
-//     const where =
-//         latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > hundredDaysAgo
-//             ? { block_gte: String(latestEvent.blockNumber) }
-//             : { timestamp_gte: hundredDaysAgo };
+    // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
+    const syncSince = daysAgo(daysToSync);
 
-//     // Get events
-//     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
-//         first: 1000,
-//         where: where,
-//         orderBy: JoinExit_OrderBy.Timestamp,
-//         orderDirection: OrderDirection.Asc,
-//     });
+    // We need to use gte, because of pagination.
+    // We don't have a guarantee that we get all the events from a specific block in one request.
+    const where =
+        chain === Chain.FANTOM
+            ? latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+                ? { timestamp_gte: latestEvent?.blockTimestamp }
+                : { timestamp_gte: syncSince }
+            : latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
+            ? { block_gte: String(latestEvent.blockNumber) }
+            : { timestamp_gte: syncSince };
 
-//     // Store only the events that are not already in the DB
-//     const existingEvents = await prisma.poolEvent.findMany({
-//         where: {
-//             id: { in: joinExits.map((event) => event.id) },
-//             type: {
-//                 in: ['JOIN', 'EXIT'],
-//             },
-//             chain: chain,
-//             vaultVersion,
-//         },
-//     });
+    // Get events
+    const getterFn =
+        chain === Chain.FANTOM
+            ? v2SubgraphClient.getFantomPoolJoinExits.bind(v2SubgraphClient)
+            : v2SubgraphClient.getPoolJoinExits.bind(v2SubgraphClient);
 
-//     const events = joinExits.filter((event) => !existingEvents.some((existing) => existing.id === event.id));
+    const { joinExits } = await getterFn({
+        first: 1000,
+        where: where,
+        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
+        orderDirection: OrderDirection.Asc,
+    });
 
-//     // Prepare DB entries
-//     const dbEntries = await Promise.all(
-//         events.map(async (event) => {
-//             // TODO: Calculate USD amounts with token prices at the time of the event
-//             // 🚨 Reading from the DB in a loop – will get slow with a large events volume
-//             // But we need prices based on the event timestamp, so batching this should be based on timestamp ranges
-//             const prices = await prisma.prismaTokenPrice.findMany({
-//                 where: {
-//                     tokenAddress: { in: event.pool.tokensList },
-//                     timestamp: roundToHour(Number(event.timestamp)), // 🚨 Assuming all prices are available hourly
-//                     chain: chain,
-//                 },
-//                 include: {
-//                     token: true,
-//                 },
-//             });
+    // Prepare DB entries
+    const dbEntries = await joinExitV2Transformer(joinExits, chain);
 
-//             const usd = event.pool.tokensList.map((address, index) => {
-//                 const price = prices.find((price) => price.tokenAddress === address);
-//                 return {
-//                     address: address,
-//                     amount: event.amounts[index],
-//                     valueUSD: Number(event.amounts[index]) * (price?.price || 0), // TODO: check USD amount
-//                 };
-//             });
+    // Enrich with USD values
+    const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
-//             return {
-//                 id: event.id, // tx + logIndex
-//                 tx: event.tx,
-//                 type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,
-//                 poolId: event.pool.id,
-//                 chain: chain,
-//                 userAddress: event.sender,
-//                 // blockNumber: Number(event.block),
-//                 blockTimestamp: Number(event.timestamp),
-//                 logIndex: Number(event.id.substring(66)),
-//                 valueUSD: usd.reduce((acc, token) => acc + Number(token.valueUSD), 0),
-//                 payload: {
-//                     tokens: usd,
-//                 },
-//             };
-//         }),
-//     ).catch((e) => {
-//         console.error('Error preparing DB entries', e);
-//         return [];
-//     });
+    // Create entries and skip duplicates
+    await prisma.prismaPoolEvent.createMany({
+        data: dbEntriesWithUsd,
+        skipDuplicates: true,
+    });
 
-//     // Create entries and skip duplicates
-//     await prisma.poolEvent.createMany({
-//         data: dbEntries,
-//         skipDuplicates: true,
-//     });
-
-//     // TODO: do we need a separate function to update prices? If so, we should be syncing events first, then running a price on them
-
-//     return dbEntries.map((entry) => entry.id);
-// };
+    return dbEntries.map((entry) => entry.id);
+};

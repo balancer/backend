@@ -1,4 +1,5 @@
 import { JobsController } from '../modules/controllers/jobs-controller';
+import { UserBalancesController } from '../modules/controllers/user-balances-controller';
 
 // TODO needed?
 const jobsController = JobsController();
@@ -22,13 +23,22 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncPools(chain);
     } else if (job === 'sync-join-exits-v3') {
         return jobsController.syncJoinExitsV3(chain);
-        // } else if (job === 'sync-join-exits-v2') {
-        //     return jobsController.syncJoinExitsV2(chain);
+    } else if (job === 'sync-join-exits-v2') {
+        return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
+    } else if (job === 'sync-sftmx-staking') {
+        return jobsController.syncSftmxStakingData(chain);
+    } else if (job === 'sync-sftmx-withdrawal') {
+        return jobsController.syncSftmxWithdrawalrequests(chain);
+    } else if (job === 'sync-sftmx-staking-snapshots') {
+        return jobsController.syncSftmxStakingSnapshots(chain);
+    } else if (job === 'sync-user-balances-v3') {
+        return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     } else  if (job === 'update-on-chain-data-v3'){
         return jobsController.updateOnChainDataV3(chain);
     }
+
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
 

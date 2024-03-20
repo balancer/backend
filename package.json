@@ -22,7 +22,7 @@
         "@aws-sdk/client-secrets-manager": "^3.195.0",
         "@aws-sdk/client-sqs": "^3.137.0",
         "@balancer-labs/sdk": "github:beethovenxfi/balancer-sdk#beethovenx-master",
-        "@balancer/sdk": "^0.11.0",
+        "@balancer/sdk": "^0.12.0",
         "@ethersproject/address": "^5.6.0",
         "@ethersproject/bignumber": "^5.6.0",
         "@ethersproject/constants": "^5.6.0",

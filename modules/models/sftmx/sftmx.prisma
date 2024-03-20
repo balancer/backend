@@ -18,6 +18,8 @@ model PrismaSftmxStakingData {
 
     withdrawalRequests      PrismaSftmxWithdrawalRequest[]
     vaults                  PrismaSftmxVault[]
+
+    snapshots               PrismaSftmxStakingDataSnapshot[]
 }
 
 model PrismaSftmxVault {
@@ -42,4 +44,16 @@ model PrismaSftmxWithdrawalRequest {
     amountSftmx             String
     requestTimestamp        Int
     isWithdrawn             Boolean
+}
+
+model PrismaSftmxStakingDataSnapshot {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    timestamp               Int
+    freePoolFtmAmount       String
+    lockedFtmAmount         String
+    totalFtmAmount          String
+    exchangeRate            String
 }

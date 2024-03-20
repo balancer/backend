@@ -16,8 +16,17 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): Int!
+    """
+    Will de deprecated in favor of poolGetEvents
+    """
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
+    """
+    Will de deprecated in favor of poolGetEvents
+    """
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
+    """
+    Will de deprecated in favor of poolGetEvents
+    """
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
     poolGetFeaturedPools(chains: [GqlChain!]!): [GqlPoolFeaturedPool!]!
@@ -25,6 +34,16 @@ extend type Query {
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
+    """
+    Getting swap, join and exit events
+    """
+    poolGetEvents(
+        range: GqlPoolEventsDataRange!
+        poolId: String!
+        chain: GqlChain!
+        typeIn: [GqlPoolEventType!]!
+        userAddress: String
+    ): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -874,6 +893,12 @@ type GqlFeaturePoolGroupItemExternalLink {
     buttonUrl: String!
 }
 
+enum GqlPoolEventsDataRange {
+    SEVEN_DAYS
+    THIRTY_DAYS
+    NINETY_DAYS
+}
+
 enum GqlPoolSnapshotDataRange {
     THIRTY_DAYS
     NINETY_DAYS
@@ -932,4 +957,71 @@ type GqlPoolStakingOtherGauge {
     status: GqlPoolStakingGaugeStatus!
     version: Int!
     rewards: [GqlPoolStakingGaugeReward!]!
+}
+
+enum GqlPoolEventType {
+    JOIN
+    EXIT
+    SWAP
+}
+
+input GqlPoolEventsFilter {
+    typeIn: [GqlPoolEventType!]
+    poolIdIn: [String!]
+    chainIn: [GqlChain!]
+    userAddress: String
+}
+
+type GqlPoolEventAmount {
+    address: String!
+    amount: String!
+    valueUSD: Float!
+}
+
+interface GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+}
+
+type GqlPoolJoinExitEventV3 implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+    tokens: [GqlPoolEventAmount!]!
+}
+
+type GqlPoolSwapEventV3 implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+    tokenIn: GqlPoolEventAmount!
+    tokenOut: GqlPoolEventAmount!
 }

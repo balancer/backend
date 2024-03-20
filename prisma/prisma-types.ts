@@ -1,6 +1,6 @@
-import { Prisma, PrismaToken, PrismaTokenTypeOption, PoolEvent } from '@prisma/client';
+import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
 
-export type SwapEvent = PoolEvent & {
+export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';
     payload: {
         tokenIn: {
@@ -16,7 +16,7 @@ export type SwapEvent = PoolEvent & {
     };
 };
 
-export type JoinExitEvent = PoolEvent & {
+export type JoinExitEvent = PrismaPoolEvent & {
     type: 'JOIN' | 'EXIT';
     payload: {
         tokens: {

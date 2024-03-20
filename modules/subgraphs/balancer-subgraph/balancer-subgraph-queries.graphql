@@ -364,6 +364,26 @@ query BalancerJoinExits(
     }
 }
 
+query FantomJoinExits(
+    $skip: Int
+    $first: Int
+    $orderBy: JoinExit_orderBy
+    $orderDirection: OrderDirection
+    $where: JoinExit_filter
+    $block: Block_height
+) {
+    joinExits(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...FantomJoinExit
+    }
+}
+
 fragment BalancerLatestPrice on LatestPrice {
     id
     asset
@@ -376,6 +396,21 @@ fragment BalancerLatestPrice on LatestPrice {
 }
 
 fragment BalancerJoinExit on JoinExit {
+    amounts
+    id
+    sender
+    block
+    timestamp
+    tx
+    type
+    pool {
+        id
+        tokensList
+    }
+    valueUSD
+}
+
+fragment FantomJoinExit on JoinExit {
     amounts
     id
     sender

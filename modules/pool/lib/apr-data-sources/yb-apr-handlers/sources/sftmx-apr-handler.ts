@@ -3,9 +3,9 @@ import { AprHandler } from '..';
 import { SftmxAprConfig } from '../../../../../network/apr-config-types';
 import { BigNumber, ethers } from 'ethers';
 import { getContractAt } from '../../../../../web3/contract';
-import FTMStaking from '../../../../../sftmx/abi/FTMStaking.json';
-import Vault from '../../../../../sftmx/abi/Vault.json';
 import { formatFixed } from '@ethersproject/bignumber';
+import FTMStaking from '../../../../../sources/contracts/abis/FTMStaking';
+import SftmxVault from '../../../../../sources/contracts/abis/SftmxVault';
 
 export class SftmxAprHandler implements AprHandler {
     tokens: {
@@ -42,7 +42,7 @@ export class SftmxAprHandler implements AprHandler {
 
             for (const tokenAddress in this.tokens) {
                 const tokenDefinition = this.tokens[tokenAddress];
-                const ftmStakingContract = getContractAt(tokenDefinition.ftmStakingAddress, FTMStaking.abi);
+                const ftmStakingContract = getContractAt(tokenDefinition.ftmStakingAddress, FTMStaking);
 
                 const totalFtm = (await ftmStakingContract.totalFTMWorth()) as BigNumber;
                 const poolFtm = (await ftmStakingContract.getPoolBalance()) as BigNumber;
@@ -52,7 +52,7 @@ export class SftmxAprHandler implements AprHandler {
 
                 for (let i = 0; i < maturedVaultCount; i++) {
                     const vaultAddress = await ftmStakingContract.getMaturedVault(i);
-                    const vaultContract = getContractAt(vaultAddress, Vault.abi);
+                    const vaultContract = getContractAt(vaultAddress, SftmxVault);
                     const vaultAmount = await vaultContract.currentStakeValue();
                     maturedFtmAmount = maturedFtmAmount.add(vaultAmount);
                 }

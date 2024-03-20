@@ -54,7 +54,9 @@ export const swapPathsZeroResponse = (tokenIn: string, tokenOut: string): GqlSor
         effectivePrice: '0',
         effectivePriceReversed: '0',
         routes: [],
-        priceImpact: '0',
+        priceImpact: {
+            error: 'No swaps found',
+        },
     };
 };
 
