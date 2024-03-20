@@ -141,7 +141,8 @@ export class GaugeAprService implements PoolAprService {
                     }
                 })
                 .flat()
-                .filter((apr): apr is PrismaPoolAprItem | PrismaPoolAprRange => apr !== null);
+                .filter((apr): apr is PrismaPoolAprItem | PrismaPoolAprRange => apr !== null)
+                .sort((a, b) => (a.id.includes('apr-range') && !b.id.includes('apr-range') ? 1 : -1)); // Sorting to ensure the range is inserted after the item
 
             // Prepare DB operations
             for (const item of aprItems) {
