@@ -80,7 +80,7 @@ export function SftmxQueryController(tracer?: any) {
                 id: snapshot.id,
                 timestamp: snapshot.timestamp,
                 totalFtmAmount: snapshot.totalFtmAmount,
-                totalFtmAmountStaked: snapshot.totalFtmAmount,
+                totalFtmAmountStaked: snapshot.lockedFtmAmount,
                 totalFtmAmountInPool: snapshot.freePoolFtmAmount,
                 exchangeRate: snapshot.exchangeRate,
             }));
