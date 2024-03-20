@@ -174,6 +174,12 @@ export default <NetworkData>{
                 scale: 10000,
                 isIbYield: true,
             },
+            ezETH: {
+                tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                sourceUrl: 'https://app.renzoprotocol.com/api/apr',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
