@@ -88,7 +88,13 @@ type GqlPoolMinimal {
     factory: Bytes
     version: Int!
     createTime: Int!
+    """
+    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
+    """
     displayTokens: [GqlPoolTokenDisplay!]!
+    """
+    Returns all pool tokens, including any nested tokens and phantom BPTs
+    """
     allTokens: [GqlPoolTokenExpanded!]!
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -251,6 +257,9 @@ type GqlPoolWeighted implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
 
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
