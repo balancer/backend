@@ -7,7 +7,6 @@ import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../schema';
 import { Cache, CacheClass } from 'memory-cache';
 import * as Sentry from '@sentry/node';
-import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
 import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
 import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
@@ -17,6 +16,8 @@ import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 import { AavePriceHandlerService } from './token-price-handlers/aave-price-handler.service';
+import { DAYS_OF_HOURLY_PRICES } from '../../../config';
+import config from '../../../config';
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
@@ -42,14 +43,12 @@ export class TokenPriceService {
         });
 
         for (const chain of chains) {
-            const wethPrice = tokenPrices.find(
-                (tokenPrice) => tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address,
-            );
+            const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === config[chain].weth.address);
 
             if (wethPrice) {
                 tokenPrices.push({
                     ...wethPrice,
-                    tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
+                    tokenAddress: config[chain].eth.address,
                 });
             }
         }
@@ -244,7 +243,7 @@ export class TokenPriceService {
     public async purgeOldTokenPricesForAllChains(): Promise<number> {
         // DATE(to_timestamp(timestamp)) will return the midnight timestamp. We'll delete all prices that are not midnight timestamps AND are older than 100 days.
         const deleted =
-            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '100 days'`;
+            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '${DAYS_OF_HOURLY_PRICES} days'`;
 
         return deleted;
     }
@@ -280,15 +279,13 @@ export class TokenPriceService {
     private addNativeEthPrice(chains: Chain[], tokenPrices: { tokenAddress: string; chain: Chain }[]) {
         for (const chain of chains) {
             const wethPrice = tokenPrices.find(
-                (tokenPrice) =>
-                    tokenPrice.tokenAddress === AllNetworkConfigsKeyedOnChain[chain].data.weth.address &&
-                    tokenPrice.chain === chain,
+                (tokenPrice) => tokenPrice.tokenAddress === config[chain].weth.address && tokenPrice.chain === chain,
             );
 
             if (wethPrice) {
                 tokenPrices.push({
                     ...wethPrice,
-                    tokenAddress: AllNetworkConfigsKeyedOnChain[chain].data.eth.address,
+                    tokenAddress: config[chain].eth.address,
                 });
             }
         }
