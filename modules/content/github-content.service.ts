@@ -37,7 +37,7 @@ const sepoliaTokens: Record<string, { symbol: string; coingeckoTokenId: string }
         symbol: 'BAL',
         coingeckoTokenId: 'balancer',
     },
-    '0xf04378a3ff97b3f979a46f91f9b2d5a1d2394773': {
+    '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613': {
         symbol: 'DAI',
         coingeckoTokenId: 'dai',
     },

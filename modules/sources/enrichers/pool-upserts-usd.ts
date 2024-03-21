@@ -35,15 +35,12 @@ export async function poolUpsertsUsd<T extends OnchainPoolUpdateData | SubgraphP
             chain: chain,
         },
     });
-    const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
     const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
 
     return upsertData.map((pool) => {
         const poolTokenDynamicData = pool.poolTokenDynamicData.map((token) => ({
             ...token,
-            balanceUSD:
-                parseFloat(formatUnits(BigInt(token.balance), decimals[token.id.split('-')[1]])) *
-                    prices[token.id.split('-')[1]] || 0,
+            balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
         }));
 
         const poolDynamicData = {

@@ -1,9 +1,10 @@
-import { Multicaller3 } from '../../web3/multicaller3';
 import { BigNumber } from '@ethersproject/bignumber';
-import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
 import * as Sentry from '@sentry/node';
+import { ViemClient } from '../types';
+import { ViemMulticallCall, multicallViem } from '../../web3/multicaller-viem';
+import BalancerRouterAbi from './abis/BalancerRouter';
 
 interface PoolInput {
     id: string;
@@ -64,22 +65,25 @@ interface OnchainData {
     bToAAmountOut: BigNumber;
 }
 
-export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
+export async function fetchTokenPairData(
+    routerAddress: string,
+    pools: PoolInput[],
+    client: ViemClient,
+): Promise<PoolTokenPairsOutput> {
     if (pools.length === 0) {
         return {};
     }
 
     const tokenPairOutput: PoolTokenPairsOutput = {};
 
-    const multicaller = new Multicaller3(BalancerQueries, batchSize);
-
+    let multicallerRouter: ViemMulticallCall[] = [];
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
     // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
-    const tokenPairs = generateTokenPairs(pools);
+    let tokenPairs = generateTokenPairs(pools);
 
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
@@ -90,12 +94,12 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
             tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
-            addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
-            addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+            addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
 
-    const resultOne = (await multicaller.execute()) as {
+    const resultOne = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
 
@@ -105,13 +109,14 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
         }
     });
 
+    multicallerRouter = [];
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
-            addBToAPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
+            addBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
 
-    const resultTwo = (await multicaller.execute()) as {
+    const resultTwo = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
 
@@ -150,7 +155,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
             for (let j = i + 1; j < pool.tokens.length; j++) {
-                //skip pairs with phantom BPT
+                //we only want pairs of the tokens in the pool, not pairing with its own phantom bpt
                 if (pool.tokens[i].address === pool.address || pool.tokens[j].address === pool.address) continue;
                 tokenPairs.push({
                     poolId: pool.id,
@@ -188,82 +193,72 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     return tokenPairs;
 }
 
-// call querySwap from tokenA->tokenB with 100USD worth of tokenA
+// call querySwapSingleTokenExactIn from tokenA->tokenB with 100USD worth of tokenA
 function addEffectivePriceCallsToMulticaller(
     tokenPair: TokenPair,
-    balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
-    multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
-        balancerQueriesAddress,
-        'querySwap',
-        [
-            [
-                tokenPair.poolId,
-                0,
-                tokenPair.tokenA.address,
-                tokenPair.tokenB.address,
-                `${tokenPair.effectivePriceAmountIn}`,
-                ZERO_ADDRESS,
-            ],
-            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.effectivePriceAmountIn,
+            ZERO_ADDRESS,
         ],
-    );
+    });
 }
 
-// call querySwap from tokenA->tokenB with 1% of tokenA balance
+// call querySwapSingleTokenExactIn from tokenA->tokenB with 1% of tokenA balance
 function addAToBPriceCallsToMulticaller(
     tokenPair: TokenPair,
-    balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
-    multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
-        balancerQueriesAddress,
-        'querySwap',
-        [
-            [
-                tokenPair.poolId,
-                0,
-                tokenPair.tokenA.address,
-                tokenPair.tokenB.address,
-                `${tokenPair.aToBAmountIn}`,
-                ZERO_ADDRESS,
-            ],
-            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.aToBAmountIn,
+            ZERO_ADDRESS,
         ],
-    );
+    });
 }
 
-// call querySwap from tokenA->tokenB with AtoB amount out
 function addBToAPriceCallsToMulticaller(
     tokenPair: TokenPair,
-    balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
-    multicaller.call(
-        `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
-        balancerQueriesAddress,
-        'querySwap',
-        [
-            [
-                tokenPair.poolId,
-                0,
-                tokenPair.tokenB.address,
-                tokenPair.tokenA.address,
-                `${tokenPair.aToBAmountOut}`,
-                ZERO_ADDRESS,
-            ],
-            [ZERO_ADDRESS, false, ZERO_ADDRESS, false],
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenB.address,
+            tokenPair.tokenA.address,
+            `${tokenPair.aToBAmountOut}`,
+            ZERO_ADDRESS,
         ],
-    );
+    });
 }
 
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.effectivePriceAmountOut && result.aToBAmountOut) {
+    if (result && result.effectivePriceAmountOut && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
@@ -276,7 +271,7 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
 function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.bToAAmountOut) {
+    if (result && result.bToAAmountOut) {
         tokenPair.bToAAmountOut = BigInt(result.bToAAmountOut.toString());
     }
 }
@@ -295,6 +290,7 @@ function calculateSpotPrice(tokenPair: TokenPair) {
     }
 }
 
+// TODO this seems to yield positive price impact for all pairs, meaning all pools have the same normalized liquidity
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // spotPrice and effective price are already scaled to 18 decimals by the MathSol output
     let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
@@ -302,6 +298,9 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // this happens if you get a "bonus" ie positive price impact.
     if (priceRatio > parseEther('0.999999')) {
         Sentry.captureException(
+            `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
+        );
+        console.log(
             `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
         );
         priceRatio = parseEther('0.999999');
