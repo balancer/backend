@@ -53,7 +53,7 @@ extend type Query {
         """
         swapAmount: BigDecimal! #expected in human readable form
         """
-        Whether to run queryBatchSwap to update with onchain values, default: true
+        Whether to run queryBatchSwap to update with onchain values, default: false
         """
         queryBatchSwap: Boolean
         """

@@ -111,7 +111,7 @@ export interface NetworkData {
         };
         v3: {
             vaultAddress: string;
-            routerAddress?: string;
+            routerAddress: string;
             defaultSwapFeePercentage: string;
             defaultYieldFeePercentage: string;
             tokenAdmin?: string;

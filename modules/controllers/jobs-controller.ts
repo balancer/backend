@@ -17,7 +17,7 @@ import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../action
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { updateOnChainDataV3 } from "../actions/pool/update-on-chain-data-v3";
+import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -95,9 +95,8 @@ export function JobsController(tracer?: any) {
             const newPools = await client.getAllInitializedPools({ id_not_in: ids });
 
             const viemClient = getViemClient(chain);
-            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, viemClient, vaultAddress, chain, latestBlock);
+            await upsertPools(newPools, viemClient, vaultAddress, chain);
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -122,9 +121,8 @@ export function JobsController(tracer?: any) {
             const allPools = await client.getAllInitializedPools();
 
             const viemClient = getViemClient(chain);
-            const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(allPools, viemClient, vaultAddress, chain, latestBlock);
+            await upsertPools(allPools, viemClient, vaultAddress, chain);
         },
         /**
          * Syncs database pools state with the onchain state
@@ -135,7 +133,7 @@ export function JobsController(tracer?: any) {
             const chain = chainIdToChain[chainId];
             const {
                 balancer: {
-                    v3: { vaultAddress },
+                    v3: { vaultAddress, routerAddress },
                 },
             } = config[chain];
 
@@ -165,12 +163,14 @@ export function JobsController(tracer?: any) {
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
 
-            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
             const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
-            if (ids.length === 0 || !latestBlock) {
+            if (ids.length === 0) {
                 return [];
             }
-            return syncPools(ids, viemClient, vaultAddress, chain, latestBlock + 1n);
+            await syncPools(ids, viemClient, vaultAddress, chain);
+            await syncTokenPairs(ids, viemClient, routerAddress, chain);
+            return ids;
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
@@ -247,10 +247,5 @@ export function JobsController(tracer?: any) {
 
             await syncSftmxStakingSnapshots(stakingContractAddress as Address, sftmxSubgraphClient);
         },
-        async updateOnChainDataV3(chainId: string){
-            const chain = chainIdToChain[chainId];
-            await updateOnChainDataV3(chain);
-            return 
-        }
     };
 }

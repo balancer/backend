@@ -63,7 +63,7 @@ export class SorService {
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             vaultVersion: args.useVaultVersion ?? 2,
-            queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : true,
+            queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {
                       receiver: args.callDataInput.receiver,
