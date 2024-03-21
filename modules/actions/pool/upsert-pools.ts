@@ -23,14 +23,12 @@ export const upsertPools = async (
     viemClient: ViemClient,
     vaultAddress: string,
     chain = 'SEPOLIA' as Chain,
-    blockNumber: bigint, // TODO: deprecate since we are using always the latest block
 ) => {
     // Enrich with onchain data for all the pools
     const onchainData = await fetchPoolData(
         vaultAddress,
         subgraphPools.map((pool) => pool.id),
         viemClient,
-        blockNumber,
     );
 
     // Store pool tokens and BPT in the tokens table before creating the pools
@@ -45,9 +43,7 @@ export const upsertPools = async (
     }
 
     // Get the data for the tables about pools
-    const dbPools = subgraphPools.map((poolData) =>
-        subgraphPoolUpsert(poolData, onchainData[poolData.id], chain, Number(blockNumber)),
-    );
+    const dbPools = subgraphPools.map((poolData) => subgraphPoolUpsert(poolData, onchainData[poolData.id], chain));
 
     // Enrich updates with USD values
     const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);

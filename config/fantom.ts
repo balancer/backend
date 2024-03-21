@@ -94,6 +94,7 @@ export default <NetworkData>{
         },
         v3: {
             vaultAddress: '0x20dd72ed959b6147912c2e529f0a0c651c33c9ce',
+            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
             defaultSwapFeePercentage: '0.25',
             defaultYieldFeePercentage: '0.25',
         },

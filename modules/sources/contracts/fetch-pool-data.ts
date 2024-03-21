@@ -1,10 +1,10 @@
 import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
-import vaultV3Abi from './abis/VaultV3';
+import VaultV3Abi from './abis/VaultV3';
 
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?
-type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof vaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
+type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
 
 export interface OnchainPoolData {
     totalSupply: bigint;
@@ -25,38 +25,37 @@ export async function fetchPoolData(
     vault: string,
     pools: string[],
     client: ViemClient,
-    blockNumber?: bigint,
 ): Promise<{ [address: string]: OnchainPoolData }> {
     const contracts = pools
         .map((pool) => [
             {
                 address: vault as `0x${string}`,
-                abi: vaultV3Abi,
+                abi: VaultV3Abi,
                 functionName: 'totalSupply',
                 args: [pool as `0x${string}`],
             },
             {
                 address: vault as `0x${string}`,
-                abi: vaultV3Abi,
+                abi: VaultV3Abi,
                 functionName: 'getPoolConfig',
                 args: [pool as `0x${string}`],
             },
             {
                 address: vault as `0x${string}`,
-                abi: vaultV3Abi,
+                abi: VaultV3Abi,
                 functionName: 'getPoolTokenInfo',
                 args: [pool as `0x${string}`],
             },
             {
                 address: vault as `0x${string}`,
-                abi: vaultV3Abi,
+                abi: VaultV3Abi,
                 functionName: 'getPoolTokenRates',
                 args: [pool as `0x${string}`],
             },
         ])
         .flat();
 
-    const results = await client.multicall({ contracts, blockNumber: blockNumber });
+    const results = await client.multicall({ contracts });
 
     // Parse the results
     const parsedResults = pools.map((pool, i) => {
