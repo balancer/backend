@@ -290,6 +290,7 @@ function calculateSpotPrice(tokenPair: TokenPair) {
     }
 }
 
+// TODO this seems to yield positive price impact for all pairs, meaning all pools have the same normalized liquidity
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // spotPrice and effective price are already scaled to 18 decimals by the MathSol output
     let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
