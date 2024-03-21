@@ -604,3 +604,34 @@ query BalancerGetMeta {
         hasIndexingErrors
     }
 }
+
+fragment PoolBalances on Pool {
+    id
+    address
+    tokens {
+        address
+        decimals
+        balance
+        priceRate
+    }
+}
+
+query PoolBalances(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    pools(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...PoolBalances
+    }
+}
