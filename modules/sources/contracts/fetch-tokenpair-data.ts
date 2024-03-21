@@ -9,7 +9,6 @@ import BalancerRouterAbi from './abis/BalancerRouter';
 interface PoolInput {
     id: string;
     address: string;
-    vaultVersion: number;
     tokens: {
         address: string;
         token: {
@@ -40,7 +39,6 @@ export type TokenPairData = {
 
 interface TokenPair {
     poolId: string;
-    poolVaultVersion: number;
     poolTvl: number;
     valid: boolean;
     tokenA: Token;
@@ -114,7 +112,7 @@ export async function fetchTokenPairData(
     multicallerRouter = [];
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
-            addBToAPriceCallsToMulticallerV3(tokenPair, routerAddress, multicallerRouter);
+            addBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
 
@@ -150,66 +148,6 @@ export async function fetchTokenPairData(
     return tokenPairOutput;
 }
 
-function addEffectivePriceCallsToMulticaller(
-    tokenPair: TokenPair,
-    balancerRouterAddress: string,
-    multicaller: ViemMulticallCall[],
-) {
-    multicaller.push({
-        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
-        address: balancerRouterAddress as `0x${string}`,
-        functionName: 'querySwapSingleTokenExactIn',
-        abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            tokenPair.tokenA.address,
-            tokenPair.tokenB.address,
-            tokenPair.effectivePriceAmountIn,
-            ZERO_ADDRESS,
-        ],
-    });
-}
-
-function addAToBPriceCallsToMulticaller(
-    tokenPair: TokenPair,
-    balancerRouterAddress: string,
-    multicaller: ViemMulticallCall[],
-) {
-    multicaller.push({
-        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
-        address: balancerRouterAddress as `0x${string}`,
-        functionName: 'querySwapSingleTokenExactIn',
-        abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            tokenPair.tokenA.address,
-            tokenPair.tokenB.address,
-            tokenPair.aToBAmountIn,
-            ZERO_ADDRESS,
-        ],
-    });
-}
-
-function addBToAPriceCallsToMulticallerV3(
-    tokenPair: TokenPair,
-    balancerRouterAddress: string,
-    multicaller: ViemMulticallCall[],
-) {
-    multicaller.push({
-        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
-        address: balancerRouterAddress as `0x${string}`,
-        functionName: 'querySwapSingleTokenExactIn',
-        abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            tokenPair.tokenB.address,
-            tokenPair.tokenA.address,
-            `${tokenPair.aToBAmountOut}`,
-            ZERO_ADDRESS,
-        ],
-    });
-}
-
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     const tokenPairs: TokenPair[] = [];
 
@@ -222,7 +160,6 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,
-                    poolVaultVersion: pool.vaultVersion,
                     // remove pools that have <$1000 TVL or a token without a balance or USD balance
                     valid:
                         // V2 Validation
@@ -254,6 +191,68 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         }
     }
     return tokenPairs;
+}
+
+// call querySwapSingleTokenExactIn from tokenA->tokenB with 100USD worth of tokenA
+function addEffectivePriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.effectivePriceAmountIn,
+            ZERO_ADDRESS,
+        ],
+    });
+}
+
+// call querySwapSingleTokenExactIn from tokenA->tokenB with 1% of tokenA balance
+function addAToBPriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenA.address,
+            tokenPair.tokenB.address,
+            tokenPair.aToBAmountIn,
+            ZERO_ADDRESS,
+        ],
+    });
+}
+
+function addBToAPriceCallsToMulticaller(
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'querySwapSingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.tokenB.address,
+            tokenPair.tokenA.address,
+            `${tokenPair.aToBAmountOut}`,
+            ZERO_ADDRESS,
+        ],
+    });
 }
 
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
