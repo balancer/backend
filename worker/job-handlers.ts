@@ -358,11 +358,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'update-liquidity-24h-ago-for-all-pools-v3':
+            case 'update-liquidity-24h-ago':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.updateLiquidity24hAgoForAllPoolsV3(),
+                    () => jobsController.updateLiquidity24hAgo(chainId),
                     res,
                     next,
                 );

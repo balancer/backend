@@ -93,10 +93,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
-        },
-        {
             name: 'cache-average-block-time',
             interval: every(1, 'hours'),
         },
@@ -157,6 +153,11 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-sftmx-staking-snapshots',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
+        },
+        // Refactored
+        {
+            name: 'update-liquidity-24h-ago',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         // V3 Jobs
         {
