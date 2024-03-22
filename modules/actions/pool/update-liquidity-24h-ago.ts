@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { BlockNumbersSubgraphClient, V3VaultSubgraphClient } from '../../sources/subgraphs';
-import { V2VaultSubgraphClient } from '../../subgraphs/balancer-subgraph';
+import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { getLiquidityAndSharesAtTimestamp } from '../../sources/enrichers/get-liquidity-and-shares-at-timestamp';
 import { daysAgo, hoursAgo } from '../../common/time';
 import { prisma } from '../../../prisma/prisma-client';
@@ -17,7 +17,7 @@ import { prisma } from '../../../prisma/prisma-client';
  */
 export const updateLiquidity24hAgo = async (
     ids: string[],
-    subgraphClient: V2VaultSubgraphClient | V3VaultSubgraphClient,
+    subgraphClient: V2SubgraphClient | V3VaultSubgraphClient,
     blocksClient: BlockNumbersSubgraphClient,
     chain: Chain,
 ) => {
