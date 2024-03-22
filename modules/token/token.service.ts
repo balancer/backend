@@ -26,7 +26,7 @@ export class TokenService {
     public async syncTokenContentData() {
         //sync coingecko Ids first, then override Ids from the content service
         await this.coingeckoDataService.syncCoingeckoIds();
-        await networkContext.config.contentService.syncTokenContentData();
+        await networkContext.config.contentService.syncTokenContentData([networkContext.chain]);
     }
 
     public async getToken(address: string, chain = networkContext.chain): Promise<PrismaToken | null> {
@@ -250,7 +250,7 @@ export class TokenService {
         await prisma.prismaTokenType.deleteMany({
             where: { chain: networkContext.chain },
         });
-        await networkContext.config.contentService.syncTokenContentData();
+        await networkContext.config.contentService.syncTokenContentData([networkContext.chain]);
     }
 }
 
