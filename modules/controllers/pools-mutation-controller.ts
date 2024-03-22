@@ -1,7 +1,7 @@
 import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { syncPools } from '../actions/pool/sync-pools';
-import { syncSwaps } from '../actions/pool/sync-swaps';
+import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { chainIdToChain } from '../network/chain-id-to-chain';
@@ -33,7 +33,7 @@ export function PoolsMutationController(tracer?: any) {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },

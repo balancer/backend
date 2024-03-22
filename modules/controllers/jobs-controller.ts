@@ -6,7 +6,7 @@ import { syncJoinExitsV2 } from '../actions/pool/sync-join-exits-v2';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
-import { syncSwaps } from '../actions/pool/sync-swaps';
+import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
@@ -193,7 +193,7 @@ export function JobsController(tracer?: any) {
             }
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-            const entries = await syncSwaps(vaultSubgraphClient, chain);
+            const entries = await syncSwapsV3(vaultSubgraphClient, chain);
             return entries;
         },
         // TODO also update yieldfee
@@ -211,7 +211,7 @@ export function JobsController(tracer?: any) {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
