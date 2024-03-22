@@ -33,6 +33,7 @@ import {
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
     GqlPoolFx,
+    GqlPoolTokenDetail,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
@@ -484,6 +485,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
+            poolTokens: this.mapPoolTokens(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
         };
 
@@ -634,6 +636,28 @@ export class PoolGqlLoaderService {
                     weight: poolToken?.dynamicData?.weight,
                 };
             });
+    }
+
+    
+    private mapPoolTokens(pool: PrismaPoolMinimal): GqlPoolTokenDetail[] {
+        return pool.tokens.map((token) => {
+            
+            const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
+            const isNested = !poolToken;
+            const isPhantomBpt = token.tokenAddress === pool.address;
+            const isMainToken = !token.token.types.some(
+                (type) => type.type === 'LINEAR_WRAPPED_TOKEN' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
+            );
+
+            return {
+                ...token.token,
+                id: `${pool.id}-${token.tokenAddress}`,
+                weight: poolToken?.dynamicData?.weight,
+                isNested,
+                isPhantomBpt,
+                isMainToken,
+            };
+        });
     }
 
     private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {

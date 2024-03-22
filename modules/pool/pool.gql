@@ -148,6 +148,7 @@ interface GqlPoolBase {
 
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -239,6 +240,8 @@ enum GqlPoolNestingType {
     HAS_SOME_PHANTOM_BPT
     HAS_ONLY_PHANTOM_BPT
 }
+
+
 
 type GqlPoolWeighted implements GqlPoolBase {
     id: ID!
@@ -567,6 +570,21 @@ union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolComposableStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable | GqlPoolTokenLinear
 union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
+
+type GqlPoolTokenDetail {
+    id: ID!
+    address: String!
+    decimals: Int!
+    name: String!
+    symbol: String!
+
+    balance: BigDecimal!
+    index: Int!
+    priceRate: BigDecimal!
+    priceRateProvider: String
+    weight: BigDecimal
+    nestedPool: GqlPoolMinimal
+}
 
 interface GqlPoolTokenBase {
     id: ID!

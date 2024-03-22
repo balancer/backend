@@ -69,6 +69,13 @@ type GqlToken {
     priority: Int!
     tradable: Boolean!
     chain: GqlChain!
+    rateProvider: GqlTokenRateProvider
+}
+
+type GqlTokenRateProvider {
+    address: String!
+    reviewed: Boolean!
+    summary: String
 }
 
 type GqlTokenDynamicData {
