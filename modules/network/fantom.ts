@@ -164,5 +164,9 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-join-exits-v2',
             interval: every(1, 'minutes'),
         },
+        {
+            name: 'sync-swaps-v2',
+            interval: every(1, 'minutes'),
+        },
     ],
 };
