@@ -9,6 +9,7 @@ export const onchainPoolUpdate = (
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
     id: string,
+    blockNumber: bigint,
 ) => {
     const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
     return {
@@ -18,7 +19,7 @@ export const onchainPoolUpdate = (
             isPaused: onchainPoolData.isPoolPaused,
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: formatEther(onchainPoolData.totalSupply),
-            blockNumber: 0,
+            blockNumber: Number(blockNumber),
             swapFee: String(onchainPoolData.swapFee ?? '0'),
         },
         poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
@@ -26,7 +27,7 @@ export const onchainPoolUpdate = (
             chain: chain,
             balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
             priceRate: String(tokenData.rate),
-            blockNumber: 0,
+            blockNumber: Number(blockNumber),
         })),
     };
 };
