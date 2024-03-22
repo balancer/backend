@@ -1,6 +1,7 @@
 fragment PoolBalances on Pool {
     id
     address
+    totalShares
     tokens {
         address
         decimals

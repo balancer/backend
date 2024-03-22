@@ -8,7 +8,7 @@ import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
 import { syncSwaps } from '../actions/pool/sync-swaps';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
-import { getBlockNumbersClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
+import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { getChangedPools } from '../sources/logs/get-changed-pools';
 import { syncStakingData as syncSftmxStakingData } from '../actions/sftmx/sync-staking-data';
@@ -20,6 +20,7 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
+import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -176,7 +177,9 @@ export function JobsController(tracer?: any) {
                 return [];
             }
             const latestBlock = await viemClient.getBlockNumber();
-            return syncPools(ids, vaultClient, chain, latestBlock + 1n);
+            await syncPools(ids, vaultClient, chain, latestBlock + 1n);
+            await syncTokenPairs(ids, viemClient, routerAddress, chain);
+            return ids;
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
@@ -267,7 +270,7 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const blocksSubgraph = getBlockNumbersClient(blocks);
+            const blocksSubgraph = getBlockNumbersSubgraphClient(blocks);
 
             const poolIds = await prisma.prismaPoolDynamicData.findMany({
                 where: { chain },

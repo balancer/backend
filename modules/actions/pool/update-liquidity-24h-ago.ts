@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
-import { BlockNumbersClient, V3VaultSubgraphClient } from '../../sources/subgraphs';
+import { BlockNumbersSubgraphClient, V3VaultSubgraphClient } from '../../sources/subgraphs';
 import { V2VaultSubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { getLiquidityAtTimestamp } from '../../sources/enrichers/get-liquidity-at-timestamp';
+import { getLiquidityAndSharesAtTimestamp } from '../../sources/enrichers/get-liquidity-and-shares-at-timestamp';
 import { daysAgo, hoursAgo } from '../../common/time';
 import { prisma } from '../../../prisma/prisma-client';
 
@@ -18,16 +18,16 @@ import { prisma } from '../../../prisma/prisma-client';
 export const updateLiquidity24hAgo = async (
     ids: string[],
     subgraphClient: V2VaultSubgraphClient | V3VaultSubgraphClient,
-    blocksClient: BlockNumbersClient,
+    blocksClient: BlockNumbersSubgraphClient,
     chain: Chain,
 ) => {
     // Get liquidity data
     const ts = chain === Chain.SEPOLIA ? hoursAgo(1) : daysAgo(1);
-    const tvls = await getLiquidityAtTimestamp(ids, subgraphClient, blocksClient, ts);
-    if (!tvls) return;
+    const data = await getLiquidityAndSharesAtTimestamp(ids, subgraphClient, blocksClient, ts);
+    if (!data) return;
 
     // Update liquidity data
-    const updates = Object.entries(tvls).map(([id, liquidity]) => {
+    const updates = Object.entries(data).map(([id, { tvl, totalShares }]) => {
         return {
             where: {
                 poolId_chain: {
@@ -36,7 +36,8 @@ export const updateLiquidity24hAgo = async (
                 },
             },
             data: {
-                totalLiquidity24hAgo: liquidity,
+                totalLiquidity24hAgo: tvl,
+                totalShares24hAgo: totalShares,
             },
         };
     });

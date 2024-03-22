@@ -1,14 +1,14 @@
-import { BlockNumbersClient, V3VaultSubgraphClient } from '../subgraphs';
+import { BlockNumbersSubgraphClient, V3VaultSubgraphClient } from '../subgraphs';
 import { V2VaultSubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { prisma } from '../../../prisma/prisma-client';
 import { daysAgo, roundToHour, roundToMidnight } from '../../common/time';
-import { fn } from '../../common/numbers';
+import { weiToFloat } from '../../common/numbers';
 import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 
-export const getLiquidityAtTimestamp = async (
+export const getLiquidityAndSharesAtTimestamp = async (
     ids: string[],
     vaultClient: V2VaultSubgraphClient | V3VaultSubgraphClient,
-    blockNumbersClient: BlockNumbersClient,
+    blockNumbersClient: BlockNumbersSubgraphClient,
     timestamp = daysAgo(1), // 24 hours ago
 ) => {
     const blockNumber = await blockNumbersClient.fetchBlockByTime(timestamp);
@@ -47,17 +47,17 @@ export const getLiquidityAtTimestamp = async (
         },
     });
 
-    const tvls = balances.map(({ id, address, tokens }) => {
+    const tvls = balances.map(({ id, address, totalShares, tokens }) => {
         const tvl = tokens
             ?.filter((token) => token.address !== address) // Filter out the pool token
             .reduce((acc, token) => {
                 const price = prices.find((p) => p.tokenAddress === token.address);
                 if (!price) return acc;
 
-                return acc + fn(token.balance, token.decimals) * price.price * parseFloat(token.priceRate);
+                return acc + weiToFloat(token.balance, token.decimals) * price.price * parseFloat(token.priceRate);
             }, 0);
 
-        return [id, tvl] as const;
+        return [id, { tvl, totalShares }] as const;
     });
 
     return Object.fromEntries(tvls);

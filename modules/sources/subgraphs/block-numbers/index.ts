@@ -4,7 +4,7 @@ const query = (timestamp: number) => `{
   }
 }`;
 
-interface BlockNumberResponse {
+interface BlockNumberSubgraphResponse {
     data: {
         blocks: [
             {
@@ -14,11 +14,11 @@ interface BlockNumberResponse {
     };
 }
 
-export interface BlockNumbersClient {
+export interface BlockNumbersSubgraphClient {
     fetchBlockByTime: (timestamp: number) => Promise<bigint>;
 }
 
-export const getBlockNumbersClient = (url: string): BlockNumbersClient => ({
+export const getBlockNumbersSubgraphClient = (url: string): BlockNumbersSubgraphClient => ({
     fetchBlockByTime: (timestamp: number) => fetchBlockByTime(url, timestamp),
 });
 
@@ -35,7 +35,7 @@ const fetchBlockByTime = async (endpoint: string, timestamp: number): Promise<bi
 
     const {
         data: { blocks },
-    } = (await response.json()) as BlockNumberResponse;
+    } = (await response.json()) as BlockNumberSubgraphResponse;
 
     return BigInt(blocks[0].number);
 };

@@ -7,7 +7,7 @@ import { formatUnits } from 'viem';
  * @param decimals
  * @returns
  */
-export const fn = (value: string | bigint, decimals: number): number => {
+export const weiToFloat = (value: string | bigint, decimals: number): number => {
     // Guard against null or undefined
     if (value === null || value === undefined) {
         return 0;

@@ -1,4 +1,4 @@
-import { getLiquidityAtTimestamp } from './get-liquidity-at-timestamp';
+import { getLiquidityAndSharesAtTimestamp } from './get-liquidity-and-shares-at-timestamp';
 
 jest.mock('../../../prisma/prisma-client', () => ({
     prisma: {
@@ -13,16 +13,20 @@ jest.mock('../../../prisma/prisma-client', () => ({
     },
 }));
 
-const blockNumbersClient = {
+const blockNumbersSubgraphClient = {
     fetchBlockByTime: jest.fn().mockResolvedValue(1),
 };
 
-describe('getLiquidityAtTimestamp', () => {
+describe('getLiquidityAndSharesAtTimestamp', () => {
     it('should return null if there are no pools', async () => {
         const subgraphClient = {
             getAllPoolBalances: jest.fn().mockResolvedValue([]),
         };
-        const result = await getLiquidityAtTimestamp([], subgraphClient as any, blockNumbersClient as any);
+        const result = await getLiquidityAndSharesAtTimestamp(
+            [],
+            subgraphClient as any,
+            blockNumbersSubgraphClient as any,
+        );
         expect(result).toBeNull();
     });
 
@@ -36,7 +40,11 @@ describe('getLiquidityAtTimestamp', () => {
                 },
             ]),
         };
-        const result = await getLiquidityAtTimestamp(['0x0'], subgraphClient as any, blockNumbersClient as any);
+        const result = await getLiquidityAndSharesAtTimestamp(
+            ['0x0'],
+            subgraphClient as any,
+            blockNumbersSubgraphClient as any,
+        );
         expect(result).toBeNull();
     });
 
@@ -57,9 +65,13 @@ describe('getLiquidityAtTimestamp', () => {
                 },
             ]),
         };
-        const result = await getLiquidityAtTimestamp(['0x0'], subgraphClient as any, blockNumbersClient as any);
+        const result = await getLiquidityAndSharesAtTimestamp(
+            ['0x0'],
+            subgraphClient as any,
+            blockNumbersSubgraphClient as any,
+        );
 
         // 1 * 2 * 1.1 + 2 * 3 * 1.2 + 3 * 4 * 1.3 = 25
-        expect(result).toEqual({ '0x0': 25 });
+        expect(result).toEqual({ '0x0': { tvl: 25 } });
     });
 });
