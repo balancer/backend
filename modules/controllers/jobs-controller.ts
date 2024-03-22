@@ -6,6 +6,7 @@ import { syncJoinExitsV2 } from '../actions/pool/sync-join-exits-v2';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
+import { syncSwapsV2 } from '../actions/pool/sync-swaps-v2';
 import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
@@ -180,6 +181,21 @@ export function JobsController(tracer?: any) {
             await syncPools(ids, vaultClient, chain, latestBlock + 1n);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             return ids;
+        },
+        async syncSwapsV2(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const subgraphClient = getV2SubgraphClient(balancer);
+            const entries = await syncSwapsV2(subgraphClient, chain);
+            return entries;
         },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
