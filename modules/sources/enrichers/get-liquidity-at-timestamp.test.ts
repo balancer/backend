@@ -20,9 +20,7 @@ const blockNumbersClient = {
 describe('getLiquidityAtTimestamp', () => {
     it('should return null if there are no pools', async () => {
         const subgraphClient = {
-            PoolBalances: jest.fn().mockResolvedValue({
-                pools: [],
-            }),
+            getAllPoolBalances: jest.fn().mockResolvedValue([]),
         };
         const result = await getLiquidityAtTimestamp([], subgraphClient as any, blockNumbersClient as any);
         expect(result).toBeNull();
@@ -30,15 +28,13 @@ describe('getLiquidityAtTimestamp', () => {
 
     it('should return null if there are no token addresses', async () => {
         const subgraphClient = {
-            PoolBalances: jest.fn().mockResolvedValue({
-                pools: [
-                    {
-                        id: '0x0',
-                        address: '0x0',
-                        tokens: [],
-                    },
-                ],
-            }),
+            getAllPoolBalances: jest.fn().mockResolvedValue([
+                {
+                    id: '0x0',
+                    address: '0x0',
+                    tokens: [],
+                },
+            ]),
         };
         const result = await getLiquidityAtTimestamp(['0x0'], subgraphClient as any, blockNumbersClient as any);
         expect(result).toBeNull();
@@ -53,15 +49,13 @@ describe('getLiquidityAtTimestamp', () => {
         }));
 
         const subgraphClient = {
-            PoolBalances: jest.fn().mockResolvedValue({
-                pools: [
-                    {
-                        id: '0x0',
-                        address: '0x0',
-                        tokens,
-                    },
-                ],
-            }),
+            getAllPoolBalances: jest.fn().mockResolvedValue([
+                {
+                    id: '0x0',
+                    address: '0x0',
+                    tokens,
+                },
+            ]),
         };
         const result = await getLiquidityAtTimestamp(['0x0'], subgraphClient as any, blockNumbersClient as any);
 

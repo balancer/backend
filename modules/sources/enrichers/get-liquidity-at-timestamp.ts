@@ -13,17 +13,19 @@ export const getLiquidityAtTimestamp = async (
 ) => {
     const blockNumber = await blockNumbersClient.fetchBlockByTime(timestamp);
 
-    const { pools } = await vaultClient.PoolBalances({
-        where: { id_in: ids },
+    //  If ids count is >= 1000 just get all
+    const where = ids.length >= 1000 ? {} : { id_in: ids };
+    const balances = await vaultClient.getAllPoolBalances({
+        where,
         block: { number: Number(blockNumber) },
     });
 
     // Guard against empty pools, for example when the pools weren't created yet
-    if (!pools.length) {
+    if (!balances.length) {
         return null;
     }
 
-    const tokenAddresses = pools
+    const tokenAddresses = balances
         .map(({ tokens }) => tokens?.map(({ address }) => address))
         .flat()
         .filter((address): address is string => !!address);
@@ -45,7 +47,7 @@ export const getLiquidityAtTimestamp = async (
         },
     });
 
-    const tvls = pools.map(({ id, address, tokens }) => {
+    const tvls = balances.map(({ id, address, tokens }) => {
         const tvl = tokens
             ?.filter((token) => token.address !== address) // Filter out the pool token
             .reduce((acc, token) => {
