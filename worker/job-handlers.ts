@@ -349,6 +349,9 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-swaps-v3':
                 await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV3(chainId), res, next);
                 break;
+            case 'sync-swaps-v2':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV2(chainId), res, next);
+                break;
             case 'sync-join-exits-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
