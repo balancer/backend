@@ -117,6 +117,12 @@ export class PoolUsdDataService {
         const block24hAgo = await this.blockSubgraphService.getBlockFrom24HoursAgo();
         const tokenPrices24hAgo = await this.tokenService.getTokenPriceFrom24hAgo(this.chain);
 
+        if (!block24hAgo) {
+            // Send an alert to Sentry
+            Sentry.captureException(`Block Subgraph not working on ${this.chain}`);
+            return;
+        }
+
         const subgraphPools = await this.balancerSubgraphService.getAllPools(
             { block: { number: parseInt(block24hAgo.number) } },
             false,
