@@ -1,5 +1,5 @@
 import { BlockNumbersSubgraphClient, V3VaultSubgraphClient } from '../subgraphs';
-import { V2VaultSubgraphClient } from '../../subgraphs/balancer-subgraph';
+import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { prisma } from '../../../prisma/prisma-client';
 import { daysAgo, roundToHour, roundToMidnight } from '../../common/time';
 import { weiToFloat } from '../../common/numbers';
@@ -7,7 +7,7 @@ import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 
 export const getLiquidityAndSharesAtTimestamp = async (
     ids: string[],
-    vaultClient: V2VaultSubgraphClient | V3VaultSubgraphClient,
+    vaultClient: V2SubgraphClient | V3VaultSubgraphClient,
     blockNumbersClient: BlockNumbersSubgraphClient,
     timestamp = daysAgo(1), // 24 hours ago
 ) => {

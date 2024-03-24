@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { JoinExitFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent } from '../../../prisma/prisma-types';
-import { formatUnits } from 'viem';
 import { prisma } from '../../../prisma/prisma-client';
+import { weiToFloat } from '../../common/numbers';
 
 /**
  * Takes V3 subgraph swaps and transforms them into DB entries
@@ -32,9 +32,11 @@ export async function joinExitV3Transformer(events: JoinExitFragment[], chain: C
         payload: {
             tokens: event.pool.tokens.map((token) => ({
                 address: token.address,
-                amount: formatUnits(
-                    BigInt(event.amounts[token.index]),
-                    allTokens.find((t) => t.address === token.address)?.decimals || 18,
+                amount: String(
+                    weiToFloat(
+                        event.amounts[token.index],
+                        allTokens.find((t) => t.address === token.address)?.decimals || 18,
+                    ),
                 ),
                 valueUSD: 0,
             })),

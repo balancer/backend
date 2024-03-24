@@ -6,7 +6,8 @@ import { syncJoinExitsV2 } from '../actions/pool/sync-join-exits-v2';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
-import { syncSwaps } from '../actions/pool/sync-swaps';
+import { syncSwapsV2 } from '../actions/pool/sync-swaps-v2';
+import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
@@ -181,6 +182,21 @@ export function JobsController(tracer?: any) {
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             return ids;
         },
+        async syncSwapsV2(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const subgraphClient = getV2SubgraphClient(balancer);
+            const entries = await syncSwapsV2(subgraphClient, chain);
+            return entries;
+        },
         async syncSwapsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
@@ -193,7 +209,7 @@ export function JobsController(tracer?: any) {
             }
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-            const entries = await syncSwaps(vaultSubgraphClient, chain);
+            const entries = await syncSwapsV3(vaultSubgraphClient, chain);
             return entries;
         },
         // TODO also update yieldfee
@@ -211,7 +227,7 @@ export function JobsController(tracer?: any) {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
             await updateVolumeAndFees(poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
