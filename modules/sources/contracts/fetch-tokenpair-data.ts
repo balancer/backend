@@ -221,44 +221,44 @@ function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     const bptTokenPairs: TokenPair[] = [];
 
     for (const pool of filteredPools) {
-        // add/remove liquidity will only be included in the SOR Paths if the V3 Pools 
-        if(pool.vaultVersion!==3) continue;
-        for(const poolToken of pool.tokens){
-        // create all pairs for pool's bpt
-        //we don't want a pair of the bpt with itself
-        if (poolToken.address === pool.address || poolToken.address === pool.address) continue;
-        bptTokenPairs.push({
-            poolId: pool.id,
-            poolTvl: pool.dynamicData?.totalLiquidity || 0,
-            // remove pools that have <$1000 TVL or a token without a balance or USD balance
-            valid:
-            // V2 Validation
-              (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
-              !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
-              !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
+        // add/remove liquidity will only be included in the SOR Paths if the V3 Pools
+        if (pool.vaultVersion !== 3) continue;
+        for (const poolToken of pool.tokens) {
+            // create all pairs for pool's bpt
+            //we don't want a pair of the bpt with itself
+            if (poolToken.address === pool.address || poolToken.address === pool.address) continue;
+            bptTokenPairs.push({
+                poolId: pool.id,
+                poolTvl: pool.dynamicData?.totalLiquidity || 0,
+                // remove pools that have <$1000 TVL or a token without a balance or USD balance
+                valid:
+                    // V2 Validation
+                    (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+                    !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
+                    !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
 
-            tokenA: {
-                address: pool.address,
-                decimals: 18,
-                balance: pool.dynamicData?.totalShares || '0',
-                balanceUsd: pool.dynamicData?.totalLiquidity || 0,
-            },
-            tokenB: {
-                address: poolToken.address,
-                decimals: poolToken.token.decimals,
-                balance: poolToken.dynamicData?.balance || '0',
-                balanceUsd: poolToken.dynamicData?.balanceUSD || 0,
-            },
-            normalizedLiqudity: 0n,
-            spotPrice: 0n,
-            aToBAmountIn: 0n,
-            aToBAmountOut: 0n,
-            bToAAmountOut: 0n,
-            effectivePrice: 0n,
-            effectivePriceAmountIn: 0n,
-            tokenBIndex: poolToken.index,
-            poolTokensLength: pool.tokens.length,
-        });
+                tokenA: {
+                    address: pool.address,
+                    decimals: 18,
+                    balance: pool.dynamicData?.totalShares || '0',
+                    balanceUsd: pool.dynamicData?.totalLiquidity || 0,
+                },
+                tokenB: {
+                    address: poolToken.address,
+                    decimals: poolToken.token.decimals,
+                    balance: poolToken.dynamicData?.balance || '0',
+                    balanceUsd: poolToken.dynamicData?.balanceUSD || 0,
+                },
+                normalizedLiqudity: 0n,
+                spotPrice: 0n,
+                aToBAmountIn: 0n,
+                aToBAmountOut: 0n,
+                bToAAmountOut: 0n,
+                effectivePrice: 0n,
+                effectivePriceAmountIn: 0n,
+                tokenBIndex: poolToken.index,
+                poolTokensLength: pool.tokens.length,
+            });
         }
     }
     return bptTokenPairs;
@@ -287,21 +287,16 @@ function addEffectivePriceCallsToMulticaller(
 
 // call queryRemoveLiquiditySingleTokenExactIn from tokenA(BPT)->tokenB with 100USD worth of BPT
 function addBptEffectivePriceCallsToMulticaller(
-  tokenPair: TokenPair,
-  balancerRouterAddress: string,
-  multicaller: ViemMulticallCall[],
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
     multicaller.push({
         path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
         address: balancerRouterAddress as `0x${string}`,
         functionName: 'queryRemoveLiquiditySingleTokenExactIn',
         abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            tokenPair.effectivePriceAmountIn,
-            tokenPair.tokenB.address,
-            ZERO_ADDRESS,
-        ],
+        args: [tokenPair.poolId, tokenPair.effectivePriceAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS],
     });
 }
 
@@ -328,21 +323,16 @@ function addAToBPriceCallsToMulticaller(
 
 // call querySwapSingleTokenExactIn from tokenA->tokenB with 1% of tokenA balance
 function addBptAToBPriceCallsToMulticaller(
-  tokenPair: TokenPair,
-  balancerRouterAddress: string,
-  multicaller: ViemMulticallCall[],
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
     multicaller.push({
         path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
         address: balancerRouterAddress as `0x${string}`,
         functionName: 'queryRemoveLiquiditySingleTokenExactIn',
         abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            tokenPair.aToBAmountIn,
-            tokenPair.tokenB.address,
-            ZERO_ADDRESS,
-        ],
+        args: [tokenPair.poolId, tokenPair.aToBAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS],
     });
 }
 
@@ -367,25 +357,21 @@ function addBToAPriceCallsToMulticaller(
 }
 
 function addBptBToAPriceCallsToMulticaller(
-  tokenPair: TokenPair,
-  balancerRouterAddress: string,
-  multicaller: ViemMulticallCall[],
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
-    if(tokenPair.tokenBIndex === undefined || tokenPair.poolTokensLength === undefined){
+    if (tokenPair.tokenBIndex === undefined || tokenPair.poolTokensLength === undefined) {
         return;
     }
-    let amountsIn = new Array(tokenPair.poolTokensLength).fill(0)
-    amountsIn[tokenPair.tokenBIndex] = tokenPair.aToBAmountOut
+    let amountsIn = new Array(tokenPair.poolTokensLength).fill(0);
+    amountsIn[tokenPair.tokenBIndex] = tokenPair.aToBAmountOut;
     multicaller.push({
         path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
         address: balancerRouterAddress as `0x${string}`,
         functionName: 'queryAddLiquidityUnbalanced',
         abi: BalancerRouterAbi,
-        args: [
-            tokenPair.poolId,
-            amountsIn,
-            ZERO_ADDRESS,
-        ],
+        args: [tokenPair.poolId, amountsIn, ZERO_ADDRESS],
     });
 }
 
