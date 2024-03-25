@@ -1,7 +1,7 @@
 import { ViemClient } from '../viem-client';
 import vaultV3Abi from './abis/VaultV3';
 
-interface ProtocolFees {
+export interface ProtocolFees {
     protocolSwapFeePercentage?: bigint;
     protocolYieldFeePercentage?: bigint;
 }

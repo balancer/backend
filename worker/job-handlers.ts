@@ -349,6 +349,9 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-swaps-v3':
                 await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV3(chainId), res, next);
                 break;
+            case 'sync-swaps-v2':
+                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV2(chainId), res, next);
+                break;
             case 'sync-join-exits-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -358,11 +361,11 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'update-liquidity-24h-ago-for-all-pools-v3':
+            case 'update-liquidity-24h-ago':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.updateLiquidity24hAgoForAllPoolsV3(),
+                    () => jobsController.updateLiquidity24hAgo(chainId),
                     res,
                     next,
                 );

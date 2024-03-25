@@ -3,6 +3,11 @@ import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@pr
 export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';
     payload: {
+        fee: {
+            address: string;
+            amount: string;
+            valueUSD: number;
+        };
         tokenIn: {
             address: string;
             amount: string;
