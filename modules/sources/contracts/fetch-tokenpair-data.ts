@@ -9,8 +9,10 @@ import BalancerRouterAbi from './abis/BalancerRouter';
 interface PoolInput {
     id: string;
     address: string;
+    vaultVersion: number;
     tokens: {
         address: string;
+        index: number;
         token: {
             decimals: number;
         };
@@ -20,6 +22,7 @@ interface PoolInput {
         } | null;
     }[];
     dynamicData: {
+        totalShares: string;
         totalLiquidity: number;
     } | null;
 }
@@ -50,6 +53,8 @@ interface TokenPair {
     bToAAmountOut: bigint;
     effectivePrice: bigint;
     effectivePriceAmountIn: bigint;
+    tokenBIndex?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
+    poolTokensLength?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
 }
 
 interface Token {
@@ -84,7 +89,6 @@ export async function fetchTokenPairData(
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
     let tokenPairs = generateTokenPairs(pools);
-
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             // prepare swap amounts in
@@ -98,12 +102,27 @@ export async function fetchTokenPairData(
             addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
+    
+    let bptTokenPairs = generateBptTokenPairs(pools);
+    bptTokenPairs.forEach((bptTokenPair) => {
+        if (bptTokenPair.valid) {
+            // prepare swap amounts in
+            // tokenA->tokenB with 1% of tokenA balance
+            bptTokenPair.aToBAmountIn = parseUnits(bptTokenPair.tokenA.balance, bptTokenPair.tokenA.decimals) / 100n;
+            // tokenA->tokenB with 100USD worth of tokenA
+            const oneHundredUsdOfTokenA = (parseFloat(bptTokenPair.tokenA.balance) / bptTokenPair.tokenA.balanceUsd) * 100;
+            bptTokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, bptTokenPair.tokenA.decimals);
 
+            addBptEffectivePriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
+            addBptAToBPriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
+        }
+    });
+    
     const resultOne = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
-
-    tokenPairs.forEach((tokenPair) => {
+    
+    [...tokenPairs, ...bptTokenPairs].forEach((tokenPair) => {
         if (tokenPair.valid) {
             getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
         }
@@ -116,11 +135,16 @@ export async function fetchTokenPairData(
         }
     });
 
+    bptTokenPairs.forEach((tokenPair) => {
+        if (tokenPair.valid) {
+            addBptBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+        }
+    });
+    
     const resultTwo = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
-
-    tokenPairs.forEach((tokenPair) => {
+    [...tokenPairs, ...bptTokenPairs].forEach((tokenPair) => {
         if (tokenPair.valid) {
             getBToAAmountFromResult(tokenPair, resultTwo);
             calculateSpotPrice(tokenPair);
@@ -150,7 +174,7 @@ export async function fetchTokenPairData(
 
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     const tokenPairs: TokenPair[] = [];
-
+    
     for (const pool of filteredPools) {
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
@@ -193,11 +217,58 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     return tokenPairs;
 }
 
+function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
+    const bptTokenPairs: TokenPair[] = [];
+
+    for (const pool of filteredPools) {
+        // add/remove liquidity will only be included in the SOR Paths if the V3 Pools 
+        if(pool.vaultVersion!==3) continue;
+        for(const poolToken of pool.tokens){
+        // create all pairs for pool's bpt
+        //we don't want a pair of the bpt with itself
+        if (poolToken.address === pool.address || poolToken.address === pool.address) continue;
+        bptTokenPairs.push({
+            poolId: pool.id,
+            poolTvl: pool.dynamicData?.totalLiquidity || 0,
+            // remove pools that have <$1000 TVL or a token without a balance or USD balance
+            valid:
+            // V2 Validation
+              (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+              !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
+              !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
+
+            tokenA: {
+                address: pool.address,
+                decimals: 18,
+                balance: pool.dynamicData?.totalShares || '0',
+                balanceUsd: pool.dynamicData?.totalLiquidity || 0,
+            },
+            tokenB: {
+                address: poolToken.address,
+                decimals: poolToken.token.decimals,
+                balance: poolToken.dynamicData?.balance || '0',
+                balanceUsd: poolToken.dynamicData?.balanceUSD || 0,
+            },
+            normalizedLiqudity: 0n,
+            spotPrice: 0n,
+            aToBAmountIn: 0n,
+            aToBAmountOut: 0n,
+            bToAAmountOut: 0n,
+            effectivePrice: 0n,
+            effectivePriceAmountIn: 0n,
+            tokenBIndex: poolToken.index,
+            poolTokensLength: pool.tokens.length,
+        });
+        }
+    }
+    return bptTokenPairs;
+}
+
 // call querySwapSingleTokenExactIn from tokenA->tokenB with 100USD worth of tokenA
 function addEffectivePriceCallsToMulticaller(
-    tokenPair: TokenPair,
-    balancerRouterAddress: string,
-    multicaller: ViemMulticallCall[],
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: ViemMulticallCall[],
 ) {
     multicaller.push({
         path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
@@ -209,6 +280,26 @@ function addEffectivePriceCallsToMulticaller(
             tokenPair.tokenA.address,
             tokenPair.tokenB.address,
             tokenPair.effectivePriceAmountIn,
+            ZERO_ADDRESS,
+        ],
+    });
+}
+
+// call queryRemoveLiquiditySingleTokenExactIn from tokenA(BPT)->tokenB with 100USD worth of BPT
+function addBptEffectivePriceCallsToMulticaller(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'queryRemoveLiquiditySingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.effectivePriceAmountIn,
+            tokenPair.tokenB.address,
             ZERO_ADDRESS,
         ],
     });
@@ -235,6 +326,26 @@ function addAToBPriceCallsToMulticaller(
     });
 }
 
+// call querySwapSingleTokenExactIn from tokenA->tokenB with 1% of tokenA balance
+function addBptAToBPriceCallsToMulticaller(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: ViemMulticallCall[],
+) {
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'queryRemoveLiquiditySingleTokenExactIn',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            tokenPair.aToBAmountIn,
+            tokenPair.tokenB.address,
+            ZERO_ADDRESS,
+        ],
+    });
+}
+
 function addBToAPriceCallsToMulticaller(
     tokenPair: TokenPair,
     balancerRouterAddress: string,
@@ -250,6 +361,29 @@ function addBToAPriceCallsToMulticaller(
             tokenPair.tokenB.address,
             tokenPair.tokenA.address,
             `${tokenPair.aToBAmountOut}`,
+            ZERO_ADDRESS,
+        ],
+    });
+}
+
+function addBptBToAPriceCallsToMulticaller(
+  tokenPair: TokenPair,
+  balancerRouterAddress: string,
+  multicaller: ViemMulticallCall[],
+) {
+    if(tokenPair.tokenBIndex === undefined || tokenPair.poolTokensLength === undefined){
+        return;
+    }
+    let amountsIn = new Array(tokenPair.poolTokensLength).fill(0)
+    amountsIn[tokenPair.tokenBIndex] = tokenPair.aToBAmountOut
+    multicaller.push({
+        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
+        address: balancerRouterAddress as `0x${string}`,
+        functionName: 'queryAddLiquidityUnbalanced',
+        abi: BalancerRouterAbi,
+        args: [
+            tokenPair.poolId,
+            amountsIn,
             ZERO_ADDRESS,
         ],
     });
