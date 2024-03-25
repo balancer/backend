@@ -2,6 +2,8 @@ import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
+import { PathOperation } from "../../../types";
+import { Address } from "viem";
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
@@ -25,10 +27,12 @@ export class PathGraph {
     // pool pairs (default 2).
     public buildGraph({
         pools,
-        maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
+        maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR, 
+        includeAddRemoveLiquidity,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
+        includeAddRemoveLiquidity: boolean
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
@@ -36,10 +40,14 @@ export class PathGraph {
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
         this.buildPoolAddressMap(pools);
-
+        if(includeAddRemoveLiquidity){
+            this.addPoolsAsGraphNodes(pools);
+        }
         this.addAllTokensAsGraphNodes(pools);
 
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
+        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, includeAddRemoveLiquidity });
+        
+        console.log(this.edges.entries());
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -179,20 +187,29 @@ export class PathGraph {
             }
         }
     }
-
+    
+    private addPoolsAsGraphNodes(pools: BasePool[]) {
+        for (const pool of pools) {
+            const poolToken = new Token(pool.tokens[0].token.chainId, pool.address as Address, 18);
+            if (!this.nodes.has(pool.address)) {
+                this.addNode(poolToken);
+            }
+        }
+    }
     private addTokenPairsAsGraphEdges({
         pools,
         maxPathsPerTokenPair,
+        includeAddRemoveLiquidity
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
+        includeAddRemoveLiquidity: boolean;
     }) {
         for (const pool of pools) {
             for (let i = 0; i < pool.tokens.length - 1; i++) {
                 for (let j = i + 1; j < pool.tokens.length; j++) {
                     const tokenI = pool.tokens[i].token;
                     const tokenJ = pool.tokens[j].token;
-
                     this.addEdge({
                         edgeProps: {
                             pool,
@@ -212,6 +229,49 @@ export class PathGraph {
                         },
                         maxPathsPerTokenPair,
                     });
+                    if(includeAddRemoveLiquidity){
+                        const poolToken = new Token(tokenI.chainId, pool.address as Address, 18)
+                        this.addEdge({
+                            edgeProps:{
+                                pool,
+                                tokenIn: tokenI,
+                                tokenOut: poolToken,
+                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                                operation: PathOperation.AddLiquidity
+                            },
+                            maxPathsPerTokenPair
+                        })
+                        this.addEdge({
+                            edgeProps:{
+                                pool,
+                                tokenIn: tokenJ,
+                                tokenOut: poolToken,
+                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                                operation: PathOperation.AddLiquidity
+                            },
+                            maxPathsPerTokenPair
+                        })
+                        this.addEdge({
+                            edgeProps:{
+                                pool,
+                                tokenIn: poolToken,
+                                tokenOut: tokenI,
+                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                                operation: PathOperation.RemoveLiquidity
+                            },
+                            maxPathsPerTokenPair
+                        })
+                        this.addEdge({
+                            edgeProps:{
+                                pool,
+                                tokenIn: poolToken,
+                                tokenOut: tokenJ,
+                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                                operation: PathOperation.RemoveLiquidity
+                            },
+                            maxPathsPerTokenPair
+                        })
+                    }
                 }
             }
         }
@@ -254,7 +314,7 @@ export class PathGraph {
         const tokenInVertex = this.nodes.get(edgeProps.tokenIn.wrapped);
         const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.wrapped);
         const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
-
+        
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
