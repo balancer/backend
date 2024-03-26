@@ -1,6 +1,95 @@
-# Beethoven X Backend
+# Balancer API
 
-# Contributions
+Welcome to Balancer's API. This guide will help you get started with using the API and accessing the data locked in Balancer's contracts.
+
+## Getting started
+
+The API is running as a graphql server and is deployed at: [https://api-v3.balancer.fi](https://api-v3.balancer.fi)
+
+## Use cases
+
+Queries are organised around these main domains:
+
+-   Pools
+    -   poolGetPool
+    -   poolGetPools
+-   Gauges
+    -   veBalGetUser
+    -   veBalGetUserBalance
+    -   veBalGetVotingList
+-   Events
+    -   poolGetEvents
+-   Users
+    -   userGetPoolBalances
+    -   userGetStaking
+-   Tokens
+    -   tokenGetTokens
+    -   tokenGetTokenDynamicData
+    -   tokenGetTokensDynamicData
+    -   tokenGetTokenData
+    -   tokenGetTokensData
+-   Prices
+    -   tokenGetCurrentPrices
+    -   tokenGetHistoricalPrices
+-   SOR
+    -   sorGetSwaps
+    -   sorGetSwapPaths
+
+To query specific data refer to the [API's documentation](https://api-v3.balancer.fi/).
+
+## Examples
+
+How to get the pool's details including APRs.
+
+```
+{
+  poolGetPool(id: "0x7f2b3b7fbd3226c5be438cde49a519f442ca2eda00020000000000000000067d", chain:MAINNET) {
+    id
+    name
+    type
+    version
+    allTokens {
+      address
+      name
+    }
+    displayTokens {
+      ...on GqlPoolTokenDisplay {
+        symbol
+      }
+    }
+    dynamicData {
+      totalLiquidity
+      apr {
+        swapApr
+        nativeRewardApr {
+          ...on GqlPoolAprTotal {
+            total
+          }
+        }
+        thirdPartyApr {
+          ...on GqlPoolAprTotal {
+            total
+          }
+        }
+        items {
+          title
+          apr {
+            ...on GqlPoolAprRange {
+              min
+              max
+            }
+            ...on GqlPoolAprTotal {
+              total
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+# Development
 
 ## Project setup
 
