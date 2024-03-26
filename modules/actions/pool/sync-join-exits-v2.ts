@@ -2,9 +2,7 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { daysAgo } from '../../common/time';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
-import { JOIN_EXIT_HISTORY_DAYS } from './sync-join-exits';
 import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
 
 /**
@@ -12,11 +10,7 @@ import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-t
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (
-    v2SubgraphClient: BalancerSubgraphService,
-    chain: Chain,
-    daysToSync = JOIN_EXIT_HISTORY_DAYS,
-): Promise<string[]> => {
+export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
     const vaultVersion = 2;
 
     // Get latest event from the DB
@@ -33,19 +27,16 @@ export const syncJoinExitsV2 = async (
         },
     });
 
-    // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
-    const syncSince = daysAgo(daysToSync);
-
     // We need to use gte, because of pagination.
     // We don't have a guarantee that we get all the events from a specific block in one request.
-    const where =
-        chain === Chain.FANTOM
-            ? latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-                ? { timestamp_gte: latestEvent?.blockTimestamp }
-                : { timestamp_gte: syncSince }
-            : latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-            ? { block_gte: String(latestEvent.blockNumber) }
-            : { timestamp_gte: syncSince };
+    let where = {};
+
+    if (latestEvent?.blockTimestamp) {
+        where =
+            chain === Chain.FANTOM
+                ? { timestamp_gte: latestEvent.blockTimestamp }
+                : { block_gte: String(latestEvent.blockNumber) };
+    }
 
     // Get events
     const getterFn =
