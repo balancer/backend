@@ -19,7 +19,7 @@ const optimismNetworkData: NetworkData = config.OPTIMISM;
 
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
-    contentService: new SanityContentService(optimismNetworkData.chain.prismaId),
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(optimismNetworkData.ybAprConfig, optimismNetworkData.chain.prismaId),
