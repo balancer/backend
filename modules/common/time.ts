@@ -162,3 +162,13 @@ export const roundToMidnight = (timestamp: number) => Math.floor(timestamp / 864
 export const daysAgo = (daysAgo: number): number => {
     return Math.floor(+new Date(Date.now() - daysAgo * secondsPerDay * 1000) / 1000);
 };
+
+/**
+ * Returns the timestamp for the hours ago
+ *
+ * @param daysAgo
+ * @returns
+ */
+export const hoursAgo = (hoursAgo: number): number => {
+    return Math.floor(+new Date(Date.now() - hoursAgo * 60 * 1000) / 1000);
+};

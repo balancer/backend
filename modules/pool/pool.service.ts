@@ -247,7 +247,7 @@ export class PoolService {
     }
 
     public async syncPoolContentData() {
-        await this.contentService.syncPoolContentData();
+        await this.contentService.syncPoolContentData(this.chain);
     }
 
     public async syncStakingForPools() {

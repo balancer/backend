@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { roundToHour, roundToMidnight } from '../../common/time';
+import { daysAgo, roundToHour, roundToMidnight } from '../../common/time';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { SwapEvent } from '../../../prisma/prisma-types';
@@ -18,7 +18,7 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
     const groupedSwaps = _.groupBy(swaps, (swap) => {
         const timestamp = swap.blockTimestamp;
         // If swap is older than 30 days, round to midnight
-        if (timestamp < Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60) {
+        if (timestamp < daysAgo(30)) {
             return roundToMidnight(timestamp);
         }
         // Otherwise round to the nearest hour
@@ -34,30 +34,24 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
                 },
                 chain,
             },
-            include: {
-                token: true,
-            },
         });
 
         for (const swap of swaps) {
             const tokenIn = tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenIn.address);
             const tokenOut = tokenPrices.find((price) => price.tokenAddress === swap.payload.tokenOut.address);
 
-            console.log('tokenIn', tokenIn);
-            console.log('tokenOut', tokenOut);
-
             const payload = {
+                fee: {
+                    ...swap.payload.fee,
+                    valueUSD: (tokenOut?.price || 0) * parseFloat(swap.payload.fee.amount),
+                },
                 tokenIn: {
                     ...swap.payload.tokenIn,
-                    valueUSD:
-                        (tokenIn?.price || 0) *
-                        parseFloat(formatUnits(BigInt(swap.payload.tokenIn.amount), tokenIn?.token.decimals || 18)),
+                    valueUSD: (tokenIn?.price || 0) * parseFloat(swap.payload.tokenIn.amount),
                 },
                 tokenOut: {
                     ...swap.payload.tokenOut,
-                    valueUSD:
-                        (tokenOut?.price || 0) *
-                        parseFloat(formatUnits(BigInt(swap.payload.tokenOut.amount), tokenOut?.token.decimals || 18)),
+                    valueUSD: (tokenOut?.price || 0) * parseFloat(swap.payload.tokenOut.amount),
                 },
             };
 

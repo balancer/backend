@@ -10,6 +10,8 @@ import polygonConfig from './polygon';
 import sepoliaConfig from './sepolia';
 import zkevmConfig from './zkevm';
 
+export const DAYS_OF_HOURLY_PRICES = 100;
+
 export default {
     [Chain.ARBITRUM]: arbitrumConfig,
     [Chain.AVALANCHE]: avalacheConfig,

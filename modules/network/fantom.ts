@@ -23,7 +23,7 @@ const fantomNetworkData: NetworkData = config.FANTOM;
 
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
-    contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
@@ -93,10 +93,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
-        },
-        {
             name: 'cache-average-block-time',
             interval: every(1, 'hours'),
         },
@@ -158,9 +154,22 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'sync-sftmx-staking-snapshots',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(30, 'minutes'),
         },
+        // Refactored
+        {
+            name: 'update-liquidity-24h-ago',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+        },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'backfill-join-exits-v2',
+            interval: every(20, 'seconds'),
+        },
+        {
+            name: 'sync-swaps-v2',
             interval: every(1, 'minutes'),
         },
     ],

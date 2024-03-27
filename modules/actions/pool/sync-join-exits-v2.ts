@@ -2,9 +2,7 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { daysAgo } from '../../common/time';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
-import { JOIN_EXIT_HISTORY_DAYS } from './sync-join-exits';
 import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
 
 /**
@@ -12,11 +10,7 @@ import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-t
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (
-    v2SubgraphClient: BalancerSubgraphService,
-    chain: Chain,
-    daysToSync = JOIN_EXIT_HISTORY_DAYS,
-): Promise<string[]> => {
+export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
     const vaultVersion = 2;
 
     // Get latest event from the DB
@@ -33,18 +27,27 @@ export const syncJoinExitsV2 = async (
         },
     });
 
-    // Get events since the latest event or 100 days (it will be around 15k events on mainnet)
-    const syncSince = daysAgo(daysToSync);
-    const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-            ? { block_gt: String(latestEvent.blockNumber) }
-            : { timestamp_gte: syncSince };
+    // We need to use gte, because of pagination.
+    // We don't have a guarantee that we get all the events from a specific block in one request.
+    let where = {};
+
+    if (latestEvent?.blockTimestamp) {
+        where =
+            chain === Chain.FANTOM
+                ? { timestamp_gte: latestEvent.blockTimestamp }
+                : { block_gte: String(latestEvent.blockNumber) };
+    }
 
     // Get events
-    const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
+    const getterFn =
+        chain === Chain.FANTOM
+            ? v2SubgraphClient.getFantomPoolJoinExits.bind(v2SubgraphClient)
+            : v2SubgraphClient.getPoolJoinExits.bind(v2SubgraphClient);
+
+    const { joinExits } = await getterFn({
         first: 1000,
         where: where,
-        orderBy: JoinExit_OrderBy.Block,
+        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
         orderDirection: OrderDirection.Asc,
     });
 

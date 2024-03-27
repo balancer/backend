@@ -58,6 +58,7 @@ export default <NetworkData>{
         },
         v3: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
@@ -172,6 +173,12 @@ export default <NetworkData>{
                 sourceUrl: 'https://www.plutusdao.io/api/getPlsRdntInfo',
                 path: 'apr',
                 scale: 10000,
+                isIbYield: true,
+            },
+            ezETH: {
+                tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                sourceUrl: 'https://app.renzoprotocol.com/api/apr',
+                path: 'apr',
                 isIbYield: true,
             },
         },

@@ -73,6 +73,7 @@ export default <NetworkData>{
         },
         v3: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
             tokenAdmin: '0xf302f9f50958c5593770fdf4d4812309ff77414f',
@@ -244,6 +245,12 @@ export default <NetworkData>{
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
         sveth: true,
         defaultHandlers: {
+            uniETH: {
+                tokenAddress: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4',
+                sourceUrl: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',
+                path: 'data.apy',
+                scale: 10000,
+            },
             vETH: {
                 tokenAddress: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
                 sourceUrl: 'https://apy.liebi.com/veth',
@@ -251,6 +258,12 @@ export default <NetworkData>{
             },
             stETH: {
                 tokenAddress: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
+            pufETH: {
+                tokenAddress: '0xd9a442856c234a39a81a089c06451ebaa4306a72',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                 path: 'data.smaApr',
                 isIbYield: true,
