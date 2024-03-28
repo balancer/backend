@@ -30,6 +30,7 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    TokenAmount,
     SwapKind,
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
@@ -43,7 +44,7 @@ class SorPathService implements SwapService {
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain,  2);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -59,7 +60,7 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb,  2, config);
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
@@ -67,7 +68,7 @@ class SorPathService implements SwapService {
                 return new SwapResultV2(null, chain);
             }
 
-            const swap = new SwapLocal({ paths: paths, swapKind });
+            const swap = new SwapLocal({ paths, swapKind });
 
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
@@ -102,6 +103,7 @@ class SorPathService implements SwapService {
                 paths!,
                 input.swapType,
                 input.chain,
+                input.vaultVersion as 2 | 3,
                 input.queryBatchSwap,
                 input.callDataInput,
             );
@@ -122,11 +124,11 @@ class SorPathService implements SwapService {
     }
 
     private async getSwapPathsFromSor(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapPathsInput,
+        { chain, tokenIn, tokenOut, swapType, swapAmount, vaultVersion, graphTraversalConfig }: GetSwapPathsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<PathWithAmount[] | null> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, vaultVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -142,7 +144,7 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, vaultVersion, config);
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
@@ -171,17 +173,18 @@ class SorPathService implements SwapService {
         paths: PathWithAmount[],
         swapType: GqlSorSwapType,
         chain: Chain,
+        vaultVersion: 2 | 3,
         queryFirst = false,
         callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
-        let updatedAmount;
+        let updatedAmount: TokenAmount | undefined = undefined;
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
-                vaultVersion: 2 as 2 | 3,
+                vaultVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -271,7 +274,7 @@ class SorPathService implements SwapService {
         for (const path of paths) {
             // paths used as input for b-sdk for client
             sorPaths.push({
-                vaultVersion: 2,
+                vaultVersion,
                 inputAmountRaw: path.inputAmount.amount.toString(),
                 outputAmountRaw: path.outputAmount.amount.toString(),
                 tokens: path.tokens.map((token) => ({
@@ -289,7 +292,7 @@ class SorPathService implements SwapService {
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         return {
-            vaultVersion: 2,
+            vaultVersion,
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),
@@ -399,18 +402,19 @@ class SorPathService implements SwapService {
      * Fetch pools from Prisma and map to b-sdk BasePool.
      * @returns
      */
-    private async getBasePoolsFromDb(chain: Chain): Promise<PrismaPoolWithDynamic[]> {
+    private async getBasePoolsFromDb(chain: Chain, vaultVersion: number): Promise<PrismaPoolWithDynamic[]> {
         const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 chain,
+                vaultVersion,
                 dynamicData: {
                     totalSharesNum: {
                         gt: 0.000000000001,
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 1000,
+                        gte: vaultVersion===2?1000:0,
                     },
                 },
                 id: {
@@ -449,7 +453,7 @@ class SorPathService implements SwapService {
         const tokenIn = path.tokens[0].address;
         const tokenOut = path.tokens[path.tokens.length - 1].address;
         const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
-        const tokenOutAmount = formatUnits(path.inputAmount.amount, path.tokens[path.tokens.length - 1].decimals);
+        const tokenOutAmount = formatUnits(path.outputAmount.amount, path.tokens[path.tokens.length - 1].decimals);
 
         return {
             tokenIn,
@@ -460,7 +464,7 @@ class SorPathService implements SwapService {
             hops: path.pools.map((pool, i) => {
                 return {
                     tokenIn: `${path.tokens[i].address}`,
-                    tokenOut: `${path.tokens[i + 1]}`,
+                    tokenOut: `${path.tokens[i + 1].address}`,
                     tokenInAmount: i === 0 ? tokenInAmount : '0',
                     tokenOutAmount: i === pools.length - 1 ? tokenOutAmount : '0',
                     poolId: pool.id,

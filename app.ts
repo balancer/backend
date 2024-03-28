@@ -20,8 +20,6 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
-import { prisma } from './prisma/prisma-client';
-
 async function startServer() {
     const app = createExpressApp();
 
@@ -127,3 +125,9 @@ if (process.env.WORKER === 'true') {
 } else {
     startServer();
 }
+
+// Included this line in order to fix Error "Do not know how to serialize BigInt" https://github.com/prisma/studio/issues/614
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+    return { $bigint: this.toString() };
+};
