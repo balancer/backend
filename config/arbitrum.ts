@@ -172,7 +172,7 @@ export default <NetworkData>{
                 tokenAddress: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
                 sourceUrl: 'https://www.plutusdao.io/api/getPlsRdntInfo',
                 path: 'apr',
-                scale: 10000,
+                scale: 1,
                 isIbYield: true,
             },
             ezETH: {
