@@ -45,13 +45,18 @@ export function JobsController(tracer?: any) {
         // Temporary action to backfill join/exits for v2
         async backfillJoinExitsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
-            const {
+            let {
                 subgraphs: { balancer },
             } = config[chain];
 
             // Guard against unconfigured chains
             if (!balancer) {
                 throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            // Polygon uses the pruned subgraph by default
+            if (chainId === '137') {
+                balancer = 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2';
             }
 
             const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
