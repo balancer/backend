@@ -285,4 +285,20 @@ export class GyroEPool implements BasePool {
 
         return { tIn, tOut };
     }
+
+    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        throw new Error('GyroE - addLiquiditiySingleTokenExactIn: Invalid Method');
+    }
+
+    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
+        throw new Error('GyroE - getLimitAmountAddLiquidity: Invalid Method');
+    }
+
+    getLimitAmountRemoveLiquidity(): bigint {
+        throw new Error('GyroE - getLimitAmountRemoveLiquidity: Invalid Method');
+    }
+
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+        throw new Error('GyroE - removeLiquiditySingleTokenExactIn: Invalid Method');
+    }
 }

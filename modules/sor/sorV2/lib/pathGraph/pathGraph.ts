@@ -2,8 +2,8 @@ import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
-import { PathOperation } from "../../../types";
-import { Address } from "viem";
+import { PathOperation } from '../../../types';
+import { Address } from 'viem';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
@@ -27,12 +27,12 @@ export class PathGraph {
     // pool pairs (default 2).
     public buildGraph({
         pools,
-        maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR, 
-        includeAddRemoveLiquidity,
+        maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
+        enableAddRemoveLiquidityPaths,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
-        includeAddRemoveLiquidity: boolean
+        enableAddRemoveLiquidityPaths: boolean;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
@@ -40,14 +40,13 @@ export class PathGraph {
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
         this.buildPoolAddressMap(pools);
-        if(includeAddRemoveLiquidity){
-            this.addPoolsAsGraphNodes(pools);
-        }
         this.addAllTokensAsGraphNodes(pools);
+        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
 
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, includeAddRemoveLiquidity });
-        
-        console.log(this.edges.entries());
+        if (enableAddRemoveLiquidityPaths) {
+            this.addPoolsAsGraphNodes(pools);
+            this.addBptTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
+        }
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -121,14 +120,15 @@ export class PathGraph {
         }
 
         return this.sortAndFilterPaths(paths).map((path) => {
-            const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
+            const pathTokens: Token[] = path.map((segment) => segment.tokenOut);
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
-            return {
-                tokens: pathTokens,
-                pools: path.map((segment) => segment.pool),
-            };
+            return new PathLocal(
+                pathTokens,
+                path.map((segment) => segment.pool),
+                path.map((segment) => (!!segment.operation ? segment.operation : PathOperation.Swap)),
+            );
         });
     }
 
@@ -136,7 +136,7 @@ export class PathGraph {
         const pathsWithLimits = paths
             .map((path) => {
                 try {
-                    const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
+                    const limit = this.getLimitAmountSwapForPath(path);
                     return { path, limit };
                 } catch (_e) {
                     console.error('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
@@ -187,7 +187,7 @@ export class PathGraph {
             }
         }
     }
-    
+
     private addPoolsAsGraphNodes(pools: BasePool[]) {
         for (const pool of pools) {
             const poolToken = new Token(pool.tokens[0].token.chainId, pool.address as Address, 18);
@@ -199,11 +199,9 @@ export class PathGraph {
     private addTokenPairsAsGraphEdges({
         pools,
         maxPathsPerTokenPair,
-        includeAddRemoveLiquidity
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
-        includeAddRemoveLiquidity: boolean;
     }) {
         for (const pool of pools) {
             for (let i = 0; i < pool.tokens.length - 1; i++) {
@@ -229,50 +227,42 @@ export class PathGraph {
                         },
                         maxPathsPerTokenPair,
                     });
-                    if(includeAddRemoveLiquidity){
-                        const poolToken = new Token(tokenI.chainId, pool.address as Address, 18)
-                        this.addEdge({
-                            edgeProps:{
-                                pool,
-                                tokenIn: tokenI,
-                                tokenOut: poolToken,
-                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                                operation: PathOperation.AddLiquidity
-                            },
-                            maxPathsPerTokenPair
-                        })
-                        this.addEdge({
-                            edgeProps:{
-                                pool,
-                                tokenIn: tokenJ,
-                                tokenOut: poolToken,
-                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                                operation: PathOperation.AddLiquidity
-                            },
-                            maxPathsPerTokenPair
-                        })
-                        this.addEdge({
-                            edgeProps:{
-                                pool,
-                                tokenIn: poolToken,
-                                tokenOut: tokenI,
-                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                                operation: PathOperation.RemoveLiquidity
-                            },
-                            maxPathsPerTokenPair
-                        })
-                        this.addEdge({
-                            edgeProps:{
-                                pool,
-                                tokenIn: poolToken,
-                                tokenOut: tokenJ,
-                                normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                                operation: PathOperation.RemoveLiquidity
-                            },
-                            maxPathsPerTokenPair
-                        })
-                    }
                 }
+            }
+        }
+    }
+
+    private addBptTokenPairsAsGraphEdges({
+        pools,
+        maxPathsPerTokenPair,
+    }: {
+        pools: BasePool[];
+        maxPathsPerTokenPair: number;
+    }) {
+        for (const pool of pools) {
+            const bptToken = new Token(pool.tokens[0].token.chainId, pool.address as `0x${string}`, 18);
+            for (let { token } of pool.tokens) {
+                this.addEdge({
+                    edgeProps: {
+                        pool,
+                        tokenIn: bptToken,
+                        tokenOut: token,
+                        normalizedLiquidity: pool.getNormalizedLiquidity(bptToken, token),
+                        operation: PathOperation.RemoveLiquidity,
+                    },
+                    maxPathsPerTokenPair,
+                });
+
+                this.addEdge({
+                    edgeProps: {
+                        pool,
+                        tokenIn: token,
+                        tokenOut: bptToken,
+                        normalizedLiquidity: pool.getNormalizedLiquidity(bptToken, token),
+                        operation: PathOperation.AddLiquidity,
+                    },
+                    maxPathsPerTokenPair,
+                });
             }
         }
     }
@@ -314,7 +304,7 @@ export class PathGraph {
         const tokenInVertex = this.nodes.get(edgeProps.tokenIn.wrapped);
         const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.wrapped);
         const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
-        
+
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
@@ -517,35 +507,63 @@ export class PathGraph {
         return filtered;
     }
 
-    private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
-        let limit = path[path.length - 1].pool.getLimitAmountSwap(
-            path[path.length - 1].tokenIn,
-            path[path.length - 1].tokenOut,
-            swapKind,
-        );
-
-        for (let i = path.length - 2; i >= 0; i--) {
-            const poolLimitExactIn = path[i].pool.getLimitAmountSwap(
-                path[i].tokenIn,
-                path[i].tokenOut,
+    private getLimitAmountSwapForPath(path: PathGraphEdgeData[]): bigint {
+        const lastOperation = path[path.length - 1].operation;
+        let limit;
+        if (lastOperation === PathOperation.AddLiquidity) {
+            limit = path[path.length - 1].pool.getLimitAmountAddLiquidity(path[path.length - 1].tokenIn);
+        } else if (lastOperation === PathOperation.RemoveLiquidity) {
+            limit = path[path.length - 1].pool.getLimitAmountRemoveLiquidity();
+        } else {
+            limit = path[path.length - 1].pool.getLimitAmountSwap(
+                path[path.length - 1].tokenIn,
+                path[path.length - 1].tokenOut,
                 SwapKind.GivenIn,
             );
-            const poolLimitExactOut = path[i].pool.getLimitAmountSwap(
-                path[i].tokenIn,
-                path[i].tokenOut,
-                SwapKind.GivenOut,
-            );
+        }
 
-            if (poolLimitExactOut <= limit) {
-                limit = poolLimitExactIn;
+        for (let i = path.length - 2; i >= 0; i--) {
+            let limitGivenIn;
+            let limitGivenOut;
+            if (!path[i].operation || path[i].operation === PathOperation.Swap) {
+                limitGivenIn = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenIn);
+                limitGivenOut = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenOut);
+                if (limitGivenOut <= limit) {
+                    limit = limitGivenIn;
+                } else {
+                    const pulledLimit: bigint = path[i].pool.swapGivenOut(
+                        path[i].tokenIn,
+                        path[i].tokenOut,
+                        TokenAmount.fromRawAmount(path[i].tokenOut, limit),
+                    ).amount;
+                    limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
+                }
+            } else if (path[i].operation === PathOperation.AddLiquidity) {
+                limitGivenIn = path[i].pool.getLimitAmountAddLiquidity(path[i].tokenIn);
+                limitGivenOut = path[i].pool.getLimitAmountRemoveLiquidity();
+                if (limitGivenOut <= limit) {
+                    limit = limitGivenIn;
+                } else {
+                    const pulledLimit: bigint = path[i].pool.removeLiquiditySingleTokenExactIn(
+                        path[i].tokenOut,
+                        path[i].tokenIn,
+                        TokenAmount.fromRawAmount(path[i].tokenIn, limit),
+                    ).amount;
+                    limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
+                }
             } else {
-                const pulledLimit = path[i].pool.swapGivenOut(
-                    path[i].tokenIn,
-                    path[i].tokenOut,
-                    TokenAmount.fromRawAmount(path[i].tokenOut, limit),
-                ).amount;
-
-                limit = pulledLimit > poolLimitExactIn ? poolLimitExactIn : pulledLimit;
+                limitGivenIn = path[i].pool.getLimitAmountRemoveLiquidity();
+                limitGivenOut = path[i].pool.getLimitAmountAddLiquidity(path[i].tokenOut);
+                if (limitGivenOut <= limit) {
+                    limit = limitGivenIn;
+                } else {
+                    const pulledLimit: bigint = path[i].pool.addLiquiditySingleTokenExactIn(
+                        path[i].tokenIn,
+                        path[i].tokenOut,
+                        TokenAmount.fromRawAmount(path[i].tokenIn, limit),
+                    ).amount;
+                    limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
+                }
             }
         }
 

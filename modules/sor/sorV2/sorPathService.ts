@@ -44,7 +44,7 @@ class SorPathService implements SwapService {
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain,  2);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, 2);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -60,7 +60,7 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb,  2, config);
+            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, 2, config);
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
@@ -144,7 +144,15 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, vaultVersion, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                vaultVersion,
+                config,
+            );
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
@@ -414,7 +422,7 @@ class SorPathService implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gte: vaultVersion===2?1000:0,
+                        gte: vaultVersion === 2 ? 1000 : 0,
                     },
                 },
                 id: {

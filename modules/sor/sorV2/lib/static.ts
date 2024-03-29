@@ -58,9 +58,15 @@ export async function sorGetSwapsWithPools(
 
     const router = new Router();
 
-    const includeAddRemoveLiquidity = vaultVersion === 3 ? true : false
-    
-    const candidatePaths = router.getCandidatePaths(tokenIn, tokenOut, basePools, swapOptions?.graphTraversalConfig, includeAddRemoveLiquidity);
+    const enableAddRemoveLiquidityPaths = vaultVersion === 3 ? true : false;
+
+    const candidatePaths = router.getCandidatePaths(
+        tokenIn,
+        tokenOut,
+        basePools,
+        swapOptions?.graphTraversalConfig,
+        enableAddRemoveLiquidityPaths,
+    );
     if (candidatePaths.length === 0) return null;
 
     const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);

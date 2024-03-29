@@ -345,4 +345,30 @@ export class ComposableStablePool implements BasePool {
         }
         return amountsWithoutBpt;
     }
+
+    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        return this.swapGivenIn(tokenIn, bpt, amount);
+    }
+
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+        return this.swapGivenIn(bpt, tokenOut, bptIn);
+    }
+
+    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
+        const bptToken = this.tokens.find(
+            ({ token: { address } }) => address.toLowerCase() === this.address.toLowerCase(),
+        )?.token as Token;
+        if (!bptToken) {
+            throw new Error("getLimitAmountAddLiquidity: Couldn't find BPT among pool tokens");
+        }
+        return this.getLimitAmountSwap(tokenIn, bptToken, SwapKind.GivenIn);
+    }
+
+    getLimitAmountRemoveLiquidity(): bigint {
+        const bpt = this.tokenMap.get(this.address);
+        if (!bpt) {
+            throw new Error("getLimitAmountRemoveLiquidity: BPT wasn't found");
+        }
+        return (bpt.amount * WAD) / bpt.rate;
+    }
 }
