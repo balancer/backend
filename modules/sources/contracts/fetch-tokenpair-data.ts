@@ -226,7 +226,7 @@ function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         for (const poolToken of pool.tokens) {
             // create all pairs for pool's bpt
             //we don't want a pair of the bpt with itself
-            if (poolToken.address === pool.address || poolToken.address === pool.address) continue;
+            if (poolToken.address === pool.address) continue;
             bptTokenPairs.push({
                 poolId: pool.id,
                 poolTvl: pool.dynamicData?.totalLiquidity || 0,
