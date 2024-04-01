@@ -346,12 +346,40 @@ export class ComposableStablePool implements BasePool {
         return amountsWithoutBpt;
     }
 
-    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
-        return this.swapGivenIn(tokenIn, bpt, amount);
+    addLiquiditySingleTokenExactIn(
+        tokenIn: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances: boolean,
+    ): TokenAmount {
+        return this.swapGivenIn(tokenIn, bpt, amount, mutateBalances);
     }
 
-    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
-        return this.swapGivenIn(bpt, tokenOut, bptIn);
+    removeLiquiditySingleTokenExactIn(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances: boolean,
+    ): TokenAmount {
+        return this.swapGivenIn(bpt, tokenOut, amount, mutateBalances);
+    }
+
+    addLiquiditySingleTokenExactOut(
+        tokenIn: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances: boolean,
+    ): TokenAmount {
+        return this.swapGivenOut(tokenIn, bpt, amount, mutateBalances);
+    }
+
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances: boolean,
+    ): TokenAmount {
+        return this.swapGivenOut(bpt, tokenOut, amount, mutateBalances);
     }
 
     getLimitAmountAddLiquidity(tokenIn: Token): bigint {

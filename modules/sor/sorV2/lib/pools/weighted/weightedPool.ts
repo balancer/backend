@@ -44,6 +44,7 @@ export class WeightedPool implements BasePool {
     public readonly totalShares: bigint;
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
+    private readonly MAX_INVARIANT_RATIO = BigInt(3e18);
     private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
@@ -69,15 +70,10 @@ export class WeightedPool implements BasePool {
             // TODO: parseFloat with toFixed changes the value, better use parseEther instead
             const balance = parseFloat(poolToken.dynamicData.balance).toFixed(18);
             const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
-
-            poolTokens.push(
-                new WeightedPoolToken(
-                    token,
-                    tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.weight),
-                    poolToken.index,
-                ),
-            );
+            //TODO: Remove this once the weight for V3 Pools is in the same format as V2 Pools
+            const poolTokenWeight =
+                pool.vaultVersion === 3 ? poolToken.dynamicData.weight : parseEther(poolToken.dynamicData.weight);
+            poolTokens.push(new WeightedPoolToken(token, tokenAmount.amount, poolTokenWeight, poolToken.index));
         }
 
         return new WeightedPool(
@@ -220,16 +216,52 @@ export class WeightedPool implements BasePool {
         }
     }
 
-    public removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+    public addLiquiditySingleTokenExactOut(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        try {
+            const token = this.tokenMap.get(tokenIn.wrapped);
+            if (!token) {
+                throw new Error(`Invalid Token: ${tokenIn.address}`);
+            }
+            const tokenInAmount = this._calcTokenInGivenExactBptOut(
+                token.scale18,
+                token.weight,
+                amount.scale18,
+                this.totalShares,
+            );
+            return TokenAmount.fromRawAmount(tokenIn, tokenInAmount);
+        } catch (err) {
+            return TokenAmount.fromRawAmount(tokenIn, 0n);
+        }
+    }
+
+    public removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
         const { amount: tokenBalance, weight: tokenWeight } = Array.from(this.tokenMap.values()).find(
             (weightedPoolToken) => isSameAddress(weightedPoolToken.token.address, tokenOut.address),
         ) as WeightedPoolToken;
         const tokenAmountOut = this._calcTokenOutGivenExactBptIn(
             tokenBalance,
             tokenWeight,
-            bptIn.scale18,
+            amount.scale18,
             this.totalShares,
         );
+        return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
+    }
+
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        const { tokenBalances, amountsOut, weights } = Array.from(this.tokenMap.values()).reduce(
+            (acc: { tokenBalances: bigint[]; amountsOut: bigint[]; weights: bigint[] }, weightedPoolToken) => {
+                if (weightedPoolToken.token.address.toLowerCase() === tokenOut.address.toLowerCase()) {
+                    acc.amountsOut.push(amount.scale18);
+                } else {
+                    acc.amountsOut.push(0n);
+                }
+                acc.tokenBalances.push(weightedPoolToken.scale18);
+                acc.weights.push(weightedPoolToken.weight);
+                return acc;
+            },
+            { tokenBalances: [], amountsOut: [], weights: [] },
+        );
+        const tokenAmountOut = this._calcBptInGivenExactTokensOut(tokenBalances, weights, amountsOut, this.totalShares);
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }
 
@@ -361,5 +393,106 @@ export class WeightedPool implements BasePool {
         } else {
             return 0n;
         }
+    }
+    _calcTokenInGivenExactBptOut = (
+        balance: bigint,
+        normalizedWeight: bigint,
+        bptAmountOut: bigint,
+        bptTotalSupply: bigint,
+    ): bigint => {
+        /*****************************************************************************************
+         // tokenInForExactBptOut                                                                //
+         // a = amountIn                                                                         //
+         // b = balance                      /  /     bpt + bptOut     \    (1 / w)      \       //
+         // bptOut = bptAmountOut   a = b * |  | ---------------------- | ^          - 1  |      //
+         // bpt = bptTotalSupply             \  \         bpt          /                 /       //
+         // w = normalizedWeight                                                                 //
+         *****************************************************************************************/
+
+        // Token in, so we round up overall
+
+        // Calculate the factor by which the invariant will increase after minting `bptAmountOut`
+        const invariantRatio = MathSol.divUpFixed(bptTotalSupply + bptAmountOut, bptTotalSupply);
+        if (invariantRatio > this.MAX_INVARIANT_RATIO) {
+            throw new Error('MAX_OUT_BPT_FOR_TOKEN_IN');
+        }
+
+        // Calculate by how much the token balance has to increase to cause `invariantRatio`
+        const balanceRatio = MathSol.powUpFixed(invariantRatio, MathSol.divUpFixed(WAD, normalizedWeight));
+        const amountInWithoutFee = MathSol.mulUpFixed(balance, balanceRatio - WAD);
+        // We can now compute how much extra balance is being deposited and used in virtual swaps, and charge swap fees accordingly
+        const taxablePercentage = MathSol.complementFixed(normalizedWeight);
+        const taxableAmount = MathSol.mulUpFixed(amountInWithoutFee, taxablePercentage);
+        const nonTaxableAmount = amountInWithoutFee - taxableAmount;
+
+        return nonTaxableAmount + MathSol.divUpFixed(taxableAmount, MathSol.complementFixed(this.swapFee));
+    };
+
+    private _calcBptInGivenExactTokensOut(
+        balances: bigint[],
+        normalizedWeights: bigint[],
+        amountsOut: bigint[],
+        bptTotalSupply: bigint,
+    ): bigint {
+        // BPT in, so we round up overall.
+        const balanceRatiosWithoutFee = new Array<bigint>(amountsOut.length);
+
+        let invariantRatioWithoutFees = 0n;
+        for (let i = 0; i < balances.length; i++) {
+            balanceRatiosWithoutFee[i] = MathSol.divUpFixed(balances[i] - amountsOut[i], balances[i]);
+            invariantRatioWithoutFees =
+                invariantRatioWithoutFees + MathSol.mulUpFixed(balanceRatiosWithoutFee[i], normalizedWeights[i]);
+        }
+
+        const invariantRatio = this._computeExitExactTokensOutInvariantRatio(
+            balances,
+            normalizedWeights,
+            amountsOut,
+            balanceRatiosWithoutFee,
+            invariantRatioWithoutFees,
+            this.swapFee,
+        );
+
+        return MathSol.mulUpFixed(bptTotalSupply, MathSol.complementFixed(invariantRatio));
+    }
+    private _computeExitExactTokensOutInvariantRatio(
+        balances: bigint[],
+        normalizedWeights: bigint[],
+        amountsOut: bigint[],
+        balanceRatiosWithoutFee: bigint[],
+        invariantRatioWithoutFees: bigint,
+        swapFeePercentage: bigint,
+    ): bigint {
+        let invariantRatio = WAD;
+
+        for (let i = 0; i < balances.length; i++) {
+            // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it to
+            // 'token out'. This results in slightly larger price impact.
+
+            let amountOutWithFee;
+            if (invariantRatioWithoutFees > balanceRatiosWithoutFee[i]) {
+                const nonTaxableAmount = MathSol.mulDownFixed(
+                    balances[i],
+                    MathSol.complementFixed(invariantRatioWithoutFees),
+                );
+                const taxableAmount = amountsOut[i] - nonTaxableAmount;
+                const taxableAmountPlusFees = MathSol.divUpFixed(
+                    taxableAmount,
+                    MathSol.complementFixed(swapFeePercentage),
+                );
+
+                amountOutWithFee = nonTaxableAmount + taxableAmountPlusFees;
+            } else {
+                amountOutWithFee = amountsOut[i];
+            }
+
+            const balanceRatio = MathSol.divDownFixed(balances[i] - amountOutWithFee, balances[i]);
+
+            invariantRatio = MathSol.mulDownFixed(
+                invariantRatio,
+                MathSol.powDownFixed(balanceRatio, normalizedWeights[i]),
+            );
+        }
+        return invariantRatio;
     }
 }

@@ -231,4 +231,22 @@ export class MetaStablePool implements BasePool {
     removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
         throw new Error('MetaStable - removeLiquiditySingleTokenExactIn: Method not Implemented');
     }
+
+    addLiquiditySingleTokenExactOut(
+        tokenIn: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
+        throw new Error('MetaStable - addLiquiditySingleTokenExactOut: Method not Implemented');
+    }
+
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
+        throw new Error('MetaStable - removeLiquiditySingleTokenExactOut: Method not Implemented');
+    }
 }

@@ -32,10 +32,13 @@ import {
     SwapBuildOutputExactOut,
     TokenAmount,
     SwapKind,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
+import { update } from 'lodash';
 
 class SorPathService implements SwapService {
     // This is only used for the old SOR service
@@ -188,6 +191,7 @@ class SorPathService implements SwapService {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
+        let queryOutput: ExactInQueryOutput | ExactOutQueryOutput | undefined = undefined;
         let updatedAmount: TokenAmount | undefined = undefined;
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
@@ -204,7 +208,12 @@ class SorPathService implements SwapService {
             swapKind,
         });
         if (queryFirst) {
-            updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            queryOutput = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            if (swapKind === SwapKind.GivenIn) {
+                updatedAmount = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            } else {
+                updatedAmount = (queryOutput as ExactOutQueryOutput).expectedAmountIn;
+            }
         }
 
         let inputAmount = getInputAmount(paths);
@@ -224,7 +233,10 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountOut: outputAmount,
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountOut: outputAmount,
+                    },
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactIn;
@@ -242,7 +254,10 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountIn: inputAmount,
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountIn: inputAmount,
+                    },
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactOut;

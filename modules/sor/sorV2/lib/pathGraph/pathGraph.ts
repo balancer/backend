@@ -1,4 +1,4 @@
-import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
@@ -189,7 +189,9 @@ export class PathGraph {
     }
 
     private addPoolsAsGraphNodes(pools: BasePool[]) {
+        const validPoolTypes = ['WEIGHTED', 'COMPOSABLE_STABLE'];
         for (const pool of pools) {
+            if (!validPoolTypes.includes(pool.poolType)) continue;
             const poolToken = new Token(pool.tokens[0].token.chainId, pool.address as Address, 18);
             if (!this.nodes.has(pool.address)) {
                 this.addNode(poolToken);
@@ -239,7 +241,9 @@ export class PathGraph {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
     }) {
+        const validPoolTypes = ['WEIGHTED', 'COMPOSABLE_STABLE'];
         for (const pool of pools) {
+            if (!validPoolTypes.includes(pool.poolType)) continue;
             const bptToken = new Token(pool.tokens[0].token.chainId, pool.address as `0x${string}`, 18);
             for (let { token } of pool.tokens) {
                 this.addEdge({
@@ -544,9 +548,9 @@ export class PathGraph {
                 if (limitGivenOut <= limit) {
                     limit = limitGivenIn;
                 } else {
-                    const pulledLimit: bigint = path[i].pool.removeLiquiditySingleTokenExactIn(
-                        path[i].tokenOut,
+                    const pulledLimit: bigint = path[i].pool.addLiquiditySingleTokenExactOut(
                         path[i].tokenIn,
+                        path[i].tokenOut,
                         TokenAmount.fromRawAmount(path[i].tokenIn, limit),
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
@@ -557,9 +561,9 @@ export class PathGraph {
                 if (limitGivenOut <= limit) {
                     limit = limitGivenIn;
                 } else {
-                    const pulledLimit: bigint = path[i].pool.addLiquiditySingleTokenExactIn(
-                        path[i].tokenIn,
+                    const pulledLimit: bigint = path[i].pool.removeLiquiditySingleTokenExactOut(
                         path[i].tokenOut,
+                        path[i].tokenIn,
                         TokenAmount.fromRawAmount(path[i].tokenIn, limit),
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
