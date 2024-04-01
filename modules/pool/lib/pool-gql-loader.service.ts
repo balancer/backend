@@ -187,7 +187,7 @@ export class PoolGqlLoaderService {
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
         const featuredPoolGroups = [];
         if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
-            const sanityContentService = new SanityContentService('FANTOM');
+            const sanityContentService = new SanityContentService();
             featuredPoolGroups.push(...(await sanityContentService.getFeaturedPoolGroups(chains)));
         }
         const poolIds = featuredPoolGroups

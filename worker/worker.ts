@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import { env } from '../app/env';
 import { configureWorkerRoutes } from './job-handlers';
-import { prisma } from '../prisma/prisma-client';
+import { captureConsoleIntegration } from '@sentry/integrations';
 
 export async function startWorker() {
     const app = express();
@@ -19,6 +19,7 @@ export async function startWorker() {
             // new Sentry.Integrations.Express({ app }),
             new Sentry.Integrations.Http({ tracing: true }),
             new ProfilingIntegration(),
+            captureConsoleIntegration({ levels: ['error'] }),
         ],
         tracesSampleRate: 0.005,
         profilesSampleRate: 0.1,

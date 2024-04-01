@@ -6,15 +6,19 @@ import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
 
 /**
- * Get the join and exit events from the subgraph and store them in the database
+ * We have some data in the DB already and want to fill the data previous to the earliest event in the DB.
+ * This is meant as a one-time action to fill the data.
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
+export const backfillJoinExitsV2 = async (
+    v2SubgraphClient: BalancerSubgraphService,
+    chain: Chain,
+): Promise<string[]> => {
     const vaultVersion = 2;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.prismaPoolEvent.findFirst({
+    const earliestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
             type: {
                 in: ['JOIN', 'EXIT'],
@@ -23,20 +27,21 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
             vaultVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockNumber: 'asc',
         },
     });
 
     // We need to use gte, because of pagination.
     // We don't have a guarantee that we get all the events from a specific block in one request.
-    let where = {};
-
-    if (latestEvent?.blockTimestamp) {
-        where =
-            chain === Chain.FANTOM
-                ? { timestamp_gte: latestEvent.blockTimestamp }
-                : { block_gte: String(latestEvent.blockNumber) };
-    }
+    const now = Math.floor(Date.now() / 1000);
+    const where =
+        chain === Chain.FANTOM
+            ? earliestEvent?.blockTimestamp
+                ? { timestamp_lte: earliestEvent?.blockTimestamp }
+                : { timestamp_lte: now }
+            : earliestEvent?.blockTimestamp
+            ? { block_lte: String(earliestEvent.blockNumber) }
+            : { timestamp_lte: now };
 
     // Get events
     const getterFn =
@@ -48,7 +53,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
         first: 1000,
         where: where,
         orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
-        orderDirection: OrderDirection.Asc,
+        orderDirection: OrderDirection.Desc,
     });
 
     // Prepare DB entries

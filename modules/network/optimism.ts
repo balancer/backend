@@ -19,7 +19,7 @@ const optimismNetworkData: NetworkData = config.OPTIMISM;
 
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
-    contentService: new SanityContentService(optimismNetworkData.chain.prismaId),
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(optimismNetworkData.ybAprConfig, optimismNetworkData.chain.prismaId),
@@ -132,6 +132,10 @@ export const optimismNetworkConfig: NetworkConfig = {
         {
             name: 'sync-join-exits-v2',
             interval: every(1, 'minutes'),
+        },
+        {
+            name: 'backfill-join-exits-v2',
+            interval: every(20, 'seconds'),
         },
         {
             name: 'sync-swaps-v2',
