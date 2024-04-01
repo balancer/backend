@@ -125,9 +125,3 @@ if (process.env.WORKER === 'true') {
 } else {
     startServer();
 }
-
-// Included this line in order to fix Error "Do not know how to serialize BigInt" https://github.com/prisma/studio/issues/614
-// @ts-ignore
-BigInt.prototype.toJSON = function () {
-    return { $bigint: this.toString() };
-};
