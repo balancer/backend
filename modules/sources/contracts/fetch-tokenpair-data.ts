@@ -102,7 +102,7 @@ export async function fetchTokenPairData(
             addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
-    
+
     let bptTokenPairs = generateBptTokenPairs(pools);
     bptTokenPairs.forEach((bptTokenPair) => {
         if (bptTokenPair.valid) {
@@ -110,18 +110,19 @@ export async function fetchTokenPairData(
             // tokenA->tokenB with 1% of tokenA balance
             bptTokenPair.aToBAmountIn = parseUnits(bptTokenPair.tokenA.balance, bptTokenPair.tokenA.decimals) / 100n;
             // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (parseFloat(bptTokenPair.tokenA.balance) / bptTokenPair.tokenA.balanceUsd) * 100;
+            const oneHundredUsdOfTokenA =
+                (parseFloat(bptTokenPair.tokenA.balance) / bptTokenPair.tokenA.balanceUsd) * 100;
             bptTokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, bptTokenPair.tokenA.decimals);
 
             addBptEffectivePriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
             addBptAToBPriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
         }
     });
-    
+
     const resultOne = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
-    
+
     [...tokenPairs, ...bptTokenPairs].forEach((tokenPair) => {
         if (tokenPair.valid) {
             getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
@@ -140,7 +141,7 @@ export async function fetchTokenPairData(
             addBptBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }
     });
-    
+
     const resultTwo = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
@@ -174,7 +175,7 @@ export async function fetchTokenPairData(
 
 function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
     const tokenPairs: TokenPair[] = [];
-    
+
     for (const pool of filteredPools) {
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
@@ -225,8 +226,7 @@ function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         if (pool.vaultVersion !== 3) continue;
         for (const poolToken of pool.tokens) {
             // create all pairs for pool's bpt
-            //we don't want a pair of the bpt with itself
-            if (poolToken.address === pool.address) continue;
+
             bptTokenPairs.push({
                 poolId: pool.id,
                 poolTvl: pool.dynamicData?.totalLiquidity || 0,
@@ -266,9 +266,9 @@ function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 
 // call querySwapSingleTokenExactIn from tokenA->tokenB with 100USD worth of tokenA
 function addEffectivePriceCallsToMulticaller(
-  tokenPair: TokenPair,
-  balancerRouterAddress: string,
-  multicaller: ViemMulticallCall[],
+    tokenPair: TokenPair,
+    balancerRouterAddress: string,
+    multicaller: ViemMulticallCall[],
 ) {
     multicaller.push({
         path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
