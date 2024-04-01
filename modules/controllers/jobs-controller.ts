@@ -22,6 +22,7 @@ import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
+import { backfillJoinExitsV2 } from '../actions/pool/backfill-join-exits-v2';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -41,6 +42,27 @@ export function JobsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
+        // Temporary action to backfill join/exits for v2
+        async backfillJoinExitsV2(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            let {
+                subgraphs: { balancer },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            // Polygon uses the pruned subgraph by default
+            if (chainId === '137') {
+                balancer = 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2';
+            }
+
+            const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
+            const entries = await backfillJoinExitsV2(subgraphClient, chain);
+            return entries;
+        },
         async syncJoinExitsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {

@@ -23,7 +23,7 @@ const fantomNetworkData: NetworkData = config.FANTOM;
 
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
-    contentService: new SanityContentService(fantomNetworkData.chain.prismaId),
+    contentService: new SanityContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
@@ -163,6 +163,10 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-join-exits-v2',
             interval: every(1, 'minutes'),
+        },
+        {
+            name: 'backfill-join-exits-v2',
+            interval: every(20, 'seconds'),
         },
         {
             name: 'sync-swaps-v2',
