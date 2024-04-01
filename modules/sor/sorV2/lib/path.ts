@@ -94,7 +94,6 @@ export class PathWithAmount extends PathLocal {
                 for (let i = this.pools.length; i >= 1; i--) {
                     const pool = this.pools[i - 1];
                     let inputAmount;
-                    console.log(this.operations);
                     if (this.operations && this.operations[i - 1] === PathOperation.AddLiquidity) {
                         inputAmount = pool.addLiquiditySingleTokenExactOut(
                             this.tokens[i - 1],
