@@ -1,13 +1,18 @@
 import { TokenAmount, SwapKind, Token } from '@balancer/sdk';
 import { BasePool } from './pools/basePool';
+import { PathOperation } from '../../types';
 
 export class PathLocal {
     public readonly pools: BasePool[];
     public readonly tokens: Token[];
+    public readonly operations: PathOperation[];
 
-    public constructor(tokens: Token[], pools: BasePool[]) {
+    public constructor(tokens: Token[], pools: BasePool[], operations: PathOperation[]) {
         if (pools.length === 0 || tokens.length < 2) {
             throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
+        }
+        if (operations.length === 0 || operations.length !== pools.length) {
+            throw new Error('Invalid path: operations length is incorrect');
         }
         if (tokens.length !== pools.length + 1) {
             throw new Error('Invalid path: tokens length must equal pools length + 1');
@@ -15,6 +20,7 @@ export class PathLocal {
 
         this.pools = pools;
         this.tokens = tokens;
+        this.operations = operations;
     }
 }
 
@@ -26,8 +32,14 @@ export class PathWithAmount extends PathLocal {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
 
-    public constructor(tokens: Token[], pools: BasePool[], swapAmount: TokenAmount, mutateBalances?: boolean) {
-        super(tokens, pools);
+    public constructor(
+        tokens: Token[],
+        pools: BasePool[],
+        operations: PathOperation[] | undefined,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ) {
+        super(tokens, pools, operations || new Array(pools.length).fill(PathOperation.Swap));
         this.swapAmount = swapAmount;
         this.mutateBalances = Boolean(mutateBalances);
 
@@ -44,12 +56,29 @@ export class PathWithAmount extends PathLocal {
                 amounts[0] = this.swapAmount;
                 for (let i = 0; i < this.pools.length; i++) {
                     const pool = this.pools[i];
-                    const outputAmount = pool.swapGivenIn(
-                        this.tokens[i],
-                        this.tokens[i + 1],
-                        amounts[i],
-                        this.mutateBalances,
-                    );
+                    let outputAmount;
+                    if (this.operations && this.operations[i] === PathOperation.AddLiquidity) {
+                        outputAmount = pool.addLiquiditySingleTokenExactIn(
+                            this.tokens[i],
+                            this.tokens[i + 1],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    } else if (this.operations && this.operations[i] === PathOperation.RemoveLiquidity) {
+                        outputAmount = pool.removeLiquiditySingleTokenExactIn(
+                            this.tokens[i + 1],
+                            this.tokens[i],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    } else {
+                        outputAmount = pool.swapGivenIn(
+                            this.tokens[i],
+                            this.tokens[i + 1],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    }
                     amounts[i + 1] = outputAmount;
                     this.printPath.push({
                         pool: pool.id,
@@ -64,12 +93,29 @@ export class PathWithAmount extends PathLocal {
                 amounts[amounts.length - 1] = this.swapAmount;
                 for (let i = this.pools.length; i >= 1; i--) {
                     const pool = this.pools[i - 1];
-                    const inputAmount = pool.swapGivenOut(
-                        this.tokens[i - 1],
-                        this.tokens[i],
-                        amounts[i],
-                        this.mutateBalances,
-                    );
+                    let inputAmount;
+                    if (this.operations && this.operations[i - 1] === PathOperation.AddLiquidity) {
+                        inputAmount = pool.addLiquiditySingleTokenExactOut(
+                            this.tokens[i - 1],
+                            this.tokens[i],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    } else if (this.operations && this.operations[i - 1] === PathOperation.RemoveLiquidity) {
+                        inputAmount = pool.removeLiquiditySingleTokenExactOut(
+                            this.tokens[i],
+                            this.tokens[i - 1],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    } else {
+                        inputAmount = pool.swapGivenOut(
+                            this.tokens[i - 1],
+                            this.tokens[i],
+                            amounts[i],
+                            this.mutateBalances,
+                        );
+                    }
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
                         pool: pool.id,
