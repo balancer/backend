@@ -27,7 +27,9 @@ export class SwapLocal {
         this.pathsImmutable = cloneDeep(paths);
 
         // Recalculate paths while mutating pool balances
-        this.paths = paths.map((path) => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true));
+        this.paths = paths.map(
+            (path) => new PathWithAmount(path.tokens, path.pools, path.operations, path.swapAmount, true),
+        );
         this.chainId = paths[0].tokens[0].chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
@@ -148,6 +150,7 @@ export class SwapLocal {
                 new PathWithAmount(
                     [...path.tokens].reverse(),
                     [...path.pools].reverse(),
+                    [...path.operations].reverse(),
                     this.swapKind === SwapKind.GivenIn ? path.outputAmount : path.inputAmount,
                 ),
         );

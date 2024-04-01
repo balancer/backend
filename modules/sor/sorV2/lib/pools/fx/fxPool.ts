@@ -231,4 +231,38 @@ export class FxPool implements BasePool {
             swapKind,
         };
     }
+
+    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        throw new Error('FX - addLiquiditiySingleTokenExactIn: Invalid Method');
+    }
+
+    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
+        throw new Error('FX - getLimitAmountAddLiquidity: Invalid Method');
+    }
+
+    getLimitAmountRemoveLiquidity(): bigint {
+        throw new Error('FX - getLimitAmountRemoveLiquidity: Invalid Method');
+    }
+
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+        throw new Error('FX - removeLiquiditySingleTokenExactIn: Invalid Method');
+    }
+
+    addLiquiditySingleTokenExactOut(
+        tokenIn: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
+        throw new Error('FX - addLiquiditySingleTokenExactOut: Invalid Method');
+    }
+
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
+        throw new Error('FX - removeLiquiditySingleTokenExactOut: Invalid Method');
+    }
 }
