@@ -1,5 +1,5 @@
 extend type Query {
-    contentGetNewsItems: [GqlContentNewsItem!]!
+    contentGetNewsItems(chain: GqlChain): [GqlContentNewsItem!]!
 }
 
 type GqlContentNewsItem {

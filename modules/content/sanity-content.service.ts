@@ -11,7 +11,6 @@ import {
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 import { chainToIdMap } from '../network/network-config';
-import { wrap } from 'module';
 import { LinearData } from '../pool/subgraph-mapper';
 
 interface SanityToken {
@@ -43,121 +42,119 @@ const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
 };
 
 export class SanityContentService implements ContentService {
-    constructor(
-        private readonly chain: Chain,
-        private readonly projectId = '1g2ag2hb',
-        private readonly dataset = 'production',
-    ) {}
+    constructor(private readonly projectId = '1g2ag2hb', private readonly dataset = 'production') {}
 
-    async syncTokenContentData(): Promise<void> {
-        const sanityTokens = await this.getSanityClient().fetch<SanityToken[]>(`
-            *[_type=="${SANITY_TOKEN_TYPE_MAP[chainToIdMap[this.chain]]}"] {
-                name,
-                address,
-                symbol,
-                decimals,
-                logoURI,
-                'priority': coalesce(priority, 0),
-                coingeckoPlatformId,
-                coingeckoContractAddress,
-                coingeckoTokenId,
-                description,
-                websiteUrl,
-                twitterUsername,
-                discordUrl,
-                telegramUrl
+    async syncTokenContentData(chains: Chain[]): Promise<void> {
+        for (const chain of chains) {
+            const sanityTokens = await this.getSanityClient().fetch<SanityToken[]>(`
+                *[_type=="${SANITY_TOKEN_TYPE_MAP[chainToIdMap[chain]]}"] {
+                    name,
+                    address,
+                    symbol,
+                    decimals,
+                    logoURI,
+                    'priority': coalesce(priority, 0),
+                    coingeckoPlatformId,
+                    coingeckoContractAddress,
+                    coingeckoTokenId,
+                    description,
+                    websiteUrl,
+                    twitterUsername,
+                    discordUrl,
+                    telegramUrl
+                }
+            `);
+
+            //TODO: could be more intelligent about when to upsert
+            for (const sanityToken of sanityTokens) {
+                const tokenAddress = sanityToken.address.toLowerCase();
+                let tokenData = {};
+                if (
+                    sanityToken.description ||
+                    sanityToken.websiteUrl ||
+                    sanityToken.discordUrl ||
+                    sanityToken.telegramUrl ||
+                    sanityToken.twitterUsername
+                ) {
+                    tokenData = {
+                        description: sanityToken.description || null,
+                        websiteUrl: sanityToken.websiteUrl || null,
+                        discordUrl: sanityToken.discordUrl || null,
+                        telegramUrl: sanityToken.telegramUrl || null,
+                        twitterUsername: sanityToken.twitterUsername || null,
+                    };
+                }
+
+                await prisma.prismaToken.upsert({
+                    where: {
+                        address_chain: { address: tokenAddress, chain: chain },
+                    },
+                    create: {
+                        name: sanityToken.name,
+                        address: tokenAddress,
+                        chain: chain,
+                        symbol: sanityToken.symbol,
+                        decimals: sanityToken.decimals,
+                        logoURI: sanityToken.logoURI,
+                        priority: sanityToken.priority,
+                        coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
+                        coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
+                        coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
+                        ...tokenData,
+                    },
+                    update: {
+                        name: sanityToken.name,
+                        symbol: sanityToken.symbol,
+                        //use set to ensure we overwrite the underlying value if it is removed in sanity
+                        logoURI: { set: sanityToken.logoURI || null },
+                        decimals: sanityToken.decimals,
+                        priority: sanityToken.priority,
+                        coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
+                        coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
+                        coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
+                        ...tokenData,
+                    },
+                });
             }
-        `);
 
-        //TODO: could be more intelligent about when to upsert
-        for (const sanityToken of sanityTokens) {
-            const tokenAddress = sanityToken.address.toLowerCase();
-            let tokenData = {};
-            if (
-                sanityToken.description ||
-                sanityToken.websiteUrl ||
-                sanityToken.discordUrl ||
-                sanityToken.telegramUrl ||
-                sanityToken.twitterUsername
-            ) {
-                tokenData = {
-                    description: sanityToken.description || null,
-                    websiteUrl: sanityToken.websiteUrl || null,
-                    discordUrl: sanityToken.discordUrl || null,
-                    telegramUrl: sanityToken.telegramUrl || null,
-                    twitterUsername: sanityToken.twitterUsername || null,
-                };
-            }
-
-            await prisma.prismaToken.upsert({
+            const whiteListedTokens = await prisma.prismaTokenType.findMany({
                 where: {
-                    address_chain: { address: tokenAddress, chain: this.chain },
-                },
-                create: {
-                    name: sanityToken.name,
-                    address: tokenAddress,
-                    chain: this.chain,
-                    symbol: sanityToken.symbol,
-                    decimals: sanityToken.decimals,
-                    logoURI: sanityToken.logoURI,
-                    priority: sanityToken.priority,
-                    coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
-                    coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
-                    coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
-                    ...tokenData,
-                },
-                update: {
-                    name: sanityToken.name,
-                    symbol: sanityToken.symbol,
-                    //use set to ensure we overwrite the underlying value if it is removed in sanity
-                    logoURI: { set: sanityToken.logoURI || null },
-                    decimals: sanityToken.decimals,
-                    priority: sanityToken.priority,
-                    coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
-                    coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
-                    coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
-                    ...tokenData,
+                    type: 'WHITE_LISTED',
+                    chain: chain,
                 },
             });
+
+            const addToWhitelist = sanityTokens.filter((sanityToken) => {
+                return !whiteListedTokens.some((dbToken) => isSameAddress(sanityToken.address, dbToken.tokenAddress));
+            });
+
+            const removeFromWhitelist = whiteListedTokens.filter((dbToken) => {
+                return !sanityTokens.some((sanityToken) => isSameAddress(dbToken.tokenAddress, sanityToken.address));
+            });
+
+            await prisma.prismaTokenType.createMany({
+                data: addToWhitelist.map((token) => ({
+                    id: `${token.address}-white-listed`,
+                    chain: chain,
+                    tokenAddress: token.address.toLowerCase(),
+                    type: 'WHITE_LISTED' as const,
+                })),
+                skipDuplicates: true,
+            });
+
+            await prisma.prismaTokenType.deleteMany({
+                where: { id: { in: removeFromWhitelist.map((token) => token.id) }, chain: chain },
+            });
+
+            await this.syncTokenTypes(chain);
         }
-
-        const whiteListedTokens = await prisma.prismaTokenType.findMany({
-            where: {
-                type: 'WHITE_LISTED',
-                chain: this.chain,
-            },
-        });
-
-        const addToWhitelist = sanityTokens.filter((sanityToken) => {
-            return !whiteListedTokens.some((dbToken) => isSameAddress(sanityToken.address, dbToken.tokenAddress));
-        });
-
-        const removeFromWhitelist = whiteListedTokens.filter((dbToken) => {
-            return !sanityTokens.some((sanityToken) => isSameAddress(dbToken.tokenAddress, sanityToken.address));
-        });
-
-        await prisma.prismaTokenType.createMany({
-            data: addToWhitelist.map((token) => ({
-                id: `${token.address}-white-listed`,
-                chain: this.chain,
-                tokenAddress: token.address.toLowerCase(),
-                type: 'WHITE_LISTED' as const,
-            })),
-            skipDuplicates: true,
-        });
-
-        await prisma.prismaTokenType.deleteMany({
-            where: { id: { in: removeFromWhitelist.map((token) => token.id) }, chain: this.chain },
-        });
-
-        await this.syncTokenTypes();
     }
 
-    private async syncTokenTypes() {
-        const pools = await this.loadPoolData();
+    private async syncTokenTypes(chain: Chain) {
+        const pools = await this.loadPoolData(chain);
         const tokens = await prisma.prismaToken.findMany({
             include: { types: true },
-            where: { chain: this.chain },
+            where: { chain: chain },
         });
         const types: Prisma.PrismaTokenTypeCreateManyInput[] = [];
 
@@ -168,7 +165,7 @@ export class SanityContentService implements ContentService {
             if (pool && !tokenTypes.includes('BPT')) {
                 types.push({
                     id: `${token.address}-bpt`,
-                    chain: this.chain,
+                    chain: chain,
                     type: 'BPT',
                     tokenAddress: token.address,
                 });
@@ -180,7 +177,7 @@ export class SanityContentService implements ContentService {
             ) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
-                    chain: this.chain,
+                    chain: chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
                 });
@@ -194,7 +191,7 @@ export class SanityContentService implements ContentService {
             if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 types.push({
                     id: `${token.address}-linear-wrapped`,
-                    chain: this.chain,
+                    chain: chain,
                     type: 'LINEAR_WRAPPED_TOKEN',
                     tokenAddress: token.address,
                 });
@@ -202,7 +199,7 @@ export class SanityContentService implements ContentService {
 
             if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
                 prisma.prismaTokenType.delete({
-                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: this.chain } },
+                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: chain } },
                 });
             }
         }
@@ -210,9 +207,9 @@ export class SanityContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: types });
     }
 
-    private async loadPoolData() {
+    private async loadPoolData(chain: Chain) {
         return prisma.prismaPool.findMany({
-            where: { chain: this.chain },
+            where: { chain: chain },
             select: {
                 address: true,
                 symbol: true,
@@ -224,10 +221,9 @@ export class SanityContentService implements ContentService {
         });
     }
 
-    public async syncPoolContentData(): Promise<void> {
-        const response = await this.getSanityClient().fetch(`*[_type == "config" && chainId == ${
-            chainToIdMap[this.chain]
-        }][0]{
+    public async syncPoolContentData(chain: Chain): Promise<void> {
+        const response = await this.getSanityClient()
+            .fetch(`*[_type == "config" && chainId == ${chainToIdMap[chain]}][0]{
             incentivizedPools,
             blacklistedPools,
         }`);
@@ -237,21 +233,26 @@ export class SanityContentService implements ContentService {
             blacklistedPools: response?.blacklistedPools ?? [],
         };
 
-        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: this.chain } });
+        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: chain } });
         const incentivized = categories.filter((item) => item.category === 'INCENTIVIZED').map((item) => item.poolId);
         const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
 
-        await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED');
-        await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED');
+        await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED', chain);
+        await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED', chain);
     }
 
-    private async updatePoolCategory(currentPoolIds: string[], newPoolIds: string[], category: PrismaPoolCategoryType) {
+    private async updatePoolCategory(
+        currentPoolIds: string[],
+        newPoolIds: string[],
+        category: PrismaPoolCategoryType,
+        chain: Chain,
+    ) {
         const itemsToAdd = newPoolIds.filter((poolId) => !currentPoolIds.includes(poolId));
         const itemsToRemove = currentPoolIds.filter((poolId) => !newPoolIds.includes(poolId));
 
         // make sure the pools really exist to prevent sanity mistakes from breaking the system
         const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: itemsToAdd }, chain: this.chain },
+            where: { id: { in: itemsToAdd }, chain: chain },
             select: { id: true },
         });
         const poolIds = pools.map((pool) => pool.id);
@@ -261,14 +262,14 @@ export class SanityContentService implements ContentService {
             prisma.prismaPoolCategory.createMany({
                 data: existingItemsToAdd.map((poolId) => ({
                     id: `${poolId}-${category}`,
-                    chain: this.chain,
+                    chain: chain,
                     category,
                     poolId,
                 })),
                 skipDuplicates: true,
             }),
             prisma.prismaPoolCategory.deleteMany({
-                where: { poolId: { in: itemsToRemove }, category, chain: this.chain },
+                where: { poolId: { in: itemsToRemove }, category, chain: chain },
             }),
         ]);
     }
@@ -341,9 +342,9 @@ export class SanityContentService implements ContentService {
         return featuredPools;
     }
 
-    public async getNewsItems(): Promise<HomeScreenNewsItem[]> {
+    public async getNewsItems(chain: Chain): Promise<HomeScreenNewsItem[]> {
         const data = await this.getSanityClient().fetch<ConfigHomeScreen | null>(`
-    *[_type == "homeScreen" && chainId == ${chainToIdMap[this.chain]}][0]{
+    *[_type == "homeScreen" && chainId == ${chainToIdMap[chain]}][0]{
         ...,
         "featuredPoolGroups": featuredPoolGroups[]{
             ...,
@@ -363,7 +364,7 @@ export class SanityContentService implements ContentService {
         if (data?.newsItems) {
             return data.newsItems;
         }
-        throw new Error(`No news items found for chain id ${this.chain}`);
+        throw new Error(`No news items found for chain id ${chain}`);
     }
 
     private getSanityClient() {

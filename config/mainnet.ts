@@ -262,6 +262,12 @@ export default <NetworkData>{
                 path: 'data.smaApr',
                 isIbYield: true,
             },
+            pufETH: {
+                tokenAddress: '0xd9a442856c234a39a81a089c06451ebaa4306a72',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
             wstETH: {
                 tokenAddress: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',

@@ -24,7 +24,8 @@ export class GaugeAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: { id: string }[]): Promise<void> {
-        const operations: any[] = [];
+        const itemOperations: any[] = [];
+        const rangeOperations: any[] = [];
 
         // Get the data
         const tokenPrices = await this.tokenService.getTokenPrices();
@@ -141,35 +142,36 @@ export class GaugeAprService implements PoolAprService {
                     }
                 })
                 .flat()
-                .filter((apr): apr is PrismaPoolAprItem | PrismaPoolAprRange => apr !== null)
-                .sort((a, b) => (a.id.includes('apr-range') && !b.id.includes('apr-range') ? 1 : -1)); // Sorting to ensure the range is inserted after the item
+                .filter((apr): apr is PrismaPoolAprItem | PrismaPoolAprRange => apr !== null);
 
-            // Prepare DB operations
-            for (const item of aprItems) {
-                if (item.id.includes('apr-range')) {
-                    operations.push(
-                        prisma.prismaPoolAprRange.upsert({
-                            where: {
-                                id_chain: { id: item.id, chain: networkContext.chain },
-                            },
-                            update: item,
-                            create: item as PrismaPoolAprRange,
-                        }),
-                    );
-                } else {
-                    operations.push(
-                        prisma.prismaPoolAprItem.upsert({
-                            where: {
-                                id_chain: { id: item.id, chain: networkContext.chain },
-                            },
-                            update: item,
-                            create: item as PrismaPoolAprItem,
-                        }),
-                    );
-                }
-            }
+            const items = aprItems.filter((item) => !item.id.includes('apr-range'));
+            const ranges = aprItems.filter((item) => item.id.includes('apr-range'));
+
+            itemOperations.push(
+                ...items.map((item) =>
+                    prisma.prismaPoolAprItem.upsert({
+                        where: {
+                            id_chain: { id: item.id, chain: networkContext.chain },
+                        },
+                        update: item,
+                        create: item as PrismaPoolAprItem,
+                    }),
+                ),
+            );
+            rangeOperations.push(
+                ...ranges.map((range) =>
+                    prisma.prismaPoolAprRange.upsert({
+                        where: {
+                            id_chain: { id: range.id, chain: networkContext.chain },
+                        },
+                        update: range,
+                        create: range as PrismaPoolAprRange,
+                    }),
+                ),
+            );
         }
 
-        await prismaBulkExecuteOperations(operations);
+        await prismaBulkExecuteOperations(itemOperations);
+        await prismaBulkExecuteOperations(rangeOperations);
     }
 }
