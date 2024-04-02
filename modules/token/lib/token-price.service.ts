@@ -243,7 +243,7 @@ export class TokenPriceService {
     public async purgeOldTokenPricesForAllChains(): Promise<number> {
         // DATE(to_timestamp(timestamp)) will return the midnight timestamp. We'll delete all prices that are not midnight timestamps AND are older than 100 days.
         const deleted =
-            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '${DAYS_OF_HOURLY_PRICES} days'`;
+            await prisma.$executeRaw`DELETE FROM "PrismaTokenPrice" WHERE DATE(to_timestamp(timestamp)) != to_timestamp(timestamp) AND to_timestamp(timestamp) < CURRENT_DATE - INTERVAL '100 days'`;
 
         return deleted;
     }
