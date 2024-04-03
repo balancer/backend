@@ -106,11 +106,11 @@ export async function fetchSftmxStakingData(
 
     const totalFtmStaked = totalFtm - poolBalance;
 
-    const maxLockApr = 0.06;
+    const maxLockApr = 0.0647;
     const validatorFee = 0.15;
     const sftmxFee = 0.1;
     const stakingApr =
-        (parseFloat(formatEther(totalFtm)) / parseFloat(formatEther(totalFtm))) *
+        (parseFloat(formatEther(totalFtmStaked)) / parseFloat(formatEther(totalFtm))) *
         (maxLockApr * (1 - validatorFee)) *
         (1 - sftmxFee);
 
