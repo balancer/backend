@@ -241,8 +241,6 @@ enum GqlPoolNestingType {
     HAS_ONLY_PHANTOM_BPT
 }
 
-
-
 type GqlPoolWeighted implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -581,9 +579,9 @@ type GqlPoolTokenDetail {
     balance: BigDecimal!
     index: Int!
     priceRate: BigDecimal!
-    priceRateProvider: String
+    priceRateProvider: GqlTokenRateProvider
     weight: BigDecimal
-    nestedPool: GqlPoolMinimal
+    pool: GqlNestedPool
 }
 
 interface GqlPoolTokenBase {
@@ -594,6 +592,7 @@ interface GqlPoolTokenBase {
     name: String!
     symbol: String!
     index: Int!
+
     priceRate: BigDecimal!
     priceRateProvider: String
     weight: BigDecimal
@@ -616,6 +615,30 @@ type GqlPoolToken implements GqlPoolTokenBase {
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
+}
+
+type GqlNestedPool {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolType!
+    version: Int!
+
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+
+    tokens: [GqlPoolTokenDetail!]!
+
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
+    nestedShares: BigDecimal!
+    nestedLiquidity: BigDecimal!
+    nestedPercentage: BigDecimal!
+
+    swapFee: BigDecimal!
+    bptPriceRate: BigDecimal!
 }
 
 type GqlPoolTokenLinear implements GqlPoolTokenBase {
