@@ -26,6 +26,7 @@ phases:
             - yarn prisma generate
             - yarn prisma migrate deploy
             - yarn build
+            - yarn cleanup-console
     post_build:
         commands:
             - rm -fr node_modules

@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import { env } from '../app/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
