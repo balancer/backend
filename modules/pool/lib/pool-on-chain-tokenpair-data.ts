@@ -149,10 +149,11 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 
     for (const pool of filteredPools) {
         // create all pairs for pool
-        for (let i = 0; i < pool.tokens.length - 1; i++) {
-            for (let j = i + 1; j < pool.tokens.length; j++) {
+        for (let i = 0; i < pool.tokens.length; i++) {
+            for (let j = 0; j < pool.tokens.length; j++) {
                 const tokenA = pool.tokens[i];
                 const tokenB = pool.tokens[j];
+                if (tokenA.address === tokenB.address) continue;
                 // V2 Validation
                 // remove pools that have <$1000 TVL or a token without a balance or USD balance
                 // TODO: check if it's trully needed or if we're ok removing only the pairs without balance or balanceUSD
