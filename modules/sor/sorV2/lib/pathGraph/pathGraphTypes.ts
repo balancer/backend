@@ -1,6 +1,6 @@
 import { Token } from '@balancer/sdk';
 import { BasePool } from '../pools/basePool';
-import { PathOperation } from "../../../types";
+import { PathOperation } from '../../../types';
 
 export interface PoolTokenPair {
     id: string;
@@ -46,5 +46,4 @@ export interface PathGraphEdgeData {
     normalizedLiquidity: bigint;
     tokenIn: Token;
     tokenOut: Token;
-    operation?: PathOperation
 }

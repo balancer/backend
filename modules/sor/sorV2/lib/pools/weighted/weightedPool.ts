@@ -190,19 +190,18 @@ export class WeightedPool implements BasePool {
     public addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
         try {
             // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-            const { tokenBalances, amountsIn, weights } = Array.from(this.tokenMap.values()).reduce(
-                (acc: { tokenBalances: bigint[]; amountsIn: bigint[]; weights: bigint[] }, weightedPoolToken) => {
-                    if (weightedPoolToken.token.isSameAddress(tokenIn.address)) {
-                        acc.amountsIn.push(amount.scale18);
-                    } else {
-                        acc.amountsIn.push(0n);
-                    }
-                    acc.tokenBalances.push(weightedPoolToken.scale18);
-                    acc.weights.push(weightedPoolToken.weight);
-                    return acc;
-                },
-                { tokenBalances: [], amountsIn: [], weights: [] },
-            );
+            const tokenBalances: bigint[] = [];
+            const amountsIn: bigint[] = [];
+            const weights: bigint[] = [];
+            Array.from(this.tokenMap.values()).forEach((weightedPoolToken) => {
+                if (weightedPoolToken.token.isSameAddress(tokenIn.address)) {
+                    amountsIn.push(amount.scale18);
+                } else {
+                    amountsIn.push(0n);
+                }
+                tokenBalances.push(weightedPoolToken.scale18);
+                weights.push(weightedPoolToken.weight);
+            });
             const bptAmountOut = this._calcBptOutGivenExactTokensIn(
                 tokenBalances,
                 weights,
@@ -247,19 +246,18 @@ export class WeightedPool implements BasePool {
     }
 
     removeLiquiditySingleTokenExactOut(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
-        const { tokenBalances, amountsOut, weights } = Array.from(this.tokenMap.values()).reduce(
-            (acc: { tokenBalances: bigint[]; amountsOut: bigint[]; weights: bigint[] }, weightedPoolToken) => {
-                if (weightedPoolToken.token.address.toLowerCase() === tokenOut.address.toLowerCase()) {
-                    acc.amountsOut.push(amount.scale18);
-                } else {
-                    acc.amountsOut.push(0n);
-                }
-                acc.tokenBalances.push(weightedPoolToken.scale18);
-                acc.weights.push(weightedPoolToken.weight);
-                return acc;
-            },
-            { tokenBalances: [], amountsOut: [], weights: [] },
-        );
+        const tokenBalances: bigint[] = [];
+        const amountsOut: bigint[] = [];
+        const weights: bigint[] = [];
+        Array.from(this.tokenMap.values()).forEach((weightedPoolToken) => {
+            if (weightedPoolToken.token.address.toLowerCase() === tokenOut.address.toLowerCase()) {
+                amountsOut.push(amount.scale18);
+            } else {
+                amountsOut.push(0n);
+            }
+            tokenBalances.push(weightedPoolToken.scale18);
+            weights.push(weightedPoolToken.weight);
+        });
         const tokenAmountOut = this._calcBptInGivenExactTokensOut(tokenBalances, weights, amountsOut, this.totalShares);
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }

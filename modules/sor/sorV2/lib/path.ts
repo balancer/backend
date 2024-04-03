@@ -5,14 +5,10 @@ import { PathOperation } from '../../types';
 export class PathLocal {
     public readonly pools: BasePool[];
     public readonly tokens: Token[];
-    public readonly operations: PathOperation[];
 
-    public constructor(tokens: Token[], pools: BasePool[], operations: PathOperation[]) {
+    public constructor(tokens: Token[], pools: BasePool[]) {
         if (pools.length === 0 || tokens.length < 2) {
             throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
-        }
-        if (operations.length === 0 || operations.length !== pools.length) {
-            throw new Error('Invalid path: operations length is incorrect');
         }
         if (tokens.length !== pools.length + 1) {
             throw new Error('Invalid path: tokens length must equal pools length + 1');
@@ -20,7 +16,6 @@ export class PathLocal {
 
         this.pools = pools;
         this.tokens = tokens;
-        this.operations = operations;
     }
 }
 
@@ -39,7 +34,7 @@ export class PathWithAmount extends PathLocal {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ) {
-        super(tokens, pools, operations || new Array(pools.length).fill(PathOperation.Swap));
+        super(tokens, pools);
         this.swapAmount = swapAmount;
         this.mutateBalances = Boolean(mutateBalances);
 
@@ -57,14 +52,14 @@ export class PathWithAmount extends PathLocal {
                 for (let i = 0; i < this.pools.length; i++) {
                     const pool = this.pools[i];
                     let outputAmount;
-                    if (this.operations && this.operations[i] === PathOperation.AddLiquidity) {
+                    if (this.tokens[i + 1].isSameAddress(pool.address as `0x${string}`)) {
                         outputAmount = pool.addLiquiditySingleTokenExactIn(
                             this.tokens[i],
                             this.tokens[i + 1],
                             amounts[i],
                             this.mutateBalances,
                         );
-                    } else if (this.operations && this.operations[i] === PathOperation.RemoveLiquidity) {
+                    } else if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
                         outputAmount = pool.removeLiquiditySingleTokenExactIn(
                             this.tokens[i + 1],
                             this.tokens[i],
@@ -94,14 +89,14 @@ export class PathWithAmount extends PathLocal {
                 for (let i = this.pools.length; i >= 1; i--) {
                     const pool = this.pools[i - 1];
                     let inputAmount;
-                    if (this.operations && this.operations[i - 1] === PathOperation.AddLiquidity) {
+                    if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
                         inputAmount = pool.addLiquiditySingleTokenExactOut(
                             this.tokens[i - 1],
                             this.tokens[i],
                             amounts[i],
                             this.mutateBalances,
                         );
-                    } else if (this.operations && this.operations[i - 1] === PathOperation.RemoveLiquidity) {
+                    } else if (this.tokens[i - 1].isSameAddress(pool.address as `0x${string}`)) {
                         inputAmount = pool.removeLiquiditySingleTokenExactOut(
                             this.tokens[i],
                             this.tokens[i - 1],

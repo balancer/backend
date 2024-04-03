@@ -1,4 +1,4 @@
-import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
@@ -127,7 +127,6 @@ export class PathGraph {
             return new PathLocal(
                 pathTokens,
                 path.map((segment) => segment.pool),
-                path.map((segment) => (!!segment.operation ? segment.operation : PathOperation.Swap)),
             );
         });
     }
@@ -241,9 +240,7 @@ export class PathGraph {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
     }) {
-        const validPoolTypes = ['WEIGHTED', 'COMPOSABLE_STABLE'];
         for (const pool of pools) {
-            if (!validPoolTypes.includes(pool.poolType)) continue;
             const bptToken = new Token(pool.tokens[0].token.chainId, pool.address as `0x${string}`, 18);
             for (let { token } of pool.tokens) {
                 this.addEdge({
@@ -252,7 +249,6 @@ export class PathGraph {
                         tokenIn: bptToken,
                         tokenOut: token,
                         normalizedLiquidity: pool.getNormalizedLiquidity(bptToken, token),
-                        operation: PathOperation.RemoveLiquidity,
                     },
                     maxPathsPerTokenPair,
                 });
@@ -263,7 +259,6 @@ export class PathGraph {
                         tokenIn: token,
                         tokenOut: bptToken,
                         normalizedLiquidity: pool.getNormalizedLiquidity(bptToken, token),
-                        operation: PathOperation.AddLiquidity,
                     },
                     maxPathsPerTokenPair,
                 });
@@ -512,11 +507,10 @@ export class PathGraph {
     }
 
     private getLimitAmountSwapForPath(path: PathGraphEdgeData[]): bigint {
-        const lastOperation = path[path.length - 1].operation;
         let limit;
-        if (lastOperation === PathOperation.AddLiquidity) {
+        if (this.getOperationFromPath(path[path.length - 1]) === PathOperation.AddLiquidity) {
             limit = path[path.length - 1].pool.getLimitAmountAddLiquidity(path[path.length - 1].tokenIn);
-        } else if (lastOperation === PathOperation.RemoveLiquidity) {
+        } else if (this.getOperationFromPath(path[path.length - 1]) === PathOperation.RemoveLiquidity) {
             limit = path[path.length - 1].pool.getLimitAmountRemoveLiquidity();
         } else {
             limit = path[path.length - 1].pool.getLimitAmountSwap(
@@ -529,7 +523,7 @@ export class PathGraph {
         for (let i = path.length - 2; i >= 0; i--) {
             let limitGivenIn;
             let limitGivenOut;
-            if (!path[i].operation || path[i].operation === PathOperation.Swap) {
+            if (this.getOperationFromPath(path[i]) === PathOperation.Swap) {
                 limitGivenIn = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenIn);
                 limitGivenOut = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenOut);
                 if (limitGivenOut <= limit) {
@@ -542,7 +536,7 @@ export class PathGraph {
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenOut : pulledLimit;
                 }
-            } else if (path[i].operation === PathOperation.AddLiquidity) {
+            } else if (this.getOperationFromPath(path[i]) === PathOperation.AddLiquidity) {
                 limitGivenIn = path[i].pool.getLimitAmountAddLiquidity(path[i].tokenIn);
                 limitGivenOut = path[i].pool.getLimitAmountRemoveLiquidity();
                 if (limitGivenOut <= limit) {
@@ -572,5 +566,15 @@ export class PathGraph {
         }
 
         return limit;
+    }
+
+    private getOperationFromPath(pathSegment: PathGraphEdgeData) {
+        if (pathSegment.tokenOut.isSameAddress(pathSegment.pool.address as `0x${string}`)) {
+            return PathOperation.AddLiquidity;
+        } else if (pathSegment.tokenIn.isSameAddress(pathSegment.pool.address as `0x${string}`)) {
+            return PathOperation.RemoveLiquidity;
+        } else {
+            return PathOperation.Swap;
+        }
     }
 }
