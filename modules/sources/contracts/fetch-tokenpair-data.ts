@@ -55,6 +55,7 @@ interface TokenPair {
     effectivePriceAmountIn: bigint;
     tokenBIndex?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
     poolTokensLength?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
+    vaultVersion: number;
 }
 
 interface Token {
@@ -97,25 +98,13 @@ export async function fetchTokenPairData(
             // tokenA->tokenB with 100USD worth of tokenA
             const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
             tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
-
-            addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
-            addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
-        }
-    });
-
-    let bptTokenPairs = generateBptTokenPairs(pools);
-    bptTokenPairs.forEach((bptTokenPair) => {
-        if (bptTokenPair.valid) {
-            // prepare swap amounts in
-            // tokenA->tokenB with 1% of tokenA balance
-            bptTokenPair.aToBAmountIn = parseUnits(bptTokenPair.tokenA.balance, bptTokenPair.tokenA.decimals) / 100n;
-            // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA =
-                (parseFloat(bptTokenPair.tokenA.balance) / bptTokenPair.tokenA.balanceUsd) * 100;
-            bptTokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, bptTokenPair.tokenA.decimals);
-
-            addBptEffectivePriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
-            addBptAToBPriceCallsToMulticaller(bptTokenPair, routerAddress, multicallerRouter);
+            if (isBptTokenPair(tokenPair)) {
+                addBptEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+                addBptAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            } else {
+                addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+                addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            }
         }
     });
 
@@ -123,7 +112,7 @@ export async function fetchTokenPairData(
         [id: string]: OnchainData;
     };
 
-    [...tokenPairs, ...bptTokenPairs].forEach((tokenPair) => {
+    tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             getAmountOutAndEffectivePriceFromResult(tokenPair, resultOne);
         }
@@ -132,20 +121,19 @@ export async function fetchTokenPairData(
     multicallerRouter = [];
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
-            addBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
-        }
-    });
-
-    bptTokenPairs.forEach((tokenPair) => {
-        if (tokenPair.valid) {
-            addBptBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            if (isBptTokenPair(tokenPair)) {
+                addBptBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            } else {
+                addBToAPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
+            }
         }
     });
 
     const resultTwo = (await multicallViem(client, multicallerRouter)) as {
         [id: string]: OnchainData;
     };
-    [...tokenPairs, ...bptTokenPairs].forEach((tokenPair) => {
+
+    tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             getBToAAmountFromResult(tokenPair, resultTwo);
             calculateSpotPrice(tokenPair);
@@ -211,23 +199,15 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     bToAAmountOut: 0n,
                     effectivePrice: 0n,
                     effectivePriceAmountIn: 0n,
+                    vaultVersion: pool.vaultVersion,
                 });
             }
         }
-    }
-    return tokenPairs;
-}
-
-function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
-    const bptTokenPairs: TokenPair[] = [];
-
-    for (const pool of filteredPools) {
-        // add/remove liquidity will only be included in the SOR Paths if the V3 Pools
         if (pool.vaultVersion !== 3) continue;
         for (const poolToken of pool.tokens) {
             // create all pairs for pool's bpt
 
-            bptTokenPairs.push({
+            tokenPairs.push({
                 poolId: pool.id,
                 poolTvl: pool.dynamicData?.totalLiquidity || 0,
                 // remove pools that have <$1000 TVL or a token without a balance or USD balance
@@ -258,10 +238,11 @@ function generateBptTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 effectivePriceAmountIn: 0n,
                 tokenBIndex: poolToken.index,
                 poolTokensLength: pool.tokens.length,
+                vaultVersion: pool.vaultVersion,
             });
         }
     }
-    return bptTokenPairs;
+    return tokenPairs;
 }
 
 // call querySwapSingleTokenExactIn from tokenA->tokenB with 100USD worth of tokenA
@@ -433,4 +414,11 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
         // if that happens, normalizedLiquidity should be 0 as well.
         tokenPair.normalizedLiqudity = 0n;
     }
+}
+
+function isBptTokenPair(tokenPair: TokenPair) {
+    return (
+        tokenPair.tokenA.address.toLowerCase() === tokenPair.poolId.toLowerCase() ||
+        tokenPair.tokenB.address.toLowerCase() === tokenPair.poolId.toLowerCase()
+    );
 }

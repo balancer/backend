@@ -110,7 +110,6 @@ export class WeightedPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        // const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
         const tokenPair = this.tokenPairs.find(
             (tokenPair) =>
                 (tokenPair.tokenA === tokenIn.address && tokenPair.tokenB === tokenOut.address) ||
@@ -193,7 +192,7 @@ export class WeightedPool implements BasePool {
             // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
             const { tokenBalances, amountsIn, weights } = Array.from(this.tokenMap.values()).reduce(
                 (acc: { tokenBalances: bigint[]; amountsIn: bigint[]; weights: bigint[] }, weightedPoolToken) => {
-                    if (weightedPoolToken.token.isSameAddress(tokenIn.address) {
+                    if (weightedPoolToken.token.isSameAddress(tokenIn.address)) {
                         acc.amountsIn.push(amount.scale18);
                     } else {
                         acc.amountsIn.push(0n);
