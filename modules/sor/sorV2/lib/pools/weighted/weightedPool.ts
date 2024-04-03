@@ -236,7 +236,7 @@ export class WeightedPool implements BasePool {
 
     public removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
         const { amount: tokenBalance, weight: tokenWeight } = Array.from(this.tokenMap.values()).find(
-            (weightedPoolToken) => isSameAddress(weightedPoolToken.token.address, tokenOut.address),
+            (weightedPoolToken) => weightedPoolToken.token.isSameAddress(tokenOut.address),
         ) as WeightedPoolToken;
         const tokenAmountOut = this._calcTokenOutGivenExactBptIn(
             tokenBalance,
