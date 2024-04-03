@@ -37,6 +37,8 @@ export default <NetworkData>{
     rpcUrl:
         env.GATEWAYFM_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://rpc.eu-central-2.gateway.fm/v4/gnosis/archival/mainnet?apiKey=${env.GATEWAYFM_API_KEY}`
+            : env.GROVE_CITY
+            ? `https://gnosischain-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
             : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
