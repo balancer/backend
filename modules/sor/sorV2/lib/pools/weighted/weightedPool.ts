@@ -193,7 +193,7 @@ export class WeightedPool implements BasePool {
             // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
             const { tokenBalances, amountsIn, weights } = Array.from(this.tokenMap.values()).reduce(
                 (acc: { tokenBalances: bigint[]; amountsIn: bigint[]; weights: bigint[] }, weightedPoolToken) => {
-                    if (weightedPoolToken.token.address.toLowerCase() === tokenIn.address.toLowerCase()) {
+                    if (weightedPoolToken.token.isSameAddress(tokenIn.address) {
                         acc.amountsIn.push(amount.scale18);
                     } else {
                         acc.amountsIn.push(0n);
