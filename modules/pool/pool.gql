@@ -575,13 +575,37 @@ type GqlPoolTokenDetail {
     decimals: Int!
     name: String!
     symbol: String!
+    index: Int!
 
     balance: BigDecimal!
-    index: Int!
     priceRate: BigDecimal!
     priceRateProvider: GqlTokenRateProvider
     weight: BigDecimal
     pool: GqlNestedPool
+}
+
+type GqlNestedPool {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolType!
+    version: Int!
+
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+
+    tokens: [GqlPoolTokenDetail!]!
+
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
+    nestedShares: BigDecimal!
+    nestedLiquidity: BigDecimal!
+    nestedPercentage: BigDecimal!
+
+    swapFee: BigDecimal!
+    bptPriceRate: BigDecimal!
 }
 
 interface GqlPoolTokenBase {
@@ -615,30 +639,6 @@ type GqlPoolToken implements GqlPoolTokenBase {
     weight: BigDecimal
     #the total balance in the pool, regardless of nesting
     totalBalance: BigDecimal!
-}
-
-type GqlNestedPool {
-    id: ID!
-    name: String!
-    symbol: String!
-    address: Bytes!
-    type: GqlPoolType!
-    version: Int!
-
-    owner: Bytes!
-    factory: Bytes
-    createTime: Int!
-
-    tokens: [GqlPoolTokenDetail!]!
-
-    totalShares: BigDecimal!
-    totalLiquidity: BigDecimal!
-    nestedShares: BigDecimal!
-    nestedLiquidity: BigDecimal!
-    nestedPercentage: BigDecimal!
-
-    swapFee: BigDecimal!
-    bptPriceRate: BigDecimal!
 }
 
 type GqlPoolTokenLinear implements GqlPoolTokenBase {
