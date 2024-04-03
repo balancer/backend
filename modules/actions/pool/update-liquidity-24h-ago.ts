@@ -42,5 +42,19 @@ export const updateLiquidity24hAgo = async (
         };
     });
 
-    return prisma.$transaction(updates.map((update) => prisma.prismaPoolDynamicData.update(update)));
+    const updated: string[] = [];
+    for (const update of updates) {
+        try {
+            await prisma.prismaPoolDynamicData.update(update);
+            updated.push(update.where.poolId_chain.poolId);
+        } catch (e) {
+            // TODO: Some V2 pools are missing dynamic data on creation. Should be fixed when creating new pool records.
+            // https://github.com/balancer/backend/issues/288
+            console.error(
+                `Error updating liquidity 24h ago for pool ${update.where.poolId_chain.poolId} with error: ${e}`,
+            );
+        }
+    }
+
+    return updated;
 };
