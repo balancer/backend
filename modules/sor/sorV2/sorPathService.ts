@@ -449,7 +449,7 @@ class SorPathService implements SwapService {
         const tokenIn = path.tokens[0].address;
         const tokenOut = path.tokens[path.tokens.length - 1].address;
         const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
-        const tokenOutAmount = formatUnits(path.inputAmount.amount, path.tokens[path.tokens.length - 1].decimals);
+        const tokenOutAmount = formatUnits(path.outputAmount.amount, path.tokens[path.tokens.length - 1].decimals);
 
         return {
             tokenIn,
@@ -460,7 +460,7 @@ class SorPathService implements SwapService {
             hops: path.pools.map((pool, i) => {
                 return {
                     tokenIn: `${path.tokens[i].address}`,
-                    tokenOut: `${path.tokens[i + 1]}`,
+                    tokenOut: `${path.tokens[i + 1].address}`,
                     tokenInAmount: i === 0 ? tokenInAmount : '0',
                     tokenOutAmount: i === pools.length - 1 ? tokenOutAmount : '0',
                     poolId: pool.id,
