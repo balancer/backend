@@ -487,7 +487,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolTokens(token)),
+            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
         };
 
@@ -640,7 +640,7 @@ export class PoolGqlLoaderService {
             });
     }
 
-    private mapPoolTokens(poolToken: PrismaPoolTokenWithSingleLayerNesting): GqlPoolTokenDetail {
+    private mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, hasNestedPool: boolean): GqlPoolTokenDetail {
         const { nestedPool } = poolToken;
 
         return {
@@ -655,37 +655,12 @@ export class PoolGqlLoaderService {
                 summary: 'none',
             },
             weight: poolToken?.dynamicData?.weight,
-            pool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
+            hasNestedPool: hasNestedPool,
+            nestedPool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
         };
     }
 
-    /*
-    type GqlNestedPool {
-    id: ID!
-    name: String!
-    symbol: String!
-    address: Bytes!
-    type: GqlPoolType!
-    version: Int!
-
-    owner: Bytes!
-    factory: Bytes
-    createTime: Int!
-
-    tokens: [GqlPoolTokenDetail!]!
-
-    totalShares: BigDecimal!
-    totalLiquidity: BigDecimal!
-    nestedShares: BigDecimal!
-    nestedLiquidity: BigDecimal!
-    nestedPercentage: BigDecimal!
-
-    swapFee: BigDecimal!
-    bptPriceRate: BigDecimal!
-}
-    */
-
-    private mapNestedPool(nestedPool: PrismaNestedPoolWithNoNesting, tokenBalance: string): GqlNestedPool {
+    private mapNestedPool(nestedPool: PrismaNestedPoolWithSingleLayerNesting, tokenBalance: string): GqlNestedPool {
         const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
         const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
         const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
@@ -699,10 +674,13 @@ export class PoolGqlLoaderService {
             nestedLiquidity: `${totalLiquidity * percentOfSupplyNested}`,
             nestedPercentage: `${percentOfSupplyNested}`,
             tokens: nestedPool.tokens.map((token) =>
-                this.mapPoolTokens({
-                    ...token,
-                    nestedPool: null,
-                }),
+                this.mapPoolToken(
+                    {
+                        ...token,
+                        nestedPool: null,
+                    },
+                    token.nestedPool !== null,
+                ),
             ),
             swapFee: nestedPool.dynamicData?.swapFee || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',

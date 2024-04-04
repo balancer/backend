@@ -148,6 +148,9 @@ interface GqlPoolBase {
 
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    """
+    Returns all pool tokens, including BPTs and nested pools if there are any.
+    """
     poolTokens: [GqlPoolTokenDetail!]!
 
     dynamicData: GqlPoolDynamicData!
@@ -257,6 +260,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -287,6 +291,7 @@ type GqlPoolGyro implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     alpha: String!
     beta: String!
@@ -338,6 +343,8 @@ type GqlPoolFx implements GqlPoolBase {
     withdrawConfig: GqlPoolWithdrawConfig!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
+
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
@@ -360,6 +367,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -386,6 +394,7 @@ type GqlPoolStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -412,6 +421,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -438,6 +448,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
+
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
@@ -465,6 +477,7 @@ type GqlPoolElement implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]!
 
     #element specific fields
@@ -494,6 +507,7 @@ type GqlPoolLinear implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]!
 
     #linear specific fields
@@ -581,7 +595,8 @@ type GqlPoolTokenDetail {
     priceRate: BigDecimal!
     priceRateProvider: GqlTokenRateProvider
     weight: BigDecimal
-    pool: GqlNestedPool
+    hasNestedPool: Boolean!
+    nestedPool: GqlNestedPool
 }
 
 type GqlNestedPool {
