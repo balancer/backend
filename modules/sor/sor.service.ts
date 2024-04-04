@@ -49,6 +49,17 @@ export class SorService {
             return emptyResponse;
         }
 
+        // we return an empty response if tokenIn and tokenOut are the same
+        // also if tokenIn and tokenOut is weth/eth
+        if (
+            tokenIn === tokenOut ||
+            (wethIsEth &&
+                (tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.weth.address ||
+                    tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.weth.address))
+        ) {
+            return emptyResponse;
+        }
+
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
