@@ -4,7 +4,7 @@ import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { WAD } from './utils/math';
 import { BasePool } from './pools/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { formatEther, maxInt256, parseUnits } from 'viem';
+import { formatEther, maxInt256, parseEther, parseUnits } from 'viem';
 
 export class Router {
     private readonly pathGraph: PathGraph;
@@ -83,46 +83,31 @@ export class Router {
         const bestPathNormalizedLiquidities = bestPath.pools.map((p, i) =>
             p.getNormalizedLiquidity(bestPath.tokens[i], bestPath.tokens[i + 1]),
         );
+        // const bestPathPIs = bestPathNormalizedLiquidities.map((normLiq) => MathSol.divDownFixed(WAD, normLiq));
+        // const bestPathPI = bestPathPIs.reduce((acc, pi) => acc + pi, 0n);
+
         // console.log('bestPathNormalizedLiquidities', bestPathNormalizedLiquidities);
 
-        const bestNormLiq = MathSol.powDownFixed(
-            bestPathNormalizedLiquidities.reduce((acc, normLiq) => MathSol.mulDownFixed(acc, normLiq), WAD),
-            WAD / BigInt(bestPathNormalizedLiquidities.length),
+        const bestNormLiq = MathSol.divDownFixed(
+            WAD,
+            bestPathNormalizedLiquidities.reduce((acc, normLiq) => acc + MathSol.divDownFixed(WAD, normLiq), 0n),
         );
-        // const bestNormLiq = bestPathNormalizedLiquidities.reduce(
-        //     (acc, normLiq) => MathSol.min(acc, normLiq),
-        //     maxInt256,
-        // );
-        // console.log('bestNormLiq  ', bestNormLiq);
-
-        // console.log('bestPath    ', bestPath.outputAmount.amount);
-
-        let bestPaths: PathWithAmount[] = [];
-        let bestPathsNorm: PathWithAmount[] = [];
-        let bestPaths50_50: PathWithAmount[] = [];
-        let bestNormLiq2 = 0n;
 
         // If there is only one path, return it
         if (orderedQuotePaths.length === 1) {
-            bestPaths = orderedQuotePaths;
+            // console.log('Single path');
+            return orderedQuotePaths;
         } else {
-            const secondBestPath = orderedQuotePaths[1];
-            // console.log('second bestPath pools', secondBestPath.pools);
+            const bestPath2 = orderedQuotePaths[1];
 
-            const secondBestPathNormalizedLiquidities = secondBestPath.pools.map((p, i) =>
-                p.getNormalizedLiquidity(secondBestPath.tokens[i], secondBestPath.tokens[i + 1]),
+            const bestPath2NormalizedLiquidities = bestPath2.pools.map((p, i) =>
+                p.getNormalizedLiquidity(bestPath2.tokens[i], bestPath2.tokens[i + 1]),
             );
-            // console.log('bestPathNormalizedLiquidities 2', secondBestPathNormalizedLiquidities);
 
-            bestNormLiq2 = MathSol.powDownFixed(
-                secondBestPathNormalizedLiquidities.reduce((acc, normLiq) => MathSol.mulDownFixed(acc, normLiq), WAD),
-                WAD / BigInt(secondBestPathNormalizedLiquidities.length),
+            const bestNormLiq2 = MathSol.divDownFixed(
+                WAD,
+                bestPath2NormalizedLiquidities.reduce((acc, normLiq) => acc + MathSol.divDownFixed(WAD, normLiq), 0n),
             );
-            // const secondBestNormLiq = secondBestPathNormalizedLiquidities.reduce(
-            //     (acc, normLiq) => MathSol.min(acc, normLiq),
-            //     maxInt256,
-            // );
-            // console.log('bestNormLiq 2', bestNormLiq2);
 
             const normLiqSum = bestNormLiq + bestNormLiq2;
             const bestPathRatio = MathSol.divDownFixed(bestNormLiq, normLiqSum);
@@ -139,11 +124,7 @@ export class Router {
                 orderedQuotePaths[1].pools,
                 swapAmountNormDown,
             );
-            bestPathsNorm = [pathNormUp, pathNormDown];
-            // console.log('bestPath 2  ', secondBestPath.outputAmount.amount);
-            // console.log('pathNormUp  ', pathNormUp.outputAmount.amount);
-            // console.log('pathNormDown', pathNormDown.outputAmount.amount);
-            // console.log('outputAmount', pathNormUp.outputAmount.amount + pathNormDown.outputAmount.amount);
+            const bestPathsNorm = [pathNormUp, pathNormDown];
 
             const swapAmount50up = swapAmount.mulDownFixed(WAD / 2n);
             const swapAmount50down = swapAmount.sub(swapAmount50up);
@@ -158,10 +139,9 @@ export class Router {
                 orderedQuotePaths[1].pools,
                 swapAmount50down,
             );
-            bestPaths50_50 = [path50up, path50down];
-            // console.log('path50up    ', path50up.outputAmount.amount);
-            // console.log('path50down  ', path50down.outputAmount.amount);
-            // console.log('outputAmount', path50up.outputAmount.amount + path50down.outputAmount.amount);
+            const bestPaths50_50 = [path50up, path50down];
+
+            let bestPaths: PathWithAmount[] = [];
 
             if (swapKind === SwapKind.GivenIn) {
                 if (
@@ -182,34 +162,41 @@ export class Router {
                     bestPaths = [path50up, path50down];
                 }
             }
+
+            const amountSingle = parseFloat(formatEther(orderedQuotePaths[0].outputAmount.amount)).toFixed(4);
+            const amountNorm = parseFloat(
+                formatEther(bestPathsNorm.reduce((acc, path) => acc + path.outputAmount.amount, 0n)),
+            ).toFixed(4);
+            const amount5050 = parseFloat(
+                formatEther(bestPaths50_50.reduce((acc, path) => acc + path.outputAmount.amount, 0n)),
+            ).toFixed(4);
+            const bestLiq = parseFloat(formatEther(bestNormLiq)).toFixed(2);
+            const bestLiq2 = parseFloat(formatEther(bestNormLiq2)).toFixed(2);
+
+            const greatestAmount =
+                bestPaths.length === 1 ? 'single' : parseFloat(amountNorm) > parseFloat(amount5050) ? 'norm' : '50-50';
+            const greatestLiq = parseFloat(bestLiq) > parseFloat(bestLiq2) ? '1' : '2';
+
+            const tIn = bestPaths[0].tokens[0].address;
+            const tOut = bestPaths[0].tokens[bestPaths[0].tokens.length - 1].address;
+            if (bestPathRatio > parseEther('0.6')) {
+                console.table([
+                    {
+                        tokenIn: `${tIn.slice(0, 5)}...${tIn.slice(39)}`,
+                        tokenOut: `${tOut.slice(0, 5)}...${tOut.slice(39)}`,
+                        amountSingle,
+                        amountNorm,
+                        amount5050,
+                        bestLiq,
+                        bestLiq2,
+                        bestPathRatio: parseFloat(formatEther(bestPathRatio)).toFixed(2),
+                        greatestAmount,
+                        greatestLiq,
+                    },
+                ]);
+            }
+
+            return bestPaths;
         }
-        const amountSingle = parseFloat(formatEther(orderedQuotePaths[0].outputAmount.amount)).toFixed(2);
-        const amountNorm = parseFloat(
-            formatEther(bestPathsNorm.reduce((acc, path) => acc + path.outputAmount.amount, 0n)),
-        ).toFixed(2);
-        const amount5050 = parseFloat(
-            formatEther(bestPaths50_50.reduce((acc, path) => acc + path.outputAmount.amount, 0n)),
-        ).toFixed(2);
-        const bestLiq = parseFloat(formatEther(bestNormLiq)).toFixed(2);
-        const bestLiq2 = parseFloat(formatEther(bestNormLiq2)).toFixed(2);
-
-        const pathSplit = bestPaths.length === 1 ? 'single' : 'split';
-        const greatestAmount = parseFloat(amountNorm) > parseFloat(amount5050) ? 'norm' : '50-50';
-        const greatestLiq = parseFloat(bestLiq) > parseFloat(bestLiq2) ? '1' : '2';
-
-        console.table([
-            {
-                amountSingle,
-                amountNorm,
-                amount5050,
-                bestLiq,
-                bestLiq2,
-                pathSplit,
-                greatestAmount,
-                greatestLiq,
-            },
-        ]);
-
-        return bestPaths;
     }
 }
