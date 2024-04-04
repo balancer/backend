@@ -1,25 +1,23 @@
 import {
-    GqlSorSwapType,
-    GqlSorGetSwapsResponse,
-    QuerySorGetSwapsArgs,
-    QuerySorGetSwapPathsArgs,
     GqlSorGetSwapPaths,
+    GqlSorGetSwapsResponse,
+    GqlSorSwapType,
+    QuerySorGetSwapPathsArgs,
+    QuerySorGetSwapsArgs,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorPathService';
-import { GetSwapsInput, SwapResult } from './types';
+import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult } from './types';
 import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
-import { parseUnits, formatUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, swapPathsZeroResponse, zeroResponse } from './utils';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { SwapKind } from '@balancer/sdk';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
-        if(!!args.useVaultVersion && args.useVaultVersion!==2 && args.useVaultVersion!==3){
-            throw new Error("Vault Version must be 2 or 3");
-        }
         console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
@@ -55,14 +53,32 @@ export class SorService {
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
-
+        if (!args.useVaultVersion) {
+            return this.getBestSwapPathVersion({
+                chain: args.chain!,
+                swapAmount: amount,
+                swapType: args.swapType,
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
+                callDataInput: args.callDataInput
+                    ? {
+                          receiver: args.callDataInput.receiver,
+                          sender: args.callDataInput.sender,
+                          slippagePercentage: args.callDataInput.slippagePercentage,
+                          deadline: args.callDataInput.deadline,
+                          wethIsEth: wethIsEth,
+                      }
+                    : undefined,
+            });
+        }
         return sorV2Service.getSorSwapPaths({
             chain: args.chain!,
             swapAmount: amount,
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            vaultVersion: args.useVaultVersion ?? 2,
+            vaultVersion: args.useVaultVersion,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {
@@ -239,6 +255,37 @@ export class SorService {
                 v2Perf.toFixed(8),
             ].join(','),
         );
+    }
+
+    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'vaultVersion'>) {
+        const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 2 });
+        const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 3 });
+        return this.compareSwapPathResults(swapBalancerV2, swapBalancerV3, input.swapType);
+    }
+
+    private compareSwapPathResults(
+        swapPath1: GqlSorGetSwapPaths,
+        swapPath2: GqlSorGetSwapPaths,
+        swapType: GqlSorSwapType,
+    ) {
+        if (swapPath1.returnAmount === '0') {
+            return swapPath2;
+        } else if (swapPath2.returnAmount === '0') {
+            return swapPath1;
+        }
+        if (swapType === 'EXACT_IN') {
+            if (BigInt(swapPath1.returnAmount) > BigInt(swapPath2.returnAmount)) {
+                return swapPath1;
+            } else {
+                return swapPath2;
+            }
+        } else {
+            if (BigInt(swapPath1.returnAmount) < BigInt(swapPath2.returnAmount)) {
+                return swapPath1;
+            } else {
+                return swapPath2;
+            }
+        }
     }
 }
 
