@@ -211,6 +211,29 @@ export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayloa
     typeof prismaPoolTokenWithExpandedNesting
 >;
 
+const prismaPoolTokenWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
+    include: {
+        token: true,
+        dynamicData: true,
+        nestedPool: {
+            include: {
+                dynamicData: true,
+                tokens: {
+                    orderBy: { index: 'asc' },
+                    include: {
+                        token: true,
+                        dynamicData: true,
+                    },
+                },
+            },
+        },
+    },
+});
+
+export type PrismaPoolTokenWithSingleLayerNesting = Prisma.PrismaPoolTokenGetPayload<
+    typeof prismaPoolTokenWithSingleLayerNesting
+>;
+
 export type PrismaTokenWithTypes = PrismaToken & {
     types: PrismaTokenTypeOption[];
 };

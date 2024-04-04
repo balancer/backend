@@ -5,6 +5,7 @@ import {
     PrismaPoolMinimal,
     PrismaPoolTokenWithDynamicData,
     PrismaPoolTokenWithExpandedNesting,
+    PrismaPoolTokenWithSingleLayerNesting,
     prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
 } from '../../../prisma/prisma-types';
@@ -33,6 +34,8 @@ import {
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
     GqlPoolFx,
+    GqlPoolTokenDetail,
+    GqlNestedPool,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
@@ -484,6 +487,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
+            poolTokens: pool.tokens.map((token) => this.mapPoolTokens(token)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
         };
 
@@ -634,6 +638,75 @@ export class PoolGqlLoaderService {
                     weight: poolToken?.dynamicData?.weight,
                 };
             });
+    }
+
+    private mapPoolTokens(poolToken: PrismaPoolTokenWithSingleLayerNesting): GqlPoolTokenDetail {
+        const { nestedPool } = poolToken;
+
+        return {
+            id: `${poolToken.poolId}-${poolToken.token.address}`,
+            ...poolToken.token,
+            index: poolToken.index,
+            balance: poolToken.dynamicData?.balance || '0',
+            priceRate: poolToken.dynamicData?.priceRate || '1.0',
+            priceRateProvider: {
+                address: '123',
+                reviewed: false,
+                summary: 'none',
+            },
+            weight: poolToken?.dynamicData?.weight,
+            pool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
+        };
+    }
+
+    /*
+    type GqlNestedPool {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolType!
+    version: Int!
+
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+
+    tokens: [GqlPoolTokenDetail!]!
+
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
+    nestedShares: BigDecimal!
+    nestedLiquidity: BigDecimal!
+    nestedPercentage: BigDecimal!
+
+    swapFee: BigDecimal!
+    bptPriceRate: BigDecimal!
+}
+    */
+
+    private mapNestedPool(nestedPool: PrismaNestedPoolWithNoNesting, tokenBalance: string): GqlNestedPool {
+        const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
+        const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
+        const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
+        const bpt = nestedPool.tokens.find((token) => token.address === nestedPool.address);
+
+        return {
+            ...nestedPool,
+            totalLiquidity: `${totalLiquidity}`,
+            totalShares: `${totalShares}`,
+            nestedShares: `${totalShares * percentOfSupplyNested}`,
+            nestedLiquidity: `${totalLiquidity * percentOfSupplyNested}`,
+            nestedPercentage: `${percentOfSupplyNested}`,
+            tokens: nestedPool.tokens.map((token) =>
+                this.mapPoolTokens({
+                    ...token,
+                    nestedPool: null,
+                }),
+            ),
+            swapFee: nestedPool.dynamicData?.swapFee || '0',
+            bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+        };
     }
 
     private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {
