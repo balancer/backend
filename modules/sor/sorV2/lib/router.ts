@@ -39,7 +39,7 @@ export class Router {
         // Check if PathWithAmount is valid (each hop pool swap limit)
         paths.forEach((path) => {
             try {
-                quotePaths.push(new PathWithAmount(path.tokens, path.pools, path.operations, swapAmount));
+                quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
             } catch {
                 // logger.trace('Invalid path:');
                 // logger.trace(path.tokens.map((token) => token.symbol).join(' -> '));
@@ -84,16 +84,10 @@ export class Router {
         const swapAmount50up = swapAmount.mulDownFixed(WAD / 2n);
         const swapAmount50down = swapAmount.sub(swapAmount50up);
 
-        const path50up = new PathWithAmount(
-            orderedQuotePaths[0].tokens,
-            orderedQuotePaths[0].pools,
-            orderedQuotePaths[0].operations,
-            swapAmount50up,
-        );
+        const path50up = new PathWithAmount(orderedQuotePaths[0].tokens, orderedQuotePaths[0].pools, swapAmount50up);
         const path50down = new PathWithAmount(
             orderedQuotePaths[1].tokens,
             orderedQuotePaths[1].pools,
-            orderedQuotePaths[1].operations,
             swapAmount50down,
         );
 

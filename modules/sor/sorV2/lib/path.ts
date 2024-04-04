@@ -27,13 +27,7 @@ export class PathWithAmount extends PathLocal {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
 
-    public constructor(
-        tokens: Token[],
-        pools: BasePool[],
-        operations: PathOperation[] | undefined,
-        swapAmount: TokenAmount,
-        mutateBalances?: boolean,
-    ) {
+    public constructor(tokens: Token[], pools: BasePool[], swapAmount: TokenAmount, mutateBalances?: boolean) {
         super(tokens, pools);
         this.swapAmount = swapAmount;
         this.mutateBalances = Boolean(mutateBalances);
