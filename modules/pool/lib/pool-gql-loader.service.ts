@@ -649,11 +649,7 @@ export class PoolGqlLoaderService {
             index: poolToken.index,
             balance: poolToken.dynamicData?.balance || '0',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
-            priceRateProvider: {
-                address: '123',
-                reviewed: false,
-                summary: 'none',
-            },
+            priceRateProvider: poolToken.priceRateProvider,
             weight: poolToken?.dynamicData?.weight,
             hasNestedPool: hasNestedPool,
             nestedPool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
