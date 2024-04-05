@@ -188,7 +188,7 @@ export class PathGraph {
     }
 
     private addPoolsAsGraphNodes(pools: BasePool[]) {
-        const validPoolTypes = ['WEIGHTED', 'COMPOSABLE_STABLE'];
+        const validPoolTypes = ['WEIGHTED', 'STABLE'];
         for (const pool of pools) {
             if (!validPoolTypes.includes(pool.poolType)) continue;
             const poolToken = new Token(pool.tokens[0].token.chainId, pool.address as Address, 18);

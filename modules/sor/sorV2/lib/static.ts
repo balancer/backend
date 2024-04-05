@@ -12,6 +12,7 @@ import { ComposableStablePool } from './pools/composableStable/composableStableP
 import { BasePool } from './pools/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
+import { StablePool } from './pools/stable/stablePool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -38,6 +39,8 @@ export async function sorGetSwapsWithPools(
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
                 break;
+            case 'STABLE':
+                basePools.push(StablePool.fromPrismaPool(prismaPool));
             case 'FX':
                 basePools.push(FxPool.fromPrismaPool(prismaPool));
                 break;

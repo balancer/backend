@@ -10,36 +10,13 @@ import {
     _calcTokenInGivenExactBptOut,
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
-} from './stableMath';
+} from '../stable/stableMath';
 import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-
-export class ComposableStablePoolToken extends TokenAmount {
-    public readonly rate: bigint;
-    public readonly index: number;
-
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
-        super(token, amount);
-        this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-}
+import { StablePoolToken } from '../stable/stablePool';
 
 export class ComposableStablePool implements BasePool {
     public readonly chain: Chain;
@@ -52,13 +29,13 @@ export class ComposableStablePool implements BasePool {
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
-    public tokens: ComposableStablePoolToken[];
+    public tokens: StablePoolToken[];
 
-    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
+    private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): ComposableStablePool {
-        const poolTokens: ComposableStablePoolToken[] = [];
+        const poolTokens: StablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -74,7 +51,7 @@ export class ComposableStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
-                new ComposableStablePoolToken(
+                new StablePoolToken(
                     token,
                     tokenAmount.amount,
                     parseEther(poolToken.dynamicData.priceRate),
@@ -104,7 +81,7 @@ export class ComposableStablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: ComposableStablePoolToken[],
+        tokens: StablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
     ) {
@@ -345,58 +322,37 @@ export class ComposableStablePool implements BasePool {
         }
         return amountsWithoutBpt;
     }
-
-    addLiquiditySingleTokenExactIn(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances: boolean,
-    ): TokenAmount {
-        return this.swapGivenIn(tokenIn, bpt, amount, mutateBalances);
+    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+        throw new Error('Composable Stable - addLiquiditiySingleTokenExactIn: Method not Implemented');
     }
 
-    removeLiquiditySingleTokenExactIn(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances: boolean,
-    ): TokenAmount {
-        return this.swapGivenIn(bpt, tokenOut, amount, mutateBalances);
+    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
+        throw new Error('Composable Stable - getLimitAmountAddLiquidity: Method not Implemented');
+    }
+
+    getLimitAmountRemoveLiquidity(): bigint {
+        throw new Error('Composable Stable - getLimitAmountRemoveLiquidity: Method not Implemented');
+    }
+
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+        throw new Error('Composable Stable - removeLiquiditySingleTokenExactIn: Method not Implemented');
     }
 
     addLiquiditySingleTokenExactOut(
         tokenIn: Token,
         bpt: Token,
         amount: TokenAmount,
-        mutateBalances: boolean,
+        mutateBalances?: boolean,
     ): TokenAmount {
-        return this.swapGivenOut(tokenIn, bpt, amount, mutateBalances);
+        throw new Error('Composable Stable - addLiquiditySingleTokenExactOut: Method not Implemented');
     }
 
     removeLiquiditySingleTokenExactOut(
         tokenOut: Token,
         bpt: Token,
         amount: TokenAmount,
-        mutateBalances: boolean,
+        mutateBalances?: boolean,
     ): TokenAmount {
-        return this.swapGivenOut(bpt, tokenOut, amount, mutateBalances);
-    }
-
-    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
-        const bptToken = this.tokens.find(
-            ({ token: { address } }) => address.toLowerCase() === this.address.toLowerCase(),
-        )?.token as Token;
-        if (!bptToken) {
-            throw new Error("getLimitAmountAddLiquidity: Couldn't find BPT among pool tokens");
-        }
-        return this.getLimitAmountSwap(tokenIn, bptToken, SwapKind.GivenIn);
-    }
-
-    getLimitAmountRemoveLiquidity(): bigint {
-        const bpt = this.tokenMap.get(this.address);
-        if (!bpt) {
-            throw new Error("getLimitAmountRemoveLiquidity: BPT wasn't found");
-        }
-        return (bpt.amount * WAD) / bpt.rate;
+        throw new Error('Composable Stable - removeLiquiditySingleTokenExactOut: Method not Implemented');
     }
 }
