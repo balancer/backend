@@ -743,7 +743,7 @@ type GqlPoolTokenDetail {
 
     balance: BigDecimal!
     priceRate: BigDecimal!
-    priceRateProvider: GqlTokenRateProvider
+    priceRateProvider: String
     weight: BigDecimal
     hasNestedPool: Boolean!
     nestedPool: GqlNestedPool
