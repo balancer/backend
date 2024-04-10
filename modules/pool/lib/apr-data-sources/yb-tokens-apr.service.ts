@@ -73,13 +73,13 @@ export class YbTokensAprService implements PoolAprService {
 
                 let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
 
-                if (collectsYieldFee(pool) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
-                    const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee || '0');
-                    const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee || '0');
-                    aprInPoolAfterFees =
+                if (collectsYieldFee(pool, token) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
+                    const fee =
                         pool.type === 'META_STABLE'
-                            ? aprInPoolAfterFees * (1 - protocolSwapFeePercentage)
-                            : aprInPoolAfterFees * (1 - protocolYieldFeePercentage);
+                            ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
+                            : parseFloat(pool.dynamicData.protocolYieldFee || '0');
+
+                    aprInPoolAfterFees = aprInPoolAfterFees * (1 - fee);
                 }
 
                 const yieldType: PrismaPoolAprType =
