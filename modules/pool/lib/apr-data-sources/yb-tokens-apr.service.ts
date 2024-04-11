@@ -8,6 +8,7 @@ import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
 import { networkContext } from '../../../network/network-context.service';
+import { zeroAddress } from 'viem';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
@@ -56,6 +57,11 @@ export class YbTokensAprService implements PoolAprService {
             }
 
             for (const token of pool.tokens) {
+                // Tokens with 0 rate provider don't accrue yield
+                if (token.priceRateProvider === zeroAddress) {
+                    continue;
+                }
+
                 const tokenApr = aprs.get(token.address);
                 if (!tokenApr) {
                     continue;
