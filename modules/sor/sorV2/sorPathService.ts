@@ -71,7 +71,7 @@ class SorPathService implements SwapService {
 
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
-            console.error(
+            console.log(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
             );
             Sentry.captureException(err.message, {
@@ -149,7 +149,7 @@ class SorPathService implements SwapService {
             }
             return paths;
         } catch (err: any) {
-            console.error(
+            console.log(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
             );
             Sentry.captureException(err.message, {

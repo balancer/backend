@@ -1,7 +1,6 @@
 import { AprHandler } from '..';
 import axios from 'axios';
 import { YearnAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 export class YearnAprHandler implements AprHandler {
     sourceUrl: string;
@@ -30,7 +29,6 @@ export class YearnAprHandler implements AprHandler {
             return aprs;
         } catch (error) {
             console.error(`Yearn IB APR handler failed: `, error);
-            Sentry.captureException(`Yearn IB APR handler failed: ${error}`);
             return {};
         }
     }

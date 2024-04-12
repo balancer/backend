@@ -1,8 +1,6 @@
 import axios from 'axios';
-
 import { AprHandler } from '..';
 import { IdleAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 export class IdleAprHandler implements AprHandler {
     tokens: {
@@ -48,7 +46,6 @@ export class IdleAprHandler implements AprHandler {
             return Object.fromEntries(res);
         } catch (error) {
             console.error('Failed to fetch Idle APR:', error);
-            Sentry.captureException(`Idle IB APR handler failed: ${error}`);
             return {};
         }
     }
