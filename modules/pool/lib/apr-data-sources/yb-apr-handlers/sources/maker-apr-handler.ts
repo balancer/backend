@@ -2,7 +2,6 @@ import { AprHandler } from '..';
 import { MakerAprConfig } from '../../../../../network/apr-config-types';
 import { getContractAt } from '../../../../../web3/contract';
 import { abi as makerPotAbi } from './abis/maker-pot';
-import * as Sentry from '@sentry/node';
 
 export class MakerAprHandler implements AprHandler {
     group = 'MAKER';
@@ -35,7 +34,6 @@ export class MakerAprHandler implements AprHandler {
                 };
             } catch (error) {
                 console.error(`Maker APR Failed for token ${address}: `, error);
-                Sentry.captureException(`Maker APR Failed for token ${address}: ${error}`);
             }
         }
         return aprs;

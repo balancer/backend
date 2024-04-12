@@ -4,7 +4,6 @@ import ReaperCryptStrategyAbi from './abis/ReaperCryptStrategy.json';
 import axios from 'axios';
 import ReaperCryptAbi from './abis/ReaperCrypt.json';
 import { ReaperAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 const APR_PERCENT_DIVISOR = 10_000;
 
@@ -82,7 +81,6 @@ export class ReaperCryptAprHandler implements AprHandler {
                 aprs[address] = { apr: avgAprAcrossXHarvests, isIbYield: isIbYield ?? false };
             } catch (error) {
                 console.error(`Reaper IB APR handler failed for onChain source: `, error);
-                Sentry.captureException(`Reaper IB APR handler failed for onChain source: ${error}`);
                 return {};
             }
         }
@@ -131,7 +129,6 @@ export class ReaperCryptAprHandler implements AprHandler {
             }, {});
         } catch (error) {
             console.error(`Reaper IB APR handler failed for subgraph source: `, error);
-            Sentry.captureException(`Reaper IB APR handler failed for subgraph source: ${error}`);
             return {};
         }
     }

@@ -1,8 +1,6 @@
 import axios from 'axios';
-
 import { AprHandler } from '..';
 import { TranchessAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 export class TranchessAprHandler implements AprHandler {
     url: string;
@@ -41,7 +39,6 @@ export class TranchessAprHandler implements AprHandler {
             return Object.fromEntries(aprEntries);
         } catch (error) {
             console.error('Failed to fetch Tranchess APR:', error);
-            Sentry.captureException(`Tranchess IB APR handler failed: ${error}`);
             return {};
         }
     }
