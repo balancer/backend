@@ -1,7 +1,5 @@
 import { BigNumber, Contract } from 'ethers';
 import { abi } from './abis/oErc20';
-import * as Sentry from '@sentry/node';
-
 import { AprHandler } from '..';
 import { networkContext } from '../../../../../network/network-context.service';
 import { OvixAprConfig } from '../../../../../network/apr-config-types';
@@ -38,7 +36,6 @@ export class OvixAprHandler implements AprHandler {
             return Object.fromEntries(await Promise.all(aprEntries));
         } catch (error) {
             console.error('Failed to fetch Ovix APR:', error);
-            Sentry.captureException(`Ovix IB APR handler failed: ${error}`);
             return {};
         }
     }

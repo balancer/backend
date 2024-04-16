@@ -2,7 +2,6 @@ import { AprHandler } from '..';
 import { BloomAprConfig } from '../../../../../network/apr-config-types';
 import { getContractAt } from '../../../../../web3/contract';
 import { abi as bloomBpsFeed } from './abis/bloom-bps-feed';
-import * as Sentry from '@sentry/node';
 
 export class BloomAprHandler implements AprHandler {
     group = 'DEFAULT';
@@ -30,7 +29,6 @@ export class BloomAprHandler implements AprHandler {
                 };
             } catch (error) {
                 console.error(`Bloom APR Failed for token ${address}: `, error);
-                Sentry.captureException(`Bloom APR Failed for token ${address}: ${error}`);
             }
         }
         return aprs;
