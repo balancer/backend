@@ -6,6 +6,7 @@ import { headerChain } from '../context/header-chain';
 import { syncLatestFXPrices } from './latest-fx-price';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import moment from 'moment';
+import { entropyToMnemonic } from 'ethers/lib/utils';
 
 const resolvers: Resolvers = {
     Query: {
@@ -32,6 +33,7 @@ const resolvers: Resolvers = {
                 price: price.price,
                 chain: price.chain,
                 updatedAt: moment(price.updatedAt).unix(),
+                updatedBy: price.updatedBy,
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
