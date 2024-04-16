@@ -30,6 +30,7 @@ const resolvers: Resolvers = {
                 address: price.tokenAddress,
                 price: price.price,
                 chain: price.chain,
+                updatedAt: price.updatedAt.getTime(),
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
