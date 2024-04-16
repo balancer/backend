@@ -30,7 +30,7 @@ const resolvers: Resolvers = {
                 address: price.tokenAddress,
                 price: price.price,
                 chain: price.chain,
-                updatedAt: price.updatedAt.getTime(),
+                updatedAt: price.updatedAt.getTime() / 100,
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
@@ -46,7 +46,7 @@ const resolvers: Resolvers = {
                     prices: grouped[address].map((entry) => ({
                         timestamp: `${entry.timestamp}`,
                         price: entry.price,
-                        updatedAt: entry.updatedAt.getTime(),
+                        updatedAt: entry.updatedAt.getTime() / 100,
                         updatedBy: entry.updatedBy,
                     })),
                 });
