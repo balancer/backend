@@ -127,17 +127,6 @@ export class TokenService {
     }
 
     public async getWhiteListedTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
-        /*const cached = this.cache.get(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY) as PrismaTokenCurrentPrice[] | null;
-
-        if (cached) {
-            return cached;
-        }
-
-        const tokenPrices = await this.tokenPriceService.getWhiteListedCurrentTokenPrices();
-        this.cache.put(WHITE_LISTED_TOKEN_PRICES_CACHE_KEY, tokenPrices, 10000);
-
-        return tokenPrices;*/
-
         return this.tokenPriceService.getWhiteListedCurrentTokenPrices(chains);
     }
 
