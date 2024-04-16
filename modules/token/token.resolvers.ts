@@ -46,6 +46,8 @@ const resolvers: Resolvers = {
                     prices: grouped[address].map((entry) => ({
                         timestamp: `${entry.timestamp}`,
                         price: entry.price,
+                        updatedAt: entry.updatedAt.getTime(),
+                        updatedBy: entry.updatedBy,
                     })),
                 });
             }

@@ -54,6 +54,8 @@ type GqlHistoricalTokenPrice {
 type GqlHistoricalTokenPriceEntry {
     timestamp: String!
     price: Float!
+    updatedAt: Int!
+    updatedBy: String
 }
 
 type GqlToken {
