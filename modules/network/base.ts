@@ -128,10 +128,6 @@ export const baseNetworkConfig: NetworkConfig = {
             interval: every(1, 'minutes'),
         },
         {
-            name: 'backfill-join-exits-v2',
-            interval: every(20, 'seconds'),
-        },
-        {
             name: 'sync-swaps-v2',
             interval: every(1, 'minutes'),
         },

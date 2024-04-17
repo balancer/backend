@@ -190,15 +190,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'backfill-join-exits-v2':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => jobsController.backfillJoinExitsV2(chainId),
-                    res,
-                    next,
-                );
-                break;
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);
                 break;
