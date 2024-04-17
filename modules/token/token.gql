@@ -41,6 +41,8 @@ type GqlTokenPrice {
     address: String!
     chain: GqlChain!
     price: Float!
+    updatedAt: Int!
+    updatedBy: String
 }
 
 type GqlHistoricalTokenPrice {
@@ -52,6 +54,8 @@ type GqlHistoricalTokenPrice {
 type GqlHistoricalTokenPriceEntry {
     timestamp: String!
     price: Float!
+    updatedAt: Int!
+    updatedBy: String
 }
 
 type GqlToken {
