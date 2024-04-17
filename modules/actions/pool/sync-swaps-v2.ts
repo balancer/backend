@@ -28,23 +28,11 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
         },
     });
 
-    const where =
-        chain === Chain.FANTOM // FANTOM has no block column
-            ? latestEvent
-                ? { timestamp_gte: Number(latestEvent.blockTimestamp) }
-                : {}
-            : latestEvent
-            ? { block_gte: String(latestEvent.blockNumber) }
-            : {};
-
-    const getterFn =
-        chain === Chain.FANTOM
-            ? subgraphClient.BalancerSwaps.bind(subgraphClient)
-            : subgraphClient.BalancerSwapsWithBlock.bind(subgraphClient);
+    const where = latestEvent ? { block_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
     console.time('BalancerSwaps');
-    const { swaps } = await getterFn({
+    const { swaps } = await subgraphClient.BalancerSwaps({
         first: 1000,
         where,
         orderBy: chain === Chain.FANTOM ? Swap_OrderBy.Timestamp : Swap_OrderBy.Block,
