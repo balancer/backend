@@ -244,6 +244,10 @@ interface GqlPoolBase {
     """
     vaultVersion: Int!
     """
+    The pool type, such as weighted, stable, etc.
+    """
+    type: GqlPoolType!
+    """
     The name of the pool as per contract
     """
     name: String!
