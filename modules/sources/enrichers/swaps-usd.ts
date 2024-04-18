@@ -43,22 +43,24 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
             const payload = {
                 fee: {
                     ...swap.payload.fee,
-                    valueUSD: (tokenOut?.price || 0) * parseFloat(swap.payload.fee.amount),
+                    valueUSD: String((tokenOut?.price || 0) * parseFloat(swap.payload.fee.amount)),
                 },
                 tokenIn: {
                     ...swap.payload.tokenIn,
-                    valueUSD: (tokenIn?.price || 0) * parseFloat(swap.payload.tokenIn.amount),
                 },
                 tokenOut: {
                     ...swap.payload.tokenOut,
-                    valueUSD: (tokenOut?.price || 0) * parseFloat(swap.payload.tokenOut.amount),
                 },
             };
+
+            const valueUSD =
+                (tokenIn?.price || 0) * parseFloat(swap.payload.tokenIn.amount) ||
+                (tokenOut?.price || 0) * parseFloat(swap.payload.tokenOut.amount);
 
             dbEntries.push({
                 ...swap,
                 // Taking all the chances to get the token price
-                valueUSD: payload.tokenIn.valueUSD || payload.tokenOut.valueUSD || 0,
+                valueUSD,
                 payload,
             });
         }
