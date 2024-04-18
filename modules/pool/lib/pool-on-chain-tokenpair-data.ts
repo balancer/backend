@@ -18,6 +18,7 @@ interface PoolInput {
         } | null;
     }[];
     dynamicData: {
+        totalShares: string;
         totalLiquidity: number;
     } | null;
 }
@@ -149,29 +150,53 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
         // create all pairs for pool
         for (let i = 0; i < pool.tokens.length - 1; i++) {
             for (let j = i + 1; j < pool.tokens.length; j++) {
-                //skip pairs with phantom BPT
-                if (pool.tokens[i].address === pool.address || pool.tokens[j].address === pool.address) continue;
+                const tokenA = pool.tokens[i];
+                const tokenB = pool.tokens[j];
+                // V2 Validation
+                // remove pools that have <$1000 TVL or a token without a balance or USD balance
+                // TODO: check if it's trully needed or if we're ok removing only the pairs without balance or balanceUSD
+                const valid =
+                    (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+                    !pool.tokens.some((token) => {
+                        const balance =
+                            token.address === pool.address ? pool.dynamicData?.totalShares : token.dynamicData?.balance;
+                        return (balance || '0') === '0';
+                    }) &&
+                    !pool.tokens.some((token) => {
+                        const balanceUSD =
+                            token.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity
+                                : token.dynamicData?.balanceUSD;
+                        return (balanceUSD || 0) === 0;
+                    });
+
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,
-                    // remove pools that have <$1000 TVL or a token without a balance or USD balance
-                    valid:
-                        // V2 Validation
-                        (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
-                        !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
-                        !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
-
+                    valid,
                     tokenA: {
-                        address: pool.tokens[i].address,
-                        decimals: pool.tokens[i].token.decimals,
-                        balance: pool.tokens[i].dynamicData?.balance || '0',
-                        balanceUsd: pool.tokens[i].dynamicData?.balanceUSD || 0,
+                        address: tokenA.address,
+                        decimals: tokenA.token.decimals,
+                        balance:
+                            tokenA.address === pool.address
+                                ? pool.dynamicData?.totalShares || '0'
+                                : tokenA.dynamicData?.balance || '0',
+                        balanceUsd:
+                            tokenA.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity || 0
+                                : tokenA.dynamicData?.balanceUSD || 0,
                     },
                     tokenB: {
-                        address: pool.tokens[j].address,
-                        decimals: pool.tokens[j].token.decimals,
-                        balance: pool.tokens[j].dynamicData?.balance || '0',
-                        balanceUsd: pool.tokens[j].dynamicData?.balanceUSD || 0,
+                        address: tokenB.address,
+                        decimals: tokenB.token.decimals,
+                        balance:
+                            tokenB.address === pool.address
+                                ? pool.dynamicData?.totalShares || '0'
+                                : tokenB.dynamicData?.balance || '0',
+                        balanceUsd:
+                            tokenB.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity || 0
+                                : tokenB.dynamicData?.balanceUSD || 0,
                     },
                     normalizedLiqudity: 0n,
                     spotPrice: 0n,
