@@ -32,9 +32,11 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEvent => {
         timestamp: event.blockTimestamp,
         tokenIn: {
             ...event.payload.tokenIn,
+            valueUSD: event.valueUSD,
         },
         tokenOut: {
             ...event.payload.tokenOut,
+            valueUSD: event.valueUSD,
         },
     };
 };
