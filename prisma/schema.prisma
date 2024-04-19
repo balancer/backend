@@ -629,6 +629,7 @@ model PrismaPoolEvent {
     @@index([blockNumber])
     @@index([blockTimestamp])
     @@index([logIndex])
+    @@index([vaultVersion])
 }
 
 
