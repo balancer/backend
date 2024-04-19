@@ -626,9 +626,9 @@ model PrismaPoolEvent {
     @@index([chain])
     @@index([chain, poolId])
     @@index([userAddress])
-    @@index([blockNumber])
-    @@index([blockTimestamp])
-    @@index([logIndex])
+    @@index([blockNumber(sort: Desc)])
+    @@index([blockTimestamp(sort: Desc)])
+    @@index([logIndex(sort: Desc)])
     @@index([vaultVersion])
 }
 
