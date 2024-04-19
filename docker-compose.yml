@@ -10,9 +10,14 @@ services:
             POSTGRES_USER: backend
             POSTGRES_PASSWORD: let-me-in
             POSTGRES_DB: database
+        volumes:
+            - data:/var/lib/postgresql/data
         networks:
             - balancer
 
 networks:
     balancer:
         name: balancer
+
+volumes:
+    data:
