@@ -35,21 +35,19 @@ export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Pr
                 amount: String(
                     weiToFloat(swap.swapFeeAmount, allTokens.find((t) => t.address === swap.tokenOut)?.decimals || 18),
                 ),
-                valueUSD: 0,
+                valueUSD: '0', // Will be calculated later
             },
             tokenIn: {
                 address: swap.tokenIn,
                 amount: String(
                     weiToFloat(swap.tokenAmountIn, allTokens.find((t) => t.address === swap.tokenIn)?.decimals || 18),
                 ),
-                valueUSD: 0,
             },
             tokenOut: {
                 address: swap.tokenOut,
                 amount: String(
                     weiToFloat(swap.tokenAmountOut, allTokens.find((t) => t.address === swap.tokenOut)?.decimals || 18),
                 ),
-                valueUSD: 0,
             },
         },
     }));

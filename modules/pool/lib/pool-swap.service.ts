@@ -41,12 +41,7 @@ export class PoolSwapService {
             for (const chain of args.where.chainIn) {
                 const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
-                const getterFn =
-                    chain === Chain.FANTOM
-                        ? balancerSubgraphService.getFantomPoolJoinExits.bind(balancerSubgraphService)
-                        : balancerSubgraphService.getPoolJoinExits.bind(balancerSubgraphService);
-
-                const { joinExits } = await getterFn({
+                const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
                     where: { pool_in: args.where?.poolIdIn },
                     first,
                     skip: args.skip,
@@ -81,12 +76,7 @@ export class PoolSwapService {
     ): Promise<GqlPoolJoinExit[]> {
         const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
-        const getterFn =
-            chain === Chain.FANTOM
-                ? balancerSubgraphService.getFantomPoolJoinExits.bind(balancerSubgraphService)
-                : balancerSubgraphService.getPoolJoinExits.bind(balancerSubgraphService);
-
-        const { joinExits } = await getterFn({
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
             skip: skip,

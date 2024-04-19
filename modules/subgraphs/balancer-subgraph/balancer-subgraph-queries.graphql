@@ -364,26 +364,6 @@ query BalancerJoinExits(
     }
 }
 
-query FantomJoinExits(
-    $skip: Int
-    $first: Int
-    $orderBy: JoinExit_orderBy
-    $orderDirection: OrderDirection
-    $where: JoinExit_filter
-    $block: Block_height
-) {
-    joinExits(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...FantomJoinExit
-    }
-}
-
 fragment BalancerLatestPrice on LatestPrice {
     id
     asset
@@ -400,20 +380,6 @@ fragment BalancerJoinExit on JoinExit {
     id
     sender
     block
-    timestamp
-    tx
-    type
-    pool {
-        id
-        tokensList
-    }
-    valueUSD
-}
-
-fragment FantomJoinExit on JoinExit {
-    amounts
-    id
-    sender
     timestamp
     tx
     type
@@ -480,48 +446,6 @@ fragment BalancerTradePairSnapshot on TradePairSnapshot {
     }
 }
 
-query BalancerSwapsWithBlock(
-    $skip: Int
-    $first: Int
-    $orderBy: Swap_orderBy
-    $orderDirection: OrderDirection
-    $where: Swap_filter
-    $block: Block_height
-) {
-    swaps(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...BalancerSwap
-    }
-}
-
-fragment BalancerSwapWithBlock on Swap {
-    id
-    caller
-    tokenIn
-    tokenInSym
-    tokenOut
-    tokenOutSym
-    tokenAmountIn
-    tokenAmountOut
-    poolId {
-        id
-        swapFee
-    }
-    userAddress {
-        id
-    }
-    timestamp
-    tx
-    valueUSD
-    block
-}
-
 query BalancerSwaps(
     $skip: Int
     $first: Int
@@ -561,6 +485,7 @@ fragment BalancerSwap on Swap {
     timestamp
     tx
     valueUSD
+    block
 }
 
 query BalancerAmpUpdates(
