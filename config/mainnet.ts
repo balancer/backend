@@ -358,6 +358,12 @@ export default <NetworkData>{
                 sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x9D39A5DE30e57443BfF2A8307A4256c8797A3497',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
