@@ -279,11 +279,6 @@ export class SorService {
         swapPath2: GqlSorGetSwapPaths,
         swapType: GqlSorSwapType,
     ) {
-        if (swapPath1.returnAmount === '0') {
-            return swapPath2;
-        } else if (swapPath2.returnAmount === '0') {
-            return swapPath1;
-        }
         if (swapType === 'EXACT_IN') {
             if (BigInt(swapPath1.returnAmount) > BigInt(swapPath2.returnAmount)) {
                 return swapPath1;
