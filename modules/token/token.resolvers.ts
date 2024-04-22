@@ -5,6 +5,8 @@ import { tokenService } from './token.service';
 import { headerChain } from '../context/header-chain';
 import { syncLatestFXPrices } from './latest-fx-price';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import moment from 'moment';
+import { entropyToMnemonic } from 'ethers/lib/utils';
 
 const resolvers: Resolvers = {
     Query: {
@@ -30,6 +32,8 @@ const resolvers: Resolvers = {
                 address: price.tokenAddress,
                 price: price.price,
                 chain: price.chain,
+                updatedAt: moment(price.updatedAt).unix(),
+                updatedBy: price.updatedBy,
             }));
         },
         tokenGetHistoricalPrices: async (parent, { addresses, chain, range }, context) => {
@@ -45,6 +49,8 @@ const resolvers: Resolvers = {
                     prices: grouped[address].map((entry) => ({
                         timestamp: `${entry.timestamp}`,
                         price: entry.price,
+                        updatedAt: moment(entry.updatedAt).unix(),
+                        updatedBy: entry.updatedBy,
                     })),
                 });
             }

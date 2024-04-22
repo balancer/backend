@@ -1,7 +1,5 @@
 import axios from 'axios';
-
 import { AprHandler } from '..';
-import * as Sentry from '@sentry/node';
 
 export class DefaultAprHandler implements AprHandler {
     tokenAddress: string;
@@ -42,7 +40,6 @@ export class DefaultAprHandler implements AprHandler {
             };
         } catch (error) {
             console.error(`Failed to fetch APRs in url ${this.url}:`, error);
-            Sentry.captureException(`Failed to fetch default IB APRs in url ${this.url}: ${error}`);
             return {};
         }
     }

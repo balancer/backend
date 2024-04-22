@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import { prisma } from '../../../prisma/prisma-client';
 import { poolWithTokens } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
@@ -26,7 +25,6 @@ export class PoolAprUpdaterService {
                 await aprService.updateAprForPools(pools);
             } catch (e) {
                 console.error(`Error during APR update of aprService:`, e);
-                Sentry.captureException(e);
                 failedAprServices.push(aprService.getAprServiceName());
             }
         }

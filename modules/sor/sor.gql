@@ -51,9 +51,9 @@ extend type Query {
         """
         The amount to swap, in human form.
         """
-        swapAmount: BigDecimal! #expected in human readable form
+        swapAmount: AmountHumanReadable! #expected in human readable form
         """
-        Whether to run queryBatchSwap to update with onchain values, default: false
+        Whether to run queryBatchSwap to update the return amount with most up-to-date on-chain values, default: false
         """
         queryBatchSwap: Boolean
         """

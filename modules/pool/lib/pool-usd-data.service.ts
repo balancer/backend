@@ -119,7 +119,7 @@ export class PoolUsdDataService {
 
         if (!block24hAgo) {
             // Send an alert to Sentry
-            Sentry.captureException(`Block Subgraph not working on ${this.chain}`);
+            console.error(`Block Subgraph not working on ${this.chain}`);
             return;
         }
 

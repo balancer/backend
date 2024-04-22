@@ -3,7 +3,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
-import * as Sentry from '@sentry/node';
 
 interface PoolInput {
     id: string;
@@ -327,7 +326,7 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
     // this happens if you get a "bonus" ie positive price impact.
     if (priceRatio > parseEther('0.999999')) {
-        Sentry.captureException(
+        console.error(
             `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
         );
         priceRatio = parseEther('0.999999');

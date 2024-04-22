@@ -28,13 +28,16 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEvent => {
     return {
         __typename: 'GqlPoolSwapEventV3',
         ...event,
+        valueUSD: event.valueUSD || 0,
         sender: event.userAddress,
         timestamp: event.blockTimestamp,
         tokenIn: {
             ...event.payload.tokenIn,
+            valueUSD: event.valueUSD,
         },
         tokenOut: {
             ...event.payload.tokenOut,
+            valueUSD: event.valueUSD,
         },
     };
 };

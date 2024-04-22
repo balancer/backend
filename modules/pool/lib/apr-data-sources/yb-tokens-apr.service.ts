@@ -8,6 +8,7 @@ import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
 import { networkContext } from '../../../network/network-context.service';
+import { zeroAddress } from 'viem';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
@@ -56,6 +57,11 @@ export class YbTokensAprService implements PoolAprService {
             }
 
             for (const token of pool.tokens) {
+                // Tokens with 0 rate provider don't accrue yield
+                if (token.priceRateProvider === zeroAddress) {
+                    continue;
+                }
+
                 const tokenApr = aprs.get(token.address);
                 if (!tokenApr) {
                     continue;
@@ -73,13 +79,13 @@ export class YbTokensAprService implements PoolAprService {
 
                 let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
 
-                if (collectsYieldFee(pool) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
-                    const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee || '0');
-                    const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee || '0');
-                    aprInPoolAfterFees =
+                if (collectsYieldFee(pool, token) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
+                    const fee =
                         pool.type === 'META_STABLE'
-                            ? aprInPoolAfterFees * (1 - protocolSwapFeePercentage)
-                            : aprInPoolAfterFees * (1 - protocolYieldFeePercentage);
+                            ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
+                            : parseFloat(pool.dynamicData.protocolYieldFee || '0');
+
+                    aprInPoolAfterFees = aprInPoolAfterFees * (1 - fee);
                 }
 
                 const yieldType: PrismaPoolAprType =

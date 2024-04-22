@@ -1,9 +1,9 @@
-import { PrismaPromise } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import _ from 'lodash';
 import { prisma } from './prisma-client';
 
 export async function prismaBulkExecuteOperations(
-    operations: PrismaPromise<any>[],
+    operations: Prisma.PrismaPromise<any>[],
     transaction: boolean = false,
     chunkSize = 100,
 ) {

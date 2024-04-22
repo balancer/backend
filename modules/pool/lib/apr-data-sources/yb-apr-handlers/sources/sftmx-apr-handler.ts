@@ -1,7 +1,6 @@
-import * as Sentry from '@sentry/node';
 import { AprHandler } from '..';
 import { SftmxAprConfig } from '../../../../../network/apr-config-types';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { getContractAt } from '../../../../../web3/contract';
 import { formatFixed } from '@ethersproject/bignumber';
 import FTMStaking from '../../../../../sources/contracts/abis/FTMStaking';
@@ -76,7 +75,6 @@ export class SftmxAprHandler implements AprHandler {
             return aprs;
         } catch (error) {
             console.error('Failed to fetch sftmx APR:', error);
-            Sentry.captureException(`sftmx IB APR handler failed: ${error}`);
             return {};
         }
     }

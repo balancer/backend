@@ -1,10 +1,8 @@
 import { Contract } from 'ethers';
 import { abi } from './abis/tesseraPool';
-
 import { AprHandler } from '..';
 import { networkContext } from '../../../../../network/network-context.service';
 import { TesseraAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 export class TesseraAprHandler implements AprHandler {
     tokens: {
@@ -41,7 +39,6 @@ export class TesseraAprHandler implements AprHandler {
                 ]);
             } catch (error) {
                 console.error('Failed to fetch Tessera Ape Coin APR:', error);
-                Sentry.captureException(`Tessera IB APR handler failed: ${error}`);
                 aprEntries.push([tokenAddress, { apr: 0, isIbYield: isIbYield ?? false }]);
             }
         }
