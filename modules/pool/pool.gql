@@ -417,7 +417,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
 
     """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -465,6 +465,9 @@ type GqlPoolGyro implements GqlPoolBase {
     z: String!
     dSq: String!
 
+    """
+    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
@@ -502,6 +505,9 @@ type GqlPoolFx implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
+    """
+    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
 }
 
@@ -523,6 +529,9 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
+    """
+    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
@@ -604,6 +613,9 @@ type GqlPoolComposableStable implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
+    """
+    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
@@ -748,6 +760,7 @@ type GqlPoolTokenDetail {
     balance: BigDecimal!
     priceRate: BigDecimal!
     priceRateProvider: String
+    priceRateProviderData: GqlPriceRateProviderData
     weight: BigDecimal
     hasNestedPool: Boolean!
     nestedPool: GqlNestedPool

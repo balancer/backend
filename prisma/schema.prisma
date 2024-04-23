@@ -242,7 +242,7 @@ model PrismaPoolToken {
     nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
 
     priceRateProvider           String?
-    exemptFromProtocolYieldFee  Boolean             @default(false)
+        exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
 }
@@ -666,6 +666,7 @@ model PrismaToken {
 
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
+    priceRateProviderData    PrismaPriceRateProviderData[]
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
@@ -748,6 +749,21 @@ enum PrismaTokenTypeOption {
     BPT
     PHANTOM_BPT
     LINEAR_WRAPPED_TOKEN
+}
+
+model PrismaPriceRateProviderData {
+    @@id([chain, rateProviderAddress])
+
+    chain               Chain
+    rateProviderAddress String
+
+    tokenAddress        String
+    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+
+    reviewed            Boolean
+    name                String?
+    summary             String?
+    reviewUrl           String?
 }
 
 
