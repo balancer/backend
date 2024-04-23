@@ -18,6 +18,9 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        select: {
+            blockNumber: true,
+        },
         where: {
             type: 'SWAP',
             chain: chain,
