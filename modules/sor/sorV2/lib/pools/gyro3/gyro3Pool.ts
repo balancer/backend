@@ -112,7 +112,7 @@ export class Gyro3Pool implements BasePool {
         );
 
         if (tokenPair) {
-            return parseEther(tokenPair.normalizedLiquidity);
+            return BigInt(tokenPair.normalizedLiquidity);
         }
         return 0n;
     }

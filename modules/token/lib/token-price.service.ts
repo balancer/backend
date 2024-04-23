@@ -16,7 +16,6 @@ import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
 import { AavePriceHandlerService } from './token-price-handlers/aave-price-handler.service';
-import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 import config from '../../../config';
 
 export class TokenPriceService {
@@ -35,7 +34,6 @@ export class TokenPriceService {
     public async getWhiteListedCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             orderBy: { timestamp: 'desc' },
-            distinct: ['tokenAddress'],
             where: {
                 chain: { in: chains },
                 token: { types: { some: { type: 'WHITE_LISTED' } } },

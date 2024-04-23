@@ -1,5 +1,11 @@
 extend type Query {
+    """
+    Returns one pool. If a user address is provided, the user balances for the given pool will also be returned.
+    """
     poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
+    """
+    Returns all pools for a given filter
+    """
     poolGetPools(
         first: Int
         skip: Int
@@ -8,6 +14,9 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): [GqlPoolMinimal!]!
+    """
+    Returns the number of pools for a given filter.
+    """
     poolGetPoolsCount(
         first: Int
         skip: Int
@@ -17,25 +26,43 @@ extend type Query {
         textSearch: String
     ): Int!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
+    """
+    Will de deprecated in favor of poolGetFeaturedPools
+    """
     poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
+    """
+    Returns the list of featured pools for chains
+    """
     poolGetFeaturedPools(chains: [GqlChain!]!): [GqlPoolFeaturedPool!]!
+    """
+    Gets all the snapshots for a given pool on a chain for a certain range
+    """
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    """
+    Gets all linear pools
+    """
     poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
+    """
+    Gets all gyro pools
+    """
     poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
+    """
+    Gets all FX pools
+    """
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
     """
-    Getting swap, join and exit events
+    Will de deprecated in favor of poolEvents
     """
     poolGetEvents(
         range: GqlPoolEventsDataRange!
@@ -44,6 +71,10 @@ extend type Query {
         typeIn: [GqlPoolEventType!]!
         userAddress: String
     ): [GqlPoolEvent!]!
+    """
+    Getting swap, join and exit events
+    """
+    poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter!): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -76,36 +107,113 @@ extend type Mutation {
     poolInitOnChainDataForAllPools: String!
 }
 
+"""
+The pool schema returned for poolGetPools (pool list query)
+"""
 type GqlPoolMinimal {
+    """
+    The pool id. This is equal to the address for vaultVersion 3 pools
+    """
     id: ID!
+    """
+    The chain on which the pool is deployed
+    """
     chain: GqlChain!
+    """
+    The vault version on which the pool is deployed, 2 or 3
+    """
     vaultVersion: Int!
+    """
+    The name of the pool as per contract
+    """
     name: String!
+    """
+    The token symbol of the pool as per contract
+    """
     symbol: String!
+    """
+    The contract address of the pool.
+    """
     address: Bytes!
+    """
+    The decimals of the BPT, usually 18
+    """
     decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
     owner: Bytes
+    """
+    The factory contract address from which the pool was created.
+    """
     factory: Bytes
-    version: Int!
+    """
+    The timestamp the pool was created.
+    """
     createTime: Int!
+    """
+    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
+    """
     displayTokens: [GqlPoolTokenDisplay!]!
+    """
+    Returns all pool tokens, including any nested tokens and phantom BPTs
+    """
     allTokens: [GqlPoolTokenExpanded!]!
+    """
+    Dynamic data such as token balances, swap fees or volume
+    """
     dynamicData: GqlPoolDynamicData!
+    """
+    Staking options of this pool which emit additional rewards
+    """
     staking: GqlPoolStaking
+    """
+    The pool type, such as weighted, stable, etc.
+    """
     type: GqlPoolType!
+    """
+    The version of the pool type.
+    """
     version: Int!
+    """
+    If a user address was provided in the query, the user balance is populated here
+    """
     userBalance: GqlPoolUserBalance
 }
 
+"""
+If a user address was provided in the query, the user balance is populated here
+"""
 type GqlPoolUserBalance {
+    """
+    Total balance (wallet + staked) as float
+    """
     totalBalance: AmountHumanReadable!
+    """
+    Total balance (wallet + staked) in USD as float
+    """
     totalBalanceUsd: Float!
+    """
+    The wallet balance (BPT in wallet) as float.
+    """
     walletBalance: AmountHumanReadable!
+    """
+    The wallet balance (BPT in wallet) in USD as float.
+    """
     walletBalanceUsd: Float!
+    """
+    The staked balance in either a gauge or farm as float.
+    """
     stakedBalance: AmountHumanReadable!
+    """
+    The staked balance in either a gauge or farm in USD as float.
+    """
     stakedBalanceUsd: Float!
 }
 
+"""
+Supported pool types
+"""
 enum GqlPoolType {
     WEIGHTED
     STABLE
@@ -123,29 +231,89 @@ enum GqlPoolType {
     FX
 }
 
+"""
+The base type as returned by poolGetPool (specific pool query)
+"""
 interface GqlPoolBase {
-    #fields that never change after creation
+    """
+    The pool id. This is equal to the address for vaultVersion 3 pools
+    """
     id: ID!
+    """
+    The chain on which the pool is deployed
+    """
     chain: GqlChain!
+    """
+    The vault version on which the pool is deployed, 2 or 3
+    """
     vaultVersion: Int!
+    """
+    The pool type, such as weighted, stable, etc.
+    """
     type: GqlPoolType!
-    version: Int!
+    """
+    The name of the pool as per contract
+    """
     name: String!
+    """
+    The token symbol of the pool as per contract
+    """
     symbol: String!
+    """
+    The contract address of the pool.
+    """
     address: Bytes!
+    """
+    The decimals of the BPT, usually 18
+    """
     decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
     owner: Bytes
+    """
+    The factory contract address from which the pool was created.
+    """
     factory: Bytes
+    """
+    The timestamp the pool was created.
+    """
     createTime: Int!
+    """
+    The version of the pool type.
+    """
+    version: Int!
+    """
+    Deprecated
+    """
     investConfig: GqlPoolInvestConfig!
+    """
+    Deprecated
+    """
     withdrawConfig: GqlPoolWithdrawConfig!
-
+    """
+    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
+    """
     displayTokens: [GqlPoolTokenDisplay!]!
+    """
+    Returns all pool tokens, including any nested tokens and phantom BPTs on one level.
+    """
     allTokens: [GqlPoolTokenExpanded!]!
-
+    """
+    Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+    """
+    poolTokens: [GqlPoolTokenDetail!]!
+    """
+    Dynamic data such as token balances, swap fees or volume
+    """
     dynamicData: GqlPoolDynamicData!
+    """
+    Staking options of this pool which emit additional rewards
+    """
     staking: GqlPoolStaking
-
+    """
+    If a user address was provided in the query, the user balance is populated here
+    """
     userBalance: GqlPoolUserBalance
 }
 
@@ -250,7 +418,11 @@ type GqlPoolWeighted implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
@@ -277,6 +449,7 @@ type GqlPoolGyro implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     alpha: String!
     beta: String!
@@ -328,6 +501,8 @@ type GqlPoolFx implements GqlPoolBase {
     withdrawConfig: GqlPoolWithdrawConfig!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
+
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
@@ -350,6 +525,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
@@ -376,6 +552,7 @@ type GqlPoolStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -402,6 +579,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
 
     tokens: [GqlPoolToken!]!
     amp: BigInt!
@@ -428,6 +606,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
+
     tokens: [GqlPoolTokenUnion!]!
     nestingType: GqlPoolNestingType!
     amp: BigInt!
@@ -455,6 +635,7 @@ type GqlPoolElement implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]!
 
     #element specific fields
@@ -484,6 +665,7 @@ type GqlPoolLinear implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
+    poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]!
 
     #linear specific fields
@@ -559,6 +741,46 @@ union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolComposableStableNested
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable | GqlPoolTokenLinear
 union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
 
+type GqlPoolTokenDetail {
+    id: ID!
+    address: String!
+    decimals: Int!
+    name: String!
+    symbol: String!
+    index: Int!
+
+    balance: BigDecimal!
+    priceRate: BigDecimal!
+    priceRateProvider: String
+    weight: BigDecimal
+    hasNestedPool: Boolean!
+    nestedPool: GqlNestedPool
+}
+
+type GqlNestedPool {
+    id: ID!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    type: GqlPoolType!
+    version: Int!
+
+    owner: Bytes!
+    factory: Bytes
+    createTime: Int!
+
+    tokens: [GqlPoolTokenDetail!]!
+
+    totalShares: BigDecimal!
+    totalLiquidity: BigDecimal!
+    nestedShares: BigDecimal!
+    nestedLiquidity: BigDecimal!
+    nestedPercentage: BigDecimal!
+
+    swapFee: BigDecimal!
+    bptPriceRate: BigDecimal!
+}
+
 interface GqlPoolTokenBase {
     id: ID!
     address: String!
@@ -567,6 +789,7 @@ interface GqlPoolTokenBase {
     name: String!
     symbol: String!
     index: Int!
+
     priceRate: BigDecimal!
     priceRateProvider: String
     weight: BigDecimal
@@ -966,10 +1189,11 @@ enum GqlPoolEventType {
 }
 
 input GqlPoolEventsFilter {
-    typeIn: [GqlPoolEventType!]
-    poolIdIn: [String!]
-    chainIn: [GqlChain!]
+    chain: GqlChain!
+    poolId: String!
+    typeIn: [GqlPoolEventType]
     userAddress: String
+    range: GqlPoolEventsDataRange
 }
 
 type GqlPoolEventAmount {

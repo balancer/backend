@@ -18,6 +18,9 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        select: {
+            blockNumber: true,
+        },
         where: {
             type: 'SWAP',
             chain: chain,
@@ -28,23 +31,11 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
         },
     });
 
-    const where =
-        chain === Chain.FANTOM // FANTOM has no block column
-            ? latestEvent
-                ? { timestamp_gte: Number(latestEvent.blockTimestamp) }
-                : {}
-            : latestEvent
-            ? { block_gte: String(latestEvent.blockNumber) }
-            : {};
-
-    const getterFn =
-        chain === Chain.FANTOM
-            ? subgraphClient.BalancerSwaps.bind(subgraphClient)
-            : subgraphClient.BalancerSwapsWithBlock.bind(subgraphClient);
+    const where = latestEvent ? { block_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
     console.time('BalancerSwaps');
-    const { swaps } = await getterFn({
+    const { swaps } = await subgraphClient.BalancerSwaps({
         first: 1000,
         where,
         orderBy: chain === Chain.FANTOM ? Swap_OrderBy.Timestamp : Swap_OrderBy.Block,
@@ -58,10 +49,11 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
 
     // TODO: parse batchSwaps, if needed
 
-    // Enrich with USD values
-    console.time('swapsUsd');
-    const dbEntries = await swapsUsd(dbSwaps, chain);
-    console.timeEnd('swapsUsd');
+    // Enrich with USD values – no need - take V2 swap usd values from the subgraph
+    const dbEntries = dbSwaps;
+    // console.time('swapsUsd');
+    // const dbEntries = await swapsUsd(dbSwaps, chain);
+    // console.timeEnd('swapsUsd');
 
     console.time('prismaPoolEvent.createMany');
     await prisma.prismaPoolEvent.createMany({

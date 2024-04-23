@@ -21,6 +21,9 @@ export async function syncSwapsV3(
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        select: {
+            blockNumber: true,
+        },
         where: {
             type: 'SWAP',
             chain: chain,
@@ -31,7 +34,7 @@ export async function syncSwapsV3(
         },
     });
 
-    const where = latestEvent?.blockTimestamp ? { blockTimestamp_gte: String(latestEvent.blockTimestamp) } : {};
+    const where = latestEvent?.blockNumber ? { blockNumber_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
     const { swaps } = await vaultSubgraphClient.Swaps({

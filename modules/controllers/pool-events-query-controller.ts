@@ -1,15 +1,10 @@
-import {
-    GqlPoolEventsDataRange,
-    GqlPoolJoinExitEventV3 as GqlPoolJoinExitEvent,
-    GqlPoolSwapEventV3 as GqlPoolSwapEvent,
-    QueryPoolGetEventsArgs,
-} from '../../schema';
+import { GqlPoolEventsDataRange, GqlPoolJoinExitEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
-import { Prisma } from '@prisma/client';
+import { PoolEventType, Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
-import moment from 'moment';
+import { daysAgo } from '../common/time';
 
-const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEvent => {
+const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEventV3 => {
     return {
         __typename: 'GqlPoolJoinExitEventV3',
         tokens: event.payload.tokens.map((token) => ({
@@ -24,29 +19,32 @@ const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEvent => {
     };
 };
 
-const parseSwap = (event: SwapEvent): GqlPoolSwapEvent => {
+const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
     return {
         __typename: 'GqlPoolSwapEventV3',
         ...event,
+        valueUSD: event.valueUSD || 0,
         sender: event.userAddress,
         timestamp: event.blockTimestamp,
         tokenIn: {
             ...event.payload.tokenIn,
+            valueUSD: event.valueUSD,
         },
         tokenOut: {
             ...event.payload.tokenOut,
+            valueUSD: event.valueUSD,
         },
     };
 };
 
-const getTimestampForRange = (range: GqlPoolEventsDataRange): number => {
+const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
     switch (range) {
         case 'SEVEN_DAYS':
-            return moment().startOf('day').subtract(7, 'days').unix();
+            return daysAgo(7);
         case 'THIRTY_DAYS':
-            return moment().startOf('day').subtract(30, 'days').unix();
+            return daysAgo(30);
         case 'NINETY_DAYS':
-            return moment().startOf('day').subtract(90, 'days').unix();
+            return daysAgo(90);
     }
 };
 
@@ -61,40 +59,43 @@ export function EventsQueryController(tracer?: any) {
          * @returns
          */
         getEvents: async ({
-            range,
-            poolId,
-            chain,
-            typeIn,
-            userAddress,
-        }: QueryPoolGetEventsArgs): Promise<(GqlPoolSwapEvent | GqlPoolJoinExitEvent)[]> => {
+            first,
+            skip,
+            where,
+        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolJoinExitEventV3)[]> => {
             // Setting default values
+            first = first ?? 1000;
+            skip = skip ?? 0;
+            let { chain, poolId, userAddress, typeIn, range } = where;
 
-            const conditions: Prisma.PrismaPoolEventWhereInput = {};
+            const conditions: Prisma.PrismaPoolEventWhereInput = {
+                chain,
+                poolId,
+            };
 
+            if (typeIn && typeIn.length) {
+                conditions.type = {
+                    in: typeIn.filter((type): type is PoolEventType =>
+                        Object.keys(PoolEventType).includes(type as string),
+                    ),
+                };
+            }
             if (userAddress) {
                 conditions.userAddress = {
                     equals: userAddress,
                     mode: 'insensitive',
                 };
             }
-
-            const since = getTimestampForRange(range);
-            conditions.blockTimestamp = {
-                gte: since,
-            };
+            if (range) {
+                conditions.blockTimestamp = {
+                    gte: rangeToTimestamp(range),
+                };
+            }
 
             const dbEvents = await prisma.prismaPoolEvent.findMany({
-                where: {
-                    ...conditions,
-                    poolId: poolId,
-                    chain: chain,
-                    type: {
-                        in: typeIn,
-                    },
-                    blockTimestamp: {
-                        gte: since,
-                    },
-                },
+                where: conditions,
+                take: first,
+                skip,
                 orderBy: [
                     {
                         blockNumber: 'desc',

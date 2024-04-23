@@ -609,7 +609,7 @@ enum PoolEventType {
 }
 
 model PrismaPoolEvent {
-    id                  String @id
+    id                  String
     tx                  String
     type                PoolEventType
     chain               Chain
@@ -622,13 +622,14 @@ model PrismaPoolEvent {
     valueUSD            Float
     payload             Json
 
+    @@id([id, chain])
     @@index([type])
-    @@index([chain])
-    @@index([chain, poolId])
+    @@index([poolId])
     @@index([userAddress])
-    @@index([blockNumber])
-    @@index([blockTimestamp])
-    @@index([logIndex])
+    @@index([vaultVersion])
+    @@index([blockTimestamp(sort: Desc)])
+    @@index([blockNumber(sort: Desc), logIndex(sort: Desc)])
+    @@map("PartitionedPoolEvent")
 }
 
 

@@ -6,17 +6,15 @@ export type SwapEvent = PrismaPoolEvent & {
         fee: {
             address: string;
             amount: string;
-            valueUSD: number;
+            valueUSD: string;
         };
         tokenIn: {
             address: string;
             amount: string;
-            valueUSD: number;
         };
         tokenOut: {
             address: string;
             amount: string;
-            valueUSD: number;
         };
     };
 };
@@ -209,6 +207,29 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
 
 export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayload<
     typeof prismaPoolTokenWithExpandedNesting
+>;
+
+const prismaPoolTokenWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
+    include: {
+        token: true,
+        dynamicData: true,
+        nestedPool: {
+            include: {
+                dynamicData: true,
+                tokens: {
+                    orderBy: { index: 'asc' },
+                    include: {
+                        token: true,
+                        dynamicData: true,
+                    },
+                },
+            },
+        },
+    },
+});
+
+export type PrismaPoolTokenWithSingleLayerNesting = Prisma.PrismaPoolTokenGetPayload<
+    typeof prismaPoolTokenWithSingleLayerNesting
 >;
 
 export type PrismaTokenWithTypes = PrismaToken & {
