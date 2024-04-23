@@ -68,6 +68,24 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
+        maker: {
+            sdai: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
+        },
+        aave: {
+            v3: {
+                subgraphUrl:
+                    'https://api.goldsky.com/api/public/project_clk74pd7lueg738tw9sjh79d6/subgraphs/aave-v3-base/1.0.0/gn',
+                tokens: {
+                    USDC: {
+                        underlyingAssetAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                        aTokenAddress: '0x4e65fe4dba92790696d040ac24aa414708f5c0ab',
+                        wrappedTokens: {
+                            stataBasUSDC: '0x4ea71a20e655794051d1ee8b6e4a3269b13ccacc',
+                        },
+                    },
+                },
+            },
+        },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
