@@ -45,6 +45,7 @@ import {
     Prisma,
     PrismaPoolAprType,
     PrismaPoolStaking,
+    PrismaPriceRateProviderData,
     PrismaUserStakedBalance,
     PrismaUserWalletBalance,
 } from '@prisma/client';
@@ -58,6 +59,7 @@ import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
+import { ZERO_ADDRESS } from '@balancer/sdk';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -77,11 +79,46 @@ export class PoolGqlLoaderService {
             throw new Error('Pool exists, but has an unknown type');
         }
 
-        return this.mapPoolToGqlPool(
+        const mappedPool = this.mapPoolToGqlPool(
             pool,
             pool.userWalletBalances,
             userAddress ? pool.staking.map((staking) => staking.userStakedBalances).flat() : [],
         );
+
+        // load rate provider data into PoolTokenDetail model
+        for (const token of mappedPool.poolTokens) {
+            if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
+                const rateprovider = await prisma.prismaPriceRateProviderData.findUniqueOrThrow({
+                    where: {
+                        chain_rateProviderAddress: { chain: chain, rateProviderAddress: token.priceRateProvider },
+                    },
+                });
+                token.priceRateProviderData = {
+                    ...rateprovider,
+                    address: rateprovider.rateProviderAddress,
+                };
+            }
+            if (token.hasNestedPool) {
+                for (const nestedToken of token.nestedPool!.tokens) {
+                    if (nestedToken.priceRateProvider && nestedToken.priceRateProvider !== ZERO_ADDRESS) {
+                        const rateprovider = await prisma.prismaPriceRateProviderData.findUniqueOrThrow({
+                            where: {
+                                chain_rateProviderAddress: {
+                                    chain: chain,
+                                    rateProviderAddress: nestedToken.priceRateProvider,
+                                },
+                            },
+                        });
+                        nestedToken.priceRateProviderData = {
+                            ...rateprovider,
+                            address: rateprovider.rateProviderAddress,
+                        };
+                    }
+                }
+            }
+        }
+
+        return mappedPool;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
