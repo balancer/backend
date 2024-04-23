@@ -68,6 +68,9 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
+        maker: {
+            sdai: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
+        },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

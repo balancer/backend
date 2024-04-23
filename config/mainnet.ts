@@ -217,12 +217,7 @@ export default <NetworkData>{
             },
         },
         maker: {
-            tokens: {
-                sDAI: {
-                    address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-                    potAddress: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
-                },
-            },
+            sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
         },
         tessera: {
             tokens: {
