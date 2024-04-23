@@ -44,6 +44,8 @@ const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
 export class SanityContentService implements ContentService {
     constructor(private readonly projectId = '1g2ag2hb', private readonly dataset = 'production') {}
 
+    async syncRateProviderReviews(chains: Chain[]): Promise<void> {}
+
     async syncTokenContentData(chains: Chain[]): Promise<void> {
         for (const chain of chains) {
             const sanityTokens = await this.getSanityClient().fetch<SanityToken[]>(`
