@@ -359,7 +359,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             sUSDE: {
-                tokenAddress: '0x9D39A5DE30e57443BfF2A8307A4256c8797A3497',
+                tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
                 sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
                 path: 'stakingYield.value',
                 isIbYield: true,
