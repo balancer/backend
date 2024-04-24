@@ -751,7 +751,7 @@ union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken | GqlPoolTokenLinea
 
 """
 All info on the pool token. It will also include the nested pool if the token is a BPT. It will only support 1 level of nesting.
-A second (unsupported) level of nesting is shown by having `hasNestedPool = true` but `nestedPool = null`.
+A second (unsupported) level of nesting is shown by having hasNestedPool = true but nestedPool = null.
 """
 type GqlPoolTokenDetail {
     """
