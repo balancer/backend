@@ -19,7 +19,7 @@ export default <NetworkData>{
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
-        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
+        sftmx: `https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

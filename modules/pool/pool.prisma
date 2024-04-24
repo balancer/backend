@@ -517,13 +517,10 @@ model PrismaPoolEvent {
 
     @@id([id, chain])
     @@index([type])
-    @@index([chain])
-    @@index([chain, poolId])
+    @@index([poolId])
     @@index([userAddress])
-    @@index([blockNumber(sort: Desc)])
-    @@index([chain, blockNumber(sort: Desc)])
-    @@index([blockTimestamp(sort: Desc)])
-    @@index([logIndex(sort: Desc)])
     @@index([vaultVersion])
+    @@index([blockTimestamp(sort: Desc)])
+    @@index([blockNumber(sort: Desc), logIndex(sort: Desc)])
     @@map("PartitionedPoolEvent")
 }

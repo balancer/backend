@@ -34,7 +34,6 @@ export class TokenPriceService {
     public async getWhiteListedCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             orderBy: { timestamp: 'desc' },
-            distinct: ['tokenAddress'],
             where: {
                 chain: { in: chains },
                 token: { types: { some: { type: 'WHITE_LISTED' } } },

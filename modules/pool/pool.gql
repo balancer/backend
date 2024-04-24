@@ -26,15 +26,15 @@ extend type Query {
         textSearch: String
     ): Int!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
     """
-    Will de deprecated in favor of poolGetEvents
+    Will de deprecated in favor of poolEvents
     """
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
     """
@@ -62,7 +62,7 @@ extend type Query {
     """
     poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
     """
-    Getting swap, join and exit events
+    Will de deprecated in favor of poolEvents
     """
     poolGetEvents(
         range: GqlPoolEventsDataRange!
@@ -71,6 +71,10 @@ extend type Query {
         typeIn: [GqlPoolEventType!]!
         userAddress: String
     ): [GqlPoolEvent!]!
+    """
+    Getting swap, join and exit events
+    """
+    poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter!): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -1185,10 +1189,11 @@ enum GqlPoolEventType {
 }
 
 input GqlPoolEventsFilter {
-    typeIn: [GqlPoolEventType!]
-    poolIdIn: [String!]
-    chainIn: [GqlChain!]
+    chain: GqlChain!
+    poolId: String!
+    typeIn: [GqlPoolEventType]
     userAddress: String
+    range: GqlPoolEventsDataRange
 }
 
 type GqlPoolEventAmount {
