@@ -188,7 +188,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             jitoSOL: {
-                tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                tokenAddress: '0x83e1d2310Ade410676B1733d16e89f91822FD5c3',
                 sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
                 path: 'apr.0.data',
                 scale: 1,
