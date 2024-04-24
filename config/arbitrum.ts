@@ -181,6 +181,19 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
+            jitoSOL: {
+                tokenAddress: '0x83e1d2310ade410676b1733d16e89f91822fd5c3',
+                sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
+                path: 'apy.0.data',
+                scale: 1,
+                isIbYield: true,
+            },
         },
     },
     beefy: {

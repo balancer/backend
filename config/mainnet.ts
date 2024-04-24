@@ -217,12 +217,7 @@ export default <NetworkData>{
             },
         },
         maker: {
-            tokens: {
-                sDAI: {
-                    address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-                    potAddress: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
-                },
-            },
+            sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
         },
         tessera: {
             tokens: {
@@ -356,6 +351,12 @@ export default <NetworkData>{
             rswETH: {
                 tokenAddress: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0',
                 sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
+                isIbYield: true,
+            },
+            sUSDE: {
+                tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
                 isIbYield: true,
             },
         },

@@ -1,6 +1,8 @@
 import * as sources from './sources';
 import { YbAprConfig } from '../../../../network/apr-config-types';
 import { Chain } from '@prisma/client';
+import { AprHandler, AprHandlerConstructor, TokenApr } from './types';
+export type { AprHandler, AprHandlerConstructor, TokenApr };
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
@@ -91,26 +93,3 @@ export class YbAprHandlers {
         return aprs;
     }
 }
-
-interface AprHandlerConstructor {
-    new (config?: any): AprHandler;
-}
-
-export interface AprHandler {
-    group?: string;
-    getAprs(chain?: Chain): Promise<{
-        [tokenAddress: string]: {
-            /** Defined as float, eg: 0.01 is 1% */
-            apr: number;
-            isIbYield: boolean;
-            group?: string;
-        };
-    }>;
-}
-
-export type TokenApr = {
-    apr: number;
-    address: string;
-    isIbYield: boolean;
-    group?: string;
-};
