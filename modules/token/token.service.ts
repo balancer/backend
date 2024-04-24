@@ -1,10 +1,22 @@
-import { TokenDefinition, TokenPriceItem } from './token-types';
+import { TokenPriceItem } from './token-types';
 import { prisma } from '../../prisma/prisma-client';
 import { TokenPriceService } from './lib/token-price.service';
-import { Chain, PrismaToken, PrismaTokenCurrentPrice, PrismaTokenDynamicData, PrismaTokenPrice } from '@prisma/client';
+import {
+    Chain,
+    PrismaPriceRateProviderData,
+    PrismaToken,
+    PrismaTokenCurrentPrice,
+    PrismaTokenDynamicData,
+    PrismaTokenPrice,
+} from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
-import { GqlTokenChartDataRange, MutationTokenDeleteTokenTypeArgs } from '../../schema';
+import {
+    GqlPriceRateProviderData,
+    GqlToken,
+    GqlTokenChartDataRange,
+    MutationTokenDeleteTokenTypeArgs,
+} from '../../schema';
 import { networkContext } from '../network/network-context.service';
 import { Dictionary } from 'lodash';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
@@ -52,10 +64,10 @@ export class TokenService {
         return tokens;
     }
 
-    public async getTokenDefinitions(chains: Chain[]): Promise<TokenDefinition[]> {
+    public async getTokenDefinitions(chains: Chain[]): Promise<GqlToken[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: { types: { some: { type: 'WHITE_LISTED' } }, chain: { in: chains } },
-            include: { types: true, dynamicData: true },
+            include: { types: true, dynamicData: true, priceRateProviderData: true },
             orderBy: { priority: 'desc' },
         });
 
@@ -96,7 +108,37 @@ export class TokenService {
             ...token,
             chainId: AllNetworkConfigsKeyedOnChain[token.chain].data.chain.id,
             tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
+            rateProviderData: this.mapPriceRateProviderData(token.priceRateProviderData),
         }));
+    }
+
+    mapPriceRateProviderData(
+        priceRateProviderData: PrismaPriceRateProviderData[],
+    ): GqlPriceRateProviderData | undefined {
+        if (priceRateProviderData.length === 0) {
+            return undefined;
+        }
+
+        if (priceRateProviderData.length === 1) {
+            return {
+                ...priceRateProviderData[0],
+                address: priceRateProviderData[0].rateProviderAddress,
+            };
+        }
+
+        // need to find the "preferred" price rate provider
+        // only return the safe one
+        // if all are reviewed and safe, we can just return the first one
+        for (const provider of priceRateProviderData) {
+            if (provider.reviewed && provider.summary === 'safe') {
+                return {
+                    ...provider,
+                    address: provider.rateProviderAddress,
+                };
+            }
+        }
+
+        return undefined;
     }
 
     public async updateTokenPrices(chainIds: string[]): Promise<void> {

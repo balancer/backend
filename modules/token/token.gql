@@ -83,7 +83,7 @@ type GqlPriceRateProviderData {
     summary: String
     reviewUrl: String
     warnings: [String!]
-    factory: String?
+    factory: String
     upgradeableComponents: [GqlPriceRateProviderUpgradeableComponent]
 }
 

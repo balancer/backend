@@ -242,7 +242,7 @@ model PrismaPoolToken {
     nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
 
     priceRateProvider           String?
-        exemptFromProtocolYieldFee  Boolean             @default(false)
+    exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
 }
