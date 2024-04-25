@@ -248,7 +248,7 @@ export class PoolGqlLoaderService {
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || undefined;
+        const orderDirection = args.orderDirection || 'desc';
         const userAddress = args.where?.userAddress;
 
         switch (args.orderBy) {
