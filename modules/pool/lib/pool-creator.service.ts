@@ -23,14 +23,11 @@ export class PoolCreatorService {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
-        // TODO any pool can be nested
-        const allNestedTypePools = await prisma.prismaPool.findMany({
-            where: {
-                chain: this.chain,
-                type: { in: [PrismaPoolType.COMPOSABLE_STABLE] },
-            },
-            select: { id: true, address: true },
-        });
+        // any pool can be nested
+        const allNestedTypePools = [
+            ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
+            ...sortedSubgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
+        ];
 
         const poolIds: string[] = [];
 
@@ -71,13 +68,7 @@ export class PoolCreatorService {
         const poolIds = new Set<string>();
 
         const allNestedTypePools = [
-            ...(await prisma.prismaPool.findMany({
-                where: {
-                    chain: this.chain,
-                    type: { in: [PrismaPoolType.COMPOSABLE_STABLE] },
-                },
-                select: { id: true, address: true },
-            })),
+            ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
             ...sortedSubgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
         ];
 
