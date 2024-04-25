@@ -23,10 +23,11 @@ export class PoolCreatorService {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
         const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
+        // TODO any pool can be nested
         const allNestedTypePools = await prisma.prismaPool.findMany({
             where: {
                 chain: this.chain,
-                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
+                type: { in: [PrismaPoolType.COMPOSABLE_STABLE] },
             },
             select: { id: true, address: true },
         });
@@ -73,7 +74,7 @@ export class PoolCreatorService {
             ...(await prisma.prismaPool.findMany({
                 where: {
                     chain: this.chain,
-                    type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
+                    type: { in: [PrismaPoolType.COMPOSABLE_STABLE] },
                 },
                 select: { id: true, address: true },
             })),
@@ -304,9 +305,7 @@ export class PoolCreatorService {
         return _.sortBy(subgraphPools, (pool) => {
             const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
 
-            if (poolType === 'LINEAR') {
-                return 0;
-            } else if (poolType === 'COMPOSABLE_STABLE') {
+            if (poolType === 'COMPOSABLE_STABLE') {
                 //if the composable stable has a nested composable stable, it needs to appear later in the list
                 const nestedComposableStableToken = (pool.tokens || []).find((token) => {
                     if (token.address === pool.address) {
@@ -341,8 +340,6 @@ export class PoolCreatorService {
                 return 'COMPOSABLE_STABLE';
             case 'ComposableStable':
                 return 'COMPOSABLE_STABLE';
-            case 'Linear':
-                return 'LINEAR';
             case 'Element':
                 return 'ELEMENT';
             case 'Investment':
@@ -355,11 +352,6 @@ export class PoolCreatorService {
                 return 'GYROE';
             case 'FX':
                 return 'FX';
-        }
-
-        // balancer still uses AaveLinear, etc, so we account for that here
-        if (poolType.includes('Linear')) {
-            return 'LINEAR';
         }
 
         return 'UNKNOWN';

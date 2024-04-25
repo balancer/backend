@@ -99,15 +99,6 @@ const balancerResolvers: Resolvers = {
                 holdersCount: `${snapshot.holdersCount}`,
             }));
         },
-        poolGetLinearPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetLinearPools error: Provide "chains" param');
-            }
-            return poolService.getGqlLinearPools(chains);
-        },
         poolGetGyroPools: async (parent, { chains }, context) => {
             const currentChain = headerChain();
             if (!chains && currentChain) {

@@ -11,7 +11,6 @@ import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { sleep } from '../../common/promise';
 import { networkContext } from '../../network/network-context.service';
 import { CoingeckoDataService, TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
 
