@@ -359,6 +359,9 @@ export class PoolGqlLoaderService {
                 totalSharesNum: {
                     gt: 0.000000000001,
                 },
+                totalLiquidity: {
+                    gt: where?.minTvl || undefined,
+                },
             },
             chain: {
                 in: where?.chainIn || undefined,
