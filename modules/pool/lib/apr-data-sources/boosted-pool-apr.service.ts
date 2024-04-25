@@ -58,14 +58,14 @@ export class BoostedPoolAprService implements PoolAprService {
                     return token.nestedPool?.type === 'COMPOSABLE_STABLE';
                 }
 
-                return token.nestedPool?.type === 'LINEAR' || token.nestedPool?.type === 'COMPOSABLE_STABLE';
+                return token.nestedPool?.type === 'COMPOSABLE_STABLE';
             });
 
             const poolIds = tokens.map((token) => token.nestedPool?.id || '');
             const aprItems = await prisma.prismaPoolAprItem.findMany({
                 where: {
                     poolId: { in: poolIds },
-                    type: { in: ['LINEAR_BOOSTED', 'PHANTOM_STABLE_BOOSTED', 'IB_YIELD', 'SWAP_FEE'] },
+                    type: { in: ['PHANTOM_STABLE_BOOSTED', 'IB_YIELD', 'SWAP_FEE'] },
                     chain: networkContext.chain,
                 },
             });

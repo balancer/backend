@@ -88,8 +88,7 @@ export class YbTokensAprService implements PoolAprService {
                     aprInPoolAfterFees = aprInPoolAfterFees * (1 - fee);
                 }
 
-                const yieldType: PrismaPoolAprType =
-                    tokenApr.isIbYield || pool.type !== 'LINEAR' ? 'IB_YIELD' : 'LINEAR_BOOSTED';
+                const yieldType: PrismaPoolAprType = tokenApr.isIbYield ? 'IB_YIELD' : 'LINEAR_BOOSTED';
 
                 const itemId = `${pool.id}-${token.token.symbol}-yield-apr`;
 

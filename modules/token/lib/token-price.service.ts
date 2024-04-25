@@ -11,7 +11,6 @@ import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-h
 import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
 import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
 import { FallbackHandlerService } from './token-price-handlers/fallback-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
@@ -26,7 +25,6 @@ export class TokenPriceService {
         new AavePriceHandlerService(),
         new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
         new FallbackHandlerService(),
     ];

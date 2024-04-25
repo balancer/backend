@@ -118,9 +118,7 @@ export class PoolSnapshotService {
         });
 
         for (const pool of poolsWithoutSnapshots) {
-            if (pool.type !== 'LINEAR') {
-                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
-            }
+            await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
         }
     }
 
@@ -158,10 +156,6 @@ export class PoolSnapshotService {
 
         if (numDays < 0) {
             numDays = moment().diff(moment.unix(startTimestamp), 'days');
-        }
-
-        if (pool.type === 'LINEAR') {
-            throw new Error('Unsupported pool type');
         }
 
         const swaps = await this.balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
