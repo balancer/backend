@@ -1,4 +1,3 @@
-import { parseEther } from 'viem';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { networkContext } from '../modules/network/network-context.service';
 import { poolService } from '../modules/pool/pool.service';
@@ -9,8 +8,8 @@ async function debugScript() {
     const chain = 'MAINNET';
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
-    // const latestBlockNumber = await networkContext.provider.getBlockNumber();
-    // await poolService.loadOnChainDataForAllPools();
+    const latestBlockNumber = await networkContext.provider.getBlockNumber();
+    await poolService.loadOnChainDataForAllPools();
 
     // BAL, WETH, DAI, wstETH, rETH, GNO, AAVE
     const tokens = [
