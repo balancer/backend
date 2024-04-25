@@ -152,12 +152,7 @@ export class StablePool implements BasePool {
         }
     }
 
-    addLiquiditySingleTokenExactOut(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
+    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         try {
             const tokenInIndex = this.tokenIndexMap.get(tokenIn.address);
             if (!tokenInIndex) throw new Error('Provided Token In is Invalid');
@@ -221,12 +216,7 @@ export class StablePool implements BasePool {
         return 0n;
     }
 
-    removeLiquiditySingleTokenExactIn(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
         if (!tokenOutIndex) throw new Error('Provided Token Out is Invalid');
         const tokenBalances = Array.from(this.tokens.values()).map(({ scale18 }) => scale18);
@@ -243,12 +233,7 @@ export class StablePool implements BasePool {
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }
 
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         const tokenBalances: bigint[] = [];
         const amountsOut: bigint[] = [];
         const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);

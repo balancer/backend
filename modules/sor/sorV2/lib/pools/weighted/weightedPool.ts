@@ -214,7 +214,7 @@ export class WeightedPool implements BasePool {
         }
     }
 
-    public addLiquiditySingleTokenExactOut(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+    public addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount): TokenAmount {
         try {
             const token = this.tokenMap.get(tokenIn.wrapped);
             if (!token) {
@@ -232,7 +232,7 @@ export class WeightedPool implements BasePool {
         }
     }
 
-    public removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+    public removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount): TokenAmount {
         const { amount: tokenBalance, weight: tokenWeight } = Array.from(this.tokenMap.values()).find(
             (weightedPoolToken) => weightedPoolToken.token.isSameAddress(tokenOut.address),
         ) as WeightedPoolToken;
@@ -245,7 +245,7 @@ export class WeightedPool implements BasePool {
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }
 
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount): TokenAmount {
         const tokenBalances: bigint[] = [];
         const amountsOut: bigint[] = [];
         const weights: bigint[] = [];

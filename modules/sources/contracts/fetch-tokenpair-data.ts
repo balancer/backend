@@ -212,7 +212,6 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 poolTvl: pool.dynamicData?.totalLiquidity || 0,
                 // remove pools that have <$1000 TVL or a token without a balance or USD balance
                 valid:
-                    // V2 Validation
                     (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
                     !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
                     !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),

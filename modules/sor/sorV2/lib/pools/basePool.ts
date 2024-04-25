@@ -16,24 +16,9 @@ export interface BasePool {
         amount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount;
-    addLiquiditySingleTokenExactOut(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount;
-    removeLiquiditySingleTokenExactIn(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount;
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount;
+    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint;
     getLimitAmountRemoveLiquidity(): bigint;
     getLimitAmountAddLiquidity(tokenIn: Token): bigint;
