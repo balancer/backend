@@ -47,7 +47,6 @@ enum PrismaPoolType {
     PHANTOM_STABLE
     COMPOSABLE_STABLE
     ELEMENT
-    LINEAR
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
@@ -132,7 +131,7 @@ model PrismaPoolToken {
     index                       Int
 
     nestedPoolId                String?
-    nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain])
+    nestedPool                  PrismaPool?         @relation(name: "PoolNestedInToken", fields:[nestedPoolId, chain], references: [id, chain], onDelete: Cascade)
 
     priceRateProvider           String?
     exemptFromProtocolYieldFee  Boolean             @default(false)
@@ -261,7 +260,7 @@ model PrismaPoolCategory {
 
     id                  String
     poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain])
+    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     category            PrismaPoolCategoryType
 }

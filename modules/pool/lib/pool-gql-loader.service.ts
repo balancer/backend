@@ -487,7 +487,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    type: pool.type,
                 };
             case 'META_STABLE':
                 return {
@@ -496,7 +495,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    type: pool.type,
                 };
             case 'COMPOSABLE_STABLE':
                 return {
@@ -505,7 +503,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
-                    type: pool.type,
                 };
             case 'ELEMENT':
                 return {
@@ -514,14 +511,12 @@ export class PoolGqlLoaderService {
                     ...(typeData as ElementData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    type: pool.type,
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
                     ...mappedData,
-                    type: pool.type,
                 };
             case 'GYRO':
             case 'GYRO3':
@@ -531,7 +526,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as GyroData),
                     ...mappedData,
-                    type: pool.type,
                 };
             case 'FX':
                 return {
@@ -539,7 +533,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...mappedData,
                     ...(typeData as FxData),
-                    type: pool.type,
                 };
         }
 
