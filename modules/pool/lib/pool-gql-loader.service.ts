@@ -565,8 +565,8 @@ export class PoolGqlLoaderService {
         return pool.tokens
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
-                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address)!;
-                if (allToken.nestedPool?.type === 'COMPOSABLE_STABLE') {
+                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address);
+                if (allToken?.nestedPool?.type === 'COMPOSABLE_STABLE') {
                     const mainTokens =
                         allToken.nestedPool.allTokens.filter(
                             (nestedToken) =>
