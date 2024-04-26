@@ -544,7 +544,6 @@ export class PathGraph {
                 } else {
                     const pulledLimit: bigint = path[i].pool.addLiquiditySingleTokenExactOut(
                         path[i].tokenIn,
-                        path[i].tokenOut,
                         TokenAmount.fromRawAmount(path[i].tokenOut, limit),
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;
@@ -557,7 +556,6 @@ export class PathGraph {
                 } else {
                     const pulledLimit: bigint = path[i].pool.removeLiquiditySingleTokenExactOut(
                         path[i].tokenOut,
-                        path[i].tokenIn,
                         TokenAmount.fromRawAmount(path[i].tokenOut, limit),
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;

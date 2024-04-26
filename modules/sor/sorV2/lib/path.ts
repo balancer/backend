@@ -56,7 +56,6 @@ export class PathWithAmount extends PathLocal {
                     } else if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
                         outputAmount = pool.removeLiquiditySingleTokenExactIn(
                             this.tokens[i + 1],
-                            this.tokens[i],
                             amounts[i],
                             this.mutateBalances,
                         );
@@ -86,14 +85,12 @@ export class PathWithAmount extends PathLocal {
                     if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
                         inputAmount = pool.addLiquiditySingleTokenExactOut(
                             this.tokens[i - 1],
-                            this.tokens[i],
                             amounts[i],
                             this.mutateBalances,
                         );
                     } else if (this.tokens[i - 1].isSameAddress(pool.address as `0x${string}`)) {
                         inputAmount = pool.removeLiquiditySingleTokenExactOut(
                             this.tokens[i],
-                            this.tokens[i - 1],
                             amounts[i],
                             this.mutateBalances,
                         );

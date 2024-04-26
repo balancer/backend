@@ -228,25 +228,15 @@ export class MetaStablePool implements BasePool {
         throw new Error('MetaStable - getLimitAmountRemoveLiquidity: Method not Implemented');
     }
 
-    removeLiquiditySingleTokenExactIn(tokenOut: Token, bpt: Token, bptIn: TokenAmount): TokenAmount {
+    removeLiquiditySingleTokenExactIn(tokenOut: Token, bptIn: TokenAmount): TokenAmount {
         throw new Error('MetaStable - removeLiquiditySingleTokenExactIn: Method not Implemented');
     }
 
-    addLiquiditySingleTokenExactOut(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
+    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         throw new Error('MetaStable - addLiquiditySingleTokenExactOut: Method not Implemented');
     }
 
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         throw new Error('MetaStable - removeLiquiditySingleTokenExactOut: Method not Implemented');
     }
 }
