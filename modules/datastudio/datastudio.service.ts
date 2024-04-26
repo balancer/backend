@@ -191,7 +191,7 @@ export class DatastudioService {
                 `${endOfYesterday.unix()}`,
                 `${now}`,
                 pool.address,
-                pool.name,
+                pool.name.replace(/[^\x00-\x7F]/g, ''),
                 poolType,
                 pool.symbol,
                 swapFee,
