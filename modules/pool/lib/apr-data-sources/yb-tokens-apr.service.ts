@@ -79,7 +79,7 @@ export class YbTokensAprService implements PoolAprService {
 
                 let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
 
-                if (collectsYieldFee(pool, token) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
+                if (collectsYieldFee(pool, token) && token.dynamicData) {
                     const fee =
                         pool.type === 'META_STABLE'
                             ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
