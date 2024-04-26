@@ -187,6 +187,13 @@ export default <NetworkData>{
                 path: 'stakingYield.value',
                 isIbYield: true,
             },
+            jitoSOL: {
+                tokenAddress: '0x83e1d2310ade410676b1733d16e89f91822fd5c3',
+                sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
+                path: 'apy.0.data',
+                scale: 1,
+                isIbYield: true,
+            },
         },
     },
     beefy: {

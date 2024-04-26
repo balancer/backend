@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AprHandler } from '..';
+import type { AprHandler } from '../types';
 
 export class DefaultAprHandler implements AprHandler {
     tokenAddress: string;
