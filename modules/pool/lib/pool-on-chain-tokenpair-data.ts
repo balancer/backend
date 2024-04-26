@@ -325,7 +325,7 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
     // this happens if you get a "bonus" ie positive price impact.
     if (priceRatio > parseEther('0.999999')) {
-        console.error(
+        console.log(
             `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
         );
         priceRatio = parseEther('0.999999');
