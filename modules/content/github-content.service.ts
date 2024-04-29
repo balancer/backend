@@ -66,6 +66,14 @@ export class GithubContentService implements ContentService {
         for (const chain of chains) {
             const chainRateProviderList = githubAllRateProviderList.reviewed[chain.toLowerCase()];
 
+            // delete any reviews that are no longer part of the review repo
+            await prisma.prismaPriceRateProviderData.deleteMany({
+                where: {
+                    chain: chain,
+                    rateProviderAddress: { notIn: Object.keys(chainRateProviderList) },
+                },
+            });
+
             for (const rateProviderAddress in chainRateProviderList) {
                 const rateProviderData = chainRateProviderList[rateProviderAddress];
 
@@ -96,14 +104,6 @@ export class GithubContentService implements ContentService {
                     },
                 });
             }
-
-            // delete any reviews that are no longer part of the review repo
-            await prisma.prismaPriceRateProviderData.deleteMany({
-                where: {
-                    chain: chain,
-                    rateProviderAddress: { notIn: Object.keys(chainRateProviderList) },
-                },
-            });
         }
     }
 
