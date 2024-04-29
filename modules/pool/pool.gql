@@ -417,9 +417,9 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
 
     """
-    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -466,9 +466,9 @@ type GqlPoolGyro implements GqlPoolBase {
     dSq: String!
 
     """
-    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     version: Int!
@@ -506,9 +506,9 @@ type GqlPoolFx implements GqlPoolBase {
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
     """
-    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -530,9 +530,9 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
 
     """
-    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -586,7 +586,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -614,9 +614,9 @@ type GqlPoolComposableStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
 
     """
-    DEPRECATED: All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     amp: BigInt!
     staking: GqlPoolStaking
@@ -644,7 +644,7 @@ type GqlPoolElement implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
 
     #element specific fields
     unitSeconds: BigInt!
@@ -674,7 +674,7 @@ type GqlPoolLinear implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
 
     #linear specific fields
     mainIndex: Int!
@@ -697,7 +697,7 @@ type GqlPoolLinearNested {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
 
     totalShares: BigDecimal!
     totalLiquidity: BigDecimal!
@@ -721,7 +721,7 @@ type GqlPoolComposableStableNested {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    tokens: [GqlPoolTokenComposableStableNestedUnion!]!
+    tokens: [GqlPoolTokenComposableStableNestedUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
 
     totalShares: BigDecimal!
