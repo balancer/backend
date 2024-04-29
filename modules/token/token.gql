@@ -39,27 +39,27 @@ extend type Query {
         address: String!
         range: GqlTokenChartDataRange!
         chain: GqlChain
-    ): [GqlTokenPriceChartDataItem!]!
+    ): [GqlTokenPriceChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead") 
     """ 
-    DEPRECATED: Returns the candlestick chart data for a token for a given range.
+    Returns the candlestick chart data for a token for a given range.
     """
     tokenGetCandlestickChartData(
         address: String!
         range: GqlTokenChartDataRange!
         chain: GqlChain
-    ): [GqlTokenCandlestickChartDataItem!]!
+    ): [GqlTokenCandlestickChartDataItem!]!  @deprecated(reason: "Use tokenGetHistoricalPrices instead")  
     """
-    DEPRECATED: Returns meta data for a given token such as description, website, etc.
+    Returns meta data for a given token such as description, website, etc.
     """
-    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData
+    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData @deprecated(reason: "Use tokenGetTokens instead")  
     """
-    DEPRECATED: Returns meta data for a given set of tokens such as description, website, etc.
+    Returns meta data for a given set of tokens such as description, website, etc.
     """
-    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]!
+    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]! @deprecated(reason: "Use tokenGetTokens instead")  
     """
-    DEPRECATED: Returns the price of either BAL or BEETS depending on chain
+    Returns the price of either BAL or BEETS depending on chain
     """
-    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
+    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable! @deprecated(reason: "Use tokenGetTokensDynamicData instead")  
 }
 
 extend type Mutation {
