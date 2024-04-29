@@ -39,27 +39,28 @@ extend type Query {
         address: String!
         range: GqlTokenChartDataRange!
         chain: GqlChain
-    ): [GqlTokenPriceChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead") 
-    """ 
+    ): [GqlTokenPriceChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
+    """
     Returns the candlestick chart data for a token for a given range.
     """
     tokenGetCandlestickChartData(
         address: String!
         range: GqlTokenChartDataRange!
         chain: GqlChain
-    ): [GqlTokenCandlestickChartDataItem!]!  @deprecated(reason: "Use tokenGetHistoricalPrices instead")  
+    ): [GqlTokenCandlestickChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
     """
     Returns meta data for a given token such as description, website, etc.
     """
-    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData @deprecated(reason: "Use tokenGetTokens instead")  
+    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData @deprecated(reason: "Use tokenGetTokens instead")
     """
     Returns meta data for a given set of tokens such as description, website, etc.
     """
-    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]! @deprecated(reason: "Use tokenGetTokens instead")  
+    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]! @deprecated(reason: "Use tokenGetTokens instead")
     """
     Returns the price of either BAL or BEETS depending on chain
     """
-    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable! @deprecated(reason: "Use tokenGetTokensDynamicData instead")  
+    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
+        @deprecated(reason: "Use tokenGetTokensDynamicData instead")
 }
 
 extend type Mutation {
@@ -221,9 +222,6 @@ type GqlTokenDynamicData {
     updatedAt: String!
 }
 
-"""
-Represents the data of a price rate provider
-"""
 """
 Represents the data of a price rate provider
 """
