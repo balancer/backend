@@ -120,10 +120,13 @@ model PrismaPriceRateProviderData {
     rateProviderAddress String
 
     tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
 
     reviewed            Boolean
     name                String?
     summary             String?
     reviewUrl           String?
+    
+    @@index([chain, rateProviderAddress])
+    @@index([tokenAddress])
 }
