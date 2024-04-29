@@ -3,11 +3,10 @@ import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { isSameAddress } from '@balancer-labs/sdk';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -42,6 +41,7 @@ export class WeightedPool implements BasePool {
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
     public readonly totalShares: bigint;
+    public readonly vaultVersion: number;
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
     private readonly MAX_INVARIANT_RATIO = BigInt(3e18);
@@ -81,6 +81,7 @@ export class WeightedPool implements BasePool {
             pool.address,
             pool.chain,
             pool.version,
+            pool.vaultVersion,
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
@@ -93,6 +94,7 @@ export class WeightedPool implements BasePool {
         address: string,
         chain: Chain,
         poolTypeVersion: number,
+        vaultVersion: number,
         swapFee: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
@@ -101,6 +103,7 @@ export class WeightedPool implements BasePool {
         this.chain = chain;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
+        this.vaultVersion = vaultVersion;
         this.address = address;
         this.swapFee = swapFee;
         this.tokens = tokens;
@@ -139,8 +142,26 @@ export class WeightedPool implements BasePool {
         return (tIn.amount * this.MAX_IN_RATIO) / WAD;
     }
 
-    public getLimitAmountRemoveLiquidity(): bigint {
-        return (this.totalShares * this.MAX_IN_RATIO) / WAD;
+    public getLimitAmountRemoveLiquidity(
+        bpt: Token,
+        tokenOut: Token,
+        removeLiquidityKind: RemoveLiquidityKind,
+    ): bigint {
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        if (!tOut) {
+            throw new Error('getLimitRemoveLiquidity: Token not found');
+        }
+        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactOut) {
+            return tOut.amount;
+        }
+        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactIn) {
+            return this.removeLiquiditySingleTokenExactOut(
+                tokenOut,
+                bpt,
+                TokenAmount.fromRawAmount(tokenOut, tOut.amount),
+            ).amount;
+        }
+        throw new Error('getLimitRemoveLiquidity: Invalid RemoveLiquidityKind');
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
@@ -245,7 +266,7 @@ export class WeightedPool implements BasePool {
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }
 
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount): TokenAmount {
+    removeLiquiditySingleTokenExactOut(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
         const tokenBalances: bigint[] = [];
         const amountsOut: bigint[] = [];
         const weights: bigint[] = [];
@@ -258,8 +279,8 @@ export class WeightedPool implements BasePool {
             tokenBalances.push(weightedPoolToken.scale18);
             weights.push(weightedPoolToken.weight);
         });
-        const tokenAmountOut = this._calcBptInGivenExactTokensOut(tokenBalances, weights, amountsOut, this.totalShares);
-        return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
+        const bptIn = this._calcBptInGivenExactTokensOut(tokenBalances, weights, amountsOut, this.totalShares);
+        return TokenAmount.fromRawAmount(bpt, bptIn);
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {

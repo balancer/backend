@@ -91,6 +91,7 @@ export class PathWithAmount extends PathLocal {
                     } else if (this.tokens[i - 1].isSameAddress(pool.address as `0x${string}`)) {
                         inputAmount = pool.removeLiquiditySingleTokenExactOut(
                             this.tokens[i],
+                            this.tokens[i - 1],
                             amounts[i],
                             this.mutateBalances,
                         );

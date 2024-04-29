@@ -1,4 +1,4 @@
-import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Hex } from 'viem';
 
 export interface BasePool {
@@ -18,8 +18,12 @@ export interface BasePool {
     ): TokenAmount;
     addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
     removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount;
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint;
-    getLimitAmountRemoveLiquidity(): bigint;
-    getLimitAmountAddLiquidity(tokenIn: Token): bigint;
+    getLimitAmountRemoveLiquidity(bpt: Token, tokenOut: Token, removeLiquidityKind: RemoveLiquidityKind): bigint;
 }

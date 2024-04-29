@@ -238,7 +238,12 @@ export class Gyro3Pool implements BasePool {
         throw new Error('Gyro3 - addLiquiditySingleTokenExactOut: Invalid Method');
     }
 
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         throw new Error('Gyro3 - removeLiquiditySingleTokenExactOut: Invalid Method');
     }
 }

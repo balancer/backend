@@ -1,4 +1,4 @@
-import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { MAX_UINT256, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
@@ -509,9 +509,13 @@ export class PathGraph {
     private getLimitAmountSwapForPath(path: PathGraphEdgeData[]): bigint {
         let limit;
         if (this.getOperationFromPath(path[path.length - 1]) === PathOperation.AddLiquidity) {
-            limit = path[path.length - 1].pool.getLimitAmountAddLiquidity(path[path.length - 1].tokenIn);
+            limit = MAX_UINT256;
         } else if (this.getOperationFromPath(path[path.length - 1]) === PathOperation.RemoveLiquidity) {
-            limit = path[path.length - 1].pool.getLimitAmountRemoveLiquidity();
+            limit = path[path.length - 1].pool.getLimitAmountRemoveLiquidity(
+                path[path.length - 1].tokenIn,
+                path[path.length - 1].tokenOut,
+                RemoveLiquidityKind.SingleTokenExactIn,
+            );
         } else {
             limit = path[path.length - 1].pool.getLimitAmountSwap(
                 path[path.length - 1].tokenIn,
@@ -527,7 +531,7 @@ export class PathGraph {
                 limitGivenIn = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenIn);
                 limitGivenOut = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenOut);
                 if (limitGivenOut <= limit) {
-                    limit = limitGivenIn;
+                    limit = limitGivenOut;
                 } else {
                     const pulledLimit: bigint = path[i].pool.swapGivenOut(
                         path[i].tokenIn,
@@ -536,26 +540,23 @@ export class PathGraph {
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;
                 }
-            } else if (this.getOperationFromPath(path[i]) === PathOperation.AddLiquidity) {
-                limitGivenIn = path[i].pool.getLimitAmountAddLiquidity(path[i].tokenIn);
-                limitGivenOut = path[i].pool.getLimitAmountRemoveLiquidity();
+            } else if (this.getOperationFromPath(path[i]) === PathOperation.RemoveLiquidity) {
+                limitGivenIn = path[i].pool.getLimitAmountRemoveLiquidity(
+                    path[i].tokenIn,
+                    path[i].tokenOut,
+                    RemoveLiquidityKind.SingleTokenExactIn,
+                );
+                limitGivenOut = path[i].pool.getLimitAmountRemoveLiquidity(
+                    path[i].tokenIn,
+                    path[i].tokenOut,
+                    RemoveLiquidityKind.SingleTokenExactOut,
+                );
                 if (limitGivenOut <= limit) {
-                    limit = limitGivenIn;
-                } else {
-                    const pulledLimit: bigint = path[i].pool.addLiquiditySingleTokenExactOut(
-                        path[i].tokenIn,
-                        TokenAmount.fromRawAmount(path[i].tokenOut, limit),
-                    ).amount;
-                    limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;
-                }
-            } else {
-                limitGivenIn = path[i].pool.getLimitAmountRemoveLiquidity();
-                limitGivenOut = path[i].pool.getLimitAmountAddLiquidity(path[i].tokenOut);
-                if (limitGivenOut <= limit) {
-                    limit = limitGivenIn;
+                    limit = limitGivenOut;
                 } else {
                     const pulledLimit: bigint = path[i].pool.removeLiquiditySingleTokenExactOut(
                         path[i].tokenOut,
+                        path[i].tokenIn,
                         TokenAmount.fromRawAmount(path[i].tokenOut, limit),
                     ).amount;
                     limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;

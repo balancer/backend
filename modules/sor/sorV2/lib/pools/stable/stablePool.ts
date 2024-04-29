@@ -1,5 +1,5 @@
 import { BasePool } from '../basePool';
-import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, PoolType, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { Chain } from '@prisma/client';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
@@ -173,15 +173,22 @@ export class StablePool implements BasePool {
         }
     }
 
-    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        if (!tIn) throw new Error('Pool does not contain the token provided');
-        return (tIn.amount * WAD) / tIn.rate;
-    }
-
-    getLimitAmountRemoveLiquidity(): bigint {
-        //TODO add division by BPT price rate
-        return this.totalShares;
+    getLimitAmountRemoveLiquidity(bpt: Token, tokenOut: Token, removeLiquidityKind: RemoveLiquidityKind): bigint {
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        if (!tOut) {
+            throw new Error('getLimitRemoveLiquidity: Token not found');
+        }
+        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactOut) {
+            return (tOut.amount * WAD) / tOut.rate;
+        }
+        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactIn) {
+            return this.removeLiquiditySingleTokenExactOut(
+                tokenOut,
+                bpt,
+                TokenAmount.fromRawAmount(tokenOut, tOut.amount),
+            ).amount;
+        }
+        throw new Error('getLimitRemoveLiquidity: Invalid RemoveLiquidityKind');
     }
 
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
@@ -233,7 +240,12 @@ export class StablePool implements BasePool {
         return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
     }
 
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tokenBalances: bigint[] = [];
         const amountsOut: bigint[] = [];
         const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
@@ -247,7 +259,7 @@ export class StablePool implements BasePool {
             tokenBalances.push(stablePoolToken.scale18);
         });
         const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
-        const tokenAmountOut = _calcBptInGivenExactTokensOut(
+        const bptIn = _calcBptInGivenExactTokensOut(
             this.amp,
             tokenBalances,
             amountsOut,
@@ -255,7 +267,7 @@ export class StablePool implements BasePool {
             currentInvariant,
             this.swapFee,
         );
-        return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
+        return TokenAmount.fromRawAmount(bpt, bptIn);
     }
 
     swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount {

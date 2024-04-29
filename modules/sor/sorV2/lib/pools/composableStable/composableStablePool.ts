@@ -342,7 +342,12 @@ export class ComposableStablePool implements BasePool {
         throw new Error('Composable Stable - addLiquiditySingleTokenExactOut: Method not Implemented');
     }
 
-    removeLiquiditySingleTokenExactOut(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
+    removeLiquiditySingleTokenExactOut(
+        tokenOut: Token,
+        bpt: Token,
+        amount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         throw new Error('Composable Stable - removeLiquiditySingleTokenExactOut: Method not Implemented');
     }
 }
