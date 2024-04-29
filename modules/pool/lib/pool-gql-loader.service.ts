@@ -36,6 +36,7 @@ import {
     GqlPoolFx,
     GqlPoolTokenDetail,
     GqlNestedPool,
+    GqlPoolAprV2,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
@@ -43,6 +44,8 @@ import { prisma } from '../../../prisma/prisma-client';
 import {
     Chain,
     Prisma,
+    PrismaPoolAprItem,
+    PrismaPoolAprRange,
     PrismaPoolAprType,
     PrismaPoolStaking,
     PrismaUserStakedBalance,
@@ -84,10 +87,11 @@ export class PoolGqlLoaderService {
         );
     }
 
-    public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
+    public async getPools(args: QueryPoolGetPoolsArgs, paths: string[] = []): Promise<GqlPoolMinimal[]> {
         // only include wallet and staked balances if the query requests it
         // this makes sure that we don't load ALL user balances when we don't filter on userAddress
         // need to support ordering and paging by userbalanceUsd. Need to take care of that here, as the DB does not (and should not) store the usd balance
+        // TODO: let's find a way to do that in the DB
         if (args.where?.userAddress) {
             const first = args.first;
             const skip = args.skip ? args.skip : 0;
@@ -176,6 +180,7 @@ export class PoolGqlLoaderService {
             ...pool,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
+            apr: this.getPoolApr(pool.aprItems),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
@@ -481,6 +486,7 @@ export class PoolGqlLoaderService {
             decimals: 18,
             staking: stakingData,
             dynamicData: this.getPoolDynamicData(pool),
+            apr: this.getPoolApr(pool.aprItems),
             investConfig: this.getPoolInvestConfig(pool),
             withdrawConfig: this.getPoolWithdrawConfig(pool),
             nestingType: this.getPoolNestingType(pool),
@@ -773,6 +779,27 @@ export class PoolGqlLoaderService {
             stakedBalanceUsd: stakedBalanceNum * bptPrice,
             totalBalanceUsd: (walletBalanceNum + stakedBalanceNum) * bptPrice,
         };
+    }
+
+    private getPoolApr(
+        items: (PrismaPoolAprItem & {
+            range: PrismaPoolAprRange | null;
+        })[],
+    ): GqlPoolAprV2 {
+        items = items.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0));
+
+        const components = items.map((item) => ({
+            type: item.type,
+            name: item.title,
+            value: item.range?.min || item.apr,
+            max: item.range?.max || item.apr,
+        }));
+
+        const total = components.reduce((acc, item) => {
+            return acc + item.value;
+        }, 0);
+
+        return { total, components };
     }
 
     private getPoolDynamicData(pool: PrismaPoolMinimal): GqlPoolDynamicData {

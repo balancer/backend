@@ -75,8 +75,8 @@ export class PoolService {
         return this.poolGqlLoaderService.getPool(id, chain, userAddress);
     }
 
-    public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
-        return this.poolGqlLoaderService.getPools(args);
+    public async getGqlPools(args: QueryPoolGetPoolsArgs, paths: string[] = []): Promise<GqlPoolMinimal[]> {
+        return this.poolGqlLoaderService.getPools(args, paths);
     }
 
     public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {

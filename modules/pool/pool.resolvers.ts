@@ -5,6 +5,31 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
 import { EventsQueryController } from '../controllers/pool-events-query-controller';
+import { FieldNode, SelectionNode } from 'graphql';
+
+const extractPaths = (node: FieldNode) => {
+    let paths: string[] = [];
+
+    const traverse = (nodes: readonly SelectionNode[], currentPath = '') => {
+        nodes.forEach((selection) => {
+            if (selection.kind === 'Field') {
+                const newPath = currentPath + (currentPath ? '.' : '') + selection.name.value;
+                if (!selection.selectionSet) {
+                    paths.push(newPath);
+                } else {
+                    traverse(selection.selectionSet.selections, newPath);
+                }
+            } else if (selection.kind === 'InlineFragment') {
+                const typeCondition = selection.typeCondition?.name.value;
+                traverse(selection.selectionSet.selections, currentPath + (currentPath ? '.' : '') + typeCondition);
+            }
+        });
+    };
+
+    if (node.selectionSet) traverse(node.selectionSet?.selections, '');
+
+    return paths;
+};
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -17,8 +42,10 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getGqlPool(id, chain, userAddress ? userAddress : undefined);
         },
-        poolGetPools: async (parent, args, context) => {
-            return poolService.getGqlPools(args);
+        poolGetPools: async (parent, args, context, { fieldNodes }) => {
+            // Parse requested fields into paths expanded recursively into strings representing a path
+            const paths = extractPaths(fieldNodes[0]);
+            return poolService.getGqlPools(args, paths);
         },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);

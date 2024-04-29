@@ -179,6 +179,10 @@ type GqlPoolMinimal {
     If a user address was provided in the query, the user balance is populated here
     """
     userBalance: GqlPoolUserBalance
+    """
+    Pool's APRs
+    """
+    apr: GqlPoolAprV2!
 }
 
 """
@@ -315,6 +319,10 @@ interface GqlPoolBase {
     If a user address was provided in the query, the user balance is populated here
     """
     userBalance: GqlPoolUserBalance
+    """
+    Pool's APRs
+    """
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolDynamicData {
@@ -330,7 +338,7 @@ type GqlPoolDynamicData {
     volume24h: BigDecimal!
     fees24h: BigDecimal!
     yieldCapture24h: BigDecimal!
-    apr: GqlPoolApr!
+    apr: GqlPoolApr! @deprecated(reason: "moved to top level .apr")
 
     isInRecoveryMode: Boolean!
     isPaused: Boolean!
@@ -430,6 +438,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -475,6 +484,7 @@ type GqlPoolGyro implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolFx implements GqlPoolBase {
@@ -507,6 +517,7 @@ type GqlPoolFx implements GqlPoolBase {
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
     tokens: [GqlPoolTokenUnion!]!
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -534,6 +545,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -561,6 +573,7 @@ type GqlPoolStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -588,6 +601,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolComposableStable implements GqlPoolBase {
@@ -617,6 +631,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -647,6 +662,7 @@ type GqlPoolElement implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolLinear implements GqlPoolBase {
@@ -679,6 +695,7 @@ type GqlPoolLinear implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+    apr: GqlPoolAprV2!
 }
 
 type GqlPoolLinearNested {
@@ -897,12 +914,12 @@ type GqlPoolLinearPoolWrappedToken {
 }
 
 type GqlPoolApr {
-    apr: GqlPoolAprValue!
-    swapApr: BigDecimal! # we make the assumption swap apr will never have a range
-    nativeRewardApr: GqlPoolAprValue!
-    thirdPartyApr: GqlPoolAprValue!
-    items: [GqlBalancePoolAprItem!]!
-    hasRewardApr: Boolean!
+    apr: GqlPoolAprValue! @deprecated(reason: "use apr.total")
+    swapApr: BigDecimal! @deprecated(reason: "FE logic, simplified in apr.components")
+    nativeRewardApr: GqlPoolAprValue! @deprecated(reason: "FE logic, simplified in apr.components")
+    thirdPartyApr: GqlPoolAprValue! @deprecated(reason: "FE logic, simplified in apr.components")
+    items: [GqlBalancePoolAprItem!]! @deprecated(reason: "FE logic, simplified in apr.components")
+    hasRewardApr: Boolean! @deprecated(reason: "FE logic, simplified in apr.components")
 }
 
 union GqlPoolAprValue = GqlPoolAprRange | GqlPoolAprTotal
@@ -1075,6 +1092,31 @@ type GqlBalancePoolAprItem {
     title: String!
     apr: GqlPoolAprValue!
     subItems: [GqlBalancePoolAprSubItem!]
+}
+
+enum GqlAprType {
+    IB_YIELD # Interest bearing yield? I have reservations about that name.
+    SWAP_FEE
+    PHANTOM_STABLE_BOOSTED
+    VOTING
+    LINEAR_BOOSTED
+    NATIVE_REWARD
+    THIRD_PARTY_REWARD
+}
+
+type GqlPoolAprV2 {
+    total: Float!
+    components: [GqlPoolAprComponent]
+}
+
+type GqlPoolAprComponent {
+    name: String!
+    value: Float!
+    """
+    Maximal APR depending on LP actions
+    """
+    max: Float!
+    type: GqlAprType
 }
 
 type GqlBalancePoolAprSubItem {
