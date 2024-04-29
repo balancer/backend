@@ -134,7 +134,7 @@ export class GaugeAprService implements PoolAprService {
                             max: minApr * this.MAX_VEBAL_BOOST,
                         };
 
-                        itemData.apr = minApr;
+                        itemData.apr = minApr * this.MAX_VEBAL_BOOST;
 
                         return [itemData, rangeData];
                     } else {
