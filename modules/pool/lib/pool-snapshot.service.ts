@@ -193,7 +193,7 @@ export class PoolSnapshotService {
                     },
                 });
                 if (priceForDays.length === 0) {
-                    console.error(
+                    console.log(
                         `No historical price in DB for to create pool snapshots. Skipping token ${token.address}.`,
                     );
                 } else {

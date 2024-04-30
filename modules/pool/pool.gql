@@ -951,6 +951,7 @@ input GqlPoolFilter {
     createTime: GqlPoolTimePeriod
     userAddress: String
     vaultVersionIn: [Int!]
+    minTvl: Float
 }
 
 enum GqlPoolFilterCategory {
