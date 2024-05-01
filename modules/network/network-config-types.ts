@@ -128,24 +128,6 @@ export interface NetworkData {
         address: string;
         excludedFarmIds: string[];
     };
-    copper?: {
-        proxyAddress: string;
-    };
-    beefy?: {
-        linearPools: string[];
-    };
-    stader?: {
-        sFtmxContract: string;
-    };
-    rocket?: {
-        rEthContract: string;
-    };
-    spooky?: {
-        xBooContract: string;
-    };
-    overnight?: {
-        aprEndpoint: string;
-    };
     avgBlockSpeed: number;
     sor?: {
         poolIdsToExclude?: string[];

@@ -217,15 +217,6 @@ export default <NetworkData>{
             },
         },
     },
-    copper: {
-        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
-    },
-    beefy: {
-        linearPools: [''],
-    },
-    spooky: {
-        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
-    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',

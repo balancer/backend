@@ -51,7 +51,6 @@ export class BoostedPoolAprService implements PoolAprService {
                     return false;
                 }
 
-                //for phantom stable pools, the linear apr items have already been set in PhantomStableAprService,
                 //so we're only concerned with finding the apr for phantom stable BPTs nested inside of
                 //this phantom stable
                 if (pool.type === 'COMPOSABLE_STABLE') {

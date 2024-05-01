@@ -338,7 +338,6 @@ enum PrismaPoolAprType {
     SWAP_FEE
     NATIVE_REWARD
     THIRD_PARTY_REWARD
-    LINEAR_BOOSTED
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
     VOTING
@@ -743,7 +742,6 @@ enum PrismaTokenTypeOption {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
-    LINEAR_WRAPPED_TOKEN
 }
 
 

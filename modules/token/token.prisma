@@ -109,5 +109,4 @@ enum PrismaTokenTypeOption {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
-    LINEAR_WRAPPED_TOKEN
 }

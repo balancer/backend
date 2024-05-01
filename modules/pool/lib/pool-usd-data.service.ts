@@ -224,7 +224,7 @@ export class PoolUsdDataService {
 
                 // we approximate total APR by summing it up, as APRs are usually small, this is good enough
                 // we need IB yield APR (such as sFTMx) as well as phantom stable APR, which is set for phantom stable pools
-                // we need any phantom stable pool or weighted pool that has either a phantom stable or a linear nested, which has no apr type set (done by boosted-pool-apr.service.ts)
+                // we need any phantom stable pool or weighted pool that has either a phantom stable nested, which has no apr type set (done by boosted-pool-apr.service.ts)
                 pool.aprItems.forEach((aprItem) => {
                     if (
                         aprItem.type === 'IB_YIELD' ||

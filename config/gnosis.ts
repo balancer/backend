@@ -100,7 +100,4 @@ export default <NetworkData>{
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
-    beefy: {
-        linearPools: [''],
-    },
 };
