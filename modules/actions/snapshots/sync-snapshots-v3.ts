@@ -36,9 +36,9 @@ export async function syncSnapshotsV3(
         subgraphTimestamp = poolSnapshots[0].timestamp;
     }
 
+    // Adding a day to the last stored snapshot timestamp,
+    // because we want to sync the next day from what we have in the DB
     const timestamp = (storedTimestamp && storedTimestamp + 86400) || subgraphTimestamp;
-
-    console.log(storedTimestamp, subgraphTimestamp, timestamp);
 
     return syncSnapshotsForADayV3(vaultSubgraphClient, chain, timestamp);
 }
@@ -69,20 +69,8 @@ export async function syncSnapshotsForADayV3(
         },
     });
 
-    console.log(
-        'dbSnapshots',
-        previousSnapshots.length,
-        previousSnapshots.map((s) => s.poolId),
-    );
-
-    // Get snapshots from the previous day
+    // Get snapshots for the next day
     const nextSnapshots = await vaultSubgraphClient.getSnapshotsForTimestamp(next);
-
-    console.log(
-        'nextDaySnapshotsSubgraph',
-        nextSnapshots.length,
-        nextSnapshots.map((s) => s.pool.id),
-    );
 
     // Get all pool IDs we are interested in
     const dbPools = await prisma.prismaPool.findMany({
@@ -112,8 +100,8 @@ export async function syncSnapshotsForADayV3(
             },
         })
     )
-        .map((p) => ({ [p.tokenAddress]: p.price }))
-        .reduce((acc, p) => ({ ...acc, ...p }), {});
+        .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
+        .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
 
     const allTokens = await prisma.prismaToken.findMany({ where: { chain } });
 
