@@ -1,4 +1,5 @@
 -- Delete all PrismaPoolExpandedTokens that are linear pool BPTs.
+BEGIN;
 WITH tokens_bpt as (
     SELECT p.address, p.chain
     FROM "PrismaPool" p
