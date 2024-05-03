@@ -103,7 +103,7 @@ const subgraphMapper = (
     const tokens =
         pool.tokens?.map((token) => {
             const nestedPool = nestedPools.find((nestedPool) => {
-                return nestedPool.address === token.address;
+                return pool.id !== nestedPool.id && nestedPool.address === token.address;
             });
 
             let priceRateProvider;
