@@ -40,6 +40,8 @@ export async function syncStakingData(stakingContractAddress: Address, viemClien
         },
     });
 
+    await prisma.prismaSftmxVault.deleteMany({ where: { id: { notIn: stakingData.vaults.map((vault) => vault.id) } } });
+
     for (const vaultData of stakingData.vaults) {
         await prisma.prismaSftmxVault.upsert({
             where: { id: vaultData.id },

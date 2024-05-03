@@ -210,10 +210,8 @@ export class SanityContentService implements ContentService {
         };
 
         const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: chain } });
-        const incentivized = categories.filter((item) => item.category === 'INCENTIVIZED').map((item) => item.poolId);
         const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
 
-        await this.updatePoolCategory(incentivized, config.incentivizedPools, 'INCENTIVIZED', chain);
         await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED', chain);
     }
 

@@ -118,10 +118,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
-        {
-            name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
-        },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',

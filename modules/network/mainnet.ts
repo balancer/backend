@@ -130,10 +130,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
                     : every(10, 'days'),
         },
         {
-            name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
-        },
-        {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
         },

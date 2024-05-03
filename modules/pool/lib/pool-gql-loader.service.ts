@@ -235,7 +235,7 @@ export class PoolGqlLoaderService {
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
         let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || undefined;
+        const orderDirection = args.orderDirection || 'desc';
         const userAddress = args.where?.userAddress;
 
         switch (args.orderBy) {
@@ -345,6 +345,9 @@ export class PoolGqlLoaderService {
             dynamicData: {
                 totalSharesNum: {
                     gt: 0.000000000001,
+                },
+                totalLiquidity: {
+                    gt: where?.minTvl || undefined,
                 },
             },
             chain: {
