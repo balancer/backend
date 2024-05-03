@@ -24,4 +24,5 @@ DELETE FROM "PrismaPool" WHERE type='LINEAR';
 DELETE FROM "PrismaTokenType" where type='LINEAR_WRAPPED_TOKEN';
 
 -- Delete all the linear boosted APRs
-DELETE FROM "PrismaPoolAprItem" where type='LINEAR_BOOSTED'
+DELETE FROM "PrismaPoolAprItem" where type='LINEAR_BOOSTED';
+COMMIT;
