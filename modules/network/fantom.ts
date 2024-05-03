@@ -1,6 +1,5 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { MasterchefFarmAprService } from '../pool/lib/apr-data-sources/fantom/masterchef-farm-apr.service';
@@ -27,8 +26,6 @@ export const fantomNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
-        // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new PhantomStableAprService(fantomNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),

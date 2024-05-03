@@ -11,7 +11,6 @@ import {
 import SanityClient from '@sanity/client';
 import { env } from '../../app/env';
 import { chainToIdMap } from '../network/network-config';
-import { LinearData } from '../pool/subgraph-mapper';
 
 interface SanityToken {
     name: string;
@@ -171,35 +170,12 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            if (
-                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
-                !tokenTypes.includes('PHANTOM_BPT')
-            ) {
+            if (pool?.type === 'COMPOSABLE_STABLE' && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
-                });
-            }
-
-            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
-            const wrappedLinearPoolToken = wrappedIndex
-                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
-                : undefined;
-
-            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                types.push({
-                    id: `${token.address}-linear-wrapped`,
-                    chain: chain,
-                    type: 'LINEAR_WRAPPED_TOKEN',
-                    tokenAddress: token.address,
-                });
-            }
-
-            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                prisma.prismaTokenType.delete({
-                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: chain } },
                 });
             }
         }

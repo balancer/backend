@@ -10,7 +10,6 @@ import {
     GqlPoolFx,
     GqlPoolGyro,
     GqlPoolJoinExit,
-    GqlPoolLinear,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
@@ -77,10 +76,6 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
-    }
-
-    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools(chains);
     }
 
     public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
