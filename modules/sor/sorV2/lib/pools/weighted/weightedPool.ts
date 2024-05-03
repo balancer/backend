@@ -14,7 +14,8 @@ export class WeightedPoolToken extends TokenAmount {
 
     public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
         super(token, amount);
-        this.weight = BigInt(weight);
+        //TODO: V3 Pool weights are not in the same format as V2 Pool weights
+        this.weight = parseFloat(weight.toString()) < 1 ? parseEther(weight.toString()) : BigInt(weight);
         this.index = index;
     }
 
@@ -81,11 +82,11 @@ export class WeightedPool implements BasePool {
             pool.address,
             pool.chain,
             pool.version,
-            pool.vaultVersion,
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
             parseEther(pool.dynamicData.totalShares),
+            pool.vaultVersion,
         );
     }
 
@@ -94,11 +95,11 @@ export class WeightedPool implements BasePool {
         address: string,
         chain: Chain,
         poolTypeVersion: number,
-        vaultVersion: number,
         swapFee: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
         totalShares: bigint,
+        vaultVersion: number,
     ) {
         this.chain = chain;
         this.id = id;
@@ -127,11 +128,18 @@ export class WeightedPool implements BasePool {
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
-        if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
+        if (this.vaultVersion === 2) {
+            if (swapKind === SwapKind.GivenIn) {
+                return (tIn.amount * this.MAX_IN_RATIO) / WAD;
+            }
+            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
+        } else if (this.vaultVersion === 3) {
+            if (swapKind === SwapKind.GivenIn) {
+                return tIn.amount;
+            }
+            return tOut.amount;
         }
-        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
+        throw new Error("getLimitAmountSwap: Invalid Pool's vaultVersion");
     }
 
     public getLimitAmountAddLiquidity(tokenIn: Token): bigint {
@@ -152,13 +160,13 @@ export class WeightedPool implements BasePool {
             throw new Error('getLimitRemoveLiquidity: Token not found');
         }
         if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactOut) {
-            return tOut.amount;
+            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
         if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactIn) {
             return this.removeLiquiditySingleTokenExactOut(
                 tokenOut,
                 bpt,
-                TokenAmount.fromRawAmount(tokenOut, tOut.amount),
+                TokenAmount.fromRawAmount(tokenOut, (tOut.amount * this.MAX_OUT_RATIO) / WAD),
             ).amount;
         }
         throw new Error('getLimitRemoveLiquidity: Invalid RemoveLiquidityKind');

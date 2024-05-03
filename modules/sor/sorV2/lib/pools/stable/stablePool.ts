@@ -16,12 +16,10 @@ import {
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
-import { WeightedPoolToken } from '../weighted/weightedPool';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
     public readonly index: number;
-
     public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
         super(token, amount);
         this.rate = BigInt(rate);
@@ -54,7 +52,6 @@ export class StablePool implements BasePool {
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
     public readonly tokenPairs: TokenPairData[];
-
     static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
         const poolTokens: StablePoolToken[] = [];
 
@@ -174,18 +171,19 @@ export class StablePool implements BasePool {
     }
 
     getLimitAmountRemoveLiquidity(bpt: Token, tokenOut: Token, removeLiquidityKind: RemoveLiquidityKind): bigint {
+        console.log(tokenOut);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
         if (!tOut) {
             throw new Error('getLimitRemoveLiquidity: Token not found');
         }
         if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactOut) {
-            return (tOut.amount * WAD) / tOut.rate;
+            return (tOut.amount * tOut.rate) / WAD;
         }
         if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactIn) {
             return this.removeLiquiditySingleTokenExactOut(
                 tokenOut,
                 bpt,
-                TokenAmount.fromRawAmount(tokenOut, tOut.amount),
+                TokenAmount.fromRawAmount(tokenOut, (tOut.amount * tOut.rate) / WAD),
             ).amount;
         }
         throw new Error('getLimitRemoveLiquidity: Invalid RemoveLiquidityKind');
@@ -199,10 +197,10 @@ export class StablePool implements BasePool {
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
-            return (tIn.amount * WAD) / tIn.rate;
+            return (tIn.amount * tIn.rate) / WAD;
         }
         // Return max amount of tokenOut - approx is almost all balance
-        return (tOut.amount * WAD) / tOut.rate;
+        return (tOut.amount * tOut.rate) / WAD;
     }
 
     getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -249,7 +247,7 @@ export class StablePool implements BasePool {
         const tokenBalances: bigint[] = [];
         const amountsOut: bigint[] = [];
         const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
-        if (!tokenOutIndex) throw new Error('Provided Token Out is Invalid');
+        if (tokenOutIndex === undefined) throw new Error('Provided Token Out is Invalid');
         Array.from(this.tokenMap.values()).forEach((stablePoolToken, index) => {
             if (stablePoolToken.token.isSameAddress(tokenOut.address)) {
                 amountsOut.push(amount.scale18);

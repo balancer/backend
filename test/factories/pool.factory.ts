@@ -45,6 +45,5 @@ export const poolFactory = Factory.define<BalancerPoolFragment>(() => ({
             },
         },
     ],
-
     // Add other required properties...
 }));

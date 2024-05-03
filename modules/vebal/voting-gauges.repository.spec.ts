@@ -1,4 +1,4 @@
-import { setMainnetRpcProviderForTesting } from '../../test/utils';
+import { setMainnetRpcProviderForTesting } from '../../test/network-utils';
 import { defaultStakingGaugeId, prismaMock } from './prismaPoolStakingGauge.mock';
 import { VotingGauge, VotingGaugesRepository } from './voting-gauges.repository';
 import { Chain } from '@prisma/client';
