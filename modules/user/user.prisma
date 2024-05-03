@@ -24,13 +24,13 @@ model PrismaUserWalletBalance {
     updatedAt               DateTime            @updatedAt
 
     userAddress             String
-    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address], onDelete: Cascade)
 
     poolId                  String?
     pool                    PrismaPool?         @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
 
     tokenAddress            String
-    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
 }
 
 
@@ -45,13 +45,13 @@ model PrismaUserStakedBalance {
     updatedAt               DateTime            @updatedAt
 
     userAddress             String
-    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address], onDelete: Cascade)
 
     poolId                  String?
     pool                    PrismaPool?          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
 
     tokenAddress            String
-    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token                   PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
 
     stakingId               String
     staking                 PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)

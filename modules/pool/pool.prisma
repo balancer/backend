@@ -47,6 +47,7 @@ enum PrismaPoolType {
     PHANTOM_STABLE
     COMPOSABLE_STABLE
     ELEMENT
+    LINEAR
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
@@ -127,7 +128,7 @@ model PrismaPoolToken {
     chain                       Chain
 
     address                     String
-    token                       PrismaToken          @relation(fields:[address, chain], references: [address, chain])
+    token                       PrismaToken          @relation(fields:[address, chain], references: [address, chain], onDelete: Cascade)
     index                       Int
 
     nestedPoolId                String?
