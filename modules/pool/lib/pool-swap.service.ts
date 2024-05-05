@@ -205,6 +205,18 @@ export class PoolSwapService {
         const poolIds = new Set<string>();
         const txs = new Set<string>();
 
+        // Skip creating records for non-existing pools
+        const existingPoolIds = (
+            await prisma.prismaPool.findMany({
+                where: {
+                    chain: this.chain,
+                },
+                select: {
+                    id: true,
+                },
+            })
+        ).map((pool) => ({ id: pool.id }));
+
         while (hasMore) {
             const { swaps } = await this.balancerSubgraphService.getSwaps({
                 first: pageSize,
@@ -214,7 +226,9 @@ export class PoolSwapService {
                 orderDirection: OrderDirection.Asc,
             });
 
-            console.log(`loading ${swaps.length} new swaps into the db...`);
+            const existingPoolsOnlySwaps = swaps.filter((swap) => existingPoolIds.includes(swap.poolId));
+
+            console.log(`loading ${existingPoolsOnlySwaps.length} new swaps into the db...`);
 
             if (swaps.length === 0) {
                 break;
@@ -222,7 +236,7 @@ export class PoolSwapService {
 
             await prisma.prismaPoolSwap.createMany({
                 skipDuplicates: true,
-                data: swaps.map((swap) => {
+                data: existingPoolsOnlySwaps.map((swap) => {
                     let valueUSD = 0;
                     const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn, this.chain);
                     const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut, this.chain);
