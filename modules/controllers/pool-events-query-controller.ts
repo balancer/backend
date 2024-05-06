@@ -1,18 +1,19 @@
-import { GqlPoolEventsDataRange, GqlPoolJoinExitEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
+import { GqlPoolEventsDataRange, GqlPoolAddRemoveEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { PoolEventType, Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
 import { daysAgo } from '../common/time';
 
-const parseJoinExit = (event: JoinExitEvent): GqlPoolJoinExitEventV3 => {
+const parseJoinExit = (event: JoinExitEvent): GqlPoolAddRemoveEventV3 => {
     return {
-        __typename: 'GqlPoolJoinExitEventV3',
+        __typename: 'GqlPoolAddRemoveEventV3',
         tokens: event.payload.tokens.map((token) => ({
             address: token.address,
             amount: token.amount,
             valueUSD: token.valueUSD,
         })),
         ...event,
+        type: event.type === 'JOIN' ? 'ADD' : 'REMOVE',
         valueUSD: event.valueUSD,
         timestamp: event.blockTimestamp,
         sender: event.userAddress,
@@ -62,7 +63,7 @@ export function EventsQueryController(tracer?: any) {
             first,
             skip,
             where,
-        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolJoinExitEventV3)[]> => {
+        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolAddRemoveEventV3)[]> => {
             // Setting default values
             first = first ?? 1000;
             skip = skip ?? 0;
@@ -74,10 +75,19 @@ export function EventsQueryController(tracer?: any) {
             };
 
             if (typeIn && typeIn.length) {
+                // Translate JOIN / EXIT to ADD / REMOVE
+                const dbTypes: PoolEventType[] = [];
+                if (typeIn.includes('ADD')) {
+                    dbTypes.push('JOIN');
+                }
+                if (typeIn.includes('REMOVE')) {
+                    dbTypes.push('EXIT');
+                }
+                if (typeIn.includes('SWAP')) {
+                    dbTypes.push('SWAP');
+                }
                 conditions.type = {
-                    in: typeIn.filter((type): type is PoolEventType =>
-                        Object.keys(PoolEventType).includes(type as string),
-                    ),
+                    in: dbTypes,
                 };
             }
             if (userAddress) {

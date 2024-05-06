@@ -1184,8 +1184,8 @@ type GqlPoolStakingOtherGauge {
 }
 
 enum GqlPoolEventType {
-    JOIN
-    EXIT
+    ADD
+    REMOVE
     SWAP
 }
 
@@ -1218,7 +1218,7 @@ interface GqlPoolEvent {
     valueUSD: Float!
 }
 
-type GqlPoolJoinExitEventV3 implements GqlPoolEvent {
+type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
     chain: GqlChain!
     id: ID!
     tx: String!
