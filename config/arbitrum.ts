@@ -194,6 +194,12 @@ export default <NetworkData>{
                 scale: 1,
                 isIbYield: true,
             },
+            woETH: {
+                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
+                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
     },
     beefy: {
