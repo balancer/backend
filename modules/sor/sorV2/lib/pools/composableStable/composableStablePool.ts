@@ -9,7 +9,7 @@ import {
     _calcOutGivenIn,
     _calcTokenInGivenExactBptOut,
     _calcTokenOutGivenExactBptIn,
-    _calculateInvariant,
+    _computeInvariant,
 } from '../stable/stableMath';
 import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
@@ -138,7 +138,7 @@ export class ComposableStablePool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        const invariant = _calculateInvariant(this.amp, balancesNoBpt);
+        const invariant = _computeInvariant(this.amp, balancesNoBpt);
 
         let tokenOutScale18: bigint;
         if (tokenIn.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {
@@ -222,7 +222,7 @@ export class ComposableStablePool implements BasePool {
 
         const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
 
-        const invariant = _calculateInvariant(this.amp, balancesNoBpt);
+        const invariant = _computeInvariant(this.amp, balancesNoBpt);
 
         let amountIn: TokenAmount;
         if (tokenIn.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {

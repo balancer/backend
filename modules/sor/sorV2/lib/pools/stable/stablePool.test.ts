@@ -6,7 +6,7 @@ import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../
 import { RemoveLiquidityKind, SwapKind, Token } from '@balancer/sdk';
 import { parseEther } from 'viem';
 import { StablePool } from './stablePool';
-import { _calculateInvariant } from './stableMath';
+import { _computeInvariant } from './stableMath';
 
 describe('SOR V3 Stable Pool Tests', () => {
     const token1Balance = '100';

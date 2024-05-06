@@ -11,7 +11,7 @@ import {
     _calcOutGivenIn,
     _calcTokenInGivenExactBptOut,
     _calcTokenOutGivenExactBptIn,
-    _calculateInvariant,
+    _computeInvariant,
 } from './stableMath';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { chainToIdMap } from '../../../../../network/network-config';
@@ -134,7 +134,7 @@ export class StablePool implements BasePool {
                 }
                 tokenBalances.push(stablePoolToken.scale18);
             });
-            const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
+            const currentInvariant = _computeInvariant(this.amp, tokenBalances);
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp,
                 tokenBalances,
@@ -154,7 +154,7 @@ export class StablePool implements BasePool {
             const tokenInIndex = this.tokenIndexMap.get(tokenIn.address);
             if (!tokenInIndex) throw new Error('Provided Token In is Invalid');
             const tokenBalances = Array.from(this.tokens.values()).map(({ scale18 }) => scale18);
-            const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
+            const currentInvariant = _computeInvariant(this.amp, tokenBalances);
             const tokenInAmount = _calcTokenInGivenExactBptOut(
                 this.amp,
                 tokenBalances,
@@ -225,7 +225,7 @@ export class StablePool implements BasePool {
         const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
         if (!tokenOutIndex) throw new Error('Provided Token Out is Invalid');
         const tokenBalances = Array.from(this.tokens.values()).map(({ scale18 }) => scale18);
-        const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
+        const currentInvariant = _computeInvariant(this.amp, tokenBalances);
         const tokenAmountOut = _calcTokenOutGivenExactBptIn(
             this.amp,
             tokenBalances,
@@ -256,7 +256,7 @@ export class StablePool implements BasePool {
             }
             tokenBalances.push(stablePoolToken.scale18);
         });
-        const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
+        const currentInvariant = _computeInvariant(this.amp, tokenBalances);
         const bptIn = _calcBptInGivenExactTokensOut(
             this.amp,
             tokenBalances,
@@ -283,7 +283,7 @@ export class StablePool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        const invariant = _calculateInvariant(this.amp, balances);
+        const invariant = _computeInvariant(this.amp, balances);
 
         let tokenOutScale18: bigint;
         const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
@@ -321,7 +321,7 @@ export class StablePool implements BasePool {
 
         const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
 
-        const invariant = _calculateInvariant(this.amp, balances);
+        const invariant = _computeInvariant(this.amp, balances);
 
         let amountIn: TokenAmount;
         const tokenInScale18 = _calcInGivenOut(

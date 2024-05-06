@@ -2,7 +2,7 @@ import { MathSol, WAD } from '../../utils/math';
 
 const AMP_PRECISION = 1000n;
 
-export function _calculateInvariant(amplificationParameter: bigint, balances: bigint[], roundUp?: boolean): bigint {
+export function _computeInvariant(amplificationParameter: bigint, balances: bigint[], roundUp?: boolean): bigint {
     let sum = 0n;
     const numTokens = balances.length;
     for (let i = 0; i < numTokens; i++) {
@@ -59,12 +59,7 @@ export function _calcOutGivenIn(
 ): bigint {
     balances[tokenIndexIn] = balances[tokenIndexIn] + tokenAmountIn;
 
-    const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amplificationParameter,
-        balances,
-        invariant,
-        tokenIndexOut,
-    );
+    const finalBalanceOut = _computeBalance(amplificationParameter, balances, invariant, tokenIndexOut);
 
     balances[tokenIndexIn] = balances[tokenIndexIn] - tokenAmountIn;
 
@@ -81,12 +76,7 @@ export function _calcInGivenOut(
 ): bigint {
     balances[tokenIndexOut] = balances[tokenIndexOut] - tokenAmountOut;
 
-    const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amplificationParameter,
-        balances,
-        invariant,
-        tokenIndexIn,
-    );
+    const finalBalanceIn = _computeBalance(amplificationParameter, balances, invariant, tokenIndexIn);
 
     balances[tokenIndexOut] = balances[tokenIndexOut] - tokenAmountOut;
 
@@ -131,7 +121,7 @@ export function _calcBptOutGivenExactTokensIn(
         newBalances[i] = balances[i] + amountInWithoutFee;
     }
 
-    const newInvariant = _calculateInvariant(amp, newBalances);
+    const newInvariant = _computeInvariant(amp, newBalances);
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     if (invariantRatio > WAD) {
@@ -154,12 +144,7 @@ export function _calcTokenInGivenExactBptOut(
         currentInvariant,
     );
 
-    const newBalanceTokenIndex = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        newInvariant,
-        tokenIndex,
-    );
+    const newBalanceTokenIndex = _computeBalance(amp, balances, newInvariant, tokenIndex);
     const amountInWithoutFee = newBalanceTokenIndex - balances[tokenIndex];
 
     let sumBalances = 0n;
@@ -215,7 +200,7 @@ export function _calcBptInGivenExactTokensOut(
         newBalances[i] = balances[i] - amountOutWithFee;
     }
 
-    const newInvariant = _calculateInvariant(amp, newBalances);
+    const newInvariant = _computeInvariant(amp, newBalances);
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     return MathSol.mulUpFixed(bptTotalSupply, MathSol.complementFixed(invariantRatio));
@@ -235,12 +220,7 @@ export function _calcTokenOutGivenExactBptIn(
         currentInvariant,
     );
 
-    const newBalanceTokenIndex = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        newInvariant,
-        tokenIndex,
-    );
+    const newBalanceTokenIndex = _computeBalance(amp, balances, newInvariant, tokenIndex);
     const amountOutWithoutFee = balances[tokenIndex] - newBalanceTokenIndex;
 
     let sumBalances = 0n;
@@ -257,7 +237,9 @@ export function _calcTokenOutGivenExactBptIn(
     return nonTaxableAmount + MathSol.mulDownFixed(taxableAmount, WAD - swapFee);
 }
 
-export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
+// This function calculates the balance of a given token (tokenIndex)
+// given all the other balances and the invariant
+export function _computeBalance(
     amplificationParameter: bigint,
     balances: bigint[],
     invariant: bigint,

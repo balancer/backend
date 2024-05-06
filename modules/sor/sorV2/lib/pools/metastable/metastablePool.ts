@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { _calcInGivenOut, _calcOutGivenIn, _computeInvariant } from '../stable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
@@ -122,7 +122,7 @@ export class MetaStablePool implements BasePool {
         const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
         const balances = this.tokens.map((t) => t.scale18);
 
-        const invariant = _calculateInvariant(this.amp, [...balances], true);
+        const invariant = _computeInvariant(this.amp, [...balances], true);
 
         const tokenOutScale18 = _calcOutGivenIn(
             this.amp,
@@ -167,7 +167,7 @@ export class MetaStablePool implements BasePool {
 
         const balances = this.tokens.map((t) => t.scale18);
 
-        const invariant = _calculateInvariant(this.amp, balances, true);
+        const invariant = _computeInvariant(this.amp, balances, true);
 
         const tokenInScale18 = _calcInGivenOut(
             this.amp,
