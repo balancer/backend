@@ -16,7 +16,7 @@ import { weiToFloat } from '../../common/numbers';
  * @param snapshot - V3 snapshot
  * @returns
  */
-export const snapshotsV3Transformer = async (
+export const snapshotsV3Transformer = (
     poolId: string,
     poolTokens: string[],
     epoch: number,
@@ -25,7 +25,7 @@ export const snapshotsV3Transformer = async (
     prices: Record<string, number>,
     previousDaySnapshot?: PrismaPoolSnapshot,
     snapshot?: PoolSnapshotFragment,
-): Promise<PrismaPoolSnapshot> => {
+): PrismaPoolSnapshot => {
     // Subgraph is storing balances in wei, we need to convert them to float using token decimals
     const decimals = Object.fromEntries(
         allTokens.filter((t) => poolTokens.includes(t.address)).map((t) => [t.address, t.decimals]),

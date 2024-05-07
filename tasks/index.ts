@@ -34,6 +34,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncSwapsV2(chain);
     } else if (job === 'sync-snapshots-v3') {
         return snapshotsController.syncSnapshotsV3(chain);
+    } else if (job === 'fill-missing-snapshots-v3') {
+        return snapshotsController.fillMissingSnapshotsV3(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
     } else if (job === 'update-liquidity-24h-ago') {

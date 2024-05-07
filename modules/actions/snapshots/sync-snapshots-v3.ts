@@ -110,7 +110,7 @@ export async function syncSnapshotsForADayV3(
         const previousSnapshot = previousSnapshots.find((s) => s.poolId === pool.id);
         const snapshot = nextSnapshots.find((s) => s.pool.id === pool.id);
 
-        const dbEntry = await snapshotsV3Transformer(
+        const dbEntry = snapshotsV3Transformer(
             pool.id,
             poolTokens,
             next,

@@ -1,5 +1,5 @@
 import config from '../../config';
-import { syncSnapshotsV3 } from '../actions/snapshots/sync-snapshots-v3';
+import { syncSnapshotsV3, fillMissingSnapshotsV3 } from '../actions/snapshots';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 
@@ -36,6 +36,12 @@ export function SnapshotsController(tracer?: any) {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
             const entries = await syncSnapshotsV3(vaultSubgraphClient, chain);
+            return entries;
+        },
+        async fillMissingSnapshotsV3(chainId: string) {
+            const chain = chainIdToChain[chainId];
+
+            const entries = await fillMissingSnapshotsV3(chain);
             return entries;
         },
     };
