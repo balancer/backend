@@ -246,28 +246,20 @@ export class WeightedPool implements BasePool {
     }
 
     public addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount): TokenAmount {
-        const tokenBalances: bigint[] = [];
-        const weights: bigint[] = [];
-        const tIn = this.tokenMap.get(tokenIn.address);
-        if (!tIn) {
-            throw new Error(`Invalid Token: ${tokenIn.address}`);
-        }
-        Array.from(this.tokenMap.values()).forEach((weightedPoolToken) => {
-            tokenBalances.push(weightedPoolToken.scale18);
-            weights.push(weightedPoolToken.weight);
-        });
-        if (this.vaultVersion === 3) {
-            const { amountInWithFee } = computeAddLiquiditySingleTokenExactOut(
-                tokenBalances,
-                tIn.index,
+        try {
+            const token = this.tokenMap.get(tokenIn.wrapped);
+            if (!token) {
+                throw new Error(`Invalid Token: ${tokenIn.address}`);
+            }
+            const tokenInAmount = this._calcTokenInGivenExactBptOut(
+                token.scale18,
+                token.weight,
                 amount.scale18,
                 this.totalShares,
-                this.swapFee,
-                _computeBalance,
             );
-            return TokenAmount.fromRawAmount(tokenIn, amountInWithFee);
-        } else {
-            throw new Error('addLiquiditySingleTokenExactOut: Invalid Vault Version');
+            return TokenAmount.fromRawAmount(tokenIn, tokenInAmount);
+        } catch (err) {
+            return TokenAmount.fromRawAmount(tokenIn, 0n);
         }
     }
 
@@ -286,28 +278,19 @@ export class WeightedPool implements BasePool {
 
     removeLiquiditySingleTokenExactOut(tokenOut: Token, bpt: Token, amount: TokenAmount): TokenAmount {
         const tokenBalances: bigint[] = [];
+        const amountsOut: bigint[] = [];
         const weights: bigint[] = [];
-        const tOut = this.tokenMap.get(tokenOut.address);
-        if (!tOut) {
-            throw new Error(`Invalid Token: ${tokenOut.address}`);
-        }
         Array.from(this.tokenMap.values()).forEach((weightedPoolToken) => {
+            if (weightedPoolToken.token.address.toLowerCase() === tokenOut.address.toLowerCase()) {
+                amountsOut.push(amount.scale18);
+            } else {
+                amountsOut.push(0n);
+            }
             tokenBalances.push(weightedPoolToken.scale18);
             weights.push(weightedPoolToken.weight);
         });
-        if (this.vaultVersion === 3) {
-            const { bptAmountIn } = computeRemoveLiquiditySingleTokenExactOut(
-                tokenBalances,
-                tOut.index,
-                amount.scale18,
-                this.totalShares,
-                this.swapFee,
-                _computeInvariant,
-            );
-            return TokenAmount.fromRawAmount(bpt, bptAmountIn);
-        } else {
-            throw new Error('removeLiquiditySingleTokenExactOut: Invalid Vault Version');
-        }
+        const bptIn = this._calcBptInGivenExactTokensOut(tokenBalances, weights, amountsOut, this.totalShares);
+        return TokenAmount.fromRawAmount(bpt, bptIn);
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
