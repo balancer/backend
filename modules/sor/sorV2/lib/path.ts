@@ -45,28 +45,12 @@ export class PathWithAmount extends PathLocal {
                 amounts[0] = this.swapAmount;
                 for (let i = 0; i < this.pools.length; i++) {
                     const pool = this.pools[i];
-                    let outputAmount;
-                    if (this.tokens[i + 1].isSameAddress(pool.address as `0x${string}`)) {
-                        outputAmount = pool.addLiquiditySingleTokenExactIn(
-                            this.tokens[i],
-                            this.tokens[i + 1],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    } else if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
-                        outputAmount = pool.removeLiquiditySingleTokenExactIn(
-                            this.tokens[i + 1],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    } else {
-                        outputAmount = pool.swapGivenIn(
-                            this.tokens[i],
-                            this.tokens[i + 1],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    }
+                    const outputAmount = pool.swapGivenIn(
+                        this.tokens[i],
+                        this.tokens[i + 1],
+                        amounts[i],
+                        this.mutateBalances,
+                    );
                     amounts[i + 1] = outputAmount;
                     this.printPath.push({
                         pool: pool.id,
@@ -81,28 +65,12 @@ export class PathWithAmount extends PathLocal {
                 amounts[amounts.length - 1] = this.swapAmount;
                 for (let i = this.pools.length; i >= 1; i--) {
                     const pool = this.pools[i - 1];
-                    let inputAmount;
-                    if (this.tokens[i].isSameAddress(pool.address as `0x${string}`)) {
-                        inputAmount = pool.addLiquiditySingleTokenExactOut(
-                            this.tokens[i - 1],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    } else if (this.tokens[i - 1].isSameAddress(pool.address as `0x${string}`)) {
-                        inputAmount = pool.removeLiquiditySingleTokenExactOut(
-                            this.tokens[i],
-                            this.tokens[i - 1],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    } else {
-                        inputAmount = pool.swapGivenOut(
-                            this.tokens[i - 1],
-                            this.tokens[i],
-                            amounts[i],
-                            this.mutateBalances,
-                        );
-                    }
+                    const inputAmount = pool.swapGivenOut(
+                        this.tokens[i - 1],
+                        this.tokens[i],
+                        amounts[i],
+                        this.mutateBalances,
+                    );
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
                         pool: pool.id,

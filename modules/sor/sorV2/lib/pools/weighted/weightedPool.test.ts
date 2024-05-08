@@ -46,23 +46,4 @@ describe('SOR V3 Weighted Pool Tests', () => {
         );
         expect(limitAmountIn).toBe(parseEther('144'));
     });
-    test('Remove Liquidity Limits with Exact In', () => {
-        const limitAmountIn = weightedPool.getLimitAmountRemoveLiquidity(
-            bpt,
-            weightedPool.tokens[1].token,
-            RemoveLiquidityKind.SingleTokenExactIn,
-        );
-        // Limit Amount In = 156 - (169**0.5)*((144*0.7)**0.5) =~ 25.5
-        expect(limitAmountIn).toBeGreaterThan(parseEther('25'));
-        expect(limitAmountIn).toBeLessThan(parseEther('26'));
-    });
-    test('Remove Liquidity Limits with Exact Out', () => {
-        const limitAmountIn = weightedPool.getLimitAmountRemoveLiquidity(
-            bpt,
-            weightedPool.tokens[1].token,
-            RemoveLiquidityKind.SingleTokenExactOut,
-        );
-        // 144 * 0.1 * 3 is different of 144 * 0.3 in the JS math ¯\_(ツ)_/¯
-        expect(limitAmountIn).toBe(parseEther((144 * 0.1 * 3).toString()));
-    });
 });

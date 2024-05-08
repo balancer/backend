@@ -10,20 +10,5 @@ export interface BasePool {
     getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint;
     swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount;
     swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount;
-    addLiquiditySingleTokenExactIn(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount;
-    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
-    removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount;
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount;
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint;
-    getLimitAmountRemoveLiquidity(bpt: Token, tokenOut: Token, removeLiquidityKind: RemoveLiquidityKind): bigint;
 }

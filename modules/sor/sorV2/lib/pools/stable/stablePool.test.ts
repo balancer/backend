@@ -3,10 +3,9 @@ import {
     prismaPoolTokenFactory,
 } from '../../../../../../test/factories/prismaToken.factory';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
-import { RemoveLiquidityKind, SwapKind, Token } from '@balancer/sdk';
+import { SwapKind, Token } from '@balancer/sdk';
 import { parseEther } from 'viem';
 import { StablePool } from './stablePool';
-import { _calculateInvariant } from './stableMath';
 
 describe('SOR V3 Stable Pool Tests', () => {
     const token1Balance = '100';
@@ -42,17 +41,6 @@ describe('SOR V3 Stable Pool Tests', () => {
             stablePool.tokens[0].token,
             stablePool.tokens[1].token,
             SwapKind.GivenOut,
-        );
-        expect(limitAmountIn).toBe(parseEther('400'));
-    });
-    test('Remove Liquidity Limits with Exact In', () => {
-        //TODO
-    });
-    test('Remove Liquidity Limits with Exact Out', () => {
-        const limitAmountIn = stablePool.getLimitAmountRemoveLiquidity(
-            bpt,
-            stablePool.tokens[1].token,
-            RemoveLiquidityKind.SingleTokenExactOut,
         );
         expect(limitAmountIn).toBe(parseEther('400'));
     });
