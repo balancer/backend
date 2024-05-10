@@ -552,6 +552,9 @@ model PrismaPoolSnapshot {
     swapsCount          Int
     holdersCount        Int
     amounts             String[]
+    totalVolumes        String[] @default([]) // Used for V3 snapshots
+    totalProtocolSwapFees String[] @default([]) // Used for V3 snapshots
+    totalProtocolYieldFees String[] @default([]) // Used for V3 snapshots
 }
 
 model PrismaReliquaryFarmSnapshot {
