@@ -85,6 +85,7 @@
         "@types/safe-compare": "^1.1.0",
         "@types/signale": "^1.4.4",
         "@types/uuid": "^8.0.0",
+        "@viem/anvil": "0.0.7",
         "concurrently": "^6.4.0",
         "execa": "^4.1.0",
         "fishery": "^2.2.2",

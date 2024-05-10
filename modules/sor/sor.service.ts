@@ -14,7 +14,6 @@ import { formatUnits, parseUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
 import { getToken, getTokenAmountHuman, swapPathsZeroResponse, zeroResponse } from './utils';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
-import { SwapKind } from '@balancer/sdk';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
