@@ -226,7 +226,9 @@ export class PoolSwapService {
                 orderDirection: OrderDirection.Asc,
             });
 
-            const existingPoolsOnlySwaps = swaps.filter((swap) => existingPoolIds.includes(swap.poolId));
+            const existingPoolsOnlySwaps = swaps.filter((swap) =>
+                existingPoolIds.map((pool) => pool.id).includes(swap.poolId.id),
+            );
 
             console.log(`loading ${existingPoolsOnlySwaps.length} new swaps into the db...`);
 
