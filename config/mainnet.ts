@@ -191,7 +191,7 @@ export default <NetworkData>{
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
