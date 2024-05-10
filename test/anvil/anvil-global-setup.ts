@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
-import { sleep } from '../../../b-sdk/test/lib/utils/promises';
 import { ChainId } from '@balancer/sdk';
+import { sleep } from '../utils';
 
 type NetworkSetup = {
     rpcEnv: string;
