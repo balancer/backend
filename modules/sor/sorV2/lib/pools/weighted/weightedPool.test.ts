@@ -25,11 +25,6 @@ describe('SOR V3 Weighted Pool Tests', () => {
         dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '156' }),
     });
     const weightedPool = WeightedPool.fromPrismaPool(prismaWeightedPool);
-    const bpt = new Token(
-        parseFloat(chainToIdMap[prismaWeightedPool.chain]),
-        weightedPool.address as `0x${string}`,
-        18,
-    );
     test('Swap Limits with Given In', () => {
         const limitAmountIn = weightedPool.getLimitAmountSwap(
             weightedPool.tokens[0].token,

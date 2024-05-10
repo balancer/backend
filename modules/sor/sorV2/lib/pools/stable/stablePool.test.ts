@@ -27,7 +27,6 @@ describe('SOR V3 Stable Pool Tests', () => {
         dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '100' }),
     });
     const stablePool = StablePool.fromPrismaPool(prismaStablePool);
-    const bpt = new Token(11155111, stablePool.address as `0x${string}`, 18);
     test('Swap Limits with Given In', () => {
         const limitAmountIn = stablePool.getLimitAmountSwap(
             stablePool.tokens[0].token,
