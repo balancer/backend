@@ -50,15 +50,7 @@ extend type Query {
     """
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     """
-    Gets all gyro pools
-    """
-    poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
-    """
-    Gets all FX pools
-    """
-    poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
-    """
-    Will de deprecated in favor of poolEvents
+    Getting swap, add and remove events with range
     """
     poolGetEvents(
         range: GqlPoolEventsDataRange!
@@ -68,7 +60,7 @@ extend type Query {
         userAddress: String
     ): [GqlPoolEvent!]!
     """
-    Getting swap, join and exit events
+    Getting swap, add and remove events with paging
     """
     poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter!): [GqlPoolEvent!]!
 }
@@ -96,7 +88,6 @@ extend type Mutation {
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
-    poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
