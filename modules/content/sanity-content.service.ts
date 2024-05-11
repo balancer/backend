@@ -307,6 +307,7 @@ export class SanityContentService implements ContentService {
                                 poolId: group.poolId,
                                 primary: i === 0 ? true : false,
                                 chain: chain,
+                                description: '',
                             });
                         }
                     }

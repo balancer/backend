@@ -227,6 +227,7 @@ export class PoolGqlLoaderService {
                 poolId: contentPool.poolId,
                 primary: contentPool.primary,
                 pool: pool,
+                description: contentPool.description,
             });
         }
 
