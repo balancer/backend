@@ -19,7 +19,7 @@ export default <NetworkData>{
         masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
         reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
-        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
+        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/9nyH9cdBwBiXj3AJhbSEBSphzT89ozd68s9u4KTfD3ZL`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -216,15 +216,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    copper: {
-        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
-    },
-    beefy: {
-        linearPools: [''],
-    },
-    spooky: {
-        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
     },
     datastudio: {
         main: {

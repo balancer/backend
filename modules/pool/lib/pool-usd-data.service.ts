@@ -31,26 +31,25 @@ export class PoolUsdDataService {
         maxShares: number = Number.MAX_SAFE_INTEGER,
     ) {
         const tokenPrices = await this.tokenService.getTokenPrices(this.chain);
-        const pools = await prisma.prismaPool.findMany({
-            include: { dynamicData: true, tokens: { include: { dynamicData: true } } },
+        const pdts = await prisma.prismaPoolDynamicData.findMany({
+            include: { pool: { include: { tokens: { include: { dynamicData: true } } } } },
             where: {
-                dynamicData: {
-                    AND: [
-                        {
-                            totalSharesNum: { lte: maxShares },
-                        },
-                        {
-                            totalSharesNum: { gt: minShares },
-                        },
-                    ],
-                },
+                AND: [
+                    {
+                        totalSharesNum: { lte: maxShares },
+                    },
+                    {
+                        totalSharesNum: { gt: minShares },
+                    },
+                ],
                 chain: this.chain,
             },
         });
 
         let updates: any[] = [];
 
-        for (const pool of pools) {
+        for (const pdt of pdts) {
+            const pool = pdt.pool;
             const balanceUSDs = pool.tokens.map((token) => ({
                 id: token.id,
                 balanceUSD:
@@ -123,10 +122,18 @@ export class PoolUsdDataService {
             return;
         }
 
-        const subgraphPools = await this.balancerSubgraphService.getAllPools(
+        const subgraphPoolsAll = await this.balancerSubgraphService.getAllPools(
             { block: { number: parseInt(block24hAgo.number) } },
             false,
         );
+
+        const pdts = await prisma.prismaPoolDynamicData.findMany({
+            where: { chain: this.chain },
+        });
+
+        const exitingIds = pdts.map((pdt) => pdt.id);
+
+        const subgraphPools = subgraphPoolsAll.filter((pool) => exitingIds.includes(pool.id));
 
         let updates: any[] = [];
 
@@ -224,7 +231,7 @@ export class PoolUsdDataService {
 
                 // we approximate total APR by summing it up, as APRs are usually small, this is good enough
                 // we need IB yield APR (such as sFTMx) as well as phantom stable APR, which is set for phantom stable pools
-                // we need any phantom stable pool or weighted pool that has either a phantom stable or a linear nested, which has no apr type set (done by boosted-pool-apr.service.ts)
+                // we need any phantom stable pool or weighted pool that has either a phantom stable nested, which has no apr type set (done by boosted-pool-apr.service.ts)
                 pool.aprItems.forEach((aprItem) => {
                     if (
                         aprItem.type === 'IB_YIELD' ||

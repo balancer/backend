@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
     OrderDirection,
     Pool_OrderBy,
+    PoolSnapshot_OrderBy,
     PoolsQueryVariables,
     SwapFragment,
     Swap_OrderBy,
@@ -11,6 +12,7 @@ import {
     getSdk,
     PoolBalancesFragment,
     PoolBalancesQueryVariables,
+    PoolSnapshotFragment,
 } from './generated/types';
 
 export function getVaultSubgraphClient(url: string) {
@@ -42,6 +44,31 @@ export function getVaultSubgraphClient(url: string) {
             }
 
             return pools;
+        },
+        async getSnapshotsForTimestamp(timestamp: number): Promise<PoolSnapshotFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let snapshots: PoolSnapshotFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.PoolSnapshots({
+                    where: { timestamp, id_gt: id },
+                    orderBy: PoolSnapshot_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                snapshots = [...snapshots, ...response.poolSnapshots];
+
+                if (response.poolSnapshots.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = snapshots[snapshots.length - 1].id;
+                }
+            }
+
+            return snapshots;
         },
         async getSwapsSince(timestamp: number): Promise<SwapFragment[]> {
             const limit = 1000;

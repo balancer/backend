@@ -63,7 +63,7 @@ export class Gyro2Pool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance as `${number}`);
 
             poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index));
         }

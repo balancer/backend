@@ -1,18 +1,20 @@
 import * as sources from './sources';
 import { YbAprConfig } from '../../../../network/apr-config-types';
 import { Chain } from '@prisma/client';
+import { AprHandler, AprHandlerConstructor, TokenApr } from './types';
+export type { AprHandler, AprHandlerConstructor, TokenApr };
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
     sftmx: sources.SftmxAprHandler,
-    euler: sources.EulerAprHandler,
-    gearbox: sources.GearboxAprHandler,
-    idle: sources.IdleAprHandler,
+    // euler: sources.EulerAprHandler, // Removed, pools rekt
+    // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
+    // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,
     ovix: sources.OvixAprHandler,
-    reaper: sources.ReaperCryptAprHandler,
+    // reaper: sources.ReaperCryptAprHandler, // Removed, pools rekt
     tessera: sources.TesseraAprHandler,
     tetu: sources.TetuAprHandler,
     tranchess: sources.TranchessAprHandler,
@@ -39,6 +41,11 @@ export class YbAprHandlers {
         // Add handlers from global configuration
         for (const [source, config] of Object.entries(aprConfig)) {
             const Handler = sourceToHandler[source as keyof typeof sourceToHandler];
+
+            // Ignore unknown sources
+            if (!Handler) {
+                continue;
+            }
 
             // Handle nested configs
             if (source === 'aave' || source === 'defaultHandlers') {
@@ -91,26 +98,3 @@ export class YbAprHandlers {
         return aprs;
     }
 }
-
-interface AprHandlerConstructor {
-    new (config?: any): AprHandler;
-}
-
-export interface AprHandler {
-    group?: string;
-    getAprs(chain?: Chain): Promise<{
-        [tokenAddress: string]: {
-            /** Defined as float, eg: 0.01 is 1% */
-            apr: number;
-            isIbYield: boolean;
-            group?: string;
-        };
-    }>;
-}
-
-export type TokenApr = {
-    apr: number;
-    address: string;
-    isIbYield: boolean;
-    group?: string;
-};

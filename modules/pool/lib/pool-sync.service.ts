@@ -125,6 +125,7 @@ export class PoolSyncService {
                         gauge: { status: 'PREFERRED' },
                     },
                 },
+                chain: this.chain,
             },
         });
 

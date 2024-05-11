@@ -34,6 +34,7 @@ export interface FeaturedPool {
     poolId: string;
     primary: boolean;
     chain: GqlChain;
+    description: string;
 }
 
 export interface HomeScreenNewsItem {

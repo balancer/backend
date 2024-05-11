@@ -185,6 +185,9 @@ export default <NetworkData>{
                 },
             },
         },
+        maker: {
+            sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
+        },
         defaultHandlers: {
             wstEth: {
                 tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
@@ -237,18 +240,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    beefy: {
-        linearPools: [
-            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
-            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
-        ],
-    },
-    rocket: {
-        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
     },
     datastudio: {
         main: {

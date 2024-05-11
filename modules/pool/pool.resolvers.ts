@@ -54,7 +54,17 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
-            return EventsQueryController().getEvents({ range, poolId, chain, typeIn, userAddress });
+            return EventsQueryController().getEvents({
+                first: 1000,
+                where: { range, poolId, chain, typeIn, userAddress },
+            });
+        },
+        poolEvents: (parent, { first, skip, where }, context) => {
+            return EventsQueryController().getEvents({
+                first,
+                skip,
+                where,
+            });
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();
@@ -88,15 +98,6 @@ const balancerResolvers: Resolvers = {
                 swapsCount: `${snapshot.swapsCount}`,
                 holdersCount: `${snapshot.holdersCount}`,
             }));
-        },
-        poolGetLinearPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetLinearPools error: Provide "chains" param');
-            }
-            return poolService.getGqlLinearPools(chains);
         },
         poolGetGyroPools: async (parent, { chains }, context) => {
             const currentChain = headerChain();

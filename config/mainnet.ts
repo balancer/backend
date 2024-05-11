@@ -48,7 +48,7 @@ export default <NetworkData>{
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+            : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -191,7 +191,7 @@ export default <NetworkData>{
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
@@ -217,12 +217,7 @@ export default <NetworkData>{
             },
         },
         maker: {
-            tokens: {
-                sDAI: {
-                    address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-                    potAddress: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
-                },
-            },
+            sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
         },
         tessera: {
             tokens: {
@@ -358,10 +353,13 @@ export default <NetworkData>{
                 sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

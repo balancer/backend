@@ -37,6 +37,10 @@ export const schema = {
         optional: true,
         type: String,
     },
+    THEGRAPH_API_KEY_FANTOM: {
+        optional: true,
+        type: String,
+    },
     WORKER_QUEUE_URL: {
         optional: true,
         type: String,

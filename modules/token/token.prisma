@@ -39,7 +39,7 @@ model PrismaTokenCurrentPrice {
     @@id([tokenAddress, chain])
 
     tokenAddress        String
-    token               PrismaToken          @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token               PrismaToken          @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
     chain               Chain                
 
     updatedAt           DateTime             @updatedAt
@@ -55,7 +55,7 @@ model PrismaTokenPrice {
     @@id([tokenAddress, timestamp, chain])
 
     tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
     chain               Chain               
     updatedAt           DateTime            @updatedAt
     updatedBy           String?
@@ -77,7 +77,7 @@ model PrismaTokenDynamicData {
 
     coingeckoId         String
     tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
     chain               Chain               
     updatedAt           DateTime            @updatedAt
 
@@ -101,7 +101,7 @@ model PrismaTokenType {
 
     id                  String
     tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain])
+    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
     chain               Chain               
     type                PrismaTokenTypeOption
 }
@@ -110,7 +110,6 @@ enum PrismaTokenTypeOption {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
-    LINEAR_WRAPPED_TOKEN
 }
 
 model PrismaPriceRateProviderData {

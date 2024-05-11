@@ -3,7 +3,6 @@ import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { ContentService, FeaturedPool, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import { chainIdToChain } from '../network/chain-id-to-chain';
-import { LinearData } from '../pool/subgraph-mapper';
 import { chainToIdMap } from '../network/network-config';
 import { Chain, Prisma } from '@prisma/client';
 
@@ -21,6 +20,7 @@ interface FeaturedPoolMetadata {
     imageUrl: string;
     primary: boolean;
     chainId: number;
+    description: string;
 }
 interface WhitelistedTokenList {
     name: string;
@@ -228,35 +228,12 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            if (
-                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
-                !tokenTypes.includes('PHANTOM_BPT')
-            ) {
+            if (pool?.type === 'COMPOSABLE_STABLE' && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
-                });
-            }
-
-            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
-            const wrappedLinearPoolToken = wrappedIndex
-                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
-                : undefined;
-
-            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                types.push({
-                    id: `${token.address}-linear-wrapped`,
-                    chain: chain,
-                    type: 'LINEAR_WRAPPED_TOKEN',
-                    tokenAddress: token.address,
-                });
-            }
-
-            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                prisma.prismaTokenType.delete({
-                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: chain } },
                 });
             }
         }
@@ -273,10 +250,11 @@ export class GithubContentService implements ContentService {
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
-        return pools.map(({ id, primary, chainId }) => ({
+        return pools.map(({ id, primary, chainId, description }) => ({
             poolId: id,
             chain: chainIdToChain[chainId],
             primary: Boolean(primary),
+            description: description,
         })) as FeaturedPool[];
     }
 

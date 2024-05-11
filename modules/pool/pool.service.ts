@@ -1,6 +1,5 @@
 import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
-import _, { chain, includes } from 'lodash';
-import { Cache } from 'memory-cache';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
@@ -11,7 +10,6 @@ import {
     GqlPoolFx,
     GqlPoolGyro,
     GqlPoolJoinExit,
-    GqlPoolLinear,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
@@ -37,6 +35,7 @@ import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliqu
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 import { coingeckoDataService } from '../token/lib/coingecko-data.service';
+import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 
 export class PoolService {
     constructor(
@@ -77,10 +76,6 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
-    }
-
-    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools(chains);
     }
 
     public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
@@ -256,6 +251,7 @@ export class PoolService {
 
     public async updatePoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.updatePoolAprs(chain);
+        await syncIncentivizedCategory(chain);
     }
 
     public async syncChangedPools() {
@@ -264,6 +260,7 @@ export class PoolService {
 
     public async reloadAllPoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
+        await syncIncentivizedCategory(chain);
     }
 
     public async updateLiquidity24hAgoForAllPools() {

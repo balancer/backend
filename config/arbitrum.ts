@@ -34,12 +34,11 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : env.ALCHEMY_API_KEY
-            ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : env.INFURA_API_KEY
+        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -181,10 +180,26 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
+            jitoSOL: {
+                tokenAddress: '0x83e1d2310ade410676b1733d16e89f91822fd5c3',
+                sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
+                path: 'apy.0.data',
+                scale: 1,
+                isIbYield: true,
+            },
+            woETH: {
+                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
+                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     gyro: {
         config: '0x9b683ca24b0e013512e2566b68704dbe9677413c',

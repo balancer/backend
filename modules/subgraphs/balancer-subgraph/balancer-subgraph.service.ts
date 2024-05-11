@@ -247,6 +247,7 @@ export class BalancerSubgraphService {
         return subgraphLoadAll<BalancerTokenPriceFragment>(this.sdk.BalancerTokenPrices, 'tokenPrices', args);
     }
 
+    // we dont sync linear pools anymore
     public async getAllPools(
         args: BalancerPoolsQueryVariables,
         applyTotalSharesFilter = true,
@@ -255,6 +256,7 @@ export class BalancerSubgraphService {
             ...args,
             where: {
                 totalShares_not: applyTotalSharesFilter ? '0.00000000001' : undefined,
+                poolType_not_contains_nocase: 'linear',
                 ...args.where,
             },
         });
