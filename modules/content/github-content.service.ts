@@ -15,6 +15,7 @@ interface FeaturedPoolMetadata {
     imageUrl: string;
     primary: boolean;
     chainId: number;
+    description: string;
 }
 interface WhitelistedTokenList {
     name: string;
@@ -178,10 +179,11 @@ export class GithubContentService implements ContentService {
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
-        return pools.map(({ id, primary, chainId }) => ({
+        return pools.map(({ id, primary, chainId, description }) => ({
             poolId: id,
             chain: chainIdToChain[chainId],
             primary: Boolean(primary),
+            description: description,
         })) as FeaturedPool[];
     }
 

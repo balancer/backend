@@ -981,6 +981,7 @@ type GqlPoolFeaturedPool {
     poolId: ID!
     primary: Boolean!
     pool: GqlPoolBase!
+    description: String!
 }
 
 type GqlPoolFeaturedPoolGroup {
