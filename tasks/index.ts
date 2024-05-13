@@ -1,9 +1,13 @@
-import { JobsController } from '../modules/controllers/jobs-controller';
-import { PoolsMutationController } from '../modules/controllers/pools-mutation-controller';
-import { UserBalancesController } from '../modules/controllers/user-balances-controller';
+import {
+    JobsController,
+    SnapshotsController,
+    PoolsMutationController,
+    UserBalancesController,
+} from '../modules/controllers';
 
 // TODO needed?
 const jobsController = JobsController();
+const snapshotsController = SnapshotsController();
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -28,6 +32,10 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
         return jobsController.syncSwapsV2(chain);
+    } else if (job === 'sync-snapshots-v3') {
+        return snapshotsController.syncSnapshotsV3(chain);
+    } else if (job === 'fill-missing-snapshots-v3') {
+        return snapshotsController.fillMissingSnapshotsV3(chain);
     } else if (job === 'sync-swaps-v3') {
         return jobsController.syncSwapsV3(chain);
     } else if (job === 'update-liquidity-24h-ago') {

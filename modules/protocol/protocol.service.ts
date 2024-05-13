@@ -78,7 +78,6 @@ export class ProtocolService {
         const pools = await prisma.prismaPool.findMany({
             where: {
                 categories: { none: { category: 'BLACK_LISTED' } },
-                type: { notIn: ['LINEAR'] },
                 dynamicData: {
                     totalSharesNum: {
                         gt: 0.000000000001,

@@ -1,8 +1,7 @@
 import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../../prisma/prisma-client';
-import { PrismaPoolType } from '@prisma/client';
 import _ from 'lodash';
-import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
+import { nestedPoolWithSingleLayerNesting } from '../../../prisma/prisma-types';
 import { UserService } from '../../user/user.service';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { networkContext } from '../../network/network-context.service';
@@ -22,20 +21,18 @@ export class PoolCreatorService {
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
         const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
-        const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
-        const allNestedTypePools = await prisma.prismaPool.findMany({
-            where: {
-                chain: this.chain,
-                type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
-            },
-            select: { id: true, address: true },
-        });
+
+        // any pool can be nested
+        const allNestedTypePools = [
+            ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
+            ...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
+        ];
 
         const poolIds: string[] = [];
 
         let counter = 1;
-        for (const subgraphPool of sortedSubgraphPools) {
-            console.log(`Syncing pool ${counter} of ${sortedSubgraphPools.length}`);
+        for (const subgraphPool of subgraphPools) {
+            console.log(`Syncing pool ${counter} of ${subgraphPools.length}`);
             console.log(`Pool ID: ${subgraphPool.id}`);
             counter = counter + 1;
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
@@ -66,21 +63,15 @@ export class PoolCreatorService {
             },
             false,
         );
-        const sortedSubgraphPools = this.sortSubgraphPools(subgraphPools);
         const poolIds = new Set<string>();
 
+        // any pool can be nested
         const allNestedTypePools = [
-            ...(await prisma.prismaPool.findMany({
-                where: {
-                    chain: this.chain,
-                    type: { in: [PrismaPoolType.LINEAR, PrismaPoolType.COMPOSABLE_STABLE] },
-                },
-                select: { id: true, address: true },
-            })),
-            ...sortedSubgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
+            ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
+            ...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
         ];
 
-        for (const subgraphPool of sortedSubgraphPools) {
+        for (const subgraphPool of subgraphPools) {
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
 
             if (!existsInDb) {
@@ -96,7 +87,7 @@ export class PoolCreatorService {
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
         let operations: any[] = [];
         const pools = await prisma.prismaPool.findMany({
-            ...prismaPoolWithExpandedNesting,
+            ...nestedPoolWithSingleLayerNesting,
             where: { chain: this.chain },
         });
 
@@ -115,12 +106,6 @@ export class PoolCreatorService {
                             ...nestedToken,
                             nestedPoolId: token.nestedPool?.id,
                         })),
-                        ...(token.nestedPool?.tokens.map((nestedToken) =>
-                            (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
-                                ...doubleNestedToken,
-                                nestedPoolId: nestedToken.nestedPool?.id,
-                            })),
-                        ) || []),
                     ]),
             );
 
@@ -265,7 +250,7 @@ export class PoolCreatorService {
 
     public async createAllTokensRelationshipForPool(poolId: string): Promise<void> {
         const pool = await prisma.prismaPool.findUnique({
-            ...prismaPoolWithExpandedNesting,
+            ...nestedPoolWithSingleLayerNesting,
             where: { id_chain: { id: poolId, chain: this.chain } },
         });
 
@@ -280,12 +265,6 @@ export class PoolCreatorService {
                     ...nestedToken,
                     nestedPoolId: token.nestedPool?.id || null,
                 })),
-                ...(token.nestedPool?.tokens.map((nestedToken) =>
-                    (nestedToken.nestedPool?.tokens || []).map((doubleNestedToken) => ({
-                        ...doubleNestedToken,
-                        nestedPoolId: nestedToken.nestedPool?.id || null,
-                    })),
-                ) || []),
             ]),
         );
 
@@ -298,70 +277,5 @@ export class PoolCreatorService {
                 nestedPoolId: token.nestedPoolId || null,
             })),
         });
-    }
-
-    private sortSubgraphPools(subgraphPools: BalancerPoolFragment[]) {
-        return _.sortBy(subgraphPools, (pool) => {
-            const poolType = this.mapSubgraphPoolTypeToPoolType(pool.poolType || '');
-
-            if (poolType === 'LINEAR') {
-                return 0;
-            } else if (poolType === 'COMPOSABLE_STABLE') {
-                //if the composable stable has a nested composable stable, it needs to appear later in the list
-                const nestedComposableStableToken = (pool.tokens || []).find((token) => {
-                    if (token.address === pool.address) {
-                        return false;
-                    }
-
-                    const nestedPool = subgraphPools.find((nestedPool) => nestedPool.address === token.address);
-                    const nestedPoolType = this.mapSubgraphPoolTypeToPoolType(nestedPool?.poolType || '');
-
-                    return nestedPoolType === 'COMPOSABLE_STABLE';
-                });
-
-                return nestedComposableStableToken ? 2 : 1;
-            }
-
-            return 3;
-        });
-    }
-
-    private mapSubgraphPoolTypeToPoolType(poolType: string): PrismaPoolType {
-        switch (poolType) {
-            case 'Weighted':
-                return 'WEIGHTED';
-            case 'LiquidityBootstrapping':
-                return 'LIQUIDITY_BOOTSTRAPPING';
-            case 'Stable':
-                return 'STABLE';
-            case 'MetaStable':
-                return 'META_STABLE';
-            // for the old phantom stable pool, we add it to the DB as type COMPOSABLE_STABLE with version 0
-            case 'StablePhantom':
-                return 'COMPOSABLE_STABLE';
-            case 'ComposableStable':
-                return 'COMPOSABLE_STABLE';
-            case 'Linear':
-                return 'LINEAR';
-            case 'Element':
-                return 'ELEMENT';
-            case 'Investment':
-                return 'INVESTMENT';
-            case 'Gyro2':
-                return 'GYRO';
-            case 'Gyro3':
-                return 'GYRO3';
-            case 'GyroE':
-                return 'GYROE';
-            case 'FX':
-                return 'FX';
-        }
-
-        // balancer still uses AaveLinear, etc, so we account for that here
-        if (poolType.includes('Linear')) {
-            return 'LINEAR';
-        }
-
-        return 'UNKNOWN';
     }
 }

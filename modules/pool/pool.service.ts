@@ -10,7 +10,6 @@ import {
     GqlPoolFx,
     GqlPoolGyro,
     GqlPoolJoinExit,
-    GqlPoolLinear,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
@@ -77,18 +76,6 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
-    }
-
-    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools(chains);
-    }
-
-    public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
-        return this.poolGqlLoaderService.getGyroPools(chains);
-    }
-
-    public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
-        return this.poolGqlLoaderService.getFxPools(chains);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -336,10 +323,6 @@ export class PoolService {
 
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
-    }
-
-    public async setPoolsWithPreferredGaugesAsIncentivized() {
-        await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
     public async addToBlackList(poolId: string) {

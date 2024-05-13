@@ -241,18 +241,6 @@ export default <NetworkData>{
             },
         },
     },
-    beefy: {
-        linearPools: [
-            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
-            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
-        ],
-    },
-    rocket: {
-        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
-    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
