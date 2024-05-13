@@ -144,9 +144,6 @@ export default <NetworkData>{
             },
         },
     },
-    beefy: {
-        linearPools: [''],
-    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',

@@ -154,6 +154,11 @@ export const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) *
 export const roundToMidnight = (timestamp: number) => Math.floor(timestamp / 86400) * 86400;
 
 /**
+ * Time helper to round timestamp to the next midnight
+ */
+export const roundToNextMidnight = (timestamp: number) => roundToMidnight(timestamp + 86400);
+
+/**
  * Returns the timestamp for the days ago
  *
  * @param daysAgo

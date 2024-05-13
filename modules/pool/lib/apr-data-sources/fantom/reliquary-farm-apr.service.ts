@@ -116,7 +116,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
                         chain: networkContext.chain,
                         poolId: pool.id,
                         title: 'BEETS reward APR',
-                        apr: 0,
+                        apr: maxApr,
                         range: {
                             create: {
                                 id: `${pool.id}-beets-apr-range`,

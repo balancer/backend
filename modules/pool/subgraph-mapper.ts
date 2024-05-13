@@ -1,7 +1,7 @@
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { AddressZero } from '@ethersproject/constants';
-import { fx, gyro, linear, element, stable } from './pool-data';
+import { fx, gyro, element, stable } from './pool-data';
 
 export const subgraphToPrismaCreate = (
     pool: BalancerPoolFragment,
@@ -103,7 +103,7 @@ const subgraphMapper = (
     const tokens =
         pool.tokens?.map((token) => {
             const nestedPool = nestedPools.find((nestedPool) => {
-                return nestedPool.address === token.address;
+                return pool.id !== nestedPool.id && nestedPool.address === token.address;
             });
 
             let priceRateProvider;
@@ -147,8 +147,6 @@ const mapSubgraphPoolTypeToPoolType = (poolType: string): PrismaPoolType => {
             return 'COMPOSABLE_STABLE';
         case 'ComposableStable':
             return 'COMPOSABLE_STABLE';
-        case 'Linear':
-            return 'LINEAR';
         case 'Element':
             return 'ELEMENT';
         case 'Investment':
@@ -161,11 +159,6 @@ const mapSubgraphPoolTypeToPoolType = (poolType: string): PrismaPoolType => {
             return 'GYROE';
         case 'FX':
             return 'FX';
-    }
-
-    // balancer still uses AaveLinear, etc, so we account for that here
-    if (poolType.includes('Linear')) {
-        return 'LINEAR';
     }
 
     return 'UNKNOWN';
@@ -187,7 +180,6 @@ const typeDataMapper = {
     GYRO: gyro,
     GYRO3: gyro,
     GYROE: gyro,
-    LINEAR: linear,
     STABLE: stable,
     COMPOSABLE_STABLE: stable,
     META_STABLE: stable,
@@ -195,6 +187,5 @@ const typeDataMapper = {
 
 export type FxData = ReturnType<typeof fx>;
 export type GyroData = ReturnType<typeof gyro>;
-export type LinearData = ReturnType<typeof linear>;
 export type ElementData = ReturnType<typeof element>;
 export type StableData = ReturnType<typeof stable>;

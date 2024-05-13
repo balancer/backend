@@ -87,7 +87,10 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
             // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            const oneHundredUsdOfTokenA = (
+                (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) *
+                100
+            ).toFixed(20);
             tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
@@ -325,11 +328,11 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
     // this happens if you get a "bonus" ie positive price impact.
-    if (priceRatio > parseEther('0.999999')) {
-        console.error(
-            `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
+    if (priceRatio > parseEther('1')) {
+        console.log(
+            `Price ratio was ${priceRatio} for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}. Setting to 0.999999999999 instead.`,
         );
-        priceRatio = parseEther('0.999999');
+        priceRatio = parseEther('0.999999999999');
     }
     if (priceRatio !== 0n) {
         const priceImpact = WAD - priceRatio;

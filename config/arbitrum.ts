@@ -34,12 +34,11 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : env.ALCHEMY_API_KEY
-            ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : env.INFURA_API_KEY
+        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -194,10 +193,13 @@ export default <NetworkData>{
                 scale: 1,
                 isIbYield: true,
             },
+            woETH: {
+                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
+                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     gyro: {
         config: '0x9b683ca24b0e013512e2566b68704dbe9677413c',

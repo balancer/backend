@@ -5,7 +5,7 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType } from '@prisma/client';
 import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
 import { tokenService } from '../../../token/token.service';
-import { collectsYieldFee } from '../pool-utils';
+import { collectsYieldFee, tokenCollectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
 import { networkContext } from '../../../network/network-context.service';
 import { zeroAddress } from 'viem';
@@ -77,19 +77,18 @@ export class YbTokensAprService implements PoolAprService {
                     continue;
                 }
 
-                let aprInPoolAfterFees = tokenApr.apr * tokenPercentageInPool;
+                let userApr = tokenApr.apr * tokenPercentageInPool;
 
-                if (collectsYieldFee(pool, token) && token.dynamicData && token.dynamicData.priceRate !== '1.0') {
+                if (collectsYieldFee(pool) && tokenCollectsYieldFee(token) && token.dynamicData) {
                     const fee =
                         pool.type === 'META_STABLE'
                             ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
                             : parseFloat(pool.dynamicData.protocolYieldFee || '0');
 
-                    aprInPoolAfterFees = aprInPoolAfterFees * (1 - fee);
+                    userApr = userApr * (1 - fee);
                 }
 
-                const yieldType: PrismaPoolAprType =
-                    tokenApr.isIbYield || pool.type !== 'LINEAR' ? 'IB_YIELD' : 'LINEAR_BOOSTED';
+                const yieldType: PrismaPoolAprType = 'IB_YIELD';
 
                 const itemId = `${pool.id}-${token.token.symbol}-yield-apr`;
 
@@ -98,7 +97,7 @@ export class YbTokensAprService implements PoolAprService {
                     chain: this.chain,
                     poolId: pool.id,
                     title: `${token.token.symbol} APR`,
-                    apr: aprInPoolAfterFees,
+                    apr: userApr,
                     group: tokenApr.group as PrismaPoolAprItemGroup,
                     type: yieldType,
                 };

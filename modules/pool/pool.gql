@@ -50,19 +50,7 @@ extend type Query {
     """
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     """
-    Gets all linear pools
-    """
-    poolGetLinearPools(chains: [GqlChain!]): [GqlPoolLinear!]!
-    """
-    Gets all gyro pools
-    """
-    poolGetGyroPools(chains: [GqlChain!]): [GqlPoolGyro!]!
-    """
-    Gets all FX pools
-    """
-    poolGetFxPools(chains: [GqlChain!]): [GqlPoolFx!]!
-    """
-    Will de deprecated in favor of poolEvents
+    Getting swap, add and remove events with range
     """
     poolGetEvents(
         range: GqlPoolEventsDataRange!
@@ -72,7 +60,7 @@ extend type Query {
         userAddress: String
     ): [GqlPoolEvent!]!
     """
-    Getting swap, join and exit events
+    Getting swap, add and remove events with paging
     """
     poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter!): [GqlPoolEvent!]!
 }
@@ -100,7 +88,6 @@ extend type Mutation {
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
     poolReloadAllTokenNestedPoolIds: String!
-    poolSetPoolsWithPreferredGaugesAsIncentivized: String!
     poolBlackListAddPool(poolId: String!): String!
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
@@ -221,7 +208,6 @@ enum GqlPoolType {
     PHANTOM_STABLE
     COMPOSABLE_STABLE
     ELEMENT
-    LINEAR
     UNKNOWN
     LIQUIDITY_BOOTSTRAPPING
     INVESTMENT
@@ -649,62 +635,6 @@ type GqlPoolElement implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 }
 
-type GqlPoolLinear implements GqlPoolBase {
-    id: ID!
-    chain: GqlChain!
-    vaultVersion: Int!
-    name: String!
-    symbol: String!
-    address: Bytes!
-    decimals: Int!
-    owner: Bytes!
-    factory: Bytes
-    createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
-    dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]!
-    allTokens: [GqlPoolTokenExpanded!]!
-    poolTokens: [GqlPoolTokenDetail!]!
-    tokens: [GqlPoolToken!]!
-
-    #linear specific fields
-    mainIndex: Int!
-    wrappedIndex: Int!
-    upperTarget: BigInt!
-    lowerTarget: BigInt!
-    staking: GqlPoolStaking
-    bptPriceRate: BigDecimal!
-    type: GqlPoolType!
-    version: Int!
-
-    userBalance: GqlPoolUserBalance
-}
-
-type GqlPoolLinearNested {
-    id: ID!
-    name: String!
-    symbol: String!
-    address: Bytes!
-    owner: Bytes!
-    factory: Bytes
-    createTime: Int!
-    tokens: [GqlPoolToken!]!
-
-    totalShares: BigDecimal!
-    totalLiquidity: BigDecimal!
-
-    #linear specific fields
-    mainIndex: Int!
-    wrappedIndex: Int!
-    upperTarget: BigInt!
-    lowerTarget: BigInt!
-    bptPriceRate: BigDecimal!
-
-    type: GqlPoolType!
-    version: Int!
-}
-
 type GqlPoolComposableStableNested {
     id: ID!
     name: String!
@@ -730,16 +660,15 @@ union GqlPoolUnion =
       GqlPoolWeighted
     | GqlPoolStable
     | GqlPoolMetaStable
-    | GqlPoolLinear
     | GqlPoolComposableStable
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
     | GqlPoolFx
-union GqlPoolNestedUnion = GqlPoolLinearNested | GqlPoolComposableStableNested
+union GqlPoolNestedUnion = GqlPoolComposableStableNested
 
-union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable | GqlPoolTokenLinear
-union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken | GqlPoolTokenLinear
+union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable
+union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken
 
 type GqlPoolTokenDetail {
     id: ID!
@@ -814,27 +743,6 @@ type GqlPoolToken implements GqlPoolTokenBase {
     totalBalance: BigDecimal!
 }
 
-type GqlPoolTokenLinear implements GqlPoolTokenBase {
-    id: ID!
-    address: String!
-    balance: BigDecimal!
-    decimals: Int!
-    name: String!
-    symbol: String!
-    index: Int!
-    priceRate: BigDecimal!
-    priceRateProvider: String
-    weight: BigDecimal
-
-    pool: GqlPoolLinearNested!
-    #the proportional balances of the underlying tokens, computed as the fraction balance / totalShares
-    mainTokenBalance: BigDecimal!
-    wrappedTokenBalance: BigDecimal!
-    totalMainTokenBalance: BigDecimal! # mainTokenBalance + wrappedTokenBalance * priceRate
-    #the total balance in the pool, regardless of nesting
-    totalBalance: BigDecimal!
-}
-
 type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
     id: ID!
     address: String!
@@ -852,20 +760,6 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
     pool: GqlPoolComposableStableNested!
 }
 
-type GqlPoolLinearPoolData {
-    id: ID!
-    address: String!
-    symbol: String!
-    priceRate: String!
-    mainToken: GqlPoolLinearPoolMainToken!
-    wrappedToken: GqlPoolLinearPoolWrappedToken!
-    unwrappedTokenAddress: String!
-    totalSupply: String!
-    balance: String!
-    poolToken: String!
-    mainTokenTotalBalance: String!
-}
-
 type GqlPoolStableComposablePoolData {
     id: ID!
     address: String!
@@ -873,27 +767,6 @@ type GqlPoolStableComposablePoolData {
     tokens: [GqlPoolToken!]!
     totalSupply: String!
     balance: String!
-}
-
-type GqlPoolLinearPoolMainToken {
-    address: String!
-    index: Int!
-    balance: String!
-    totalSupply: String!
-    name: String!
-    symbol: String!
-    decimals: Int!
-}
-
-type GqlPoolLinearPoolWrappedToken {
-    address: String!
-    index: Int!
-    balance: String!
-    totalSupply: String!
-    priceRate: String!
-    name: String!
-    symbol: String!
-    decimals: Int!
 }
 
 type GqlPoolApr {
@@ -951,6 +824,7 @@ input GqlPoolFilter {
     createTime: GqlPoolTimePeriod
     userAddress: String
     vaultVersionIn: [Int!]
+    minTvl: Float
 }
 
 enum GqlPoolFilterCategory {
@@ -1098,6 +972,7 @@ type GqlPoolFeaturedPool {
     poolId: ID!
     primary: Boolean!
     pool: GqlPoolBase!
+    description: String!
 }
 
 type GqlPoolFeaturedPoolGroup {
@@ -1183,8 +1058,8 @@ type GqlPoolStakingOtherGauge {
 }
 
 enum GqlPoolEventType {
-    JOIN
-    EXIT
+    ADD
+    REMOVE
     SWAP
 }
 
@@ -1217,7 +1092,7 @@ interface GqlPoolEvent {
     valueUSD: Float!
 }
 
-type GqlPoolJoinExitEventV3 implements GqlPoolEvent {
+type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
     chain: GqlChain!
     id: ID!
     tx: String!
