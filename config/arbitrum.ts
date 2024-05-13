@@ -199,6 +199,12 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            ETHx: {
+                tokenAddress: '0xED65C5085a18Fa160Af0313E60dcc7905E944Dc7',
+                sourceUrl: 'https://universe.staderlabs.com/eth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
     },
     gyro: {
