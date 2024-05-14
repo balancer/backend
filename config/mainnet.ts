@@ -359,6 +359,12 @@ export default <NetworkData>{
                 path: 'stakingYield.value',
                 isIbYield: true,
             },
+            saETH: {
+                tokenAddress: '0xf1617882a71467534d14eee865922de1395c9e89',
+                sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
