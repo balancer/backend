@@ -76,7 +76,6 @@ export class Router {
 
         const orderedQuotePaths = valueArr.map((item) => item.item);
 
-
         // If there is only one path, return it
         if (orderedQuotePaths.length === 1) {
             return orderedQuotePaths;
@@ -90,8 +89,12 @@ export class Router {
             this.splitPaths(swapAmount, bestPath, secondBestPath, 0.25), // 25/75 split
             this.splitPaths(swapAmount, bestPath, secondBestPath, 0.5), // 50/50 split
             this.splitPaths(swapAmount, bestPath, secondBestPath, 0.75), // 75/25 split
-            this.splitPathsNormalizedLiquidity(swapAmount, bestPath, secondBestPath), // normalized liquidity split
         ];
+        // prevent splitPaths from failing due to normalizedLiquidity not being properly filled out
+        const normalizedLiquiditySplitPaths = this.splitPathsNormalizedLiquidity(swapAmount, bestPath, secondBestPath);
+        if (normalizedLiquiditySplitPaths !== undefined) {
+            splitPaths.push(normalizedLiquiditySplitPaths);
+        }
 
         // Find the split path that yields the best result (i.e. maxAmountOut on GivenIn, minAmountIn on GivenOut)
         let bestSplitPaths: PathWithAmount[] = [];
@@ -144,13 +147,16 @@ export class Router {
         const bestPathNLs = bestPath.pools.map((p, i) =>
             p.getNormalizedLiquidity(bestPath.tokens[i], bestPath.tokens[i + 1]),
         );
+        const secondBestPathNLs = secondBestPath.pools.map((p, i) =>
+            p.getNormalizedLiquidity(secondBestPath.tokens[i], secondBestPath.tokens[i + 1]),
+        );
+        if (bestPathNLs.some((nl) => nl === 0n) || secondBestPathNLs.some((nl) => nl === 0n)) {
+            return undefined; // TODO: check what could be causing NL to be 0 for some token pairs
+        }
+
         const bestPathNL = MathSol.divDownFixed(
             WAD,
             bestPathNLs.reduce((acc, normLiq) => acc + MathSol.divDownFixed(WAD, normLiq), 0n),
-        );
-
-        const secondBestPathNLs = secondBestPath.pools.map((p, i) =>
-            p.getNormalizedLiquidity(secondBestPath.tokens[i], secondBestPath.tokens[i + 1]),
         );
         const secondBestPathNL = MathSol.divDownFixed(
             WAD,

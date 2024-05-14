@@ -1,15 +1,21 @@
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
+import { AllNetworkConfigs } from '../modules/network/network-config';
 import { networkContext } from '../modules/network/network-context.service';
 import { poolService } from '../modules/pool/pool.service';
 import { sorService } from '../modules/sor/sor.service';
+import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 
 async function debugScript() {
     const chainId = '1';
-    const chain = 'MAINNET';
+    const config = AllNetworkConfigs[chainId].data;
+    const subgraphUrl = config.subgraphs.balancer;
+    const chain = config.chain.prismaId;
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
-    const latestBlockNumber = await networkContext.provider.getBlockNumber();
-    await poolService.loadOnChainDataForAllPools();
+    // run only once to sync pools - comment out for future analysis runs
+    // await poolService.syncAllPoolsFromSubgraph();
+    // await poolService.loadOnChainDataForAllPools();
+    // await syncLatestFXPrices(subgraphUrl, chain);
 
     // BAL, WETH, DAI, wstETH, rETH, GNO, AAVE
     const tokens = [
@@ -25,7 +31,15 @@ async function debugScript() {
     // GNO = 350 USD -> 30 GNO = 1050 USD
     // WETH = 3500 USD -> 3 WETH = 1050 USD
 
-    const amounts = [200, 0.3, 0.3, 0.3, 1000, 3, 1000];
+    const amounts = [
+        200, // BAL
+        0.3, // WETH
+        0.3, // wstETH
+        0.3, // rETH
+        1000, // DAI
+        3, // GNO
+        1000, // GYD
+    ];
 
     const scaling = [10];
 
