@@ -200,7 +200,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             ETHx: {
-                tokenAddress: '0xED65C5085a18Fa160Af0313E60dcc7905E944Dc7',
+                tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
                 sourceUrl: 'https://universe.staderlabs.com/eth/apy',
                 path: 'value',
                 isIbYield: true,

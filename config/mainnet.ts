@@ -360,7 +360,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             saETH: {
-                tokenAddress: '0xF1617882A71467534D14EEe865922de1395c9E89',
+                tokenAddress: '0xf1617882a71467534d14eee865922de1395c9e89',
                 sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
                 path: 'apr',
                 isIbYield: true,
