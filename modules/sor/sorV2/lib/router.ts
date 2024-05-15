@@ -1,10 +1,10 @@
-import { MathSol, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { WAD, max, min } from './utils/math';
+import { MathSol, WAD, max, min } from './utils/math';
 import { BasePool } from './pools/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { formatEther, maxInt256, parseEther, parseUnits } from 'viem';
+import { parseEther } from 'viem';
 
 export class Router {
     private readonly pathGraph: PathGraph;
