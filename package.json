@@ -16,8 +16,7 @@
         "prisma-merge": "ts-node prisma/prisma-merge.ts",
         "test": "jest",
         "vitest": "vitest",
-        "task": "ts-node -r tsconfig-paths/register -r dotenv/config tasks/index.ts",
-        "normLiqAnalysis": "ts-node -r dotenv/config -r tsconfig-paths/register test/normLiqAnalysis.ts"
+        "task": "ts-node -r tsconfig-paths/register -r dotenv/config tasks/index.ts"
     },
     "dependencies": {
         "@aws-sdk/client-cloudwatch": "^3.388.0",
