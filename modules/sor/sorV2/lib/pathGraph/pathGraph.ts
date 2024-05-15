@@ -1,9 +1,7 @@
-import { MAX_UINT256, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../pools/basePool';
 import { PathLocal } from '../path';
-import { PathOperation } from '../../../types';
-import { Address } from 'viem';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 

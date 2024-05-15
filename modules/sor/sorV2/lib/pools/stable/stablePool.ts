@@ -4,15 +4,7 @@ import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { Chain } from '@prisma/client';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { MathSol, WAD } from '../../utils/math';
-import {
-    _calcBptInGivenExactTokensOut,
-    _calcBptOutGivenExactTokensIn,
-    _calcInGivenOut,
-    _calcOutGivenIn,
-    _calcTokenInGivenExactBptOut,
-    _calcTokenOutGivenExactBptIn,
-    _calculateInvariant,
-} from './stableMath';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './stableMath';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
@@ -116,79 +108,6 @@ export class StablePool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    addLiquiditySingleTokenExactIn(
-        tokenIn: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
-        try {
-            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-            const tokenBalances: bigint[] = [];
-            const amountsIn: bigint[] = [];
-            Array.from(this.tokenMap.values()).forEach((stablePoolToken) => {
-                if (stablePoolToken.token.isSameAddress(tokenIn.address)) {
-                    amountsIn.push(amount.scale18);
-                } else {
-                    amountsIn.push(0n);
-                }
-                tokenBalances.push(stablePoolToken.scale18);
-            });
-            const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
-            const bptAmountOut = _calcBptOutGivenExactTokensIn(
-                this.amp,
-                tokenBalances,
-                amountsIn,
-                this.totalShares,
-                currentInvariant,
-                this.swapFee,
-            );
-            return TokenAmount.fromRawAmount(bpt, bptAmountOut);
-        } catch (err) {
-            return TokenAmount.fromRawAmount(bpt, 0n);
-        }
-    }
-
-    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
-        try {
-            const tokenInIndex = this.tokenIndexMap.get(tokenIn.address);
-            if (!tokenInIndex) throw new Error('Provided Token In is Invalid');
-            const tokenBalances = Array.from(this.tokens.values()).map(({ scale18 }) => scale18);
-            const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
-            const tokenInAmount = _calcTokenInGivenExactBptOut(
-                this.amp,
-                tokenBalances,
-                tokenInIndex,
-                amount.scale18,
-                this.totalShares,
-                currentInvariant,
-                this.swapFee,
-            );
-            return TokenAmount.fromRawAmount(tokenIn, tokenInAmount);
-        } catch (err) {
-            return TokenAmount.fromRawAmount(tokenIn, 0n);
-        }
-    }
-
-    getLimitAmountRemoveLiquidity(bpt: Token, tokenOut: Token, removeLiquidityKind: RemoveLiquidityKind): bigint {
-        console.log(tokenOut);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-        if (!tOut) {
-            throw new Error('getLimitRemoveLiquidity: Token not found');
-        }
-        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactOut) {
-            return (tOut.amount * tOut.rate) / WAD;
-        }
-        if (removeLiquidityKind === RemoveLiquidityKind.SingleTokenExactIn) {
-            return this.removeLiquiditySingleTokenExactOut(
-                tokenOut,
-                bpt,
-                TokenAmount.fromRawAmount(tokenOut, (tOut.amount * tOut.rate) / WAD),
-            ).amount;
-        }
-        throw new Error('getLimitRemoveLiquidity: Invalid RemoveLiquidityKind');
-    }
-
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
@@ -220,54 +139,6 @@ export class StablePool implements BasePool {
         }
         return 0n;
     }
-
-    removeLiquiditySingleTokenExactIn(tokenOut: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
-        const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
-        if (!tokenOutIndex) throw new Error('Provided Token Out is Invalid');
-        const tokenBalances = Array.from(this.tokens.values()).map(({ scale18 }) => scale18);
-        const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
-        const tokenAmountOut = _calcTokenOutGivenExactBptIn(
-            this.amp,
-            tokenBalances,
-            tokenOutIndex,
-            amount.scale18,
-            this.totalShares,
-            currentInvariant,
-            this.swapFee,
-        );
-        return TokenAmount.fromRawAmount(tokenOut, tokenAmountOut);
-    }
-
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
-        const tokenBalances: bigint[] = [];
-        const amountsOut: bigint[] = [];
-        const tokenOutIndex = this.tokenIndexMap.get(tokenOut.address);
-        if (tokenOutIndex === undefined) throw new Error('Provided Token Out is Invalid');
-        Array.from(this.tokenMap.values()).forEach((stablePoolToken, index) => {
-            if (stablePoolToken.token.isSameAddress(tokenOut.address)) {
-                amountsOut.push(amount.scale18);
-            } else {
-                amountsOut.push(0n);
-            }
-            tokenBalances.push(stablePoolToken.scale18);
-        });
-        const currentInvariant = _calculateInvariant(this.amp, tokenBalances);
-        const bptIn = _calcBptInGivenExactTokensOut(
-            this.amp,
-            tokenBalances,
-            amountsOut,
-            this.totalShares,
-            currentInvariant,
-            this.swapFee,
-        );
-        return TokenAmount.fromRawAmount(bpt, bptIn);
-    }
-
     swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount {
         const tInIndex = this.tokenIndexMap.get(tokenIn.wrapped);
         const tOutIndex = this.tokenIndexMap.get(tokenOut.wrapped);

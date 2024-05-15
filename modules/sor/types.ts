@@ -40,9 +40,3 @@ export interface SwapResult {
 export interface SwapService {
     getSwapResult(inputs: GetSwapsInput): Promise<SwapResult>;
 }
-
-export enum PathOperation {
-    Swap = 0,
-    AddLiquidity = 1,
-    RemoveLiquidity = 2,
-}

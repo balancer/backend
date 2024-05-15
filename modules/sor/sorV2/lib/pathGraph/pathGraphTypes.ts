@@ -1,6 +1,5 @@
 import { Token } from '@balancer/sdk';
 import { BasePool } from '../pools/basePool';
-import { PathOperation } from '../../../types';
 
 export interface PoolTokenPair {
     id: string;

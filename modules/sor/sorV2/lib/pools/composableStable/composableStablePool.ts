@@ -322,32 +322,4 @@ export class ComposableStablePool implements BasePool {
         }
         return amountsWithoutBpt;
     }
-    addLiquiditySingleTokenExactIn(tokenIn: Token, bpt: Token, amount: TokenAmount): TokenAmount {
-        throw new Error('Composable Stable - addLiquiditiySingleTokenExactIn: Method not Implemented');
-    }
-
-    getLimitAmountAddLiquidity(tokenIn: Token): bigint {
-        throw new Error('Composable Stable - getLimitAmountAddLiquidity: Method not Implemented');
-    }
-
-    getLimitAmountRemoveLiquidity(): bigint {
-        throw new Error('Composable Stable - getLimitAmountRemoveLiquidity: Method not Implemented');
-    }
-
-    removeLiquiditySingleTokenExactIn(tokenOut: Token, bptIn: TokenAmount): TokenAmount {
-        throw new Error('Composable Stable - removeLiquiditySingleTokenExactIn: Method not Implemented');
-    }
-
-    addLiquiditySingleTokenExactOut(tokenIn: Token, amount: TokenAmount, mutateBalances?: boolean): TokenAmount {
-        throw new Error('Composable Stable - addLiquiditySingleTokenExactOut: Method not Implemented');
-    }
-
-    removeLiquiditySingleTokenExactOut(
-        tokenOut: Token,
-        bpt: Token,
-        amount: TokenAmount,
-        mutateBalances?: boolean,
-    ): TokenAmount {
-        throw new Error('Composable Stable - removeLiquiditySingleTokenExactOut: Method not Implemented');
-    }
 }
