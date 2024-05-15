@@ -11,9 +11,9 @@ const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
 
 const RATEPROVIDER_REVIEW_URL =
-    'https://raw.githubusercontent.com/balancer/code-review/Registry_update/rate-providers/registry.json';
+    'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/registry.json';
 
-const RATEPROVIDER_BASE_URL = 'https://raw.githubusercontent.com/balancer/code-review/Registry_update/rate-providers/';
+const RATEPROVIDER_BASE_URL = 'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/';
 
 interface FeaturedPoolMetadata {
     id: string;
@@ -41,20 +41,18 @@ interface WhitelistedToken {
 }
 
 interface RateProviderReview {
-    [status: string]: {
-        [chain: string]: {
-            [rateproviderAddress: string]: {
-                name: string;
-                asset: string;
-                summary: string;
-                review: string;
-                warnings: string[];
-                factory?: string;
-                upgradeableComponents: {
-                    entrypoint: string;
-                    implementationReviewed: string;
-                }[];
-            };
+    [chain: string]: {
+        [rateproviderAddress: string]: {
+            name: string;
+            asset: string;
+            summary: string;
+            review: string;
+            warnings: string[];
+            factory: string;
+            upgradeableComponents: {
+                entrypoint: string;
+                implementationReviewed: string;
+            }[];
         };
     };
 }
@@ -64,7 +62,7 @@ export class GithubContentService implements ContentService {
         const { data: githubAllRateProviderList } = await axios.get<RateProviderReview>(RATEPROVIDER_REVIEW_URL);
 
         for (const chain of chains) {
-            const chainRateProviderList = githubAllRateProviderList.reviewed[chain.toLowerCase()];
+            const chainRateProviderList = githubAllRateProviderList[chain.toLowerCase()];
 
             // delete any reviews that are no longer part of the review repo
             await prisma.prismaPriceRateProviderData.deleteMany({
