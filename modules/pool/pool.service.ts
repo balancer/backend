@@ -78,14 +78,6 @@ export class PoolService {
         return this.poolGqlLoaderService.getPools(args);
     }
 
-    public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
-        return this.poolGqlLoaderService.getGyroPools(chains);
-    }
-
-    public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
-        return this.poolGqlLoaderService.getFxPools(chains);
-    }
-
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return this.poolGqlLoaderService.getPoolsCount(args);
     }
@@ -331,10 +323,6 @@ export class PoolService {
 
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
-    }
-
-    public async setPoolsWithPreferredGaugesAsIncentivized() {
-        await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
     public async addToBlackList(poolId: string) {

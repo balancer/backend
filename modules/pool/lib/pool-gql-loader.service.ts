@@ -1,5 +1,4 @@
 import {
-    PrismaNestedPoolWithNoNesting,
     PrismaNestedPoolWithSingleLayerNesting,
     prismaPoolMinimal,
     PrismaPoolMinimal,
@@ -14,7 +13,6 @@ import {
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolFeaturedPool,
-    GqlPoolGyro,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
     GqlPoolMinimal,
@@ -30,7 +28,6 @@ import {
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
-    GqlPoolFx,
     GqlPoolTokenDetail,
     GqlNestedPool,
 } from '../../../schema';
@@ -47,7 +44,6 @@ import {
     PrismaUserWalletBalance,
 } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
-import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { parseUnits } from 'ethers/lib/utils';
@@ -169,26 +165,6 @@ export class PoolGqlLoaderService {
         });
 
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
-    }
-
-    public async getGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
-        const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: { in: chains } },
-            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
-            include: prismaPoolWithExpandedNesting.include,
-        });
-
-        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolGyro[];
-    }
-
-    public async getFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
-        const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['FX'] }, chain: { in: chains } },
-            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
-            include: prismaPoolWithExpandedNesting.include,
-        });
-
-        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolFx[];
     }
 
     public mapToMinimalGqlPool(
@@ -509,10 +485,10 @@ export class PoolGqlLoaderService {
             decimals: 18,
             staking: stakingData,
             dynamicData: this.getPoolDynamicData(pool),
-            investConfig: this.getPoolInvestConfig(pool),
-            withdrawConfig: this.getPoolWithdrawConfig(pool),
+            investConfig: this.getPoolInvestConfig(pool), // TODO DEPRECATE
+            withdrawConfig: this.getPoolWithdrawConfig(pool), // TODO DEPRECATE
             nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
+            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
