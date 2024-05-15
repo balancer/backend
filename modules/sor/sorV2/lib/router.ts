@@ -112,8 +112,6 @@ export class Router {
             bestSplitPaths = splitPaths[minAmountInIndex];
         }
 
-        console.log('bestSplitPaths index', splitPaths.indexOf(bestSplitPaths));
-
         return bestSplitPaths;
     }
 
@@ -168,7 +166,7 @@ export class Router {
 
         const pathNormUp = new PathWithAmount(bestPath.tokens, bestPath.pools, swapAmountNormUp);
         const pathNormDown = new PathWithAmount(secondBestPath.tokens, secondBestPath.pools, swapAmountNormDown);
-        const bestPathsNorm = [pathNormUp, pathNormDown];
-        return bestPathsNorm;
+
+        return [pathNormUp, pathNormDown];
     }
 }
