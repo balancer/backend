@@ -154,7 +154,7 @@ type GqlToken {
     """
     The rate provider data for the token
     """
-    rateProviderData: GqlPriceRateProviderData
+    priceRateProviderData: GqlPriceRateProviderData
 }
 """
 Represents additional data for a token

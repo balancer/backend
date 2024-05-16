@@ -67,7 +67,7 @@ export class TokenService {
     public async getTokenDefinitions(chains: Chain[]): Promise<GqlToken[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: { types: { some: { type: 'WHITE_LISTED' } }, chain: { in: chains } },
-            include: { types: true, dynamicData: true, priceRateProviderData: true },
+            include: { types: true, dynamicData: true },
             orderBy: { priority: 'desc' },
         });
 
@@ -104,41 +104,54 @@ export class TokenService {
             return 0;
         });
 
+        const rateProviderData = await this.getPriceRateProviderData(tokens);
+
         return tokens.map((token) => ({
             ...token,
             chainId: AllNetworkConfigsKeyedOnChain[token.chain].data.chain.id,
             tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
-            rateProviderData: this.mapPriceRateProviderData(token.priceRateProviderData),
+            rateProviderData: rateProviderData[token.address],
         }));
     }
 
-    mapPriceRateProviderData(
-        priceRateProviderData: PrismaPriceRateProviderData[],
-    ): GqlPriceRateProviderData | undefined {
-        if (priceRateProviderData.length === 0) {
-            return undefined;
-        }
+    private async getPriceRateProviderData(
+        tokens: PrismaToken[],
+    ): Promise<Record<string, GqlPriceRateProviderData | undefined>> {
+        const priceRateProviders = await prisma.prismaPriceRateProviderData.findMany({
+            where: {
+                tokenAddress: {
+                    in: tokens.map((t) => t.address),
+                },
+            },
+        });
 
-        if (priceRateProviderData.length === 1) {
-            return {
-                ...priceRateProviderData[0],
-                address: priceRateProviderData[0].rateProviderAddress,
-            };
-        }
+        const priceRateProviderDataResult: Record<string, GqlPriceRateProviderData | undefined> = {};
 
-        // need to find the "preferred" price rate provider
-        // only return the safe one
-        // if all are reviewed and safe, we can just return the first one
-        for (const provider of priceRateProviderData) {
-            if (provider.reviewed && provider.summary === 'safe') {
-                return {
-                    ...provider,
-                    address: provider.rateProviderAddress,
+        for (const token of tokens) {
+            const providersForToken = priceRateProviders.filter((provider) => provider.tokenAddress === token.address);
+
+            if (providersForToken.length === 1) {
+                priceRateProviderDataResult[token.address] = {
+                    ...providersForToken[0],
+                    address: providersForToken[0].rateProviderAddress,
                 };
+            } else if (providersForToken.length > 1) {
+                // need to find the "preferred" price rate provider
+                // only return the safe one
+                // if all are reviewed and safe, we can just return the first one
+                for (const provider of providersForToken) {
+                    if (provider.reviewed && provider.summary === 'safe') {
+                        priceRateProviderDataResult[token.address] = {
+                            ...provider,
+                            address: provider.rateProviderAddress,
+                        };
+                    }
+                }
+            } else {
+                priceRateProviderDataResult[token.address] = undefined;
             }
         }
-
-        return undefined;
+        return priceRateProviderDataResult;
     }
 
     public async updateTokenPrices(chainIds: string[]): Promise<void> {

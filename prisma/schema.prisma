@@ -664,7 +664,6 @@ model PrismaToken {
 
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
-    priceRateProviderData    PrismaPriceRateProviderData[]
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
@@ -755,7 +754,6 @@ model PrismaPriceRateProviderData {
     rateProviderAddress String
 
     tokenAddress        String
-    token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
 
     reviewed            Boolean
     name                String?

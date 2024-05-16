@@ -62,7 +62,8 @@ export class GithubContentService implements ContentService {
         const { data: githubAllRateProviderList } = await axios.get<RateProviderReview>(RATEPROVIDER_REVIEW_URL);
 
         for (const chain of chains) {
-            const chainRateProviderList = githubAllRateProviderList[chain.toLowerCase()];
+            const chainRateProviderList =
+                githubAllRateProviderList[chain === 'MAINNET' ? 'ethereum' : chain.toLowerCase()];
 
             // delete any reviews that are no longer part of the review repo
             await prisma.prismaPriceRateProviderData.deleteMany({
@@ -74,6 +75,10 @@ export class GithubContentService implements ContentService {
 
             for (const rateProviderAddress in chainRateProviderList) {
                 const rateProviderData = chainRateProviderList[rateProviderAddress];
+
+                console.log(
+                    `Adding rateprovider ${rateProviderAddress} for chain ${chain} and token ${rateProviderData.asset}`,
+                );
 
                 await prisma.prismaPriceRateProviderData.upsert({
                     where: {
