@@ -99,6 +99,81 @@ describe('sync new reviews', () => {
         }
     });
 
+    it('pooltokens with missing rateprovider review', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+
+        const pools = await prisma.prismaPool.findMany({
+            where: {
+                tokens: { some: { priceRateProvider: { not: ZERO_ADDRESS } } },
+            },
+            include: { tokens: true, dynamicData: true },
+        });
+
+        const allRateproviders = await prisma.prismaPriceRateProviderData.findMany();
+
+        const errors: {
+            poolid: string;
+            chain: string;
+            token: string;
+            rateprovider: string;
+            tvl: number;
+            createTime: number;
+            reason: string;
+        }[] = [];
+
+        let i = 0;
+        for (const pool of pools) {
+            for (const token of pool.tokens) {
+                if (pools.map((p) => p.address).includes(token.address)) continue; //skip pools
+                if (token.priceRateProvider === token.address) continue; //skip self rateprovider, most likely a nested pool
+                if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
+                    const rateproviderReviewForRateproviderAddress = allRateproviders.find(
+                        (rp) => rp.chain === pool.chain && rp.rateProviderAddress === token.priceRateProvider,
+                    );
+                    const rateproviderReviewForTokenAddress = allRateproviders.find(
+                        (rp) => rp.chain === pool.chain && rp.tokenAddress === token.address,
+                    );
+                    if (
+                        (rateproviderReviewForRateproviderAddress &&
+                            rateproviderReviewForRateproviderAddress.tokenAddress !== token.address) ||
+                        (rateproviderReviewForTokenAddress &&
+                            rateproviderReviewForTokenAddress?.rateProviderAddress !== token.priceRateProvider)
+                    ) {
+                        // missmatch
+                        errors.push({
+                            poolid: pool.id,
+                            chain: pool.chain,
+                            token: token.address,
+                            rateprovider: token.priceRateProvider,
+                            tvl: pool.dynamicData?.totalLiquidity || 0,
+                            createTime: pool.createTime,
+                            reason: 'mismatch',
+                        });
+                    }
+                    if (!rateproviderReviewForRateproviderAddress) {
+                        errors.push({
+                            poolid: pool.id,
+                            chain: pool.chain,
+                            token: token.address,
+                            rateprovider: token.priceRateProvider,
+                            tvl: pool.dynamicData?.totalLiquidity || 0,
+                            createTime: pool.createTime,
+                            reason: 'no review',
+                        });
+                    }
+                }
+            }
+        }
+
+        console.log('poolid,chain,token,rateprovider,reason,createTime,tvl');
+        for (const error of errors) {
+            console.log(
+                `${error.poolid},${error.chain},${error.token},${error.rateprovider},${error.reason},${error.createTime},${error.tvl}`,
+            );
+        }
+    });
+
     it('two assets use the same rateprovider', async () => {
         const rateproviders = await prisma.prismaPriceRateProviderData.findMany({
             where: { tokenAddress: '0x862c57d48becb45583aeba3f489696d22466ca1b' },
