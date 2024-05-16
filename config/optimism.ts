@@ -239,6 +239,12 @@ export default <NetworkData>{
                 path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
+            wrsETH: {
+                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
