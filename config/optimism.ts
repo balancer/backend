@@ -240,7 +240,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             wrsETH: {
-                tokenAddress: '0x87eEE96D50Fb761AD85B1c982d28A042169d61b1',
+                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
                 sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
                 path: 'value',
                 isIbYield: true,
