@@ -747,6 +747,23 @@ enum PrismaTokenTypeOption {
     PHANTOM_BPT
 }
 
+model PrismaPriceRateProviderData {
+    @@id([chain, rateProviderAddress])
+
+    chain               Chain
+    rateProviderAddress String
+
+    tokenAddress        String
+
+    reviewed            Boolean
+    name                String?
+    summary             String?
+    reviewUrl           String?
+    
+    @@index([chain, rateProviderAddress])
+    @@index([tokenAddress])
+}
+
 
 model PrismaUser {
     address                 String              @id
