@@ -235,38 +235,4 @@ export class WeightedPool implements BasePool {
         const ratio = power - WAD;
         return MathSol.mulUpFixed(balanceIn, ratio);
     }
-
-    _calcTokenInGivenExactBptOut = (
-        balance: bigint,
-        normalizedWeight: bigint,
-        bptAmountOut: bigint,
-        bptTotalSupply: bigint,
-    ): bigint => {
-        /*****************************************************************************************
-         // tokenInForExactBptOut                                                                //
-         // a = amountIn                                                                         //
-         // b = balance                      /  /     bpt + bptOut     \    (1 / w)      \       //
-         // bptOut = bptAmountOut   a = b * |  | ---------------------- | ^          - 1  |      //
-         // bpt = bptTotalSupply             \  \         bpt          /                 /       //
-         // w = normalizedWeight                                                                 //
-         *****************************************************************************************/
-
-        // Token in, so we round up overall
-
-        // Calculate the factor by which the invariant will increase after minting `bptAmountOut`
-        const invariantRatio = MathSol.divUpFixed(bptTotalSupply + bptAmountOut, bptTotalSupply);
-        if (invariantRatio > this.MAX_INVARIANT_RATIO) {
-            throw new Error('MAX_OUT_BPT_FOR_TOKEN_IN');
-        }
-
-        // Calculate by how much the token balance has to increase to cause `invariantRatio`
-        const balanceRatio = MathSol.powUpFixed(invariantRatio, MathSol.divUpFixed(WAD, normalizedWeight));
-        const amountInWithoutFee = MathSol.mulUpFixed(balance, balanceRatio - WAD);
-        // We can now compute how much extra balance is being deposited and used in virtual swaps, and charge swap fees accordingly
-        const taxablePercentage = MathSol.complementFixed(normalizedWeight);
-        const taxableAmount = MathSol.mulUpFixed(amountInWithoutFee, taxablePercentage);
-        const nonTaxableAmount = amountInWithoutFee - taxableAmount;
-
-        return nonTaxableAmount + MathSol.divUpFixed(taxableAmount, MathSol.complementFixed(this.swapFee));
-    };
 }

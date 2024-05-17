@@ -260,25 +260,6 @@ function addBToAPriceCallsToMulticaller(
     });
 }
 
-function addBptBToAPriceCallsToMulticaller(
-    tokenPair: TokenPair,
-    balancerRouterAddress: string,
-    multicaller: ViemMulticallCall[],
-) {
-    if (tokenPair.tokenBIndex === undefined || tokenPair.poolTokensLength === undefined) {
-        return;
-    }
-    let amountsIn = new Array(tokenPair.poolTokensLength).fill(0);
-    amountsIn[tokenPair.tokenBIndex] = tokenPair.aToBAmountOut;
-    multicaller.push({
-        path: `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,
-        address: balancerRouterAddress as `0x${string}`,
-        functionName: 'queryAddLiquidityUnbalanced',
-        abi: BalancerRouterAbi,
-        args: [tokenPair.poolId, amountsIn, ZERO_ADDRESS],
-    });
-}
-
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
