@@ -105,24 +105,11 @@ export class StablePool implements BasePool {
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
         this.tokenIndexMap = new Map(this.tokens.map((token) => [token.token.address, token.index]));
+
         this.tokenPairs = tokenPairs;
     }
 
-    getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-
-        if (swapKind === SwapKind.GivenIn) {
-            // Return max valid amount of tokenIn
-            return (tIn.amount * tIn.rate) / WAD;
-        }
-        // Return max amount of tokenOut - approx is almost all balance
-        return (tOut.amount * tOut.rate) / WAD;
-    }
-
-    getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
@@ -139,7 +126,13 @@ export class StablePool implements BasePool {
         }
         return 0n;
     }
-    swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount {
+
+    public swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tInIndex = this.tokenIndexMap.get(tokenIn.wrapped);
         const tOutIndex = this.tokenIndexMap.get(tokenOut.wrapped);
 
@@ -160,7 +153,14 @@ export class StablePool implements BasePool {
         const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
         const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
 
-        tokenOutScale18 = _calcOutGivenIn(this.amp, balances, tInIndex, tOutIndex, amountInWithRate.scale18, invariant);
+        tokenOutScale18 = _calcOutGivenIn(
+            this.amp,
+            [...balances],
+            tInIndex,
+            tOutIndex,
+            amountInWithRate.scale18,
+            invariant,
+        );
 
         const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
         const amountOutWithRate = amountOut.divDownFixed(this.tokens[tOutIndex].rate);
@@ -175,7 +175,12 @@ export class StablePool implements BasePool {
         return amountOutWithRate;
     }
 
-    swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount, mutateBalances?: boolean): TokenAmount {
+    public swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tInIndex = this.tokenIndexMap.get(tokenIn.wrapped);
         const tOutIndex = this.tokenIndexMap.get(tokenOut.wrapped);
 
@@ -226,5 +231,19 @@ export class StablePool implements BasePool {
 
     public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
+    }
+
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
+
+        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+
+        if (swapKind === SwapKind.GivenIn) {
+            // Return max valid amount of tokenIn
+            return (tIn.amount * WAD) / tIn.rate;
+        }
+        // Return max amount of tokenOut - approx is almost all balance
+        return (tOut.amount * WAD) / tOut.rate;
     }
 }

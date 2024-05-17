@@ -25,6 +25,7 @@ export class Router {
             tokenOut,
             graphTraversalConfig,
         });
+
         return candidatePaths;
     }
 

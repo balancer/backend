@@ -53,8 +53,6 @@ interface TokenPair {
     bToAAmountOut: bigint;
     effectivePrice: bigint;
     effectivePriceAmountIn: bigint;
-    tokenBIndex?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
-    poolTokensLength?: number; // Necessary only for BPT token pairs (AddLiquidityUnbalanced calls)
     vaultVersion: number;
 }
 
@@ -90,6 +88,7 @@ export async function fetchTokenPairData(
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
     let tokenPairs = generateTokenPairs(pools);
+
     tokenPairs.forEach((tokenPair) => {
         if (tokenPair.valid) {
             // prepare swap amounts in
@@ -98,6 +97,7 @@ export async function fetchTokenPairData(
             // tokenA->tokenB with 100USD worth of tokenA
             const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
             tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+
             addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
             addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
         }

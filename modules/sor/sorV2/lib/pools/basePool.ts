@@ -1,4 +1,4 @@
-import { PoolType, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Hex } from 'viem';
 
 export interface BasePool {

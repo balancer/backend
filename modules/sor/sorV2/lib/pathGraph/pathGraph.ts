@@ -36,7 +36,9 @@ export class PathGraph {
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
         this.buildPoolAddressMap(pools);
+
         this.addAllTokensAsGraphNodes(pools);
+
         this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
     }
 
@@ -111,7 +113,7 @@ export class PathGraph {
         }
 
         return this.sortAndFilterPaths(paths).map((path) => {
-            const pathTokens: Token[] = path.map((segment) => segment.tokenOut);
+            const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
@@ -126,7 +128,7 @@ export class PathGraph {
         const pathsWithLimits = paths
             .map((path) => {
                 try {
-                    const limit = this.getLimitAmountSwapForPath(path);
+                    const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
                     return { path, limit };
                 } catch (_e) {
                     console.error('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
@@ -190,6 +192,7 @@ export class PathGraph {
                 for (let j = i + 1; j < pool.tokens.length; j++) {
                     const tokenI = pool.tokens[i].token;
                     const tokenJ = pool.tokens[j].token;
+
                     this.addEdge({
                         edgeProps: {
                             pool,
@@ -454,29 +457,35 @@ export class PathGraph {
         return filtered;
     }
 
-    private getLimitAmountSwapForPath(path: PathGraphEdgeData[]): bigint {
-        let limit;
-
-        limit = path[path.length - 1].pool.getLimitAmountSwap(
+    private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
+        let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
             path[path.length - 1].tokenOut,
-            SwapKind.GivenIn,
+            swapKind,
         );
 
         for (let i = path.length - 2; i >= 0; i--) {
-            let limitGivenIn;
-            let limitGivenOut;
-            limitGivenIn = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenIn);
-            limitGivenOut = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenOut);
-            if (limitGivenOut <= limit) {
-                limit = limitGivenIn;
+            const poolLimitExactIn = path[i].pool.getLimitAmountSwap(
+                path[i].tokenIn,
+                path[i].tokenOut,
+                SwapKind.GivenIn,
+            );
+            const poolLimitExactOut = path[i].pool.getLimitAmountSwap(
+                path[i].tokenIn,
+                path[i].tokenOut,
+                SwapKind.GivenOut,
+            );
+
+            if (poolLimitExactOut <= limit) {
+                limit = poolLimitExactIn;
             } else {
-                const pulledLimit: bigint = path[i].pool.swapGivenOut(
+                const pulledLimit = path[i].pool.swapGivenOut(
                     path[i].tokenIn,
                     path[i].tokenOut,
                     TokenAmount.fromRawAmount(path[i].tokenOut, limit),
                 ).amount;
-                limit = pulledLimit > limitGivenIn ? limitGivenIn : pulledLimit;
+
+                limit = pulledLimit > poolLimitExactIn ? poolLimitExactIn : pulledLimit;
             }
         }
 
