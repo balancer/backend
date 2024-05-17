@@ -258,12 +258,12 @@ function addBToAPriceCallsToMulticaller(
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result && result.effectivePriceAmountOut && result.aToBAmountOut) {
+    if (result && result.effectivePriceAmountOut.gt(0) && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
             parseUnits(tokenPair.effectivePriceAmountIn.toString(), 18 - tokenPair.tokenA.decimals),
-            parseUnits(result.effectivePriceAmountOut?.toString(), 18 - tokenPair.tokenB.decimals),
+            parseUnits(result.effectivePriceAmountOut.toString(), 18 - tokenPair.tokenB.decimals),
         );
     }
 }
