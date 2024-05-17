@@ -304,10 +304,10 @@ export class ComposableStablePool implements BasePool {
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
-            return (tIn.amount * tIn.rate) / WAD;
+            return (tIn.amount * WAD) / tIn.rate;
         }
         // Return max amount of tokenOut - approx is almost all balance
-        return (tOut.amount * tOut.rate) / WAD;
+        return (tOut.amount * WAD) / tOut.rate;
     }
 
     public skipBptIndex(index: number): number {

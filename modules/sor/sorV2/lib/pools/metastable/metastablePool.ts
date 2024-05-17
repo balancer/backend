@@ -210,9 +210,9 @@ export class MetaStablePool implements BasePool {
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
             // As an approx - use almost the total balance of token out as we can add any amount of tokenIn and expect some back
-            return (tIn.amount * tIn.rate) / WAD;
+            return (tIn.amount * WAD) / tIn.rate;
         }
         // Return max amount of tokenOut - approx is almost all balance
-        return (tOut.amount * tOut.rate) / WAD;
+        return (tOut.amount * WAD) / tOut.rate;
     }
 }

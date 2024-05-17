@@ -469,7 +469,7 @@ export class PathGraph {
             limitGivenIn = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenIn);
             limitGivenOut = path[i].pool.getLimitAmountSwap(path[i].tokenIn, path[i].tokenOut, SwapKind.GivenOut);
             if (limitGivenOut <= limit) {
-                limit = limitGivenOut;
+                limit = limitGivenIn;
             } else {
                 const pulledLimit: bigint = path[i].pool.swapGivenOut(
                     path[i].tokenIn,
