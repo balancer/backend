@@ -885,6 +885,7 @@ model PrismaVeBalUserBalance {
     chain               Chain
 
     balance             String
+    locked              String              @default("0")
 
     userAddress         String
     user                PrismaUser          @relation(fields:[userAddress], references: [address])

@@ -94,6 +94,7 @@ export interface NetworkData {
     };
     veBal?: {
         address: string;
+        bptAddress: string;
         delegationProxy: string;
     };
     gaugeControllerAddress?: string;

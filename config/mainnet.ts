@@ -56,6 +56,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0000000000000000000000000000000000000000',
     },
     gaugeControllerAddress: '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
