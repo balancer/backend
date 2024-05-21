@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';

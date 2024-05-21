@@ -39,8 +39,6 @@ export async function sorGetSwapsWithPools(
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
                 break;
-            case 'STABLE':
-                basePools.push(StablePool.fromPrismaPool(prismaPool));
             case 'FX':
                 basePools.push(FxPool.fromPrismaPool(prismaPool));
                 break;
@@ -62,6 +60,7 @@ export async function sorGetSwapsWithPools(
     const router = new Router();
 
     const candidatePaths = router.getCandidatePaths(tokenIn, tokenOut, basePools, swapOptions?.graphTraversalConfig);
+
     if (candidatePaths.length === 0) return null;
 
     const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);

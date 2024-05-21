@@ -114,10 +114,12 @@ export class WeightedPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+
         const tokenPair = this.tokenPairs.find(
             (tokenPair) =>
-                (tokenPair.tokenA === tokenIn.address && tokenPair.tokenB === tokenOut.address) ||
-                (tokenPair.tokenA === tokenOut.address && tokenPair.tokenB === tokenIn.address),
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
         );
 
         if (tokenPair) {
@@ -128,18 +130,11 @@ export class WeightedPool implements BasePool {
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-        if (this.vaultVersion === 2) {
-            if (swapKind === SwapKind.GivenIn) {
-                return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-            }
-            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
-        } else if (this.vaultVersion === 3) {
-            if (swapKind === SwapKind.GivenIn) {
-                return tIn.amount;
-            }
-            return tOut.amount;
+
+        if (swapKind === SwapKind.GivenIn) {
+            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
         }
-        throw new Error("getLimitAmountSwap: Invalid Pool's vaultVersion");
+        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {

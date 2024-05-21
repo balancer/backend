@@ -10,13 +10,36 @@ import {
     _calcTokenInGivenExactBptOut,
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
-} from '../stable/stableMath';
+} from './stableMath';
 import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { StablePoolToken } from '../stable/stablePool';
+
+export class ComposableComposableStablePoolToken extends TokenAmount {
+    public readonly rate: bigint;
+    public readonly index: number;
+
+    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
+        super(token, amount);
+        this.rate = BigInt(rate);
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        this.index = index;
+    }
+
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+}
 
 export class ComposableStablePool implements BasePool {
     public readonly chain: Chain;
@@ -29,13 +52,13 @@ export class ComposableStablePool implements BasePool {
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
-    public tokens: StablePoolToken[];
+    public tokens: ComposableStablePoolToken[];
 
-    private readonly tokenMap: Map<string, StablePoolToken>;
+    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): ComposableStablePool {
-        const poolTokens: StablePoolToken[] = [];
+        const poolTokens: ComposableStablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -51,7 +74,7 @@ export class ComposableStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
 
             poolTokens.push(
-                new StablePoolToken(
+                new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
                     parseEther(poolToken.dynamicData.priceRate),
@@ -81,7 +104,7 @@ export class ComposableStablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: StablePoolToken[],
+        tokens: ComposableStablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
     ) {
