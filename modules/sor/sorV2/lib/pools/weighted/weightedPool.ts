@@ -41,11 +41,9 @@ export class WeightedPool implements BasePool {
     public readonly swapFee: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
-    public readonly totalShares: bigint;
     public readonly vaultVersion: number;
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
-    private readonly MAX_INVARIANT_RATIO = BigInt(3e18);
     private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
@@ -85,7 +83,6 @@ export class WeightedPool implements BasePool {
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            parseEther(pool.dynamicData.totalShares),
             pool.vaultVersion,
         );
     }
@@ -98,7 +95,6 @@ export class WeightedPool implements BasePool {
         swapFee: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
-        totalShares: bigint,
         vaultVersion: number,
     ) {
         this.chain = chain;
@@ -110,7 +106,6 @@ export class WeightedPool implements BasePool {
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
         this.tokenPairs = tokenPairs;
-        this.totalShares = totalShares;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {

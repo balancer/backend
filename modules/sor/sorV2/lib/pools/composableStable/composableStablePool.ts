@@ -17,7 +17,7 @@ import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
 
-export class ComposableComposableStablePoolToken extends TokenAmount {
+export class ComposableStablePoolToken extends TokenAmount {
     public readonly rate: bigint;
     public readonly index: number;
 

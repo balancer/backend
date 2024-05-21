@@ -12,7 +12,6 @@ import { ComposableStablePool } from './pools/composableStable/composableStableP
 import { BasePool } from './pools/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { StablePool } from './pools/stable/stablePool';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,

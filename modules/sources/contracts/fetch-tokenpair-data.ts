@@ -22,7 +22,6 @@ interface PoolInput {
         } | null;
     }[];
     dynamicData: {
-        totalShares: string;
         totalLiquidity: number;
     } | null;
 }

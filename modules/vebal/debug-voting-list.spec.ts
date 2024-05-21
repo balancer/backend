@@ -1,5 +1,5 @@
 import { difference, pickBy } from 'lodash';
-import { setMainnetRpcProviderForTesting } from '../../test/network-utils';
+import { setMainnetRpcProviderForTesting } from '../../test/utils';
 import { VotingGaugesRepository } from './voting-gauges.repository';
 import { VeBalVotingListService } from './vebal-voting-list.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';

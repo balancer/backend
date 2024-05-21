@@ -29,6 +29,7 @@ export const syncTokenPairs = async (
         },
     });
     const tokenPairData = await fetchTokenPairData(routerAddress, tokenPairInputPools, viemClient);
+
     // Update token pair data to the database
     for (const poolId of ids) {
         try {
