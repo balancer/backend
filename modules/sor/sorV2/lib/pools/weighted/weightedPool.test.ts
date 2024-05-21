@@ -1,12 +1,11 @@
 import { WeightedPool } from './weightedPool';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
-import { RemoveLiquidityKind, SwapKind, Token } from '@balancer/sdk';
+import { SwapKind } from '@balancer/sdk';
 import {
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
 } from '../../../../../../test/factories/prismaToken.factory';
 import { parseEther } from 'viem';
-import { chainToIdMap } from '../../../../../network/network-config';
 
 describe('SOR V3 Weighted Pool Tests', () => {
     const token1Balance = '169';

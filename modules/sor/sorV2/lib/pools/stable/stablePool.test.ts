@@ -3,7 +3,7 @@ import {
     prismaPoolTokenFactory,
 } from '../../../../../../test/factories/prismaToken.factory';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
-import { SwapKind, Token } from '@balancer/sdk';
+import { SwapKind } from '@balancer/sdk';
 import { parseEther } from 'viem';
 import { StablePool } from './stablePool';
 

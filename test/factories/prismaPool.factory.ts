@@ -4,7 +4,7 @@ import { prismaPoolTokenFactory } from './prismaToken.factory';
 import { createRandomAddress } from '../utils';
 
 export const prismaPoolFactory = Factory.define<PrismaPoolWithDynamic>(({ params }) => {
-    const poolAddress = createRandomAddress();
+    const poolAddress = params.address ?? createRandomAddress();
     return {
         id: poolAddress,
         address: poolAddress,

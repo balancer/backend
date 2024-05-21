@@ -270,26 +270,14 @@ export class SorService {
     private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'vaultVersion'>) {
         const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 2 });
         const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 3 });
-        return this.compareSwapPathResults(swapBalancerV2, swapBalancerV3, input.swapType);
-    }
-
-    private compareSwapPathResults(
-        swapPath1: GqlSorGetSwapPaths,
-        swapPath2: GqlSorGetSwapPaths,
-        swapType: GqlSorSwapType,
-    ) {
-        if (swapType === 'EXACT_IN') {
-            if (BigInt(swapPath1.returnAmount) > BigInt(swapPath2.returnAmount)) {
-                return swapPath1;
-            } else {
-                return swapPath2;
-            }
+        if (input.swapType === 'EXACT_IN') {
+            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
         } else {
-            if (BigInt(swapPath1.returnAmount) < BigInt(swapPath2.returnAmount)) {
-                return swapPath1;
-            } else {
-                return swapPath2;
-            }
+            return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
         }
     }
 }
