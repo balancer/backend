@@ -1,6 +1,8 @@
+// yarn test --testPathPattern=modules/sor/sorV2/lib/pools/weighted/weightedPool.test.ts
+
 import { WeightedPool } from './weightedPool';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
-import { SwapKind } from '@balancer/sdk';
+import { SwapKind, WAD } from '@balancer/sdk';
 import {
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
@@ -8,29 +10,33 @@ import {
 import { parseEther } from 'viem';
 
 describe('SOR V3 Weighted Pool Tests', () => {
-    const token1Balance = '169';
-    const token1 = prismaPoolTokenFactory.build({
-        dynamicData: prismaPoolTokenDynamicDataFactory.build({ balance: token1Balance }),
-    });
-    const token2Balance = '144';
-    const token2 = prismaPoolTokenFactory.build({
-        dynamicData: prismaPoolTokenDynamicDataFactory.build({ balance: token2Balance }),
+    let weightedPool: WeightedPool;
+    beforeAll(() => {
+        const token1Balance = '169';
+        const token1 = prismaPoolTokenFactory.build({
+            dynamicData: prismaPoolTokenDynamicDataFactory.build({ balance: token1Balance }),
+        });
+        const token2Balance = '144';
+        const token2 = prismaPoolTokenFactory.build({
+            dynamicData: prismaPoolTokenDynamicDataFactory.build({ balance: token2Balance }),
+        });
+
+        const prismaWeightedPool = prismaPoolFactory.build({
+            type: 'WEIGHTED',
+            vaultVersion: 3,
+            tokens: [token1, token2],
+            dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '156' }),
+        });
+        weightedPool = WeightedPool.fromPrismaPool(prismaWeightedPool);
     });
 
-    const prismaWeightedPool = prismaPoolFactory.build({
-        type: 'WEIGHTED',
-        vaultVersion: 3,
-        tokens: [token1, token2],
-        dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '156' }),
-    });
-    const weightedPool = WeightedPool.fromPrismaPool(prismaWeightedPool);
     test('Swap Limits with Given In', () => {
         const limitAmountIn = weightedPool.getLimitAmountSwap(
             weightedPool.tokens[0].token,
             weightedPool.tokens[1].token,
             SwapKind.GivenIn,
         );
-        expect(limitAmountIn).toBe(parseEther('169')); // TODO: apply MAX_IN_RATIO
+        expect(limitAmountIn).toBe((parseEther('169') * weightedPool.MAX_IN_RATIO) / WAD); // TODO: apply MAX_IN_RATIO
     });
     test('Swap Limits with Given Out', () => {
         const limitAmountIn = weightedPool.getLimitAmountSwap(
@@ -38,6 +44,6 @@ describe('SOR V3 Weighted Pool Tests', () => {
             weightedPool.tokens[1].token,
             SwapKind.GivenOut,
         );
-        expect(limitAmountIn).toBe(parseEther('144')); // TODO: apply MAX_OUT_RATIO
+        expect(limitAmountIn).toBe((parseEther('144') * weightedPool.MAX_OUT_RATIO) / WAD); // TODO: apply MAX_OUT_RATIO
     });
 });

@@ -3,7 +3,7 @@ import { GqlPoolType } from '../../../../../../schema';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { BigintIsh, RemoveLiquidityKind, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
@@ -42,10 +42,10 @@ export class WeightedPool implements BasePool {
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
     public readonly vaultVersion: number;
+    public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
+    public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
-    private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
-    private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): WeightedPool {
         const poolTokens: WeightedPoolToken[] = [];

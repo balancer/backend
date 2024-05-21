@@ -58,7 +58,6 @@ describe('Balancer SOR Integration Tests', () => {
             SwapKind.GivenIn,
             amountIn,
             [prismaWeightedPool],
-            3,
             sorConfig,
         )) as PathWithAmount[];
 
