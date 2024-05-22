@@ -7,7 +7,7 @@ import { sorGetSwapsWithPools as sorGetPathsWithPools } from './sorV2/lib/static
 import { getOutputAmount } from './sorV2/lib/utils/helpers';
 import { chainToIdMap } from '../network/network-config';
 
-import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../test/anvil/anvil-global-setup';
 import { prismaPoolTokenDynamicDataFactory, prismaPoolTokenFactory } from '../../test/factories/prismaToken.factory';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../test/factories/prismaPool.factory';
 
@@ -87,5 +87,9 @@ describe('Balancer SOR Integration Tests', () => {
         const queryOutput = await sdkSwap.query(rpcUrl);
         const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
         expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+    });
+
+    afterAll(async () => {
+        await stopAnvilForks();
     });
 });

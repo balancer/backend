@@ -1,4 +1,4 @@
-// yarn test --testPathPattern=modules/sor/sorV2/lib/pools/weighted/weightedPool.test.ts
+// yarn vitest weightedPool.test.ts
 
 import { WeightedPool } from './weightedPool';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
