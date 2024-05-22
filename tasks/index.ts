@@ -32,6 +32,10 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
         return jobsController.syncSwapsV2(chain);
+    } else if (job === 'sync-snapshots-v2') {
+        return snapshotsController.syncSnapshotsV2(chain);
+    } else if (job === 'fill-missing-snapshots-v2') {
+        return snapshotsController.fillMissingSnapshotsV2(chain);
     } else if (job === 'sync-snapshots-v3') {
         return snapshotsController.syncSnapshotsV3(chain);
     } else if (job === 'fill-missing-snapshots-v3') {

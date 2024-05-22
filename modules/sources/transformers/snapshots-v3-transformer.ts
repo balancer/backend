@@ -40,6 +40,7 @@ export const snapshotsV3Transformer = (
         chain,
         poolId,
         timestamp: epoch,
+        vaultVersion: 3,
     };
 
     const values = {
