@@ -1044,8 +1044,8 @@ enum GqlPoolAprItemType {
     STAKING
     LOCKING
     VOTING
-    VEBAL_BOOST
-    MABEETS_BOOST
+    VE_BOOST
+    MA_BOOST
     AURA
 }
 

@@ -209,22 +209,8 @@ model PrismaPoolAprItem {
     chain               Chain
     title               String
     apr                 Float
-    range               PrismaPoolAprRange?
 
     type                PrismaPoolAprType?
-    group               PrismaPoolAprItemGroup?
-}
-
-model PrismaPoolAprRange {
-    @@id([id, chain])
-    @@unique([aprItemId, chain])
-
-    id                  String
-    chain               Chain
-    aprItemId           String
-    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId, chain], references: [id, chain], onDelete: Cascade)
-    min                 Float
-    max                 Float
 }
 
 enum PrismaPoolAprType {
@@ -234,25 +220,13 @@ enum PrismaPoolAprType {
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
     VOTING
+    STAKING
+    LOCKING
+    VE_BOOST
+    MA_BOOST
+    AURA
 }
 
-enum PrismaPoolAprItemGroup {
-    BEEFY
-    OVERNIGHT
-    REAPER
-    YEARN
-    IDLE
-    TRANCHESS
-    GEARBOX
-    AAVE
-    ANKR
-    TESSERA
-    TETU
-    OVIX
-    EULER
-    MAKER
-    DEFAULT
-}
 
 model PrismaPoolCategory {
     @@id([id, chain])
