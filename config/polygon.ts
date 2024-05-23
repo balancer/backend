@@ -157,8 +157,9 @@ export default <NetworkData>{
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
-                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                path: 'data.smaApr',
+                sourceUrl: 'https://yield-tokens.balancer.workers.dev',
+                path: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
+                scale: 10000,
                 isIbYield: true,
             },
             stMATIC: {
