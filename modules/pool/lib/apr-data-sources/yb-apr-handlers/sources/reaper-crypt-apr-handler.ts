@@ -135,9 +135,9 @@ export class ReaperCryptAprHandler implements AprHandler {
 
     private async getWstEthBaseApr(): Promise<number> {
         const { data } = await axios.get<{
-            data: { aprs: [{ timeUnix: number; apr: number }]; smaApr: number };
-        }>('https://eth-api.lido.fi/v1/protocol/steth/apr/sma');
-        return data.data.smaApr / 100;
+            '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9': number;
+        }>('https://yield-tokens.balancer.workers.dev/');
+        return data['0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9'] / 10000;
     }
 }
 type MultiStratResponse = {
