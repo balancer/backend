@@ -139,6 +139,14 @@ const aaveTokens = {
             underlying: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
         },
     ],
+    [Chain.BASE]: [
+        {
+            // Static Aave Base USDC
+            wrappedToken: '0x4ea71a20e655794051d1ee8b6e4a3269b13ccacc',
+            aToken: '0x4e65fe4dba92790696d040ac24aa414708f5c0ab ',
+            underlying: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+        },
+    ],
 };
 
 export class AavePriceHandlerService implements TokenPriceHandler {
