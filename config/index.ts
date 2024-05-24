@@ -10,6 +10,7 @@ import polygonConfig from './polygon';
 import sepoliaConfig from './sepolia';
 import zkevmConfig from './zkevm';
 import fraxtalConfig from './fraxtal';
+import modeConfig from './mode';
 
 export const DAYS_OF_HOURLY_PRICES = 100;
 
@@ -25,4 +26,5 @@ export default {
     [Chain.SEPOLIA]: sepoliaConfig,
     [Chain.ZKEVM]: zkevmConfig,
     [Chain.FRAXTAL]: fraxtalConfig,
+    [Chain.MODE]: modeConfig,
 };

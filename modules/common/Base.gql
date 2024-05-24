@@ -13,4 +13,5 @@ enum GqlChain {
     ZKEVM
     SEPOLIA
     FRAXTAL
+    MODE
 }

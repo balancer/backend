@@ -25,6 +25,7 @@ enum Chain {
     SEPOLIA
     ZKEVM
     FRAXTAL
+    MODE
 }
 
 model PrismaLastBlockSynced {
