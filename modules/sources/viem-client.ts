@@ -10,6 +10,7 @@ import {
     polygon,
     polygonZkEvm,
     sepolia,
+    fraxtal,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
 import config from '../../config';
@@ -27,6 +28,7 @@ const chain2ViemChain = {
     [Chain.OPTIMISM]: optimism,
     [Chain.POLYGON]: polygon,
     [Chain.ZKEVM]: polygonZkEvm,
+    [Chain.FRAXTAL]: fraxtal,
 };
 
 export const getViemClient = (chain: Chain) => {

@@ -11,4 +11,5 @@ export const chainIdToChain: { [id: string]: Chain } = {
     '42161': Chain.ARBITRUM,
     '43114': Chain.AVALANCHE,
     '11155111': Chain.SEPOLIA,
+    '252': Chain.FRAXTAL,
 };

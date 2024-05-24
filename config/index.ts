@@ -9,6 +9,7 @@ import optimismConfig from './optimism';
 import polygonConfig from './polygon';
 import sepoliaConfig from './sepolia';
 import zkevmConfig from './zkevm';
+import fraxtalConfig from './fraxtal';
 
 export const DAYS_OF_HOURLY_PRICES = 100;
 
@@ -23,4 +24,5 @@ export default {
     [Chain.POLYGON]: polygonConfig,
     [Chain.SEPOLIA]: sepoliaConfig,
     [Chain.ZKEVM]: zkevmConfig,
+    [Chain.FRAXTAL]: fraxtalConfig,
 };

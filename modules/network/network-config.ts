@@ -8,6 +8,7 @@ import { gnosisNetworkConfig } from './gnosis';
 import { zkevmNetworkConfig } from './zkevm';
 import { avalancheNetworkConfig } from './avalanche';
 import { baseNetworkConfig } from './base';
+import { fraxtalNetworkConfig } from './fraxtal';
 import { Chain } from '@prisma/client';
 import { sepoliaNetworkConfig } from './sepolia';
 
@@ -22,6 +23,7 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '43114': avalancheNetworkConfig,
     '8453': baseNetworkConfig,
     '11155111': sepoliaNetworkConfig,
+    '252': fraxtalNetworkConfig,
 };
 
 export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } = {
@@ -35,9 +37,10 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
     AVALANCHE: avalancheNetworkConfig,
     BASE: baseNetworkConfig,
     SEPOLIA: sepoliaNetworkConfig,
+    FRAXTAL: fraxtalNetworkConfig,
 };
 
-export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453', '11155111'];
+export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453', '11155111', '252'];
 export const BeethovenChainIds = ['250', '10'];
 
 export const chainToIdMap = Object.values(AllNetworkConfigs).reduce((acc, config) => {
