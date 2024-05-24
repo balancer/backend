@@ -770,11 +770,8 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
-        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
+        const aprItems = pool.aprItems?.filter((item) => item.apr > 0) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
-
-        // swap apr cannot have a range, so we can already sum it up
-        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
         let aprTotal = `0`;
@@ -922,7 +919,7 @@ export class PoolGqlLoaderService {
                           }
                         : { __typename: 'GqlPoolAprTotal', total: thirdPartyAprTotal },
                 items: [
-                    ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
+                    ...aprItems.flatMap((item): GqlBalancePoolAprItem[] => {
                         if (item.range) {
                             return [
                                 {
@@ -945,24 +942,6 @@ export class PoolGqlLoaderService {
                                 },
                             ];
                         }
-                    }),
-                    ..._.map(grouped, (items, group): GqlBalancePoolAprItem => {
-                        // todo: might need to support apr ranges as well at some point
-                        const subItems = items.map(
-                            (item): GqlBalancePoolAprSubItem => ({
-                                ...item,
-                                apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
-                            }),
-                        );
-                        const apr = _.sumBy(items, 'apr');
-                        const title = `${group.charAt(0) + group.slice(1).toLowerCase()} boosted APR`;
-
-                        return {
-                            id: `${pool.id}-${group}`,
-                            title,
-                            apr: { __typename: 'GqlPoolAprTotal', total: `${apr}` },
-                            subItems,
-                        };
                     }),
                 ],
                 hasRewardApr,
