@@ -24,6 +24,8 @@ enum Chain {
     POLYGON
     SEPOLIA
     ZKEVM
+    FRAXTAL
+    MODE
 }
 
 model PrismaLastBlockSynced {
