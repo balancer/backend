@@ -1041,11 +1041,11 @@ type GqlPoolAprItem {
 enum GqlPoolAprItemType {
     SWAP_FEE
     IB_YIELD
+    NESTED
     STAKING
     LOCKING
     VOTING
-    VE_BOOST
-    MA_BOOST
+    STAKING_BOOST
     AURA
 }
 

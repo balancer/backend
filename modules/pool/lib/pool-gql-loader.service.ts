@@ -30,6 +30,8 @@ import {
     QueryPoolGetPoolsArgs,
     GqlPoolTokenDetail,
     GqlNestedPool,
+    GqlPoolAprItem,
+    GqlPoolAprItemType,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
@@ -770,8 +772,14 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
-        const aprItems = pool.aprItems?.filter((item) => item.apr > 0) || [];
+
+        const newAprItemsSchema = this.buildAprItems(pool);
+
+        const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
+
+        // swap apr cannot have a range, so we can already sum it up
+        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
         let aprTotal = `0`;
@@ -892,6 +900,7 @@ export class PoolGqlLoaderService {
             fees24hAtlTimestamp,
             volume24hAthTimestamp,
             volume24hAtlTimestamp,
+            aprItems: newAprItemsSchema,
             apr: {
                 apr:
                     typeof aprRangeMin !== 'undefined' && typeof aprRangeMax !== 'undefined'
@@ -919,7 +928,7 @@ export class PoolGqlLoaderService {
                           }
                         : { __typename: 'GqlPoolAprTotal', total: thirdPartyAprTotal },
                 items: [
-                    ...aprItems.flatMap((item): GqlBalancePoolAprItem[] => {
+                    ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
                         if (item.range) {
                             return [
                                 {
@@ -943,10 +952,73 @@ export class PoolGqlLoaderService {
                             ];
                         }
                     }),
+                    ..._.map(grouped, (items, group): GqlBalancePoolAprItem => {
+                        // todo: might need to support apr ranges as well at some point
+                        const subItems = items.map(
+                            (item): GqlBalancePoolAprSubItem => ({
+                                ...item,
+                                apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
+                            }),
+                        );
+                        const apr = _.sumBy(items, 'apr');
+                        const title = `${group.charAt(0) + group.slice(1).toLowerCase()} boosted APR`;
+
+                        return {
+                            id: `${pool.id}-${group}`,
+                            title,
+                            apr: { __typename: 'GqlPoolAprTotal', total: `${apr}` },
+                            subItems,
+                        };
+                    }),
                 ],
                 hasRewardApr,
             },
         };
+    }
+
+    private buildAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
+        const aprItems: GqlPoolAprItem[] = [];
+
+        for (const aprItem of pool.aprItems) {
+            let type: GqlPoolAprItemType = 'STAKING';
+            switch (aprItem.type) {
+                case PrismaPoolAprType.NATIVE_REWARD:
+                case PrismaPoolAprType.THIRD_PARTY_REWARD:
+                    type = 'STAKING';
+                case PrismaPoolAprType.IB_YIELD:
+                    type = 'IB_YIELD';
+                case PrismaPoolAprType.LOCKING:
+                    type = 'LOCKING';
+                case PrismaPoolAprType.SWAP_FEE:
+                    type = 'SWAP_FEE';
+                case PrismaPoolAprType.VOTING:
+                    type = 'VOTING';
+            }
+
+            if (aprItem.range) {
+                aprItems.push({
+                    id: aprItem.id,
+                    title: aprItem.title,
+                    apr: aprItem.range.min.toString(),
+                    type: type,
+                });
+                aprItems.push({
+                    id: aprItem.id,
+                    title: aprItem.title,
+                    apr: `${aprItem.range.max - aprItem.range.min}`,
+                    type: 'STAKING_BOOST',
+                });
+            } else {
+                aprItems.push({
+                    id: aprItem.id,
+                    title: aprItem.title,
+                    apr: aprItem.apr.toString(),
+                    type: type,
+                });
+            }
+        }
+
+        throw new Error('Method not implemented.');
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
