@@ -42,6 +42,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
     },
     gyro: {
