@@ -1,4 +1,4 @@
-import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction, parseAbi } from 'abitype';
 import { ViemClient } from '../types';
 import VaultV3Abi from './abis/VaultV3';
 
@@ -56,6 +56,7 @@ export async function fetchPoolData(
         ])
         .flat();
 
+    // @ts-ignore – viem has some issues with the typings when using imported abis
     const results = await client.multicall({ contracts, blockNumber });
 
     // Parse the results

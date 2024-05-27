@@ -12,4 +12,6 @@ enum GqlChain {
     POLYGON
     ZKEVM
     SEPOLIA
+    FRAXTAL
+    MODE
 }
