@@ -80,7 +80,7 @@ const fetchRevenue = async (timestamp: number, rpcUrl: string) => {
     return data;
 };
 
-export class ProtocolAprService implements PoolAprService {
+export class VeBalProtocolAprService implements PoolAprService {
     constructor(private rpcUrl: string) {}
 
     public getAprServiceName(): string {
