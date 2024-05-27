@@ -177,13 +177,6 @@
     {
         "stateMutability": "view",
         "type": "function",
-        "name": "totalSupply",
-        "inputs": [{ "name": "t", "type": "uint256" }],
-        "outputs": [{ "name": "", "type": "uint256" }]
-    },
-    {
-        "stateMutability": "view",
-        "type": "function",
         "name": "totalSupplyAt",
         "inputs": [{ "name": "_block", "type": "uint256" }],
         "outputs": [{ "name": "", "type": "uint256" }]
