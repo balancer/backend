@@ -88,16 +88,16 @@ export class VeBalService {
         const veBalHolders: { address: string; balance: string; locked: string }[] = [];
 
         let operations: any[] = [];
-        let response = {} as {
-            [userAddress: string]: {
-                balance: BigNumber;
-                locked: BigNumber[];
-            };
-        };
-
         // for mainnet, we get the vebal balance form the vebal contract
         if (networkContext.isMainnet) {
             const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeBalABI);
+
+            let response = {} as {
+                [userAddress: string]: {
+                    balance: BigNumber;
+                    locked: BigNumber[];
+                };
+            };
 
             for (const holder of subgraphVeBalHolders) {
                 multicall.call(`${holder.user}.balance`, networkContext.data.veBal!.address, 'balanceOf', [
@@ -126,6 +126,10 @@ export class VeBalService {
             //for L2, we get the vebal balance from the delegation proxy
             const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeDelegationAbi);
 
+            let response = {} as {
+                [userAddress: string]: BigNumber;
+            };
+
             for (const holder of subgraphVeBalHolders) {
                 multicall.call(holder.user, networkContext.data.veBal!.delegationProxy, 'adjustedBalanceOf', [
                     holder.user,
@@ -144,7 +148,7 @@ export class VeBalService {
             for (const veBalHolder in response) {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
-                    balance: formatFixed(response[veBalHolder].balance, 18),
+                    balance: formatFixed(response[veBalHolder], 18),
                     locked: '0.0',
                 });
             }

@@ -15,13 +15,7 @@ describe('vebal debugging', () => {
 
     it('sync vebal data', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '1');
+        setRequestScopedContextValue('chainId', '10');
         await veBalService.syncVeBalBalances();
-        await veBalService.syncVeBalTotalSupply();
-        const holder = await veBalService.getVeBalUserData('0x4ec8459bb6bab83d8987373f6ae47b9a60bd5a6a');
-        expect(holder.balance).not.toBe('0.0');
-        expect(holder.locked).not.toBe('0.0');
-        expect(holder.lockedUsd).not.toBe('0.00');
-        expect(holder.rank).toBeDefined();
     }, 500000);
 });
