@@ -11,26 +11,12 @@ export class BoostedPoolAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         // need to do multiple queries otherwise the nesting is too deep for many pools. Error: stack depth limit exceeded
-        const boostedPools = pools.filter((pool) => pool.type === 'COMPOSABLE_STABLE' || pool.type === 'WEIGHTED');
-
-        const boostedPoolsWithNestedPool = await prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain, id: { in: boostedPools.map((pool) => pool.id) } },
-            include: {
-                tokens: {
-                    orderBy: { index: 'asc' },
-                    include: {
-                        nestedPool: true,
-                    },
-                },
+        const poolsWithNestedPool = await prisma.prismaPool.findMany({
+            where: {
+                chain: networkContext.chain,
+                id: { in: pools.map((pool) => pool.id) },
+                tokens: { some: { nestedPoolId: { not: null } } },
             },
-        });
-
-        const filteredBoostedPools = boostedPoolsWithNestedPool.filter((pool) =>
-            pool.tokens.find((token) => token.nestedPool),
-        );
-
-        const filteredBoostedPoolsExpanded = await prisma.prismaPool.findMany({
-            where: { chain: networkContext.chain, id: { in: filteredBoostedPools.map((pool) => pool.id) } },
             include: {
                 dynamicData: true,
                 tokens: {
@@ -44,27 +30,21 @@ export class BoostedPoolAprService implements PoolAprService {
             },
         });
 
-        for (const pool of filteredBoostedPoolsExpanded) {
+        for (const pool of poolsWithNestedPool) {
             const protocolYieldFeePercentage = parseFloat(pool.dynamicData?.protocolYieldFee || '0');
             const tokens = pool.tokens.filter((token) => {
+                // exclude the phantom bpt pool token itself
                 if (token.address === pool.address) {
                     return false;
                 }
-
-                //so we're only concerned with finding the apr for phantom stable BPTs nested inside of
-                //this phantom stable
-                if (pool.type === 'COMPOSABLE_STABLE') {
-                    return token.nestedPool?.type === 'COMPOSABLE_STABLE';
-                }
-
-                return token.nestedPool?.type === 'COMPOSABLE_STABLE';
             });
 
             const poolIds = tokens.map((token) => token.nestedPool?.id || '');
+            // swap fee and IB yield is also earned on the parent pool
             const aprItems = await prisma.prismaPoolAprItem.findMany({
                 where: {
                     poolId: { in: poolIds },
-                    type: { in: ['PHANTOM_STABLE_BOOSTED', 'IB_YIELD', 'SWAP_FEE'] },
+                    type: { in: ['IB_YIELD', 'SWAP_FEE'] },
                     chain: networkContext.chain,
                 },
             });
@@ -92,12 +72,10 @@ export class BoostedPoolAprService implements PoolAprService {
 
                     if (
                         collectsYieldFee(pool) &&
-                        //nested phantom stables already have the yield fee removed
-                        token.nestedPool.type !== 'COMPOSABLE_STABLE' &&
                         // nested tokens/bpts that dont have a rate provider, we don't take any fees
                         token.dynamicData.priceRate !== '1.0'
                     ) {
-                        userApr = apr * (1 - protocolYieldFeePercentage);
+                        userApr = userApr * (1 - protocolYieldFeePercentage);
                     }
 
                     const title = aprItem.type === 'SWAP_FEE' ? `${token.token.symbol} APR` : aprItem.title;

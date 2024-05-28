@@ -234,6 +234,8 @@ enum PrismaPoolAprType {
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
     VOTING
+    LOCKING
+    AURA
 }
 
 enum PrismaPoolAprItemGroup {
@@ -253,6 +255,7 @@ enum PrismaPoolAprItemGroup {
     MAKER
     DEFAULT
 }
+
 
 model PrismaPoolCategory {
     @@id([id, chain])
