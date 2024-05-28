@@ -15,4 +15,10 @@ describe('Token service', () => {
 
         await tokenService.updateTokenPrices(['MAINNET']);
     }, 500000);
+
+    test('sync tokens from pool tokens', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '34443');
+        await tokenService.syncTokenContentData();
+    });
 });
