@@ -316,7 +316,7 @@ type GqlPoolDynamicData {
     volume24h: BigDecimal!
     fees24h: BigDecimal!
     yieldCapture24h: BigDecimal!
-    apr: GqlPoolApr!
+    apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
 
     isInRecoveryMode: Boolean!
@@ -1031,21 +1031,71 @@ type GqlPoolJoinExitAmount {
     amount: String!
 }
 
+"""
+All APRs for a pool
+"""
 type GqlPoolAprItem {
+    """
+    The id of the APR item
+    """
     id: ID!
+
+    """
+    The title of the APR item, a human readable form
+    """
     title: String!
+    """
+    The APR value in % -> 0.2 = 0.2%
+    """
     apr: BigDecimal!
+    """
+    Specific type of this APR
+    """
     type: GqlPoolAprItemType!
 }
 
+"""
+Enum representing the different types of the APR in a pool.
+"""
 enum GqlPoolAprItemType {
+    """
+    Represents the swap fee APR in a pool.
+    """
     SWAP_FEE
+
+    """
+    Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
+    """
     IB_YIELD
+
+    """
+    Represents if the APR items comes from a nested pool.
+    """
     NESTED
+
+    """
+    Staking reward APR in a pool, i.e. BAL or BEETS.
+    """
     STAKING
-    LOCKING
-    VOTING
+
+    """
+    APR boost that can be earned, i.e. via veBAL or maBEETS.
+    """
     STAKING_BOOST
+
+    """
+    APR in a pool that can be earned through locking, i.e. veBAL
+    """
+    LOCKING
+
+    """
+    APR that can be earned thourgh voting, i.e. gauge votes
+    """
+    VOTING
+
+    """
+    APR that pools earns when BPT is staked on AURA.
+    """
     AURA
 }
 
