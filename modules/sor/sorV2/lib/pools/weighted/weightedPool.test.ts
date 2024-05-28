@@ -36,7 +36,7 @@ describe('SOR V3 Weighted Pool Tests', () => {
             weightedPool.tokens[1].token,
             SwapKind.GivenIn,
         );
-        expect(limitAmountIn).toBe((parseEther('169') * weightedPool.MAX_IN_RATIO) / WAD); // TODO: apply MAX_IN_RATIO
+        expect(limitAmountIn).toBe((parseEther('169') * weightedPool.MAX_IN_RATIO) / WAD);
     });
     test('Swap Limits with Given Out', () => {
         const limitAmountIn = weightedPool.getLimitAmountSwap(
@@ -44,6 +44,6 @@ describe('SOR V3 Weighted Pool Tests', () => {
             weightedPool.tokens[1].token,
             SwapKind.GivenOut,
         );
-        expect(limitAmountIn).toBe((parseEther('144') * weightedPool.MAX_OUT_RATIO) / WAD); // TODO: apply MAX_OUT_RATIO
+        expect(limitAmountIn).toBe((parseEther('144') * weightedPool.MAX_OUT_RATIO) / WAD);
     });
 });
