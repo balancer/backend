@@ -1015,20 +1015,20 @@ export class PoolGqlLoaderService {
                 aprItems.push({
                     id: aprItem.id,
                     title: aprItem.title,
-                    apr: aprItem.range.min.toString(),
+                    apr: aprItem.range.min,
                     type: type,
                 });
                 aprItems.push({
                     id: aprItem.id,
                     title: aprItem.title,
-                    apr: `${aprItem.range.max - aprItem.range.min}`,
+                    apr: aprItem.range.max - aprItem.range.min,
                     type: 'STAKING_BOOST',
                 });
             } else {
                 aprItems.push({
                     id: aprItem.id,
                     title: aprItem.title,
-                    apr: aprItem.apr.toString(),
+                    apr: aprItem.apr,
                     type: type,
                 });
             }
