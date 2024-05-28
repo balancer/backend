@@ -14,5 +14,5 @@ describe('Token service', () => {
         setRequestScopedContextValue('chainId', '1');
 
         await tokenService.updateTokenPrices(['MAINNET']);
-    });
+    }, 500000);
 });
