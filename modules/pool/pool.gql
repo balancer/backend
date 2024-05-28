@@ -1047,7 +1047,7 @@ type GqlPoolAprItem {
     """
     The APR value in % -> 0.2 = 0.2%
     """
-    apr: BigDecimal!
+    apr: Float!
     """
     Specific type of this APR
     """
