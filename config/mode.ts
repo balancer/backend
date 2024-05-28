@@ -1,5 +1,4 @@
-import { env } from '../app/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -32,6 +31,7 @@ export default <NetworkData>{
     coingecko: {
         nativeAssetId: 'mode',
         platformId: 'mode',
+        excludedTokenAddresses: [],
     },
     rpcUrl: 'https://1rpc.io/mode',
     rpcMaxBlockRange: 500,
@@ -41,6 +41,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0x9dd5db2d38b50bef682ce532bcca5dfd203915e1',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x9805dcfD25e6De36bad8fe9D3Fe2c9b44B764102',
     },
     balancer: {

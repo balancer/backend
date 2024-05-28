@@ -1,5 +1,4 @@
-import { env } from '../app/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -33,6 +32,7 @@ export default <NetworkData>{
     coingecko: {
         nativeAssetId: 'fraxtal',
         platformId: 'fraxtal',
+        excludedTokenAddresses: [],
     },
     rpcUrl: 'https://rpc.frax.com/',
     rpcMaxBlockRange: 500,
@@ -42,6 +42,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0x5cf4928a3205728bd12830e1840f7db85c62a4b9',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0xe3881627b8deebccf9c23b291430a549fc0be5f7',
     },
     balancer: {

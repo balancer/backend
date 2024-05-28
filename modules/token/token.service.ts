@@ -156,11 +156,7 @@ export class TokenService {
         return priceRateProviderDataResult;
     }
 
-    public async updateTokenPrices(chainIds: string[]): Promise<void> {
-        const chains: Chain[] = [];
-        for (const chainId of chainIds) {
-            chains.push(chainIdToChain[chainId]);
-        }
+    public async updateTokenPrices(chains: Chain[]): Promise<void> {
         return this.tokenPriceService.updateAllTokenPrices(chains);
     }
 

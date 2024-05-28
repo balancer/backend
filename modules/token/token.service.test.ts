@@ -9,6 +9,13 @@ describe('Token service', () => {
         expect(filtered.length).toBe(2);
     });
 
+    test('update prices', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+
+        await tokenService.updateTokenPrices(['MAINNET']);
+    }, 500000);
+
     test('sync tokens from pool tokens', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '34443');
