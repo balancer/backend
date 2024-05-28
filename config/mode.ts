@@ -34,7 +34,7 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: 'https://1rpc.io/mode',
-    rpcMaxBlockRange: 500,
+    rpcMaxBlockRange: 5000,
     protocolToken: 'bal',
     bal: {
         address: '0xd08a2917653d4e460893203471f0000826fb4034',

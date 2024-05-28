@@ -35,7 +35,7 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: 'https://rpc.frax.com/',
-    rpcMaxBlockRange: 500,
+    rpcMaxBlockRange: 5000,
     protocolToken: 'bal',
     bal: {
         address: '0x2fc7447f6cf71f9aa9e7ff8814b37e55b268ec91',
