@@ -75,20 +75,22 @@ export class PoolGqlLoaderService {
         // load rate provider data into PoolTokenDetail model
         for (const token of mappedPool.poolTokens) {
             if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
-                const rateprovider = await prisma.prismaPriceRateProviderData.findUniqueOrThrow({
+                const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
                     where: {
                         chain_rateProviderAddress: { chain: chain, rateProviderAddress: token.priceRateProvider },
                     },
                 });
-                token.priceRateProviderData = {
-                    ...rateprovider,
-                    address: rateprovider.rateProviderAddress,
-                };
+                if (rateproviderData) {
+                    token.priceRateProviderData = {
+                        ...rateproviderData,
+                        address: rateproviderData.rateProviderAddress,
+                    };
+                }
             }
             if (token.hasNestedPool) {
                 for (const nestedToken of token.nestedPool!.tokens) {
                     if (nestedToken.priceRateProvider && nestedToken.priceRateProvider !== ZERO_ADDRESS) {
-                        const rateprovider = await prisma.prismaPriceRateProviderData.findUniqueOrThrow({
+                        const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
                             where: {
                                 chain_rateProviderAddress: {
                                     chain: chain,
@@ -96,10 +98,12 @@ export class PoolGqlLoaderService {
                                 },
                             },
                         });
-                        nestedToken.priceRateProviderData = {
-                            ...rateprovider,
-                            address: rateprovider.rateProviderAddress,
-                        };
+                        if (rateproviderData) {
+                            nestedToken.priceRateProviderData = {
+                                ...rateproviderData,
+                                address: rateproviderData.rateProviderAddress,
+                            };
+                        }
                     }
                 }
             }
@@ -980,19 +984,31 @@ export class PoolGqlLoaderService {
         const aprItems: GqlPoolAprItem[] = [];
 
         for (const aprItem of pool.aprItems) {
+            if (aprItem.apr === 0 || (aprItem.range && aprItem.range.max === 0)) {
+                continue;
+            }
+
             let type: GqlPoolAprItemType = 'STAKING';
             switch (aprItem.type) {
                 case PrismaPoolAprType.NATIVE_REWARD:
                 case PrismaPoolAprType.THIRD_PARTY_REWARD:
                     type = 'STAKING';
+                    break;
                 case PrismaPoolAprType.IB_YIELD:
                     type = 'IB_YIELD';
+                    break;
                 case PrismaPoolAprType.LOCKING:
                     type = 'LOCKING';
+                    break;
                 case PrismaPoolAprType.SWAP_FEE:
                     type = 'SWAP_FEE';
+                    break;
                 case PrismaPoolAprType.VOTING:
                     type = 'VOTING';
+                    break;
+                case null:
+                    type = 'NESTED';
+                    break;
             }
 
             if (aprItem.range) {
@@ -1018,7 +1034,7 @@ export class PoolGqlLoaderService {
             }
         }
 
-        throw new Error('Method not implemented.');
+        return aprItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
