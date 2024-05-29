@@ -622,6 +622,9 @@ export class PoolGqlLoaderService {
             weight: poolToken?.dynamicData?.weight,
             hasNestedPool: hasNestedPool,
             nestedPool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
+            isAllowed: poolToken.token.types.some(
+                (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
+            ),
         };
     }
 

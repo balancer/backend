@@ -30,4 +30,41 @@ describe('pool debugging', () => {
         expect(pool.dynamicData.aprItems).toBeDefined();
         expect(pool.dynamicData.aprItems.length).toBeGreaterThan(0);
     }, 5000000);
+
+    it('get types in pooltokens', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '42161');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        const pool = await poolService.getGqlPool(
+            '0x2ce4457acac29da4736ae6f5cd9f583a6b335c270000000000000000000004dc',
+            'ARBITRUM',
+        );
+        expect(pool.poolTokens[0].isAllowed).toBeDefined();
+        expect(pool.poolTokens[0].isAllowed).toBeTruthy();
+
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '10');
+        const poolOp = await poolService.getGqlPool(
+            '0xd4156a7a7e85d8cb2de2932807d8d5f08d05a88900020000000000000000011c',
+            'OPTIMISM',
+        );
+        expect(poolOp.poolTokens[0].isAllowed).toBeDefined();
+        expect(poolOp.poolTokens[0].isAllowed).toBeTruthy();
+        expect(poolOp.poolTokens[1].isAllowed).toBeDefined();
+        expect(poolOp.poolTokens[1].isAllowed).toBeFalsy();
+
+        const poolOpBpt = await poolService.getGqlPool(
+            '0x5f8893506ddc4c271837187d14a9c87964a074dc000000000000000000000106',
+            'OPTIMISM',
+        );
+        expect(poolOpBpt.poolTokens[0].isAllowed).toBeDefined();
+        expect(poolOpBpt.poolTokens[0].isAllowed).toBeTruthy();
+        expect(poolOpBpt.poolTokens[1].isAllowed).toBeDefined();
+        expect(poolOpBpt.poolTokens[1].isAllowed).toBeTruthy();
+        expect(poolOpBpt.poolTokens[2].isAllowed).toBeDefined();
+        expect(poolOpBpt.poolTokens[2].isAllowed).toBeTruthy();
+        expect(poolOpBpt.poolTokens[3].isAllowed).toBeDefined();
+        expect(poolOpBpt.poolTokens[3].isAllowed).toBeTruthy();
+    }, 5000000);
 });
