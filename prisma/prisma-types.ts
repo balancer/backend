@@ -136,7 +136,11 @@ export const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPo
         tokens: {
             orderBy: { index: 'asc' },
             include: {
-                token: true,
+                token: {
+                    include: {
+                        types: true,
+                    },
+                },
                 dynamicData: true,
                 nestedPool: {
                     include: {
@@ -144,7 +148,11 @@ export const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPo
                         tokens: {
                             orderBy: { index: 'asc' },
                             include: {
-                                token: true,
+                                token: {
+                                    include: {
+                                        types: true,
+                                    },
+                                },
                                 dynamicData: true,
                             },
                         },
@@ -176,7 +184,11 @@ export type PrismaNestedPoolWithNoNesting = Prisma.PrismaPoolGetPayload<typeof n
 
 const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
     include: {
-        token: true,
+        token: {
+            include: {
+                types: true,
+            },
+        },
         dynamicData: true,
         nestedPool: {
             include: {
@@ -184,7 +196,11 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                 tokens: {
                     orderBy: { index: 'asc' },
                     include: {
-                        token: true,
+                        token: {
+                            include: {
+                                types: true,
+                            },
+                        },
                         dynamicData: true,
                         nestedPool: {
                             include: {
@@ -192,7 +208,11 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                                 tokens: {
                                     orderBy: { index: 'asc' },
                                     include: {
-                                        token: true,
+                                        token: {
+                                            include: {
+                                                types: true,
+                                            },
+                                        },
                                         dynamicData: true,
                                     },
                                 },
