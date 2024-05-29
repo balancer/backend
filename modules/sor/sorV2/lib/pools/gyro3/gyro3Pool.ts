@@ -106,9 +106,7 @@ export class Gyro3Pool implements BasePool {
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
         const tokenPair = this.tokenPairs.find(
-            (tokenPair) =>
-                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
-                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+            (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
         );
 
         if (tokenPair) {

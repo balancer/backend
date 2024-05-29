@@ -24,6 +24,8 @@ enum Chain {
     POLYGON
     SEPOLIA
     ZKEVM
+    FRAXTAL
+    MODE
 }
 
 model PrismaLastBlockSynced {
@@ -341,6 +343,8 @@ enum PrismaPoolAprType {
     PHANTOM_STABLE_BOOSTED
     IB_YIELD
     VOTING
+    LOCKING
+    AURA
 }
 
 enum PrismaPoolAprItemGroup {
@@ -360,6 +364,7 @@ enum PrismaPoolAprItemGroup {
     MAKER
     DEFAULT
 }
+
 
 model PrismaPoolCategory {
     @@id([id, chain])
@@ -747,6 +752,23 @@ enum PrismaTokenTypeOption {
     PHANTOM_BPT
 }
 
+model PrismaPriceRateProviderData {
+    @@id([chain, rateProviderAddress])
+
+    chain               Chain
+    rateProviderAddress String
+
+    tokenAddress        String
+
+    reviewed            Boolean
+    name                String?
+    summary             String?
+    reviewUrl           String?
+    
+    @@index([chain, rateProviderAddress])
+    @@index([tokenAddress])
+}
+
 
 model PrismaUser {
     address                 String              @id
@@ -868,6 +890,7 @@ model PrismaVeBalUserBalance {
     chain               Chain
 
     balance             String
+    locked              String              @default("0")
 
     userAddress         String
     user                PrismaUser          @relation(fields:[userAddress], references: [address])

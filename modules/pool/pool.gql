@@ -316,7 +316,8 @@ type GqlPoolDynamicData {
     volume24h: BigDecimal!
     fees24h: BigDecimal!
     yieldCapture24h: BigDecimal!
-    apr: GqlPoolApr!
+    apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
+    aprItems: [GqlPoolAprItem!]!
 
     isInRecoveryMode: Boolean!
     isPaused: Boolean!
@@ -409,7 +410,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]!
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -455,7 +456,10 @@ type GqlPoolGyro implements GqlPoolBase {
     z: String!
     dSq: String!
 
-    tokens: [GqlPoolTokenUnion!]!
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     version: Int!
@@ -492,7 +496,10 @@ type GqlPoolFx implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
-    tokens: [GqlPoolTokenUnion!]!
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -513,7 +520,10 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
-    tokens: [GqlPoolTokenUnion!]!
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -567,7 +577,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -594,7 +604,10 @@ type GqlPoolComposableStable implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
-    tokens: [GqlPoolTokenUnion!]!
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
     amp: BigInt!
     staking: GqlPoolStaking
@@ -622,7 +635,7 @@ type GqlPoolElement implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
 
     #element specific fields
     unitSeconds: BigInt!
@@ -643,7 +656,7 @@ type GqlPoolComposableStableNested {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    tokens: [GqlPoolTokenComposableStableNestedUnion!]!
+    tokens: [GqlPoolTokenComposableStableNestedUnion!]! @deprecated(reason: "Use poolTokens instead")
     nestingType: GqlPoolNestingType!
 
     totalShares: BigDecimal!
@@ -670,43 +683,135 @@ union GqlPoolNestedUnion = GqlPoolComposableStableNested
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable
 union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken
 
+"""
+All info on the pool token. It will also include the nested pool if the token is a BPT. It will only support 1 level of nesting.
+A second (unsupported) level of nesting is shown by having hasNestedPool = true but nestedPool = null.
+"""
 type GqlPoolTokenDetail {
+    """
+    Id of the token. A combination of pool id and token address.
+    """
     id: ID!
+    """
+    Address of the pool token.
+    """
     address: String!
+    """
+    Decimals of the pool token.
+    """
     decimals: Int!
+    """
+    Name of the pool token.
+    """
     name: String!
+    """
+    Symbol of the pool token.
+    """
     symbol: String!
+    """
+    Index of the pool token in the pool as returned by the vault.
+    """
     index: Int!
-
+    """
+    Balance of the pool token inside the pool.
+    """
     balance: BigDecimal!
+    """
+    If it is an appreciating token, it shows the current price rate. 1 otherwise.
+    """
     priceRate: BigDecimal!
+    """
+    The address of the price rate provider.
+    """
     priceRateProvider: String
+    """
+    Additional data for the price rate provider, such as reviews or warnings.
+    """
+    priceRateProviderData: GqlPriceRateProviderData
+    """
+    The weight of the token in the pool if it is a weighted pool, null otherwise
+    """
     weight: BigDecimal
+    """
+    Indicates whether this token is a BPT and therefor has a nested pool.
+    """
     hasNestedPool: Boolean!
+    """
+    Additional data for the nested pool if the token is a BPT. Null otherwise.
+    """
     nestedPool: GqlNestedPool
 }
-
+"""
+All info on the nested pool if the token is a BPT. It will only support 1 level of nesting.
+"""
 type GqlNestedPool {
+    """
+    Unique identifier of the pool.
+    """
     id: ID!
+    """
+    Name of the pool.
+    """
     name: String!
+    """
+    Symbol of the pool.
+    """
     symbol: String!
+    """
+    Address of the pool.
+    """
     address: Bytes!
+    """
+    Type of the pool.
+    """
     type: GqlPoolType!
+    """
+    Version of the pool.
+    """
     version: Int!
-
+    """
+    Address of the pool's owner.
+    """
     owner: Bytes!
+    """
+    Address of the factory contract that created the pool, if applicable.
+    """
     factory: Bytes
+    """
+    Timestamp of when the pool was created.
+    """
     createTime: Int!
-
+    """
+    List of all tokens in the pool.
+    """
     tokens: [GqlPoolTokenDetail!]!
-
+    """
+    Total number of shares in the pool.
+    """
     totalShares: BigDecimal!
+    """
+    Total liquidity in the pool in USD.
+    """
     totalLiquidity: BigDecimal!
+    """
+    Number of shares of the parent pool in the nested pool.
+    """
     nestedShares: BigDecimal!
+    """
+    Total liquidity of the parent pool in the nested pool in USD.
+    """
     nestedLiquidity: BigDecimal!
+    """
+    Percentage of the parents pool shares inside the nested pool.
+    """
     nestedPercentage: BigDecimal!
-
+    """
+    Fee charged for swapping tokens in the pool as %. 0.01 -> 0.01%
+    """
     swapFee: BigDecimal!
+    """
+    Price rate of the Balancer Pool Token (BPT).
+    """
     bptPriceRate: BigDecimal!
 }
 
@@ -899,24 +1004,6 @@ input GqlPoolSwapFilter {
     chainIn: [GqlChain!]
 }
 
-type GqlPoolStaking {
-    id: ID!
-    chain: GqlChain!
-    type: GqlPoolStakingType!
-    address: String!
-    gauge: GqlPoolStakingGauge
-}
-
-enum GqlPoolStakingType {
-    GAUGE
-}
-
-enum GqlPoolStakingGaugeStatus {
-    KILLED
-    ACTIVE
-    PREFERRED
-}
-
 input GqlPoolJoinExitFilter {
     poolIdIn: [String!]
     chainIn: [GqlChain!]
@@ -942,6 +1029,74 @@ enum GqlPoolJoinExitType {
 type GqlPoolJoinExitAmount {
     address: String!
     amount: String!
+}
+
+"""
+All APRs for a pool
+"""
+type GqlPoolAprItem {
+    """
+    The id of the APR item
+    """
+    id: ID!
+
+    """
+    The title of the APR item, a human readable form
+    """
+    title: String!
+    """
+    The APR value in % -> 0.2 = 0.2%
+    """
+    apr: Float!
+    """
+    Specific type of this APR
+    """
+    type: GqlPoolAprItemType!
+}
+
+"""
+Enum representing the different types of the APR in a pool.
+"""
+enum GqlPoolAprItemType {
+    """
+    Represents the swap fee APR in a pool.
+    """
+    SWAP_FEE
+
+    """
+    Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
+    """
+    IB_YIELD
+
+    """
+    Represents if the APR items comes from a nested pool.
+    """
+    NESTED
+
+    """
+    Staking reward APR in a pool, i.e. BAL or BEETS.
+    """
+    STAKING
+
+    """
+    APR boost that can be earned, i.e. via veBAL or maBEETS.
+    """
+    STAKING_BOOST
+
+    """
+    APR in a pool that can be earned through locking, i.e. veBAL
+    """
+    LOCKING
+
+    """
+    APR that can be earned thourgh voting, i.e. gauge votes
+    """
+    VOTING
+
+    """
+    APR that pools earns when BPT is staked on AURA.
+    """
+    AURA
 }
 
 type GqlBalancePoolAprItem {
@@ -1031,6 +1186,29 @@ type GqlPoolTokenDisplay {
     nestedTokens: [GqlPoolTokenDisplay!]
 }
 
+type GqlPoolStaking {
+    id: ID!
+    chain: GqlChain!
+    type: GqlPoolStakingType!
+    address: String!
+    gauge: GqlPoolStakingGauge
+    farm: GqlPoolStakingMasterChefFarm
+    reliquary: GqlPoolStakingReliquaryFarm
+}
+
+enum GqlPoolStakingType {
+    GAUGE
+    MASTER_CHEF
+    FRESH_BEETS
+    RELIQUARY
+}
+
+enum GqlPoolStakingGaugeStatus {
+    KILLED
+    ACTIVE
+    PREFERRED
+}
+
 type GqlPoolStakingGauge {
     id: ID!
     gaugeAddress: String!
@@ -1055,6 +1233,72 @@ type GqlPoolStakingOtherGauge {
     status: GqlPoolStakingGaugeStatus!
     version: Int!
     rewards: [GqlPoolStakingGaugeReward!]!
+}
+
+type GqlPoolStakingMasterChefFarm {
+    id: ID!
+    beetsPerBlock: String!
+    rewarders: [GqlPoolStakingFarmRewarder!]
+}
+
+type GqlPoolStakingFarmRewarder {
+    id: ID!
+    address: String!
+    tokenAddress: String!
+    rewardPerSecond: String!
+}
+
+type GqlPoolStakingReliquaryFarm {
+    id: ID!
+    beetsPerSecond: String!
+    totalBalance: String!
+    totalWeightedBalance: String!
+    levels: [GqlPoolStakingReliquaryFarmLevel!]
+}
+
+type GqlPoolStakingReliquaryFarmLevel {
+    id: ID!
+    level: Int!
+    balance: BigDecimal!
+    requiredMaturity: Int!
+    allocationPoints: Int!
+    apr: BigDecimal!
+}
+
+type GqlReliquaryFarmSnapshot {
+    id: ID!
+    farmId: String!
+    timestamp: Int!
+    relicCount: String!
+    userCount: String!
+    totalBalance: String!
+    dailyDeposited: String!
+    dailyWithdrawn: String!
+    totalLiquidity: String!
+    levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
+    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
+}
+
+type GqlReliquaryTokenBalanceSnapshot {
+    id: ID!
+    address: String!
+    balance: String!
+    symbol: String!
+    name: String!
+    decimals: Int!
+}
+type GqlReliquaryFarmLevelSnapshot {
+    id: ID!
+    level: String!
+    balance: String!
+}
+
+type GqlRelicSnapshot {
+    relicId: Int!
+    farmId: String!
+    balance: String!
+    entryTimestamp: Int!
+    level: Int!
 }
 
 enum GqlPoolEventType {

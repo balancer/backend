@@ -14,9 +14,10 @@ import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
-import { AllNetworkConfigs } from '../modules/network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../modules/network/network-config';
 import { JobsController } from '../modules/controllers/jobs-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
+import { Chain } from '@prisma/client';
 
 const runningJobs: Set<string> = new Set();
 
@@ -128,7 +129,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigs)),
+                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigsKeyedOnChain) as Chain[]),
                     res,
                     next,
                 );

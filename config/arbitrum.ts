@@ -46,6 +46,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     },
     balancer: {
@@ -197,6 +198,12 @@ export default <NetworkData>{
                 tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
                 sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
                 path: 'apr',
+                isIbYield: true,
+            },
+            ETHx: {
+                tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
+                sourceUrl: 'https://universe.staderlabs.com/eth/apy',
+                path: 'value',
                 isIbYield: true,
             },
         },

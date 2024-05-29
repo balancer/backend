@@ -49,6 +49,7 @@ export default <NetworkData>{
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
     },
     gyro: {
         config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
@@ -237,6 +238,12 @@ export default <NetworkData>{
                 tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
                 sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
                 path: 'services.{serviceName == "eth"}.apy',
+                isIbYield: true,
+            },
+            wrsETH: {
+                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
                 isIbYield: true,
             },
         },

@@ -85,7 +85,16 @@ export const getEvents = async (
                     });
                 }
 
-                console.error('Error fetching logs:', e);
+                // Handle missing block in the RPC logs by retrying the request after 1s
+                if (e.includes && e.includes('unknown block')) {
+                    console.log(`Retrying getEvents for block ${from}-${to} on ${rpcUrl}`);
+                    return new Promise<Event[]>((resolve) => {
+                        setTimeout(() => {
+                            resolve(getEvents(from, to, addressChunk, topics, rpcUrl, rpcMaxBlockRange));
+                        }, 1000);
+                    });
+                }
+
                 return Promise.reject(e);
             });
 
