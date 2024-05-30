@@ -672,12 +672,16 @@ export class PoolGqlLoaderService {
                             apr: `${level.apr}`,
                         })),
                     },
+                    farm: null,
+                    gauge: null,
+                    aura: null,
                 };
             } else if (staking.farm) {
                 return {
                     ...staking,
                     gauge: null,
                     reliquary: null,
+                    aura: null,
                 };
             }
         }
@@ -690,6 +694,7 @@ export class PoolGqlLoaderService {
                 ...sorted[0].gauge!,
                 otherGauges: sorted.slice(1).map((item) => item.gauge!),
             },
+            aura: pool.staking.find((staking) => staking.type === 'AURA')?.aura,
             farm: null,
             reliquary: null,
         };
