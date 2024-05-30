@@ -330,6 +330,7 @@ enum PrismaPoolStakingType {
     GAUGE
     RELIQUARY
     FRESH_BEETS
+    AURA
 }
 
 model PrismaPoolStakingMasterChefFarm {
@@ -385,7 +386,7 @@ model PrismaPoolStakingAura {
     chain               Chain
 
     auraPoolAddress     String
-    apr                 String
+    apr                 Float
 }
 
 enum PrismaPoolStakingGaugeStatus {

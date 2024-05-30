@@ -1274,7 +1274,7 @@ type GqlPoolStakingFarmRewarder {
 
 type GqlPoolStakingAura {
     id: ID!
-    address: String!
+    auraPoolAddress: String!
     apr: Float!
 }
 
