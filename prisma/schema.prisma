@@ -428,6 +428,7 @@ model PrismaPoolStaking {
     farm                PrismaPoolStakingMasterChefFarm?
     gauge               PrismaPoolStakingGauge?
     reliquary           PrismaPoolStakingReliquaryFarm?
+    aura                PrismaPoolStakingAura?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -481,6 +482,19 @@ model PrismaPoolStakingGauge {
     version             Int                             @default(1)
     workingSupply       String                          @default("0.0")
     totalSupply         String                          @default("0.0")
+}
+
+model PrismaPoolStakingAura {
+    @@id([id, chain])
+    @@unique([stakingId, chain])
+
+    id                  String
+    stakingId           String
+    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)
+    chain               Chain
+
+    auraPoolAddress     String
+    apr                 String
 }
 
 enum PrismaPoolStakingGaugeStatus {

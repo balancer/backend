@@ -189,13 +189,30 @@ type GqlPoolUserBalance {
     """
     walletBalanceUsd: Float!
     """
-    The staked balance in either a gauge or farm as float.
+    The staked balance in either a gauge or farm as float which is the primary gauge or farm of the pool.
     """
-    stakedBalance: AmountHumanReadable!
+    preferentialStakedBalance: AmountHumanReadable!
+
     """
-    The staked balance in either a gauge or farm in USD as float.
+    The staked balance in either a gauge or farm in USD as float which is the primary gauge or farm of the pool.
     """
-    stakedBalanceUsd: Float!
+    preferentialStakedBalanceUsd: Float!
+    """
+    The staked balance in either a gauge or farm as float which is not the primary gauge or farm of the pool.
+    """
+    nonPreferentialStakedBalance: AmountHumanReadable!
+    """
+    The staked balance in either a gauge or farm in USD as float which is not the primary gauge or farm of the pool.
+    """
+    nonPreferentialStakedBalanceUsd: Float!
+    """
+    The staked balance in an Aura pool as float.
+    """
+    auraStakedBalance: AmountHumanReadable!
+    """
+    The staked balance in an Aura pool in USD as float.
+    """
+    auraStakedBalanceUsd: Float!
 }
 
 """
@@ -1199,6 +1216,7 @@ type GqlPoolStaking {
     gauge: GqlPoolStakingGauge
     farm: GqlPoolStakingMasterChefFarm
     reliquary: GqlPoolStakingReliquaryFarm
+    aura: GqlPoolStakingAura
 }
 
 enum GqlPoolStakingType {
@@ -1206,6 +1224,7 @@ enum GqlPoolStakingType {
     MASTER_CHEF
     FRESH_BEETS
     RELIQUARY
+    AURA
 }
 
 enum GqlPoolStakingGaugeStatus {
@@ -1251,6 +1270,12 @@ type GqlPoolStakingFarmRewarder {
     address: String!
     tokenAddress: String!
     rewardPerSecond: String!
+}
+
+type GqlPoolStakingAura {
+    id: ID!
+    address: String!
+    apr: Float!
 }
 
 type GqlPoolStakingReliquaryFarm {
