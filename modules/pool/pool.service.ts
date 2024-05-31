@@ -44,6 +44,8 @@ import {
 import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
+import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 
 export class PoolService {
     constructor(
@@ -144,6 +146,7 @@ export class PoolService {
         await deleteMasterchefStakingForAllPools(stakingTypes, chain);
         await deleteReliquaryStakingForAllPools(stakingTypes, chain);
         await deleteGaugeStakingForAllPools(stakingTypes, chain);
+        await deleteAuraStakingForAllPools(stakingTypes, chain);
 
         // if we reload staking for reliquary, we also need to reload the snapshots because they are deleted while reloading
         if (stakingTypes.includes('RELIQUARY')) {
@@ -273,6 +276,9 @@ export class PoolService {
             }
             if (networkconfig.data.subgraphs.gauge) {
                 await syncGaugeStakingForPools(new GaugeSubgraphService(networkconfig.data.subgraphs.gauge), chain);
+            }
+            if (networkconfig.data.subgraphs.aura) {
+                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));
             }
         }
     }

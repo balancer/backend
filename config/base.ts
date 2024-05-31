@@ -18,6 +18,7 @@ export default <NetworkData>{
         gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
         veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: '',
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

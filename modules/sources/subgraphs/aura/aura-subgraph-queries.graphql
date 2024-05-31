@@ -1,0 +1,17 @@
+query allPools($chainIds: [Int!]) {
+    allPools(chainIds: $chainIds) {
+        ...PoolSchema
+    }
+}
+
+fragment PoolSchema on PoolSchema {
+    id
+    chainId
+    address
+    aprs {
+        total
+    }
+    lpToken {
+        address
+    }
+}

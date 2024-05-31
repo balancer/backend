@@ -26,6 +26,7 @@ export default <NetworkData>{
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
         userBalances: 'https://',
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

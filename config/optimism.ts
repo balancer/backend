@@ -19,6 +19,7 @@ export default <NetworkData>{
         gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
         userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
         veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

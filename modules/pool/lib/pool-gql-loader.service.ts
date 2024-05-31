@@ -744,10 +744,14 @@ export class PoolGqlLoaderService {
 
         return {
             walletBalance: userWalletBalances.at(0)?.balance || '0',
-            stakedBalance: activeUserStakedBalance?.balance || '0',
+            preferentialStakedBalance: activeUserStakedBalance?.balance || '0',
+            nonPreferentialStakedBalance: '0',
+            auraStakedBalance: '0',
             totalBalance: formatFixed(stakedBalance.add(walletBalance), 18),
             walletBalanceUsd: walletBalanceNum * bptPrice,
-            stakedBalanceUsd: stakedBalanceNum * bptPrice,
+            preferentialStakedBalanceUsd: stakedBalanceNum * bptPrice,
+            nonPreferentialStakedBalanceUsd: 0,
+            auraStakedBalanceUsd: 0,
             totalBalanceUsd: (walletBalanceNum + stakedBalanceNum) * bptPrice,
         };
     }
