@@ -9,9 +9,9 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import ERC20Abi from '../../web3/abi/ERC20.json';
-import { gaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { AddressZero } from '@ethersproject/constants';
 import { getEvents } from '../../web3/events';
+import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     get chain() {
@@ -38,13 +38,17 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         return networkContext.data.multicall;
     }
 
+    get gaugeSubgraphService() {
+        return new GaugeSubgraphService(networkContext.data.subgraphs.gauge!);
+    }
+
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (!stakingTypes.includes('GAUGE')) {
             return;
         }
-        const { block } = await gaugeSubgraphService.getMetadata();
+        const { block } = await this.gaugeSubgraphService.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
-        const gaugeShares = await gaugeSubgraphService.getAllGaugeShares();
+        const gaugeShares = await this.gaugeSubgraphService.getAllGaugeShares();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({

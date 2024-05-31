@@ -8,11 +8,9 @@ import {
     YbTokensAprService,
     VeBalProtocolAprService,
 } from '../pool/lib/apr-data-sources';
-import { GaugeStakingService } from '../pool/lib/staking';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
@@ -30,7 +28,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new GaugeAprService(tokenService, [data.bal!.address]),
         new VeBalProtocolAprService(data.rpcUrl),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),

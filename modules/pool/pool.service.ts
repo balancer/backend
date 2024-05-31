@@ -7,8 +7,6 @@ import {
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
-    GqlPoolFx,
-    GqlPoolGyro,
     GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
@@ -29,13 +27,23 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
-import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 import { coingeckoDataService } from '../token/lib/coingecko-data.service';
 import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
+import {
+    deleteGaugeStakingForAllPools,
+    deleteMasterchefStakingForAllPools,
+    deleteReliquaryStakingForAllPools,
+    syncGaugeStakingForPools,
+    syncMasterchefStakingForPools,
+    syncReliquaryStakingForPools,
+} from '../actions/pool/staking';
+import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class PoolService {
     constructor(
@@ -47,7 +55,6 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolSnapshotService: PoolSnapshotService,
-        private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
     private get chain() {
@@ -56,10 +63,6 @@ export class PoolService {
 
     private get chainId() {
         return networkContext.chainId;
-    }
-
-    private get poolStakingServices(): PoolStakingService[] {
-        return networkContext.config.poolStakingServices;
     }
 
     private get contentService(): ContentService {
@@ -121,7 +124,14 @@ export class PoolService {
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
-        return this.reliquarySnapshotService.getSnapshotsForFarm(id, range);
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+
+            return reliquarySnapshotService.getSnapshotsForFarm(id, range);
+        }
+        return [];
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -130,14 +140,17 @@ export class PoolService {
         return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
     }
 
-    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
-        await Promise.all(
-            this.poolStakingServices.map((stakingService) => stakingService.reloadStakingForAllPools(stakingTypes)),
-        );
+    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
+        await deleteMasterchefStakingForAllPools(stakingTypes, chain);
+        await deleteReliquaryStakingForAllPools(stakingTypes, chain);
+        await deleteGaugeStakingForAllPools(stakingTypes, chain);
+
         // if we reload staking for reliquary, we also need to reload the snapshots because they are deleted while reloading
         if (stakingTypes.includes('RELIQUARY')) {
             this.loadReliquarySnapshotsForAllFarms();
         }
+        // reload it for all pools
+        this.syncStakingForPools([this.chain]);
     }
 
     public async syncPoolAllTokensRelationship(): Promise<void> {
@@ -237,8 +250,31 @@ export class PoolService {
         await this.contentService.syncPoolContentData(this.chain);
     }
 
-    public async syncStakingForPools() {
-        await Promise.all(this.poolStakingServices.map((stakingService) => stakingService.syncStakingForPools()));
+    public async syncStakingForPools(chains: Chain[]) {
+        for (const chain of chains) {
+            const networkconfig = AllNetworkConfigsKeyedOnChain[chain];
+            if (networkconfig.data.subgraphs.masterchef) {
+                await syncMasterchefStakingForPools(
+                    chain,
+                    new MasterchefSubgraphService(networkconfig.data.subgraphs.masterchef),
+                    networkconfig.data.masterchef?.excludedFarmIds || [],
+                    networkconfig.data.fbeets?.address || '',
+                    networkconfig.data.fbeets?.farmId || '',
+                    networkconfig.data.fbeets?.poolId || '',
+                );
+            }
+            if (networkconfig.data.subgraphs.reliquary) {
+                await syncReliquaryStakingForPools(
+                    chain,
+                    new ReliquarySubgraphService(networkconfig.data.subgraphs.reliquary),
+                    networkconfig.data.reliquary?.address || '',
+                    networkconfig.data.reliquary?.excludedFarmIds || [],
+                );
+            }
+            if (networkconfig.data.subgraphs.gauge) {
+                await syncGaugeStakingForPools(new GaugeSubgraphService(networkconfig.data.subgraphs.gauge), chain);
+            }
+        }
     }
 
     public async updatePoolAprs(chain: Chain) {
@@ -295,17 +331,27 @@ export class PoolService {
     }
 
     public async syncLatestReliquarySnapshotsForAllFarms() {
-        await this.reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+            await reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+        }
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
-        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
-        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
-        const farmIds = farms.map((farm) => parseFloat(farm.id));
-        for (const farmId of farmIds) {
-            await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+            await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
+            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
+            await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
+            const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
+            const farmIds = farms.map((farm) => parseFloat(farm.id));
+            for (const farmId of farmIds) {
+                await reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
+            }
         }
     }
 
@@ -479,5 +525,4 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService),
     new PoolSnapshotService(coingeckoDataService),
-    new ReliquarySnapshotService(reliquarySubgraphService),
 );
