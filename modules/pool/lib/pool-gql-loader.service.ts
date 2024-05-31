@@ -694,7 +694,7 @@ export class PoolGqlLoaderService {
                 ...sorted[0].gauge!,
                 otherGauges: sorted.slice(1).map((item) => item.gauge!),
             },
-            aura: pool.staking.find((staking) => staking.type === 'AURA')?.aura,
+            aura: pool.staking.find((staking) => staking.type === 'AURA' && !staking.aura!.isShutdown)?.aura,
             farm: null,
             reliquary: null,
         };

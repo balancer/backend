@@ -8,6 +8,7 @@ fragment PoolSchema on PoolSchema {
     id
     chainId
     address
+    isShutdown
     aprs {
         total
     }

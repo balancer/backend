@@ -67,4 +67,21 @@ describe('pool debugging', () => {
         expect(poolOpBpt.poolTokens[3].isAllowed).toBeDefined();
         expect(poolOpBpt.poolTokens[3].isAllowed).toBeTruthy();
     }, 5000000);
+
+    it('sync aura staking', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['AURA'], 'MAINNET');
+        const pool = await poolService.getGqlPool(
+            '0xcfca23ca9ca720b6e98e3eb9b6aa0ffc4a5c08b9000200000000000000000274',
+            'MAINNET',
+        );
+        expect(pool.staking).toBeDefined();
+        expect(pool.staking?.aura).toBeDefined();
+        expect(pool.staking?.aura?.apr).toBeGreaterThan(0);
+        expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
+    }, 5000000);
 });

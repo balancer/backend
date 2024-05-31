@@ -153,7 +153,7 @@ export class PoolService {
             this.loadReliquarySnapshotsForAllFarms();
         }
         // reload it for all pools
-        this.syncStakingForPools([this.chain]);
+        await this.syncStakingForPools([this.chain]);
     }
 
     public async syncPoolAllTokensRelationship(): Promise<void> {

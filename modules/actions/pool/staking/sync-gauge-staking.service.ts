@@ -55,11 +55,6 @@ interface GaugeBalDistributionData {
     };
 }
 
-// private balAddress: string;
-// private balMulticaller: Multicaller3; // Used to query BAL rate and gauge data
-// private rewardsMulticallerV1: Multicaller3; // Used to query rewards token data for v1 gauges
-// private rewardsMulticallerV2: Multicaller3; // Used to query rewards token data for v2 gauges
-
 export const syncGaugeStakingForPools = async (
     gaugeSubgraphService: GaugeSubgraphService,
     balAddressIn: string,
@@ -242,7 +237,14 @@ const getOnchainRewardTokensData = async (
     balMulticaller: Multicaller3,
     rewardsMulticallerV1: Multicaller3,
     rewardsMulticallerV2: Multicaller3,
-) => {
+): Promise<
+    {
+        id: string;
+        rewardPerSecond: string;
+        workingSupply: string;
+        totalSupply: string;
+    }[]
+> => {
     // Get onchain data for BAL rewards
     const currentWeek = Math.floor(Date.now() / 1000 / 604800);
     for (const gauge of gauges) {

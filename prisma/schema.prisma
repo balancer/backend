@@ -496,6 +496,7 @@ model PrismaPoolStakingAura {
 
     auraPoolAddress     String
     apr                 Float
+    isShutdown          Boolean
 }
 
 enum PrismaPoolStakingGaugeStatus {

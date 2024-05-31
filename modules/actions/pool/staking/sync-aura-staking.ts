@@ -1,6 +1,7 @@
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import { AuraSubgraphService } from '../../../sources/subgraphs/aura/aura.service';
 import { prisma } from '../../../../prisma/prisma-client';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 export const syncAuraStakingForPools = async (
     chain: Chain,
@@ -53,11 +54,14 @@ export const syncAuraStakingForPools = async (
                     stakingId: stakingId,
                     apr: auraGauge.aprs.total,
                     auraPoolAddress: auraGauge.address,
+                    isShutdown: auraGauge.isShutdown,
                 },
                 update: { apr: auraGauge.aprs.total },
             }),
         );
     }
+
+    await prismaBulkExecuteOperations(operations, true);
 };
 
 export const deleteAuraStakingForAllPools = async (stakingTypes: PrismaPoolStakingType[], chain: Chain) => {
