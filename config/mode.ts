@@ -1,5 +1,7 @@
 import { NetworkData } from '../modules/network/network-config-types';
 
+const rpcUrl = process.env.MODE_RPC_URL || 'https://mainnet.mode.network';
+
 export default <NetworkData>{
     chain: {
         slug: 'mode',
@@ -33,7 +35,7 @@ export default <NetworkData>{
         platformId: 'mode',
         excludedTokenAddresses: [],
     },
-    rpcUrl: 'https://1rpc.io/mode',
+    rpcUrl,
     rpcMaxBlockRange: 5000,
     protocolToken: 'bal',
     bal: {
