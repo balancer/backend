@@ -726,7 +726,7 @@ export class PoolGqlLoaderService {
         }
 
         const activeUserStakedBalance = userStakedBalances.find(
-            (userStakedBalance) => userStakedBalance.id === activeStakingId,
+            (userStakedBalance) => userStakedBalance.stakingId === activeStakingId,
         );
 
         const walletBalance = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
