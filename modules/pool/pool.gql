@@ -163,9 +163,9 @@ type GqlPoolMinimal {
     """
     version: Int!
     """
-    If a user address was provided in the query, the user balance is populated here
+    If a user address was provided in the query, the user balances is populated here
     """
-    userBalance: GqlPoolUserBalance
+    userBalances: GqlPoolUserBalance[]
 }
 
 """
@@ -173,47 +173,34 @@ If a user address was provided in the query, the user balance is populated here
 """
 type GqlPoolUserBalance {
     """
-    Total balance (wallet + staked) as float
+    The bpt balance as float.
     """
-    totalBalance: AmountHumanReadable!
+    balance: AmountHumanReadable!
     """
-    Total balance (wallet + staked) in USD as float
+    The BPT balance in USD as float.
     """
-    totalBalanceUsd: Float!
+    balanceUsd: Float!
     """
-    The wallet balance (BPT in wallet) as float.
+    The type of the user balance. It can be in the wallet or staked in a gauge or even externally like Aura.
     """
-    walletBalance: AmountHumanReadable!
+    type: GqlUserBalanceType!
+    
     """
-    The wallet balance (BPT in wallet) in USD as float.
+    If the user balance is staked, this is the address of the staking contract.
     """
-    walletBalanceUsd: Float!
-    """
-    The staked balance in either a gauge or farm as float which is the primary gauge or farm of the pool.
-    """
-    preferentialStakedBalance: AmountHumanReadable!
-
-    """
-    The staked balance in either a gauge or farm in USD as float which is the primary gauge or farm of the pool.
-    """
-    preferentialStakedBalanceUsd: Float!
-    """
-    The staked balance in either a gauge or farm as float which is not the primary gauge or farm of the pool.
-    """
-    nonPreferentialStakedBalance: AmountHumanReadable!
-    """
-    The staked balance in either a gauge or farm in USD as float which is not the primary gauge or farm of the pool.
-    """
-    nonPreferentialStakedBalanceUsd: Float!
-    """
-    The staked balance in an Aura pool as float.
-    """
-    auraStakedBalance: AmountHumanReadable!
-    """
-    The staked balance in an Aura pool in USD as float.
-    """
-    auraStakedBalanceUsd: Float!
+    stakingAddress: string
 }
+
+enum GqlUserBalanceType{
+    GAUGE
+    NON_PREFERENTIAL_GAUGE
+    MASTERCHEF_FARM
+    FRESH_BEETS
+    RELIQUARY
+    AURA
+    WALLET
+}
+
 
 """
 Supported pool types
@@ -1221,6 +1208,7 @@ type GqlPoolStaking {
 
 enum GqlPoolStakingType {
     GAUGE
+    NONPREFERENTIAL_GAUGE
     MASTER_CHEF
     FRESH_BEETS
     RELIQUARY
