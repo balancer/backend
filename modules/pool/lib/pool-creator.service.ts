@@ -50,38 +50,22 @@ export class PoolCreatorService {
     }
 
     public async syncNewPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
-        const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
-        const latest = await prisma.prismaPool.findFirst({
-            orderBy: { createTime: 'desc' },
-            select: { createTime: true },
-            where: { chain: this.chain },
-        });
-
-        const subgraphPools = await this.balancerSubgraphService.getAllPools(
-            {
-                where: { createTime_gte: latest?.createTime || 0 },
-            },
-            false,
+        const existing = (await prisma.prismaPool.findMany({ where: { chain: this.chain }, select: { id: true } })).map(
+            (pool) => pool.id,
         );
-        const poolIds = new Set<string>();
+
+        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+
+        const missing = subgraphPools.filter((pool) => !existing.includes(pool.id));
 
         // any pool can be nested
-        const allNestedTypePools = [
-            ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
-            ...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
-        ];
+        const allNestedTypePools = [...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address }))];
 
-        for (const subgraphPool of subgraphPools) {
-            const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
-
-            if (!existsInDb) {
-                await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
-
-                poolIds.add(subgraphPool.id);
-            }
+        for (const subgraphPool of missing) {
+            await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
         }
 
-        return Array.from(poolIds);
+        return Array.from(missing.map((pool) => pool.id));
     }
 
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
