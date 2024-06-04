@@ -12,14 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-03',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
+        balancer: `https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest`,
         balancerV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest',
         balancerPoolsV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
-        gauge: 'https://api.studio.thegraph.com/proxy/24660/balancer-gauges-sepolia/version/latest',
+        gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
         // veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
