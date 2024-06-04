@@ -722,7 +722,7 @@ export class PoolGqlLoaderService {
             bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
         }
 
-        let activeStakingId = userStakedBalances.at(0)?.id;
+        let activeStakingId = userStakedBalances.at(0)?.stakingId;
         if (pool.staking.length > 1) {
             const sortedGauges = this.getSortedGauges(pool);
             activeStakingId = sortedGauges[0].id;
