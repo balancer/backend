@@ -165,7 +165,7 @@ type GqlPoolMinimal {
     """
     If a user address was provided in the query, the user balances is populated here
     """
-    userBalances: GqlPoolUserBalance[]
+    userBalances: [GqlPoolUserBalance]
 }
 
 """
@@ -184,14 +184,14 @@ type GqlPoolUserBalance {
     The type of the user balance. It can be in the wallet or staked in a gauge or even externally like Aura.
     """
     type: GqlUserBalanceType!
-    
+
     """
     If the user balance is staked, this is the address of the staking contract.
     """
-    stakingAddress: string
+    stakingAddress: String
 }
 
-enum GqlUserBalanceType{
+enum GqlUserBalanceType {
     GAUGE
     NON_PREFERENTIAL_GAUGE
     MASTERCHEF_FARM
@@ -200,7 +200,6 @@ enum GqlUserBalanceType{
     AURA
     WALLET
 }
-
 
 """
 Supported pool types
