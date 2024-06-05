@@ -562,6 +562,7 @@ model PrismaPoolSnapshot {
     pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     timestamp           Int
+    vaultVersion        Int @default(2)
 
     totalLiquidity      Float
     sharePrice          Float
@@ -577,6 +578,9 @@ model PrismaPoolSnapshot {
     totalVolumes        String[] @default([]) // Used for V3 snapshots
     totalProtocolSwapFees String[] @default([]) // Used for V3 snapshots
     totalProtocolYieldFees String[] @default([]) // Used for V3 snapshots
+
+    @@index([vaultVersion])
+    @@index([timestamp(sort: Desc)])
 }
 
 model PrismaReliquaryFarmSnapshot {
