@@ -16,3 +16,24 @@ fragment PoolSchema on PoolSchema {
         address
     }
 }
+
+query accounts($ids: [String!]) {
+    accounts(ids: $ids) {
+        ...AccountSchema
+    }
+}
+
+fragment AccountSchema on AccountSchema {
+    id
+    poolAccounts {
+        staked
+        pool {
+            id
+            address
+            chainId
+            lpToken {
+                address
+            }
+        }
+    }
+}

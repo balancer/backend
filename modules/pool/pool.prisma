@@ -386,6 +386,7 @@ model PrismaPoolStakingAura {
     chain               Chain
 
     auraPoolAddress     String
+    auraPoolId          String
     apr                 Float
     isShutdown          Boolean
 }

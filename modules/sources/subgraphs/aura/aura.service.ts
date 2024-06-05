@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { GraphQLClient } from 'graphql-request';
-import { PoolSchema, PoolSchemaFragment, getSdk } from './generated/aura-subgraph-types';
+import { AccountSchemaFragment, PoolSchema, PoolSchemaFragment, getSdk } from './generated/aura-subgraph-types';
 import { chainToIdMap } from '../../../network/network-config';
 
 export class AuraSubgraphService {
@@ -18,5 +18,10 @@ export class AuraSubgraphService {
         });
 
         return result.allPools;
+    }
+
+    public async getAllUsers(): Promise<AccountSchemaFragment[]> {
+        const result = await this.sdk.accounts();
+        return result.accounts;
     }
 }

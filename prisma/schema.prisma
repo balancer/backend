@@ -495,6 +495,7 @@ model PrismaPoolStakingAura {
     chain               Chain
 
     auraPoolAddress     String
+    auraPoolId          String
     apr                 Float
     isShutdown          Boolean
 }
@@ -857,6 +858,7 @@ enum PrismaUserBalanceType {
     WALLET
     STAKED
     RELIQUARY
+    AURA
 }
 
 model PrismaUserPoolBalanceSnapshot {

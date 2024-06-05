@@ -25,7 +25,7 @@ export const syncAuraStakingForPools = async (
             continue;
         }
 
-        const stakingId = auraGauge.id + '-aura';
+        const stakingId = auraGauge.address;
 
         const dbStaking = pool.staking.find((staking) => staking.chain === chain && staking.id === stakingId);
 
@@ -54,6 +54,7 @@ export const syncAuraStakingForPools = async (
                     stakingId: stakingId,
                     apr: auraGauge.aprs.total,
                     auraPoolAddress: auraGauge.address,
+                    auraPoolId: auraGauge.id,
                     isShutdown: auraGauge.isShutdown,
                 },
                 update: { apr: auraGauge.aprs.total },

@@ -73,7 +73,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { chain: this.chain } }),
+                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'GAUGE' }, chain: this.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: filteredGaugeShares.map((share) => {
                         const pool = pools.find((pool) => pool.id === share.gauge.poolId);
