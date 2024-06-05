@@ -163,9 +163,9 @@ type GqlPoolMinimal {
     """
     version: Int!
     """
-    If a user address was provided in the query, the user balances is populated here
+    If a user address was provided in the query, the user balance is populated here
     """
-    userBalances: [GqlPoolUserBalance]
+    userBalance: GqlPoolUserBalance
 }
 
 """
@@ -173,32 +173,40 @@ If a user address was provided in the query, the user balance is populated here
 """
 type GqlPoolUserBalance {
     """
-    The bpt balance as float.
+    Total balance (wallet + staked) as float
+    """
+    totalBalance: AmountHumanReadable!
+    """
+    Total balance (wallet + staked) in USD as float
+    """
+    totalBalanceUsd: Float!
+    """
+    The wallet balance (BPT in wallet) as float.
+    """
+    walletBalance: AmountHumanReadable!
+    """
+    The wallet balance (BPT in wallet) in USD as float.
+    """
+    walletBalanceUsd: Float!
+    """
+    The staked BPT balances of the user.
+    """
+    stakedBalances: [GqlUserStakedBalance!]!
+}
+
+type GqlUserStakedBalance {
+    """
+    The staked BPT balance as float.
     """
     balance: AmountHumanReadable!
     """
-    The BPT balance in USD as float.
+    The steaked BPT balance in USD as float.
     """
     balanceUsd: Float!
     """
-    The type of the user balance. It can be in the wallet or staked in a gauge or even externally like Aura.
+    The staking entity (Gauge, farm, aura, etc.) in which this balance is staked.
     """
-    type: GqlUserBalanceType!
-
-    """
-    If the user balance is staked, this is the address of the staking contract.
-    """
-    stakingAddress: String
-}
-
-enum GqlUserBalanceType {
-    GAUGE
-    NON_PREFERENTIAL_GAUGE
-    MASTERCHEF_FARM
-    FRESH_BEETS
-    RELIQUARY
-    AURA
-    WALLET
+    staking: GqlPoolStaking!
 }
 
 """
@@ -1207,7 +1215,6 @@ type GqlPoolStaking {
 
 enum GqlPoolStakingType {
     GAUGE
-    NONPREFERENTIAL_GAUGE
     MASTER_CHEF
     FRESH_BEETS
     RELIQUARY
