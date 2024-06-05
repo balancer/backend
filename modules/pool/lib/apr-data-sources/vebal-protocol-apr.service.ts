@@ -130,6 +130,7 @@ export class VeBalProtocolAprService implements PoolAprService {
                 poolId: vebalPool,
                 apr,
                 title: 'Protocol APR',
+                type: 'LOCKING',
             },
             update: { apr },
         });

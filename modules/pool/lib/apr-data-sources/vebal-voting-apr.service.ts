@@ -132,6 +132,7 @@ export class VeBalVotingAprService implements PoolAprService {
                 poolId: vebalPool,
                 apr,
                 title: 'Voting APR',
+                type: 'VOTING',
             },
             update: { apr },
         });
