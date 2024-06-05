@@ -204,9 +204,9 @@ type GqlUserStakedBalance {
     """
     balanceUsd: Float!
     """
-    The staking entity (Gauge, farm, aura, etc.) in which this balance is staked.
+    The staking type (Gauge, farm, aura, etc.) in which this balance is staked.
     """
-    staking: GqlPoolStaking!
+    stakingType: GqlPoolStakingType!
 }
 
 """
@@ -1215,6 +1215,7 @@ type GqlPoolStaking {
 
 enum GqlPoolStakingType {
     GAUGE
+    NON_PREFERENTIAL_GAUGE
     MASTER_CHEF
     FRESH_BEETS
     RELIQUARY

@@ -32,6 +32,7 @@ import {
     GqlNestedPool,
     GqlPoolAprItem,
     GqlPoolAprItemType,
+    GqlUserStakedBalance,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
@@ -40,13 +41,12 @@ import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWa
 import { isWeightedPoolV2 } from './pool-utils';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { parseUnits } from 'ethers/lib/utils';
-import { formatFixed } from '@ethersproject/bignumber';
 import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
+import { formatEther, parseEther, parseUnits } from 'viem';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -726,33 +726,34 @@ export class PoolGqlLoaderService {
         if (pool.dynamicData && pool.dynamicData.totalLiquidity > 0 && parseFloat(pool.dynamicData.totalShares) > 0) {
             bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
         }
+        const walletBalance = parseEther(userWalletBalances.at(0)?.balance || '0');
+        const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
+        const walletBalanceUsd = walletBalanceNum * bptPrice;
 
-        let activeStakingId = userStakedBalances.at(0)?.id;
-        if (pool.staking.length > 1) {
-            const sortedGauges = this.getSortedGauges(pool);
-            activeStakingId = sortedGauges[0].id;
+        const gqlUserStakedBalances: GqlUserStakedBalance[] = [];
+
+        let totalBalance = walletBalanceNum;
+
+        for (const balance of userStakedBalances) {
+            const stakedBalanceNum = balance.balanceNum || 0;
+            const stakedBalanceUsd = stakedBalanceNum * bptPrice;
+
+            const staking = pool.staking.find((staking) => staking.id === balance.stakingId);
+
+            gqlUserStakedBalances.push({
+                balance: parseEther(balance.balance).toString(),
+                balanceUsd: stakedBalanceUsd,
+                stakingType: staking!.type,
+            });
+            totalBalance += stakedBalanceNum;
         }
 
-        const activeUserStakedBalance = userStakedBalances.find(
-            (userStakedBalance) => userStakedBalance.id === activeStakingId,
-        );
-
-        const walletBalance = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
-        const stakedBalance = parseUnits(activeUserStakedBalance?.balance || '0', 18);
-        const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
-        const stakedBalanceNum = activeUserStakedBalance?.balanceNum || 0;
-
         return {
-            walletBalance: userWalletBalances.at(0)?.balance || '0',
-            preferentialStakedBalance: activeUserStakedBalance?.balance || '0',
-            nonPreferentialStakedBalance: '0',
-            auraStakedBalance: '0',
-            totalBalance: formatFixed(stakedBalance.add(walletBalance), 18),
-            walletBalanceUsd: walletBalanceNum * bptPrice,
-            preferentialStakedBalanceUsd: stakedBalanceNum * bptPrice,
-            nonPreferentialStakedBalanceUsd: 0,
-            auraStakedBalanceUsd: 0,
-            totalBalanceUsd: (walletBalanceNum + stakedBalanceNum) * bptPrice,
+            walletBalance: walletBalance.toString(),
+            walletBalanceUsd,
+            totalBalance: totalBalance.toString(),
+            totalBalanceUsd: totalBalance * bptPrice,
+            stakedBalances: gqlUserStakedBalances,
         };
     }
 
