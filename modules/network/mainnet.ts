@@ -15,6 +15,7 @@ import { GithubContentService } from '../content/github-content.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -30,7 +31,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),
     ],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
     },

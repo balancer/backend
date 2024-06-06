@@ -46,7 +46,6 @@ import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
-import { formatEther, parseEther, parseUnits } from 'viem';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -477,11 +476,9 @@ export class PoolGqlLoaderService {
 
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
-        const stakingData = this.getStakingData(pool);
-
         const mappedData = {
             decimals: 18,
-            staking: stakingData,
+            staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
             investConfig: this.getPoolInvestConfig(pool), // TODO DEPRECATE
             withdrawConfig: this.getPoolWithdrawConfig(pool), // TODO DEPRECATE
@@ -726,7 +723,7 @@ export class PoolGqlLoaderService {
         if (pool.dynamicData && pool.dynamicData.totalLiquidity > 0 && parseFloat(pool.dynamicData.totalShares) > 0) {
             bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
         }
-        const walletBalance = parseEther(userWalletBalances.at(0)?.balance || '0');
+        const walletBalance = userWalletBalances.at(0)?.balance || '0';
         const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
         const walletBalanceUsd = walletBalanceNum * bptPrice;
 
@@ -741,15 +738,16 @@ export class PoolGqlLoaderService {
             const staking = pool.staking.find((staking) => staking.id === balance.stakingId);
 
             gqlUserStakedBalances.push({
-                balance: parseEther(balance.balance).toString(),
+                balance: balance.balance,
                 balanceUsd: stakedBalanceUsd,
                 stakingType: staking!.type,
+                stakingId: staking!.id,
             });
             totalBalance += stakedBalanceNum;
         }
 
         return {
-            walletBalance: walletBalance.toString(),
+            walletBalance: walletBalance,
             walletBalanceUsd,
             totalBalance: totalBalance.toString(),
             totalBalanceUsd: totalBalance * bptPrice,

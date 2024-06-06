@@ -29,18 +29,22 @@ extend type Query {
     Will de deprecated in favor of poolEvents
     """
     poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
+        @deprecated(reason: "Use poolEvents instead")
     """
     Will de deprecated in favor of poolEvents
     """
     poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
+        @deprecated(reason: "Use poolEvents instead")
     """
     Will de deprecated in favor of poolEvents
     """
     poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
+        @deprecated(reason: "Use poolEvents instead")
     """
     Will de deprecated in favor of poolGetFeaturedPools
     """
     poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
+        @deprecated(reason: "Use poolGetFeaturedPools instead")
     """
     Returns the list of featured pools for chains
     """
@@ -207,6 +211,10 @@ type GqlUserStakedBalance {
     The staking type (Gauge, farm, aura, etc.) in which this balance is staked.
     """
     stakingType: GqlPoolStakingType!
+    """
+    The id of the staking to match with GqlPoolStaking.id.
+    """
+    stakingId: String!
 }
 
 """
@@ -283,11 +291,11 @@ interface GqlPoolBase {
     """
     Deprecated
     """
-    investConfig: GqlPoolInvestConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
     """
     Deprecated
     """
-    withdrawConfig: GqlPoolWithdrawConfig!
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     """
     Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
@@ -365,13 +373,13 @@ type GqlPoolDynamicData {
     fees24hAtlTimestamp: Int!
 }
 
-type GqlPoolInvestConfig {
+type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {
     proportionalEnabled: Boolean!
     singleAssetEnabled: Boolean!
     options: [GqlPoolInvestOption!]!
 }
 
-type GqlPoolInvestOption {
+type GqlPoolInvestOption @deprecated(reason: "Removed without replacement") {
     #we include the index because it is useful for constructing contract calls
     poolTokenIndex: Int!
     poolTokenAddress: String!
@@ -382,13 +390,13 @@ type GqlPoolInvestOption {
     tokenOptions: [GqlPoolToken!]!
 }
 
-type GqlPoolWithdrawConfig {
+type GqlPoolWithdrawConfig @deprecated(reason: "Removed without replacement") {
     proportionalEnabled: Boolean!
     singleAssetEnabled: Boolean!
     options: [GqlPoolWithdrawOption!]!
 }
 
-type GqlPoolWithdrawOption {
+type GqlPoolWithdrawOption @deprecated(reason: "Removed without replacement") {
     poolTokenIndex: Int!
     poolTokenAddress: String!
     tokenOptions: [GqlPoolToken!]!
@@ -561,7 +569,7 @@ type GqlPoolStable implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
 
-    tokens: [GqlPoolToken!]!
+    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -831,7 +839,7 @@ type GqlNestedPool {
     bptPriceRate: BigDecimal!
 }
 
-interface GqlPoolTokenBase {
+interface GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
     id: ID!
     address: String!
     balance: BigDecimal!
@@ -847,7 +855,7 @@ interface GqlPoolTokenBase {
     totalBalance: BigDecimal!
 }
 
-type GqlPoolToken implements GqlPoolTokenBase {
+type GqlPoolToken implements GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
     id: ID!
     address: String!
     decimals: Int!
@@ -864,7 +872,7 @@ type GqlPoolToken implements GqlPoolTokenBase {
     totalBalance: BigDecimal!
 }
 
-type GqlPoolTokenComposableStable implements GqlPoolTokenBase {
+type GqlPoolTokenComposableStable implements GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
     id: ID!
     address: String!
     balance: BigDecimal!
@@ -890,7 +898,7 @@ type GqlPoolStableComposablePoolData {
     balance: String!
 }
 
-type GqlPoolApr {
+type GqlPoolApr @deprecated(reason: "Use GqlPoolApr instead") {
     apr: GqlPoolAprValue!
     swapApr: BigDecimal! # we make the assumption swap apr will never have a range
     nativeRewardApr: GqlPoolAprValue!
@@ -899,14 +907,14 @@ type GqlPoolApr {
     hasRewardApr: Boolean!
 }
 
-union GqlPoolAprValue = GqlPoolAprRange | GqlPoolAprTotal
+union GqlPoolAprValue @deprecated(reason: "Use GqlPoolApr instead") = GqlPoolAprRange | GqlPoolAprTotal
 
-type GqlPoolAprRange {
+type GqlPoolAprRange @deprecated(reason: "Use GqlPoolApr instead") {
     min: BigDecimal!
     max: BigDecimal!
 }
 
-type GqlPoolAprTotal {
+type GqlPoolAprTotal @deprecated(reason: "Use GqlPoolApr instead") {
     total: BigDecimal!
 }
 

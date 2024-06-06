@@ -3,7 +3,6 @@ import { prisma } from '../../../prisma/prisma-client';
 import { getContractAt } from '../../web3/contract';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
 import { Multicaller } from '../../web3/multicaller';
 import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
@@ -11,11 +10,11 @@ import { networkContext } from '../../network/network-context.service';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { AddressZero } from '@ethersproject/constants';
 import { getEvents } from '../../web3/events';
-import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
 import { formatEther, hexToBigInt, parseEther } from 'viem';
+import { PrismaUserStakedBalanceCreateManyInput } from '@prisma/client'; // Import the missing type
 
-export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
+export class UserSyncAuraBalanceService implements UserStakedBalanceService {
     get chain() {
         return networkContext.chain;
     }
@@ -79,6 +78,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                                     const pool = pools.find(
                                         (pool) => pool.address === userPosition.pool.lpToken.address,
                                     );
+                                    if (!pool) {
+                                        return undefined;
+                                    }
 
                                     return {
                                         id: `${userPosition.pool.address}-${account.id}`,
@@ -92,7 +94,8 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                                     };
                                 }),
                         )
-                        .flat(),
+                        .flat()
+                        .filter((entry) => entry !== undefined) as PrismaUserStakedBalanceCreateManyInput[],
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'AURA', chain: this.chain } },
@@ -225,7 +228,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                                 userAddress: userBalance.userAddress,
                                 poolId: pool?.id,
                                 tokenAddress: pool!.address,
-                                stakingId: userBalance.erc20Address,
+                                stakingId: userBalance.erc20Address.toLowerCase(),
                             },
                         });
                     }),
