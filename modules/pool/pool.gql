@@ -1215,7 +1215,6 @@ type GqlPoolStaking {
 
 enum GqlPoolStakingType {
     GAUGE
-    NON_PREFERENTIAL_GAUGE
     MASTER_CHEF
     FRESH_BEETS
     RELIQUARY
