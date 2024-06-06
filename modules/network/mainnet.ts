@@ -7,6 +7,7 @@ import {
     GaugeAprService,
     YbTokensAprService,
     VeBalProtocolAprService,
+    VeBalVotingAprService,
 } from '../pool/lib/apr-data-sources';
 import { GaugeStakingService } from '../pool/lib/staking';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
@@ -29,6 +30,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new GaugeAprService(tokenService, [data.bal!.address]),
         new VeBalProtocolAprService(data.rpcUrl),
+        new VeBalVotingAprService(),
     ],
     poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],

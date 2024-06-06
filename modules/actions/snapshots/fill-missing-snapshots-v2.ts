@@ -1,11 +1,11 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { snapshotsV3Transformer } from '../../sources/transformers/snapshots-v3-transformer';
+import { snapshotsV2Transformer } from '../../sources/transformers/snapshots-v2-transformer';
 
 // For each pool in the database, find the missing snapshots,
 // fetch previous day entries from the database,
 // and fill the missing snapshots with the previous day's data.
-export const fillMissingSnapshotsV3 = async (chain: Chain): Promise<string[]> => {
+export const fillMissingSnapshotsV2 = async (chain: Chain): Promise<string[]> => {
     const pools = await prisma.prismaPool.findMany({
         select: {
             id: true,
@@ -17,18 +17,17 @@ export const fillMissingSnapshotsV3 = async (chain: Chain): Promise<string[]> =>
             },
         },
         where: {
-            vaultVersion: 3,
-            chain: chain,
+            vaultVersion: 2,
+            chain,
         },
     });
-
-    const allTokens = await prisma.prismaToken.findMany({ where: { chain } });
 
     // Return list of missing timestamps for a pool
     const filledIn: string[] = [];
     for (const pool of pools) {
         const poolId = pool.id;
-        const missingTimestamps = await prisma.$queryRawUnsafe<{ day: number }[]>(`
+        const missingTimestamps = await prisma.$queryRawUnsafe<{ day: number }[]>(
+            `
             WITH pool_snapshots AS (
                 SELECT * FROM "PrismaPoolSnapshot"
                 WHERE chain = '${chain}'
@@ -43,7 +42,8 @@ export const fillMissingSnapshotsV3 = async (chain: Chain): Promise<string[]> =>
             LEFT JOIN pool_snapshots e ON dr.day = DATE_TRUNC('day', to_timestamp(timestamp))::date
             WHERE e.id IS NULL
             ORDER BY dr.day;
-        `);
+        `,
+        );
 
         if (missingTimestamps.length === 0) {
             continue;
@@ -71,7 +71,7 @@ export const fillMissingSnapshotsV3 = async (chain: Chain): Promise<string[]> =>
                 await prisma.prismaTokenPrice.findMany({
                     where: {
                         chain,
-                        timestamp: timestamp,
+                        timestamp,
                     },
                     select: {
                         tokenAddress: true,
@@ -91,7 +91,12 @@ export const fillMissingSnapshotsV3 = async (chain: Chain): Promise<string[]> =>
                         return acc;
                     }, [] as string[]) ?? [];
 
-            const data = snapshotsV3Transformer(poolId, tokens, timestamp, chain, allTokens, prices, previousSnapshot);
+            const data = snapshotsV2Transformer(poolId, tokens, timestamp, chain, prices, previousSnapshot);
+
+            if (!data) {
+                console.log(`Could not fill in missing snapshot for pool ${poolId} on day ${timestamp}.`);
+                continue;
+            }
 
             await prisma.prismaPoolSnapshot.create({
                 data,

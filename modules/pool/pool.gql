@@ -740,7 +740,12 @@ type GqlPoolTokenDetail {
     Additional data for the nested pool if the token is a BPT. Null otherwise.
     """
     nestedPool: GqlNestedPool
+    """
+    Whether the token is in the allow list.
+    """
+    isAllowed: Boolean!
 }
+
 """
 All info on the nested pool if the token is a BPT. It will only support 1 level of nesting.
 """
