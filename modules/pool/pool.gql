@@ -419,8 +419,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -450,8 +450,8 @@ type GqlPoolGyro implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -506,8 +506,8 @@ type GqlPoolFx implements GqlPoolBase {
     owner: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
@@ -532,8 +532,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -562,8 +562,8 @@ type GqlPoolStable implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -589,8 +589,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -616,8 +616,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -648,8 +648,8 @@ type GqlPoolElement implements GqlPoolBase {
     owner: Bytes!
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig!
-    withdrawConfig: GqlPoolWithdrawConfig!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
@@ -667,7 +667,7 @@ type GqlPoolElement implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 }
 
-type GqlPoolComposableStableNested {
+type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail instead") {
     id: ID!
     name: String!
     symbol: String!
@@ -697,10 +697,10 @@ union GqlPoolUnion =
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
     | GqlPoolFx
-union GqlPoolNestedUnion = GqlPoolComposableStableNested
+union GqlPoolNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolComposableStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable
-union GqlPoolTokenComposableStableNestedUnion = GqlPoolToken
+union GqlPoolTokenComposableStableNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolToken
 
 """
 All info on the pool token. It will also include the nested pool if the token is a BPT. It will only support 1 level of nesting.
