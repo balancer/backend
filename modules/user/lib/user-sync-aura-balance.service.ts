@@ -5,14 +5,13 @@ import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { Multicaller } from '../../web3/multicaller';
 import { formatFixed } from '@ethersproject/bignumber';
-import { PrismaPoolStakingType } from '@prisma/client';
+import { Prisma, PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { AddressZero } from '@ethersproject/constants';
 import { getEvents } from '../../web3/events';
 import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
-import { formatEther, hexToBigInt, parseEther } from 'viem';
-import { PrismaUserStakedBalanceCreateManyInput } from '@prisma/client'; // Import the missing type
+import { formatEther, hexToBigInt } from 'viem';
 
 export class UserSyncAuraBalanceService implements UserStakedBalanceService {
     get chain() {
@@ -95,7 +94,7 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
                                 }),
                         )
                         .flat()
-                        .filter((entry) => entry !== undefined) as PrismaUserStakedBalanceCreateManyInput[],
+                        .filter((entry) => entry !== undefined) as Prisma.PrismaUserStakedBalanceCreateManyInput[],
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'AURA', chain: this.chain } },
