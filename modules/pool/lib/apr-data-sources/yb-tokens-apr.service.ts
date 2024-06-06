@@ -57,11 +57,6 @@ export class YbTokensAprService implements PoolAprService {
             }
 
             for (const token of pool.tokens) {
-                // Tokens with 0 rate provider don't accrue yield
-                if (token.priceRateProvider === zeroAddress) {
-                    continue;
-                }
-
                 const tokenApr = aprs.get(token.address);
                 if (!tokenApr) {
                     continue;
