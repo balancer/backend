@@ -1,3 +1,4 @@
+import { env } from '../app/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 const rpcUrl = process.env.MODE_RPC_URL || 'https://mainnet.mode.network';
@@ -13,12 +14,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2024-05-22',
-        balancer: 'https://api.studio.thegraph.com/query/75376/balancer-mode-v2/version/latest',
+        balancer: `https://api.studio.thegraph.com/query/75376/balancer-mode-v2/version/latest`,
         beetsBar: '',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-mode-blocks/version/latest',
-        gauge: 'https://api.studio.thegraph.com/query/75376/balancer-gauges-mode/version/latest',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: '',
+        gauge: `https://api.studio.thegraph.com/query/75376/balancer-gauges-mode/version/latest`,
+        veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
