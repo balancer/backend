@@ -11,6 +11,7 @@ export const subgraphPoolUpsert = (
     subgraphPoolData: JoinedSubgraphPool,
     onchainPoolData: OnchainPoolData,
     chain: Chain,
+    blockNumber?: bigint,
 ) => {
     const onchainTokensData = Object.fromEntries(onchainPoolData.tokens.map((token) => [token.address, token]));
 
@@ -22,7 +23,7 @@ export const subgraphPoolUpsert = (
             chain: chain,
             totalShares: String(onchainPoolData.totalSupply),
             totalSharesNum: Number(formatUnits(onchainPoolData.totalSupply, 18)),
-            blockNumber: 0,
+            blockNumber: Number(blockNumber || 0),
             swapFee: String(onchainPoolData.swapFee ?? '0'),
             swapEnabled: true,
             totalLiquidity: 0,

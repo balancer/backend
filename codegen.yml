@@ -3,6 +3,23 @@ hooks:
     afterAllFileWrite:
         - prettier --write
 generates:
+    modules/sources/subgraphs/cow-amm/generated/types.ts:
+        schema: ${COW_AMM_SUBGRAPH}
+        documents: 'modules/sources/subgraphs/cow-amm/*.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            skipTypename: true
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/sources/subgraphs/cow-amm/generated/balancer-v3-schema.graphql:
+        schema: ${COW_AMM_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/sources/subgraphs/balancer-v3-vault/generated/types.ts:
         schema: ${V3_SUBGRAPH}
         documents: 'modules/sources/subgraphs/balancer-v3-vault/*.graphql'
