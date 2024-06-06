@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2023-06-06',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/7asfmtQA1KYu6CP7YVm5kv4bGxVyfAHEiptt2HMFgkHu`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/iliaazhel/avalanche-blocks',
+        blocks: 'https://api.studio.thegraph.com/query/48427/avalanche-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GzGBUh1X4Cq9RBdyKoCrPLhYW1saBYHwFBgcTsARPYUG`,
         veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
     },

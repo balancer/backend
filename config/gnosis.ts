@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/EJezH1Cp31QkKPaBDerhVPRWsKVZLrDfzjrLqpmv6cGg`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/rebase-agency/gnosis-chain-blocks',
+        blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HW5XpZBi2iYDLBqqEEMiRJFx8ZJAQak9uu5TzyH9BBxy`,
         veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
     },

@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2021-06-16',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H9oPAbXnobBRq1cB3HDmbZ1E8MWQyJYQjT1QDJMrdbNp`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
+        blocks: 'https://api.studio.thegraph.com/query/48427/polygon-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FxSLKXiieSqBCjDGPbqayhqbxyNtwaEC5M3rxr6hUa8h`,
         veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
     },
