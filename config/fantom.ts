@@ -13,12 +13,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
-        beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
-        blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
-        masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
-        reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/CcWtE5UMUaoKTRu8LWjzambKJtgUVjcN31pD5BdffVzK`,
+        beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/5wqt4pebTCm7259De4ejHDUkagvYMqNvG65jeN7mVKVK`,
+        blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
+        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/4aGMkmdmZBb5KT4o7rDao2N6q5Giqy3uiZ627EvoGHQb`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/A3AcKqC9ckiKNzkuTnHqy5w5z1PmKXPJnDGaSDkDGHFD`,
         sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/9nyH9cdBwBiXj3AJhbSEBSphzT89ozd68s9u4KTfD3ZL`,
     },
     eth: {
