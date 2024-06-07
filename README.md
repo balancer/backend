@@ -89,6 +89,23 @@ How to get the pool's details including APRs.
 }
 ```
 
+## Pricing of tokens
+
+First of all, for a token to be able to have a price it must be allowed, meaning it must be added to the [tokenlist](https://github.com/balancer/tokenlists).
+
+To price a token there are various handlers that will try to price antoken. These handlers take priority over each other. This means that as soon
+as a handler can price a token, it will not be price by another handler. These handlers, order by priority, are:
+
+1. Protocol specific handlers such as Aave or fbeets where prices can be infered on-chain via
+2. Coingecko
+3. BPT price handler ($TVL/totalShares)
+4. Swaps (When ever a token is swapped with a token that has a price, the original token's price is inferred relative to the swapped token)
+
+In addition to this, there are manual interventions possible:
+
+1. If a token has a wrong Coingecko feed, it can be excluded by adding [an override](https://github.com/balancer/tokenlists/blob/main/src/tokenlists/balancer/overwrites.ts#L406) like this `extensions: { coingeckoId: null, },`.
+2. If a token does not have a Coingecko feed on a specific chain, or can be priced using a different token's Coingecko feed, the Coingecko ID can [be overridden](https://github.com/balancer/tokenlists/blob/main/src/tokenlists/balancer/overwrites.ts#L393) with another ID like this `extensions: { coingeckId: 'gyroscope-gyd', },`.
+
 # Development
 
 ## Project setup
