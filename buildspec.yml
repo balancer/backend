@@ -11,6 +11,7 @@ env:
         VEBALLOCKS_SUBGRAPH: 'https://api.studio.thegraph.com/query/75376/balancer-gauges/version/latest'
         RELIQUARY_SUBGRAPH: 'https://api.studio.thegraph.com/query/73674/reliquary/version/latest'
         SFTMX_SUBGRAPH: 'https://api.studio.thegraph.com/query/73674/sftmx/version/latest'
+        AURA_SUBGRAPH: 'https://data.aura.finance/graphql'
 phases:
     install:
         runtime-versions:

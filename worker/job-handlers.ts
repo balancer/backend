@@ -216,7 +216,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-staking-for-pools':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncStakingForPools(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.syncStakingForPools([networkContext.chain]),
+                    res,
+                    next,
+                );
                 break;
             case 'cache-protocol-data':
                 await runIfNotAlreadyRunning(

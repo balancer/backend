@@ -194,14 +194,23 @@ const balancerResolvers: Resolvers = {
         poolReloadStakingForAllPools: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await poolService.reloadStakingForAllPools(args.stakingTypes);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolReloadStakingForAllPools error: Provide chain header');
+            }
+
+            await poolService.reloadStakingForAllPools(args.stakingTypes, currentChain);
 
             return 'success';
         },
         poolSyncStakingForPools: async (parent, args, context) => {
             isAdminRoute(context);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolSyncStakingForPools error: Provide chain header');
+            }
 
-            await poolService.syncStakingForPools();
+            await poolService.syncStakingForPools([currentChain]);
 
             return 'success';
         },
