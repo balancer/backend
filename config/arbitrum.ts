@@ -131,6 +131,7 @@ export default <NetworkData>{
                 },
             },
         },
+        stakewise: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x5979d7b546e38e414f7e9822514be443a4800529',
