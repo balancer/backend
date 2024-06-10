@@ -87,6 +87,24 @@ generates:
         schema: ${RELIQUARY_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/sources/subgraphs/aura/generated/aura-subgraph-types.ts:
+        schema: ${AURA_SUBGRAPH}
+        documents: 'modules/sources/subgraphs/aura/aura-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+            namingConvention:
+                enumValues: keep
+    modules/sources/subgraphs/aura/generated/aura-subgraph-schema.graphql:
+        schema: ${AURA_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/sources/subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types.ts:
         schema: ${SFTMX_SUBGRAPH}
         documents: 'modules/sources/subgraphs/sftmx-subgraph/sftmx-subgraph-queries.graphql'
