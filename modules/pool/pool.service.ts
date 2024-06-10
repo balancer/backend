@@ -78,6 +78,10 @@ export class PoolService {
         return this.poolGqlLoaderService.getPools(args);
     }
 
+    public async getBasePools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        return this.poolGqlLoaderService.getBasePools(args);
+    }
+
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return this.poolGqlLoaderService.getPoolsCount(args);
     }

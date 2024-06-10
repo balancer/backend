@@ -112,6 +112,61 @@ export class PoolGqlLoaderService {
         return mappedPool;
     }
 
+    public async getBasePools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolUnion[]> {
+        // only include wallet and staked balances if the query requests it
+        // this makes sure that we don't load ALL user balances when we don't filter on userAddress
+        // need to support ordering and paging by userbalanceUsd. Need to take care of that here, as the DB does not (and should not) store the usd balance
+        if (args.where?.userAddress) {
+            const first = args.first;
+            const skip = args.skip ? args.skip : 0;
+            if (args.orderBy === 'userbalanceUsd') {
+                // we need to retrieve all pools, regardless of paging request as we can't page on a DB level because there is no balance usd stored
+                args.first = undefined;
+                args.skip = undefined;
+            }
+            // const includeQuery = args.where.userAddress ? prismaPoolMinimal.include.staking.include.
+            const pools = await prisma.prismaPool.findMany({
+                ...this.mapQueryArgsToPoolQuery(args),
+                include: {
+                    ...this.getPoolInclude(args.where.userAddress),
+                },
+            });
+
+            const gqlPools = pools.map((pool) =>
+                this.mapPoolToGqlPool(
+                    pool,
+                    pool.userWalletBalances,
+                    pool.staking.map((staking) => staking.userStakedBalances).flat(),
+                ),
+            );
+
+            if (args.orderBy === 'userbalanceUsd') {
+                let sortedPools = [];
+                if (args.orderDirection === 'asc') {
+                    sortedPools = gqlPools.sort(
+                        (a, b) => a.userBalance!.totalBalanceUsd - b.userBalance!.totalBalanceUsd,
+                    );
+                } else {
+                    sortedPools = gqlPools.sort(
+                        (a, b) => b.userBalance!.totalBalanceUsd - a.userBalance!.totalBalanceUsd,
+                    );
+                }
+                return first ? sortedPools.slice(skip, skip + first) : sortedPools.slice(skip, undefined);
+            }
+
+            return gqlPools;
+        }
+
+        const pools = await prisma.prismaPool.findMany({
+            ...this.mapQueryArgsToPoolQuery(args),
+            include: {
+                ...this.getPoolInclude(),
+            },
+        });
+
+        return pools.map((pool) => this.mapPoolToGqlPool(pool, [], []));
+    }
+
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         // only include wallet and staked balances if the query requests it
         // this makes sure that we don't load ALL user balances when we don't filter on userAddress

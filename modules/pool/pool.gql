@@ -14,6 +14,18 @@ extend type Query {
         where: GqlPoolFilter
         textSearch: String
     ): [GqlPoolMinimal!]!
+
+    """
+    Returns all pools for a given filter, agg edition
+    """
+    poolGetBasePools(
+        first: Int
+        skip: Int
+        orderBy: GqlPoolOrderBy
+        orderDirection: GqlPoolOrderDirection
+        where: GqlPoolFilter
+        textSearch: String
+    ): [GqlPoolBase!]!
     """
     Returns the number of pools for a given filter.
     """
