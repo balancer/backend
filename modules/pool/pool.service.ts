@@ -274,8 +274,11 @@ export class PoolService {
                     networkconfig.data.reliquary?.excludedFarmIds || [],
                 );
             }
-            if (networkconfig.data.subgraphs.gauge) {
-                await syncGaugeStakingForPools(new GaugeSubgraphService(networkconfig.data.subgraphs.gauge), chain);
+            if (networkconfig.data.subgraphs.gauge && networkContext.data.bal?.address) {
+                await syncGaugeStakingForPools(
+                    new GaugeSubgraphService(networkconfig.data.subgraphs.gauge),
+                    networkContext.data.bal.address,
+                );
             }
             if (networkconfig.data.subgraphs.aura) {
                 await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));

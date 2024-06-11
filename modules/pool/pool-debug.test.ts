@@ -87,6 +87,20 @@ describe('pool debugging', () => {
         expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
     }, 5000000);
 
+    it('sync gauge staking on l2', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '10');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'OPTIMISM');
+        const pool = await poolService.getGqlPool(
+            '0x39965c9dab5448482cf7e002f583c812ceb53046000100000000000000000003',
+            'OPTIMISM',
+        );
+        expect(pool.staking).toBeDefined();
+    }, 5000000);
+
     it('sync user staking', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '1');

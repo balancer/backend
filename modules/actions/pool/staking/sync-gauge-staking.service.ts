@@ -57,9 +57,9 @@ interface GaugeBalDistributionData {
 
 export const syncGaugeStakingForPools = async (
     gaugeSubgraphService: GaugeSubgraphService,
-    balAddressIn: string,
+    balAddressInput: string,
 ): Promise<void> => {
-    const balAddress = balAddressIn.toLowerCase();
+    const balAddress = balAddressInput.toLowerCase();
 
     const balMulticaller = new Multicaller3([
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'totalSupply'),
