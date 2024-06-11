@@ -12,7 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-03',
-        balancer: `https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest`,
+        cowAmm: 'https://api.studio.thegraph.com/proxy/31386/balancer-cow-amm/version/latest',
+        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
         balancerV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest',
         balancerPoolsV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest',
         beetsBar: 'https://',

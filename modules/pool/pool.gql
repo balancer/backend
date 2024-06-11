@@ -234,6 +234,7 @@ enum GqlPoolType {
     GYRO3
     GYROE
     FX
+    COW_AMM
 }
 
 """

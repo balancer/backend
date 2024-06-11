@@ -72,6 +72,7 @@ export interface NetworkData {
         gauge?: string;
         veBalLocks?: string;
         aura?: string;
+        cowAmm?: string;
     };
     protocolToken: 'beets' | 'bal';
     beets?: {
