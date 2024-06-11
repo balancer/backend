@@ -5,6 +5,7 @@ import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import { fetchChangedPools, fetchNewPools, syncPools, upsertPools } from '../actions/cow-amm';
 import { getChangedCowAmmPools } from '../sources/logs/get-changed-cow-amm-pools';
+import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 
 export function CowAmmController(tracer?: any) {
     return {
@@ -69,13 +70,52 @@ export function CowAmmController(tracer?: any) {
         async syncPools(chainId: string) {
             const chain = chainIdToChain[chainId];
             const viemClient = getViemClient(chain);
-            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain);
+
+            // TODO: move prismaLastBlockSynced wrapping to an action
+            const fromBlock = (
+                await prisma.prismaLastBlockSynced.findFirst({
+                    where: {
+                        category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
+                        chain,
+                    },
+                })
+            )?.blockNumber;
+
+            if (!fromBlock) {
+                return false;
+            }
+
+            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock - 10); // Safety overlap
 
             if (changedPools.length === 0) {
                 return [];
             }
 
             await syncPools(changedPools, viemClient, chain, latestBlock);
+
+            await prisma.prismaLastBlockSynced.findFirst({
+                where: {
+                    category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
+                },
+            });
+
+            const toBlock = await viemClient.getBlockNumber();
+            await prisma.prismaLastBlockSynced.upsert({
+                where: {
+                    category_chain: {
+                        category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
+                        chain,
+                    },
+                },
+                update: {
+                    blockNumber: Number(toBlock),
+                },
+                create: {
+                    category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
+                    blockNumber: Number(toBlock),
+                },
+            });
+
             return changedPools;
         },
     };

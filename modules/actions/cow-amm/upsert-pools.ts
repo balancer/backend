@@ -21,7 +21,7 @@ export const upsertPools = async (
     cowAmmSubgraphClient: CowAmmSubgraphClient,
     chain: Chain,
 ) => {
-    const { pools } = await cowAmmSubgraphClient.Pools({ where: { id_in: ids } });
+    const pools = await cowAmmSubgraphClient.getAllPools({ id_in: ids });
 
     // Get onchain data for the pools
     const blockNumber = await viemClient.getBlockNumber();
@@ -57,6 +57,7 @@ export const upsertPools = async (
     }
 
     // Get the data for the tables about pools
+    // TODO: add cow amm to subgraph v3 transformer before passing to subgraphPoolUpsert
     const dbPools = pools.map((poolData) =>
         subgraphPoolUpsert(
             {
@@ -105,6 +106,7 @@ export const upsertPools = async (
     const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);
 
     // Upserts pools to the database
+    // TODO: extract to a DB helper
     for (const { pool, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of poolsWithUSD) {
         try {
             await prisma.$transaction([

@@ -39,6 +39,7 @@ model PrismaLastBlockSynced {
 enum PrismaLastBlockSyncedCategory {
     POOLS
     FARMS
+    COW_AMM_POOLS
 }
 
 

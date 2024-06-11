@@ -18,7 +18,6 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
                 amp: '10', // TODO just a place holder
             } as StableData;
             break;
-        // @ts-ignore – that's a not coming from the subgraph
         case 'COW_AMM':
             type = PrismaPoolType.COW_AMM;
             break;
