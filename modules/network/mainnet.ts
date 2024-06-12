@@ -9,14 +9,13 @@ import {
     VeBalProtocolAprService,
     VeBalVotingAprService,
 } from '../pool/lib/apr-data-sources';
-import { GaugeStakingService } from '../pool/lib/staking';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -32,8 +31,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
     },

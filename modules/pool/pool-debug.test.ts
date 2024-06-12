@@ -1,5 +1,7 @@
+import exp from 'constants';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { poolService } from '../pool/pool.service';
+import { userService } from '../user/user.service';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -66,5 +68,66 @@ describe('pool debugging', () => {
         expect(poolOpBpt.poolTokens[2].isAllowed).toBeTruthy();
         expect(poolOpBpt.poolTokens[3].isAllowed).toBeDefined();
         expect(poolOpBpt.poolTokens[3].isAllowed).toBeTruthy();
+    }, 5000000);
+
+    it('sync aura staking', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['AURA'], 'MAINNET');
+        const pool = await poolService.getGqlPool(
+            '0xcfca23ca9ca720b6e98e3eb9b6aa0ffc4a5c08b9000200000000000000000274',
+            'MAINNET',
+        );
+        expect(pool.staking).toBeDefined();
+        expect(pool.staking?.aura).toBeDefined();
+        expect(pool.staking?.aura?.apr).toBeGreaterThan(0);
+        expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
+    }, 5000000);
+
+    it('sync gauge staking on l2', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '10');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'OPTIMISM');
+        const pool = await poolService.getGqlPool(
+            '0x39965c9dab5448482cf7e002f583c812ceb53046000100000000000000000003',
+            'OPTIMISM',
+        );
+        expect(pool.staking).toBeDefined();
+    }, 5000000);
+
+    it('sync user staking', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        // await userService.initWalletBalancesForAllPools();
+        // await poolService.reloadStakingForAllPools(['AURA'], 'MAINNET');
+        // await userService.initStakedBalances(['AURA']);
+
+        await userService.syncChangedStakedBalances();
+
+        const pool = await poolService.getGqlPool(
+            '0xcfca23ca9ca720b6e98e3eb9b6aa0ffc4a5c08b9000200000000000000000274',
+            'MAINNET',
+            '0xc9cea7a3984cefd7a8d2a0405999cb62e8d206dc',
+        );
+        expect(pool.staking).toBeDefined();
+        expect(pool.staking?.aura).toBeDefined();
+        expect(pool.staking?.aura?.apr).toBeGreaterThan(0);
+        expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
+
+        expect(pool.userBalance).toBeDefined();
+        expect(pool.userBalance?.totalBalance).not.toBe('0');
+        expect(pool.userBalance?.totalBalanceUsd).toBeGreaterThan(0);
+        expect(pool.userBalance?.walletBalance).toEqual('0');
+        expect(pool.userBalance?.walletBalanceUsd).toEqual(0);
+        expect(pool.userBalance?.stakedBalances.length).toBeGreaterThan(0);
     }, 5000000);
 });

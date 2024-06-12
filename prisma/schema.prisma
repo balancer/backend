@@ -39,6 +39,7 @@ model PrismaLastBlockSynced {
 enum PrismaLastBlockSyncedCategory {
     POOLS
     FARMS
+    COW_AMM_POOLS
 }
 
 
@@ -163,6 +164,7 @@ enum PrismaPoolType {
     GYRO3
     GYROE
     FX
+    COW_AMM
 }
 
 model PrismaPoolDynamicData {
@@ -428,6 +430,7 @@ model PrismaPoolStaking {
     farm                PrismaPoolStakingMasterChefFarm?
     gauge               PrismaPoolStakingGauge?
     reliquary           PrismaPoolStakingReliquaryFarm?
+    aura                PrismaPoolStakingAura?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -438,6 +441,7 @@ enum PrismaPoolStakingType {
     GAUGE
     RELIQUARY
     FRESH_BEETS
+    AURA
 }
 
 model PrismaPoolStakingMasterChefFarm {
@@ -481,6 +485,21 @@ model PrismaPoolStakingGauge {
     version             Int                             @default(1)
     workingSupply       String                          @default("0.0")
     totalSupply         String                          @default("0.0")
+}
+
+model PrismaPoolStakingAura {
+    @@id([id, chain])
+    @@unique([stakingId, chain])
+
+    id                  String
+    stakingId           String
+    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)
+    chain               Chain
+
+    auraPoolAddress     String
+    auraPoolId          String
+    apr                 Float
+    isShutdown          Boolean
 }
 
 enum PrismaPoolStakingGaugeStatus {
@@ -845,6 +864,7 @@ enum PrismaUserBalanceType {
     WALLET
     STAKED
     RELIQUARY
+    AURA
 }
 
 model PrismaUserPoolBalanceSnapshot {

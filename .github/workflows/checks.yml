@@ -6,6 +6,7 @@ on:
 jobs:
     Build:
         env:
+            COW_AMM_SUBGRAPH: https://api.studio.thegraph.com/proxy/31386/balancer-cow-amm/version/latest
             V3_SUBGRAPH: https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest
             V3_POOLS_SUBGRAPH: https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest
             BALANCER_SUBGRAPH: https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2
@@ -17,6 +18,7 @@ jobs:
             VEBALLOCKS_SUBGRAPH: https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges
             RELIQUARY_SUBGRAPH: https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary
             SFTMX_SUBGRAPH: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx'
+            AURA_SUBGRAPH: 'https://data.aura.finance/graphql'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3

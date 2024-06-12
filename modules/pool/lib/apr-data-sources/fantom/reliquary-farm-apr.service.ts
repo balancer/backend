@@ -1,13 +1,13 @@
 import { isSameAddress } from '@balancer-labs/sdk';
 import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
-import { PrismaPoolWithExpandedNesting, PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
+import { PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
-import { reliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { networkContext } from '../../../../network/network-context.service';
+import { ReliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
 
 export class ReliquaryFarmAprService implements PoolAprService {
     constructor(private readonly beetsAddress: string) {}
@@ -17,7 +17,9 @@ export class ReliquaryFarmAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+        const reliquarySubgraphService = new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary!);
         const allSubgraphFarms = await reliquarySubgraphService.getAllFarms({});
+
         const filteredFarms = allSubgraphFarms.filter(
             (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );

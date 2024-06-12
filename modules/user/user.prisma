@@ -69,6 +69,7 @@ enum PrismaUserBalanceType {
     WALLET
     STAKED
     RELIQUARY
+    AURA
 }
 
 model PrismaUserPoolBalanceSnapshot {

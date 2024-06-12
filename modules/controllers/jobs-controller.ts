@@ -172,13 +172,12 @@ export function JobsController(tracer?: any) {
             const viemClient = getViemClient(chain);
             const vaultClient = getVaultClient(viemClient, vaultAddress);
 
-            const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
             const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
             if (ids.length === 0) {
                 return [];
             }
-            const latestBlock = await viemClient.getBlockNumber();
-            await syncPools(ids, vaultClient, chain, latestBlock + 1n);
+            await syncPools(ids, vaultClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             return ids;
         },

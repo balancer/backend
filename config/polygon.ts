@@ -12,12 +12,12 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-06-16',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H9oPAbXnobBRq1cB3HDmbZ1E8MWQyJYQjT1QDJMrdbNp`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/polygon-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FxSLKXiieSqBCjDGPbqayhqbxyNtwaEC5M3rxr6hUa8h`,
+        veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0x0000000000000000000000000000000000001010',

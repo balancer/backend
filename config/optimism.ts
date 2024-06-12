@@ -13,12 +13,12 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FsmdxmvBJLGjUQPxKMRtcWKzuCNpomKuMTbSbtRtggZ7`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        blocks: 'https://api.studio.thegraph.com/query/48427/optimism-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CbLt7GqU7sypjRaCfwissEBkFeCw3dUz2emrvBNJ7dZu`,
+        veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
