@@ -1,0 +1,78 @@
+fragment CowAmmAddRemove on AddRemove {
+    id
+    pool {
+        id
+        tokens {
+            address
+            decimals
+        }
+    }
+    user {
+        id
+    }
+    type
+    sender
+    amounts
+    blockNumber
+    blockTimestamp
+    transactionHash
+    logIndex
+}
+
+query AddRemoves(
+    $skip: Int
+    $first: Int
+    $orderBy: AddRemove_orderBy
+    $orderDirection: OrderDirection
+    $where: AddRemove_filter
+    $block: Block_height
+) {
+    addRemoves(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...CowAmmAddRemove
+    }
+}
+
+fragment CowAmmSwap on Swap {
+    id
+    pool
+    tokenInSymbol
+    tokenOutSymbol
+    tokenAmountIn
+    tokenAmountOut
+    tokenIn
+    tokenOut
+    blockNumber
+    blockTimestamp
+    transactionHash
+    logIndex
+    user {
+        id
+    }
+}
+
+query Swaps(
+    $skip: Int
+    $first: Int
+    $orderBy: Swap_orderBy
+    $orderDirection: OrderDirection
+    $where: Swap_filter
+    $block: Block_height
+) {
+    swaps(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...CowAmmSwap
+    }
+}

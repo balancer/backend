@@ -10,7 +10,7 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
  * @param poolIds
  * @param chain
  */
-export async function updateVolumeAndFees(poolIds?: string[], chain = 'SEPOLIA' as Chain) {
+export async function updateVolumeAndFees(chain = 'SEPOLIA' as Chain, poolIds?: string[]) {
     const yesterday = moment().subtract(1, 'day').unix();
     const twoDaysAgo = moment().subtract(2, 'day').unix();
     const pools = await prisma.prismaPool.findMany({

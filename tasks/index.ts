@@ -61,6 +61,14 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().syncPools(chain);
     } else if (job === 'reload-cow-amm-pools') {
         return CowAmmController().reloadPools(chain);
+    } else if (job === 'sync-cow-amm-snapshots') {
+        return CowAmmController().syncSnapshots(chain);
+    } else if (job === 'sync-cow-amm-swaps') {
+        return CowAmmController().syncSwaps(chain);
+    } else if (job === 'update-com-amm-volume-and-fees') {
+        return CowAmmController().updateVolumeAndFees(chain);
+    } else if (job === 'sync-cow-amm-join-exits') {
+        return CowAmmController().syncJoinExits(chain);
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
