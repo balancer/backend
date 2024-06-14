@@ -13,6 +13,7 @@ fragment CowAmmPool on Pool {
     holdersCount
     tokens {
         id
+        index
         name
         symbol
         address

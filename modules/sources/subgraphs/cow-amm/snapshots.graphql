@@ -24,6 +24,7 @@ fragment CowAmmSnapshot on PoolSnapshot {
         id
         tokens {
             id
+            index
             address
             decimals
         }

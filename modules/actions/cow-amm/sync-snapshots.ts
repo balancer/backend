@@ -131,13 +131,6 @@ export async function syncSnapshotsForADayCowAmm(
             pool: {
                 ...rawSnapshot.pool,
                 swapFee: pool.dynamicData!.swapFee,
-                tokens: rawSnapshot.pool.tokens.map((t) => {
-                    const index = poolTokens.findIndex((pt) => pt === t.address);
-                    return {
-                        ...t,
-                        index,
-                    };
-                }),
             },
             totalVolumes: [],
             totalProtocolSwapFees: [],

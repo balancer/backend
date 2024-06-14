@@ -38,36 +38,18 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
         orderDirection: OrderDirection.Asc,
     });
 
-    // Get token indexes for matching SG amount to tokens
-    const poolTokens = await prisma.prismaPoolToken.findMany({
-        where: {
-            poolId: {
-                in: addRemoves.map((ar) => ar.pool.id).filter((value, index, self) => self.indexOf(value) === index),
-            },
-        },
-    });
-
     // Transform COW AMM types to V3 types
     const joinExits = addRemoves.map((addRemove): JoinExitFragment => {
-        const dbTokens = poolTokens.filter((token) => token.poolId === addRemove.pool.id);
-
         return {
             ...addRemove,
             type: addRemove.type === 'Add' ? InvestType.Join : InvestType.Exit,
-            pool: {
-                id: addRemove.pool.id,
-                tokens: addRemove.pool.tokens.map((token) => ({
-                    index: dbTokens.find((dbToken) => dbToken.address === token.address)!.index,
-                    address: token.address,
-                })),
-            },
         };
     });
 
     // Prepare DB entries
     const dbEntries = await joinExitV3Transformer(joinExits, chain);
 
-    console.log(`Syncing ${dbEntries.length} join/exit events`);
+    console.log(`Syncing Cow AMM ${dbEntries.length} join/exit events`);
 
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);

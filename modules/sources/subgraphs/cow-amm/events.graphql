@@ -3,6 +3,7 @@ fragment CowAmmAddRemove on AddRemove {
     pool {
         id
         tokens {
+            index
             address
             decimals
         }
