@@ -10,9 +10,11 @@ import { SwapEvent } from '../../../prisma/prisma-types';
  * @param chain
  * @returns
  */
-export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): SwapEvent {
-    const vaultVersion = 2;
-
+export function swapV2Transformer(
+    swap: BalancerSwapFragment & { logIndex?: string },
+    chain: Chain,
+    vaultVersion = 2,
+): SwapEvent {
     // Avoiding scientific notation
     const feeFloat = parseFloat(swap.tokenAmountOut) * parseFloat(swap.poolId.swapFee ?? 0);
     const fee = feeFloat < 1e6 ? feeFloat.toFixed(18).replace(/0+$/, '').replace(/\.$/, '') : String(feeFloat);
@@ -30,7 +32,7 @@ export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): Swa
         userAddress: swap.userAddress.id,
         blockNumber: Number(swap.block ?? 0), // FANTOM is missing block
         blockTimestamp: Number(swap.timestamp),
-        logIndex: Number(swap.id.substring(66)),
+        logIndex: Number(swap.logIndex || swap.id.substring(66)),
         valueUSD: Number(swap.valueUSD),
         payload: {
             fee: {

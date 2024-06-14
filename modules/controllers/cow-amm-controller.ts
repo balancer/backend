@@ -77,7 +77,7 @@ export function CowAmmController(tracer?: any) {
             const viemClient = getViemClient(chain);
 
             // TODO: move prismaLastBlockSynced wrapping to an action
-            const fromBlock = (
+            let fromBlock = (
                 await prisma.prismaLastBlockSynced.findFirst({
                     where: {
                         category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
@@ -87,10 +87,28 @@ export function CowAmmController(tracer?: any) {
             )?.blockNumber;
 
             if (!fromBlock) {
-                return false;
+                fromBlock = await prisma.prismaPoolEvent
+                    .findFirst({
+                        where: {
+                            chain,
+                            vaultVersion: 0,
+                        },
+                        orderBy: {
+                            blockNumber: 'desc',
+                        },
+                    })
+                    .then((pool) => pool?.blockNumber);
+
+                if (fromBlock && fromBlock > 10) {
+                    fromBlock = fromBlock - 10; // Safety overlap
+                }
             }
 
-            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock - 10); // Safety overlap
+            if (!fromBlock) {
+                fromBlock = 0;
+            }
+
+            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock);
 
             if (changedPools.length === 0) {
                 return [];
@@ -118,6 +136,7 @@ export function CowAmmController(tracer?: any) {
                 create: {
                     category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
                     blockNumber: Number(toBlock),
+                    chain,
                 },
             });
 

@@ -62,6 +62,8 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
             {
                 ...swap,
                 id: swap.id,
+                block: swap.blockNumber,
+                logIndex: swap.logIndex,
                 caller: swap.user.id,
                 poolId: {
                     id: swap.pool,
@@ -76,6 +78,7 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
                 valueUSD: '0',
             },
             chain,
+            vaultVersion,
         );
     });
 
