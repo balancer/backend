@@ -189,6 +189,7 @@ export default <NetworkData>{
         maker: {
             sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
         },
+        etherfi: '0x346e03f8cce9fe01dcb3d0da3e9d00dc2c0e08f0',
         defaultHandlers: {
             wstEth: {
                 tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
