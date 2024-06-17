@@ -75,7 +75,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
+    // for each pair per pool, create multicall to do a swap with $10 (min liq is $100, so there should be at least $10 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
@@ -86,12 +86,11 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             // prepare swap amounts in
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
-            // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (
-                (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) *
-                100
-            ).toFixed(20);
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            // tokenA->tokenB with 10USD worth of tokenA
+            const tenUsdOfTokenA = ((parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 10).toFixed(
+                20,
+            );
+            tokenPair.effectivePriceAmountIn = parseUnits(`${tenUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
             addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
@@ -157,10 +156,10 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 const tokenB = pool.tokens[j];
                 if (tokenA.address === tokenB.address) continue;
                 // V2 Validation
-                // remove pools that have <$1000 TVL or a token without a balance or USD balance
+                // remove pools that have <$100 TVL or a token without a balance or USD balance
                 // TODO: check if it's trully needed or if we're ok removing only the pairs without balance or balanceUSD
                 const valid =
-                    (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
+                    (pool.dynamicData?.totalLiquidity || 0) >= 100 &&
                     !pool.tokens.some((token) => {
                         const balance =
                             token.address === pool.address ? pool.dynamicData?.totalShares : token.dynamicData?.balance;
