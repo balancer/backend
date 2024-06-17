@@ -14,7 +14,7 @@ import { swapsUsd } from '../../sources/enrichers/swaps-usd';
  * @returns
  */
 export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEPOLIA' as Chain): Promise<string[]> {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -24,7 +24,7 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
         where: {
             type: 'SWAP',
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',

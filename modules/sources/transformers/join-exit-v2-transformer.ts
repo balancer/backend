@@ -18,7 +18,7 @@ export async function joinExitV2Transformer(
     events: BalancerJoinExitFragment[],
     chain: Chain,
 ): Promise<JoinExitEvent[]> {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     return Promise.all(
         events.map(async (event) => {
@@ -65,7 +65,7 @@ export async function joinExitV2Transformer(
                 }));
             }
             return {
-                vaultVersion,
+                protocolVersion,
                 id: event.id, // tx + logIndex
                 tx: event.tx,
                 type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,
