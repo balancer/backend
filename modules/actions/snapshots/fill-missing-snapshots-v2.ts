@@ -17,7 +17,7 @@ export const fillMissingSnapshotsV2 = async (chain: Chain): Promise<string[]> =>
             },
         },
         where: {
-            vaultVersion: 2,
+            protocolVersion: 2,
             chain,
         },
     });

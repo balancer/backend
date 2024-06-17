@@ -8,7 +8,7 @@ export const fetchChangedPools = async (viemClient: ViemClient, chain: Chain, fr
         .findMany({
             where: {
                 chain,
-                vaultVersion: 0,
+                protocolVersion: 0,
             },
             select: {
                 id: true,

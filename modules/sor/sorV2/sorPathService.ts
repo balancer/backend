@@ -182,6 +182,7 @@ class SorPathService implements SwapService {
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
                 vaultVersion: 2 as 2 | 3,
+                protocolVersion: 2 as 2 | 3,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -272,6 +273,7 @@ class SorPathService implements SwapService {
             // paths used as input for b-sdk for client
             sorPaths.push({
                 vaultVersion: 2,
+                protocolVersion: 2,
                 inputAmountRaw: path.inputAmount.amount.toString(),
                 outputAmountRaw: path.outputAmount.amount.toString(),
                 tokens: path.tokens.map((token) => ({
@@ -290,6 +292,7 @@ class SorPathService implements SwapService {
 
         return {
             vaultVersion: 2,
+            protocolVersion: 2,
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),

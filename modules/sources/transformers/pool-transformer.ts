@@ -29,6 +29,7 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
         id: poolData.id.toLowerCase(),
         chain: chain,
         vaultVersion: type === PrismaPoolType.COW_AMM ? 0 : 3,
+        protocolVersion: type === PrismaPoolType.COW_AMM ? 0 : 3,
         address: poolData.id.toLowerCase(),
         decimals: 18,
         symbol: poolData.symbol,
