@@ -113,7 +113,8 @@ type GqlPoolMinimal {
     """
     The vault version on which the pool is deployed, 2 or 3
     """
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     """
     The name of the pool as per contract
     """
@@ -252,7 +253,12 @@ interface GqlPoolBase {
     """
     The vault version on which the pool is deployed, 2 or 3
     """
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int! @deprecated(reason: "Use protocolVersion instead")
+    """
+    The protocol version on which the pool is deployed, 1, 2 or 3
+    """
+    protocolVersion: Int!
     """
     The pool type, such as weighted, stable, etc.
     """
@@ -412,7 +418,8 @@ enum GqlPoolNestingType {
 type GqlPoolWeighted implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -442,7 +449,8 @@ type GqlPoolWeighted implements GqlPoolBase {
 type GqlPoolGyro implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     type: GqlPoolType!
     symbol: String!
@@ -497,7 +505,8 @@ type GqlPoolFx implements GqlPoolBase {
     # Base pool
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     type: GqlPoolType!
     version: Int!
     name: String!
@@ -525,7 +534,8 @@ type GqlPoolFx implements GqlPoolBase {
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -555,7 +565,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
 type GqlPoolStable implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -582,7 +593,8 @@ type GqlPoolStable implements GqlPoolBase {
 type GqlPoolMetaStable implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -609,7 +621,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
 type GqlPoolComposableStable implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
@@ -641,7 +654,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
 type GqlPoolElement implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
     name: String!
     symbol: String!
     address: Bytes!
