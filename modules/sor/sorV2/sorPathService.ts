@@ -410,7 +410,7 @@ class SorPathService implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 1000,
+                        gt: 100,
                     },
                 },
                 id: {
