@@ -140,6 +140,10 @@ type GqlToken {
     """
     logoURI: String
     """
+    The coingecko ID for this token, if present
+    """
+    coingeckoId: String
+    """
     The priority of the token, can be used for sorting.
     """
     priority: Int!
