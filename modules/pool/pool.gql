@@ -114,6 +114,9 @@ type GqlPoolMinimal {
     The vault version on which the pool is deployed, 2 or 3
     """
     vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    """
+    The protocol version on which the pool is deployed, 1, 2 or 3
+    """
     protocolVersion: Int!
     """
     The name of the pool as per contract
@@ -254,7 +257,6 @@ interface GqlPoolBase {
     The vault version on which the pool is deployed, 2 or 3
     """
     vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
-    protocolVersion: Int! @deprecated(reason: "Use protocolVersion instead")
     """
     The protocol version on which the pool is deployed, 1, 2 or 3
     """
