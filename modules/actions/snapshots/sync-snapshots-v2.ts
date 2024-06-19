@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { daysAgo, roundToMidnight } from '../../common/time';
 import { snapshotsV2Transformer } from '../../sources/transformers/snapshots-v2-transformer';
 
-const vaultVersion = 2;
+const protocolVersion = 2;
 
 export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: Chain): Promise<string[]> {
     // Get the latest snapshot from the DB (assuming there are no gaps)
@@ -19,7 +19,7 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
         },
         where: {
             chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             timestamp: 'desc',
@@ -71,7 +71,7 @@ export async function syncSnapshotsForADayV2(
         where: {
             chain: chain,
             timestamp: previous,
-            vaultVersion,
+            protocolVersion,
         },
     });
 
@@ -90,7 +90,7 @@ export async function syncSnapshotsForADayV2(
             },
         },
         where: {
-            vaultVersion,
+            protocolVersion,
             chain,
         },
     });
@@ -125,7 +125,7 @@ export async function syncSnapshotsForADayV2(
                         timestamp: {
                             lt: previous,
                         },
-                        vaultVersion,
+                        protocolVersion,
                     },
                     orderBy: {
                         timestamp: 'desc',

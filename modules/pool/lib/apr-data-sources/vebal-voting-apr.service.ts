@@ -45,9 +45,11 @@ const fetchHiddenHandRound = async (timestamp?: number) => {
         throw new Error('Failed to fetch voting APR');
     }
 
-    // Get sum of all votes and total value
+    // Get sum of all incentivized votes and total value
     const total = data.data.reduce((acc, proposal) => acc + proposal.totalValue, 0);
-    const votes = data.data.reduce((acc, proposal) => acc + proposal.voteCount, 0);
+    const votes = data.data
+        .filter((proposal) => proposal.totalValue > 0)
+        .reduce((acc, proposal) => acc + proposal.voteCount, 0);
 
     return { total, votes };
 };
@@ -93,7 +95,7 @@ export const getHiddenHandAPR = async (weeksAgo = 0) => {
         throw new Error('Failed to fetch veBAL price');
     }
 
-    const apr = (avgValuePerVote / veBalPrice.price) * 52 * 100;
+    const apr = (avgValuePerVote * 52) / veBalPrice.price;
 
     return apr;
 };

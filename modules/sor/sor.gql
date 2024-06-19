@@ -57,9 +57,9 @@ extend type Query {
         """
         queryBatchSwap: Boolean
         """
-        Which vault version to use. If none provided, will chose the better return from either version
+        Which protocol version to use (currently 2 and 3). If none provided, will chose the better return from any version
         """
-        useVaultVersion: Int
+        useProtocolVersion: Int
         """
         Input data to create and return transaction data. If this config is given, call data is added to the response.
         """
@@ -74,7 +74,12 @@ type GqlSorGetSwapPaths {
     """
     The version of the vault these paths are from
     """
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "Use protocolVersion instead")
+
+    """
+    The version of the protocol these paths are from
+    """
+    protocolVersion: Int!
     """
     The token address of the tokenIn provided
     """
@@ -152,7 +157,12 @@ type GqlSorPath {
     """
     Vault version of this path.
     """
-    vaultVersion: Int!
+    vaultVersion: Int! @deprecated(reason: "Use protocolVersion instead")
+
+    """
+    The version of the protocol these paths are from
+    """
+    protocolVersion: Int!
     """
     A sorted list of pool ids that are used in this path
     """

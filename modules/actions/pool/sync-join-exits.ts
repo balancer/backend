@@ -18,7 +18,7 @@ export const syncJoinExits = async (
     chain: Chain,
     daysToSync = JOIN_EXIT_HISTORY_DAYS,
 ): Promise<string[]> => {
-    const vaultVersion = 3;
+    const protocolVersion = 3;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -27,7 +27,7 @@ export const syncJoinExits = async (
                 in: ['JOIN', 'EXIT'],
             },
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',
