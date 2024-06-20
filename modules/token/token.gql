@@ -16,11 +16,11 @@ extend type Query {
         range: GqlTokenChartDataRange!
     ): [GqlHistoricalTokenPrice!]!
     """
-    Returns dynamic data of a set of tokens such as price, market cap, etc.
+    Returns dynamic data of a set of tokens such as price, market cap, etc. if the token has a coingecko feed.
     """
     tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
     """
-    Returns dynamic data of a token such as price, market cap, etc.
+    Returns dynamic data of a token such as price, market cap, etc. if the token has a coingecko feed.
     """
     tokenGetTokenDynamicData(address: String!, chain: GqlChain): GqlTokenDynamicData
     """
