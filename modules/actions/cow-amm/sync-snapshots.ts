@@ -8,7 +8,7 @@ import { snapshotsV2Transformer } from '../../sources/transformers/snapshots-v2-
 import { snapshotsV3Transformer } from '../../sources/transformers/snapshots-v3-transformer';
 import { raw } from '@prisma/client/runtime';
 
-const vaultVersion = 0;
+const protocolVersion = 1;
 
 export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> {
     // Get the latest snapshot from the DB (assuming there are no gaps)
@@ -18,7 +18,7 @@ export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain:
         },
         where: {
             chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             timestamp: 'desc',
@@ -70,7 +70,7 @@ export async function syncSnapshotsForADayCowAmm(
         where: {
             chain: chain,
             timestamp: previous,
-            vaultVersion,
+            protocolVersion,
         },
     });
 
@@ -94,7 +94,7 @@ export async function syncSnapshotsForADayCowAmm(
             },
         },
         where: {
-            vaultVersion: 3,
+            protocolVersion,
             chain: chain,
         },
     });

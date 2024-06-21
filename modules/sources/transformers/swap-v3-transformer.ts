@@ -13,7 +13,6 @@ import { weiToFloat } from '../../common/numbers';
  * @returns
  */
 export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Promise<SwapEvent[]> {
-    const protocolVersion = 3;
     // V3 vault join/exit amounts are in wei so we need decimals to convert them to human readable amounts
     const allTokens = await prisma.prismaToken.findMany({ where: { chain } });
 
@@ -23,7 +22,7 @@ export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Pr
         type: 'SWAP',
         poolId: swap.pool,
         chain: chain,
-        protocolVersion,
+        protocolVersion: 3,
         userAddress: swap.user.id,
         blockNumber: Number(swap.blockNumber),
         blockTimestamp: Number(swap.blockTimestamp),

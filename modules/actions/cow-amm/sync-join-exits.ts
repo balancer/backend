@@ -12,8 +12,6 @@ import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-t
  * @param vaultSubgraphClient
  */
 export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> => {
-    const vaultVersion = 0;
-
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
         where: {
@@ -21,7 +19,7 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
                 in: ['JOIN', 'EXIT'],
             },
             chain: chain,
-            vaultVersion,
+            protocolVersion: 1,
         },
         orderBy: {
             blockNumber: 'desc',

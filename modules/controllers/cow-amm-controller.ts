@@ -91,7 +91,7 @@ export function CowAmmController(tracer?: any) {
                     .findFirst({
                         where: {
                             chain,
-                            vaultVersion: 0,
+                            protocolVersion: 1,
                         },
                         orderBy: {
                             blockNumber: 'desc',
