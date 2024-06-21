@@ -171,6 +171,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
@@ -365,8 +366,8 @@ export class PoolGqlLoaderService {
                 in: where?.chainIn || undefined,
                 notIn: where?.chainNotIn || undefined,
             },
-            vaultVersion: {
-                in: where?.vaultVersionIn || undefined,
+            protocolVersion: {
+                in: where?.protocolVersionIn || undefined,
             },
             type: {
                 in: where?.poolTypeIn || undefined,
@@ -499,6 +500,7 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'META_STABLE':
                 return {
@@ -507,6 +509,7 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'COMPOSABLE_STABLE':
                 return {
@@ -515,6 +518,7 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'ELEMENT':
                 return {
@@ -523,12 +527,14 @@ export class PoolGqlLoaderService {
                     ...(typeData as ElementData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
                     ...mappedData,
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'GYRO':
             case 'GYRO3':
@@ -538,6 +544,7 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as GyroData),
                     ...mappedData,
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'FX':
                 return {
@@ -545,6 +552,7 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...mappedData,
                     ...(typeData as FxData),
+                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
         }
 
@@ -552,6 +560,7 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolWeighted',
             ...poolWithoutTypeData,
             ...mappedData,
+            vaultVersion: poolWithoutTypeData.protocolVersion,
         };
     }
 

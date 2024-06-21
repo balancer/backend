@@ -6,7 +6,7 @@ import { daysAgo, roundToMidnight } from '../../common/time';
 import { snapshotsV3Transformer } from '../../sources/transformers/snapshots-v3-transformer';
 import { OrderDirection, PoolSnapshot_OrderBy } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 
-const vaultVersion = 3;
+const protocolVersion = 3;
 
 export async function syncSnapshotsV3(
     vaultSubgraphClient: V3VaultSubgraphClient,
@@ -19,7 +19,7 @@ export async function syncSnapshotsV3(
         },
         where: {
             chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             timestamp: 'desc',
@@ -69,7 +69,7 @@ export async function syncSnapshotsForADayV3(
         where: {
             chain: chain,
             timestamp: previous,
-            vaultVersion,
+            protocolVersion,
         },
     });
 
@@ -88,7 +88,7 @@ export async function syncSnapshotsForADayV3(
             },
         },
         where: {
-            vaultVersion: 3,
+            protocolVersion: 3,
             chain: chain,
         },
     });

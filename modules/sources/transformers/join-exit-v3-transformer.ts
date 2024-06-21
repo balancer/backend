@@ -13,12 +13,12 @@ import { weiToFloat } from '../../common/numbers';
  * @returns
  */
 export async function joinExitV3Transformer(events: JoinExitFragment[], chain: Chain): Promise<JoinExitEvent[]> {
-    const vaultVersion = 3;
+    const protocolVersion = 3;
     // V3 vault join/exit amounts are in wei so we need decimals to convert them to human readable amounts
     const allTokens = await prisma.prismaToken.findMany({ where: { chain } });
 
     return events.map((event) => ({
-        vaultVersion,
+        protocolVersion,
         id: event.id, // tx + logIndex
         tx: event.transactionHash,
         type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,

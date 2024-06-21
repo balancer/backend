@@ -20,7 +20,7 @@ export const syncReliquaryStakingForPools = async (
         throw new Error(`Reliquary with id ${reliquaryAddress} not found in subgraph`);
     }
     const farms = await reliquarySubgraphService.getAllFarms({});
-    const filteredFarms = farms.filter((farm) => excludedFarmIds.includes(farm.pid.toString()));
+    const filteredFarms = farms.filter((farm) => !excludedFarmIds.includes(farm.pid.toString()));
     const pools = await prisma.prismaPool.findMany({
         where: { chain: chain },
         include: { staking: { include: { farm: { include: { rewarders: true } } } } },

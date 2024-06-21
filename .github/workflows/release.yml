@@ -1,0 +1,32 @@
+name: Release
+
+on:
+    workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+    release:
+        name: Release
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js 20
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20
+
+            - name: Install Dependencies
+              run: yarn
+
+            - name: Create Release Pull Request
+              uses: changesets/action@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create publish to production Pull Request
+              run: gh pr create -B v3-main -H v3-canary --title 'publish to prod' --body 'Created by Github action. Check CHANGELOG.md for more details.'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
