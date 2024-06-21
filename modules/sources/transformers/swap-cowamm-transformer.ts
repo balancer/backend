@@ -26,13 +26,13 @@ export function swapCowAmmTransformer(swap: CowAmmSwapFragment, chain: Chain): S
         valueUSD: 0, // calculated later
         payload: {
             fee: {
-                address: swap.tokenOut,
+                address: swap.tokenIn,
                 amount: '0', // TODO swap.swapFeeAmount,
                 valueUSD: '0', // calculated later
             },
             surplus: swap.surplusAmount
                 ? {
-                      address: swap.tokenAmountOut,
+                      address: swap.tokenOut,
                       amount: swap.surplusAmount,
                       valueUSD: '0', // calculated later
                   }

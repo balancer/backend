@@ -32,7 +32,7 @@ export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Pr
             fee: {
                 address: swap.tokenOut,
                 amount: String(
-                    weiToFloat(swap.swapFeeAmount, allTokens.find((t) => t.address === swap.tokenOut)?.decimals || 18),
+                    weiToFloat(swap.swapFeeAmount, allTokens.find((t) => t.address === swap.tokenOut)?.decimals || 18), // TODO this is dependent on givenIn vs givenOut
                 ),
                 valueUSD: '0', // Will be calculated later
             },

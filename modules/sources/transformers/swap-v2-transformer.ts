@@ -12,7 +12,7 @@ import { SwapEvent } from '../../../prisma/prisma-types';
  */
 export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): SwapEvent {
     // Avoiding scientific notation
-    const feeFloat = parseFloat(swap.tokenAmountOut) * parseFloat(swap.poolId.swapFee ?? 0);
+    const feeFloat = parseFloat(swap.tokenAmountIn) * parseFloat(swap.poolId.swapFee ?? 0);
     const fee = feeFloat < 1e6 ? feeFloat.toFixed(18).replace(/0+$/, '').replace(/\.$/, '') : String(feeFloat);
     const feeFloatUSD = parseFloat(swap.valueUSD) * parseFloat(swap.poolId.swapFee ?? 0);
     const feeUSD =
@@ -32,7 +32,7 @@ export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): Swa
         valueUSD: Number(swap.valueUSD),
         payload: {
             fee: {
-                address: swap.tokenOut,
+                address: swap.tokenIn,
                 amount: fee,
                 valueUSD: feeUSD,
             },
