@@ -53,6 +53,7 @@ fragment CowAmmSwap on Swap {
     blockTimestamp
     transactionHash
     logIndex
+    surplusAmount
     user {
         id
     }

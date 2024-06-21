@@ -51,6 +51,12 @@ export async function swapsUsd(swaps: SwapEvent[], chain: Chain): Promise<SwapEv
                 tokenOut: {
                     ...swap.payload.tokenOut,
                 },
+                surplus: swap.payload.surplus
+                    ? {
+                          ...swap.payload.surplus,
+                          valueUSD: String((tokenOut?.price || 0) * parseFloat(swap.payload.surplus.amount)),
+                      }
+                    : undefined,
             };
 
             const valueUSD =

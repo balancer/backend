@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { swapV2Transformer } from '../../sources/transformers/swap-v2-transformer';
 import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
+import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-transformer';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -14,7 +15,7 @@ import { swapsUsd } from '../../sources/enrichers/swaps-usd';
  * @returns
  */
 export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'SEPOLIA' as Chain) {
-    const vaultVersion = 0;
+    const protocolVersion = 1;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -24,7 +25,7 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
         where: {
             type: 'SWAP',
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',
@@ -55,32 +56,7 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
     });
 
     // Adding swap fee to the swap object
-    const dbSwaps = swaps.map((swap) => {
-        const swapFee = pools.find((pool) => pool.id === swap.pool)!.swapFee;
-
-        return swapV2Transformer(
-            {
-                ...swap,
-                id: swap.id,
-                block: swap.blockNumber,
-                logIndex: swap.logIndex,
-                caller: swap.user.id,
-                poolId: {
-                    id: swap.pool,
-                    swapFee,
-                },
-                userAddress: swap.user,
-                tokenIn: swap.tokenIn,
-                tokenInSym: swap.tokenInSymbol,
-                tokenOutSym: swap.tokenOutSymbol,
-                timestamp: Number(swap.blockTimestamp),
-                tx: swap.transactionHash,
-                valueUSD: '0',
-            },
-            chain,
-            vaultVersion,
-        );
-    });
+    const dbSwaps = swaps.map((swap) => swapCowAmmTransformer(swap, chain));
 
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
