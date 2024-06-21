@@ -1,5 +1,11 @@
 # backend
 
+## 1.0.1
+
+### Patch Changes
+
+-   07a7fc9: make the workflow manual
+
 ## 1.0.0
 
 ### Major Changes
