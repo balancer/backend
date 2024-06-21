@@ -14,7 +14,7 @@ import { CowAmmSwapFragment } from '../subgraphs/cow-amm/generated/types';
 export function swapCowAmmTransformer(swap: CowAmmSwapFragment, chain: Chain): SwapEvent {
     return {
         id: swap.id, // tx + logIndex
-        tx: '123', // TODO swap.tx,
+        tx: swap.transactionHash,
         type: 'SWAP',
         poolId: swap.pool,
         chain: chain,
