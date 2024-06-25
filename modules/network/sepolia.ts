@@ -59,5 +59,8 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
         },
+        // COW AMM
+        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
+        { name: 'sync-cow-amm-pools', interval: every(5, 'minutes') },
     ],
 };

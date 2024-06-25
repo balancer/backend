@@ -3,6 +3,7 @@ import {
     SnapshotsController,
     PoolsMutationController,
     UserBalancesController,
+    CowAmmController,
 } from '../modules/controllers';
 
 // TODO needed?
@@ -54,6 +55,12 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     } else if (job === 'load-onchain-data-v3') {
         return PoolsMutationController().loadOnchainDataForAllPools(chain);
+    } else if (job === 'add-new-cow-amm-pools') {
+        return CowAmmController().addPools(chain);
+    } else if (job === 'sync-changed-cow-amm-pools') {
+        return CowAmmController().syncPools(chain);
+    } else if (job === 'reload-cow-amm-pools') {
+        return CowAmmController().reloadPools(chain);
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }

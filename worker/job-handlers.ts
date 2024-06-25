@@ -18,6 +18,7 @@ import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../modules/net
 import { JobsController } from '../modules/controllers/jobs-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
+import { CowAmmController } from '../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
 
@@ -403,6 +404,13 @@ export function configureWorkerRoutes(app: Express) {
                     res,
                     next,
                 );
+                break;
+            // COW AMM
+            case 'add-new-cow-amm-pools':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().addPools(chainId), res, next);
+                break;
+            case 'sync-cow-amm-pools':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncPools(chainId), res, next);
                 break;
             default:
                 res.sendStatus(400);

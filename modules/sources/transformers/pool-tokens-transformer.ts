@@ -26,16 +26,19 @@ export function poolTokensDynamicDataTransformer(
 
     return tokens.map((token, i) => {
         const id = `${poolData.id}-${token.address}`.toLowerCase();
+        const subgraphToken = poolData.tokens.find((t) => t.address === token.address);
         const onchainTokenData = onchainTokensData[token.address];
         const balance = onchainTokenData?.balance ?? 0n;
         const rate = onchainTokenData?.rate ?? 0n;
+
+        if (!subgraphToken) throw new Error(`Token ${token.address} not found in subgraph data`);
 
         return {
             id,
             poolTokenId: id,
             chain,
             blockNumber: Number(poolData.blockNumber),
-            balance: String(balance),
+            balance: formatUnits(balance, subgraphToken.decimals),
             priceRate: String(rate),
             weight: poolData.weights ? poolData.weights[token.index] ?? null : null,
         };

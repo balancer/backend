@@ -11,7 +11,7 @@ import { SwapEvent } from '../../../prisma/prisma-types';
  * @returns
  */
 export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): SwapEvent {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     // Avoiding scientific notation
     const feeFloat = parseFloat(swap.tokenAmountOut) * parseFloat(swap.poolId.swapFee ?? 0);
@@ -26,7 +26,7 @@ export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): Swa
         type: 'SWAP',
         poolId: swap.poolId.id,
         chain: chain,
-        vaultVersion,
+        protocolVersion,
         userAddress: swap.userAddress.id,
         blockNumber: Number(swap.block ?? 0), // FANTOM is missing block
         blockTimestamp: Number(swap.timestamp),

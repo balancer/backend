@@ -47,7 +47,6 @@ export const upsertPools = async (
 
     // Upsert pools to the database
     for (const { pool, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of poolsWithUSD) {
-        console.log(poolDynamicData);
         try {
             await prisma.$transaction([
                 prisma.prismaPool.upsert({

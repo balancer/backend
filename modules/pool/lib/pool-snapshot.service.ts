@@ -287,7 +287,7 @@ export class PoolSnapshotService {
             chain: this.chain,
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
-            vaultVersion: 2,
+            protocolVersion: 2,
             totalLiquidity: parseFloat(snapshot.liquidity),
             totalShares: snapshot.totalShares,
             totalSharesNum: parseFloat(snapshot.totalShares),

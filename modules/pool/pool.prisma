@@ -15,7 +15,7 @@ model PrismaPool {
     owner               String
     factory             String?
 
-    vaultVersion        Int                 @default(2)
+    protocolVersion        Int                 @default(2)
 
     typeData            Json @default("{}")
 
@@ -54,6 +54,7 @@ enum PrismaPoolType {
     GYRO3
     GYROE
     FX
+    COW_AMM
 }
 
 model PrismaPoolDynamicData {
@@ -453,7 +454,7 @@ model PrismaPoolSnapshot {
     pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     timestamp           Int
-    vaultVersion        Int @default(2)
+    protocolVersion     Int @default(2)
 
     totalLiquidity      Float
     sharePrice          Float
@@ -470,7 +471,7 @@ model PrismaPoolSnapshot {
     totalProtocolSwapFees String[] @default([]) // Used for V3 snapshots
     totalProtocolYieldFees String[] @default([]) // Used for V3 snapshots
 
-    @@index([vaultVersion])
+    @@index([protocolVersion])
     @@index([timestamp(sort: Desc)])
 }
 
@@ -536,7 +537,7 @@ model PrismaPoolEvent {
     blockNumber         Int
     blockTimestamp      Int
     logIndex            Int
-    vaultVersion        Int @default(2)
+    protocolVersion     Int @default(2)
     valueUSD            Float
     payload             Json
 
@@ -544,7 +545,7 @@ model PrismaPoolEvent {
     @@index([type])
     @@index([poolId])
     @@index([userAddress])
-    @@index([vaultVersion])
+    @@index([protocolVersion])
     @@index([blockTimestamp(sort: Desc)])
     @@index([blockNumber(sort: Desc), logIndex(sort: Desc)])
     @@map("PartitionedPoolEvent")

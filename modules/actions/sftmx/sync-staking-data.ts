@@ -56,14 +56,8 @@ export async function syncStakingData(stakingContractAddress: Address, viemClien
                 ftmStakingId: stakingContractAddress,
             },
             update: {
-                id: vaultData.id,
                 vaultIndex: parseFloat(vaultData.vaultIndex.toString()),
-                ftmStaked: formatEther(vaultData.ftmStaked),
-                unlockTimestamp: parseFloat(vaultData.unlockTimestamp.toString()),
-                validatorAddress: vaultData.validatorAddress,
-                validatorId: vaultData.validatorId.toString(),
                 matured: vaultData.matured,
-                ftmStakingId: stakingContractAddress,
             },
         });
     }

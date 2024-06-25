@@ -37,7 +37,7 @@ export const snapshotsV2Transformer = (
         chain,
         poolId,
         timestamp: epoch,
-        vaultVersion: 2,
+        protocolVersion: 2,
     };
 
     const values = {

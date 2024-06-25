@@ -2,6 +2,7 @@ import exp from 'constants';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { poolService } from '../pool/pool.service';
 import { userService } from '../user/user.service';
+import { tokenService } from '../token/token.service';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -87,6 +88,20 @@ describe('pool debugging', () => {
         expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
     }, 5000000);
 
+    it('sync gauge staking on l2', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '10');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'OPTIMISM');
+        const pool = await poolService.getGqlPool(
+            '0x39965c9dab5448482cf7e002f583c812ceb53046000100000000000000000003',
+            'OPTIMISM',
+        );
+        expect(pool.staking).toBeDefined();
+    }, 5000000);
+
     it('sync user staking', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '1');
@@ -115,5 +130,21 @@ describe('pool debugging', () => {
         expect(pool.userBalance?.walletBalance).toEqual('0');
         expect(pool.userBalance?.walletBalanceUsd).toEqual(0);
         expect(pool.userBalance?.stakedBalances.length).toBeGreaterThan(0);
+    }, 5000000);
+
+    it('sync tvl', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '250');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await tokenService.syncTokenContentData();
+        // await poolService.loadOnChainDataForAllPools();
+        // await tokenService.updateTokenPrices(['FANTOM']);
+        await poolService.updateLiquidityValuesForPools();
+        const pool = await poolService.getGqlPool(
+            '0x80a02eb6c4197e571129657044b0cc41d6517b5a00010000000000000000084b',
+            'FANTOM',
+        );
+        expect(pool.dynamicData.totalLiquidity).not.toBe('0');
     }, 5000000);
 });

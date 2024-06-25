@@ -14,8 +14,9 @@ export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
 export async function multicallViem<T extends Record<string, any>>(
     client: ViemClient,
     calls: ViemMulticallCall[],
+    blockNumber?: bigint,
 ): Promise<T> {
-    const results = await client.multicall({ contracts: calls });
+    const results = await client.multicall({ contracts: calls, blockNumber });
 
     const returnObject = {};
     let i = 0;
