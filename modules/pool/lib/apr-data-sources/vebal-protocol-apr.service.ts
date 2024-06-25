@@ -93,17 +93,17 @@ export class VeBalProtocolAprService implements PoolAprService {
 
         // Prices
         const balPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: balAddress },
+            where: { tokenAddress: balAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bbAUsdPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: bbAUsdAddress },
+            where: { tokenAddress: bbAUsdAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bptPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: vebalPoolAddress },
+            where: { tokenAddress: vebalPoolAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
@@ -115,7 +115,7 @@ export class VeBalProtocolAprService implements PoolAprService {
         const lastWeekBBAUsdRevenue = revenue.bbAUsdAmount * bbAUsdPrice.price;
 
         const dailyRevenue = (lastWeekBalRevenue + lastWeekBBAUsdRevenue) / 7;
-        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply) / 100;
+        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
 
         return apr;
     }
