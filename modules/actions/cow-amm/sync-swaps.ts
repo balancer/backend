@@ -2,7 +2,6 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import _ from 'lodash';
-import { swapV2Transformer } from '../../sources/transformers/swap-v2-transformer';
 import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
 import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-transformer';

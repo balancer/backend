@@ -42,7 +42,14 @@ query AddRemoves(
 
 fragment CowAmmSwap on Swap {
     id
-    pool
+    pool {
+        id
+        tokens {
+            index
+            address
+            decimals
+        }
+    }
     tokenInSymbol
     tokenOutSymbol
     tokenAmountIn
@@ -54,6 +61,9 @@ fragment CowAmmSwap on Swap {
     transactionHash
     logIndex
     surplusAmount
+    surplusToken
+    swapFeeAmount
+    swapFeeToken
     user {
         id
     }

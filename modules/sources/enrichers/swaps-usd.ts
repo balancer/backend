@@ -3,7 +3,6 @@ import { daysAgo, roundToHour, roundToMidnight } from '../../common/time';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { SwapEvent } from '../../../prisma/prisma-types';
-import { formatUnits } from 'viem';
 
 /**
  * Takes swaps events and enriches them with USD values

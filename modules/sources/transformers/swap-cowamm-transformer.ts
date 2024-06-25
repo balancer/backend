@@ -16,7 +16,7 @@ export function swapCowAmmTransformer(swap: CowAmmSwapFragment, chain: Chain): S
         id: swap.id, // tx + logIndex
         tx: swap.transactionHash,
         type: 'SWAP',
-        poolId: swap.pool,
+        poolId: swap.pool.id,
         chain: chain,
         protocolVersion: 1,
         userAddress: swap.user.id,
@@ -26,17 +26,18 @@ export function swapCowAmmTransformer(swap: CowAmmSwapFragment, chain: Chain): S
         valueUSD: 0, // calculated later
         payload: {
             fee: {
-                address: swap.tokenIn,
-                amount: '0', // TODO swap.swapFeeAmount,
+                address: swap.swapFeeToken || swap.tokenIn,
+                amount: swap.swapFeeAmount || '0',
                 valueUSD: '0', // calculated later
             },
-            surplus: swap.surplusAmount
-                ? {
-                      address: swap.tokenOut,
-                      amount: swap.surplusAmount,
-                      valueUSD: '0', // calculated later
-                  }
-                : undefined,
+            surplus:
+                swap.surplusAmount && swap.surplusToken
+                    ? {
+                          address: swap.surplusToken,
+                          amount: swap.surplusAmount,
+                          valueUSD: '0', // calculated later
+                      }
+                    : undefined,
 
             tokenIn: {
                 address: swap.tokenIn,
