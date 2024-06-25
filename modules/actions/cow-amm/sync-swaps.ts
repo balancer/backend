@@ -41,19 +41,6 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
         orderDirection: OrderDirection.Asc,
     });
 
-    // Get pools for matching SG amount to tokens
-    const pools = await prisma.prismaPoolDynamicData.findMany({
-        where: {
-            id: {
-                in: swaps.map((swap) => swap.pool).filter((value, index, self) => self.indexOf(value) === index),
-            },
-        },
-        select: {
-            id: true,
-            swapFee: true,
-        },
-    });
-
     // Adding swap fee to the swap object
     const dbSwaps = swaps.map((swap) => swapCowAmmTransformer(swap, chain));
 

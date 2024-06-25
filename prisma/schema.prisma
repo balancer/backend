@@ -570,14 +570,17 @@ model PrismaPoolSnapshot {
     sharePrice          Float
     volume24h           Float
     fees24h             Float
+    surplus24h          Float @default(0)
     totalShares         String
     totalSharesNum      Float
     totalSwapVolume     Float
     totalSwapFee        Float
+    totalSurplus        Float @default(0)
     swapsCount          Int
     holdersCount        Int
     amounts             String[]
     totalVolumes        String[] @default([]) // Used for V3 snapshots
+    totalSurpluses      String[] @default([]) // Used for cow amm snapshots
     totalProtocolSwapFees String[] @default([]) // Used for V3 snapshots
     totalProtocolYieldFees String[] @default([]) // Used for V3 snapshots
 

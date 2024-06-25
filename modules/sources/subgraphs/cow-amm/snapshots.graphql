@@ -22,6 +22,7 @@ fragment CowAmmSnapshot on PoolSnapshot {
     id
     pool {
         id
+        swapFee
         tokens {
             id
             index
@@ -30,6 +31,9 @@ fragment CowAmmSnapshot on PoolSnapshot {
         }
     }
     balances
+    totalSurplus
+    totalSwapFee
+    totalVolume
     totalShares
     timestamp
     swapsCount
