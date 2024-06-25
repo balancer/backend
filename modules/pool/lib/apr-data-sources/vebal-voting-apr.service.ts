@@ -51,22 +51,16 @@ const fetchHiddenHandRound = async (timestamp?: number) => {
         .filter((proposal) => proposal.totalValue > 0)
         .reduce((acc, proposal) => acc + proposal.voteCount, 0);
 
-    return { total, votes };
-};
-
-const getThursdaysTimestamp = (weeksAgo: number) => {
-    const now = new Date(); // create a new Date object
-    const day = now.getUTCDay(); // get the day of the week in UTC
-    const diff = now.getUTCDate() - day + (day === 0 ? -6 : 4); // calculate the last Thursday
-    now.setUTCDate(diff); // set the date to that Thursday
-    now.setUTCHours(0, 0, 0, 0); // set time to 00:00:00.000
-    now.setUTCDate(now.getUTCDate() - weeksAgo * 7); // go back by the specified number of weeks
-    return now.getTime() / 1000; // return the timestamp in seconds
+    return { total, votes, timestamp: data.data[0].proposalDeadline };
 };
 
 export const getHiddenHandAPR = async (weeksAgo = 0) => {
-    const timestamp = getThursdaysTimestamp(weeksAgo);
+    let timestamp: number | undefined;
+    if (weeksAgo > 0) {
+        timestamp = (await fetchHiddenHandRound()).timestamp - weeksAgo * 604800;
+    }
     const round = await fetchHiddenHandRound(timestamp);
+    timestamp = round.timestamp;
 
     const avgValuePerVote = round.total / round.votes;
 
