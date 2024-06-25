@@ -55,13 +55,13 @@ const fetchHiddenHandRound = async (timestamp?: number) => {
 };
 
 const getThursdaysTimestamp = (weeksAgo: number) => {
-    const now = new Date();
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 4);
-    const thursday = new Date(now.setDate(diff));
-    thursday.setHours(0, 0, 0, 0);
-    thursday.setDate(thursday.getDate() - weeksAgo * 7);
-    return thursday.getTime() / 1000;
+    const now = new Date(); // create a new Date object
+    const day = now.getUTCDay(); // get the day of the week in UTC
+    const diff = now.getUTCDate() - day + (day === 0 ? -6 : 4); // calculate the last Thursday
+    now.setUTCDate(diff); // set the date to that Thursday
+    now.setUTCHours(0, 0, 0, 0); // set time to 00:00:00.000
+    now.setUTCDate(now.getUTCDate() - weeksAgo * 7); // go back by the specified number of weeks
+    return now.getTime() / 1000; // return the timestamp in seconds
 };
 
 export const getHiddenHandAPR = async (weeksAgo = 0) => {
