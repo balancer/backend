@@ -147,4 +147,23 @@ describe('pool debugging', () => {
         );
         expect(pool.dynamicData.totalLiquidity).not.toBe('0');
     }, 5000000);
+
+    it('time pool lists', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '250');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await tokenService.syncTokenContentData();
+        // await poolService.loadOnChainDataForAllPools();
+        // await tokenService.updateTokenPrices(['FANTOM']);
+        console.time('getBasePools');
+        const poolsBase = await poolService.getBasePools({ where: { chainIn: ['FANTOM'] } });
+        console.timeEnd('getBasePools');
+
+        console.time('getPools');
+        const poolsGql = await poolService.getGqlPools({ where: { chainIn: ['FANTOM'] } });
+        console.timeEnd('getPools');
+
+        expect(poolsBase.length).toEqual(poolsGql.length);
+    }, 5000000);
 });
