@@ -93,17 +93,17 @@ export class VeBalProtocolAprService implements PoolAprService {
 
         // Prices
         const balPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: balAddress },
+            where: { tokenAddress: balAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bbAUsdPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: bbAUsdAddress },
+            where: { tokenAddress: bbAUsdAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bptPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: vebalPoolAddress },
+            where: { tokenAddress: vebalPoolAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
