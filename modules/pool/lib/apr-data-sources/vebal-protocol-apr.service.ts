@@ -115,7 +115,7 @@ export class VeBalProtocolAprService implements PoolAprService {
         const lastWeekBBAUsdRevenue = revenue.bbAUsdAmount * bbAUsdPrice.price;
 
         const dailyRevenue = (lastWeekBalRevenue + lastWeekBBAUsdRevenue) / 7;
-        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply) / 100;
+        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
 
         return apr;
     }
