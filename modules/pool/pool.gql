@@ -1212,6 +1212,7 @@ type GqlPoolSnapshot {
     totalShares: String!
     totalSwapVolume: String!
     totalSwapFee: String!
+    totalSurplus: String!
     swapsCount: String!
     holdersCount: String!
     sharePrice: String!
