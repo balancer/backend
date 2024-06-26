@@ -41,7 +41,7 @@ export const upsertPools = async (
 
     // Get the data for the tables about pools
     const dbPools = subgraphPools
-        .map((poolData) => subgraphPoolUpsert(poolData, onchainData[poolData.id], chain))
+        .map((poolData) => subgraphPoolUpsert(poolData, onchainData[poolData.id], chain, blockNumber))
         .filter((item): item is Exclude<SubgraphPoolUpsertData, null> => Boolean(item));
 
     // Enrich updates with USD values
