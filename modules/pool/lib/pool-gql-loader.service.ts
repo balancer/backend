@@ -171,6 +171,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            incentivized: pool.categories.some((category) => category.category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
