@@ -102,7 +102,12 @@ export function JobsController(tracer?: any) {
             const vaultClient = getVaultClient(viemClient, vaultAddress);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, vaultClient, chain, latestBlock);
+            await upsertPools(
+                newPools.sort((a, b) => parseFloat(a.blockTimestamp) - parseFloat(b.blockTimestamp)),
+                vaultClient,
+                chain,
+                latestBlock,
+            );
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
