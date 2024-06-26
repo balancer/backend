@@ -4,7 +4,7 @@ import { fetchCowAmmData } from '../../sources/contracts';
 import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 import type { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import type { ViemClient } from '../../sources/types';
-import { subgraphPoolUpsert } from '../../sources/transformers/subgraph-pool-upsert';
+import { SubgraphPoolUpsertData, subgraphPoolUpsert } from '../../sources/transformers/subgraph-pool-upsert';
 import { formatUnits } from 'viem';
 
 /**
@@ -58,50 +58,52 @@ export const upsertPools = async (
 
     // Get the data for the tables about pools
     // TODO: add cow amm to subgraph v3 transformer before passing to subgraphPoolUpsert
-    const dbPools = pools.map((poolData) =>
-        subgraphPoolUpsert(
-            {
-                ...poolData,
-                factory: {
-                    id: poolData.factory.id,
-                    type: 'COW_AMM' as any,
-                    version: 1,
-                },
-                address: poolData.id,
-                pauseManager: '',
-                rateProviders: poolData.tokens.map(({ address }) => ({
-                    address: '0x0000000000000000000000000000000000000000',
-                    token: { address },
-                })),
-                pauseWindowEndTime: '',
-                tokens: poolData.tokens.map((token) => {
-                    const idx = onchainData[poolData.id].tokens.findIndex(
-                        (t) => t.address.toLowerCase() === token.address.toLowerCase(),
-                    );
+    const dbPools = pools
+        .map((poolData) =>
+            subgraphPoolUpsert(
+                {
+                    ...poolData,
+                    factory: {
+                        id: poolData.factory.id,
+                        type: 'COW_AMM' as any,
+                        version: 1,
+                    },
+                    address: poolData.id,
+                    pauseManager: '',
+                    rateProviders: poolData.tokens.map(({ address }) => ({
+                        address: '0x0000000000000000000000000000000000000000',
+                        token: { address },
+                    })),
+                    pauseWindowEndTime: '',
+                    tokens: poolData.tokens.map((token) => {
+                        const idx = onchainData[poolData.id].tokens.findIndex(
+                            (t) => t.address.toLowerCase() === token.address.toLowerCase(),
+                        );
 
-                    return {
+                        return {
+                            ...token,
+                            index: idx,
+                            totalProtocolSwapFee: '0',
+                            totalProtocolYieldFee: '0',
+                            balance: formatUnits(onchainData[poolData.id].tokens[idx].balance, token.decimals),
+                        };
+                    }),
+                },
+                {
+                    ...onchainData[poolData.id],
+                    isPoolPaused: false,
+                    isPoolInRecoveryMode: false,
+                    tokens: onchainData[poolData.id].tokens.map((token) => ({
                         ...token,
-                        index: idx,
-                        totalProtocolSwapFee: '0',
-                        totalProtocolYieldFee: '0',
-                        balance: formatUnits(onchainData[poolData.id].tokens[idx].balance, token.decimals),
-                    };
-                }),
-            },
-            {
-                ...onchainData[poolData.id],
-                isPoolPaused: false,
-                isPoolInRecoveryMode: false,
-                tokens: onchainData[poolData.id].tokens.map((token) => ({
-                    ...token,
-                    rateProvider: '',
-                    rate: 1n,
-                })),
-            },
-            chain,
-            blockNumber,
-        ),
-    );
+                        rateProvider: '',
+                        rate: 1n,
+                    })),
+                },
+                chain,
+                blockNumber,
+            ),
+        )
+        .filter((item): item is Exclude<SubgraphPoolUpsertData, null> => Boolean(item));
 
     const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);
 
