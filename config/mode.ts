@@ -18,7 +18,6 @@ export default <NetworkData>{
         beetsBar: '',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-mode-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/75376/balancer-gauges-mode/version/latest`,
-        veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

@@ -70,7 +70,6 @@ export interface NetworkData {
         sftmx?: string;
         beetsBar?: string;
         gauge?: string;
-        veBalLocks?: string;
         aura?: string;
         cowAmm?: string;
     };
