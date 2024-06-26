@@ -13,7 +13,7 @@ fragment PoolSnapshot on PoolSnapshot {
     totalShares
     swapsCount
     holdersCount
-    totalVolumes
+    totalSwapVolumes
     totalProtocolSwapFees
     totalProtocolYieldFees
 }
