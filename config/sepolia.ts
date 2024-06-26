@@ -19,7 +19,6 @@ export default <NetworkData>{
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
-        // veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

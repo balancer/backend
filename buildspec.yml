@@ -9,7 +9,6 @@ env:
         BLOCKS_SUBGRAPH: https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest
         BEETS_BAR_SUBGRAPH: https://api.studio.thegraph.com/query/73674/beets-bar/version/latest
         GAUGE_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-gauges/version/latest
-        VEBALLOCKS_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-gauges/version/latest
         RELIQUARY_SUBGRAPH: https://api.studio.thegraph.com/query/73674/reliquary/version/latest
         SFTMX_SUBGRAPH: https://api.studio.thegraph.com/query/73674/sftmx/version/latest
         AURA_SUBGRAPH: https://data.aura.finance/graphql
