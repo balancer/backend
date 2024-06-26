@@ -2,7 +2,6 @@ import { BlockNumbersSubgraphClient, V3VaultSubgraphClient } from '../subgraphs'
 import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { prisma } from '../../../prisma/prisma-client';
 import { daysAgo, roundToHour, roundToMidnight } from '../../common/time';
-import { weiToFloat } from '../../common/numbers';
 import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 
 export const getLiquidityAndSharesAtTimestamp = async (
@@ -57,7 +56,7 @@ export const getLiquidityAndSharesAtTimestamp = async (
                 const price = prices.find((p) => p.tokenAddress === token.address);
                 if (!price) return acc;
 
-                return acc + weiToFloat(token.balance, token.decimals) * price.price * parseFloat(token.priceRate);
+                return acc + parseFloat(token.balance) * price.price * parseFloat(token.priceRate);
             }, 0);
 
         return [id, { tvl, totalShares }] as const;
