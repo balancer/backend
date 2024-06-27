@@ -54,7 +54,17 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
-            return EventsQueryController().getEvents({ range, poolId, chain, typeIn, userAddress });
+            return EventsQueryController().getEvents({
+                first: 1000,
+                where: { range, poolId, chain, typeIn, userAddress },
+            });
+        },
+        poolEvents: (parent, { first, skip, where }, context) => {
+            return EventsQueryController().getEvents({
+                first,
+                skip,
+                where,
+            });
         },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();
@@ -83,38 +93,13 @@ const balancerResolvers: Resolvers = {
                 sharePrice: `${snapshot.sharePrice}`,
                 volume24h: `${snapshot.volume24h}`,
                 fees24h: `${snapshot.fees24h}`,
+                surplus24h: `${snapshot.surplus24h}`,
                 totalSwapVolume: `${snapshot.totalSwapVolume}`,
                 totalSwapFee: `${snapshot.totalSwapFee}`,
+                totalSurplus: `${snapshot.totalSurplus}`,
                 swapsCount: `${snapshot.swapsCount}`,
                 holdersCount: `${snapshot.holdersCount}`,
             }));
-        },
-        poolGetLinearPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetLinearPools error: Provide "chains" param');
-            }
-            return poolService.getGqlLinearPools(chains);
-        },
-        poolGetGyroPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetGyroPools error: Provide "chains" param');
-            }
-            return poolService.getGqlGyroPools(chains);
-        },
-        poolGetFxPools: async (parent, { chains }) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetFxPools error: Provide "chains" param');
-            }
-            return poolService.getGqlFxPools(chains);
         },
     },
     Mutation: {
@@ -208,14 +193,23 @@ const balancerResolvers: Resolvers = {
         poolReloadStakingForAllPools: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await poolService.reloadStakingForAllPools(args.stakingTypes);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolReloadStakingForAllPools error: Provide chain header');
+            }
+
+            await poolService.reloadStakingForAllPools(args.stakingTypes, currentChain);
 
             return 'success';
         },
         poolSyncStakingForPools: async (parent, args, context) => {
             isAdminRoute(context);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolSyncStakingForPools error: Provide chain header');
+            }
 
-            await poolService.syncStakingForPools();
+            await poolService.syncStakingForPools([currentChain]);
 
             return 'success';
         },
@@ -281,13 +275,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.reloadAllTokenNestedPoolIds();
-
-            return 'success';
-        },
-        poolSetPoolsWithPreferredGaugesAsIncentivized: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.setPoolsWithPreferredGaugesAsIncentivized();
 
             return 'success';
         },

@@ -32,10 +32,11 @@ Queries are organised around these main domains:
     -   tokenGetCurrentPrices
     -   tokenGetHistoricalPrices
 -   SOR
-    -   sorGetSwaps
     -   sorGetSwapPaths
 
-To query specific data refer to the [API's documentation](https://api-v3.balancer.fi/).
+To query specific data refer to the [API's documentation](https://api-v3.balancer.fi/). Click top left to show the Documentation Explorer.
+
+Most of the queries will take one or multiple `chain` as an argument. The usage of the `chainId` header is deprecated!
 
 ## Examples
 
@@ -52,42 +53,73 @@ How to get the pool's details including APRs.
       address
       name
     }
-    displayTokens {
-      ...on GqlPoolTokenDisplay {
-        symbol
-      }
+    poolTokens {
+      address
+      symbol
+      balance
+      hasNestedPool
     }
     dynamicData {
       totalLiquidity
-      apr {
-        swapApr
-        nativeRewardApr {
-          ...on GqlPoolAprTotal {
-            total
-          }
-        }
-        thirdPartyApr {
-          ...on GqlPoolAprTotal {
-            total
-          }
-        }
-        items {
-          title
-          apr {
-            ...on GqlPoolAprRange {
-              min
-              max
-            }
-            ...on GqlPoolAprTotal {
-              total
-            }
-          }
-        }
+      aprItems {
+        title
+        type
+        apr
       }
     }
   }
 }
 ```
+
+Query all pools on Arbitrum and Avalanche that have TVL greater than $10k:
+
+```
+{
+  poolGetPools(where: {chainIn: [AVALANCHE, ARBITRUM], minTvl: 10000}) {
+    id
+    address
+    name
+  }
+}
+```
+
+Query the SOR to swap 1 WETH to USDC
+
+```
+{
+  sorGetSwapPaths(
+    chain: MAINNET
+    swapAmount: "1"
+    swapType: EXACT_IN
+    tokenIn: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    tokenOut: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+  ) {
+    swapAmountRaw
+    returnAmountRaw
+    priceImpact {
+      priceImpact
+      error
+    }
+  }
+}
+```
+
+## Pricing of tokens
+
+First of all, for a token to be able to have a price it must be allowed, meaning it must be added to the [tokenlist](https://github.com/balancer/tokenlists).
+
+To price a token there are various handlers that will try to price antoken. These handlers take priority over each other. This means that as soon
+as a handler can price a token, it will not be price by another handler. These handlers, order by priority, are:
+
+1. Protocol specific handlers such as Aave or fbeets where prices can be infered on-chain via
+2. Coingecko
+3. BPT price handler ($TVL/totalShares)
+4. Swaps (When ever a token is swapped with a token that has a price, the original token's price is inferred relative to the swapped token)
+
+In addition to this, there are manual interventions possible:
+
+1. If a token has a wrong Coingecko feed, it can be excluded by adding [an override](https://github.com/balancer/tokenlists/blob/main/src/tokenlists/balancer/overwrites.ts#L406) like this `extensions: { coingeckoId: null, },`.
+2. If a token does not have a Coingecko feed on a specific chain, or can be priced using a different token's Coingecko feed, the Coingecko ID can [be overridden](https://github.com/balancer/tokenlists/blob/main/src/tokenlists/balancer/overwrites.ts#L393) with another ID like this `extensions: { coingeckId: 'gyroscope-gyd', },`.
 
 # Development
 
@@ -151,28 +183,16 @@ The output at the very end saying `ERROR: role "rdsadmin" does not exist` is nor
 ## Branching and deployment environments
 
 We run a canary and a production (called main) deployment environment.
-The canary environment is built from the `v2-canary` branch and the production deployment
-is built from the `v2-main` branch. The environments can be accessed through the following links:
+The canary environment is built from the `v3-canary` branch and the production deployment
+is built from the `v3-main` branch. The environments can be accessed through the following links:
 
-https://backend-v2.beets-ftm-node.com/graphql
+https://backend-v3.beets-ftm-node.com/
 
-https://backend-v2-canary.beets-ftm-node.com/graphql
-
-https://backend-optimism-v2.beets-ftm-node.com/graphql
-
-https://backend-optimism-v2-canary.beets-ftm-node.com/graphql
+https://api-v3.balancer.fi/
 
 ## Contributing
 
-We follow the model of [gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) using the following naming for branches:
-
--   main: v2-main
--   development: v2-canary
--   feature: feature/\*
--   release: release/\*
--   hotfix: hf/\*
-
-To contribute, branch from `v2-canary` (which is our development branch) and open a PR against `v2-canary` once the feature is complete. It will be reviewed and eventually merged into v2-canary.
+To contribute, branch from `v3-canary` (which is our development branch) and open a PR against `v3-canary` once the feature is complete. It will be reviewed and eventually merged into v2-canary.
 
 ### Database Updates
 

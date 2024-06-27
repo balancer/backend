@@ -34,6 +34,7 @@ export interface FeaturedPool {
     poolId: string;
     primary: boolean;
     chain: GqlChain;
+    description: string;
 }
 
 export interface HomeScreenNewsItem {
@@ -51,4 +52,5 @@ export interface ContentService {
     getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]>;
     getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]>;
     getNewsItems(chain: Chain): Promise<HomeScreenNewsItem[]>;
+    syncRateProviderReviews(chains: Chain[]): Promise<void>;
 }

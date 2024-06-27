@@ -25,10 +25,13 @@ import {
     ReliquaryUsersQuery,
     ReliquaryUsersQueryVariables,
 } from './generated/reliquary-subgraph-types';
-import { networkContext } from '../../network/network-context.service';
 
 export class ReliquarySubgraphService {
-    constructor() {}
+    private sdk: ReturnType<typeof getSdk>;
+
+    constructor(subgraphUrl: string) {
+        this.sdk = getSdk(new GraphQLClient(subgraphUrl));
+    }
 
     public async getMetadata() {
         const { meta } = await this.sdk.ReliquaryGetMeta();
@@ -151,12 +154,4 @@ export class ReliquarySubgraphService {
     public async getRelicSnapshots(args: ReliquaryRelicSnapshotsQueryVariables): Promise<ReliquaryRelicSnapshotsQuery> {
         return this.sdk.ReliquaryRelicSnapshots(args);
     }
-
-    public get sdk() {
-        const client = new GraphQLClient(networkContext.data.subgraphs.reliquary!);
-
-        return getSdk(client);
-    }
 }
-
-export const reliquarySubgraphService = new ReliquarySubgraphService();

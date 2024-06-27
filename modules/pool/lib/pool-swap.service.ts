@@ -41,12 +41,7 @@ export class PoolSwapService {
             for (const chain of args.where.chainIn) {
                 const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
-                const getterFn =
-                    chain === Chain.FANTOM
-                        ? balancerSubgraphService.getFantomPoolJoinExits.bind(balancerSubgraphService)
-                        : balancerSubgraphService.getPoolJoinExits.bind(balancerSubgraphService);
-
-                const { joinExits } = await getterFn({
+                const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
                     where: { pool_in: args.where?.poolIdIn },
                     first,
                     skip: args.skip,
@@ -81,12 +76,7 @@ export class PoolSwapService {
     ): Promise<GqlPoolJoinExit[]> {
         const balancerSubgraphService = AllNetworkConfigsKeyedOnChain[chain].services.balancerSubgraphService;
 
-        const getterFn =
-            chain === Chain.FANTOM
-                ? balancerSubgraphService.getFantomPoolJoinExits.bind(balancerSubgraphService)
-                : balancerSubgraphService.getPoolJoinExits.bind(balancerSubgraphService);
-
-        const { joinExits } = await getterFn({
+        const { joinExits } = await balancerSubgraphService.getPoolJoinExits({
             where: { pool: poolId, user: userAddress },
             first,
             skip: skip,
@@ -215,6 +205,18 @@ export class PoolSwapService {
         const poolIds = new Set<string>();
         const txs = new Set<string>();
 
+        // Skip creating records for non-existing pools
+        const existingPoolIds = (
+            await prisma.prismaPool.findMany({
+                where: {
+                    chain: this.chain,
+                },
+                select: {
+                    id: true,
+                },
+            })
+        ).map((pool) => ({ id: pool.id }));
+
         while (hasMore) {
             const { swaps } = await this.balancerSubgraphService.getSwaps({
                 first: pageSize,
@@ -224,7 +226,11 @@ export class PoolSwapService {
                 orderDirection: OrderDirection.Asc,
             });
 
-            console.log(`loading ${swaps.length} new swaps into the db...`);
+            const existingPoolsOnlySwaps = swaps.filter((swap) =>
+                existingPoolIds.map((pool) => pool.id).includes(swap.poolId.id),
+            );
+
+            console.log(`loading ${existingPoolsOnlySwaps.length} new swaps into the db...`);
 
             if (swaps.length === 0) {
                 break;
@@ -232,7 +238,7 @@ export class PoolSwapService {
 
             await prisma.prismaPoolSwap.createMany({
                 skipDuplicates: true,
-                data: swaps.map((swap) => {
+                data: existingPoolsOnlySwaps.map((swap) => {
                     let valueUSD = 0;
                     const tokenInPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenIn, this.chain);
                     const tokenOutPrice = this.tokenService.getPriceForToken(tokenPrices, swap.tokenOut, this.chain);

@@ -1,6 +1,5 @@
 import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
-import _, { chain, includes } from 'lodash';
-import { Cache } from 'memory-cache';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
@@ -8,10 +7,7 @@ import {
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
-    GqlPoolFx,
-    GqlPoolGyro,
     GqlPoolJoinExit,
-    GqlPoolLinear,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
@@ -31,12 +27,25 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
 import { PoolUsdDataService } from './lib/pool-usd-data.service';
-import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import { ContentService } from '../content/content-types';
 import { coingeckoDataService } from '../token/lib/coingecko-data.service';
+import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
+import {
+    deleteGaugeStakingForAllPools,
+    deleteMasterchefStakingForAllPools,
+    deleteReliquaryStakingForAllPools,
+    syncGaugeStakingForPools,
+    syncMasterchefStakingForPools,
+    syncReliquaryStakingForPools,
+} from '../actions/pool/staking';
+import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
+import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 
 export class PoolService {
     constructor(
@@ -48,7 +57,6 @@ export class PoolService {
         private readonly poolSyncService: PoolSyncService,
         private readonly poolSwapService: PoolSwapService,
         private readonly poolSnapshotService: PoolSnapshotService,
-        private readonly reliquarySnapshotService: ReliquarySnapshotService,
     ) {}
 
     private get chain() {
@@ -57,10 +65,6 @@ export class PoolService {
 
     private get chainId() {
         return networkContext.chainId;
-    }
-
-    private get poolStakingServices(): PoolStakingService[] {
-        return networkContext.config.poolStakingServices;
     }
 
     private get contentService(): ContentService {
@@ -77,18 +81,6 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
-    }
-
-    public async getGqlLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        return this.poolGqlLoaderService.getLinearPools(chains);
-    }
-
-    public async getGqlGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
-        return this.poolGqlLoaderService.getGyroPools(chains);
-    }
-
-    public async getGqlFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
-        return this.poolGqlLoaderService.getFxPools(chains);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
@@ -134,7 +126,14 @@ export class PoolService {
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
-        return this.reliquarySnapshotService.getSnapshotsForFarm(id, range);
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+
+            return reliquarySnapshotService.getSnapshotsForFarm(id, range);
+        }
+        return [];
     }
 
     public async syncAllPoolsFromSubgraph(): Promise<string[]> {
@@ -143,14 +142,18 @@ export class PoolService {
         return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
     }
 
-    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
-        await Promise.all(
-            this.poolStakingServices.map((stakingService) => stakingService.reloadStakingForAllPools(stakingTypes)),
-        );
+    public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
+        await deleteMasterchefStakingForAllPools(stakingTypes, chain);
+        await deleteReliquaryStakingForAllPools(stakingTypes, chain);
+        await deleteGaugeStakingForAllPools(stakingTypes, chain);
+        await deleteAuraStakingForAllPools(stakingTypes, chain);
+
         // if we reload staking for reliquary, we also need to reload the snapshots because they are deleted while reloading
         if (stakingTypes.includes('RELIQUARY')) {
             this.loadReliquarySnapshotsForAllFarms();
         }
+        // reload it for all pools
+        await this.syncStakingForPools([this.chain]);
     }
 
     public async syncPoolAllTokensRelationship(): Promise<void> {
@@ -250,12 +253,42 @@ export class PoolService {
         await this.contentService.syncPoolContentData(this.chain);
     }
 
-    public async syncStakingForPools() {
-        await Promise.all(this.poolStakingServices.map((stakingService) => stakingService.syncStakingForPools()));
+    public async syncStakingForPools(chains: Chain[]) {
+        for (const chain of chains) {
+            const networkconfig = AllNetworkConfigsKeyedOnChain[chain];
+            if (networkconfig.data.subgraphs.masterchef) {
+                await syncMasterchefStakingForPools(
+                    chain,
+                    new MasterchefSubgraphService(networkconfig.data.subgraphs.masterchef),
+                    networkconfig.data.masterchef?.excludedFarmIds || [],
+                    networkconfig.data.fbeets?.address || '',
+                    networkconfig.data.fbeets?.farmId || '',
+                    networkconfig.data.fbeets?.poolId || '',
+                );
+            }
+            if (networkconfig.data.subgraphs.reliquary) {
+                await syncReliquaryStakingForPools(
+                    chain,
+                    new ReliquarySubgraphService(networkconfig.data.subgraphs.reliquary),
+                    networkconfig.data.reliquary?.address || '',
+                    networkconfig.data.reliquary?.excludedFarmIds || [],
+                );
+            }
+            if (networkconfig.data.subgraphs.gauge && networkContext.data.bal?.address) {
+                await syncGaugeStakingForPools(
+                    new GaugeSubgraphService(networkconfig.data.subgraphs.gauge),
+                    networkContext.data.bal.address,
+                );
+            }
+            if (networkconfig.data.subgraphs.aura) {
+                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));
+            }
+        }
     }
 
     public async updatePoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.updatePoolAprs(chain);
+        await syncIncentivizedCategory(chain);
     }
 
     public async syncChangedPools() {
@@ -264,6 +297,7 @@ export class PoolService {
 
     public async reloadAllPoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
+        await syncIncentivizedCategory(chain);
     }
 
     public async updateLiquidity24hAgoForAllPools() {
@@ -306,17 +340,27 @@ export class PoolService {
     }
 
     public async syncLatestReliquarySnapshotsForAllFarms() {
-        await this.reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+            await reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+        }
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
-        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
-        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
-        const farmIds = farms.map((farm) => parseFloat(farm.id));
-        for (const farmId of farmIds) {
-            await this.reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
+        if (networkContext.data.subgraphs.reliquary) {
+            const reliquarySnapshotService = new ReliquarySnapshotService(
+                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+            );
+            await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
+            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
+            await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
+            const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
+            const farmIds = farms.map((farm) => parseFloat(farm.id));
+            for (const farmId of farmIds) {
+                await reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
+            }
         }
     }
 
@@ -334,10 +378,6 @@ export class PoolService {
 
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
-    }
-
-    public async setPoolsWithPreferredGaugesAsIncentivized() {
-        await this.poolSyncService.setPoolsWithPreferredGaugesAsIncentivized();
     }
 
     public async addToBlackList(poolId: string) {
@@ -494,5 +534,4 @@ export const poolService = new PoolService(
     new PoolSyncService(),
     new PoolSwapService(tokenService),
     new PoolSnapshotService(coingeckoDataService),
-    new ReliquarySnapshotService(reliquarySubgraphService),
 );

@@ -12,12 +12,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-08-23',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/EJezH1Cp31QkKPaBDerhVPRWsKVZLrDfzjrLqpmv6cGg`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/rebase-agency/gnosis-chain-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-gnosis-chain',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HW5XpZBi2iYDLBqqEEMiRJFx8ZJAQak9uu5TzyH9BBxy`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -47,6 +46,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05',
     },
     balancer: {
@@ -99,8 +99,5 @@ export default <NetworkData>{
         canary: {
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
 };

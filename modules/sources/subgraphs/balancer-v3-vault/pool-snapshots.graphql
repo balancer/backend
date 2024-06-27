@@ -2,13 +2,20 @@ fragment PoolSnapshot on PoolSnapshot {
     id
     pool {
         id
+        swapFee
         tokens {
+            index
             address
         }
     }
     timestamp
     balances
     totalShares
+    swapsCount
+    holdersCount
+    totalSwapVolumes
+    totalProtocolSwapFees
+    totalProtocolYieldFees
 }
 
 query PoolSnapshots(

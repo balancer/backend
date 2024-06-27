@@ -17,21 +17,6 @@ export interface TokenPriceHandler {
     updatePricesForTokens(tokens: PrismaTokenWithTypes[], chains: Chain[]): Promise<PrismaTokenWithTypes[]>;
 }
 
-export interface TokenDefinition {
-    name: string;
-    address: string;
-    symbol: string;
-    decimals: number;
-    chainId: number;
-    chain: Chain;
-    logoURI?: string | null;
-    priority: number;
-    coingeckoPlatformId?: string | null;
-    coingeckoContractAddress?: string | null;
-    coingeckoTokenId?: string | null;
-    tradable: boolean;
-}
-
 export interface TokenPriceItem {
     id: string;
     timestamp: number;

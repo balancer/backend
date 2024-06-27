@@ -1,7 +1,6 @@
 import { BeefyAprConfig } from '../../../../../network/apr-config-types';
 import { AprHandler } from '..';
 import axios from 'axios';
-import * as Sentry from '@sentry/node';
 
 export class BeefyAprHandler implements AprHandler {
     tokens: {
@@ -36,7 +35,6 @@ export class BeefyAprHandler implements AprHandler {
             return aprs;
         } catch (error) {
             console.error(`Beefy IB APR hanlder failed: `, error);
-            Sentry.captureException(`Beefy IB APR handler failed: ${error}`);
             return {};
         }
     }

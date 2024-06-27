@@ -1,19 +1,21 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { tokenService } from '../token/token.service';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
-import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
-import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
+import {
+    BoostedPoolAprService,
+    SwapFeeAprService,
+    GaugeAprService,
+    YbTokensAprService,
+    VeBalProtocolAprService,
+    VeBalVotingAprService,
+} from '../pool/lib/apr-data-sources';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -23,13 +25,13 @@ export const mainnetNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),
-        new PhantomStableAprService(data.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(tokenService, [data.bal!.address]),
+        new VeBalProtocolAprService(data.rpcUrl),
+        new VeBalVotingAprService(),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, data.bal!.address)],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
     },
@@ -132,10 +134,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
                     : every(10, 'days'),
         },
         {
-            name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
-        },
-        {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
         },
@@ -149,10 +147,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-join-exits-v2',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'backfill-join-exits-v2',
-            interval: every(20, 'seconds'),
         },
         {
             name: 'sync-swaps-v2',

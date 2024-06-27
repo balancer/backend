@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "PrismaPoolSnapshot" ADD COLUMN     "surplus24h" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "totalSurplus" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "totalSurpluses" TEXT[] DEFAULT ARRAY[]::TEXT[];

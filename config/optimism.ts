@@ -13,12 +13,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FsmdxmvBJLGjUQPxKMRtcWKzuCNpomKuMTbSbtRtggZ7`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        blocks: 'https://api.studio.thegraph.com/query/48427/optimism-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CbLt7GqU7sypjRaCfwissEBkFeCw3dUz2emrvBNJ7dZu`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -49,6 +48,7 @@ export default <NetworkData>{
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
     },
     gyro: {
         config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
@@ -185,6 +185,10 @@ export default <NetworkData>{
                 },
             },
         },
+        maker: {
+            sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
+        },
+        etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
         defaultHandlers: {
             wstEth: {
                 tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
@@ -236,19 +240,13 @@ export default <NetworkData>{
                 path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
+            wrsETH: {
+                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [
-            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
-            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
-        ],
-    },
-    rocket: {
-        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
     },
     datastudio: {
         main: {

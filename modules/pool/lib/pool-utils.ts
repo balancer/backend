@@ -1,4 +1,5 @@
-import { PrismaPoolDynamicData, PrismaPoolType } from '@prisma/client';
+import { ZERO_ADDRESS } from '@balancer/sdk';
+import { PrismaPoolDynamicData, PrismaPoolToken, PrismaPoolType } from '@prisma/client';
 
 type PoolWithTypeAndFactory = {
     address: string;
@@ -21,7 +22,11 @@ export function isComposableStablePool(pool: PoolWithTypeAndFactory) {
 }
 
 export function collectsYieldFee(pool: PoolWithTypeAndFactory) {
-    return !pool.dynamicData?.isInRecoveryMode && capturesYield(pool);
+    return capturesYield(pool) && !pool.dynamicData?.isInRecoveryMode;
+}
+
+export function tokenCollectsYieldFee(token: PrismaPoolToken) {
+    return !token.exemptFromProtocolYieldFee && token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS;
 }
 
 export function capturesYield(pool: PoolWithTypeAndFactory) {

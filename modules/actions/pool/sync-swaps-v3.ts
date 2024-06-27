@@ -17,21 +17,24 @@ export async function syncSwapsV3(
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {
-    const vaultVersion = 3;
+    const protocolVersion = 3;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        select: {
+            blockNumber: true,
+        },
         where: {
             type: 'SWAP',
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',
         },
     });
 
-    const where = latestEvent?.blockTimestamp ? { blockTimestamp_gte: String(latestEvent.blockTimestamp) } : {};
+    const where = latestEvent?.blockNumber ? { blockNumber_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
     const { swaps } = await vaultSubgraphClient.Swaps({

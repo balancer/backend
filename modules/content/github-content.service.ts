@@ -1,21 +1,26 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Chain, Prisma } from '@prisma/client';
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { ContentService, FeaturedPool, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import { chainIdToChain } from '../network/chain-id-to-chain';
-import { LinearData } from '../pool/subgraph-mapper';
 import { chainToIdMap } from '../network/network-config';
+import { Chain, Prisma } from '@prisma/client';
 
 const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';
+
+const RATEPROVIDER_REVIEW_URL =
+    'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/registry.json';
+
+const RATEPROVIDER_BASE_URL = 'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/';
 
 interface FeaturedPoolMetadata {
     id: string;
     imageUrl: string;
     primary: boolean;
     chainId: number;
+    description: string;
 }
 interface WhitelistedTokenList {
     name: string;
@@ -35,7 +40,76 @@ interface WhitelistedToken {
     };
 }
 
+interface RateProviderReview {
+    [chain: string]: {
+        [rateproviderAddress: string]: {
+            name: string;
+            asset: string;
+            summary: string;
+            review: string;
+            warnings: string[];
+            factory: string;
+            upgradeableComponents: {
+                entrypoint: string;
+                implementationReviewed: string;
+            }[];
+        };
+    };
+}
+
 export class GithubContentService implements ContentService {
+    async syncRateProviderReviews(chains: Chain[]): Promise<void> {
+        const { data: githubAllRateProviderList } = await axios.get<RateProviderReview>(RATEPROVIDER_REVIEW_URL);
+
+        for (const chain of chains) {
+            const chainRateProviderList =
+                githubAllRateProviderList[chain === 'MAINNET' ? 'ethereum' : chain.toLowerCase()];
+
+            // delete any reviews that are no longer part of the review repo
+            await prisma.prismaPriceRateProviderData.deleteMany({
+                where: {
+                    chain: chain,
+                    rateProviderAddress: { notIn: Object.keys(chainRateProviderList) },
+                },
+            });
+
+            for (const rateProviderAddress in chainRateProviderList) {
+                const rateProviderData = chainRateProviderList[rateProviderAddress];
+
+                console.log(
+                    `Adding rateprovider ${rateProviderAddress} for chain ${chain} and token ${rateProviderData.asset}`,
+                );
+
+                await prisma.prismaPriceRateProviderData.upsert({
+                    where: {
+                        chain_rateProviderAddress: {
+                            chain: chain,
+                            rateProviderAddress: rateProviderAddress.toLowerCase(),
+                        },
+                    },
+                    create: {
+                        rateProviderAddress: rateProviderAddress.toLowerCase(),
+                        reviewed: true,
+                        chain: chain,
+                        tokenAddress: rateProviderData.asset.toLowerCase(),
+                        name: rateProviderData.name,
+                        reviewUrl: RATEPROVIDER_BASE_URL + rateProviderData.review,
+                        summary: rateProviderData.summary,
+                    },
+                    update: {
+                        rateProviderAddress: rateProviderAddress.toLowerCase(),
+                        reviewed: true,
+                        chain: chain,
+                        tokenAddress: rateProviderData.asset.toLowerCase(),
+                        name: rateProviderData.name,
+                        reviewUrl: RATEPROVIDER_BASE_URL + rateProviderData.review,
+                        summary: rateProviderData.summary,
+                    },
+                });
+            }
+        }
+    }
+
     async syncTokenContentData(chains: Chain[]): Promise<void> {
         const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
 
@@ -157,35 +231,12 @@ export class GithubContentService implements ContentService {
                 });
             }
 
-            if (
-                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
-                !tokenTypes.includes('PHANTOM_BPT')
-            ) {
+            if (pool?.type === 'COMPOSABLE_STABLE' && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
-                });
-            }
-
-            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
-            const wrappedLinearPoolToken = wrappedIndex
-                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
-                : undefined;
-
-            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                types.push({
-                    id: `${token.address}-linear-wrapped`,
-                    chain: chain,
-                    type: 'LINEAR_WRAPPED_TOKEN',
-                    tokenAddress: token.address,
-                });
-            }
-
-            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                prisma.prismaTokenType.delete({
-                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: chain } },
                 });
             }
         }
@@ -202,10 +253,11 @@ export class GithubContentService implements ContentService {
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
-        return pools.map(({ id, primary, chainId }) => ({
+        return pools.map(({ id, primary, chainId, description }) => ({
             poolId: id,
             chain: chainIdToChain[chainId],
             primary: Boolean(primary),
+            description: description,
         })) as FeaturedPool[];
     }
 

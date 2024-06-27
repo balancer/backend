@@ -101,13 +101,7 @@ export interface IdleAprConfig {
 }
 
 export interface MakerAprConfig {
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            potAddress: string;
-            isIbYield?: boolean;
-        };
-    };
+    sdai: string;
 }
 
 export interface OvixAprConfig {

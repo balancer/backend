@@ -74,7 +74,7 @@ class SorPathService implements SwapService {
 
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
-            console.error(
+            console.log(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
             );
             Sentry.captureException(err.message, {
@@ -153,7 +153,7 @@ class SorPathService implements SwapService {
             }
             return paths;
         } catch (err: any) {
-            console.error(
+            console.log(
                 `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
             );
             Sentry.captureException(err.message, {
@@ -187,7 +187,7 @@ class SorPathService implements SwapService {
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
-                vaultVersion,
+                protocolVersion: vaultVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -288,7 +288,8 @@ class SorPathService implements SwapService {
         for (const path of paths) {
             // paths used as input for b-sdk for client
             sorPaths.push({
-                vaultVersion,
+                vaultVersion: 2,
+                protocolVersion: 2,
                 inputAmountRaw: path.inputAmount.amount.toString(),
                 outputAmountRaw: path.outputAmount.amount.toString(),
                 tokens: path.tokens.map((token) => ({
@@ -306,7 +307,8 @@ class SorPathService implements SwapService {
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         return {
-            vaultVersion,
+            vaultVersion: 2,
+            protocolVersion: 2,
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),
@@ -428,7 +430,7 @@ class SorPathService implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 1000,
+                        gt: 100,
                     },
                 },
                 id: {

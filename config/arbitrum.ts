@@ -12,12 +12,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-08-23',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/98cQDy6tufTJtshDCuhh9z2kWXsQWBHVh2bqnLHsGAeS`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-arbitrum',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/arbitrum-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Bb1hVjJZ52kL23chZyyGWJKrGEg3S6euuNa1YA6XRU4J`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -34,12 +33,11 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : env.ALCHEMY_API_KEY
-            ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : env.INFURA_API_KEY
+        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -47,6 +45,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     },
     balancer: {
@@ -131,6 +130,7 @@ export default <NetworkData>{
                 },
             },
         },
+        stakewise: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x5979d7b546e38e414f7e9822514be443a4800529',
@@ -181,10 +181,32 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
+            jitoSOL: {
+                tokenAddress: '0x83e1d2310ade410676b1733d16e89f91822fd5c3',
+                sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
+                path: 'apy.0.data',
+                scale: 1,
+                isIbYield: true,
+            },
+            woETH: {
+                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
+                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
+                path: 'apr',
+                isIbYield: true,
+            },
+            ETHx: {
+                tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
+                sourceUrl: 'https://universe.staderlabs.com/eth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     gyro: {
         config: '0x9b683ca24b0e013512e2566b68704dbe9677413c',

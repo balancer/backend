@@ -22,7 +22,6 @@ import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
-import { backfillJoinExitsV2 } from '../actions/pool/backfill-join-exits-v2';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -42,27 +41,6 @@ export function JobsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        // Temporary action to backfill join/exits for v2
-        async backfillJoinExitsV2(chainId: string) {
-            const chain = chainIdToChain[chainId];
-            let {
-                subgraphs: { balancer },
-            } = config[chain];
-
-            // Guard against unconfigured chains
-            if (!balancer) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            // Polygon uses the pruned subgraph by default
-            if (chainId === '137') {
-                balancer = 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2';
-            }
-
-            const subgraphClient = new BalancerSubgraphService(balancer, Number(chainId));
-            const entries = await backfillJoinExitsV2(subgraphClient, chain);
-            return entries;
-        },
         async syncJoinExitsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
@@ -124,7 +102,12 @@ export function JobsController(tracer?: any) {
             const vaultClient = getVaultClient(viemClient, vaultAddress);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, vaultClient, chain, latestBlock);
+            await upsertPools(
+                newPools.sort((a, b) => parseFloat(a.blockTimestamp) - parseFloat(b.blockTimestamp)),
+                vaultClient,
+                chain,
+                latestBlock,
+            );
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -194,13 +177,12 @@ export function JobsController(tracer?: any) {
             const viemClient = getViemClient(chain);
             const vaultClient = getVaultClient(viemClient, vaultAddress);
 
-            const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
             const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
             if (ids.length === 0) {
                 return [];
             }
-            const latestBlock = await viemClient.getBlockNumber();
-            await syncPools(ids, vaultClient, chain, latestBlock + 1n);
+            await syncPools(ids, vaultClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             return ids;
         },
@@ -250,7 +232,7 @@ export function JobsController(tracer?: any) {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
             const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
-            await updateVolumeAndFees(poolsWithNewSwaps);
+            await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
         async syncSftmxStakingData(chainId: string) {

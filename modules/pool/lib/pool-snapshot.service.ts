@@ -11,7 +11,6 @@ import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { sleep } from '../../common/promise';
 import { networkContext } from '../../network/network-context.service';
 import { CoingeckoDataService, TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
 
@@ -119,9 +118,7 @@ export class PoolSnapshotService {
         });
 
         for (const pool of poolsWithoutSnapshots) {
-            if (pool.type !== 'LINEAR') {
-                await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
-            }
+            await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
         }
     }
 
@@ -161,10 +158,6 @@ export class PoolSnapshotService {
             numDays = moment().diff(moment.unix(startTimestamp), 'days');
         }
 
-        if (pool.type === 'LINEAR') {
-            throw new Error('Unsupported pool type');
-        }
-
         const swaps = await this.balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
 
         const tokenPriceMap: TokenHistoricalPrices = {};
@@ -193,7 +186,7 @@ export class PoolSnapshotService {
                     },
                 });
                 if (priceForDays.length === 0) {
-                    console.error(
+                    console.log(
                         `No historical price in DB for to create pool snapshots. Skipping token ${token.address}.`,
                     );
                 } else {
@@ -294,17 +287,24 @@ export class PoolSnapshotService {
             chain: this.chain,
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
+            protocolVersion: 2,
             totalLiquidity: parseFloat(snapshot.liquidity),
             totalShares: snapshot.totalShares,
             totalSharesNum: parseFloat(snapshot.totalShares),
             totalSwapVolume: parseFloat(snapshot.swapVolume),
             totalSwapFee: parseFloat(snapshot.swapFees),
+            totalSurplus: 0,
             swapsCount: parseInt(snapshot.swapsCount),
             holdersCount: parseInt(snapshot.holdersCount),
             amounts: snapshot.amounts,
             volume24h: Math.max(parseFloat(snapshot.swapVolume) - parseFloat(prevTotalSwapVolume), 0),
             fees24h: Math.max(parseFloat(snapshot.swapFees) - parseFloat(prevTotalSwapFee), 0),
+            surplus24h: 0,
             sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
+            totalProtocolSwapFees: [],
+            totalProtocolYieldFees: [],
+            totalVolumes: [],
+            totalSurpluses: [],
         };
     }
 

@@ -22,6 +22,8 @@ enum Chain {
     POLYGON
     SEPOLIA
     ZKEVM
+    FRAXTAL
+    MODE
 }
 
 model PrismaLastBlockSynced {
@@ -35,4 +37,5 @@ model PrismaLastBlockSynced {
 enum PrismaLastBlockSyncedCategory {
     POOLS
     FARMS
+    COW_AMM_POOLS
 }

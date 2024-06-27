@@ -10,10 +10,9 @@ import gaugeControllerHelperAbi from './abi/gaugeControllerHelper.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { v1RootGaugeRecipients } from './special-pools/streamer-v1-gauges';
 import { Multicaller3 } from '../web3/multicaller3';
-import { networkContext } from '../network/network-context.service';
+import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
 // Helper contract that wraps gaugeControllerAddress contract to allow checkpointing and getting the updated relative weight
@@ -89,6 +88,7 @@ export class VotingGaugesRepository {
 
     async fetchVotingGaugesFromSubgraph(onchainAddresses: string[]) {
         // This service only works with the mainnet subgraph, will return no voting gauges for other chains
+        const gaugeSubgraphService = new GaugeSubgraphService(mainnetNetworkConfig.data.subgraphs.gauge!);
         const rootGauges = await gaugeSubgraphService.getRootGaugesForIds(onchainAddresses);
 
         const l2RootGauges: SubGraphGauge[] = rootGauges.map((gauge) => {

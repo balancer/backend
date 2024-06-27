@@ -35,8 +35,6 @@ import {
     BalancerTradePairSnapshotsQueryVariables,
     BalancerUserFragment,
     BalancerUsersQueryVariables,
-    FantomJoinExitsQuery,
-    FantomJoinExitsQueryVariables,
     getSdk,
     OrderDirection,
     PoolShare_OrderBy,
@@ -249,6 +247,7 @@ export class BalancerSubgraphService {
         return subgraphLoadAll<BalancerTokenPriceFragment>(this.sdk.BalancerTokenPrices, 'tokenPrices', args);
     }
 
+    // we dont sync linear pools anymore
     public async getAllPools(
         args: BalancerPoolsQueryVariables,
         applyTotalSharesFilter = true,
@@ -257,6 +256,7 @@ export class BalancerSubgraphService {
             ...args,
             where: {
                 totalShares_not: applyTotalSharesFilter ? '0.00000000001' : undefined,
+                poolType_not_contains_nocase: 'linear',
                 ...args.where,
             },
         });
@@ -264,10 +264,6 @@ export class BalancerSubgraphService {
 
     public async getPoolJoinExits(args: BalancerJoinExitsQueryVariables): Promise<BalancerJoinExitsQuery> {
         return this.sdk.BalancerJoinExits(args);
-    }
-
-    public async getFantomPoolJoinExits(args: FantomJoinExitsQueryVariables): Promise<FantomJoinExitsQuery> {
-        return this.sdk.FantomJoinExits(args);
     }
 
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {

@@ -3,7 +3,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
-import * as Sentry from '@sentry/node';
 
 interface PoolInput {
     id: string;
@@ -19,6 +18,7 @@ interface PoolInput {
         } | null;
     }[];
     dynamicData: {
+        totalShares: string;
         totalLiquidity: number;
     } | null;
 }
@@ -75,7 +75,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
+    // for each pair per pool, create multicall to do a swap with $10 (min liq is $100, so there should be at least $10 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
@@ -86,9 +86,11 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             // prepare swap amounts in
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
-            // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            // tokenA->tokenB with 10USD worth of tokenA
+            const tenUsdOfTokenA = ((parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 10).toFixed(
+                20,
+            );
+            tokenPair.effectivePriceAmountIn = parseUnits(`${tenUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
             addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
@@ -148,31 +150,56 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 
     for (const pool of filteredPools) {
         // create all pairs for pool
-        for (let i = 0; i < pool.tokens.length - 1; i++) {
-            for (let j = i + 1; j < pool.tokens.length; j++) {
-                //skip pairs with phantom BPT
-                if (pool.tokens[i].address === pool.address || pool.tokens[j].address === pool.address) continue;
+        for (let i = 0; i < pool.tokens.length; i++) {
+            for (let j = 0; j < pool.tokens.length; j++) {
+                const tokenA = pool.tokens[i];
+                const tokenB = pool.tokens[j];
+                if (tokenA.address === tokenB.address) continue;
+                // V2 Validation
+                // remove pools that have <$100 TVL or a token without a balance or USD balance
+                // TODO: check if it's trully needed or if we're ok removing only the pairs without balance or balanceUSD
+                const valid =
+                    (pool.dynamicData?.totalLiquidity || 0) >= 100 &&
+                    !pool.tokens.some((token) => {
+                        const balance =
+                            token.address === pool.address ? pool.dynamicData?.totalShares : token.dynamicData?.balance;
+                        return (balance || '0') === '0';
+                    }) &&
+                    !pool.tokens.some((token) => {
+                        const balanceUSD =
+                            token.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity
+                                : token.dynamicData?.balanceUSD;
+                        return (balanceUSD || 0) === 0;
+                    });
+
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,
-                    // remove pools that have <$1000 TVL or a token without a balance or USD balance
-                    valid:
-                        // V2 Validation
-                        (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
-                        !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
-                        !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
-
+                    valid,
                     tokenA: {
-                        address: pool.tokens[i].address,
-                        decimals: pool.tokens[i].token.decimals,
-                        balance: pool.tokens[i].dynamicData?.balance || '0',
-                        balanceUsd: pool.tokens[i].dynamicData?.balanceUSD || 0,
+                        address: tokenA.address,
+                        decimals: tokenA.token.decimals,
+                        balance:
+                            tokenA.address === pool.address
+                                ? pool.dynamicData?.totalShares || '0'
+                                : tokenA.dynamicData?.balance || '0',
+                        balanceUsd:
+                            tokenA.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity || 0
+                                : tokenA.dynamicData?.balanceUSD || 0,
                     },
                     tokenB: {
-                        address: pool.tokens[j].address,
-                        decimals: pool.tokens[j].token.decimals,
-                        balance: pool.tokens[j].dynamicData?.balance || '0',
-                        balanceUsd: pool.tokens[j].dynamicData?.balanceUSD || 0,
+                        address: tokenB.address,
+                        decimals: tokenB.token.decimals,
+                        balance:
+                            tokenB.address === pool.address
+                                ? pool.dynamicData?.totalShares || '0'
+                                : tokenB.dynamicData?.balance || '0',
+                        balanceUsd:
+                            tokenB.address === pool.address
+                                ? pool.dynamicData?.totalLiquidity || 0
+                                : tokenB.dynamicData?.balanceUSD || 0,
                     },
                     normalizedLiqudity: 0n,
                     spotPrice: 0n,
@@ -263,12 +290,12 @@ function addBToAPriceCallsToMulticaller(
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.effectivePriceAmountOut && result.aToBAmountOut) {
+    if (result?.effectivePriceAmountOut && result.effectivePriceAmountOut.gt(0) && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
             parseUnits(tokenPair.effectivePriceAmountIn.toString(), 18 - tokenPair.tokenA.decimals),
-            parseUnits(result.effectivePriceAmountOut?.toString(), 18 - tokenPair.tokenB.decimals),
+            parseUnits(result.effectivePriceAmountOut.toString(), 18 - tokenPair.tokenB.decimals),
         );
     }
 }
@@ -300,11 +327,11 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
     // this happens if you get a "bonus" ie positive price impact.
-    if (priceRatio > parseEther('0.999999')) {
-        Sentry.captureException(
-            `Price ratio was > 0.999999 for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}.`,
+    if (priceRatio > parseEther('1')) {
+        console.log(
+            `Price ratio was ${priceRatio} for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}. Setting to 0.999999999999 instead.`,
         );
-        priceRatio = parseEther('0.999999');
+        priceRatio = parseEther('0.999999999999');
     }
     if (priceRatio !== 0n) {
         const priceImpact = WAD - priceRatio;

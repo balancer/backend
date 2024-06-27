@@ -1,0 +1,43 @@
+fragment CowAmmPool on Pool {
+    id
+    name
+    symbol
+    factory {
+        id
+    }
+    totalShares
+    blockNumber
+    blockTimestamp
+    transactionHash
+    swapsCount
+    holdersCount
+    tokens {
+        id
+        index
+        name
+        symbol
+        address
+        decimals
+        balance
+    }
+}
+
+query Pools(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    pools(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...CowAmmPool
+    }
+}

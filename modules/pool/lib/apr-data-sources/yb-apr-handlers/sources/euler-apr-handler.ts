@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { AprHandler } from '..';
 import { EulerAprConfig } from '../../../../../network/apr-config-types';
-import * as Sentry from '@sentry/node';
 
 export class EulerAprHandler implements AprHandler {
     tokens: {
@@ -67,7 +66,6 @@ export class EulerAprHandler implements AprHandler {
             return Object.fromEntries(aprEntries);
         } catch (error) {
             console.error(`Euler IB APR handler failed: `, error);
-            Sentry.captureException(`Euler IB APR handler failed: ${error}`);
         }
     }
 }

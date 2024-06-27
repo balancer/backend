@@ -20,12 +20,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/C4ayEZP2yTXRAB8vSaTrgN4m9anTe9Mdm2ViyiAuV9TV`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -48,7 +47,7 @@ export default <NetworkData>{
     rpcUrl:
         env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
             ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+            : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -56,6 +55,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0000000000000000000000000000000000000000',
     },
     gaugeControllerAddress: '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
@@ -191,7 +191,7 @@ export default <NetworkData>{
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
@@ -217,12 +217,7 @@ export default <NetworkData>{
             },
         },
         maker: {
-            tokens: {
-                sDAI: {
-                    address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-                    potAddress: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
-                },
-            },
+            sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
         },
         tessera: {
             tokens: {
@@ -358,10 +353,19 @@ export default <NetworkData>{
                 sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
                 isIbYield: true,
             },
+            sUSDE: {
+                tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                path: 'stakingYield.value',
+                isIbYield: true,
+            },
+            saETH: {
+                tokenAddress: '0xf1617882a71467534d14eee865922de1395c9e89',
+                sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
+                path: 'apr',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

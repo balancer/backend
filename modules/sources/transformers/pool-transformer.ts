@@ -1,7 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
-import { fx, gyro, linear, element, stable } from '../../pool/pool-data';
+import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { JoinedSubgraphPool } from '../subgraphs';
 
 export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
@@ -18,6 +18,9 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
                 amp: '10', // TODO just a place holder
             } as StableData;
             break;
+        case 'COW_AMM':
+            type = PrismaPoolType.COW_AMM;
+            break;
         default:
             type = PrismaPoolType.UNKNOWN;
     }
@@ -25,7 +28,7 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
     return {
         id: poolData.id.toLowerCase(),
         chain: chain,
-        vaultVersion: 3,
+        protocolVersion: type === PrismaPoolType.COW_AMM ? 1 : 3,
         address: poolData.id.toLowerCase(),
         decimals: 18,
         symbol: poolData.symbol,
@@ -45,7 +48,6 @@ const typeDataMapper = {
     GYRO: gyro,
     GYRO3: gyro,
     GYROE: gyro,
-    LINEAR: linear,
     STABLE: stable,
     COMPOSABLE_STABLE: stable,
     META_STABLE: stable,

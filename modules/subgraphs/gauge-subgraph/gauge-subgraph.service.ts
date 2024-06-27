@@ -39,7 +39,11 @@ export type GaugeUserShare = {
 };
 
 export class GaugeSubgraphService {
-    constructor() {}
+    private sdk: ReturnType<typeof getSdk>;
+
+    constructor(subgraphUrl: string) {
+        this.sdk = getSdk(new GraphQLClient(subgraphUrl));
+    }
 
     public async getGauges(args: GaugeLiquidityGaugesQueryVariables) {
         const gaugesQuery = await this.sdk.GaugeLiquidityGauges(args);
@@ -277,12 +281,4 @@ export class GaugeSubgraphService {
         }
         return meta;
     }
-
-    public get sdk() {
-        const client = new GraphQLClient(networkContext.data.subgraphs.gauge ?? '');
-
-        return getSdk(client);
-    }
 }
-
-export const gaugeSubgraphService = new GaugeSubgraphService();

@@ -14,37 +14,28 @@ import { swapsUsd } from '../../sources/enrichers/swaps-usd';
  * @returns
  */
 export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEPOLIA' as Chain): Promise<string[]> {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
+        select: {
+            blockNumber: true,
+        },
         where: {
             type: 'SWAP',
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',
         },
     });
 
-    const where =
-        chain === Chain.FANTOM // FANTOM has no block column
-            ? latestEvent
-                ? { timestamp_gte: Number(latestEvent.blockTimestamp) }
-                : {}
-            : latestEvent
-            ? { block_gte: String(latestEvent.blockNumber) }
-            : {};
-
-    const getterFn =
-        chain === Chain.FANTOM
-            ? subgraphClient.BalancerSwaps.bind(subgraphClient)
-            : subgraphClient.BalancerSwapsWithBlock.bind(subgraphClient);
+    const where = latestEvent ? { block_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
     console.time('BalancerSwaps');
-    const { swaps } = await getterFn({
+    const { swaps } = await subgraphClient.BalancerSwaps({
         first: 1000,
         where,
         orderBy: chain === Chain.FANTOM ? Swap_OrderBy.Timestamp : Swap_OrderBy.Block,

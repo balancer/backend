@@ -63,7 +63,7 @@ export class Gyro2Pool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
+            const tokenAmount = TokenAmount.fromHumanAmount(token, poolToken.dynamicData.balance as `${number}`);
 
             poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index));
         }
@@ -113,13 +113,11 @@ export class Gyro2Pool implements BasePool {
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
         const tokenPair = this.tokenPairs.find(
-            (tokenPair) =>
-                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
-                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
+            (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
         );
 
         if (tokenPair) {
-            return parseEther(tokenPair.normalizedLiquidity);
+            return BigInt(tokenPair.normalizedLiquidity);
         }
         return 0n;
     }

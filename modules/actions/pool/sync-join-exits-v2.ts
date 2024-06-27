@@ -11,7 +11,7 @@ import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-t
  * @param vaultSubgraphClient
  */
 export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -20,7 +20,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
                 in: ['JOIN', 'EXIT'],
             },
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
             blockNumber: 'desc',
@@ -29,22 +29,10 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
 
     // We need to use gte, because of pagination.
     // We don't have a guarantee that we get all the events from a specific block in one request.
-    let where = {};
-
-    if (latestEvent?.blockTimestamp) {
-        where =
-            chain === Chain.FANTOM
-                ? { timestamp_gte: latestEvent.blockTimestamp }
-                : { block_gte: String(latestEvent.blockNumber) };
-    }
+    const where = latestEvent ? { block_gte: String(latestEvent.blockNumber) } : {};
 
     // Get events
-    const getterFn =
-        chain === Chain.FANTOM
-            ? v2SubgraphClient.getFantomPoolJoinExits.bind(v2SubgraphClient)
-            : v2SubgraphClient.getPoolJoinExits.bind(v2SubgraphClient);
-
-    const { joinExits } = await getterFn({
+    const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
         first: 1000,
         where: where,
         orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,

@@ -1,8 +1,7 @@
 import type { Chain } from '@prisma/client';
 import type { BigNumber } from 'ethers';
-import type { PoolAprService, PoolStakingService } from '../pool/pool-types';
+import type { PoolAprService } from '../pool/pool-types';
 import type { UserStakedBalanceService } from '../user/user-types';
-import type { TokenPriceHandler } from '../token/token-types';
 import type { BaseProvider } from '@ethersproject/providers';
 import type { GqlChain } from '../../schema';
 import type { ContentService } from '../content/content-types';
@@ -13,7 +12,6 @@ import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.
 export interface NetworkConfig {
     data: NetworkData;
     contentService: ContentService;
-    poolStakingServices: PoolStakingService[];
     poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];
     provider: BaseProvider;
@@ -72,8 +70,8 @@ export interface NetworkData {
         sftmx?: string;
         beetsBar?: string;
         gauge?: string;
-        veBalLocks?: string;
-        userBalances: string;
+        aura?: string;
+        cowAmm?: string;
     };
     protocolToken: 'beets' | 'bal';
     beets?: {
@@ -94,6 +92,7 @@ export interface NetworkData {
     };
     veBal?: {
         address: string;
+        bptAddress: string;
         delegationProxy: string;
     };
     gaugeControllerAddress?: string;
@@ -127,24 +126,6 @@ export interface NetworkData {
     reliquary?: {
         address: string;
         excludedFarmIds: string[];
-    };
-    copper?: {
-        proxyAddress: string;
-    };
-    beefy?: {
-        linearPools: string[];
-    };
-    stader?: {
-        sFtmxContract: string;
-    };
-    rocket?: {
-        rEthContract: string;
-    };
-    spooky?: {
-        xBooContract: string;
-    };
-    overnight?: {
-        aprEndpoint: string;
     };
     avgBlockSpeed: number;
     sor?: {

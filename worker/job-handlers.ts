@@ -14,9 +14,11 @@ import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
-import { AllNetworkConfigs } from '../modules/network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../modules/network/network-config';
 import { JobsController } from '../modules/controllers/jobs-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
+import { Chain } from '@prisma/client';
+import { CowAmmController } from '../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
 
@@ -128,7 +130,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigs)),
+                    () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigsKeyedOnChain) as Chain[]),
                     res,
                     next,
                 );
@@ -190,15 +192,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'backfill-join-exits-v2':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => jobsController.backfillJoinExitsV2(chainId),
-                    res,
-                    next,
-                );
-                break;
             case 'sync-sanity-pool-data':
                 await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);
                 break;
@@ -224,7 +217,13 @@ export function configureWorkerRoutes(app: Express) {
                 );
                 break;
             case 'sync-staking-for-pools':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncStakingForPools(), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => poolService.syncStakingForPools([networkContext.chain]),
+                    res,
+                    next,
+                );
                 break;
             case 'cache-protocol-data':
                 await runIfNotAlreadyRunning(
@@ -402,6 +401,43 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     chainId,
                     () => jobsController.syncSwapsUpdateVolumeAndFees(chainId),
+                    res,
+                    next,
+                );
+                break;
+            // COW AMM
+            case 'add-new-cow-amm-pools':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().addPools(chainId), res, next);
+                break;
+            case 'sync-cow-amm-pools':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncPools(chainId), res, next);
+                break;
+            case 'sync-cow-amm-swaps':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncSwaps(chainId), res, next);
+                break;
+            case 'sync-cow-amm-join-exits':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncJoinExits(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-cow-amm-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncSnapshots(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-com-amm-volume-and-fees':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().updateVolumeAndFees(chainId),
                     res,
                     next,
                 );

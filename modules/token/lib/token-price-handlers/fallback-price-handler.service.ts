@@ -40,7 +40,8 @@ export class FallbackHandlerService implements TokenPriceHandler {
                             update: {
                                 price: price.price,
                                 close: price.price,
-                                updatedBy: this.id,
+                                updatedAt: price.updatedAt,
+                                updatedBy: price.updatedBy,
                             },
                             create: {
                                 tokenAddress: token.address,
@@ -51,7 +52,8 @@ export class FallbackHandlerService implements TokenPriceHandler {
                                 low: price.price,
                                 open: price.price,
                                 close: price.price,
-                                updatedBy: this.id,
+                                updatedAt: price.updatedAt,
+                                updatedBy: price.updatedBy,
                             },
                         }),
                     );

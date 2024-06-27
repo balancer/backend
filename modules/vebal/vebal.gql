@@ -12,6 +12,8 @@ extend type Mutation {
 
 type GqlVeBalUserData {
     balance: AmountHumanReadable!
+    locked: AmountHumanReadable!
+    lockedUsd: AmountHumanReadable!
     rank: Int
 }
 

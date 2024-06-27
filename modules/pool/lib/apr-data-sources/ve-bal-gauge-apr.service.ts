@@ -134,6 +134,8 @@ export class GaugeAprService implements PoolAprService {
                             max: minApr * this.MAX_VEBAL_BOOST,
                         };
 
+                        itemData.apr = minApr * this.MAX_VEBAL_BOOST;
+
                         return [itemData, rangeData];
                     } else {
                         itemData.apr = gaugeTvl > 0 ? rewardPerYear / gaugeTvl : 0;

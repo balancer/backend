@@ -12,12 +12,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-07-10',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
+        balancer: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
         beetsBar: '',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-base-blocks/version/latest',
-        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: '',
+        gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -42,6 +41,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0xd87f44df0159dc78029ab9ca7d7e57e7249f5acd',
     },
     balancer: {
@@ -66,6 +66,24 @@ export default <NetworkData>{
                 path: 'apy',
                 scale: 1,
                 isIbYield: true,
+            },
+        },
+        maker: {
+            sdai: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
+        },
+        aave: {
+            v3: {
+                subgraphUrl:
+                    'https://api.goldsky.com/api/public/project_clk74pd7lueg738tw9sjh79d6/subgraphs/aave-v3-base/1.0.0/gn',
+                tokens: {
+                    USDC: {
+                        underlyingAssetAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+                        aTokenAddress: '0x4e65fe4dba92790696d040ac24aa414708f5c0ab',
+                        wrappedTokens: {
+                            stataBasUSDC: '0x4ea71a20e655794051d1ee8b6e4a3269b13ccacc',
+                        },
+                    },
+                },
             },
         },
     },

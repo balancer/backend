@@ -3,6 +3,23 @@ hooks:
     afterAllFileWrite:
         - prettier --write
 generates:
+    modules/sources/subgraphs/cow-amm/generated/types.ts:
+        schema: ${COW_AMM_SUBGRAPH}
+        documents: 'modules/sources/subgraphs/cow-amm/*.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            skipTypename: true
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+    modules/sources/subgraphs/cow-amm/generated/balancer-v3-schema.graphql:
+        schema: ${COW_AMM_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/sources/subgraphs/balancer-v3-vault/generated/types.ts:
         schema: ${V3_SUBGRAPH}
         documents: 'modules/sources/subgraphs/balancer-v3-vault/*.graphql'
@@ -87,6 +104,24 @@ generates:
         schema: ${RELIQUARY_SUBGRAPH}
         plugins:
             - schema-ast
+    modules/sources/subgraphs/aura/generated/aura-subgraph-types.ts:
+        schema: ${AURA_SUBGRAPH}
+        documents: 'modules/sources/subgraphs/aura/aura-subgraph-queries.graphql'
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            scalars:
+                BigInt: string
+                Bytes: string
+                BigDecimal: string
+            namingConvention:
+                enumValues: keep
+    modules/sources/subgraphs/aura/generated/aura-subgraph-schema.graphql:
+        schema: ${AURA_SUBGRAPH}
+        plugins:
+            - schema-ast
     modules/sources/subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types.ts:
         schema: ${SFTMX_SUBGRAPH}
         documents: 'modules/sources/subgraphs/sftmx-subgraph/sftmx-subgraph-queries.graphql'
@@ -156,7 +191,7 @@ generates:
         plugins:
             - schema-ast
     modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-types.ts:
-        schema: ${VEBALLOCKS_SUBGRAPH}
+        schema: ${GAUGE_SUBGRAPH}
         documents: 'modules/subgraphs/veBal-locks-subgraph/veBal-locks-subgraph-queries.graphql'
         plugins:
             - typescript
@@ -170,23 +205,7 @@ generates:
             namingConvention:
                 enumValues: keep
     modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-schema.graphql:
-        schema: ${VEBALLOCKS_SUBGRAPH}
-        plugins:
-            - schema-ast
-    modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-subgraph-types.ts:
-        schema: ${USER_SNAPSHOT_SUBGRAPH}
-        documents: 'modules/subgraphs/user-snapshot-subgraph/user-snapshot-subgraph-queries.graphql'
-        plugins:
-            - typescript
-            - typescript-operations
-            - typescript-graphql-request
-        config:
-            scalars:
-                BigInt: string
-                Bytes: string
-                BigDecimal: string
-    modules/subgraphs/user-snapshot-subgraph/generated/user-snapshot-schema.graphql:
-        schema: ${USER_SNAPSHOT_SUBGRAPH}
+        schema: ${GAUGE_SUBGRAPH}
         plugins:
             - schema-ast
     graphql_schema_generated.ts:

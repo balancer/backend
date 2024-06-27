@@ -12,12 +12,7 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
     public readonly id = 'SwapsPriceHandlerService';
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
-        return tokens.filter(
-            (token) =>
-                !token.types.includes('BPT') &&
-                !token.types.includes('PHANTOM_BPT') &&
-                !token.types.includes('LINEAR_WRAPPED_TOKEN'),
-        );
+        return tokens.filter((token) => !token.types.includes('BPT') && !token.types.includes('PHANTOM_BPT'));
     }
 
     public async updatePricesForTokens(

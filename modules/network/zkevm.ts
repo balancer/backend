@@ -1,19 +1,17 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { tokenService } from '../token/token.service';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
+import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
-import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../worker/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { env } from '../../app/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 
 const zkevmNetworkData: NetworkData = config.ZKEVM;
 
@@ -23,13 +21,11 @@ export const zkevmNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: zkevmNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(zkevmNetworkData.ybAprConfig, zkevmNetworkData.chain.prismaId),
-        new PhantomStableAprService(zkevmNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(tokenService, [zkevmNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, zkevmNetworkData.bal!.address)],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             zkevmNetworkData.subgraphs.balancer,
@@ -120,18 +116,10 @@ export const zkevmNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
-        {
-            name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
-        },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'backfill-join-exits-v2',
-            interval: every(20, 'seconds'),
         },
         {
             name: 'sync-swaps-v2',

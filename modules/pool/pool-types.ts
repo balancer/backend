@@ -1,4 +1,4 @@
-import { PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import { PrismaPoolWithTokens } from '../../prisma/prisma-types';
 
 export interface PoolAprService {
@@ -7,6 +7,6 @@ export interface PoolAprService {
 }
 
 export interface PoolStakingService {
-    syncStakingForPools(): Promise<void>;
-    reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[]): Promise<void>;
+    syncStakingForPools(chain: Chain): Promise<void>;
+    deleteStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void>;
 }

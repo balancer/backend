@@ -13,13 +13,12 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
-        beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
-        blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
-        masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
-        reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
-        sftmx: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/sftmx',
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/CcWtE5UMUaoKTRu8LWjzambKJtgUVjcN31pD5BdffVzK`,
+        beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/5wqt4pebTCm7259De4ejHDUkagvYMqNvG65jeN7mVKVK`,
+        blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
+        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/4aGMkmdmZBb5KT4o7rDao2N6q5Giqy3uiZ627EvoGHQb`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/A3AcKqC9ckiKNzkuTnHqy5w5z1PmKXPJnDGaSDkDGHFD`,
+        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/9nyH9cdBwBiXj3AJhbSEBSphzT89ozd68s9u4KTfD3ZL`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -66,10 +65,7 @@ export default <NetworkData>{
             '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
-    rpcUrl:
-        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.ankr.com/fantom`
-            : `https://rpc.fantom.gateway.fm`,
+    rpcUrl: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.ankr.com/fantom` : `https://rpc.ftm.tools`,
     rpcMaxBlockRange: 1000,
     protocolToken: 'beets',
     beets: {
@@ -219,15 +215,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    copper: {
-        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
-    },
-    beefy: {
-        linearPools: [''],
-    },
-    spooky: {
-        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
     },
     datastudio: {
         main: {
