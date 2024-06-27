@@ -119,6 +119,10 @@ type GqlPoolMinimal {
     """
     protocolVersion: Int!
     """
+    Pool is receiving rewards when liquidity tokens are staked
+    """
+    incentivized: Boolean!
+    """
     The name of the pool as per contract
     """
     name: String!

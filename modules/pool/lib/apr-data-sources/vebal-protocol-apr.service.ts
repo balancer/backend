@@ -17,7 +17,8 @@ const veBalAbi = parseAbi(['function totalSupply() view returns (uint)']);
 const feeDistributorAddress = '0xd3cf852898b21fc233251427c2dc93d3d604f3bb';
 const balAddress = '0xba100000625a3754423978a60c9317c58a424e3d';
 const vebalPool = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
-const vebalAddress = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56';
+const vebalPoolAddress = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56';
+const vebalAddress = '0xc128a9954e6c874ea3d62ce62b468ba073093f25';
 const bbAUsdAddress = '0xa13a9247ea42d743238089903570127dda72fe44';
 const id = `${vebalPool}-protocol-apr`;
 const chain = 'MAINNET';
@@ -92,17 +93,17 @@ export class VeBalProtocolAprService implements PoolAprService {
 
         // Prices
         const balPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: balAddress },
+            where: { tokenAddress: balAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bbAUsdPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: bbAUsdAddress },
+            where: { tokenAddress: bbAUsdAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
         const bptPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: vebalAddress },
+            where: { tokenAddress: vebalPoolAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
@@ -114,7 +115,7 @@ export class VeBalProtocolAprService implements PoolAprService {
         const lastWeekBBAUsdRevenue = revenue.bbAUsdAmount * bbAUsdPrice.price;
 
         const dailyRevenue = (lastWeekBalRevenue + lastWeekBBAUsdRevenue) / 7;
-        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply) / 100;
+        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
 
         return apr;
     }
