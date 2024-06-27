@@ -23,7 +23,7 @@ describe('SOR V3 Weighted Pool Tests', () => {
 
         const prismaWeightedPool = prismaPoolFactory.build({
             type: 'WEIGHTED',
-            vaultVersion: 3,
+            protocolVersion: 3,
             tokens: [token1, token2],
             dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '156' }),
         });
