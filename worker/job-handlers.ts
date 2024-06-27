@@ -433,7 +433,7 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'update-com-amm-volume-and-fees':
+            case 'update-cow-amm-volume-and-fees':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
