@@ -93,8 +93,10 @@ const balancerResolvers: Resolvers = {
                 sharePrice: `${snapshot.sharePrice}`,
                 volume24h: `${snapshot.volume24h}`,
                 fees24h: `${snapshot.fees24h}`,
+                surplus24h: `${snapshot.surplus24h}`,
                 totalSwapVolume: `${snapshot.totalSwapVolume}`,
                 totalSwapFee: `${snapshot.totalSwapFee}`,
+                totalSurplus: `${snapshot.totalSurplus}`,
                 swapsCount: `${snapshot.swapsCount}`,
                 holdersCount: `${snapshot.holdersCount}`,
             }));

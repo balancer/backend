@@ -293,15 +293,18 @@ export class PoolSnapshotService {
             totalSharesNum: parseFloat(snapshot.totalShares),
             totalSwapVolume: parseFloat(snapshot.swapVolume),
             totalSwapFee: parseFloat(snapshot.swapFees),
+            totalSurplus: 0,
             swapsCount: parseInt(snapshot.swapsCount),
             holdersCount: parseInt(snapshot.holdersCount),
             amounts: snapshot.amounts,
             volume24h: Math.max(parseFloat(snapshot.swapVolume) - parseFloat(prevTotalSwapVolume), 0),
             fees24h: Math.max(parseFloat(snapshot.swapFees) - parseFloat(prevTotalSwapFee), 0),
+            surplus24h: 0,
             sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
             totalProtocolSwapFees: [],
             totalProtocolYieldFees: [],
             totalVolumes: [],
+            totalSurpluses: [],
         };
     }
 

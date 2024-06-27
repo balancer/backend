@@ -10,6 +10,11 @@ export type SwapEvent = PrismaPoolEvent & {
             amount: string;
             valueUSD: string;
         };
+        surplus?: {
+            address: string;
+            amount: string;
+            valueUSD: string;
+        };
         tokenIn: {
             address: string;
             amount: string;

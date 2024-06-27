@@ -12,15 +12,13 @@ import { prisma } from '../../../prisma/prisma-client';
  * @returns
  */
 export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Promise<SwapEvent[]> {
-    const protocolVersion = 3;
-
     return swaps.map((swap) => ({
         id: swap.id, // tx + logIndex
         tx: swap.transactionHash,
         type: 'SWAP',
         poolId: swap.pool,
         chain: chain,
-        protocolVersion,
+        protocolVersion: 3,
         userAddress: swap.user.id,
         blockNumber: Number(swap.blockNumber),
         blockTimestamp: Number(swap.blockTimestamp),

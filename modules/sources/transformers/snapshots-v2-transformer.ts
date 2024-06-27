@@ -49,6 +49,7 @@ export const snapshotsV2Transformer = (
         totalVolumes: [], // V3 field only, it's a split in token volumes
         totalProtocolSwapFees: [], // V3 field only, it's a split in fees per token
         totalProtocolYieldFees: [], // V3 field only, it's a split in fees per token
+        totalSurpluses: [], // V3 field only, it's a split in token surpluses
     };
 
     // Calculate USD values
@@ -80,8 +81,10 @@ export const snapshotsV2Transformer = (
         sharePrice: values.totalSharesNum === 0 ? 0 : totalLiquidity / values.totalSharesNum,
         volume24h: dailyVolume,
         fees24h: dailyFees,
+        surplus24h: 0,
         totalSwapVolume: totalVolume,
         totalSwapFee: totalFees,
+        totalSurplus: 0,
     };
 
     return {
