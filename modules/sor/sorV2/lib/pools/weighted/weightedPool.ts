@@ -40,7 +40,6 @@ export class WeightedPool implements BasePool {
     public readonly swapFee: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
-    public readonly vaultVersion: number;
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
@@ -86,7 +85,6 @@ export class WeightedPool implements BasePool {
             parseEther(pool.dynamicData.swapFee),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            pool.protocolVersion,
         );
     }
 
@@ -98,12 +96,10 @@ export class WeightedPool implements BasePool {
         swapFee: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
-        vaultVersion: number,
     ) {
         this.chain = chain;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
-        this.vaultVersion = vaultVersion;
         this.address = address;
         this.swapFee = swapFee;
         this.tokens = tokens;
