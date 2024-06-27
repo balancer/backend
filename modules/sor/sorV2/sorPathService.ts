@@ -188,6 +188,7 @@ class SorPathService implements SwapService {
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
                 protocolVersion: vaultVersion,
+                vaultVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
