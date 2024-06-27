@@ -49,14 +49,14 @@ export const snapshotsCowAmmTransformer = (
         swapsCount: Number(snapshot?.swapsCount) || previousDaySnapshot?.swapsCount || 0,
         holdersCount: Number(snapshot?.holdersCount) || previousDaySnapshot?.holdersCount || 0,
         totalVolumes:
-            snapshot?.totalVolume.map((balance, index) => {
+            snapshot?.totalSwapVolumes.map((balance, index) => {
                 const address = poolTokens[index];
                 return String(weiToFloat(balance, decimals[address] || 18));
             }) ||
             previousDaySnapshot?.totalVolumes ||
             defaultZeros,
         totalSurpluses:
-            snapshot?.totalSurplus.map((balance, index) => {
+            snapshot?.totalSurpluses.map((balance, index) => {
                 const address = poolTokens[index];
                 return String(weiToFloat(balance, decimals[address] || 18));
             }) ||
@@ -85,7 +85,7 @@ export const snapshotsCowAmmTransformer = (
     const lastVolume = previousDaySnapshot?.totalSwapVolume || 0;
 
     const dailyVolume =
-        snapshot?.totalVolume.reduce((acc, volume, index) => {
+        snapshot?.totalSwapVolumes.reduce((acc, volume, index) => {
             const address = poolTokens[index];
             const previousVolume = previousDaySnapshot?.totalVolumes[index] || '0';
             const diff = weiToFloat(volume, decimals[address] || 18) - parseFloat(previousVolume);
@@ -98,7 +98,7 @@ export const snapshotsCowAmmTransformer = (
     const lastSurplus = previousDaySnapshot?.totalSurplus || 0;
 
     const dailySurplus =
-        snapshot?.totalSurplus.reduce((acc, surplus, index) => {
+        snapshot?.totalSurpluses.reduce((acc, surplus, index) => {
             const address = poolTokens[index];
             const previousSurplus = previousDaySnapshot?.totalSurpluses[index] || '0';
             const diff = weiToFloat(surplus, decimals[address] || 18) - parseFloat(previousSurplus);

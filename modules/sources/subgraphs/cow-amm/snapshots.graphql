@@ -31,9 +31,9 @@ fragment CowAmmSnapshot on PoolSnapshot {
         }
     }
     balances
-    totalSurplus
-    totalSwapFee
-    totalVolume
+    totalSurpluses
+    totalSwapFees
+    totalSwapVolumes
     totalShares
     timestamp
     swapsCount

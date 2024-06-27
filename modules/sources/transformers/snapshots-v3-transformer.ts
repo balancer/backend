@@ -53,6 +53,7 @@ export const snapshotsV3Transformer = (
         totalProtocolYieldFees:
             snapshot?.totalProtocolYieldFees || previousDaySnapshot?.totalProtocolYieldFees || defaultZeros,
         amounts: snapshot?.balances || previousDaySnapshot?.amounts || defaultZeros,
+        totalSurpluses: defaultZeros,
     };
 
     const tvl = values.amounts.reduce((acc, amount, index) => {
