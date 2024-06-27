@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { JoinExitFragment } from '../subgraphs/balancer-v3-vault/generated/types';
+import { AddRemoveFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent } from '../../../prisma/prisma-types';
 
@@ -10,14 +10,14 @@ import { JoinExitEvent } from '../../../prisma/prisma-types';
  * @param chain
  * @returns
  */
-export async function joinExitV3Transformer(events: JoinExitFragment[], chain: Chain): Promise<JoinExitEvent[]> {
+export async function joinExitV3Transformer(events: AddRemoveFragment[], chain: Chain): Promise<JoinExitEvent[]> {
     const protocolVersion = 3;
 
     return events.map((event) => ({
         protocolVersion,
         id: event.id, // tx + logIndex
         tx: event.transactionHash,
-        type: event.type === 'Join' ? PoolEventType.JOIN : PoolEventType.EXIT,
+        type: event.type === 'Add' ? PoolEventType.JOIN : PoolEventType.EXIT,
         poolId: event.pool.id,
         chain: chain,
         userAddress: event.user.id,

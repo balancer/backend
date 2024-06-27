@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { V3VaultSubgraphClient } from '../../sources/subgraphs';
-import { JoinExit_OrderBy, OrderDirection } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
+import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { daysAgo } from '../../common/time';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
@@ -41,15 +41,15 @@ export const syncJoinExits = async (
             : { blockTimestamp_gte: String(syncSince) };
 
     // Get events
-    const { joinExits } = await vaultSubgraphClient.JoinExits({
+    const { addRemoves } = await vaultSubgraphClient.AddRemove({
         first: 1000,
         where,
-        orderBy: JoinExit_OrderBy.BlockNumber,
+        orderBy: AddRemove_OrderBy.BlockNumber,
         orderDirection: OrderDirection.Asc,
     });
 
     // Prepare DB entries
-    const dbEntries = await joinExitV3Transformer(joinExits, chain);
+    const dbEntries = await joinExitV3Transformer(addRemoves, chain);
 
     console.log(`Syncing ${dbEntries.length} join/exit events`);
 

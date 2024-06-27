@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
-import { InvestType, JoinExitFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
+import { AddRemoveFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/cow-amm/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
@@ -37,10 +37,9 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
     });
 
     // Transform COW AMM types to V3 types
-    const joinExits = addRemoves.map((addRemove): JoinExitFragment => {
+    const joinExits = addRemoves.map((addRemove): AddRemoveFragment => {
         return {
             ...addRemove,
-            type: addRemove.type === 'Add' ? InvestType.Join : InvestType.Exit,
         };
     });
 
