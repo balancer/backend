@@ -14,7 +14,7 @@ export class WeightedPoolToken extends TokenAmount {
 
     public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
         super(token, amount);
-        this.weight = parseEther(weight.toString());
+        this.weight = BigInt(weight);
         this.index = index;
     }
 
@@ -68,9 +68,13 @@ export class WeightedPool implements BasePool {
             // TODO: parseFloat with toFixed changes the value, better use parseEther instead
             const balance = parseFloat(poolToken.dynamicData.balance).toFixed(18);
             const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
-            //TODO: Remove this once the weight for V3 Pools is in the same format as V2 Pools
             poolTokens.push(
-                new WeightedPoolToken(token, tokenAmount.amount, poolToken.dynamicData.weight, poolToken.index),
+                new WeightedPoolToken(
+                    token,
+                    tokenAmount.amount,
+                    parseEther(poolToken.dynamicData.weight),
+                    poolToken.index,
+                ),
             );
         }
 
