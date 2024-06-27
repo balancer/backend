@@ -25,11 +25,6 @@ export const snapshotsV3Transformer = (
     previousDaySnapshot?: PrismaPoolSnapshot,
     snapshot?: PoolSnapshotFragment,
 ): PrismaPoolSnapshot => {
-    // Subgraph is storing balances in wei, we need to convert them to float using token decimals
-    const decimals = Object.fromEntries(
-        allTokens.filter((t) => poolTokens.includes(t.address)).map((t) => [t.address, t.decimals]),
-    );
-
     // Use when the pool is new and there are no snapshots yet
     const defaultZeros = Array.from({ length: poolTokens.length }, () => '0');
 

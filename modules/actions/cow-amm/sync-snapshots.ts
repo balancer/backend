@@ -4,9 +4,7 @@ import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { OrderDirection, PoolSnapshot_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import _ from 'lodash';
 import { daysAgo, roundToMidnight } from '../../common/time';
-import { snapshotsV2Transformer } from '../../sources/transformers/snapshots-v2-transformer';
 import { snapshotsV3Transformer } from '../../sources/transformers/snapshots-v3-transformer';
-import { raw } from '@prisma/client/runtime';
 
 const protocolVersion = 1;
 
@@ -42,7 +40,7 @@ export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain:
     // because we want to sync the next day from what we have in the DB
     const timestamp = (storedTimestamp && storedTimestamp + 86400) || subgraphTimestamp;
 
-    console.log('Syncing V2 snapshots for', chain, timestamp);
+    console.log('Syncing COW snapshots for', chain, timestamp);
 
     return syncSnapshotsForADayCowAmm(subgraphClient, chain, timestamp);
 }

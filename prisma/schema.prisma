@@ -194,10 +194,12 @@ model PrismaPoolDynamicData {
     totalLiquidity          Float
     volume24h               Float               @default(0)
     fees24h                 Float               @default(0)
+    surplus24h              Float               @default(0)
     yieldCapture24h         Float               @default(0)
     apr                     Float               @default(0)
     volume48h               Float               @default(0)
     fees48h                 Float               @default(0)
+    surplus48h              Float               @default(0)
     yieldCapture48h         Float               @default(0)
     totalLiquidity24hAgo    Float               @default(0)
     totalShares24hAgo       String              @default("0")
