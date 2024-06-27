@@ -88,7 +88,7 @@ export class SorService {
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            vaultVersion: args.useProtocolVersion,
+            protocolVersion: args.useProtocolVersion,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {
@@ -267,9 +267,9 @@ export class SorService {
         );
     }
 
-    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'vaultVersion'>) {
-        const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 2 });
-        const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, vaultVersion: 3 });
+    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
+        const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 2 });
+        const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 3 });
         if (input.swapType === 'EXACT_IN') {
             return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
                 ? swapBalancerV2

@@ -105,7 +105,7 @@ class SorPathService implements SwapService {
                 paths!,
                 input.swapType,
                 input.chain,
-                input.vaultVersion as 2 | 3,
+                input.protocolVersion as 2 | 3,
                 input.queryBatchSwap,
                 input.callDataInput,
             );
@@ -126,11 +126,11 @@ class SorPathService implements SwapService {
     }
 
     private async getSwapPathsFromSor(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, vaultVersion, graphTraversalConfig }: GetSwapPathsInput,
+        { chain, tokenIn, tokenOut, swapType, swapAmount, protocolVersion, graphTraversalConfig }: GetSwapPathsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<PathWithAmount[] | null> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain, vaultVersion);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -175,7 +175,7 @@ class SorPathService implements SwapService {
         paths: PathWithAmount[],
         swapType: GqlSorSwapType,
         chain: Chain,
-        vaultVersion: 2 | 3,
+        protocolVersion: 2 | 3,
         queryFirst = false,
         callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
@@ -187,8 +187,8 @@ class SorPathService implements SwapService {
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
-                protocolVersion: vaultVersion,
-                vaultVersion,
+                protocolVersion,
+                vaultVersion: protocolVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
