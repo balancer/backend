@@ -70,12 +70,7 @@ export class WeightedPool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
             //TODO: Remove this once the weight for V3 Pools is in the same format as V2 Pools
             poolTokens.push(
-                new WeightedPoolToken(
-                    token,
-                    tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.weight),
-                    poolToken.index,
-                ),
+                new WeightedPoolToken(token, tokenAmount.amount, poolToken.dynamicData.weight, poolToken.index),
             );
         }
 
