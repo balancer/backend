@@ -9,7 +9,7 @@ import BalancerRouterAbi from './abis/BalancerRouter';
 interface PoolInput {
     id: string;
     address: string;
-    vaultVersion: number;
+    protocolVersion: number;
     tokens: {
         address: string;
         index: number;
@@ -189,7 +189,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     bToAAmountOut: 0n,
                     effectivePrice: 0n,
                     effectivePriceAmountIn: 0n,
-                    vaultVersion: pool.vaultVersion,
+                    vaultVersion: pool.protocolVersion,
                 });
             }
         }

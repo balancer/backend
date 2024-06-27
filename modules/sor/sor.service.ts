@@ -63,7 +63,7 @@ export class SorService {
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
-        if (!args.useVaultVersion) {
+        if (!args.useProtocolVersion) {
             return this.getBestSwapPathVersion({
                 chain: args.chain!,
                 swapAmount: amount,
@@ -88,7 +88,7 @@ export class SorService {
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            vaultVersion: args.useVaultVersion,
+            vaultVersion: args.useProtocolVersion,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {

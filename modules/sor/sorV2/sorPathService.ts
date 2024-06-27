@@ -419,12 +419,12 @@ class SorPathService implements SwapService {
      * Fetch pools from Prisma and map to b-sdk BasePool.
      * @returns
      */
-    private async getBasePoolsFromDb(chain: Chain, vaultVersion: number): Promise<PrismaPoolWithDynamic[]> {
+    private async getBasePoolsFromDb(chain: Chain, protocolVersion: number): Promise<PrismaPoolWithDynamic[]> {
         const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 chain,
-                vaultVersion,
+                protocolVersion,
                 dynamicData: {
                     totalSharesNum: {
                         gt: 0.000000000001,
