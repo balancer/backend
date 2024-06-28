@@ -335,10 +335,6 @@ export class PoolService {
         }
     }
 
-    public async syncLatestSnapshotsForAllPools(daysToSync?: number) {
-        await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
-    }
-
     public async syncLatestReliquarySnapshotsForAllFarms() {
         if (networkContext.data.subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(

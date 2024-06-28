@@ -30,11 +30,13 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
     // In case there are no snapshots stored in the DB, sync from the subgraph's earliest snapshot
     let subgraphTimestamp = 0;
     if (!storedTimestamp) {
+        console.time('BalancerPoolSnapshots');
         const { poolSnapshots } = await subgraphClient.BalancerPoolSnapshots({
             first: 1,
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
+        console.timeEnd('BalancerPoolSnapshots');
 
         subgraphTimestamp = poolSnapshots[0].timestamp;
     }
