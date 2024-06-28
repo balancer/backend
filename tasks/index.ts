@@ -57,7 +57,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return PoolsMutationController().loadOnchainDataForAllPools(chain);
     } else if (job === 'add-new-cow-amm-pools') {
         return CowAmmController().addPools(chain);
-    } else if (job === 'sync-changed-cow-amm-pools') {
+    } else if (job === 'sync-cow-amm-pools') {
         return CowAmmController().syncPools(chain);
     } else if (job === 'reload-cow-amm-pools') {
         return CowAmmController().reloadPools(chain);
