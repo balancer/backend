@@ -35,7 +35,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
         first: 1000,
         where: where,
-        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
+        orderBy: JoinExit_OrderBy.Block,
         orderDirection: OrderDirection.Asc,
     });
 
