@@ -624,6 +624,7 @@ export class PoolGqlLoaderService {
             ...poolToken.token,
             index: poolToken.index,
             balance: poolToken.dynamicData?.balance || '0',
+            balanceUSD: String(poolToken.dynamicData?.balanceUSD) || '0',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
             priceRateProvider: poolToken.priceRateProvider,
             weight: poolToken?.dynamicData?.weight,
