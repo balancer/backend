@@ -75,19 +75,11 @@ export const upsertPools = async (
                         token: { address },
                     })),
                     pauseWindowEndTime: '',
-                    tokens: poolData.tokens.map((token) => {
-                        const idx = onchainData[poolData.id].tokens.findIndex(
-                            (t) => t.address.toLowerCase() === token.address.toLowerCase(),
-                        );
-
-                        return {
-                            ...token,
-                            index: idx,
-                            totalProtocolSwapFee: '0',
-                            totalProtocolYieldFee: '0',
-                            balance: formatUnits(onchainData[poolData.id].tokens[idx].balance, token.decimals),
-                        };
-                    }),
+                    tokens: poolData.tokens.map((token) => ({
+                        ...token,
+                        totalProtocolSwapFee: '0',
+                        totalProtocolYieldFee: '0',
+                    })),
                 },
                 {
                     ...onchainData[poolData.id],
