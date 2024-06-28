@@ -759,6 +759,10 @@ type GqlPoolTokenDetail {
     """
     balance: BigDecimal!
     """
+    USD Balance of the pool token.
+    """
+    balanceUSD: BigDecimal!
+    """
     If it is an appreciating token, it shows the current price rate. 1 otherwise.
     """
     priceRate: BigDecimal!
