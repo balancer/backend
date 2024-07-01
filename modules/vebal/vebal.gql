@@ -1,8 +1,8 @@
 extend type Query {
-    veBalGetUserBalance: AmountHumanReadable!
-    veBalGetTotalSupply: AmountHumanReadable!
+    veBalGetUserBalance(chain: GqlChain, address: String): AmountHumanReadable!
+    veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
     veBalGetVotingList: [GqlVotingPool!]!
-    veBalGetUser: GqlVeBalUserData!
+    veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!
 }
 
 extend type Mutation {

@@ -412,6 +412,36 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-cow-amm-pools':
                 await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncPools(chainId), res, next);
                 break;
+            case 'sync-cow-amm-swaps':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncSwaps(chainId), res, next);
+                break;
+            case 'sync-cow-amm-join-exits':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncJoinExits(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-cow-amm-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncSnapshots(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-cow-amm-volume-and-fees':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().updateVolumeAndFees(chainId),
+                    res,
+                    next,
+                );
+                break;
             default:
                 res.sendStatus(400);
                 throw new Error(`Unhandled job type ${job.name}`);

@@ -84,10 +84,12 @@ model PrismaPoolDynamicData {
     totalLiquidity          Float
     volume24h               Float               @default(0)
     fees24h                 Float               @default(0)
+    surplus24h              Float               @default(0)
     yieldCapture24h         Float               @default(0)
     apr                     Float               @default(0)
     volume48h               Float               @default(0)
     fees48h                 Float               @default(0)
+    surplus48h              Float               @default(0)
     yieldCapture48h         Float               @default(0)
     totalLiquidity24hAgo    Float               @default(0)
     totalShares24hAgo       String              @default("0")
@@ -460,14 +462,17 @@ model PrismaPoolSnapshot {
     sharePrice          Float
     volume24h           Float
     fees24h             Float
+    surplus24h          Float @default(0)
     totalShares         String
     totalSharesNum      Float
     totalSwapVolume     Float
     totalSwapFee        Float
+    totalSurplus        Float @default(0)
     swapsCount          Int
     holdersCount        Int
     amounts             String[]
     totalVolumes        String[] @default([]) // Used for V3 snapshots
+    totalSurpluses      String[] @default([]) // Used for cow amm snapshots
     totalProtocolSwapFees String[] @default([]) // Used for V3 snapshots
     totalProtocolYieldFees String[] @default([]) // Used for V3 snapshots
 

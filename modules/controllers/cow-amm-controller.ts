@@ -3,11 +3,33 @@ import { prisma } from '../../prisma/prisma-client';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
-import { fetchChangedPools, fetchNewPools, syncPools, upsertPools } from '../actions/cow-amm';
-import { getChangedCowAmmPools } from '../sources/logs/get-changed-cow-amm-pools';
-import { PrismaLastBlockSyncedCategory } from '@prisma/client';
+import {
+    fetchChangedPools,
+    fetchNewPools,
+    syncPools,
+    upsertPools,
+    syncSnapshots,
+    syncSwaps,
+    syncJoinExits,
+} from '../actions/cow-amm';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
+import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 
 export function CowAmmController(tracer?: any) {
+    const getSubgraphClient = (chain: Chain) => {
+        const {
+            subgraphs: { cowAmm },
+        } = config[chain];
+
+        // Guard against unconfigured chains
+        if (!cowAmm) {
+            throw new Error(`Chain not configured: ${chain}`);
+        }
+
+        const client = getCowAmmSubgraphClient(cowAmm);
+
+        return client;
+    };
     return {
         /**
          * Adds new pools found in subgraph to the database
@@ -16,16 +38,7 @@ export function CowAmmController(tracer?: any) {
          */
         async addPools(chainId: string) {
             const chain = chainIdToChain[chainId];
-            const {
-                subgraphs: { cowAmm },
-            } = config[chain];
-
-            // Guard against unconfigured chains
-            if (!cowAmm) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            const subgraphClient = getCowAmmSubgraphClient(cowAmm);
+            const subgraphClient = getSubgraphClient(chain);
             const newPools = await fetchNewPools(subgraphClient, chain);
             const viemClient = getViemClient(chain);
 
@@ -40,16 +53,8 @@ export function CowAmmController(tracer?: any) {
          */
         async reloadPools(chainId: string) {
             const chain = chainIdToChain[chainId];
-            const {
-                subgraphs: { cowAmm },
-            } = config[chain];
 
-            // Guard against unconfigured chains
-            if (!cowAmm) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            const subgraphClient = getCowAmmSubgraphClient(cowAmm);
+            const subgraphClient = getSubgraphClient(chain);
             const allPools = await subgraphClient.getAllPools({});
             const viemClient = getViemClient(chain);
 
@@ -72,7 +77,7 @@ export function CowAmmController(tracer?: any) {
             const viemClient = getViemClient(chain);
 
             // TODO: move prismaLastBlockSynced wrapping to an action
-            const fromBlock = (
+            let fromBlock = (
                 await prisma.prismaLastBlockSynced.findFirst({
                     where: {
                         category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
@@ -82,10 +87,28 @@ export function CowAmmController(tracer?: any) {
             )?.blockNumber;
 
             if (!fromBlock) {
-                return false;
+                fromBlock = await prisma.prismaPoolEvent
+                    .findFirst({
+                        where: {
+                            chain,
+                            protocolVersion: 1,
+                        },
+                        orderBy: {
+                            blockNumber: 'desc',
+                        },
+                    })
+                    .then((pool) => pool?.blockNumber);
+
+                if (fromBlock && fromBlock > 10) {
+                    fromBlock = fromBlock - 10; // Safety overlap
+                }
             }
 
-            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock - 10); // Safety overlap
+            if (!fromBlock) {
+                fromBlock = 0;
+            }
+
+            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock);
 
             if (changedPools.length === 0) {
                 return [];
@@ -113,10 +136,37 @@ export function CowAmmController(tracer?: any) {
                 create: {
                     category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
                     blockNumber: Number(toBlock),
+                    chain,
                 },
             });
 
             return changedPools;
+        },
+        async syncSnapshots(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const subgraphClient = getSubgraphClient(chain);
+            const entries = await syncSnapshots(subgraphClient, chain);
+            return entries;
+        },
+        async syncJoinExits(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const subgraphClient = getSubgraphClient(chain);
+            const entries = await syncJoinExits(subgraphClient, chain);
+            return entries;
+        },
+        async syncSwaps(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const subgraphClient = getSubgraphClient(chain);
+            const swaps = await syncSwaps(subgraphClient, chain);
+            const poolIds = swaps
+                .map((event) => event.poolId)
+                .filter((value, index, self) => self.indexOf(value) === index);
+            return poolIds;
+        },
+        async updateVolumeAndFees(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            await updateVolumeAndFees(chain);
+            return true;
         },
     };
 }

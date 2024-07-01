@@ -25,7 +25,7 @@ type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
  * @returns
  */
 export async function poolUpsertsUsd<
-    T extends OnchainCowAmmPoolUpdateData | OnchainPoolUpdateData | SubgraphPoolUpsertData,
+    T extends OnchainCowAmmPoolUpdateData | OnchainPoolUpdateData | Exclude<SubgraphPoolUpsertData, null>,
 >(
     upsertData: T[],
     chain: Chain,

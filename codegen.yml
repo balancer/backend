@@ -191,7 +191,7 @@ generates:
         plugins:
             - schema-ast
     modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-types.ts:
-        schema: ${VEBALLOCKS_SUBGRAPH}
+        schema: ${GAUGE_SUBGRAPH}
         documents: 'modules/subgraphs/veBal-locks-subgraph/veBal-locks-subgraph-queries.graphql'
         plugins:
             - typescript
@@ -205,7 +205,7 @@ generates:
             namingConvention:
                 enumValues: keep
     modules/subgraphs/veBal-locks-subgraph/generated/veBal-locks-subgraph-schema.graphql:
-        schema: ${VEBALLOCKS_SUBGRAPH}
+        schema: ${GAUGE_SUBGRAPH}
         plugins:
             - schema-ast
     graphql_schema_generated.ts:

@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import { PoolSnapshotFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain, PrismaPoolSnapshot, PrismaToken } from '@prisma/client';
+import { weiToFloat } from '../../common/numbers';
+import { CowAmmSnapshotFragment } from '../subgraphs/cow-amm/generated/types';
 
 /**
  * Takes V3 subgraph snapshots and transforms them into DB entries.
@@ -15,7 +16,7 @@ import { Chain, PrismaPoolSnapshot, PrismaToken } from '@prisma/client';
  * @param snapshot - V3 snapshot
  * @returns
  */
-export const snapshotsV3Transformer = (
+export const snapshotsCowAmmTransformer = (
     poolId: string,
     poolTokens: string[],
     epoch: number,
@@ -23,8 +24,13 @@ export const snapshotsV3Transformer = (
     allTokens: PrismaToken[],
     prices: Record<string, number>,
     previousDaySnapshot?: PrismaPoolSnapshot,
-    snapshot?: PoolSnapshotFragment,
+    snapshot?: CowAmmSnapshotFragment,
 ): PrismaPoolSnapshot => {
+    // Subgraph is storing balances in wei, we need to convert them to float using token decimals
+    const decimals = Object.fromEntries(
+        allTokens.filter((t) => poolTokens.includes(t.address)).map((t) => [t.address, t.decimals]),
+    );
+
     // Use when the pool is new and there are no snapshots yet
     const defaultZeros = Array.from({ length: poolTokens.length }, () => '0');
 
@@ -34,21 +40,37 @@ export const snapshotsV3Transformer = (
         chain,
         poolId,
         timestamp: epoch,
-        protocolVersion: 3,
+        protocolVersion: 1,
     };
 
     const values = {
         totalShares: snapshot?.totalShares || previousDaySnapshot?.totalShares || '0',
-        totalSharesNum: parseFloat(snapshot?.totalShares || '0'),
+        totalSharesNum: weiToFloat(snapshot?.totalShares || previousDaySnapshot?.totalShares || '0', 18),
         swapsCount: Number(snapshot?.swapsCount) || previousDaySnapshot?.swapsCount || 0,
         holdersCount: Number(snapshot?.holdersCount) || previousDaySnapshot?.holdersCount || 0,
-        totalVolumes: snapshot?.totalSwapVolumes || previousDaySnapshot?.totalVolumes || defaultZeros,
-        totalProtocolSwapFees:
-            snapshot?.totalProtocolSwapFees || previousDaySnapshot?.totalProtocolSwapFees || defaultZeros,
-        totalProtocolYieldFees:
-            snapshot?.totalProtocolYieldFees || previousDaySnapshot?.totalProtocolYieldFees || defaultZeros,
-        amounts: snapshot?.balances || previousDaySnapshot?.amounts || defaultZeros,
-        totalSurpluses: defaultZeros,
+        totalVolumes:
+            snapshot?.totalSwapVolumes.map((balance, index) => {
+                const address = poolTokens[index];
+                return String(weiToFloat(balance, decimals[address] || 18));
+            }) ||
+            previousDaySnapshot?.totalVolumes ||
+            defaultZeros,
+        totalSurpluses:
+            snapshot?.totalSurpluses.map((balance, index) => {
+                const address = poolTokens[index];
+                return String(weiToFloat(balance, decimals[address] || 18));
+            }) ||
+            previousDaySnapshot?.totalSurpluses ||
+            defaultZeros,
+        totalProtocolSwapFees: defaultZeros,
+        totalProtocolYieldFees: defaultZeros,
+        amounts:
+            snapshot?.balances.map((balance, index) => {
+                const address = poolTokens[index];
+                return String(weiToFloat(balance, decimals[address] || 18));
+            }) ||
+            previousDaySnapshot?.amounts ||
+            defaultZeros,
     };
 
     const tvl = values.amounts.reduce((acc, amount, index) => {
@@ -66,7 +88,20 @@ export const snapshotsV3Transformer = (
         snapshot?.totalSwapVolumes.reduce((acc, volume, index) => {
             const address = poolTokens[index];
             const previousVolume = previousDaySnapshot?.totalVolumes[index] || '0';
-            const diff = parseFloat(volume) - parseFloat(previousVolume);
+            const diff = weiToFloat(volume, decimals[address] || 18) - parseFloat(previousVolume);
+            if (!prices[address]) {
+                return acc;
+            }
+            return acc + diff * prices[address];
+        }, 0) || 0;
+
+    const lastSurplus = previousDaySnapshot?.totalSurplus || 0;
+
+    const dailySurplus =
+        snapshot?.totalSurpluses.reduce((acc, surplus, index) => {
+            const address = poolTokens[index];
+            const previousSurplus = previousDaySnapshot?.totalSurpluses[index] || '0';
+            const diff = weiToFloat(surplus, decimals[address] || 18) - parseFloat(previousSurplus);
             if (!prices[address]) {
                 return acc;
             }
@@ -74,6 +109,8 @@ export const snapshotsV3Transformer = (
         }, 0) || 0;
 
     const totalVolume = lastVolume + dailyVolume;
+
+    const totalSurplus = lastSurplus + dailySurplus;
 
     const lastFees = previousDaySnapshot?.totalSwapFee || 0;
 
@@ -86,10 +123,10 @@ export const snapshotsV3Transformer = (
         sharePrice: values.totalSharesNum === 0 ? 0 : tvl / values.totalSharesNum,
         volume24h: dailyVolume,
         fees24h: dailyFees,
-        surplus24h: 0,
+        surplus24h: dailySurplus,
         totalSwapVolume: totalVolume,
         totalSwapFee: totalFees,
-        totalSurplus: 0,
+        totalSurplus: totalSurplus,
     };
 
     return {

@@ -1,0 +1,41 @@
+query Snapshots(
+    $skip: Int
+    $first: Int
+    $orderBy: PoolSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $where: PoolSnapshot_filter
+    $block: Block_height
+) {
+    poolSnapshots(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...CowAmmSnapshot
+    }
+}
+
+fragment CowAmmSnapshot on PoolSnapshot {
+    id
+    pool {
+        id
+        swapFee
+        tokens {
+            id
+            index
+            address
+            decimals
+        }
+    }
+    balances
+    totalSurpluses
+    totalSwapFees
+    totalSwapVolumes
+    totalShares
+    timestamp
+    swapsCount
+    holdersCount
+}

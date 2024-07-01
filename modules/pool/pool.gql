@@ -119,6 +119,10 @@ type GqlPoolMinimal {
     """
     protocolVersion: Int!
     """
+    Pool is receiving rewards when liquidity tokens are staked
+    """
+    incentivized: Boolean!
+    """
     The name of the pool as per contract
     """
     name: String!
@@ -343,6 +347,7 @@ type GqlPoolDynamicData {
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    surplus24h: BigDecimal!
     yieldCapture24h: BigDecimal!
     apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
@@ -354,6 +359,7 @@ type GqlPoolDynamicData {
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+    surplus48h: BigDecimal!
     yieldCapture48h: BigDecimal!
 
     lifetimeVolume: BigDecimal!
@@ -752,6 +758,10 @@ type GqlPoolTokenDetail {
     Balance of the pool token inside the pool.
     """
     balance: BigDecimal!
+    """
+    USD Balance of the pool token.
+    """
+    balanceUSD: BigDecimal!
     """
     If it is an appreciating token, it shows the current price rate. 1 otherwise.
     """
@@ -1209,9 +1219,11 @@ type GqlPoolSnapshot {
     totalLiquidity: String!
     volume24h: String!
     fees24h: String!
+    surplus24h: String!
     totalShares: String!
     totalSwapVolume: String!
     totalSwapFee: String!
+    totalSurplus: String!
     swapsCount: String!
     holdersCount: String!
     sharePrice: String!
