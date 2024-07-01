@@ -6,7 +6,7 @@ describe('vebal debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '1');
         await veBalService.syncVeBalBalances();
-        const holder = await veBalService.getVeBalUserData('0x4ec8459bb6bab83d8987373f6ae47b9a60bd5a6a');
+        const holder = await veBalService.getVeBalUserData('MAINNET', '0x4ec8459bb6bab83d8987373f6ae47b9a60bd5a6a');
         expect(holder.balance).not.toBe('0.0');
         expect(holder.locked).not.toBe('0.0');
         expect(holder.lockedUsd).not.toBe('0.00');
