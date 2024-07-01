@@ -12,12 +12,13 @@ import { AmountHumanReadable } from '../common/global-types';
 import { GqlVeBalUserData } from '../../schema';
 import { AllNetworkConfigs } from '../network/network-config';
 import VeBalABI from './abi/vebal.json';
+import { Chain } from '@prisma/client';
 
 export class VeBalService {
-    public async getVeBalUserBalance(userAddress: string): Promise<AmountHumanReadable> {
+    public async getVeBalUserBalance(chain: Chain, userAddress: string): Promise<AmountHumanReadable> {
         if (networkContext.data.veBal) {
             const veBalUser = await prisma.prismaVeBalUserBalance.findFirst({
-                where: { chain: networkContext.chain, userAddress: userAddress.toLowerCase() },
+                where: { chain: chain, userAddress: userAddress.toLowerCase() },
             });
             if (veBalUser?.balance) {
                 return veBalUser.balance;
@@ -26,13 +27,13 @@ export class VeBalService {
         return '0.0';
     }
 
-    public async getVeBalUserData(userAddress: string): Promise<GqlVeBalUserData> {
+    public async getVeBalUserData(chain: Chain, userAddress: string): Promise<GqlVeBalUserData> {
         let rank = 1;
         let balance = '0.0';
         let locked = '0.0';
         if (networkContext.data.veBal) {
             const veBalUsers = await prisma.prismaVeBalUserBalance.findMany({
-                where: { chain: networkContext.chain },
+                where: { chain: chain },
             });
 
             const veBalUsersNum = veBalUsers.map((user) => ({
@@ -57,7 +58,7 @@ export class VeBalService {
 
         if (locked !== '0.0') {
             veBalPrice = await prisma.prismaTokenCurrentPrice.findFirstOrThrow({
-                where: { chain: networkContext.chain, tokenAddress: AllNetworkConfigs['1'].data.veBal!.bptAddress },
+                where: { chain: chain, tokenAddress: AllNetworkConfigs['1'].data.veBal!.bptAddress },
             });
         }
 
@@ -69,10 +70,10 @@ export class VeBalService {
         };
     }
 
-    public async getVeBalTotalSupply(): Promise<AmountHumanReadable> {
+    public async getVeBalTotalSupply(chain: Chain): Promise<AmountHumanReadable> {
         if (networkContext.data.veBal) {
             const veBal = await prisma.prismaVeBalTotalSupply.findFirst({
-                where: { chain: networkContext.chain },
+                where: { chain: chain },
             });
             if (veBal?.totalSupply) {
                 return veBal.totalSupply;
