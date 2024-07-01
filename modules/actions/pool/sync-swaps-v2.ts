@@ -20,6 +20,7 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
         select: {
             blockNumber: true,
+            blockTimestamp: true,
         },
         where: {
             type: 'SWAP',
@@ -31,7 +32,12 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
         },
     });
 
-    const where = latestEvent ? { block_gte: String(latestEvent.blockNumber) } : {};
+    // Querying by timestamp of Fantom, because it has events without a block number in the DB
+    const where = latestEvent
+        ? chain === Chain.FANTOM
+            ? { timestamp_gte: Number(latestEvent.blockTimestamp) }
+            : { block_gte: String(latestEvent.blockNumber) }
+        : {};
 
     // Get events
     console.time('BalancerSwaps');

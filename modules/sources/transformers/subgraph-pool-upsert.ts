@@ -18,7 +18,9 @@ export const subgraphPoolUpsert = (
         return null;
     }
 
-    const onchainTokensData = Object.fromEntries(onchainPoolData.tokens.map((token) => [token.address, token]));
+    const onchainTokensData = Object.fromEntries(
+        onchainPoolData.tokens.map((token) => [token.address.toLowerCase(), token]),
+    );
 
     return {
         pool: poolTransformer(subgraphPoolData, chain),

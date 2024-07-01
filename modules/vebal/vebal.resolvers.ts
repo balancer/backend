@@ -2,19 +2,40 @@ import { Resolvers } from '../../schema';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { veBalService } from './vebal.service';
 import { veBalVotingListService } from './vebal-voting-list.service';
+import { headerChain } from '../context/header-chain';
 
 const resolvers: Resolvers = {
     Query: {
-        veBalGetUserBalance: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-            return veBalService.getVeBalUserBalance(accountAddress);
+        veBalGetUserBalance: async (parent, { chain, address }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('veBalGetUserBalance error: Provide "chains" param');
+            }
+
+            const accountAddress = address || getRequiredAccountAddress(context);
+            return veBalService.getVeBalUserBalance(chain, accountAddress);
         },
-        veBalGetUser: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-            return veBalService.getVeBalUserData(accountAddress);
+        veBalGetUser: async (parent, { chain, address }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('veBalGetUser error: Provide "chains" param');
+            }
+
+            const accountAddress = address || getRequiredAccountAddress(context);
+            return veBalService.getVeBalUserData(chain, accountAddress);
         },
-        veBalGetTotalSupply: async (parent, {}, context) => {
-            return veBalService.getVeBalTotalSupply();
+        veBalGetTotalSupply: async (parent, { chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new Error('veBalGetTotalSupply error: Provide "chains" param');
+            }
+            return veBalService.getVeBalTotalSupply(chain);
         },
 
         /*
