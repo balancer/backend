@@ -45,6 +45,8 @@ export const syncAuraStakingForPools = async (
             );
         }
 
+        const apr = auraGauge.aprs.total / 100;
+
         operations.push(
             prisma.prismaPoolStakingAura.upsert({
                 where: { id_chain: { id: stakingId, chain: chain } },
@@ -52,12 +54,12 @@ export const syncAuraStakingForPools = async (
                     id: stakingId,
                     chain: chain,
                     stakingId: stakingId,
-                    apr: auraGauge.aprs.total,
+                    apr,
                     auraPoolAddress: auraGauge.address,
                     auraPoolId: auraGauge.id,
                     isShutdown: auraGauge.isShutdown,
                 },
-                update: { apr: auraGauge.aprs.total },
+                update: { apr },
             }),
         );
     }
