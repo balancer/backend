@@ -20,8 +20,6 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import { sentryPlugin } from './app/gql/sentry-apollo-plugin';
 import { startWorker } from './worker/worker';
 import { startScheduler } from './worker/scheduler';
-import { prisma } from './prisma/prisma-client';
-
 async function startServer() {
     const app = createExpressApp();
 

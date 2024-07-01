@@ -117,10 +117,10 @@ export class PathGraph {
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
-            return {
-                tokens: pathTokens,
-                pools: path.map((segment) => segment.pool),
-            };
+            return new PathLocal(
+                pathTokens,
+                path.map((segment) => segment.pool),
+            );
         });
     }
 

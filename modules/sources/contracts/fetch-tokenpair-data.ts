@@ -9,8 +9,10 @@ import BalancerRouterAbi from './abis/BalancerRouter';
 interface PoolInput {
     id: string;
     address: string;
+    protocolVersion: number;
     tokens: {
         address: string;
+        index: number;
         token: {
             decimals: number;
         };
@@ -50,6 +52,7 @@ interface TokenPair {
     bToAAmountOut: bigint;
     effectivePrice: bigint;
     effectivePriceAmountIn: bigint;
+    vaultVersion: number;
 }
 
 interface Token {
@@ -186,6 +189,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     bToAAmountOut: 0n,
                     effectivePrice: 0n,
                     effectivePriceAmountIn: 0n,
+                    vaultVersion: pool.protocolVersion,
                 });
             }
         }
