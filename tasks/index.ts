@@ -6,6 +6,8 @@ import {
     CowAmmController,
 } from '../modules/controllers';
 
+import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
+
 // TODO needed?
 const jobsController = JobsController();
 const snapshotsController = SnapshotsController();
@@ -69,6 +71,18 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
+    } else if (job === 'backsync-swaps') {
+        // Run in loop until no new swaps are found
+        let status: string | undefined = 'true';
+        let i = 0;
+        while (status) {
+            console.time('backsyncSwaps page time');
+            status = await backsyncSwaps(chain);
+            console.timeEnd('backsyncSwaps page time');
+            i += 1000;
+            console.log('Processed', i, 'swaps');
+        }
+        return 'OK';
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
