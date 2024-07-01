@@ -186,8 +186,10 @@ export class PoolService {
         const result = await prisma.prismaPool.findMany({
             select: { id: true },
             where: {
-                categories: {
-                    none: { category: 'BLACK_LISTED' },
+                NOT: {
+                    categories: {
+                        has: 'BLACK_LISTED',
+                    },
                 },
                 chain: this.chain,
             },
@@ -248,10 +250,6 @@ export class PoolService {
 
     public async syncSwapsForLast48Hours(): Promise<string[]> {
         return this.poolSwapService.syncSwapsForLast48Hours();
-    }
-
-    public async syncPoolContentData() {
-        await this.contentService.syncPoolContentData(this.chain);
     }
 
     public async syncStakingForPools(chains: Chain[]) {
@@ -379,35 +377,6 @@ export class PoolService {
 
     public async reloadAllTokenNestedPoolIds() {
         await this.poolCreatorService.reloadAllTokenNestedPoolIds();
-    }
-
-    public async addToBlackList(poolId: string) {
-        const category = await prisma.prismaPoolCategory.findFirst({
-            where: { poolId, chain: this.chain, category: 'BLACK_LISTED' },
-        });
-
-        if (category) {
-            throw new Error('Pool with id is already blacklisted');
-        }
-
-        await prisma.prismaPoolCategory.create({
-            data: {
-                id: `${this.chain}-${poolId}-BLACK_LISTED`,
-                category: 'BLACK_LISTED',
-                chain: this.chain,
-                poolId,
-            },
-        });
-    }
-
-    public async removeFromBlackList(poolId: string) {
-        await prisma.prismaPoolCategory.deleteMany({
-            where: {
-                category: 'BLACK_LISTED',
-                chain: this.chain,
-                poolId,
-            },
-        });
     }
 
     public async deletePool(poolId: string) {

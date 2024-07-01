@@ -136,7 +136,7 @@ model PrismaPool {
     snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
-    categories          PrismaPoolCategory[]
+    categories          String[] @default([])
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
 
     allTokens           PrismaPoolExpandedTokens[]
@@ -148,6 +148,8 @@ model PrismaPool {
     userStakedBalances  PrismaUserStakedBalance[]
 
     userPoolBalanceSnapshots    PrismaUserPoolBalanceSnapshot[]
+
+    @@index([categories(ops: ArrayOps)], type: Gin)
 }
 
 enum PrismaPoolType {
@@ -368,22 +370,6 @@ enum PrismaPoolAprItemGroup {
     EULER
     MAKER
     DEFAULT
-}
-
-
-model PrismaPoolCategory {
-    @@id([id, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-    category            PrismaPoolCategoryType
-}
-
-enum PrismaPoolCategoryType {
-    INCENTIVIZED
-    BLACK_LISTED
 }
 
 model PrismaPoolExpandedTokens {

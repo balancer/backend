@@ -165,5 +165,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-swaps-v2',
             interval: every(1, 'minutes'),
         },
+        {
+            name: 'sync-categories',
+            interval: every(10, 'minutes'),
+        },
     ],
 };

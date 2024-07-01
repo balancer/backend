@@ -107,7 +107,6 @@ export class DatastudioService {
                         token: true,
                     },
                 },
-                categories: true,
                 staking: {
                     include: {
                         farm: { include: { rewarders: true } },
@@ -176,7 +175,7 @@ export class DatastudioService {
 
             const swapFee = pool.dynamicData?.swapFee || `0`;
 
-            const blacklisted = pool.categories.find((category) => category.category === 'BLACK_LISTED');
+            const blacklisted = pool.categories.find((category) => category === 'BLACK_LISTED');
             let poolType = pool.type.toString();
             if (isComposableStablePool(pool)) {
                 poolType = 'COMPOSABLE_STABLE';
