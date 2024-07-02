@@ -30,11 +30,13 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
     // In case there are no snapshots stored in the DB, sync from the subgraph's earliest snapshot
     let subgraphTimestamp = 0;
     if (!storedTimestamp) {
+        console.time('BalancerPoolSnapshots');
         const { poolSnapshots } = await subgraphClient.BalancerPoolSnapshots({
             first: 1,
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
+        console.timeEnd('BalancerPoolSnapshots');
 
         subgraphTimestamp = poolSnapshots[0].timestamp;
     }
@@ -95,19 +97,38 @@ export async function syncSnapshotsForADayV2(
         },
     });
 
-    const prices = (
-        await prisma.prismaTokenCurrentPrice.findMany({
-            where: {
-                chain,
-            },
-            select: {
-                tokenAddress: true,
-                price: true,
-            },
-        })
-    )
-        .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
-        .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
+    let prices: { [address: string]: number } = {};
+
+    if (timestamp === daysAgo(0)) {
+        prices = (
+            await prisma.prismaTokenCurrentPrice.findMany({
+                where: {
+                    chain,
+                },
+                select: {
+                    tokenAddress: true,
+                    price: true,
+                },
+            })
+        )
+            .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
+            .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
+    } else {
+        prices = (
+            await prisma.prismaTokenPrice.findMany({
+                where: {
+                    chain,
+                    timestamp,
+                },
+                select: {
+                    tokenAddress: true,
+                    price: true,
+                },
+            })
+        )
+            .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
+            .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
+    }
 
     for (const pool of dbPools) {
         const poolTokens = pool.tokens.map((t, idx) => pool.tokens.find(({ index }) => index === idx)?.address ?? '');
@@ -135,8 +156,10 @@ export async function syncSnapshotsForADayV2(
             if (previousSnapshot && previousSnapshot?.timestamp < previous - 86400) {
                 // Needs to be filled in
                 // Schedule a job to fill in the missing snapshots
+                console.log('Missing snapshots for', pool.id);
                 continue;
             }
+            // Otherwise it's a new pool
         }
 
         const dbEntry = snapshotsV2Transformer(pool.id, poolTokens, next, chain, prices, previousSnapshot, snapshot);

@@ -87,7 +87,7 @@ extend type Mutation {
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-    poolSyncLatestSnapshotsForAllPools(daysToSync: Int): String!
+    poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
     poolUpdateLifetimeValuesForAllPools: String!
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!

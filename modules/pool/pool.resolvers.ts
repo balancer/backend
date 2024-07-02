@@ -4,7 +4,8 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { EventsQueryController } from '../controllers/pool-events-query-controller';
+import { EventsQueryController, SnapshotsController } from '../controllers';
+import { chainToIdMap } from '../network/network-config';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -234,10 +235,11 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
+        poolSyncLatestSnapshotsForAllPools: async (parent, { chain }, context) => {
             isAdminRoute(context);
+            const chainId = chainToIdMap[chain];
 
-            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
+            await SnapshotsController().syncSnapshotsV2(chainId);
 
             return 'success';
         },
