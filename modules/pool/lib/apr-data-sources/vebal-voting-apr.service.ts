@@ -60,6 +60,10 @@ export const getHiddenHandAPR = async (weeksAgo = 0) => {
         timestamp = (await fetchHiddenHandRound()).timestamp - weeksAgo * 604800;
     }
     const round = await fetchHiddenHandRound(timestamp);
+
+    // Debugging purposes
+    console.log('Hiddenhand round', timestamp, round.timestamp, round.total, round.votes);
+
     timestamp = round.timestamp;
 
     const avgValuePerVote = round.total / round.votes;
