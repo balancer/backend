@@ -95,7 +95,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-optimism',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
                 tokens: {
                     USDCe: {
                         underlyingAssetAddress: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',

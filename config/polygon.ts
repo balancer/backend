@@ -67,7 +67,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v2: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/aave-v2-matic',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -93,7 +93,7 @@ export default <NetworkData>{
                 },
             },
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-polygon',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
                 tokens: {
                     USDCn: {
                         underlyingAssetAddress: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',

@@ -109,7 +109,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v2: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: underlyingTokens.USDC,
@@ -135,7 +135,7 @@ export default <NetworkData>{
                 },
             },
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: underlyingTokens.USDC,
