@@ -73,8 +73,7 @@ export default <NetworkData>{
         },
         aave: {
             v3: {
-                subgraphUrl:
-                    'https://api.goldsky.com/api/public/project_clk74pd7lueg738tw9sjh79d6/subgraphs/aave-v3-base/1.0.0/gn',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GQFbb95cE6d8mV989mL5figjaGaKCQB3xqYrr1bRyXqF`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
