@@ -233,11 +233,20 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-latest-snapshots-for-all-pools':
+            case 'sync-snapshots-v2':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
                     () => SnapshotsController().syncSnapshotsV2(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-snapshots-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => SnapshotsController().syncSnapshotsV3(chainId),
                     res,
                     next,
                 );
@@ -373,15 +382,6 @@ export function configureWorkerRoutes(app: Express) {
                     job.name,
                     chainId,
                     () => jobsController.updateLiquidity24hAgo(chainId),
-                    res,
-                    next,
-                );
-                break;
-            case 'sync-latest-snapshots-for-all-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => poolService.syncLatestSnapshotsForAllPoolsV3(),
                     res,
                     next,
                 );
