@@ -68,7 +68,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-arbitrum',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DLuE98kEb5pQNXAcKFQGQgfSQ57Xdou4jnVbAEqMfy3B`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
