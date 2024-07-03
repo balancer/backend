@@ -42,9 +42,9 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
     }
 
     // If latest snapshot is today and is already stored, resync the current day
-    if (storedTimestamp === roundToMidnight(daysAgo(0))) {
-        console.log('Resyncing V2 snapshots for', chain, storedTimestamp);
-        return syncSnapshotsForADayV2(subgraphClient, chain, storedTimestamp);
+    if (storedTimestamp >= roundToMidnight(daysAgo(0))) {
+        console.log('Resyncing V2 snapshots for', chain, roundToMidnight(daysAgo(0)));
+        return syncSnapshotsForADayV2(subgraphClient, chain, roundToMidnight(daysAgo(0)));
     }
 
     // Adding a day to the last stored snapshot timestamp,
