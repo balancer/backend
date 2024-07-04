@@ -109,10 +109,10 @@ describe('pool debugging', () => {
         // await poolService.syncAllPoolsFromSubgraph();
         // await poolService.loadOnChainDataForAllPools();
         // await userService.initWalletBalancesForAllPools();
-        // await poolService.reloadStakingForAllPools(['AURA'], 'MAINNET');
+        await poolService.reloadStakingForAllPools(['AURA'], 'MAINNET');
         // await userService.initStakedBalances(['AURA']);
 
-        await userService.syncChangedStakedBalances();
+        // await userService.syncChangedStakedBalances();
 
         const pool = await poolService.getGqlPool(
             '0xcfca23ca9ca720b6e98e3eb9b6aa0ffc4a5c08b9000200000000000000000274',
@@ -123,6 +123,38 @@ describe('pool debugging', () => {
         expect(pool.staking?.aura).toBeDefined();
         expect(pool.staking?.aura?.apr).toBeGreaterThan(0);
         expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
+        expect(pool.staking?.aura?.auraPoolId).toBe('100');
+        expect(pool.staking?.aura?.isShutdown).toBe(false);
+
+        // expect(pool.userBalance).toBeDefined();
+        // expect(pool.userBalance?.totalBalance).not.toBe('0');
+        // expect(pool.userBalance?.totalBalanceUsd).toBeGreaterThan(0);
+        // expect(pool.userBalance?.walletBalance).toEqual('0');
+        // expect(pool.userBalance?.walletBalanceUsd).toEqual(0);
+        // expect(pool.userBalance?.stakedBalances.length).toBeGreaterThan(0);
+    }, 5000000);
+
+    it('debug user staking', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '42161');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        // await userService.initWalletBalancesForAllPools();
+        await poolService.syncStakingForPools(['ARBITRUM']);
+        // await userService.initStakedBalances(['AURA']);
+
+        await userService.syncChangedStakedBalances();
+
+        const pool = await poolService.getGqlPool(
+            '0xc7fa3a3527435720f0e2a4c1378335324dd4f9b3000200000000000000000459',
+            'ARBITRUM',
+            '0xbee21365a462b8df12cfe9ab7c40f1bb5f5ed495',
+        );
+        expect(pool.staking).toBeDefined();
+        expect(pool.staking?.aura).toBeDefined();
+        expect(pool.staking?.aura?.apr).toBeGreaterThan(0);
+        // expect(pool.staking?.aura?.auraPoolAddress).toBe('0x1204f5060be8b716f5a62b4df4ce32acd01a69f5');
 
         expect(pool.userBalance).toBeDefined();
         expect(pool.userBalance?.totalBalance).not.toBe('0');
