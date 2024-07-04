@@ -9,8 +9,10 @@ import BalancerRouterAbi from './abis/BalancerRouter';
 interface PoolInput {
     id: string;
     address: string;
+    protocolVersion: number;
     tokens: {
         address: string;
+        index: number;
         token: {
             decimals: number;
         };
@@ -50,6 +52,7 @@ interface TokenPair {
     bToAAmountOut: bigint;
     effectivePrice: bigint;
     effectivePriceAmountIn: bigint;
+    vaultVersion: number;
 }
 
 interface Token {
@@ -77,9 +80,9 @@ export async function fetchTokenPairData(
     const tokenPairOutput: PoolTokenPairsOutput = {};
 
     let multicallerRouter: ViemMulticallCall[] = [];
-    // only inlcude pools with TVL >=$100
+    // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $10 for each token) for effectivePrice calc and a swap with 1% TVL
+    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
@@ -90,9 +93,9 @@ export async function fetchTokenPairData(
             // prepare swap amounts in
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
-            // tokenA->tokenB with 10USD worth of tokenA
-            const tenUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 10;
-            tokenPair.effectivePriceAmountIn = parseUnits(`${tenUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            // tokenA->tokenB with 100USD worth of tokenA
+            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
             addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
@@ -160,10 +163,10 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                 tokenPairs.push({
                     poolId: pool.id,
                     poolTvl: pool.dynamicData?.totalLiquidity || 0,
-                    // remove pools that have <$100 TVL or a token without a balance or USD balance
+                    // remove pools that have <$1000 TVL or a token without a balance or USD balance
                     valid:
                         // V3 Validation
-                        (pool.dynamicData?.totalLiquidity || 0) >= 100 &&
+                        (pool.dynamicData?.totalLiquidity || 0) >= 1000 &&
                         !pool.tokens.some((token) => (token.dynamicData?.balance || '0') === '0') &&
                         !pool.tokens.some((token) => (token.dynamicData?.balanceUSD || 0) === 0),
 
@@ -186,6 +189,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
                     bToAAmountOut: 0n,
                     effectivePrice: 0n,
                     effectivePriceAmountIn: 0n,
+                    vaultVersion: pool.protocolVersion,
                 });
             }
         }

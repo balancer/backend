@@ -87,7 +87,7 @@ extend type Mutation {
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-    poolSyncLatestSnapshotsForAllPools(daysToSync: Int): String!
+    poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
     poolUpdateLifetimeValuesForAllPools: String!
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
@@ -1248,6 +1248,7 @@ type GqlPoolStaking {
     farm: GqlPoolStakingMasterChefFarm
     reliquary: GqlPoolStakingReliquaryFarm
     aura: GqlPoolStakingAura
+    vebal: GqlPoolStakingVebal
 }
 
 enum GqlPoolStakingType {
@@ -1256,6 +1257,7 @@ enum GqlPoolStakingType {
     FRESH_BEETS
     RELIQUARY
     AURA
+    VEBAL
 }
 
 enum GqlPoolStakingGaugeStatus {
@@ -1306,7 +1308,14 @@ type GqlPoolStakingFarmRewarder {
 type GqlPoolStakingAura {
     id: ID!
     auraPoolAddress: String!
+    auraPoolId: String!
+    isShutdown: Boolean!
     apr: Float!
+}
+
+type GqlPoolStakingVebal {
+    id: ID!
+    vebalAddress: String!
 }
 
 type GqlPoolStakingReliquaryFarm {

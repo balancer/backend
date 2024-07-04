@@ -2,7 +2,7 @@ import { BalancerSorService } from './sorV1Beets/balancer-sor.service';
 import { tokenService } from '../token/token.service';
 import { poolService } from '../pool/pool.service';
 
-import { GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSorSwapType, GqlPoolMinimal } from '../../schema';
+import { GqlSorSwapType } from '../../schema';
 
 // npx jest --testPathPattern=modules/beethoven/balancer-sor.test.ts
 describe('SmartOrderRouter', () => {

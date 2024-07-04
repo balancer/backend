@@ -46,6 +46,7 @@ import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
 import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
+import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
 
 export class PoolService {
     constructor(
@@ -283,6 +284,10 @@ export class PoolService {
             if (networkconfig.data.subgraphs.aura) {
                 await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));
             }
+
+            if (chain === 'MAINNET') {
+                await syncVebalStakingForPools();
+            }
         }
     }
 
@@ -333,10 +338,6 @@ export class PoolService {
             const poolIds = chunk.map((pool) => pool.id);
             await this.poolSnapshotService.loadAllSnapshotsForPools(poolIds);
         }
-    }
-
-    public async syncLatestSnapshotsForAllPools(daysToSync?: number) {
-        await this.poolSnapshotService.syncLatestSnapshotsForAllPools(daysToSync);
     }
 
     public async syncLatestReliquarySnapshotsForAllFarms() {

@@ -41,7 +41,7 @@ export const syncTokenPairs = async (
                     },
                 },
                 data: {
-                    tokenPairsData: tokenPairData,
+                    tokenPairsData: tokenPairData[poolId].tokenPairs,
                 },
             });
         } catch (e) {

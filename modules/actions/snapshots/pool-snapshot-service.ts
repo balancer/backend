@@ -11,19 +11,11 @@ import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
-import { networkContext } from '../../network/network-context.service';
-import { CoingeckoDataService, TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
+import { TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
+import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 
 export class PoolSnapshotService {
-    constructor(private readonly coingeckoService: CoingeckoDataService) {}
-
-    private get balancerSubgraphService() {
-        return networkContext.config.services.balancerSubgraphService;
-    }
-
-    private get chain() {
-        return networkContext.chain;
-    }
+    constructor(private balancerSubgraphService: V2SubgraphClient, private chain: Chain) {}
 
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
         const timestamp = this.getTimestampForRange(range);
@@ -40,9 +32,91 @@ export class PoolSnapshotService {
         });
     }
 
+    /*
+    Per default, this method syncs the snapshot from today and from yesterday (daysTosync=2). It is important to also sync the snapshot from
+    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
+    */
+    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
+        let operations: any[] = [];
+        const daysAgoStartOfDay = moment()
+            .utc()
+            .startOf('day')
+            .subtract(daysToSync - 1, 'days')
+            .unix();
+
+        // per default (daysToSync=2) returns snapshots from yesterday and today
+        const allSnapshots = await this.balancerSubgraphService.legacyService.getAllPoolSnapshots({
+            where: { timestamp_gte: daysAgoStartOfDay },
+            orderBy: PoolSnapshot_OrderBy.Timestamp,
+            orderDirection: OrderDirection.Asc,
+        });
+
+        const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
+            where: {
+                // there is no guarantee that a pool receives a swap per day, so we get the last day with a swap
+                timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
+                chain: this.chain,
+            },
+            orderBy: { timestamp: 'desc' },
+            distinct: 'poolId',
+        });
+
+        const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
+        const pools = await prisma.prismaPool.findMany({ where: { id: { in: poolIds }, chain: this.chain } });
+
+        for (const pool of pools) {
+            const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === pool.id);
+            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === pool.id);
+
+            if (!latestSyncedSnapshot && pool.createTime < daysAgoStartOfDay) {
+                // in this instance, this pool should already have snapshots stored.
+                // since that's not the case, we reload from the subgraph and bail.
+                await this.loadAllSnapshotsForPools([pool.id]);
+                continue;
+            }
+
+            const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
+            const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
+
+            const poolOperations = snapshots.map((snapshot, index) => {
+                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
+                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].swapFees;
+
+                const data = this.getPrismaPoolSnapshotFromSubgraphData(
+                    snapshot,
+                    prevTotalSwapVolume,
+                    prevTotalSwapFee,
+                );
+
+                return prisma.prismaPoolSnapshot.upsert({
+                    where: { id_chain: { id: snapshot.id, chain: this.chain } },
+                    create: data,
+                    update: data,
+                });
+            });
+            operations.push(...poolOperations);
+        }
+
+        await prismaBulkExecuteOperations(operations);
+
+        const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
+            where: {
+                OR: [
+                    { type: 'COMPOSABLE_STABLE', chain: this.chain },
+                    { tokens: { some: { nestedPoolId: { not: null } } }, chain: this.chain },
+                ],
+            },
+            include: { tokens: true },
+        });
+
+        for (const pool of poolsWithoutSnapshots) {
+            await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
+        }
+    }
+
     public async loadAllSnapshotsForPools(poolIds: string[]) {
         //assuming the pool does not have more than 5,000 snapshots, we should be ok.
-        const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
+        const allSnapshots = await this.balancerSubgraphService.legacyService.getAllPoolSnapshots({
             where: { pool_in: poolIds },
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
@@ -76,7 +150,10 @@ export class PoolSnapshotService {
             numDays = moment().diff(moment.unix(startTimestamp), 'days');
         }
 
-        const swaps = await this.balancerSubgraphService.getAllSwapsWithPaging({ where: { poolId }, startTimestamp });
+        const swaps = await this.balancerSubgraphService.legacyService.getAllSwapsWithPaging({
+            where: { poolId },
+            startTimestamp,
+        });
 
         const tokenPriceMap: TokenHistoricalPrices = {};
 
@@ -139,7 +216,7 @@ export class PoolSnapshotService {
                 return valueUsd;
             });
 
-            const { pool: poolAtBlock } = await this.balancerSubgraphService.getPool({
+            const { pool: poolAtBlock } = await this.balancerSubgraphService.legacyService.getPool({
                 id: poolId,
                 block: { number: parseInt(block.number) },
             });

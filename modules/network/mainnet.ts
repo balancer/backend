@@ -16,6 +16,7 @@ import { env } from '../../app/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
+import { UserSyncVebalLockBalanceService } from '../user/lib/user-sync-vebal-lock-balance.service';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -31,7 +32,11 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),
     ],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
+    userStakedBalanceServices: [
+        new UserSyncGaugeBalanceService(),
+        new UserSyncAuraBalanceService(),
+        new UserSyncVebalLockBalanceService(),
+    ],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
     },
@@ -86,7 +91,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'sync-latest-snapshots-for-all-pools',
+            name: 'sync-snapshots-v2',
             interval: every(90, 'minutes'),
         },
         {

@@ -8,14 +8,16 @@ import {
     PoolSnapshot_OrderBy,
     getSdk,
 } from './generated/balancer-subgraph-types';
+import { BalancerSubgraphService } from './balancer-subgraph.service';
 
 export type V2SubgraphClient = ReturnType<typeof getV2SubgraphClient>;
 
-export function getV2SubgraphClient(url: string) {
+export function getV2SubgraphClient(url: string, chainId: number) {
     const sdk = getSdk(new GraphQLClient(url));
 
     return {
         ...sdk,
+        legacyService: new BalancerSubgraphService(url, chainId),
         async getSnapshotsForTimestamp(timestamp: number): Promise<BalancerPoolSnapshotFragment[]> {
             const limit = 1000;
             let hasMore = true;

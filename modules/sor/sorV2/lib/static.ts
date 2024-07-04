@@ -7,7 +7,7 @@ import { FxPool } from './pools/fx/fxPool';
 import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
 import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
 import { GyroEPool } from './pools/gyroE/gyroEPool';
-import { Swap, SwapKind, Token } from '@balancer/sdk';
+import { SwapKind, Token } from '@balancer/sdk';
 import { ComposableStablePool } from './pools/composableStable/composableStablePool';
 import { BasePool } from './pools/basePool';
 import { SorSwapOptions } from './types';
