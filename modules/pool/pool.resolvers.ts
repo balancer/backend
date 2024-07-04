@@ -4,7 +4,8 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { EventsQueryController } from '../controllers/pool-events-query-controller';
+import { EventsQueryController, SnapshotsController } from '../controllers';
+import { chainToIdMap } from '../network/network-config';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -96,8 +97,10 @@ const balancerResolvers: Resolvers = {
                 sharePrice: `${snapshot.sharePrice}`,
                 volume24h: `${snapshot.volume24h}`,
                 fees24h: `${snapshot.fees24h}`,
+                surplus24h: `${snapshot.surplus24h}`,
                 totalSwapVolume: `${snapshot.totalSwapVolume}`,
                 totalSwapFee: `${snapshot.totalSwapFee}`,
+                totalSurplus: `${snapshot.totalSurplus}`,
                 swapsCount: `${snapshot.swapsCount}`,
                 holdersCount: `${snapshot.holdersCount}`,
             }));
@@ -235,10 +238,11 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
+        poolSyncLatestSnapshotsForAllPools: async (parent, { chain }, context) => {
             isAdminRoute(context);
+            const chainId = chainToIdMap[chain];
 
-            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
+            await SnapshotsController().syncSnapshotsV2(chainId);
 
             return 'success';
         },

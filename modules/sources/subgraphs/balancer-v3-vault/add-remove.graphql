@@ -1,4 +1,4 @@
-fragment JoinExit on JoinExit {
+fragment AddRemove on AddRemove {
     id
     type
     sender
@@ -19,15 +19,15 @@ fragment JoinExit on JoinExit {
     transactionHash
 }
 
-query JoinExits(
+query AddRemove(
     $skip: Int
     $first: Int
-    $orderBy: JoinExit_orderBy
+    $orderBy: AddRemove_orderBy
     $orderDirection: OrderDirection
-    $where: JoinExit_filter
+    $where: AddRemove_filter
     $block: Block_height
 ) {
-    joinExits(
+    addRemoves(
         skip: $skip
         first: $first
         orderBy: $orderBy
@@ -35,6 +35,6 @@ query JoinExits(
         where: $where
         block: $block
     ) {
-        ...JoinExit
+        ...AddRemove
     }
 }

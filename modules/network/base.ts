@@ -79,7 +79,7 @@ export const baseNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'sync-latest-snapshots-for-all-pools',
+            name: 'sync-snapshots-v2',
             interval: every(90, 'minutes'),
         },
         {

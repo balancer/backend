@@ -34,7 +34,7 @@ export function PoolsMutationController(tracer?: any) {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
             const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
-            await updateVolumeAndFees(poolsWithNewSwaps);
+            await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
         async loadOnchainDataForAllPools(chainId: string) {

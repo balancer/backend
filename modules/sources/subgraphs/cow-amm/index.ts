@@ -1,5 +1,13 @@
 import { GraphQLClient } from 'graphql-request';
-import { OrderDirection, Pool_OrderBy, PoolsQueryVariables, CowAmmPoolFragment, getSdk } from './generated/types';
+import {
+    OrderDirection,
+    Pool_OrderBy,
+    PoolsQueryVariables,
+    CowAmmPoolFragment,
+    getSdk,
+    CowAmmSnapshotFragment,
+    PoolSnapshot_OrderBy,
+} from './generated/types';
 
 /**
  * Builds a client based on subgraph URL.
@@ -37,6 +45,31 @@ export const getCowAmmSubgraphClient = (subgraphUrl: string) => {
             }
 
             return pools;
+        },
+        async getSnapshotsForTimestamp(timestamp: number): Promise<CowAmmSnapshotFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let snapshots: CowAmmSnapshotFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.Snapshots({
+                    where: { timestamp, id_gt: id },
+                    orderBy: PoolSnapshot_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                snapshots = [...snapshots, ...response.poolSnapshots];
+
+                if (response.poolSnapshots.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = snapshots[snapshots.length - 1].id;
+                }
+            }
+
+            return snapshots;
         },
     };
 };

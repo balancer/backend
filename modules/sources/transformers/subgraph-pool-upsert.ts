@@ -13,7 +13,14 @@ export const subgraphPoolUpsert = (
     chain: Chain,
     blockNumber?: bigint,
 ) => {
-    const onchainTokensData = Object.fromEntries(onchainPoolData.tokens.map((token) => [token.address, token]));
+    // Handle the case when the pool doesn't have tokens
+    if (!subgraphPoolData.tokens || !subgraphPoolData.tokens.length) {
+        return null;
+    }
+
+    const onchainTokensData = Object.fromEntries(
+        onchainPoolData.tokens.map((token) => [token.address.toLowerCase(), token]),
+    );
 
     return {
         pool: poolTransformer(subgraphPoolData, chain),

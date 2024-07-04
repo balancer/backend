@@ -11,6 +11,11 @@ export default [
                 name: 'authorizer',
                 type: 'address',
             },
+            {
+                internalType: 'contract IProtocolFeeController',
+                name: 'protocolFeeController',
+                type: 'address',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -35,6 +40,26 @@ export default [
             },
         ],
         name: 'AddressInsufficientBalance',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterSwapHookFailed',
         type: 'error',
     },
     {
@@ -95,6 +120,31 @@ export default [
         type: 'error',
     },
     {
+        inputs: [],
+        name: 'BalanceOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeSwapHookFailed',
+        type: 'error',
+    },
+    {
         inputs: [
             {
                 internalType: 'uint256',
@@ -139,6 +189,21 @@ export default [
     {
         inputs: [],
         name: 'DoesNotSupportAddLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportRemoveLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportUnbalancedLiquidity',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DynamicSwapFeeHookFailed',
         type: 'error',
     },
     {
@@ -235,17 +300,22 @@ export default [
     {
         inputs: [
             {
-                internalType: 'uint256',
-                name: 'index',
-                type: 'uint256',
+                internalType: 'address',
+                name: 'poolHooksContract',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'poolFactory',
+                type: 'address',
             },
         ],
-        name: 'HandlerOutOfBounds',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'HookFailed',
+        name: 'HookRegistrationFailed',
         type: 'error',
     },
     {
@@ -295,7 +365,7 @@ export default [
     },
     {
         inputs: [],
-        name: 'NoHandler',
+        name: 'NotEnoughBufferShares',
         type: 'error',
     },
     {
@@ -306,6 +376,11 @@ export default [
     {
         inputs: [],
         name: 'NotVaultDelegateCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'OperationNotSupported',
         type: 'error',
     },
     {
@@ -414,17 +489,17 @@ export default [
     },
     {
         inputs: [],
-        name: 'ProtocolSwapFeePercentageTooHigh',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ProtocolYieldFeePercentageTooHigh',
+        name: 'ProtocolFeesExceedTotalCollected',
         type: 'error',
     },
     {
         inputs: [],
         name: 'QueriesDisabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QuoteResultSpoofed',
         type: 'error',
     },
     {
@@ -435,22 +510,6 @@ export default [
     {
         inputs: [],
         name: 'RouterNotTrusted',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'uint8',
-                name: 'bits',
-                type: 'uint8',
-            },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
-        ],
-        name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
@@ -479,17 +538,6 @@ export default [
         inputs: [
             {
                 internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'SenderIsNotPauseManager',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
                 name: 'sender',
                 type: 'address',
             },
@@ -500,6 +548,11 @@ export default [
     {
         inputs: [],
         name: 'SwapFeePercentageTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SwapFeePercentageTooLow',
         type: 'error',
     },
     {
@@ -578,6 +631,16 @@ export default [
     },
     {
         inputs: [],
+        name: 'VaultBuffersArePaused',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultIsNotUnlocked',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'VaultNotPaused',
         type: 'error',
     },
@@ -600,21 +663,59 @@ export default [
         inputs: [
             {
                 internalType: 'address',
-                name: 'handler',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'caller',
+                name: 'wrappedToken',
                 type: 'address',
             },
         ],
-        name: 'WrongHandler',
+        name: 'WrapAmountTooSmall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongProtocolFeeControllerDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'WrongUnderlyingAmount',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongVaultAdminDeployment',
         type: 'error',
     },
     {
         inputs: [],
         name: 'WrongVaultExtensionDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'WrongWrappedAmount',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'WrongWrappedTokenAsset',
         type: 'error',
     },
     {
@@ -680,12 +781,6 @@ export default [
                 internalType: 'address',
                 name: 'liquidityProvider',
                 type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'contract IERC20[]',
-                name: 'tokens',
-                type: 'address[]',
             },
             {
                 indexed: false,
@@ -782,7 +877,7 @@ export default [
                     },
                     {
                         internalType: 'bool',
-                        name: 'yieldFeeExempt',
+                        name: 'paysYieldFees',
                         type: 'bool',
                     },
                 ],
@@ -794,14 +889,37 @@ export default [
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'pauseWindowEndTime',
+                name: 'swapFeePercentage',
                 type: 'uint256',
             },
             {
                 indexed: false,
-                internalType: 'address',
-                name: 'pauseManager',
-                type: 'address',
+                internalType: 'uint32',
+                name: 'pauseWindowEndTime',
+                type: 'uint32',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                indexed: false,
+                internalType: 'struct PoolRoleAccounts',
+                name: 'roleAccounts',
+                type: 'tuple',
             },
             {
                 components: [
@@ -813,6 +931,11 @@ export default [
                     {
                         internalType: 'bool',
                         name: 'shouldCallAfterInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallComputeDynamicSwapFee',
                         type: 'bool',
                     },
                     {
@@ -845,22 +968,32 @@ export default [
                         name: 'shouldCallAfterRemoveLiquidity',
                         type: 'bool',
                     },
+                    {
+                        internalType: 'address',
+                        name: 'hooksContract',
+                        type: 'address',
+                    },
                 ],
                 indexed: false,
-                internalType: 'struct PoolHooks',
-                name: 'hooks',
+                internalType: 'struct HooksConfig',
+                name: 'hooksConfig',
                 type: 'tuple',
             },
             {
                 components: [
                     {
                         internalType: 'bool',
-                        name: 'supportsAddLiquidityCustom',
+                        name: 'disableUnbalancedLiquidity',
                         type: 'bool',
                     },
                     {
                         internalType: 'bool',
-                        name: 'supportsRemoveLiquidityCustom',
+                        name: 'enableAddLiquidityCustom',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableRemoveLiquidityCustom',
                         type: 'bool',
                     },
                 ],
@@ -878,94 +1011,12 @@ export default [
         inputs: [
             {
                 indexed: true,
-                internalType: 'contract IERC20',
-                name: 'token',
+                internalType: 'contract IProtocolFeeController',
+                name: 'newProtocolFeeController',
                 type: 'address',
             },
-            {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
         ],
-        name: 'ProtocolFeeCollected',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'token',
-                type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolSwapFeeCharged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'swapFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolSwapFeePercentageChanged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'token',
-                type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolYieldFeeCharged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'yieldFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolYieldFeePercentageChanged',
+        name: 'ProtocolFeeControllerChanged',
         type: 'event',
     },
     {
@@ -1004,11 +1055,42 @@ export default [
             {
                 indexed: false,
                 internalType: 'uint256',
+                name: 'swapFeePercentage',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
                 name: 'swapFeeAmount',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'contract IERC20',
+                name: 'swapFeeToken',
+                type: 'address',
+            },
         ],
         name: 'Swap',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'swapFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'SwapFeePercentageChanged',
         type: 'event',
     },
     {
@@ -1046,6 +1128,37 @@ export default [
         anonymous: false,
         inputs: [
             {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'underlyingToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'burnedShares',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'withdrawnUnderlying',
+                type: 'uint256',
+            },
+        ],
+        name: 'Unwrap',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 indexed: false,
                 internalType: 'bool',
                 name: 'paused',
@@ -1056,34 +1169,39 @@ export default [
         type: 'event',
     },
     {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'underlyingToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'depositedUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'mintedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'Wrap',
+        type: 'event',
+    },
+    {
         stateMutability: 'payable',
         type: 'fallback',
-    },
-    {
-        inputs: [],
-        name: 'MAX_BUFFER_PERIOD_DURATION',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'MAX_PAUSE_WINDOW_DURATION',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
     },
     {
         inputs: [
@@ -1149,6 +1267,80 @@ export default [
     {
         inputs: [
             {
+                components: [
+                    {
+                        internalType: 'enum SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'enum WrappingDirection',
+                        name: 'direction',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IERC4626',
+                        name: 'wrappedToken',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amountGivenRaw',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'limitRaw',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
+                ],
+                internalType: 'struct BufferWrapOrUnwrapParams',
+                name: 'params',
+                type: 'tuple',
+            },
+        ],
+        name: 'erc4626BufferWrapOrUnwrap',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'amountCalculatedRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountInRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountOutRaw',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getAuthorizer',
+        outputs: [
+            {
+                internalType: 'contract IAuthorizer',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
@@ -1177,6 +1369,19 @@ export default [
     },
     {
         inputs: [],
+        name: 'getProtocolFeeController',
+        outputs: [
+            {
+                internalType: 'contract IProtocolFeeController',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getVaultExtension',
         outputs: [
             {
@@ -1186,25 +1391,6 @@ export default [
             },
         ],
         stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'bytes',
-                name: 'data',
-                type: 'bytes',
-            },
-        ],
-        name: 'invoke',
-        outputs: [
-            {
-                internalType: 'bytes',
-                name: 'result',
-                type: 'bytes',
-            },
-        ],
-        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -1284,42 +1470,13 @@ export default [
     {
         inputs: [
             {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'from',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'exactBptAmountIn',
-                type: 'uint256',
-            },
-        ],
-        name: 'removeLiquidityRecovery',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'amountsOutRaw',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
                 internalType: 'contract IERC20',
                 name: 'token',
                 type: 'address',
             },
             {
                 internalType: 'address',
-                name: 'from',
+                name: 'to',
                 type: 'address',
             },
             {
@@ -1328,7 +1485,7 @@ export default [
                 type: 'uint256',
             },
         ],
-        name: 'retrieve',
+        name: 'sendTo',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -1421,25 +1578,25 @@ export default [
     {
         inputs: [
             {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
+                internalType: 'bytes',
+                name: 'data',
+                type: 'bytes',
             },
         ],
-        name: 'wire',
-        outputs: [],
-        stateMutability: 'nonpayable',
+        name: 'unlock',
+        outputs: [
+            {
+                internalType: 'bytes',
+                name: 'result',
+                type: 'bytes',
+            },
+        ],
+        stateMutability: 'payable',
         type: 'function',
+    },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
     },
     {
         inputs: [
@@ -1449,14 +1606,9 @@ export default [
                 type: 'address',
             },
             {
-                internalType: 'uint256',
-                name: 'pauseWindowDuration',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'bufferPeriodDuration',
-                type: 'uint256',
+                internalType: 'contract IVaultAdmin',
+                name: 'vaultAdmin',
+                type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
@@ -1482,6 +1634,26 @@ export default [
             },
         ],
         name: 'AddressInsufficientBalance',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterSwapHookFailed',
         type: 'error',
     },
     {
@@ -1537,6 +1709,31 @@ export default [
         type: 'error',
     },
     {
+        inputs: [],
+        name: 'BalanceOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeSwapHookFailed',
+        type: 'error',
+    },
+    {
         inputs: [
             {
                 internalType: 'uint256',
@@ -1581,6 +1778,26 @@ export default [
     {
         inputs: [],
         name: 'CodecOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportAddLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportRemoveLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportUnbalancedLiquidity',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DynamicSwapFeeHookFailed',
         type: 'error',
     },
     {
@@ -1671,23 +1888,33 @@ export default [
     },
     {
         inputs: [],
+        name: 'ErrorSelectorNotFound',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'FailedInnerCall',
         type: 'error',
     },
     {
         inputs: [
             {
-                internalType: 'uint256',
-                name: 'index',
-                type: 'uint256',
+                internalType: 'address',
+                name: 'poolHooksContract',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'poolFactory',
+                type: 'address',
             },
         ],
-        name: 'HandlerOutOfBounds',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'HookFailed',
+        name: 'HookRegistrationFailed',
         type: 'error',
     },
     {
@@ -1703,6 +1930,22 @@ export default [
     {
         inputs: [],
         name: 'InvalidRemoveLiquidityKind',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'currentValue',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'expectedSize',
+                type: 'uint256',
+            },
+        ],
+        name: 'InvalidSize',
         type: 'error',
     },
     {
@@ -1732,7 +1975,7 @@ export default [
     },
     {
         inputs: [],
-        name: 'NoHandler',
+        name: 'NotEnoughBufferShares',
         type: 'error',
     },
     {
@@ -1743,6 +1986,11 @@ export default [
     {
         inputs: [],
         name: 'NotVaultDelegateCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'OperationNotSupported',
         type: 'error',
     },
     {
@@ -1856,12 +2104,7 @@ export default [
     },
     {
         inputs: [],
-        name: 'ProtocolSwapFeePercentageTooHigh',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ProtocolYieldFeePercentageTooHigh',
+        name: 'ProtocolFeesExceedTotalCollected',
         type: 'error',
     },
     {
@@ -1871,28 +2114,28 @@ export default [
     },
     {
         inputs: [],
-        name: 'ReentrancyGuardReentrantCall',
+        name: 'QuoteResultSpoofed',
         type: 'error',
     },
     {
         inputs: [],
-        name: 'RouterNotTrusted',
+        name: 'ReentrancyGuardReentrantCall',
         type: 'error',
     },
     {
         inputs: [
             {
-                internalType: 'uint8',
-                name: 'bits',
-                type: 'uint8',
-            },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
+                internalType: 'bytes',
+                name: 'result',
+                type: 'bytes',
             },
         ],
-        name: 'SafeCastOverflowedUintDowncast',
+        name: 'Result',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'RouterNotTrusted',
         type: 'error',
     },
     {
@@ -1910,28 +2153,6 @@ export default [
         inputs: [
             {
                 internalType: 'address',
-                name: 'token',
-                type: 'address',
-            },
-        ],
-        name: 'SafeERC20FailedOperation',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'SenderIsNotPauseManager',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
                 name: 'sender',
                 type: 'address',
             },
@@ -1941,12 +2162,12 @@ export default [
     },
     {
         inputs: [],
-        name: 'SenderNotAllowed',
+        name: 'SwapFeePercentageTooHigh',
         type: 'error',
     },
     {
         inputs: [],
-        name: 'SwapFeePercentageTooHigh',
+        name: 'SwapFeePercentageTooLow',
         type: 'error',
     },
     {
@@ -2003,6 +2224,11 @@ export default [
         type: 'error',
     },
     {
+        inputs: [],
+        name: 'TokensNotSorted',
+        type: 'error',
+    },
+    {
         inputs: [
             {
                 internalType: 'uint256',
@@ -2021,6 +2247,16 @@ export default [
     {
         inputs: [],
         name: 'UserDataNotSupported',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultBuffersArePaused',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultIsNotUnlocked',
         type: 'error',
     },
     {
@@ -2047,21 +2283,59 @@ export default [
         inputs: [
             {
                 internalType: 'address',
-                name: 'handler',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'caller',
+                name: 'wrappedToken',
                 type: 'address',
             },
         ],
-        name: 'WrongHandler',
+        name: 'WrapAmountTooSmall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongProtocolFeeControllerDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'WrongUnderlyingAmount',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongVaultAdminDeployment',
         type: 'error',
     },
     {
         inputs: [],
         name: 'WrongVaultExtensionDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'WrongWrappedAmount',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'WrongWrappedTokenAsset',
         type: 'error',
     },
     {
@@ -2122,12 +2396,6 @@ export default [
                 internalType: 'address',
                 name: 'liquidityProvider',
                 type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'contract IERC20[]',
-                name: 'tokens',
-                type: 'address[]',
             },
             {
                 indexed: false,
@@ -2224,7 +2492,7 @@ export default [
                     },
                     {
                         internalType: 'bool',
-                        name: 'yieldFeeExempt',
+                        name: 'paysYieldFees',
                         type: 'bool',
                     },
                 ],
@@ -2236,14 +2504,37 @@ export default [
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'pauseWindowEndTime',
+                name: 'swapFeePercentage',
                 type: 'uint256',
             },
             {
                 indexed: false,
-                internalType: 'address',
-                name: 'pauseManager',
-                type: 'address',
+                internalType: 'uint32',
+                name: 'pauseWindowEndTime',
+                type: 'uint32',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                indexed: false,
+                internalType: 'struct PoolRoleAccounts',
+                name: 'roleAccounts',
+                type: 'tuple',
             },
             {
                 components: [
@@ -2255,6 +2546,11 @@ export default [
                     {
                         internalType: 'bool',
                         name: 'shouldCallAfterInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallComputeDynamicSwapFee',
                         type: 'bool',
                     },
                     {
@@ -2287,22 +2583,32 @@ export default [
                         name: 'shouldCallAfterRemoveLiquidity',
                         type: 'bool',
                     },
+                    {
+                        internalType: 'address',
+                        name: 'hooksContract',
+                        type: 'address',
+                    },
                 ],
                 indexed: false,
-                internalType: 'struct PoolHooks',
-                name: 'hooks',
+                internalType: 'struct HooksConfig',
+                name: 'hooksConfig',
                 type: 'tuple',
             },
             {
                 components: [
                     {
                         internalType: 'bool',
-                        name: 'supportsAddLiquidityCustom',
+                        name: 'disableUnbalancedLiquidity',
                         type: 'bool',
                     },
                     {
                         internalType: 'bool',
-                        name: 'supportsRemoveLiquidityCustom',
+                        name: 'enableAddLiquidityCustom',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableRemoveLiquidityCustom',
                         type: 'bool',
                     },
                 ],
@@ -2320,18 +2626,12 @@ export default [
         inputs: [
             {
                 indexed: true,
-                internalType: 'contract IERC20',
-                name: 'token',
+                internalType: 'contract IProtocolFeeController',
+                name: 'newProtocolFeeController',
                 type: 'address',
             },
-            {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
         ],
-        name: 'ProtocolFeeCollected',
+        name: 'ProtocolFeeControllerChanged',
         type: 'event',
     },
     {
@@ -2345,31 +2645,48 @@ export default [
             },
             {
                 indexed: true,
-                internalType: 'address',
-                name: 'token',
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
                 type: 'address',
             },
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'amount',
+                name: 'amountIn',
                 type: 'uint256',
             },
-        ],
-        name: 'ProtocolSwapFeeCharged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
             {
-                indexed: true,
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
                 internalType: 'uint256',
                 name: 'swapFeePercentage',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'swapFeeAmount',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'contract IERC20',
+                name: 'swapFeeToken',
+                type: 'address',
+            },
         ],
-        name: 'ProtocolSwapFeePercentageChanged',
+        name: 'Swap',
         type: 'event',
     },
     {
@@ -2379,48 +2696,10 @@ export default [
                 indexed: true,
                 internalType: 'address',
                 name: 'pool',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'token',
                 type: 'address',
             },
             {
                 indexed: false,
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolYieldFeeCharged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'yieldFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolYieldFeePercentageChanged',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                indexed: true,
                 internalType: 'uint256',
                 name: 'swapFeePercentage',
                 type: 'uint256',
@@ -2464,6 +2743,37 @@ export default [
         anonymous: false,
         inputs: [
             {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'underlyingToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'burnedShares',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'withdrawnUnderlying',
+                type: 'uint256',
+            },
+        ],
+        name: 'Unwrap',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 indexed: false,
                 internalType: 'bool',
                 name: 'paused',
@@ -2474,30 +2784,39 @@ export default [
         type: 'event',
     },
     {
-        inputs: [],
-        name: 'MAX_BUFFER_PERIOD_DURATION',
-        outputs: [
+        anonymous: false,
+        inputs: [
             {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'underlyingToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
                 internalType: 'uint256',
-                name: '',
+                name: 'depositedUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'mintedShares',
                 type: 'uint256',
             },
         ],
-        stateMutability: 'view',
-        type: 'function',
+        name: 'Wrap',
+        type: 'event',
     },
     {
-        inputs: [],
-        name: 'MAX_PAUSE_WINDOW_DURATION',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
+        stateMutability: 'payable',
+        type: 'fallback',
     },
     {
         inputs: [
@@ -2584,20 +2903,39 @@ export default [
     {
         inputs: [
             {
-                internalType: 'contract IERC20[]',
-                name: 'tokens',
-                type: 'address[]',
+                internalType: 'enum SwapKind',
+                name: 'kind',
+                type: 'uint8',
+            },
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountGiven',
+                type: 'uint256',
             },
         ],
-        name: 'collectProtocolFees',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'disableQuery',
-        outputs: [],
+        name: 'calculateBufferAmounts',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'amountCalculated',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountInUnderlying',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountOutWrapped',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -2608,10 +2946,111 @@ export default [
                 name: 'pool',
                 type: 'address',
             },
+            {
+                components: [
+                    {
+                        internalType: 'enum SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amountGivenScaled18',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'balancesScaled18',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'indexIn',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'indexOut',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'router',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
+                ],
+                internalType: 'struct IBasePool.PoolSwapParams',
+                name: 'swapParams',
+                type: 'tuple',
+            },
         ],
-        name: 'disableRecoveryMode',
-        outputs: [],
-        stateMutability: 'nonpayable',
+        name: 'computeDynamicSwapFee',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: 'success',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256',
+                name: 'dynamicSwapFee',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'getAggregateSwapFeeAmount',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'getAggregateYieldFeeAmount',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {
@@ -2622,63 +3061,11 @@ export default [
                 type: 'address',
             },
         ],
-        name: 'enableRecoveryMode',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'bytes4',
-                name: 'selector',
-                type: 'bytes4',
-            },
-        ],
-        name: 'getActionId',
-        outputs: [
-            {
-                internalType: 'bytes32',
-                name: '',
-                type: 'bytes32',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getAuthorizer',
-        outputs: [
-            {
-                internalType: 'contract IAuthorizer',
-                name: '',
-                type: 'address',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getBufferPeriodDuration',
+        name: 'getBptRate',
         outputs: [
             {
                 internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getBufferPeriodEndTime',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
+                name: 'rate',
                 type: 'uint256',
             },
         ],
@@ -2687,78 +3074,97 @@ export default [
     },
     {
         inputs: [
-            {
-                internalType: 'uint256',
-                name: 'index',
-                type: 'uint256',
-            },
-        ],
-        name: 'getHandler',
-        outputs: [
             {
                 internalType: 'address',
-                name: '',
+                name: 'pool',
                 type: 'address',
             },
         ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getHandlersCount',
+        name: 'getCurrentLiveBalances',
         outputs: [
             {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
+                internalType: 'uint256[]',
+                name: 'balancesLiveScaled18',
+                type: 'uint256[]',
             },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
-        inputs: [],
-        name: 'getMaximumPoolTokens',
-        outputs: [
+        inputs: [
             {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
             },
         ],
-        stateMutability: 'pure',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMinimumPoolTokens',
+        name: 'getHooksConfig',
         outputs: [
             {
-                internalType: 'uint256',
+                components: [
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallComputeDynamicSwapFee',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeSwap',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterSwap',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeAddLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterAddLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeRemoveLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterRemoveLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'hooksContract',
+                        type: 'address',
+                    },
+                ],
+                internalType: 'struct HooksConfig',
                 name: '',
-                type: 'uint256',
+                type: 'tuple',
             },
         ],
-        stateMutability: 'pure',
+        stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getNonzeroDeltaCount',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getPauseWindowEndTime',
         outputs: [
             {
                 internalType: 'uint256',
@@ -2782,6 +3188,53 @@ export default [
             {
                 components: [
                     {
+                        components: [
+                            {
+                                internalType: 'bool',
+                                name: 'disableUnbalancedLiquidity',
+                                type: 'bool',
+                            },
+                            {
+                                internalType: 'bool',
+                                name: 'enableAddLiquidityCustom',
+                                type: 'bool',
+                            },
+                            {
+                                internalType: 'bool',
+                                name: 'enableRemoveLiquidityCustom',
+                                type: 'bool',
+                            },
+                        ],
+                        internalType: 'struct LiquidityManagement',
+                        name: 'liquidityManagement',
+                        type: 'tuple',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'staticSwapFeePercentage',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'aggregateSwapFeePercentage',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'aggregateYieldFeePercentage',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint24',
+                        name: 'tokenDecimalDiffs',
+                        type: 'uint24',
+                    },
+                    {
+                        internalType: 'uint32',
+                        name: 'pauseWindowEndTime',
+                        type: 'uint32',
+                    },
+                    {
                         internalType: 'bool',
                         name: 'isPoolRegistered',
                         type: 'bool',
@@ -2801,92 +3254,81 @@ export default [
                         name: 'isPoolInRecoveryMode',
                         type: 'bool',
                     },
-                    {
-                        internalType: 'bool',
-                        name: 'hasDynamicSwapFee',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'uint64',
-                        name: 'staticSwapFeePercentage',
-                        type: 'uint64',
-                    },
-                    {
-                        internalType: 'uint24',
-                        name: 'tokenDecimalDiffs',
-                        type: 'uint24',
-                    },
-                    {
-                        internalType: 'uint32',
-                        name: 'pauseWindowEndTime',
-                        type: 'uint32',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallBeforeInitialize',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallAfterInitialize',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallBeforeSwap',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallAfterSwap',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallBeforeAddLiquidity',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallAfterAddLiquidity',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallBeforeRemoveLiquidity',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'shouldCallAfterRemoveLiquidity',
-                                type: 'bool',
-                            },
-                        ],
-                        internalType: 'struct PoolHooks',
-                        name: 'hooks',
-                        type: 'tuple',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'bool',
-                                name: 'supportsAddLiquidityCustom',
-                                type: 'bool',
-                            },
-                            {
-                                internalType: 'bool',
-                                name: 'supportsRemoveLiquidityCustom',
-                                type: 'bool',
-                            },
-                        ],
-                        internalType: 'struct LiquidityManagement',
-                        name: 'liquidityManagement',
-                        type: 'tuple',
-                    },
                 ],
                 internalType: 'struct PoolConfig',
+                name: '',
+                type: 'tuple',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
+        name: 'getPoolData',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'PoolConfigBits',
+                        name: 'poolConfigBits',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'contract IERC20[]',
+                        name: 'tokens',
+                        type: 'address[]',
+                    },
+                    {
+                        components: [
+                            {
+                                internalType: 'enum TokenType',
+                                name: 'tokenType',
+                                type: 'uint8',
+                            },
+                            {
+                                internalType: 'contract IRateProvider',
+                                name: 'rateProvider',
+                                type: 'address',
+                            },
+                            {
+                                internalType: 'bool',
+                                name: 'paysYieldFees',
+                                type: 'bool',
+                            },
+                        ],
+                        internalType: 'struct TokenInfo[]',
+                        name: 'tokenInfo',
+                        type: 'tuple[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'balancesRaw',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'balancesLiveScaled18',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'tokenRates',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'decimalScalingFactors',
+                        type: 'uint256[]',
+                    },
+                ],
+                internalType: 'struct PoolData',
                 name: '',
                 type: 'tuple',
             },
@@ -2910,19 +3352,55 @@ export default [
                 type: 'bool',
             },
             {
-                internalType: 'uint256',
+                internalType: 'uint32',
                 name: '',
-                type: 'uint256',
+                type: 'uint32',
             },
             {
-                internalType: 'uint256',
+                internalType: 'uint32',
                 name: '',
-                type: 'uint256',
+                type: 'uint32',
             },
             {
                 internalType: 'address',
                 name: '',
                 type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
+        name: 'getPoolRoleAccounts',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                internalType: 'struct PoolRoleAccounts',
+                name: '',
+                type: 'tuple',
             },
         ],
         stateMutability: 'view',
@@ -2944,9 +3422,26 @@ export default [
                 type: 'address[]',
             },
             {
-                internalType: 'enum TokenType[]',
-                name: 'tokenTypes',
-                type: 'uint8[]',
+                components: [
+                    {
+                        internalType: 'enum TokenType',
+                        name: 'tokenType',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IRateProvider',
+                        name: 'rateProvider',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'paysYieldFees',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct TokenInfo[]',
+                name: 'tokenInfo',
+                type: 'tuple[]',
             },
             {
                 internalType: 'uint256[]',
@@ -2955,13 +3450,8 @@ export default [
             },
             {
                 internalType: 'uint256[]',
-                name: 'decimalScalingFactors',
+                name: 'lastLiveBalances',
                 type: 'uint256[]',
-            },
-            {
-                internalType: 'contract IRateProvider[]',
-                name: 'rateProviders',
-                type: 'address[]',
             },
         ],
         stateMutability: 'view',
@@ -2979,7 +3469,12 @@ export default [
         outputs: [
             {
                 internalType: 'uint256[]',
-                name: '',
+                name: 'decimalScalingFactors',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'tokenRates',
                 type: 'uint256[]',
             },
         ],
@@ -2998,7 +3493,7 @@ export default [
         outputs: [
             {
                 internalType: 'contract IERC20[]',
-                name: '',
+                name: 'tokens',
                 type: 'address[]',
             },
         ],
@@ -3008,38 +3503,12 @@ export default [
     {
         inputs: [
             {
-                internalType: 'address',
+                internalType: 'contract IERC20',
                 name: 'token',
                 type: 'address',
             },
         ],
-        name: 'getProtocolFees',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getProtocolSwapFeePercentage',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getProtocolYieldFeePercentage',
+        name: 'getReservesOf',
         outputs: [
             {
                 internalType: 'uint256',
@@ -3072,11 +3541,6 @@ export default [
     {
         inputs: [
             {
-                internalType: 'address',
-                name: 'user',
-                type: 'address',
-            },
-            {
                 internalType: 'contract IERC20',
                 name: 'token',
                 type: 'address',
@@ -3094,42 +3558,13 @@ export default [
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-        ],
-        name: 'getTokenReserve',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
         inputs: [],
-        name: 'getVaultPausedState',
+        name: 'getVaultAdmin',
         outputs: [
             {
-                internalType: 'bool',
+                internalType: 'address',
                 name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
+                type: 'address',
             },
         ],
         stateMutability: 'view',
@@ -3270,7 +3705,7 @@ export default [
     },
     {
         inputs: [],
-        name: 'isVaultPaused',
+        name: 'isUnlocked',
         outputs: [
             {
                 internalType: 'bool',
@@ -3279,26 +3714,6 @@ export default [
             },
         ],
         stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'pausePool',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'pauseVault',
-        outputs: [],
-        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -3317,6 +3732,19 @@ export default [
                 type: 'bytes',
             },
         ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'bytes',
+                name: 'data',
+                type: 'bytes',
+            },
+        ],
+        name: 'quoteAndRevert',
+        outputs: [],
         stateMutability: 'payable',
         type: 'function',
     },
@@ -3359,7 +3787,7 @@ export default [
                     },
                     {
                         internalType: 'bool',
-                        name: 'yieldFeeExempt',
+                        name: 'paysYieldFees',
                         type: 'bool',
                     },
                 ],
@@ -3369,71 +3797,61 @@ export default [
             },
             {
                 internalType: 'uint256',
-                name: 'pauseWindowEndTime',
+                name: 'swapFeePercentage',
                 type: 'uint256',
             },
             {
+                internalType: 'uint32',
+                name: 'pauseWindowEndTime',
+                type: 'uint32',
+            },
+            {
+                internalType: 'bool',
+                name: 'protocolFeeExempt',
+                type: 'bool',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                internalType: 'struct PoolRoleAccounts',
+                name: 'roleAccounts',
+                type: 'tuple',
+            },
+            {
                 internalType: 'address',
-                name: 'pauseManager',
+                name: 'poolHooksContract',
                 type: 'address',
             },
             {
                 components: [
                     {
                         internalType: 'bool',
-                        name: 'shouldCallBeforeInitialize',
+                        name: 'disableUnbalancedLiquidity',
                         type: 'bool',
                     },
                     {
                         internalType: 'bool',
-                        name: 'shouldCallAfterInitialize',
+                        name: 'enableAddLiquidityCustom',
                         type: 'bool',
                     },
                     {
                         internalType: 'bool',
-                        name: 'shouldCallBeforeSwap',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'shouldCallAfterSwap',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'shouldCallBeforeAddLiquidity',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'shouldCallAfterAddLiquidity',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'shouldCallBeforeRemoveLiquidity',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'shouldCallAfterRemoveLiquidity',
-                        type: 'bool',
-                    },
-                ],
-                internalType: 'struct PoolHooks',
-                name: 'poolHooks',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'bool',
-                        name: 'supportsAddLiquidityCustom',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'supportsRemoveLiquidityCustom',
+                        name: 'enableRemoveLiquidityCustom',
                         type: 'bool',
                     },
                 ],
@@ -3450,57 +3868,29 @@ export default [
     {
         inputs: [
             {
-                internalType: 'contract IAuthorizer',
-                name: 'newAuthorizer',
-                type: 'address',
-            },
-        ],
-        name: 'setAuthorizer',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'newProtocolSwapFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'setProtocolSwapFeePercentage',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'newProtocolYieldFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'setProtocolYieldFeePercentage',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
             },
             {
+                internalType: 'address',
+                name: 'from',
+                type: 'address',
+            },
+            {
                 internalType: 'uint256',
-                name: 'swapFeePercentage',
+                name: 'exactBptAmountIn',
                 type: 'uint256',
             },
         ],
-        name: 'setStaticSwapFeePercentage',
-        outputs: [],
+        name: 'removeLiquidityRecovery',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOutRaw',
+                type: 'uint256[]',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -3587,26 +3977,6 @@ export default [
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'unpausePool',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'unpauseVault',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
         inputs: [],
         name: 'vault',
         outputs: [
@@ -3618,5 +3988,9 @@ export default [
         ],
         stateMutability: 'view',
         type: 'function',
+    },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
     },
 ] as const;

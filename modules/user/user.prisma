@@ -70,6 +70,7 @@ enum PrismaUserBalanceType {
     STAKED
     RELIQUARY
     AURA
+    VEBAL
 }
 
 model PrismaUserPoolBalanceSnapshot {

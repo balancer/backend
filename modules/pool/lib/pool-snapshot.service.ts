@@ -40,88 +40,6 @@ export class PoolSnapshotService {
         });
     }
 
-    /*
-    Per default, this method syncs the snapshot from today and from yesterday (daysTosync=2). It is important to also sync the snapshot from
-    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
-    */
-    public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
-        let operations: any[] = [];
-        const daysAgoStartOfDay = moment()
-            .utc()
-            .startOf('day')
-            .subtract(daysToSync - 1, 'days')
-            .unix();
-
-        // per default (daysToSync=2) returns snapshots from yesterday and today
-        const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
-            where: { timestamp_gte: daysAgoStartOfDay },
-            orderBy: PoolSnapshot_OrderBy.Timestamp,
-            orderDirection: OrderDirection.Asc,
-        });
-
-        const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
-            where: {
-                // there is no guarantee that a pool receives a swap per day, so we get the last day with a swap
-                timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
-                chain: this.chain,
-            },
-            orderBy: { timestamp: 'desc' },
-            distinct: 'poolId',
-        });
-
-        const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
-        const pools = await prisma.prismaPool.findMany({ where: { id: { in: poolIds }, chain: this.chain } });
-
-        for (const pool of pools) {
-            const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === pool.id);
-            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === pool.id);
-
-            if (!latestSyncedSnapshot && pool.createTime < daysAgoStartOfDay) {
-                // in this instance, this pool should already have snapshots stored.
-                // since that's not the case, we reload from the subgraph and bail.
-                await this.loadAllSnapshotsForPools([pool.id]);
-                continue;
-            }
-
-            const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
-            const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
-
-            const poolOperations = snapshots.map((snapshot, index) => {
-                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
-                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].swapFees;
-
-                const data = this.getPrismaPoolSnapshotFromSubgraphData(
-                    snapshot,
-                    prevTotalSwapVolume,
-                    prevTotalSwapFee,
-                );
-
-                return prisma.prismaPoolSnapshot.upsert({
-                    where: { id_chain: { id: snapshot.id, chain: this.chain } },
-                    create: data,
-                    update: data,
-                });
-            });
-            operations.push(...poolOperations);
-        }
-
-        await prismaBulkExecuteOperations(operations);
-
-        const poolsWithoutSnapshots = await prisma.prismaPool.findMany({
-            where: {
-                OR: [
-                    { type: 'COMPOSABLE_STABLE', chain: this.chain },
-                    { tokens: { some: { nestedPoolId: { not: null } } }, chain: this.chain },
-                ],
-            },
-            include: { tokens: true },
-        });
-
-        for (const pool of poolsWithoutSnapshots) {
-            await this.createPoolSnapshotsForPoolsMissingSubgraphData(pool.id, daysToSync);
-        }
-    }
-
     public async loadAllSnapshotsForPools(poolIds: string[]) {
         //assuming the pool does not have more than 5,000 snapshots, we should be ok.
         const allSnapshots = await this.balancerSubgraphService.getAllPoolSnapshots({
@@ -293,15 +211,18 @@ export class PoolSnapshotService {
             totalSharesNum: parseFloat(snapshot.totalShares),
             totalSwapVolume: parseFloat(snapshot.swapVolume),
             totalSwapFee: parseFloat(snapshot.swapFees),
+            totalSurplus: 0,
             swapsCount: parseInt(snapshot.swapsCount),
             holdersCount: parseInt(snapshot.holdersCount),
             amounts: snapshot.amounts,
             volume24h: Math.max(parseFloat(snapshot.swapVolume) - parseFloat(prevTotalSwapVolume), 0),
             fees24h: Math.max(parseFloat(snapshot.swapFees) - parseFloat(prevTotalSwapFee), 0),
+            surplus24h: 0,
             sharePrice: totalLiquidity > 0 && totalShares > 0 ? totalLiquidity / totalShares : 0,
             totalProtocolSwapFees: [],
             totalProtocolYieldFees: [],
             totalVolumes: [],
+            totalSurpluses: [],
         };
     }
 

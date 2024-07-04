@@ -16,7 +16,6 @@ export default <NetworkData>{
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/avalanche-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GzGBUh1X4Cq9RBdyKoCrPLhYW1saBYHwFBgcTsARPYUG`,
-        veBalLocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
@@ -68,7 +67,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-avalanche',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e',

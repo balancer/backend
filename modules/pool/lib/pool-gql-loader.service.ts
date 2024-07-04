@@ -226,6 +226,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            incentivized: pool.categories.some((category) => category.category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
@@ -678,6 +679,7 @@ export class PoolGqlLoaderService {
             ...poolToken.token,
             index: poolToken.index,
             balance: poolToken.dynamicData?.balance || '0',
+            balanceUSD: String(poolToken.dynamicData?.balanceUSD) || '0',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
             priceRateProvider: poolToken.priceRateProvider,
             weight: poolToken?.dynamicData?.weight,
@@ -738,6 +740,13 @@ export class PoolGqlLoaderService {
                     aura: null,
                 };
             } else if (staking.farm) {
+                return {
+                    ...staking,
+                    gauge: null,
+                    reliquary: null,
+                    aura: null,
+                };
+            } else if (staking.vebal) {
                 return {
                     ...staking,
                     gauge: null,
@@ -824,8 +833,10 @@ export class PoolGqlLoaderService {
             fees24h,
             totalLiquidity,
             volume24h,
+            surplus24h,
             fees48h,
             volume48h,
+            surplus48h,
             yieldCapture24h,
             yieldCapture48h,
             totalLiquidity24hAgo,
@@ -955,6 +966,8 @@ export class PoolGqlLoaderService {
             totalShares24hAgo,
             fees24h: `${fixedNumber(fees24h, 2)}`,
             volume24h: `${fixedNumber(volume24h, 2)}`,
+            surplus24h: `${fixedNumber(surplus24h, 2)}`,
+            surplus48h: `${fixedNumber(surplus48h, 2)}`,
             yieldCapture24h: `${fixedNumber(yieldCapture24h, 2)}`,
             yieldCapture48h: `${fixedNumber(yieldCapture48h, 2)}`,
             fees48h: `${fixedNumber(fees48h, 2)}`,

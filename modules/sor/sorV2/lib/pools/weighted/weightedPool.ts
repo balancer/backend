@@ -40,10 +40,10 @@ export class WeightedPool implements BasePool {
     public readonly swapFee: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
+    public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
+    public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
-    private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
-    private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): WeightedPool {
         const poolTokens: WeightedPoolToken[] = [];
@@ -64,9 +64,9 @@ export class WeightedPool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
+            // TODO: parseFloat with toFixed changes the value, better use parseEther instead
             const balance = parseFloat(poolToken.dynamicData.balance).toFixed(18);
             const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
-
             poolTokens.push(
                 new WeightedPoolToken(
                     token,

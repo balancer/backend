@@ -15,10 +15,9 @@ import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../modules/network/network-config';
-import { JobsController } from '../modules/controllers/jobs-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
-import { CowAmmController } from '../modules/controllers';
+import { JobsController, CowAmmController, SnapshotsController } from '../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
 
@@ -234,11 +233,20 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-latest-snapshots-for-all-pools':
+            case 'sync-snapshots-v2':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => poolService.syncLatestSnapshotsForAllPools(),
+                    () => SnapshotsController().syncSnapshotsV2(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-snapshots-v3':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => SnapshotsController().syncSnapshotsV3(chainId),
                     res,
                     next,
                 );
@@ -378,15 +386,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-latest-snapshots-for-all-pools-v3':
-                await runIfNotAlreadyRunning(
-                    job.name,
-                    chainId,
-                    () => poolService.syncLatestSnapshotsForAllPoolsV3(),
-                    res,
-                    next,
-                );
-                break;
             case 'update-lifetime-values-for-all-pools-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
@@ -411,6 +410,36 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-cow-amm-pools':
                 await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncPools(chainId), res, next);
+                break;
+            case 'sync-cow-amm-swaps':
+                await runIfNotAlreadyRunning(job.name, chainId, () => CowAmmController().syncSwaps(chainId), res, next);
+                break;
+            case 'sync-cow-amm-join-exits':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncJoinExits(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'sync-cow-amm-snapshots':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().syncSnapshots(chainId),
+                    res,
+                    next,
+                );
+                break;
+            case 'update-cow-amm-volume-and-fees':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().updateVolumeAndFees(chainId),
+                    res,
+                    next,
+                );
                 break;
             default:
                 res.sendStatus(400);

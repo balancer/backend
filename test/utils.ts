@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { providers } from 'ethers';
 import { mainnetNetworkConfig } from '../modules/network/mainnet';
 
@@ -14,4 +15,12 @@ export function setMainnetRpcProviderForTesting(httpRpc = defaultAnvilRpcUrl) {
 
 export function getRpcProvider(httpRpc = defaultAnvilRpcUrl) {
     return new providers.JsonRpcProvider(httpRpc);
+}
+
+export function createRandomAddress() {
+    return '0x' + randomBytes(20).toString('hex');
+}
+
+export function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }

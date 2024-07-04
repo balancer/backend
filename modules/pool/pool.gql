@@ -99,7 +99,7 @@ extend type Mutation {
     poolUpdateLiquidity24hAgoForAllPools: String!
     poolLoadSnapshotsForAllPools: String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-    poolSyncLatestSnapshotsForAllPools(daysToSync: Int): String!
+    poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
     poolUpdateLifetimeValuesForAllPools: String!
     poolInitializeSnapshotsForPool(poolId: String!): String!
     poolSyncPool(poolId: String!): String!
@@ -130,6 +130,10 @@ type GqlPoolMinimal {
     The protocol version on which the pool is deployed, 1, 2 or 3
     """
     protocolVersion: Int!
+    """
+    Pool is receiving rewards when liquidity tokens are staked
+    """
+    incentivized: Boolean!
     """
     The name of the pool as per contract
     """
@@ -355,6 +359,7 @@ type GqlPoolDynamicData {
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    surplus24h: BigDecimal!
     yieldCapture24h: BigDecimal!
     apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
@@ -366,6 +371,7 @@ type GqlPoolDynamicData {
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+    surplus48h: BigDecimal!
     yieldCapture48h: BigDecimal!
 
     lifetimeVolume: BigDecimal!
@@ -764,6 +770,10 @@ type GqlPoolTokenDetail {
     Balance of the pool token inside the pool.
     """
     balance: BigDecimal!
+    """
+    USD Balance of the pool token.
+    """
+    balanceUSD: BigDecimal!
     """
     If it is an appreciating token, it shows the current price rate. 1 otherwise.
     """
@@ -1221,9 +1231,11 @@ type GqlPoolSnapshot {
     totalLiquidity: String!
     volume24h: String!
     fees24h: String!
+    surplus24h: String!
     totalShares: String!
     totalSwapVolume: String!
     totalSwapFee: String!
+    totalSurplus: String!
     swapsCount: String!
     holdersCount: String!
     sharePrice: String!
@@ -1248,6 +1260,7 @@ type GqlPoolStaking {
     farm: GqlPoolStakingMasterChefFarm
     reliquary: GqlPoolStakingReliquaryFarm
     aura: GqlPoolStakingAura
+    vebal: GqlPoolStakingVebal
 }
 
 enum GqlPoolStakingType {
@@ -1256,6 +1269,7 @@ enum GqlPoolStakingType {
     FRESH_BEETS
     RELIQUARY
     AURA
+    VEBAL
 }
 
 enum GqlPoolStakingGaugeStatus {
@@ -1306,7 +1320,14 @@ type GqlPoolStakingFarmRewarder {
 type GqlPoolStakingAura {
     id: ID!
     auraPoolAddress: String!
+    auraPoolId: String!
+    isShutdown: Boolean!
     apr: Float!
+}
+
+type GqlPoolStakingVebal {
+    id: ID!
+    vebalAddress: String!
 }
 
 type GqlPoolStakingReliquaryFarm {

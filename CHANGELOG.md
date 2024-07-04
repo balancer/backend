@@ -1,5 +1,41 @@
 # backend
 
+## 1.2.0
+
+### Minor Changes
+
+-   d8752b4: adding vebal as a staking option
+
+### Patch Changes
+
+-   b03f0ce: fix aura apr scaling
+-   b3aedfc: Increase swap size to 100 USD for normalized liquidity calculation. Also only use pools that have >=1000USD tvl
+-   e8e8bcc: adding SOR support for vault v3 - swaps only
+-   ddb3616: moving snapshot syncing to a separate functions
+-   e643603: updated AAVE subgraph URLs for getting token APRs
+-   b071980: adding backsyncing task for filling up subgraph swaps
+-   abc67d0: exposing aura pool id and shutdown flag for aura staking
+
+## 1.1.0
+
+### Minor Changes
+
+-   a7711cb: Adding incentivized field to the pool response type
+-   7fcea18: add cow-amm support for swaps, add, removes and snapshots. Also incorporate surplus
+
+### Patch Changes
+
+-   deb7c03: adjust syncs to newest vault v3 version
+-   455bb0b: rename join/exit to add/remove for v3 subgraph
+-   755e873: config fix
+-   95e5636: fix: removing renamed vaultVersion column
+-   4465dbf: adding poolToken -> balanceUSD
+-   798c947: adding chain and user address as query params to vebal queries
+-   0851e56: Update to newest v3 subgraph. Adjust balances etc from wei to floats
+-   8961dfb: handle missing tokens in subgraph pools
+-   1021114: fix voting apr timestamp to use UTC
+-   489cf3e: removing duplicated vebal locks subgraph url
+
 ## 1.0.1
 
 ### Patch Changes

@@ -10,6 +10,11 @@ export type SwapEvent = PrismaPoolEvent & {
             amount: string;
             valueUSD: string;
         };
+        surplus?: {
+            address: string;
+            amount: string;
+            valueUSD: string;
+        };
         tokenIn: {
             address: string;
             amount: string;
@@ -67,6 +72,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                     },
                 },
                 aura: true,
+                vebal: true,
             },
         },
         categories: true,
@@ -313,6 +319,7 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                     },
                 },
                 aura: true,
+                vebal: true,
             },
         },
     },

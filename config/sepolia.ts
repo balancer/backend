@@ -12,14 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-03',
-        cowAmm: 'https://api.studio.thegraph.com/proxy/31386/balancer-cow-amm/version/latest',
+        cowAmm: 'https://api.studio.thegraph.com/proxy/75376/balancer-cow-amm-sepolia/version/latest',
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
-        balancerV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest',
-        balancerPoolsV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest',
+        balancerV3: 'https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-5th/version/latest',
+        balancerPoolsV3: 'https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-5th/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
-        // veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -36,9 +35,7 @@ export default <NetworkData>{
         platformId: 'ethereum',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.GROVE_CITY
-        ? `https://sepolia.rpc.grove.city/v1/${env.GROVE_CITY}`
-        : env.ALCHEMY_API_KEY
+    rpcUrl: env.ALCHEMY_API_KEY
         ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : env.INFURA_API_KEY
         ? `https://sepolia.infura.io/v3/${env.INFURA_API_KEY}`
@@ -60,8 +57,8 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0x1fc7f1f84cfe61a04224ac8d3f87f56214fec08c',
-            routerAddress: '0xa0de078cd5cfa7088821b83e0bd7545ccfb7c883',
+            vaultAddress: '0xd5584b37d1845ffed958c2d94bc675603ddcce68',
+            routerAddress: '0x1c58cc548a23956469c7c528bb3a846c842dfaf9',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },

@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import { networkContext } from '../../network/network-context.service';
+import config from '../../../config/mainnet';
 import _ from 'lodash';
 import { VotingEscrowLock_OrderBy, OrderDirection, getSdk } from './generated/veBal-locks-subgraph-types';
 import moment from 'moment';
@@ -43,8 +43,17 @@ export class VeBalLocksSubgraphService {
         return locks;
     }
 
+    public async getMetadata() {
+        const { meta } = await this.sdk.VebalGetMeta();
+
+        if (!meta) {
+            throw new Error('Missing meta data');
+        }
+        return meta;
+    }
+
     public get sdk() {
-        const client = new GraphQLClient(networkContext.data.subgraphs.veBalLocks ?? '');
+        const client = new GraphQLClient(config.subgraphs.gauge ?? '');
 
         return getSdk(client);
     }

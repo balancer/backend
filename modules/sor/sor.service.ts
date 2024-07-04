@@ -1,18 +1,18 @@
 import {
-    GqlSorSwapType,
-    GqlSorGetSwapsResponse,
-    QuerySorGetSwapsArgs,
-    QuerySorGetSwapPathsArgs,
     GqlSorGetSwapPaths,
+    GqlSorGetSwapsResponse,
+    GqlSorSwapType,
+    QuerySorGetSwapPathsArgs,
+    QuerySorGetSwapsArgs,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorPathService';
-import { GetSwapsInput, SwapResult } from './types';
+import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult } from './types';
 import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
-import { parseUnits, formatUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, swapPathsZeroResponse, zeroResponse } from './utils';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 export class SorService {
@@ -63,13 +63,32 @@ export class SorService {
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
-
+        if (!args.useProtocolVersion) {
+            return this.getBestSwapPathVersion({
+                chain: args.chain!,
+                swapAmount: amount,
+                swapType: args.swapType,
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
+                callDataInput: args.callDataInput
+                    ? {
+                          receiver: args.callDataInput.receiver,
+                          sender: args.callDataInput.sender,
+                          slippagePercentage: args.callDataInput.slippagePercentage,
+                          deadline: args.callDataInput.deadline,
+                          wethIsEth: wethIsEth,
+                      }
+                    : undefined,
+            });
+        }
         return sorV2Service.getSorSwapPaths({
             chain: args.chain!,
             swapAmount: amount,
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
+            protocolVersion: args.useProtocolVersion,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {
@@ -246,6 +265,20 @@ export class SorService {
                 v2Perf.toFixed(8),
             ].join(','),
         );
+    }
+
+    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
+        const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 2 });
+        const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 3 });
+        if (input.swapType === 'EXACT_IN') {
+            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
+        } else {
+            return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
+        }
     }
 }
 

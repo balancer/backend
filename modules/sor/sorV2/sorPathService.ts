@@ -30,7 +30,10 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    TokenAmount,
     SwapKind,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
@@ -43,7 +46,7 @@ class SorPathService implements SwapService {
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, 2);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -67,7 +70,7 @@ class SorPathService implements SwapService {
                 return new SwapResultV2(null, chain);
             }
 
-            const swap = new SwapLocal({ paths: paths, swapKind });
+            const swap = new SwapLocal({ paths, swapKind });
 
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
@@ -102,6 +105,7 @@ class SorPathService implements SwapService {
                 paths!,
                 input.swapType,
                 input.chain,
+                input.protocolVersion as 2 | 3,
                 input.queryBatchSwap,
                 input.callDataInput,
             );
@@ -122,11 +126,11 @@ class SorPathService implements SwapService {
     }
 
     private async getSwapPathsFromSor(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapPathsInput,
+        { chain, tokenIn, tokenOut, swapType, swapAmount, protocolVersion, graphTraversalConfig }: GetSwapPathsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<PathWithAmount[] | null> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -171,18 +175,20 @@ class SorPathService implements SwapService {
         paths: PathWithAmount[],
         swapType: GqlSorSwapType,
         chain: Chain,
+        protocolVersion: 2 | 3,
         queryFirst = false,
         callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
-        let updatedAmount;
+        let queryOutput: ExactInQueryOutput | ExactOutQueryOutput | undefined = undefined;
+        let updatedAmount: TokenAmount | undefined = undefined;
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
-                vaultVersion: 2 as 2 | 3,
-                protocolVersion: 2 as 2 | 3,
+                protocolVersion,
+                vaultVersion: protocolVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -194,7 +200,12 @@ class SorPathService implements SwapService {
             swapKind,
         });
         if (queryFirst) {
-            updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            queryOutput = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            if (swapKind === SwapKind.GivenIn) {
+                updatedAmount = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            } else {
+                updatedAmount = (queryOutput as ExactOutQueryOutput).expectedAmountIn;
+            }
         }
 
         let inputAmount = getInputAmount(paths);
@@ -214,7 +225,10 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountOut: outputAmount,
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountOut: outputAmount,
+                    },
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactIn;
@@ -232,7 +246,10 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountIn: inputAmount,
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountIn: inputAmount,
+                    },
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactOut;
@@ -402,11 +419,12 @@ class SorPathService implements SwapService {
      * Fetch pools from Prisma and map to b-sdk BasePool.
      * @returns
      */
-    private async getBasePoolsFromDb(chain: Chain): Promise<PrismaPoolWithDynamic[]> {
+    private async getBasePoolsFromDb(chain: Chain, protocolVersion: number): Promise<PrismaPoolWithDynamic[]> {
         const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 chain,
+                protocolVersion,
                 dynamicData: {
                     totalSharesNum: {
                         gt: 0.000000000001,

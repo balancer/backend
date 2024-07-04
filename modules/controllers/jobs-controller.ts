@@ -102,7 +102,12 @@ export function JobsController(tracer?: any) {
             const vaultClient = getVaultClient(viemClient, vaultAddress);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(newPools, vaultClient, chain, latestBlock);
+            await upsertPools(
+                newPools.sort((a, b) => parseFloat(a.blockTimestamp) - parseFloat(b.blockTimestamp)),
+                vaultClient,
+                chain,
+                latestBlock,
+            );
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -192,7 +197,7 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = getV2SubgraphClient(balancer);
+            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
             const entries = await syncSwapsV2(subgraphClient, chain);
             return entries;
         },
@@ -227,7 +232,7 @@ export function JobsController(tracer?: any) {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
             const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
-            await updateVolumeAndFees(poolsWithNewSwaps);
+            await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
         async syncSftmxStakingData(chainId: string) {
@@ -279,7 +284,8 @@ export function JobsController(tracer?: any) {
 
             // Guard against unconfigured chains
             const subgraph =
-                (balancerV3 && getVaultSubgraphClient(balancerV3)) || (balancer && getV2SubgraphClient(balancer));
+                (balancerV3 && getVaultSubgraphClient(balancerV3)) ||
+                (balancer && getV2SubgraphClient(balancer, Number(chainId)));
 
             if (!subgraph) {
                 throw new Error(`Chain not configured: ${chain}`);
