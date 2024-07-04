@@ -285,7 +285,7 @@ export class PoolService {
                 await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));
             }
 
-            if (networkContext.chain === 'MAINNET') {
+            if (chain === 'MAINNET') {
                 await syncVebalStakingForPools();
             }
         }
