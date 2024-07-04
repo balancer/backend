@@ -691,6 +691,13 @@ export class PoolGqlLoaderService {
                     reliquary: null,
                     aura: null,
                 };
+            } else if (staking.vebal) {
+                return {
+                    ...staking,
+                    gauge: null,
+                    reliquary: null,
+                    aura: null,
+                };
             }
         }
 

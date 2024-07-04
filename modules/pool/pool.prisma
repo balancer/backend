@@ -323,6 +323,7 @@ model PrismaPoolStaking {
     gauge               PrismaPoolStakingGauge?
     reliquary           PrismaPoolStakingReliquaryFarm?
     aura                PrismaPoolStakingAura?
+    vebal               PrismaPoolStakingVebal?
 
     userStakedBalances  PrismaUserStakedBalance[]
 }
@@ -334,6 +335,7 @@ enum PrismaPoolStakingType {
     RELIQUARY
     FRESH_BEETS
     AURA
+    VEBAL
 }
 
 model PrismaPoolStakingMasterChefFarm {
@@ -392,6 +394,18 @@ model PrismaPoolStakingAura {
     auraPoolId          String
     apr                 Float
     isShutdown          Boolean
+}
+
+model PrismaPoolStakingVebal {
+    @@id([id, chain])
+    @@unique([stakingId, chain])
+
+    id                  String
+    stakingId           String
+    staking             PrismaPoolStaking   @relation(fields:[stakingId, chain], references: [id, chain], onDelete: Cascade)
+    chain               Chain
+
+    vebalAddress        String
 }
 
 enum PrismaPoolStakingGaugeStatus {

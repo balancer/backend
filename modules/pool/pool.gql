@@ -1248,6 +1248,7 @@ type GqlPoolStaking {
     farm: GqlPoolStakingMasterChefFarm
     reliquary: GqlPoolStakingReliquaryFarm
     aura: GqlPoolStakingAura
+    vebal: GqlPoolStakingVebal
 }
 
 enum GqlPoolStakingType {
@@ -1256,6 +1257,7 @@ enum GqlPoolStakingType {
     FRESH_BEETS
     RELIQUARY
     AURA
+    VEBAL
 }
 
 enum GqlPoolStakingGaugeStatus {
@@ -1309,6 +1311,11 @@ type GqlPoolStakingAura {
     auraPoolId: String!
     isShutdown: Boolean!
     apr: Float!
+}
+
+type GqlPoolStakingVebal {
+    id: ID!
+    vebalAddress: String!
 }
 
 type GqlPoolStakingReliquaryFarm {

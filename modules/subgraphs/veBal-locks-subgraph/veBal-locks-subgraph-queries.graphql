@@ -21,3 +21,13 @@ query VotingEscrowLocks(
         }
     }
 }
+
+query VebalGetMeta {
+    meta: _meta {
+        block {
+            number
+        }
+        deployment
+        hasIndexingErrors
+    }
+}

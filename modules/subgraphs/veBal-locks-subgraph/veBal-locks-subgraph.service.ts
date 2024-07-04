@@ -43,6 +43,15 @@ export class VeBalLocksSubgraphService {
         return locks;
     }
 
+    public async getMetadata() {
+        const { meta } = await this.sdk.VebalGetMeta();
+
+        if (!meta) {
+            throw new Error('Missing meta data');
+        }
+        return meta;
+    }
+
     public get sdk() {
         const client = new GraphQLClient(config.subgraphs.gauge ?? '');
 
