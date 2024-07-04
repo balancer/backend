@@ -197,7 +197,7 @@ export function JobsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = getV2SubgraphClient(balancer);
+            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
             const entries = await syncSwapsV2(subgraphClient, chain);
             return entries;
         },
@@ -284,7 +284,8 @@ export function JobsController(tracer?: any) {
 
             // Guard against unconfigured chains
             const subgraph =
-                (balancerV3 && getVaultSubgraphClient(balancerV3)) || (balancer && getV2SubgraphClient(balancer));
+                (balancerV3 && getVaultSubgraphClient(balancerV3)) ||
+                (balancer && getV2SubgraphClient(balancer, Number(chainId)));
 
             if (!subgraph) {
                 throw new Error(`Chain not configured: ${chain}`);

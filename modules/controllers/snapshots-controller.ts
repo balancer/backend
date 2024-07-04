@@ -32,7 +32,7 @@ export function SnapshotsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = getV2SubgraphClient(balancer);
+            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
             const entries = await syncSnapshotsV2(subgraphClient, chain);
             return entries;
         },

@@ -8,7 +8,7 @@ import { swapsUsd } from '../../modules/sources/enrichers/swaps-usd';
 export const backsyncSwaps = async (chainId: string) => {
     const chain = chainIdToChain[chainId];
     const subgraphUrl = config[chain].subgraphs.balancer;
-    const subgraphClient = getV2SubgraphClient(subgraphUrl);
+    const subgraphClient = getV2SubgraphClient(subgraphUrl, Number(chainId));
 
     // Read last synced ID from DB - use empty event as a placeholder
     const syncingStatus = await prisma.prismaPoolEvent.findFirst({
