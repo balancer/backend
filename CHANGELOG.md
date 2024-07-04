@@ -1,5 +1,21 @@
 # backend
 
+## 1.2.0
+
+### Minor Changes
+
+-   d8752b4: adding vebal as a staking option
+
+### Patch Changes
+
+-   b03f0ce: fix aura apr scaling
+-   b3aedfc: Increase swap size to 100 USD for normalized liquidity calculation. Also only use pools that have >=1000USD tvl
+-   e8e8bcc: adding SOR support for vault v3 - swaps only
+-   ddb3616: moving snapshot syncing to a separate functions
+-   e643603: updated AAVE subgraph URLs for getting token APRs
+-   b071980: adding backsyncing task for filling up subgraph swaps
+-   abc67d0: exposing aura pool id and shutdown flag for aura staking
+
 ## 1.1.0
 
 ### Minor Changes
