@@ -4,6 +4,7 @@ import {
     PoolsMutationController,
     UserBalancesController,
     CowAmmController,
+    AprsController,
 } from '../modules/controllers';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
@@ -83,6 +84,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
             console.log('Processed', i, 'swaps');
         }
         return 'OK';
+    } else if (job === 'sync-merkl') {
+        return AprsController().syncMerkl();
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
