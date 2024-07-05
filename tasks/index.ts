@@ -71,8 +71,6 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
-    } else if (job === 'sync-metadata') {
-        return JobsController().syncMetadata();
     } else if (job === 'backsync-swaps') {
         // Run in loop until no new swaps are found
         let status: string | undefined = 'true';

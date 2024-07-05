@@ -383,8 +383,6 @@ model PrismaPoolCategory {
 enum PrismaPoolCategoryType {
     INCENTIVIZED
     BLACK_LISTED
-    LRT
-    POINTS
 }
 
 model PrismaPoolExpandedTokens {
