@@ -441,9 +441,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-metadata':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncMetadata(), res, next);
-                break;
             default:
                 res.sendStatus(400);
                 throw new Error(`Unhandled job type ${job.name}`);
