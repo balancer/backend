@@ -148,6 +148,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
         },
+        {
+            name: 'sync-merkl',
+            interval: every(1, 'hours'),
+        },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',
