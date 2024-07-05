@@ -22,6 +22,7 @@ import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
+import { syncMetadata } from '../actions/pool/sync-metadata';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
@@ -306,6 +307,10 @@ export function JobsController(tracer?: any) {
             );
 
             return updates;
+        },
+        async syncMetadata() {
+            await syncMetadata();
+            return 'OK';
         },
     };
 }
