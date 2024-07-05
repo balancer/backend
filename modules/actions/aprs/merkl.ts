@@ -43,20 +43,17 @@ const fetchMerklCampaigns = async () => {
 export const syncMerklRewards = async () => {
     const campaigns = await fetchMerklCampaigns();
 
-    // Delete all Merkl rewards
-    await prisma.prismaPoolAprItem.deleteMany({ where: { type: PrismaPoolAprType.MERKL } });
+    const data = campaigns.map((campaign) => ({
+        id: `${campaign.typeInfo.poolId}-merkl`,
+        type: PrismaPoolAprType.MERKL,
+        title: `Merkl Rewards - ${campaign.campaignParameters.symbolRewardToken}`,
+        chain: chainIdToChain[campaign.chainId],
+        poolId: campaign.typeInfo.poolId,
+        apr: campaign.apr / 100,
+    }));
 
-    // For each campaign, create a reward
-    for (const campaign of campaigns) {
-        await prisma.prismaPoolAprItem.create({
-            data: {
-                id: `${campaign.typeInfo.poolId}-merkl`,
-                type: PrismaPoolAprType.MERKL,
-                title: `Merkl Rewards - ${campaign.campaignParameters.symbolRewardToken}`,
-                chain: chainIdToChain[campaign.chainId],
-                poolId: campaign.typeInfo.poolId,
-                apr: campaign.apr / 100,
-            },
-        });
-    }
+    await prisma.$transaction([
+        prisma.prismaPoolAprItem.deleteMany({ where: { type: PrismaPoolAprType.MERKL } }),
+        prisma.prismaPoolAprItem.createMany({ data }),
+    ]);
 };
