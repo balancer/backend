@@ -152,6 +152,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-merkl',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'sync-rate-provider-reviews',
+            interval: every(1, 'hours'),
+        },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',

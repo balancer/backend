@@ -5,6 +5,7 @@ import {
     UserBalancesController,
     CowAmmController,
     AprsController,
+    ContentController,
 } from '../modules/controllers';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
@@ -86,6 +87,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return 'OK';
     } else if (job === 'sync-merkl') {
         return AprsController().syncMerkl();
+    } else if (job === 'sync-rate-provider-reviews') {
+        return ContentController().syncRateProviderReviews();
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }

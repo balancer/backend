@@ -58,58 +58,6 @@ interface RateProviderReview {
 }
 
 export class GithubContentService implements ContentService {
-    async syncRateProviderReviews(chains: Chain[]): Promise<void> {
-        const { data: githubAllRateProviderList } = await axios.get<RateProviderReview>(RATEPROVIDER_REVIEW_URL);
-
-        for (const chain of chains) {
-            const chainRateProviderList =
-                githubAllRateProviderList[chain === 'MAINNET' ? 'ethereum' : chain.toLowerCase()];
-
-            // delete any reviews that are no longer part of the review repo
-            await prisma.prismaPriceRateProviderData.deleteMany({
-                where: {
-                    chain: chain,
-                    rateProviderAddress: { notIn: Object.keys(chainRateProviderList) },
-                },
-            });
-
-            for (const rateProviderAddress in chainRateProviderList) {
-                const rateProviderData = chainRateProviderList[rateProviderAddress];
-
-                console.log(
-                    `Adding rateprovider ${rateProviderAddress} for chain ${chain} and token ${rateProviderData.asset}`,
-                );
-
-                await prisma.prismaPriceRateProviderData.upsert({
-                    where: {
-                        chain_rateProviderAddress: {
-                            chain: chain,
-                            rateProviderAddress: rateProviderAddress.toLowerCase(),
-                        },
-                    },
-                    create: {
-                        rateProviderAddress: rateProviderAddress.toLowerCase(),
-                        reviewed: true,
-                        chain: chain,
-                        tokenAddress: rateProviderData.asset.toLowerCase(),
-                        name: rateProviderData.name,
-                        reviewUrl: RATEPROVIDER_BASE_URL + rateProviderData.review,
-                        summary: rateProviderData.summary,
-                    },
-                    update: {
-                        rateProviderAddress: rateProviderAddress.toLowerCase(),
-                        reviewed: true,
-                        chain: chain,
-                        tokenAddress: rateProviderData.asset.toLowerCase(),
-                        name: rateProviderData.name,
-                        reviewUrl: RATEPROVIDER_BASE_URL + rateProviderData.review,
-                        summary: rateProviderData.summary,
-                    },
-                });
-            }
-        }
-    }
-
     async syncTokenContentData(chains: Chain[]): Promise<void> {
         const { data: githubAllTokenList } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
 

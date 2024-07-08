@@ -37,7 +37,14 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
+import {
+    Chain,
+    Prisma,
+    PrismaPoolAprType,
+    PrismaPriceRateProviderData,
+    PrismaUserStakedBalance,
+    PrismaUserWalletBalance,
+} from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
@@ -82,6 +89,12 @@ export class PoolGqlLoaderService {
                 if (rateproviderData) {
                     token.priceRateProviderData = {
                         ...rateproviderData,
+                        warnings: rateproviderData.warnings?.split(',') || [],
+                        upgradeableComponents:
+                            (rateproviderData.upgradableComponents as {
+                                implementationReviewed: string;
+                                entryPoint: string;
+                            }[]) || [],
                         address: rateproviderData.rateProviderAddress,
                     };
                 }
@@ -100,6 +113,12 @@ export class PoolGqlLoaderService {
                         if (rateproviderData) {
                             nestedToken.priceRateProviderData = {
                                 ...rateproviderData,
+                                warnings: rateproviderData.warnings?.split(',') || [],
+                                upgradeableComponents:
+                                    (rateproviderData.upgradableComponents as {
+                                        implementationReviewed: string;
+                                        entryPoint: string;
+                                    }[]) || [],
                                 address: rateproviderData.rateProviderAddress,
                             };
                         }
