@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolAprType } from '@prisma/client';
+import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
 
@@ -6,6 +6,7 @@ const url = 'https://api.merkl.xyz/v3/campaigns?types=1&live=true';
 
 interface MerklCampaign {
     chainId: number;
+    computeChainId: number;
     apr: number;
     type: 'balancerPool';
     typeInfo: {
@@ -47,7 +48,7 @@ export const syncMerklRewards = async () => {
         id: `${campaign.typeInfo.poolId}-merkl`,
         type: PrismaPoolAprType.MERKL,
         title: `Merkl Rewards - ${campaign.campaignParameters.symbolRewardToken}`,
-        chain: chainIdToChain[campaign.chainId],
+        chain: chainIdToChain[campaign.computeChainId],
         poolId: campaign.typeInfo.poolId,
         apr: campaign.apr / 100,
     }));
