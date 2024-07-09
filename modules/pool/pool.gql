@@ -1148,6 +1148,11 @@ enum GqlPoolAprItemType {
     APR that pools earns when BPT is staked on AURA.
     """
     AURA
+
+    """
+    Rewards distributed by merkl.xyz
+    """
+    MERKL
 }
 
 type GqlBalancePoolAprItem {
