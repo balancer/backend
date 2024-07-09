@@ -57,7 +57,7 @@ const balancerResolvers: Resolvers = {
         poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
             return EventsQueryController().getEvents({
                 first: 1000,
-                where: { range, poolId, chain, typeIn, userAddress },
+                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
             });
         },
         poolEvents: (parent, { first, skip, where }, context) => {

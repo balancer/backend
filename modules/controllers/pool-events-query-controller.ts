@@ -1,6 +1,6 @@
 import { GqlPoolEventsDataRange, GqlPoolAddRemoveEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
-import { PoolEventType, Prisma } from '@prisma/client';
+import { Chain, PoolEventType, Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
 import { daysAgo } from '../common/time';
 
@@ -67,12 +67,21 @@ export function EventsQueryController(tracer?: any) {
             // Setting default values
             first = first ?? 1000;
             skip = skip ?? 0;
-            let { chain, poolId, userAddress, typeIn, range } = where;
+            let { chainIn, poolIdIn, userAddress, typeIn, range } = where || {};
 
-            const conditions: Prisma.PrismaPoolEventWhereInput = {
-                chain,
-                poolId,
-            };
+            const conditions: Prisma.PrismaPoolEventWhereInput = {};
+
+            if (chainIn && chainIn.length) {
+                conditions.chain = {
+                    in: chainIn as Chain[],
+                };
+            }
+
+            if (poolIdIn && poolIdIn.length) {
+                conditions.poolId = {
+                    in: poolIdIn as string[],
+                };
+            }
 
             if (typeIn && typeIn.length) {
                 // Translate JOIN / EXIT to ADD / REMOVE
