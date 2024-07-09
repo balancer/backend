@@ -1,5 +1,18 @@
 # backend
 
+## 1.3.0
+
+### Minor Changes
+
+-   331c657: adding metadata categories from the github repo
+-   2b1cbec: adding merkl reward aprs
+
+### Patch Changes
+
+-   4009872: adding missing fields to rate provider reviews
+-   7397078: use subgraph deployment IDs instead of subgraph id
+-   76c8176: Exclude current round from HiddenHand APRs
+
 ## 1.2.0
 
 ### Minor Changes
