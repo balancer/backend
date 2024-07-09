@@ -17,7 +17,13 @@ import { syncLatestFXPrices } from '../modules/token/latest-fx-price';
 import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../modules/network/network-config';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
-import { JobsController, CowAmmController, SnapshotsController, AprsController } from '../modules/controllers';
+import {
+    JobsController,
+    CowAmmController,
+    SnapshotsController,
+    AprsController,
+    ContentController,
+} from '../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
 
@@ -443,6 +449,15 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-merkl':
                 await runIfNotAlreadyRunning(job.name, chainId, () => AprsController().syncMerkl(), res, next);
+                break;
+            case 'sync-rate-provider-reviews':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => ContentController().syncRateProviderReviews(),
+                    res,
+                    next,
+                );
                 break;
             default:
                 res.sendStatus(400);
