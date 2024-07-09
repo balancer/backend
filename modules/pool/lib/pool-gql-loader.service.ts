@@ -1040,26 +1040,17 @@ export class PoolGqlLoaderService {
                 continue;
             }
 
-            let type: GqlPoolAprItemType = 'STAKING';
+            let type: GqlPoolAprItemType;
             switch (aprItem.type) {
                 case PrismaPoolAprType.NATIVE_REWARD:
                 case PrismaPoolAprType.THIRD_PARTY_REWARD:
                     type = 'STAKING';
                     break;
-                case PrismaPoolAprType.IB_YIELD:
-                    type = 'IB_YIELD';
-                    break;
-                case PrismaPoolAprType.LOCKING:
-                    type = 'LOCKING';
-                    break;
-                case PrismaPoolAprType.SWAP_FEE:
-                    type = 'SWAP_FEE';
-                    break;
-                case PrismaPoolAprType.VOTING:
-                    type = 'VOTING';
-                    break;
                 case null:
                     type = 'NESTED';
+                    break;
+                default:
+                    type = aprItem.type;
                     break;
             }
 
