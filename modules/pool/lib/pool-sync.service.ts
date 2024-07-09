@@ -115,38 +115,4 @@ export class PoolSyncService {
             },
         });
     }
-
-    public async setPoolsWithPreferredGaugesAsIncentivized() {
-        const poolsWithGauges = await prisma.prismaPool.findMany({
-            include: { staking: true },
-            where: {
-                staking: {
-                    some: {
-                        gauge: { status: 'PREFERRED' },
-                    },
-                },
-                chain: this.chain,
-            },
-        });
-
-        await prisma.prismaPoolCategory.createMany({
-            data: poolsWithGauges.map((pool) => ({
-                id: `${this.chain}-${pool.id}-INCENTIVIZED`,
-                poolId: pool.id,
-                category: 'INCENTIVIZED' as const,
-                chain: this.chain,
-            })),
-            skipDuplicates: true,
-        });
-
-        await prisma.prismaPoolCategory.deleteMany({
-            where: {
-                category: 'INCENTIVIZED',
-                chain: this.chain,
-                poolId: {
-                    notIn: poolsWithGauges.map((pool) => pool.id),
-                },
-            },
-        });
-    }
 }

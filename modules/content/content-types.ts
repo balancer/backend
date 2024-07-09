@@ -48,7 +48,6 @@ export interface HomeScreenNewsItem {
 
 export interface ContentService {
     syncTokenContentData(chains: Chain[]): Promise<void>;
-    syncPoolContentData(chain: Chain): Promise<void>;
     getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]>;
     getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]>;
     getNewsItems(chain: Chain): Promise<HomeScreenNewsItem[]>;

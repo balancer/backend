@@ -149,13 +149,6 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncSanityPoolData: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncPoolContentData();
-
-            return 'success';
-        },
         poolUpdateAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
@@ -277,20 +270,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.reloadAllTokenNestedPoolIds();
-
-            return 'success';
-        },
-        poolBlackListAddPool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.addToBlackList(poolId);
-
-            return 'success';
-        },
-        poolBlackListRemovePool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.removeFromBlackList(poolId);
 
             return 'success';
         },

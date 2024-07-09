@@ -197,9 +197,6 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
-            case 'sync-sanity-pool-data':
-                await runIfNotAlreadyRunning(job.name, chainId, () => poolService.syncPoolContentData(), res, next);
-                break;
             case 'sync-tokens-from-pool-tokens':
                 await runIfNotAlreadyRunning(job.name, chainId, () => tokenService.syncTokenContentData(), res, next);
                 break;
@@ -449,6 +446,8 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-merkl':
                 await runIfNotAlreadyRunning(job.name, chainId, () => AprsController().syncMerkl(), res, next);
+            case 'sync-categories':
+                await runIfNotAlreadyRunning(job.name, chainId, () => ContentController().syncCategories(), res, next);
                 break;
             case 'sync-rate-provider-reviews':
                 await runIfNotAlreadyRunning(

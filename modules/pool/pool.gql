@@ -178,6 +178,18 @@ type GqlPoolMinimal {
     If a user address was provided in the query, the user balance is populated here
     """
     userBalance: GqlPoolUserBalance
+    """
+    List of categories assigned by the team based on external factors
+    """
+    categories: [GqlPoolFilterCategory]
+}
+
+enum GqlPoolFilterCategory {
+    INCENTIVIZED
+    BLACK_LISTED
+    LRT
+    POINTS
+    POINTS_EIGENLAYER
 }
 
 """
@@ -333,6 +345,10 @@ interface GqlPoolBase {
     If a user address was provided in the query, the user balance is populated here
     """
     userBalance: GqlPoolUserBalance
+    """
+    List of categories assigned by the team based on external factors
+    """
+    categories: [GqlPoolFilterCategory]
 }
 
 type GqlPoolDynamicData {
@@ -981,11 +997,6 @@ input GqlPoolFilter {
     userAddress: String
     protocolVersionIn: [Int!]
     minTvl: Float
-}
-
-enum GqlPoolFilterCategory {
-    INCENTIVIZED
-    BLACK_LISTED
 }
 
 type GqlPoolTokenExpanded {

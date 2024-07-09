@@ -33,9 +33,10 @@ import {
     GqlPoolAprItem,
     GqlPoolAprItemType,
     GqlUserStakedBalance,
+    GqlPoolFilterCategory,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
-import _ from 'lodash';
+import _, { has } from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import {
     Chain,
@@ -190,7 +191,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
-            incentivized: pool.categories.some((category) => category.category === 'INCENTIVIZED'),
+            incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
@@ -198,6 +199,7 @@ export class PoolGqlLoaderService {
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
+            categories: pool.categories as GqlPoolFilterCategory[],
         };
     }
 
@@ -298,8 +300,10 @@ export class PoolGqlLoaderService {
             return {
                 ...baseQuery,
                 where: {
-                    categories: {
-                        none: { category: 'BLACK_LISTED' },
+                    NOT: {
+                        categories: {
+                            has: 'BLACK_LISTED',
+                        },
                     },
                     dynamicData: {
                         totalSharesNum: {
@@ -403,26 +407,8 @@ export class PoolGqlLoaderService {
                 notIn: where?.idNotIn || undefined,
                 mode: 'insensitive',
             },
-            categories: {
-                ...(where?.categoryNotIn
-                    ? {
-                          every: {
-                              category: {
-                                  notIn: where.categoryNotIn,
-                              },
-                          },
-                      }
-                    : {}),
-                ...(where?.categoryIn
-                    ? {
-                          some: {
-                              category: {
-                                  in: where.categoryIn,
-                              },
-                          },
-                      }
-                    : {}),
-            },
+            ...(where?.categoryIn ? { categories: { hasSome: where.categoryIn } } : {}),
+            ...(where?.categoryNotIn ? { NOT: { categories: { hasSome: where.categoryNotIn } } } : {}),
             filters: {
                 ...(where?.filterNotIn
                     ? {
@@ -509,6 +495,8 @@ export class PoolGqlLoaderService {
             displayTokens: this.mapDisplayTokens(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
+            categories: pool.categories as GqlPoolFilterCategory[],
+            vaultVersion: poolWithoutTypeData.protocolVersion,
         };
 
         //TODO: may need to build out the types here still
@@ -520,7 +508,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'META_STABLE':
                 return {
@@ -529,7 +516,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'COMPOSABLE_STABLE':
                 return {
@@ -538,7 +524,6 @@ export class PoolGqlLoaderService {
                     ...(typeData as StableData),
                     ...mappedData,
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'ELEMENT':
                 return {
@@ -547,14 +532,12 @@ export class PoolGqlLoaderService {
                     ...(typeData as ElementData),
                     ...mappedData,
                     tokens: mappedData.tokens as GqlPoolToken[],
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
                     ...mappedData,
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'GYRO':
             case 'GYRO3':
@@ -564,7 +547,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as GyroData),
                     ...mappedData,
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
             case 'FX':
                 return {
@@ -572,7 +554,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...mappedData,
                     ...(typeData as FxData),
-                    vaultVersion: poolWithoutTypeData.protocolVersion,
                 };
         }
 
@@ -580,7 +561,6 @@ export class PoolGqlLoaderService {
             __typename: 'GqlPoolWeighted',
             ...poolWithoutTypeData,
             ...mappedData,
-            vaultVersion: poolWithoutTypeData.protocolVersion,
         };
     }
 
