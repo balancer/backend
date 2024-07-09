@@ -22,7 +22,6 @@ import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
-import { syncCategories } from '../actions/content/sync-categories';
 
 /**
  * Controller responsible for configuring and executing ETL actions, usually in the form of jobs.
