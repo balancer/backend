@@ -1203,6 +1203,7 @@ export class PoolGqlLoaderService {
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+            categories: pool.categories as GqlPoolFilterCategory[],
         };
     }
 
