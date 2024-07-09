@@ -457,6 +457,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -489,6 +490,7 @@ type GqlPoolGyro implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     alpha: String!
     beta: String!
@@ -545,6 +547,7 @@ type GqlPoolFx implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -573,6 +576,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -604,6 +608,7 @@ type GqlPoolStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -632,6 +637,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -660,6 +666,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -694,6 +701,7 @@ type GqlPoolElement implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
+    categories: [GqlPoolFilterCategory]
 
     #element specific fields
     unitSeconds: BigInt!
@@ -725,6 +733,7 @@ type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail i
 
     type: GqlPoolType!
     version: Int!
+    categories: [GqlPoolFilterCategory]
 }
 
 union GqlPoolUnion =
