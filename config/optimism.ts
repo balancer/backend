@@ -13,10 +13,10 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FsmdxmvBJLGjUQPxKMRtcWKzuCNpomKuMTbSbtRtggZ7`,
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/optimism-blocks/version/latest',
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CbLt7GqU7sypjRaCfwissEBkFeCw3dUz2emrvBNJ7dZu`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {

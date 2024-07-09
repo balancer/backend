@@ -13,12 +13,12 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/CcWtE5UMUaoKTRu8LWjzambKJtgUVjcN31pD5BdffVzK`,
-        beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/5wqt4pebTCm7259De4ejHDUkagvYMqNvG65jeN7mVKVK`,
-        blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
-        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/4aGMkmdmZBb5KT4o7rDao2N6q5Giqy3uiZ627EvoGHQb`,
-        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/A3AcKqC9ckiKNzkuTnHqy5w5z1PmKXPJnDGaSDkDGHFD`,
-        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/9nyH9cdBwBiXj3AJhbSEBSphzT89ozd68s9u4KTfD3ZL`,
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
+        beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXcxzZioHXV5ts2UcG6gNNEayoaZ9ip7D9JvPS88K2HXe`,
+        blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
+        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmcUVq8VZtaTPqCQ3mBbaLKoWyL3u2KokCiNZLuzXfjEnw`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSaarDZVkqGJhVePCa45SG5rEETAWiSRSFK5RnzpcNSNT`,
+        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmaD9zWMc6kQrBVbtjXNjNjbhpGWUHQFQdxABBEaVJqK5s`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

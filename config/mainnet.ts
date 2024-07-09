@@ -20,10 +20,10 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/C4ayEZP2yTXRAB8vSaTrgN4m9anTe9Mdm2ViyiAuV9TV`,
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNjLuUukf1QcSDWyYYAvSpNThLKjX3KubckiS3H2mn6rG`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
