@@ -106,13 +106,14 @@ export class SanityContentService implements ContentService {
                     update: {
                         name: sanityToken.name,
                         symbol: sanityToken.symbol,
-                        //use set to ensure we overwrite the underlying value if it is removed in sanity
+                        // if you update a field with "undefined" it will actually NOT update the field at all, need to use "null" to set to null
+                        // once we remove the entry from sanity, it will use whatever was provided by coingecko as it wont update here anymore (is set to undefined)
                         logoURI: { set: sanityToken.logoURI || null },
                         decimals: sanityToken.decimals,
                         priority: sanityToken.priority,
-                        coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
-                        coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
-                        coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
+                        coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
+                        coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
+                        coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
                         ...tokenData,
                     },
                 });
