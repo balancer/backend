@@ -291,7 +291,7 @@ export class PoolService {
 
     public async updatePoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.updatePoolAprs(chain);
-        await syncIncentivizedCategory(chain);
+        await syncIncentivizedCategory();
     }
 
     public async syncChangedPools() {
@@ -300,7 +300,7 @@ export class PoolService {
 
     public async reloadAllPoolAprs(chain: Chain) {
         await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
-        await syncIncentivizedCategory(chain);
+        await syncIncentivizedCategory();
     }
 
     public async updateLiquidity24hAgoForAllPools() {
