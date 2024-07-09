@@ -66,7 +66,7 @@ extend type Query {
     """
     Getting swap, add and remove events with paging
     """
-    poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter!): [GqlPoolEvent!]!
+    poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
 }
 
 extend type Mutation {
@@ -1403,8 +1403,8 @@ enum GqlPoolEventType {
 }
 
 input GqlPoolEventsFilter {
-    chain: GqlChain!
-    poolId: String!
+    chainIn: [GqlChain]
+    poolIdIn: [String]
     typeIn: [GqlPoolEventType]
     userAddress: String
     range: GqlPoolEventsDataRange
