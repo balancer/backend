@@ -65,7 +65,7 @@ export function EventsQueryController(tracer?: any) {
             where,
         }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolAddRemoveEventV3)[]> => {
             // Setting default values
-            first = first ?? 1000;
+            first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
             let { chainIn, poolIdIn, userAddress, typeIn, range } = where || {};
 
