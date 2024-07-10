@@ -36,16 +36,19 @@ export class SorService {
             await getToken(tokenIn, args.chain!);
             await getToken(tokenOut, args.chain!);
         } catch (e: any) {
-            Sentry.captureException(e.message, {
-                tags: {
-                    service: 'sorV2',
-                    tokenIn,
-                    tokenOut,
-                    swapAmount: args.swapAmount,
-                    swapType: args.swapType,
-                    chain: args.chain,
-                },
-            });
+            // Just log to console for parsing
+            console.log('Missing token for SOR request', `in: ${tokenIn}`, `out: ${tokenOut}`, args.chain);
+
+            // Sentry.captureException(e.message, {
+            //     tags: {
+            //         service: 'sorV2',
+            //         tokenIn,
+            //         tokenOut,
+            //         swapAmount: args.swapAmount,
+            //         swapType: args.swapType,
+            //         chain: args.chain,
+            //     },
+            // });
             return emptyResponse;
         }
 
