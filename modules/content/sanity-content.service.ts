@@ -1,5 +1,5 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Chain, Prisma, PrismaPoolCategoryType } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import {
     ConfigHomeScreen,
@@ -27,11 +27,6 @@ interface SanityToken {
     twitterUsername?: string;
     discordUrl?: string;
     telegramUrl?: string;
-}
-
-interface SanityPoolConfig {
-    incentivizedPools: string[];
-    blacklistedPools: string[];
 }
 
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
@@ -106,13 +101,14 @@ export class SanityContentService implements ContentService {
                     update: {
                         name: sanityToken.name,
                         symbol: sanityToken.symbol,
-                        //use set to ensure we overwrite the underlying value if it is removed in sanity
+                        // if you update a field with "undefined" it will actually NOT update the field at all, need to use "null" to set to null
+                        // once we remove the entry from sanity, it will use whatever was provided by coingecko as it wont update here anymore (is set to undefined)
                         logoURI: { set: sanityToken.logoURI || null },
                         decimals: sanityToken.decimals,
                         priority: sanityToken.priority,
-                        coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
-                        coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
-                        coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
+                        coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
+                        coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
+                        coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
                         ...tokenData,
                     },
                 });
@@ -197,57 +193,6 @@ export class SanityContentService implements ContentService {
                 tokens: { orderBy: { index: 'asc' } },
             },
         });
-    }
-
-    public async syncPoolContentData(chain: Chain): Promise<void> {
-        const response = await this.getSanityClient()
-            .fetch(`*[_type == "config" && chainId == ${chainToIdMap[chain]}][0]{
-            incentivizedPools,
-            blacklistedPools,
-        }`);
-
-        const config: SanityPoolConfig = {
-            incentivizedPools: response?.incentivizedPools ?? [],
-            blacklistedPools: response?.blacklistedPools ?? [],
-        };
-
-        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: chain } });
-        const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
-
-        await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED', chain);
-    }
-
-    private async updatePoolCategory(
-        currentPoolIds: string[],
-        newPoolIds: string[],
-        category: PrismaPoolCategoryType,
-        chain: Chain,
-    ) {
-        const itemsToAdd = newPoolIds.filter((poolId) => !currentPoolIds.includes(poolId));
-        const itemsToRemove = currentPoolIds.filter((poolId) => !newPoolIds.includes(poolId));
-
-        // make sure the pools really exist to prevent sanity mistakes from breaking the system
-        const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: itemsToAdd }, chain: chain },
-            select: { id: true },
-        });
-        const poolIds = pools.map((pool) => pool.id);
-        const existingItemsToAdd = itemsToAdd.filter((poolId) => poolIds.includes(poolId));
-
-        await prisma.$transaction([
-            prisma.prismaPoolCategory.createMany({
-                data: existingItemsToAdd.map((poolId) => ({
-                    id: `${poolId}-${category}`,
-                    chain: chain,
-                    category,
-                    poolId,
-                })),
-                skipDuplicates: true,
-            }),
-            prisma.prismaPoolCategory.deleteMany({
-                where: { poolId: { in: itemsToRemove }, category, chain: chain },
-            }),
-        ]);
     }
 
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {

@@ -75,7 +75,6 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                 vebal: true,
             },
         },
-        categories: true,
         allTokens: {
             include: {
                 token: {
@@ -262,7 +261,6 @@ export type PrismaTokenWithTypes = PrismaToken & {
 export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
-        categories: true,
         allTokens: {
             include: {
                 token: {

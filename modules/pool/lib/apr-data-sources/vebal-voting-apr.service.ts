@@ -54,11 +54,7 @@ const fetchHiddenHandRound = async (timestamp?: number) => {
     return { total, votes, timestamp: data.data[0].proposalDeadline };
 };
 
-export const getHiddenHandAPR = async (weeksAgo = 0) => {
-    let timestamp: number | undefined;
-    if (weeksAgo > 0) {
-        timestamp = (await fetchHiddenHandRound()).timestamp - weeksAgo * 604800;
-    }
+export const getHiddenHandAPR = async (timestamp: number) => {
     const round = await fetchHiddenHandRound(timestamp);
 
     // Debugging purposes
@@ -107,7 +103,13 @@ export class VeBalVotingAprService implements PoolAprService {
 
     async getApr(): Promise<number> {
         // Get APRs for last 3 weeks, if available
-        const aprs = await Promise.allSettled([getHiddenHandAPR(), getHiddenHandAPR(1), getHiddenHandAPR(2)]);
+        const timestamp = (await fetchHiddenHandRound()).timestamp;
+
+        const aprs = await Promise.allSettled([
+            getHiddenHandAPR(timestamp - 1 * 604800),
+            getHiddenHandAPR(timestamp - 2 * 604800),
+            getHiddenHandAPR(timestamp - 3 * 604800),
+        ]);
 
         // Average successfully fetched APRs
         const avg = aprs

@@ -31,6 +31,8 @@ model PrismaToken {
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
+
+    @@index([address, chain])
 }
 
 
@@ -92,6 +94,8 @@ model PrismaTokenDynamicData {
     priceChangePercent7d Float?
     priceChangePercent14d Float?
     priceChangePercent30d Float?
+
+    @@index([tokenAddress, chain])
 }
 
 model PrismaTokenType {
@@ -123,6 +127,8 @@ model PrismaPriceRateProviderData {
     name                String?
     summary             String?
     reviewUrl           String?
+    warnings            String?
+    upgradableComponents Json?
     
     @@index([chain, rateProviderAddress])
     @@index([tokenAddress])
