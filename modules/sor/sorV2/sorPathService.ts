@@ -462,8 +462,8 @@ class SorPathService implements SwapService {
             include: prismaPoolWithDynamic.include,
         });
 
-        // cache for 20s
-        this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 20 * 1000);
+        // cache for 10s
+        this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 10 * 1000);
         return pools;
     }
 
