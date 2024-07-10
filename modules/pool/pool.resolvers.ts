@@ -57,7 +57,7 @@ const balancerResolvers: Resolvers = {
         poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
             return EventsQueryController().getEvents({
                 first: 1000,
-                where: { range, poolId, chain, typeIn, userAddress },
+                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
             });
         },
         poolEvents: (parent, { first, skip, where }, context) => {
@@ -146,13 +146,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.loadOnChainDataForPoolsWithActiveUpdates();
-
-            return 'success';
-        },
-        poolSyncSanityPoolData: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncPoolContentData();
 
             return 'success';
         },
@@ -277,20 +270,6 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.reloadAllTokenNestedPoolIds();
-
-            return 'success';
-        },
-        poolBlackListAddPool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.addToBlackList(poolId);
-
-            return 'success';
-        },
-        poolBlackListRemovePool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.removeFromBlackList(poolId);
 
             return 'success';
         },

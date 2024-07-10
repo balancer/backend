@@ -1,7 +1,7 @@
-import { Chain } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 
-export const syncIncentivizedCategory = async (chain: Chain) => {
+export const syncIncentivizedCategory = async () => {
     const poolsWithReward = await prisma.prismaPoolAprItem.findMany({
         select: { poolId: true },
         where: {
@@ -11,29 +11,20 @@ export const syncIncentivizedCategory = async (chain: Chain) => {
             apr: {
                 gt: 0,
             },
-            chain,
         },
     });
 
     const ids = poolsWithReward.map(({ poolId }) => poolId);
 
-    await prisma.prismaPoolCategory.createMany({
-        data: ids.map((poolId) => ({
-            id: `${chain}-${poolId}-INCENTIVIZED`,
-            category: 'INCENTIVIZED' as const,
-            poolId,
-            chain,
-        })),
-        skipDuplicates: true,
-    });
+    await prisma.$transaction([
+        // Remove incentivized category from pools
+        prisma.$executeRaw`UPDATE "PrismaPool"
+        SET categories = array_remove(categories, 'INCENTIVIZED')
+        WHERE 'INCENTIVIZED' = ANY(categories);`,
 
-    await prisma.prismaPoolCategory.deleteMany({
-        where: {
-            category: 'INCENTIVIZED',
-            chain,
-            poolId: {
-                notIn: ids,
-            },
-        },
-    });
+        // Readd 'incentivized' category to incentivized pools only
+        prisma.$executeRaw`UPDATE "PrismaPool"
+        SET categories = array_append(categories, 'INCENTIVIZED')
+        WHERE id IN (${Prisma.join(ids)});`,
+    ]);
 };

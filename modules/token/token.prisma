@@ -127,6 +127,8 @@ model PrismaPriceRateProviderData {
     name                String?
     summary             String?
     reviewUrl           String?
+    warnings            String?
+    upgradableComponents Json?
     
     @@index([chain, rateProviderAddress])
     @@index([tokenAddress])

@@ -4,3 +4,5 @@ export * from './pools-mutation-controller';
 export * from './user-balances-controller';
 export * from './cow-amm-controller';
 export * from './pool-events-query-controller';
+export * from './aprs-controller';
+export * from './content-controller';

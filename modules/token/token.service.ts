@@ -40,7 +40,6 @@ export class TokenService {
         //sync coingecko Ids first, then override Ids from the content service
         await this.coingeckoDataService.syncCoingeckoIds();
         await networkContext.config.contentService.syncTokenContentData([networkContext.chain]);
-        await new GithubContentService().syncRateProviderReviews([networkContext.chain]);
     }
 
     public async getToken(address: string, chain = networkContext.chain): Promise<PrismaToken | null> {
@@ -136,6 +135,7 @@ export class TokenService {
             if (providersForToken.length === 1) {
                 priceRateProviderDataResult[token.address] = {
                     ...providersForToken[0],
+                    warnings: providersForToken[0].warnings?.split(',') || [],
                     address: providersForToken[0].rateProviderAddress,
                 };
             } else if (providersForToken.length > 1) {
@@ -146,6 +146,7 @@ export class TokenService {
                     if (provider.reviewed && provider.summary === 'safe') {
                         priceRateProviderDataResult[token.address] = {
                             ...provider,
+                            warnings: provider.warnings?.split(',') || [],
                             address: provider.rateProviderAddress,
                         };
                     }

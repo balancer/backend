@@ -18,6 +18,7 @@ export const prismaPoolFactory = Factory.define<PrismaPoolWithDynamic>(({ params
         version: 1,
         protocolVersion: 3,
         typeData: {},
+        categories: [],
         createTime: 1708433018,
         dynamicData: prismaPoolDynamicDataFactory.build({ id: poolAddress, chain: params?.chain || 'SEPOLIA' }),
         tokens: prismaPoolTokenFactory.buildList(2),

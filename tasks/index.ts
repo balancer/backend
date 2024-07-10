@@ -4,6 +4,8 @@ import {
     PoolsMutationController,
     UserBalancesController,
     CowAmmController,
+    AprsController,
+    ContentController,
 } from '../modules/controllers';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
@@ -71,6 +73,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
+    } else if (job === 'sync-categories') {
+        return ContentController().syncCategories();
     } else if (job === 'backsync-swaps') {
         // Run in loop until no new swaps are found
         let status: string | undefined = 'true';
@@ -83,6 +87,10 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
             console.log('Processed', i, 'swaps');
         }
         return 'OK';
+    } else if (job === 'sync-merkl') {
+        return AprsController().syncMerkl();
+    } else if (job === 'sync-rate-provider-reviews') {
+        return ContentController().syncRateProviderReviews();
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
