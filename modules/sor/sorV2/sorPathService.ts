@@ -38,8 +38,12 @@ import {
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
+import { Cache } from 'memory-cache';
 
 class SorPathService implements SwapService {
+    private cache = new Cache<string, PrismaPoolWithDynamic[]>();
+    private readonly SOR_POOLS_CACHE_KEY = `sor:pools`;
+
     // This is only used for the old SOR service
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
@@ -420,6 +424,11 @@ class SorPathService implements SwapService {
      * @returns
      */
     private async getBasePoolsFromDb(chain: Chain, protocolVersion: number): Promise<PrismaPoolWithDynamic[]> {
+        const cached = this.cache.get(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`);
+        if (cached) {
+            return cached;
+        }
+
         const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
@@ -452,6 +461,9 @@ class SorPathService implements SwapService {
             },
             include: prismaPoolWithDynamic.include,
         });
+
+        // cache for 20s
+        this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 20 * 1000);
         return pools;
     }
 
