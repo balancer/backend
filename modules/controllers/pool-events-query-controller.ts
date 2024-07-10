@@ -117,7 +117,7 @@ export function EventsQueryController(tracer?: any) {
                 skip,
                 orderBy: [
                     {
-                        blockNumber: 'desc',
+                        blockTimestamp: 'desc',
                     },
                     {
                         logIndex: 'desc',
