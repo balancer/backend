@@ -1,5 +1,13 @@
 # backend
 
+## 1.3.1
+
+### Patch Changes
+
+-   95b752f: fixing missing files in metadata repo
+-   480c22c: add cache to db query in SOR
+-   2dc67f1: fix fantom blocks subgraph url
+
 ## 1.3.0
 
 ### Minor Changes
