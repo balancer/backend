@@ -14,6 +14,10 @@ export const getPoolCategories = async (): Promise<{ [id: string]: string[] }> =
     // Fetch all category files concurrently and parse the data
     const metadataEntries = await Promise.all(
         categoriesList.map(async ({ id, name, file }) => {
+            if (!file) {
+                return [id, []] as [string, string[]];
+            }
+
             try {
                 const response = await fetch(CATEGORIES_BASE + file);
                 const data = (await response.json()) as string[];
