@@ -76,6 +76,9 @@ export default <NetworkData>{
             },
         },
     },
+    gyro: {
+        config: '0x00a2a9bbd352ab46274433faa9fec35fe3abb4a8',
+    },
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
