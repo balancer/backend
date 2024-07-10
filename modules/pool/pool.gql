@@ -181,15 +181,7 @@ type GqlPoolMinimal {
     """
     List of categories assigned by the team based on external factors
     """
-    categories: [GqlPoolFilterCategory]
-}
-
-enum GqlPoolFilterCategory {
-    INCENTIVIZED
-    BLACK_LISTED
-    LRT
-    POINTS
-    POINTS_EIGENLAYER
+    categories: [String]
 }
 
 """
@@ -348,7 +340,7 @@ interface GqlPoolBase {
     """
     List of categories assigned by the team based on external factors
     """
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 }
 
 type GqlPoolDynamicData {
@@ -457,7 +449,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -490,7 +482,7 @@ type GqlPoolGyro implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     alpha: String!
     beta: String!
@@ -547,7 +539,7 @@ type GqlPoolFx implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -576,7 +568,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -608,7 +600,7 @@ type GqlPoolStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -637,7 +629,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -666,7 +658,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -701,7 +693,7 @@ type GqlPoolElement implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 
     #element specific fields
     unitSeconds: BigInt!
@@ -733,7 +725,7 @@ type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail i
 
     type: GqlPoolType!
     version: Int!
-    categories: [GqlPoolFilterCategory]
+    categories: [String]
 }
 
 union GqlPoolUnion =
@@ -989,9 +981,32 @@ enum GqlPoolOrderDirection {
     desc
 }
 
+enum GqlPoolFilterCategory {
+    INCENTIVIZED
+    BLACK_LISTED
+    LRT
+    POINTS
+    POINTS_EIGENLAYER
+    POINTS_SWELL
+    POINTS_GYRO
+    POINTS_RENZO
+    POINTS_KELP
+    SUPERFEST
+}
+
 input GqlPoolFilter {
-    categoryIn: [GqlPoolFilterCategory!]
-    categoryNotIn: [GqlPoolFilterCategory!]
+    categoryIn: [GqlPoolFilterCategory!] @deprecated(reason: "Use tagIn instead")
+    categoryNotIn: [GqlPoolFilterCategory!] @deprecated(reason: "Use tagNotIn instead")
+    """
+    For list of categories see: https://github.com/balancer/metadata/blob/main/pools/index.json
+    Use uppercase
+    """
+    tagIn: [String!]
+    """
+    For list of categories see: https://github.com/balancer/metadata/blob/main/pools/index.json
+    Use uppercase
+    """
+    tagNotIn: [String!]
     tokensIn: [String!]
     tokensNotIn: [String!]
     poolTypeIn: [GqlPoolType!]
