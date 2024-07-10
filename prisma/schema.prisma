@@ -252,6 +252,10 @@ model PrismaPoolToken {
     exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
+
+    @@index([poolId, chain])
+    @@index([address, chain])
+    @@index([nestedPoolId, chain])
 }
 
 model PrismaPoolTokenDynamicData {
@@ -700,6 +704,8 @@ model PrismaToken {
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
+
+    @@index([address, chain])
 }
 
 
@@ -761,6 +767,8 @@ model PrismaTokenDynamicData {
     priceChangePercent7d Float?
     priceChangePercent14d Float?
     priceChangePercent30d Float?
+
+    @@index([tokenAddress, chain])
 }
 
 model PrismaTokenType {
