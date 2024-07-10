@@ -142,6 +142,10 @@ model PrismaPoolToken {
     exemptFromProtocolYieldFee  Boolean             @default(false)
 
     dynamicData         PrismaPoolTokenDynamicData?
+
+    @@index([poolId, chain])
+    @@index([address, chain])
+    @@index([nestedPoolId, chain])
 }
 
 model PrismaPoolTokenDynamicData {
