@@ -1,5 +1,16 @@
 # backend
 
+## 1.3.2
+
+### Patch Changes
+
+-   6429e7a: Adding new pool filter tags tagIn and tagNotIn. These replace categoryIn/categoryNotIn removing enum constraint.
+-   f816e93: changed the events query ordering from blockNumber to blockTimestamp to mitigate different chain height.
+-   21da677: adding gyro config on gnosis chain
+-   8389be2: using pool instead of global variables in ybTokenService
+-   34a7a8c: fix aura and gauge user balance sync
+-   57bbc2a: fix tracking of balance if last relic was transferred
+
 ## 1.3.1
 
 ### Patch Changes
