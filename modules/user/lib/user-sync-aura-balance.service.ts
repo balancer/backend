@@ -137,10 +137,9 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock;
 
         // no new blocks have been minted, needed for slow networks
-        if (startBlock > endBlock) {
+        if (startBlock > latestBlock) {
             return;
         }
 

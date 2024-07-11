@@ -4,7 +4,7 @@ import { userService } from './user.service';
 describe('user debugging', () => {
     it('sync reliquary balances', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '250');
+        setRequestScopedContextValue('chainId', '42161');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
         // const reliquaryUserService = new UserSyncReliquaryFarmBalanceService(networkContext.s.reliquary!.address);
