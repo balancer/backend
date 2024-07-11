@@ -7,8 +7,6 @@ import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee, tokenCollectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
-import { networkContext } from '../../../network/network-context.service';
-import { zeroAddress } from 'viem';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
@@ -23,7 +21,7 @@ export class YbTokensAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
         const operations: any[] = [];
-        const tokenPrices = await tokenService.getTokenPrices();
+        const tokenPrices = await tokenService.getTokenPrices(pools[0].chain);
         const aprs = await this.fetchYieldTokensApr();
         const poolsWithYbTokens = pools.filter((pool) => {
             return pool.tokens.find((token) => {
@@ -62,7 +60,7 @@ export class YbTokensAprService implements PoolAprService {
                     continue;
                 }
 
-                const tokenPrice = tokenService.getPriceForToken(tokenPrices, token.address, networkContext.chain);
+                const tokenPrice = tokenService.getPriceForToken(tokenPrices, token.address, pool.chain);
                 const tokenBalance = token.dynamicData?.balance;
 
                 const tokenLiquidity = tokenPrice * parseFloat(tokenBalance || '0');
@@ -89,7 +87,7 @@ export class YbTokensAprService implements PoolAprService {
 
                 const data = {
                     id: itemId,
-                    chain: this.chain,
+                    chain: pool.chain,
                     poolId: pool.id,
                     title: `${token.token.symbol} APR`,
                     apr: userApr,
@@ -99,7 +97,7 @@ export class YbTokensAprService implements PoolAprService {
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({
-                        where: { id_chain: { id: itemId, chain: this.chain } },
+                        where: { id_chain: { id: itemId, chain: pool.chain } },
                         create: data,
                         update: data,
                     }),
