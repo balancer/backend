@@ -181,7 +181,11 @@ type GqlPoolMinimal {
     """
     List of categories assigned by the team based on external factors
     """
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    """
+    List of tags assigned by the team based on external factors
+    """
+    tags: [String]
 }
 
 """
@@ -340,7 +344,11 @@ interface GqlPoolBase {
     """
     List of categories assigned by the team based on external factors
     """
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    """
+    List of tags assigned by the team based on external factors
+    """
+    tags: [String]
 }
 
 type GqlPoolDynamicData {
@@ -449,7 +457,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -482,7 +491,8 @@ type GqlPoolGyro implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     alpha: String!
     beta: String!
@@ -539,7 +549,8 @@ type GqlPoolFx implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -568,7 +579,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -600,7 +612,8 @@ type GqlPoolStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -629,7 +642,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -658,7 +672,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
     displayTokens: [GqlPoolTokenDisplay!]!
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -693,7 +708,8 @@ type GqlPoolElement implements GqlPoolBase {
     allTokens: [GqlPoolTokenExpanded!]!
     poolTokens: [GqlPoolTokenDetail!]!
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 
     #element specific fields
     unitSeconds: BigInt!
@@ -725,7 +741,8 @@ type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail i
 
     type: GqlPoolType!
     version: Int!
-    categories: [String]
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
 }
 
 union GqlPoolUnion =
@@ -998,12 +1015,12 @@ input GqlPoolFilter {
     categoryIn: [GqlPoolFilterCategory!] @deprecated(reason: "Use tagIn instead")
     categoryNotIn: [GqlPoolFilterCategory!] @deprecated(reason: "Use tagNotIn instead")
     """
-    For list of categories see: https://github.com/balancer/metadata/blob/main/pools/index.json
+    For list of tags see: https://github.com/balancer/metadata/blob/main/pools/index.json
     Use uppercase
     """
     tagIn: [String!]
     """
-    For list of categories see: https://github.com/balancer/metadata/blob/main/pools/index.json
+    For list of tags see: https://github.com/balancer/metadata/blob/main/pools/index.json
     Use uppercase
     """
     tagNotIn: [String!]

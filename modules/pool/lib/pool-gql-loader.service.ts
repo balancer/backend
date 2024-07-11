@@ -33,6 +33,7 @@ import {
     GqlPoolAprItem,
     GqlPoolAprItemType,
     GqlUserStakedBalance,
+    GqlPoolFilterCategory,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has } from 'lodash';
@@ -198,6 +199,8 @@ export class PoolGqlLoaderService {
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
         };
     }
 
@@ -504,6 +507,8 @@ export class PoolGqlLoaderService {
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             vaultVersion: poolWithoutTypeData.protocolVersion,
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
         };
 
         //TODO: may need to build out the types here still
@@ -1210,6 +1215,8 @@ export class PoolGqlLoaderService {
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
         };
     }
 
