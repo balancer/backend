@@ -21,7 +21,8 @@ export const getPoolCategories = async (): Promise<{ [id: string]: string[] }> =
             try {
                 const response = await fetch(CATEGORIES_BASE + file);
                 const data = (await response.json()) as string[];
-                return [id, data] as [string, string[]];
+                // Data is a list of pool IDs, make them unique
+                return [id, Array.from(new Set(data))] as [string, string[]];
             } catch (e) {
                 console.error(`Failed to fetch category file for: ${name}`);
                 return [id, []] as [string, string[]];
