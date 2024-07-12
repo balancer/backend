@@ -1,4 +1,8 @@
-import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import {
+    BalancerPoolFragment,
+    OrderDirection,
+    Pool_OrderBy,
+} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { nestedPoolWithSingleLayerNesting } from '../../../prisma/prisma-types';
@@ -20,9 +24,12 @@ export class PoolCreatorService {
 
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService.getAllPools(
+            { orderBy: Pool_OrderBy.CreateTime, orderDirection: OrderDirection.Asc },
+            false,
+        );
 
-        // any pool can be nested
+        // Any pool can be nested
         const allNestedTypePools = [
             ...existingPools.map((pool) => ({ id: pool.id, address: pool.address })),
             ...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address })),
@@ -30,9 +37,36 @@ export class PoolCreatorService {
 
         const poolIds: string[] = [];
 
+        // Create nested pools first
+        const nestedPools = subgraphPools.filter((pool) => {
+            // Is pool address present in any other pool's tokens?
+            return subgraphPools.some((otherPool) => {
+                return otherPool.id !== pool.id && otherPool.tokensList.includes(pool.address);
+            });
+        });
+
+        const total = subgraphPools.length;
         let counter = 1;
+        for (const nestedPool of nestedPools) {
+            console.log(`Syncing pool ${counter} of ${total}`);
+            console.log(`Pool ID: ${nestedPool.id}`);
+            counter = counter + 1;
+            const existsInDb = !!existingPools.find((pool) => pool.id === nestedPool.id);
+
+            if (!existsInDb) {
+                await this.createPoolRecord(nestedPool, blockNumber, allNestedTypePools);
+
+                poolIds.push(nestedPool.id);
+            } else {
+                await this.updatePoolRecord(nestedPool, blockNumber, allNestedTypePools);
+            }
+
+            // Remove nested pool from subgraph pools
+            _.remove(subgraphPools, (pool) => pool.id === nestedPool.id);
+        }
+
         for (const subgraphPool of subgraphPools) {
-            console.log(`Syncing pool ${counter} of ${subgraphPools.length}`);
+            console.log(`Syncing pool ${counter} of ${total}`);
             console.log(`Pool ID: ${subgraphPool.id}`);
             counter = counter + 1;
             const existsInDb = !!existingPools.find((pool) => pool.id === subgraphPool.id);
@@ -60,6 +94,19 @@ export class PoolCreatorService {
 
         // any pool can be nested
         const allNestedTypePools = [...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address }))];
+
+        // Create nested pools first
+        const nestedPools = subgraphPools.filter((pool) => {
+            // Is pool address present in any other pool's tokens?
+            return subgraphPools.some((otherPool) => {
+                return otherPool.id !== pool.id && otherPool.tokensList.includes(pool.address);
+            });
+        });
+
+        for (const nestedPool of nestedPools) {
+            await this.createPoolRecord(nestedPool, blockNumber, allNestedTypePools);
+            _.remove(missing, (pool) => pool.id === nestedPool.id);
+        }
 
         for (const subgraphPool of missing) {
             await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
