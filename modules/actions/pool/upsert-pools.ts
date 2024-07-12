@@ -4,6 +4,7 @@ import { tokensTransformer } from '../../sources/transformers/tokens-transformer
 import { JoinedSubgraphPool } from '../../sources/subgraphs';
 import { subgraphPoolUpsert, SubgraphPoolUpsertData } from '../../sources/transformers/subgraph-pool-upsert';
 import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
+import { getErc4626Tokens } from '../../sources/enrichers/erc4626-tokens';
 import type { VaultClient } from '../../sources/contracts';
 
 /**
@@ -27,6 +28,9 @@ export const upsertPools = async (
         subgraphPools.map((pool) => pool.id),
         blockNumber,
     );
+
+    // Find possible ERC4626 tokens
+    const erc4626Tokens = await getErc4626Tokens(onchainData, chain);
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);

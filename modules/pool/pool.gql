@@ -123,6 +123,10 @@ type GqlPoolMinimal {
     """
     incentivized: Boolean!
     """
+    Whether at least one token in this pool is considered an ERC4626 token.
+    """
+    hasERC4626: Boolean!
+    """
     The name of the pool as per contract
     """
     name: String!
@@ -824,6 +828,37 @@ type GqlPoolTokenDetail {
     Whether the token is in the allow list.
     """
     isAllowed: Boolean!
+    """
+    Whether the token is considered an ERC4626 token.
+    """
+    isERC4626: Boolean!
+    """
+    The buffer that is associated with the pool token.
+    """
+    buffer: GqlTokenBuffer
+}
+
+type GqlTokenBuffer {
+    """
+    The address of the wrapped token, i.e. waUSDC.
+    """
+    wrappedToken: GqlToken!
+    """
+    The balance of the wrapped token.
+    """
+    wrappedTokenBalance: BigDecimal!
+    """
+    The address of the udnerlying token, i.e. USDC.
+    """
+    underlyingToken: GqlToken!
+    """
+    The balance of the underlying token.
+    """
+    underlyingTokenBalance: BigDecimal!
+    """
+    Amount of shares for the buffer.
+    """
+    totlaShares: BigDecimal!
 }
 
 """
@@ -1050,6 +1085,7 @@ type GqlPoolTokenExpanded {
     isNested: Boolean!
     isPhantomBpt: Boolean!
     isMainToken: Boolean!
+    isERC4626: Boolean!
 }
 
 type GqlPoolSwap {
