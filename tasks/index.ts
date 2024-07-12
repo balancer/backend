@@ -67,12 +67,23 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().reloadPools(chain);
     } else if (job === 'sync-cow-amm-snapshots') {
         return CowAmmController().syncSnapshots(chain);
+    } else if (job === 'sync-all-cow-amm-snapshots') {
+        // Run in loop until no new snapshots are returned
+        let run = true;
+        while (run === true) {
+            run = !!(await CowAmmController().syncSnapshots(chain)).length;
+        }
+        return run;
     } else if (job === 'sync-cow-amm-swaps') {
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'update-com-amm-volume-and-fees') {
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
+    } else if (job === 'update-surplus-aprs') {
+        return CowAmmController().updateSurplusAprs();
+    } else if (job === 'update-cow-amm-volume-and-fees') {
+        return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'backsync-swaps') {
