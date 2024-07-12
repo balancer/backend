@@ -1,4 +1,4 @@
-import { AbiParameterToPrimitiveType, ExtractAbiFunction, parseAbi } from 'abitype';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
 import VaultV3Abi from './abis/VaultV3';
 
