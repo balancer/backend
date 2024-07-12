@@ -24,6 +24,7 @@ export interface OnchainPoolData {
         balance: bigint;
         rateProvider: string;
         rate: bigint;
+        isErc4626: boolean;
     }[];
 }
 
@@ -92,6 +93,7 @@ export async function fetchPoolData(
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
                     rate: poolTokenRates[i],
+                    isErc4626: false, // will be added later in the process
                 })),
             },
         ];

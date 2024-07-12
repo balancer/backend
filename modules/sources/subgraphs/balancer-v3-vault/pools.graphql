@@ -19,6 +19,7 @@ fragment VaultPool on Pool {
         balance
         totalProtocolSwapFee
         totalProtocolYieldFee
+        paysYieldFees
         nestedPool {
             id
         }
