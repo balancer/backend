@@ -444,6 +444,15 @@ export function configureWorkerRoutes(app: Express) {
                     next,
                 );
                 break;
+            case 'update-surplus-aprs':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => CowAmmController().updateSurplusAprs(),
+                    res,
+                    next,
+                );
+                break;
             case 'sync-merkl':
                 await runIfNotAlreadyRunning(job.name, chainId, () => AprsController().syncMerkl(), res, next);
             case 'sync-categories':
