@@ -128,15 +128,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-vebal-totalSupply',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
-        // this does not work on dev because we don't sync all chains on dev. Hence we only sync it rarely as it produces a lot of errors
         {
             name: 'sync-vebal-voting-gauges',
-            interval:
-                (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary'
-                    ? every(20, 'minutes')
-                    : (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-                    ? every(5, 'minutes')
-                    : every(10, 'days'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(20, 'minutes') : every(5, 'minutes'),
         },
         {
             name: 'sync-latest-fx-prices',
@@ -150,7 +144,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-merkl',
-            interval: every(1, 'hours'),
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-rate-provider-reviews',
@@ -158,7 +152,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-surplus-aprs',
-            interval: every(1, 'hours'),
+            interval: every(10, 'minutes'),
         },
         // V3 Jobs
         {
