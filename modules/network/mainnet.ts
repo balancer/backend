@@ -157,7 +157,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'udpate-surplus-aprs',
+            name: 'update-surplus-aprs',
             interval: every(1, 'hours'),
         },
         // V3 Jobs
