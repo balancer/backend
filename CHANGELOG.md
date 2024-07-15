@@ -1,5 +1,15 @@
 # backend
 
+## 1.4.0
+
+### Minor Changes
+
+-   d4caec8: Cow AMM aprs calculated from daily surplus
+
+### Patch Changes
+
+-   812bdba: return filename only for rateprovider review
+
 ## 1.3.2
 
 ### Patch Changes
