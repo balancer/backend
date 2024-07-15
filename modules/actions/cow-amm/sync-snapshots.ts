@@ -4,13 +4,13 @@ import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { OrderDirection, PoolSnapshot_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import _ from 'lodash';
 import { daysAgo, roundToMidnight } from '../../common/time';
-import { snapshotsV3Transformer } from '../../sources/transformers/snapshots-v3-transformer';
+import { snapshotsCowAmmTransformer } from '../../sources/transformers/snapshots-cowamm-transformer';
 
 const protocolVersion = 1;
 
 export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> {
     // Get the latest snapshot from the DB (assuming there are no gaps)
-    const storedSnapshot = await prisma.prismaPoolSnapshot.findFirst({
+    const latestStoredSnapshot = await prisma.prismaPoolSnapshot.findFirst({
         select: {
             timestamp: true,
         },
@@ -22,23 +22,23 @@ export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain:
             timestamp: 'desc',
         },
     });
-    const storedTimestamp = storedSnapshot?.timestamp || 0;
 
-    // In case there are no snapshots stored in the DB, sync from the subgraph's earliest snapshot
-    let subgraphTimestamp = 0;
-    if (!storedTimestamp) {
+    let timestamp;
+    if (latestStoredSnapshot && latestStoredSnapshot.timestamp < daysAgo(1)) {
+        timestamp = latestStoredSnapshot.timestamp + 86400; // Try to get the next day
+    } else if (latestStoredSnapshot && latestStoredSnapshot.timestamp > daysAgo(1)) {
+        console.log('No new snapshots to sync for', chain);
+        return [];
+    } else {
+        // Get the earliest snapshot from the subgraph
         const { poolSnapshots } = await subgraphClient.Snapshots({
             first: 1,
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
 
-        subgraphTimestamp = poolSnapshots[0].timestamp;
+        timestamp = poolSnapshots[0].timestamp;
     }
-
-    // Adding a day to the last stored snapshot timestamp,
-    // because we want to sync the next day from what we have in the DB
-    const timestamp = (storedTimestamp && storedTimestamp + 86400) || subgraphTimestamp;
 
     console.log('Syncing COW snapshots for', chain, timestamp);
 
@@ -59,9 +59,6 @@ export async function syncSnapshotsForADayCowAmm(
 ): Promise<string[]> {
     const previous = roundToMidnight(timestamp - 86400); // Previous day stored in the DB
     const next = roundToMidnight(timestamp); // Day to fetch snapshots for
-
-    // TODO: do we want to have a bucket for the current day?
-    // const current = roundToNextMidnight(previous);
 
     // Check for previous snapshots
     const previousSnapshots = await prisma.prismaPoolSnapshot.findMany({
@@ -111,36 +108,16 @@ export async function syncSnapshotsForADayCowAmm(
         .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
         .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
 
-    const allTokens = await prisma.prismaToken.findMany({ where: { chain } });
-
     for (const pool of dbPools) {
         const poolTokens = pool.tokens.map((t, idx) => pool.tokens.find(({ index }) => index === idx)?.address ?? '');
         const previousSnapshot = previousSnapshots.find((s) => s.poolId === pool.id);
-        const rawSnapshot = nextSnapshots.find((s) => s.pool.id === pool.id);
+        const snapshot = nextSnapshots.find((s) => s.pool.id === pool.id);
 
-        if (!rawSnapshot) {
-            console.log('No next day snapshot found for pool', pool.id);
-            continue;
-        }
-
-        // TODO: polyfill missing data, remove one by one once available in SG
-        const snapshot = {
-            ...rawSnapshot!,
-            pool: {
-                ...rawSnapshot.pool,
-                swapFee: pool.dynamicData!.swapFee,
-            },
-            totalVolumes: [],
-            totalProtocolSwapFees: [],
-            totalProtocolYieldFees: [],
-        };
-
-        const dbEntry = snapshotsV3Transformer(
+        const dbEntry = snapshotsCowAmmTransformer(
             pool.id,
             poolTokens,
             next,
             chain,
-            allTokens,
             prices,
             previousSnapshot,
             snapshot,

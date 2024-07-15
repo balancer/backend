@@ -11,6 +11,7 @@ import {
     syncSnapshots,
     syncSwaps,
     syncJoinExits,
+    updateSurplusAPRs,
 } from '../actions/cow-amm';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
@@ -162,6 +163,10 @@ export function CowAmmController(tracer?: any) {
                 .map((event) => event.poolId)
                 .filter((value, index, self) => self.indexOf(value) === index);
             return poolIds;
+        },
+        async updateSurplusAprs() {
+            const aprs = await updateSurplusAPRs();
+            return aprs;
         },
         async updateVolumeAndFees(chainId: string) {
             const chain = chainIdToChain[chainId];

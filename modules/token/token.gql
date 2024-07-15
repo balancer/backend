@@ -247,9 +247,9 @@ type GqlPriceRateProviderData {
     """
     summary: String
     """
-    The URL of the review of the price rate provider
+    The filename of the review of the price rate provider
     """
-    reviewUrl: String
+    reviewFile: String
     """
     Warnings associated with the price rate provider
     """

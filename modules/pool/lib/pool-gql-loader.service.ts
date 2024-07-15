@@ -97,6 +97,7 @@ export class PoolGqlLoaderService {
                                 entryPoint: string;
                             }[]) || [],
                         address: rateproviderData.rateProviderAddress,
+                        reviewFile: rateproviderData.reviewUrl,
                     };
                 }
             }
