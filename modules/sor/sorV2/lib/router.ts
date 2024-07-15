@@ -112,7 +112,7 @@ export class Router {
             bestSplitPaths = splitPaths[minAmountInIndex];
         }
 
-        console.log('SOR_SPLIT_PATHS_', splitPaths.indexOf(bestSplitPaths));
+        console.log(`SOR_SPLIT_PATHS_${splitPaths.indexOf(bestSplitPaths)}`);
 
         return bestSplitPaths;
     }
