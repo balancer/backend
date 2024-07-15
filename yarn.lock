@@ -2446,6 +2446,11 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@balancer-labs/balancer-maths@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/balancer-maths/-/balancer-maths-0.0.6.tgz#8885813f17af55dbf64763086ba535978b1a9e5a"
+  integrity sha512-kP4sP1qEIzR0Kt8SmasmTrjvdinNSHkbHnOEuJkvrlFvm71pgY6mt4RRFCuuOwDrZ+tYNuqV+ieZsEAFNqmfkQ==
+
 "@balancer-labs/sdk@github:beethovenxfi/balancer-sdk#beethovenx-master":
   version "0.1.1"
   resolved "https://codeload.github.com/beethovenxfi/balancer-sdk/tar.gz/18cb9ff9ebda45735fedb4f772991d6171ba13aa"

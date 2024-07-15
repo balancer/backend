@@ -153,6 +153,7 @@ class SorPathService implements SwapService {
             const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
+                // TODO: we should be able to refactor this 'retry' logic so it's configurable from outside instead of hardcoding it here
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return paths;

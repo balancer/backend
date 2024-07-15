@@ -12,6 +12,8 @@ import { ComposableStablePool } from './pools/composableStable/composableStableP
 import { BasePool } from './pools/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
+import { WeightedPoolV3 } from './pools/weighted/weightedPoolV3';
+import { StablePoolV3 } from './pools/composableStable/stablePoolV3';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -28,11 +30,23 @@ export async function sorGetSwapsWithPools(
     for (const prismaPool of prismaPools) {
         switch (prismaPool.type) {
             case 'WEIGHTED':
-                basePools.push(WeightedPool.fromPrismaPool(prismaPool));
+                {
+                    if (prismaPool.protocolVersion === 2) {
+                        basePools.push(WeightedPool.fromPrismaPool(prismaPool));
+                    } else {
+                        basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool));
+                    }
+                }
                 break;
             case 'COMPOSABLE_STABLE':
             case 'PHANTOM_STABLE':
-                basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
+                {
+                    if (prismaPool.protocolVersion === 2) {
+                        basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
+                    } else {
+                        basePools.push(StablePoolV3.fromPrismaPool(prismaPool));
+                    }
+                }
                 break;
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
