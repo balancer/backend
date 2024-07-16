@@ -33,5 +33,5 @@ describe('upsert pools debug', () => {
         const latestBlock = await viemClient.getBlockNumber();
 
         await upsertPools(pools, vaultClient, chain, latestBlock);
-    });
+    }, 5000000);
 });

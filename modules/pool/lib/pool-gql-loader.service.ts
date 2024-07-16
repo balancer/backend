@@ -201,6 +201,7 @@ export class PoolGqlLoaderService {
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
+            hasErc4626: pool.allTokens.some((token) => token.token.isErc4626),
         };
     }
 
