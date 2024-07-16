@@ -18,63 +18,63 @@ interface CallData {
 export async function getErc4626Tokens(
     onchainData: { [address: string]: OnchainPoolData },
     chain: Chain,
-): Promise<void>{
-
+): Promise<void> {
     const viemClient = getViemClient(chain);
 
     for (const pool in onchainData) {
         for (const token of onchainData[pool].tokens) {
-            try{
-                
-            await viemClient.multicall({
-                contracts: [
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'asset',
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'convertToAssets',
-                        args: [1n],
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'convertToShares',
-                        args: [1n],
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'previewDeposit',
-                        args: [1n],
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'previewMint',
-                        args: [1n],
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'previewRedeem',
-                        args: [1n],
-                    },
-                    {
-                        address: token.address as `0x${string}`,
-                        abi: MinimalErc4626Abi,
-                        functionName: 'previewWithdraw',
-                        args: [1n],
-                    },
-                ],
-                allowFailure: false,
-            });
-        }catch(e){
-            console.log(e); 
+            try {
+                await viemClient.multicall({
+                    contracts: [
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'asset',
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'convertToAssets',
+                            args: [1n],
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'convertToShares',
+                            args: [1n],
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'previewDeposit',
+                            args: [1n],
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'previewMint',
+                            args: [1n],
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'previewRedeem',
+                            args: [1n],
+                        },
+                        {
+                            address: token.address as `0x${string}`,
+                            abi: MinimalErc4626Abi,
+                            functionName: 'previewWithdraw',
+                            args: [1n],
+                        },
+                    ],
+                    allowFailure: false,
+                });
+            } catch (e) {
+                token.isErc4626 = false;
+                continue;
+            }
+            token.isErc4626 = true;
         }
     }
-
 }
