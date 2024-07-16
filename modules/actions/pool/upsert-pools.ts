@@ -29,11 +29,12 @@ export const upsertPools = async (
         blockNumber,
     );
 
-    // Find possible ERC4626 tokens
-    await tokensEnrichErc4626(onchainData, chain);
-
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);
+
+    // Find possible ERC4626 tokens
+    await tokensEnrichErc4626(allTokens, chain);
+
     try {
         await prisma.prismaToken.createMany({
             data: allTokens,

@@ -9,6 +9,8 @@ model PrismaToken {
     description         String?
     decimals            Int
 
+    isErc4626           Boolean             @default(false)
+
     logoURI             String?
     websiteUrl          String?
     discordUrl          String?
