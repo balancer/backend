@@ -65,7 +65,10 @@ export default <NetworkData>{
             '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
-    rpcUrl: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.ankr.com/fantom` : `https://rpc.ftm.tools`,
+    rpcUrl:
+        (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+            ? `https://fantom-mainnet.rpc.grove.city/v1/${env.GROVE_CITY_FANTOM}`
+            : `https://rpc.ankr.com/fantom`,
     rpcMaxBlockRange: 1000,
     protocolToken: 'beets',
     beets: {
