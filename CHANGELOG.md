@@ -1,5 +1,11 @@
 # backend
 
+## 1.4.2
+
+### Patch Changes
+
+-   3613c9f: reduce multicall batch size
+
 ## 1.4.1
 
 ### Patch Changes
