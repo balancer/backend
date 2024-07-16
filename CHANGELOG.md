@@ -1,5 +1,11 @@
 # backend
 
+## 1.4.3
+
+### Patch Changes
+
+-   43735c9: fix sfrax apr on fraxtal
+
 ## 1.4.2
 
 ### Patch Changes
