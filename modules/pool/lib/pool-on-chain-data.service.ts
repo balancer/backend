@@ -54,7 +54,7 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, networkContext.chain === 'ZKEVM' ? 190 : 1024);
+        const state = await fetchOnChainPoolState(filteredPools, networkContext.chain === 'ZKEVM' ? 190 : 400);
 
         const operations = [];
         for (const pool of filteredPools) {
