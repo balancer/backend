@@ -1,4 +1,4 @@
-import { MathGyro, ONE_XP } from '../../utils/gyroHelpers/math';
+import { MathGyro, ONE_XP } from '../../../utils/gyroHelpers/math';
 import { MAX_BALANCES } from './constants';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 

@@ -1,19 +1,22 @@
-import { Router } from './router';
-import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
-import { checkInputs } from './utils/helpers';
-import { WeightedPool } from './pools/weighted/weightedPool';
-import { MetaStablePool } from './pools/metastable/metastablePool';
-import { FxPool } from './pools/fx/fxPool';
-import { Gyro2Pool } from './pools/gyro2/gyro2Pool';
-import { Gyro3Pool } from './pools/gyro3/gyro3Pool';
-import { GyroEPool } from './pools/gyroE/gyroEPool';
 import { SwapKind, Token } from '@balancer/sdk';
-import { ComposableStablePool } from './pools/composableStable/composableStablePool';
-import { BasePool } from './pools/basePool';
-import { SorSwapOptions } from './types';
+
+import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
+
 import { PathWithAmount } from './path';
-import { WeightedPoolV3 } from './pools/weighted/weightedPoolV3';
-import { StablePoolV3 } from './pools/composableStable/stablePoolV3';
+import { BasePool } from './pools/types';
+import {
+    ComposableStablePool,
+    FxPool,
+    Gyro2Pool,
+    Gyro3Pool,
+    GyroEPool,
+    WeightedPool,
+    MetaStablePool,
+} from './pools/v2';
+import { StablePool, WeightedPoolV3 } from './pools/v3';
+import { Router } from './router';
+import { SorSwapOptions } from './types';
+import { checkInputs } from './utils/helpers';
 
 export async function sorGetSwapsWithPools(
     tokenIn: Token,
@@ -44,7 +47,7 @@ export async function sorGetSwapsWithPools(
                     if (prismaPool.protocolVersion === 2) {
                         basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
                     } else {
-                        basePools.push(StablePoolV3.fromPrismaPool(prismaPool));
+                        basePools.push(StablePool.fromPrismaPool(prismaPool));
                     }
                 }
                 break;

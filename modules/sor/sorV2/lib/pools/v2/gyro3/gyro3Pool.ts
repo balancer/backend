@@ -1,14 +1,16 @@
 import { Address, Hex, parseEther } from 'viem';
-import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { Chain } from '@prisma/client';
-import { MathSol, WAD } from '../../utils/math';
-import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
 import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { chainToIdMap } from '../../../../../network/network-config';
-import { GyroData } from '../../../../../pool/subgraph-mapper';
-import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
-import { BasePool } from '../basePool';
+import { Chain } from '@prisma/client';
+
+import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
+import { chainToIdMap } from '@/modules/network/network-config';
+import { GyroData } from '@/modules/pool/subgraph-mapper';
+import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
+
+import { MathSol, WAD } from '../../../utils/math';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
+import { BasePool } from '../../types';
+import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
 
 export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;

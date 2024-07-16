@@ -1,7 +1,14 @@
-import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { Chain } from '@prisma/client';
-import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
+import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Chain } from '@prisma/client';
+
+import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
+import { chainToIdMap } from '@/modules/network/network-config';
+import { StableData } from '@/modules/pool/subgraph-mapper';
+import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
+
+import { MathSol, WAD } from '../../../utils/math';
+import { BasePool } from '../../types';
 import {
     _calcBptInGivenExactTokensOut,
     _calcBptOutGivenExactTokensIn,
@@ -11,11 +18,6 @@ import {
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
 } from './stableMath';
-import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { chainToIdMap } from '../../../../../network/network-config';
-import { StableData } from '../../../../../pool/subgraph-mapper';
-import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
-import { BasePool } from '../basePool';
 
 export class ComposableStablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -308,15 +310,6 @@ export class ComposableStablePool implements BasePool {
         return amountIn;
     }
 
-    public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        const feeAmount = amount.mulUpFixed(this.swapFee);
-        return amount.sub(feeAmount);
-    }
-
-    public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
-    }
-
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
@@ -332,12 +325,23 @@ export class ComposableStablePool implements BasePool {
         return tOut.amount;
     }
 
-    public skipBptIndex(index: number): number {
+    // Private methods
+
+    private subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        const feeAmount = amount.mulUpFixed(this.swapFee);
+        return amount.sub(feeAmount);
+    }
+
+    private addSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
+    }
+
+    private skipBptIndex(index: number): number {
         if (index === this.bptIndex) throw new Error('Cannot skip BPT index');
         return index < this.bptIndex ? index : index - 1;
     }
 
-    public dropBptItem(amounts: bigint[]): bigint[] {
+    private dropBptItem(amounts: bigint[]): bigint[] {
         const amountsWithoutBpt = new Array(amounts.length - 1).fill(0n);
         for (let i = 0; i < amountsWithoutBpt.length; i++) {
             amountsWithoutBpt[i] = amounts[i < this.bptIndex ? i : i + 1];

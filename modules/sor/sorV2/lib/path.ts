@@ -1,5 +1,5 @@
 import { TokenAmount, SwapKind, Token } from '@balancer/sdk';
-import { BasePool } from './pools/basePool';
+import { BasePool } from './pools/types';
 
 export class PathLocal {
     public readonly pools: BasePool[];

@@ -1,6 +1,6 @@
 import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
-import { BasePool } from '../pools/basePool';
+import { BasePool } from '../pools/types';
 import { PathLocal } from '../path';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;

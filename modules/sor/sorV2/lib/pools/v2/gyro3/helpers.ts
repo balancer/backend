@@ -1,4 +1,4 @@
-import { WAD } from '../../utils/math';
+import { WAD } from '../../../utils/math';
 import { _SAFE_LARGE_POW3_THRESHOLD, MIDDECIMAL } from './constants';
 
 // Helpers

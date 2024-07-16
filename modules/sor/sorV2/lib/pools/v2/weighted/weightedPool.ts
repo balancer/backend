@@ -1,35 +1,15 @@
-import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { GqlPoolType } from '../../../../../../schema';
-import { Chain } from '@prisma/client';
-import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { chainToIdMap } from '../../../../../network/network-config';
-import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
-import { BasePool } from '../basePool';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Chain } from '@prisma/client';
 
-export class WeightedPoolToken extends TokenAmount {
-    public readonly weight: bigint;
-    public readonly index: number;
+import { chainToIdMap } from '@/modules/network/network-config';
+import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
+import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
+import { GqlPoolType } from '@/schema';
 
-    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
-        super(token, amount);
-        this.weight = BigInt(weight);
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-}
+import { MathSol, WAD } from '../../../utils/math';
+import { BasePool } from '../../types';
+import { WeightedPoolToken } from './weightedPoolToken';
 
 export class WeightedPool implements BasePool {
     public readonly chain: Chain;
@@ -38,7 +18,6 @@ export class WeightedPool implements BasePool {
     public readonly poolType: GqlPoolType = 'WEIGHTED';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly totalShares: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
@@ -83,7 +62,6 @@ export class WeightedPool implements BasePool {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
         );
@@ -95,7 +73,6 @@ export class WeightedPool implements BasePool {
         chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
-        totalShares: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
     ) {
@@ -104,7 +81,6 @@ export class WeightedPool implements BasePool {
         this.poolTypeVersion = poolTypeVersion;
         this.address = address;
         this.swapFee = swapFee;
-        this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
         this.tokenPairs = tokenPairs;
@@ -121,15 +97,6 @@ export class WeightedPool implements BasePool {
             return BigInt(tokenPair.normalizedLiquidity);
         }
         return 0n;
-    }
-
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
-        if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-        }
-        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
@@ -176,14 +143,16 @@ export class WeightedPool implements BasePool {
         return tokenInAmount;
     }
 
-    public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        const feeAmount = amount.mulUpFixed(this.swapFee);
-        return amount.sub(feeAmount);
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+
+        if (swapKind === SwapKind.GivenIn) {
+            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
+        }
+        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
-    public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
-    }
+    // Private methods
 
     private getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
@@ -194,6 +163,15 @@ export class WeightedPool implements BasePool {
         }
 
         return { tIn, tOut };
+    }
+
+    private subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        const feeAmount = amount.mulUpFixed(this.swapFee);
+        return amount.sub(feeAmount);
+    }
+
+    private addSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
     private _calcOutGivenIn(

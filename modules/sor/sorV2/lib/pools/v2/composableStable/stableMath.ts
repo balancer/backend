@@ -1,4 +1,4 @@
-import { MathSol, WAD } from '../../utils/math';
+import { MathSol, WAD } from '../../../utils/math';
 
 const AMP_PRECISION = 1000n;
 

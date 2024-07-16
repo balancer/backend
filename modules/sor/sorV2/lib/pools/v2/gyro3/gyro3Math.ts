@@ -1,7 +1,7 @@
 // Invariant Calculation
 
-import { MathGyro } from '../../utils/gyroHelpers/math';
-import { WAD } from '../../utils/math';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
+import { WAD } from '../../../utils/math';
 import { _INVARIANT_MIN_ITERATIONS, _INVARIANT_SHRINKING_FACTOR_PER_STEP } from './constants';
 import { _safeLargePow3ADown } from './helpers';
 

@@ -1,5 +1,5 @@
-import { MathGyro } from '../../utils/gyroHelpers/math';
-import { WAD } from '../../utils/math';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
+import { WAD } from '../../../utils/math';
 import { virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 

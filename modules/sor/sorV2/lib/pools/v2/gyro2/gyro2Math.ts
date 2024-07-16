@@ -1,5 +1,5 @@
-import { MathGyro } from '../../utils/gyroHelpers/math';
-import { FOUR_WAD, MathSol, TWO_WAD, WAD } from '../../utils/math';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
+import { FOUR_WAD, MathSol, TWO_WAD, WAD } from '../../../utils/math';
 
 export function _calcOutGivenIn(
     balanceIn: bigint,

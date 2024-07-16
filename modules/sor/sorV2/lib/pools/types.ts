@@ -1,6 +1,6 @@
+import { Hex } from 'viem';
 import { PoolState } from '@balancer-labs/balancer-maths';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { Hex } from 'viem';
 
 export interface BasePool {
     readonly poolType: PoolType | string;
