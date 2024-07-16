@@ -152,20 +152,42 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-surplus-aprs',
-            interval: every(10, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         // V3 Jobs
         {
             name: 'sync-join-exits-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-swaps-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-categories',
-            interval: every(10, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(30, 'minutes') : every(10, 'minutes'),
+        },
+
+        // COW AMM
+        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
+        {
+            name: 'sync-cow-amm-pools',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+        },
+        {
+            name: 'sync-cow-amm-swaps',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
+        },
+        {
+            name: 'sync-cow-amm-join-exits',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
+        },
+        { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
+        {
+            name: 'update-cow-amm-volume-and-fees',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
     ],
 };
