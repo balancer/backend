@@ -21,10 +21,6 @@ export const schema = {
         optional: true,
         type: String,
     },
-    GROVE_CITY_FANTOM: {
-        optional: true,
-        type: String,
-    },
     INFURA_API_KEY: {
         optional: true,
         type: String,
