@@ -113,6 +113,7 @@ export class TokenService {
             tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
             rateProviderData: rateProviderData[token.address],
             coingeckoId: token.coingeckoTokenId,
+            isErc4626: token.isErc4626,
         }));
     }
 

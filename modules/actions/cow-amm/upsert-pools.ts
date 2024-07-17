@@ -79,6 +79,7 @@ export const upsertPools = async (
                         ...token,
                         totalProtocolSwapFee: '0',
                         totalProtocolYieldFee: '0',
+                        paysYieldFees: false,
                     })),
                 },
                 {
@@ -89,6 +90,8 @@ export const upsertPools = async (
                         ...token,
                         rateProvider: '',
                         rate: 1n,
+                        paysYieldFees: false,
+                        isErc4626: false,
                     })),
                 },
                 chain,

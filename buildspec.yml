@@ -2,7 +2,7 @@ version: 0.2
 env:
     variables:
         COW_AMM_SUBGRAPH: https://api.studio.thegraph.com/proxy/75376/balancer-cow-amm-sepolia/version/latest
-        V3_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-5th/version/latest
+        V3_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-6th/version/latest
         V3_POOLS_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-5th/version/latest
         BALANCER_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-v2/version/latest
         MASTERCHEF_SUBGRAPH: https://api.studio.thegraph.com/query/73674/masterchefv2/version/latest

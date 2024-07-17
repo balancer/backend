@@ -162,7 +162,7 @@ type GqlToken {
     """
     Whether the token is considered an ERC4626 token.
     """
-    isERC4626: Boolean!
+    isErc4626: Boolean!
 }
 """
 Represents additional data for a token
