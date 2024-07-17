@@ -206,6 +206,12 @@ export default <NetworkData>{
                 path: 'value',
                 isIbYield: true,
             },
+            gUSDC: {
+                tokenAddress: '0xd3443ee1e91af28e5fb858fbd0d72a63ba8046e0',
+                sourceUrl: 'https://backend-arbitrum.gains.trade/apr',
+                path: 'collateralRewards.{symbol == "USDC"}.vaultApr',
+                isIbYield: true,
+            },
         },
     },
     gyro: {
