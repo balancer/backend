@@ -10,10 +10,9 @@ import { CowAmmSnapshotFragment } from '../subgraphs/cow-amm/generated/types';
  * @param poolTokens - list of token addresses
  * @param epoch - timestamp of the current day
  * @param chain - chain
- * @param allTokens - list of all tokens, used to get decimals
  * @param prices - token prices used to calculate USD values
  * @param previousDaySnapshot - previous day snapshot used to calculate daily values and acts as a fallback for total values when there were no swaps in the current day
- * @param snapshot - V3 snapshot
+ * @param snapshot - cow amm snapshot
  * @returns
  */
 export const snapshotsCowAmmTransformer = (
@@ -21,18 +20,15 @@ export const snapshotsCowAmmTransformer = (
     poolTokens: string[],
     epoch: number,
     chain: Chain,
-    allTokens: PrismaToken[],
     prices: Record<string, number>,
     previousDaySnapshot?: PrismaPoolSnapshot,
     snapshot?: CowAmmSnapshotFragment,
 ): PrismaPoolSnapshot => {
-    // Subgraph is storing balances in wei, we need to convert them to float using token decimals
-    const decimals = Object.fromEntries(
-        allTokens.filter((t) => poolTokens.includes(t.address)).map((t) => [t.address, t.decimals]),
-    );
-
     // Use when the pool is new and there are no snapshots yet
     const defaultZeros = Array.from({ length: poolTokens.length }, () => '0');
+
+    // Order pool tokens by ID
+    const orderedTokens = snapshot?.pool.tokens.sort((a, b) => a.index - b.index) || [];
 
     // `poolId-epoch` is used as the ID
     const base = {
@@ -50,15 +46,13 @@ export const snapshotsCowAmmTransformer = (
         holdersCount: Number(snapshot?.holdersCount) || previousDaySnapshot?.holdersCount || 0,
         totalVolumes:
             snapshot?.totalSwapVolumes.map((balance, index) => {
-                const address = poolTokens[index];
-                return String(weiToFloat(balance, decimals[address] || 18));
+                return String(weiToFloat(balance, orderedTokens[index].decimals || 18));
             }) ||
             previousDaySnapshot?.totalVolumes ||
             defaultZeros,
         totalSurpluses:
             snapshot?.totalSurpluses.map((balance, index) => {
-                const address = poolTokens[index];
-                return String(weiToFloat(balance, decimals[address] || 18));
+                return String(weiToFloat(balance, orderedTokens[index].decimals || 18));
             }) ||
             previousDaySnapshot?.totalSurpluses ||
             defaultZeros,
@@ -66,8 +60,7 @@ export const snapshotsCowAmmTransformer = (
         totalProtocolYieldFees: defaultZeros,
         amounts:
             snapshot?.balances.map((balance, index) => {
-                const address = poolTokens[index];
-                return String(weiToFloat(balance, decimals[address] || 18));
+                return String(weiToFloat(balance, orderedTokens[index].decimals || 18));
             }) ||
             previousDaySnapshot?.amounts ||
             defaultZeros,
@@ -88,7 +81,7 @@ export const snapshotsCowAmmTransformer = (
         snapshot?.totalSwapVolumes.reduce((acc, volume, index) => {
             const address = poolTokens[index];
             const previousVolume = previousDaySnapshot?.totalVolumes[index] || '0';
-            const diff = weiToFloat(volume, decimals[address] || 18) - parseFloat(previousVolume);
+            const diff = weiToFloat(volume, orderedTokens[index].decimals || 18) - parseFloat(previousVolume);
             if (!prices[address]) {
                 return acc;
             }
@@ -101,7 +94,7 @@ export const snapshotsCowAmmTransformer = (
         snapshot?.totalSurpluses.reduce((acc, surplus, index) => {
             const address = poolTokens[index];
             const previousSurplus = previousDaySnapshot?.totalSurpluses[index] || '0';
-            const diff = weiToFloat(surplus, decimals[address] || 18) - parseFloat(previousSurplus);
+            const diff = weiToFloat(surplus, orderedTokens[index].decimals || 18) - parseFloat(previousSurplus);
             if (!prices[address]) {
                 return acc;
             }

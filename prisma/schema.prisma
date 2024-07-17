@@ -355,6 +355,7 @@ enum PrismaPoolAprType {
     LOCKING
     AURA
     MERKL
+    SURPLUS
 }
 
 enum PrismaPoolAprItemGroup {

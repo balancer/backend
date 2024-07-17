@@ -1,5 +1,33 @@
 # backend
 
+## 1.4.3
+
+### Patch Changes
+
+-   43735c9: fix sfrax apr on fraxtal
+
+## 1.4.2
+
+### Patch Changes
+
+-   3613c9f: reduce multicall batch size
+
+## 1.4.1
+
+### Patch Changes
+
+-   6daa985: smaller chunks for pool fetching
+
+## 1.4.0
+
+### Minor Changes
+
+-   d4caec8: Cow AMM aprs calculated from daily surplus
+
+### Patch Changes
+
+-   812bdba: return filename only for rateprovider review
+
 ## 1.3.2
 
 ### Patch Changes

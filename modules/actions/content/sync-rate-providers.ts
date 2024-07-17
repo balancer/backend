@@ -1,8 +1,6 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { getRateProviderReviews } from '../../sources/github/rate-providers';
 
-const RATEPROVIDER_BASE_URL = 'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/';
-
 export const syncRateProviderReviews = async (): Promise<void> => {
     const rateProviders = await getRateProviderReviews();
 
@@ -13,7 +11,7 @@ export const syncRateProviderReviews = async (): Promise<void> => {
         summary: item.summary,
         tokenAddress: item.asset.toLowerCase(),
         rateProviderAddress: item.rateProviderAddress.toLowerCase(),
-        reviewUrl: RATEPROVIDER_BASE_URL + item.review,
+        reviewUrl: item.review,
         warnings: item.warnings.join(','),
         upgradableComponents: item.upgradeableComponents.map((component) => ({
             entryPoint: component.entrypoint,

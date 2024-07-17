@@ -11,6 +11,7 @@ import {
     syncSnapshots,
     syncSwaps,
     syncJoinExits,
+    updateSurplusAPRs,
 } from '../actions/cow-amm';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
@@ -104,17 +105,33 @@ export function CowAmmController(tracer?: any) {
                 }
             }
 
-            if (!fromBlock) {
-                fromBlock = 0;
+            let poolsToSync: string[] = [];
+            let blockToSync: bigint;
+
+            if (fromBlock) {
+                const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock);
+
+                if (changedPools.length === 0) {
+                    return [];
+                }
+                poolsToSync = changedPools;
+                blockToSync = latestBlock;
+            } else {
+                poolsToSync = await prisma.prismaPool
+                    .findMany({
+                        where: {
+                            chain,
+                            protocolVersion: 1,
+                        },
+                        select: {
+                            id: true,
+                        },
+                    })
+                    .then((pools) => pools.map((pool) => pool.id));
+                blockToSync = await viemClient.getBlockNumber();
             }
 
-            const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock);
-
-            if (changedPools.length === 0) {
-                return [];
-            }
-
-            await syncPools(changedPools, viemClient, chain, latestBlock);
+            await syncPools(poolsToSync, viemClient, chain, blockToSync);
 
             await prisma.prismaLastBlockSynced.findFirst({
                 where: {
@@ -140,7 +157,7 @@ export function CowAmmController(tracer?: any) {
                 },
             });
 
-            return changedPools;
+            return poolsToSync;
         },
         async syncSnapshots(chainId: string) {
             const chain = chainIdToChain[chainId];
@@ -162,6 +179,10 @@ export function CowAmmController(tracer?: any) {
                 .map((event) => event.poolId)
                 .filter((value, index, self) => self.indexOf(value) === index);
             return poolIds;
+        },
+        async updateSurplusAprs() {
+            const aprs = await updateSurplusAPRs();
+            return aprs;
         },
         async updateVolumeAndFees(chainId: string) {
             const chain = chainIdToChain[chainId];
