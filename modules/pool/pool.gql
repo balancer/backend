@@ -1241,11 +1241,6 @@ enum GqlPoolAprItemType {
     Rewards distributed by merkl.xyz
     """
     MERKL
-
-    """
-    Cow AMM specific APR
-    """
-    SURPLUS
 }
 
 type GqlBalancePoolAprItem {
