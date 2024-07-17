@@ -684,6 +684,7 @@ model PrismaToken {
     decimals            Int
 
     isErc4626           Boolean             @default(false)
+    underlyingTokenAddress String?
 
     logoURI             String?
     websiteUrl          String?

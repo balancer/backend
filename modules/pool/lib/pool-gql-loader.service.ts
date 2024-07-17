@@ -584,6 +584,7 @@ export class PoolGqlLoaderService {
             const isNested = !poolToken;
             const isPhantomBpt = token.tokenAddress === pool.address;
             const isMainToken = !token.token.types.some((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT');
+            const isErc4626 = token.token.isErc4626;
 
             return {
                 ...token.token,
@@ -592,6 +593,7 @@ export class PoolGqlLoaderService {
                 isNested,
                 isPhantomBpt,
                 isMainToken,
+                isErc4626,
             };
         });
     }
@@ -601,7 +603,7 @@ export class PoolGqlLoaderService {
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
                 const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address);
-                if (allToken?.nestedPool?.type === 'COMPOSABLE_STABLE') {
+                if (allToken?.nestedPool) {
                     const mainTokens =
                         allToken.nestedPool.allTokens.filter(
                             (nestedToken) =>

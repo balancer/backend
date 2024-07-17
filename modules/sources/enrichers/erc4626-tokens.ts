@@ -14,14 +14,23 @@ interface CallData {
 }
 
 export async function getErc4626Tokens(
-    tokens: { address: string; decimals: number; name: string; symbol: string; chain: Chain; isErc4626: boolean }[],
+    tokens: {
+        address: string;
+        decimals: number;
+        name: string;
+        symbol: string;
+        chain: Chain;
+        isErc4626: boolean;
+        underlyingTokenAddress?: string;
+    }[],
     chain: Chain,
 ): Promise<void> {
     const viemClient = getViemClient(chain);
 
     for (const token of tokens) {
+        let response;
         try {
-            await viemClient.multicall({
+            response = await viemClient.multicall({
                 contracts: [
                     {
                         address: token.address as `0x${string}`,
@@ -72,5 +81,6 @@ export async function getErc4626Tokens(
             continue;
         }
         token.isErc4626 = true;
+        token.underlyingTokenAddress = response[0].toLowerCase();
     }
 }
