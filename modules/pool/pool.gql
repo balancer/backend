@@ -833,6 +833,14 @@ type GqlPoolTokenDetail {
     """
     isErc4626: Boolean!
     """
+    If it is an Erc4262, this is the address of the underlying token
+    """
+    underlyingTokenAddress: String
+    """
+    If it is an Erc4262, this will be the underlying token if present in the API.
+    """
+    underlyingToken: GqlToken
+    """
     The buffer that is associated with the pool token.
     """
     buffer: GqlTokenBuffer
