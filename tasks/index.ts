@@ -1,7 +1,7 @@
 import {
     JobsController,
     SnapshotsController,
-    PoolsMutationController,
+    PoolMutationController,
     UserBalancesController,
     CowAmmController,
     AprsController,
@@ -58,7 +58,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     } else if (job === 'sync-user-balances-v3') {
         return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     } else if (job === 'load-onchain-data-v3') {
-        return PoolsMutationController().loadOnchainDataForAllPools(chain);
+        return PoolMutationController().loadOnchainDataForAllPools(chain);
     } else if (job === 'add-new-cow-amm-pools') {
         return CowAmmController().addPools(chain);
     } else if (job === 'sync-cow-amm-pools') {
