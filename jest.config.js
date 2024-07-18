@@ -14,6 +14,5 @@ module.exports = {
         '^@app/(.*)$': '<rootDir>/app/$1',
         '^@config/(.*)$': '<rootDir>/config/$1',
         '^@modules/(.*)$': '<rootDir>/modules/$1',
-        '^@/(.*)$': '<rootDir>/$1',
     },
 };

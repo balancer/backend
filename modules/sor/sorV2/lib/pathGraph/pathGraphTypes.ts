@@ -1,5 +1,5 @@
 import { Token } from '@balancer/sdk';
-import { BasePool } from '../pools/basePool';
+import { BasePool } from '../pools/types';
 
 export interface PoolTokenPair {
     id: string;
