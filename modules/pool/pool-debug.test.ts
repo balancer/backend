@@ -4,6 +4,7 @@ import { poolService } from '../pool/pool.service';
 import { userService } from '../user/user.service';
 import { tokenService } from '../token/token.service';
 import mainnet from '../../config/mainnet';
+import { prisma } from '../../prisma/prisma-client';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -208,5 +209,32 @@ describe('pool debugging', () => {
             'FANTOM',
         );
         expect(pool.dynamicData.totalLiquidity).not.toBe('0');
+    }, 5000000);
+
+    it('delete and sync pools', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '252');
+
+        await prisma.prismaPool.deleteMany({
+            where: { chain: 'FRAXTAL' },
+        });
+
+        let pools = await poolService.getGqlPools({ where: { chainIn: ['FRAXTAL'] } });
+
+        expect(pools.length).toBe(0);
+
+        await poolService.syncAllPoolsFromSubgraph();
+        await poolService.initOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'FRAXTAL');
+        await userService.initWalletBalancesForAllPools();
+        await userService.initStakedBalances(['GAUGE']);
+
+        pools = await poolService.getGqlPools({ where: { chainIn: ['FRAXTAL'] } });
+
+        expect(pools.length).toBeGreaterThan(0);
+
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.syncChangedPools();
     }, 5000000);
 });
