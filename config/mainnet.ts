@@ -45,11 +45,7 @@ export default <NetworkData>{
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
-    rpcUrl: env.INFURA_API_KEY
-        ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : env.INFURA_API_KEY_TEST
-        ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY_TEST}`
-        : 'https://rpc.ankr.com/eth',
+    rpcUrl: env.INFURA_API_KEY ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {

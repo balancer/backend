@@ -35,8 +35,6 @@ export default <NetworkData>{
     },
     rpcUrl: env.ALCHEMY_API_KEY
         ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.ALCHEMY_API_KEY_TEST
-        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY_TEST}`
         : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

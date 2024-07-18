@@ -35,8 +35,6 @@ export default <NetworkData>{
     },
     rpcUrl: env.INFURA_API_KEY
         ? `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : env.INFURA_API_KEY_TEST
-        ? `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY_TEST}`
         : 'https://rpc.ankr.com/avalanche',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

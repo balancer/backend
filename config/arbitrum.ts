@@ -33,11 +33,7 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.ALCHEMY_API_KEY_TEST
-        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY_TEST}`
-        : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}` : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
