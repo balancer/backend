@@ -11,17 +11,18 @@ describe('sor debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '42161');
         //only do once before starting to debug
-        await poolService.syncAllPoolsFromSubgraph();
-        await poolService.loadOnChainDataForAllPools();
-        await poolService.updateLiquidityValuesForPools();
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        // await poolService.updateLiquidityValuesForPools();
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
             tokenIn,
             tokenOut,
-            swapType: 'EXACT_IN',
-            swapAmount: '0.1',
+            swapType: 'EXACT_OUT',
+            swapAmount: '100',
             queryBatchSwap: true,
+            // useProtocolVersion: 2,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
