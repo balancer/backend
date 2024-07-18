@@ -20,6 +20,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/E31tHMWuP5bYmUxKjAap7Y3BgVDzvqLKNHofWhmNW6t4`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
@@ -44,10 +45,7 @@ export default <NetworkData>{
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.ankr.com/eth',
+    rpcUrl: env.INFURA_API_KEY ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {

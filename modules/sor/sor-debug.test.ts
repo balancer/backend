@@ -4,15 +4,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../conte
 import { poolService } from '../pool/pool.service';
 import { sorService } from './sor.service';
 import { chainIdToChain } from '../network/chain-id-to-chain';
-import {
-    JobsController,
-    SnapshotsController,
-    PoolsMutationController,
-    UserBalancesController,
-    CowAmmController,
-    AprsController,
-    ContentController,
-} from '../controllers';
+import { PoolController } from '../controllers/pool-controller'; // Add this import statement
 
 describe('sor debugging', () => {
     it('sor v2 arb eth->usdc', async () => {
@@ -46,15 +38,14 @@ describe('sor debugging', () => {
     }, 5000000);
 
     it('sor v3 sepolia eth->usdc', async () => {
-        const jobsController = JobsController();
         const chain = Chain.SEPOLIA;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         //only do once before starting to debug
-        await jobsController.addPools(chainId);
-        await jobsController.syncPools(chainId);
+        await PoolController().addPoolsV3(chainId);
+        await PoolController().syncPoolsV3(chainId);
 
         const swaps = await sorService.getSorSwapPaths({
             chain,

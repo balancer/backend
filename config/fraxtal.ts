@@ -69,7 +69,7 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             sFRAX: {
-                tokenAddress: '0xfc00000000000000000000000000000000000005',
+                tokenAddress: '0xfc00000000000000000000000000000000000008',
                 sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
                 path: 'items.0.sfraxApr',
                 isIbYield: true,
@@ -80,8 +80,7 @@ export default <NetworkData>{
                 path: 'stakingYield.value',
                 isIbYield: true,
             },
-
-        }
+        },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
