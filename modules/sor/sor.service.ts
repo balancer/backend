@@ -273,15 +273,9 @@ export class SorService {
     private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
         const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 2 });
         const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 3 });
-        if (input.swapType === 'EXACT_IN') {
-            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
-                ? swapBalancerV2
-                : swapBalancerV3;
-        } else {
-            return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
-                ? swapBalancerV2
-                : swapBalancerV3;
-        }
+        return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
+            ? swapBalancerV2
+            : swapBalancerV3;
     }
 }
 
