@@ -33,7 +33,11 @@ export default <NetworkData>{
         platformId: 'polygon-pos',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.INFURA_API_KEY ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://1rpc.io/matic',
+    rpcUrl: env.INFURA_API_KEY
+        ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : env.INFURA_API_KEY_TEST
+        ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY_TEST}`
+        : 'https://1rpc.io/matic',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {

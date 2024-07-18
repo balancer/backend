@@ -35,8 +35,8 @@ export default <NetworkData>{
     },
     rpcUrl: env.ALCHEMY_API_KEY
         ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.INFURA_API_KEY
-        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : env.ALCHEMY_API_KEY_TEST
+        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY_TEST}`
         : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

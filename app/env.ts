@@ -25,11 +25,19 @@ export const schema = {
         optional: true,
         type: String,
     },
+    INFURA_API_KEY_TEST: {
+        optional: true,
+        type: String,
+    },
     GATEWAYFM_API_KEY: {
         optional: true,
         type: String,
     },
     ALCHEMY_API_KEY: {
+        optional: true,
+        type: String,
+    },
+    ALCHEMY_API_KEY_TEST: {
         optional: true,
         type: String,
     },
