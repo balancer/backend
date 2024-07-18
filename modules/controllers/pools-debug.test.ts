@@ -1,3 +1,5 @@
+// yarn vitest pools-debug.test.ts
+
 import { prisma } from '../../prisma/prisma-client';
 import { poolService } from '../pool/pool.service';
 import { PoolController } from './pool-controller';
