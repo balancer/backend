@@ -278,9 +278,16 @@ export class SorService {
                 ? swapBalancerV2
                 : swapBalancerV3;
         } else {
-            return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
-                ? swapBalancerV2
-                : swapBalancerV3;
+            // return swap path with smallest non-zero amountsIn (if it exists)
+            if (parseFloat(swapBalancerV2.returnAmount) === 0) {
+                return swapBalancerV3;
+            } else if (parseFloat(swapBalancerV3.returnAmount) === 0) {
+                return swapBalancerV2;
+            } else {
+                return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
+                    ? swapBalancerV2
+                    : swapBalancerV3;
+            }
         }
     }
 }
