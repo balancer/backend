@@ -36,6 +36,8 @@ export default <NetworkData>{
     },
     rpcUrl: env.INFURA_API_KEY
         ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+        : env.INFURA_API_KEY_TEST
+        ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY_TEST}`
         : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
     protocolToken: 'beets',
