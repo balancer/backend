@@ -273,9 +273,22 @@ export class SorService {
     private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
         const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 2 });
         const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 3 });
-        return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
-            ? swapBalancerV2
-            : swapBalancerV3;
+        if (input.swapType === 'EXACT_IN') {
+            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
+        } else {
+            // return swap path with smallest non-zero amountsIn (if it exists)
+            if (parseFloat(swapBalancerV2.returnAmount) === 0) {
+                return swapBalancerV3;
+            } else if (parseFloat(swapBalancerV3.returnAmount) === 0) {
+                return swapBalancerV2;
+            } else {
+                return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
+                    ? swapBalancerV2
+                    : swapBalancerV3;
+            }
+        }
     }
 }
 
