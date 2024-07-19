@@ -1,5 +1,14 @@
 # backend
 
+## 1.5.1
+
+### Patch Changes
+
+-   40631b9: change fantom rpc
+-   0fd0952: change cow amm subgraph to deployment id
+-   64cdecc: more robust aura sync
+-   4cfbf0e: add gUSDC apr
+
 ## 1.5.0
 
 ### Minor Changes
