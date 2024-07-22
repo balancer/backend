@@ -33,11 +33,7 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.INFURA_API_KEY
-        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}` : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -204,6 +200,12 @@ export default <NetworkData>{
                 tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
                 sourceUrl: 'https://universe.staderlabs.com/eth/apy',
                 path: 'value',
+                isIbYield: true,
+            },
+            gUSDC: {
+                tokenAddress: '0xd3443ee1e91af28e5fb858fbd0d72a63ba8046e0',
+                sourceUrl: 'https://backend-arbitrum.gains.trade/apr',
+                path: 'collateralRewards.{symbol == "USDC"}.vaultApr',
                 isIbYield: true,
             },
         },

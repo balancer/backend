@@ -120,14 +120,13 @@ export const polygonNetworkConfig: NetworkConfig = {
             name: 'sync-latest-fx-prices',
             interval: every(10, 'minutes'),
         },
-        // V3 Jobs
         {
             name: 'sync-join-exits-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-swaps-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

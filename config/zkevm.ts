@@ -33,9 +33,7 @@ export default <NetworkData>{
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.GROVE_CITY
-        ? `https://polygon-zkevm-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
-        : env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
+    rpcUrl: env.ALCHEMY_API_KEY
         ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,

@@ -65,7 +65,9 @@ export default <NetworkData>{
             '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
-    rpcUrl: `https://rpc.ankr.com/fantom`,
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://fantom-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : `https://rpc.ankr.com/fantom`,
     rpcMaxBlockRange: 1000,
     protocolToken: 'beets',
     beets: {
