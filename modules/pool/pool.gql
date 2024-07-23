@@ -155,7 +155,7 @@ type GqlPoolMinimal {
     """
     createTime: Int!
     """
-    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
+    Only returns main or underlying tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
     displayTokens: [GqlPoolTokenDisplay!]!
     """
@@ -324,11 +324,11 @@ interface GqlPoolBase {
     """
     Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
-    displayTokens: [GqlPoolTokenDisplay!]!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     """
     Returns all pool tokens, including any nested tokens and phantom BPTs on one level.
     """
-    allTokens: [GqlPoolTokenExpanded!]!
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     """
     Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
     """
@@ -833,40 +833,9 @@ type GqlPoolTokenDetail {
     """
     isErc4626: Boolean!
     """
-    If it is an Erc4262, this is the address of the underlying token
-    """
-    underlyingTokenAddress: String
-    """
     If it is an Erc4262, this will be the underlying token if present in the API.
     """
     underlyingToken: GqlToken
-    """
-    The buffer that is associated with the pool token.
-    """
-    buffer: GqlTokenBuffer
-}
-
-type GqlTokenBuffer {
-    """
-    The address of the wrapped token, i.e. waUSDC.
-    """
-    wrappedToken: GqlToken!
-    """
-    The balance of the wrapped token.
-    """
-    wrappedTokenBalance: BigDecimal!
-    """
-    The address of the udnerlying token, i.e. USDC.
-    """
-    underlyingToken: GqlToken!
-    """
-    The balance of the underlying token.
-    """
-    underlyingTokenBalance: BigDecimal!
-    """
-    Amount of shares for the buffer.
-    """
-    totlaShares: BigDecimal!
 }
 
 """

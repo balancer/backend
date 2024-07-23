@@ -43,6 +43,7 @@ import {
     Prisma,
     PrismaPoolAprType,
     PrismaPriceRateProviderData,
+    PrismaTokenTypeOption,
     PrismaUserStakedBalance,
     PrismaUserWalletBalance,
 } from '@prisma/client';
@@ -83,7 +84,10 @@ export class PoolGqlLoaderService {
         // load rate provider data into PoolTokenDetail model
         await this.enrichWithRateproviderData(mappedPool);
 
-        // load underlying token info into PoolTokenDetail model
+        // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
+        await this.enrichWithUnderlyingTokenData(mappedPool);
+
+        // load underlying token info into GqlPoolTokenDisplay model
         await this.enrichWithUnderlyingTokenData(mappedPool);
 
         return mappedPool;
@@ -97,6 +101,7 @@ export class PoolGqlLoaderService {
                     mappedPool.chain,
                 );
                 token.underlyingToken = tokenDefinition;
+                mappedPool.displayTokens.push();
             }
             if (token.hasNestedPool) {
                 for (const nestedToken of token.nestedPool!.tokens) {
@@ -236,7 +241,7 @@ export class PoolGqlLoaderService {
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
-            hasErc4626: pool.allTokens.some((token) => token.token.isErc4626),
+            hasErc4626: pool.allTokens.some((token) => token.token.types.some((type) => type.type === 'ERC4626')),
         };
     }
 
@@ -617,8 +622,10 @@ export class PoolGqlLoaderService {
             const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
             const isNested = !poolToken;
             const isPhantomBpt = token.tokenAddress === pool.address;
-            const isMainToken = !token.token.types.some((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT');
-            const isErc4626 = token.token.isErc4626;
+            const isMainToken = !token.token.types.some(
+                (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'ERC4626',
+            );
+            const isErc4626 = token.token.types.some((type) => type.type === 'ERC4626');
 
             return {
                 ...token.token,
@@ -682,7 +689,7 @@ export class PoolGqlLoaderService {
             isAllowed: poolToken.token.types.some(
                 (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
             ),
-            isErc4626: poolToken.token.isErc4626,
+            isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
         };
     }
 

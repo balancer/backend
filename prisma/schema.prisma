@@ -683,9 +683,6 @@ model PrismaToken {
     description         String?
     decimals            Int
 
-    isErc4626           Boolean             @default(false)
-    underlyingTokenAddress String?
-
     logoURI             String?
     websiteUrl          String?
     discordUrl          String?
@@ -790,6 +787,7 @@ enum PrismaTokenTypeOption {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
+    ERC4626
 }
 
 model PrismaPriceRateProviderData {

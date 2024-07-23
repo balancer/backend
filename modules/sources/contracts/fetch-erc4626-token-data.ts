@@ -1,31 +1,28 @@
-import { getViemClient } from '../viem-client';
-import MinimalErc4626Abi from '../contracts/abis/MinimalERC4626';
-import { Chain } from '@prisma/client';
-import { VaultPoolFragment as VaultSubgraphPoolFragment } from '../subgraphs/balancer-v3-vault/generated/types';
+import { ViemClient } from '../viem-client';
+import MinimalErc4626Abi from './abis/MinimalERC4626';
+import { fetchErc20Headers } from '.';
 
-interface CallData {
-    asset: string;
-    convertToAssets: BigInt;
-    convertToShares: BigInt;
-    previewDeposit: BigInt;
-    previewMint: BigInt;
-    previewRedeem: BigInt;
-    previewWithdraw: BigInt;
-}
-
-export async function getErc4626Tokens(
-    tokens: {
+export async function fetchErc4626AndUnderlyingTokenData(
+    tokens: { address: string; decimals: number; name: string; symbol: string }[],
+    viemClient: ViemClient,
+): Promise<
+    {
         address: string;
         decimals: number;
         name: string;
         symbol: string;
-        chain: Chain;
         isErc4626: boolean;
-        underlyingTokenAddress?: string;
-    }[],
-    chain: Chain,
-): Promise<void> {
-    const viemClient = getViemClient(chain);
+    }[]
+> {
+    const tokenData: {
+        [id: string]: {
+            address: string;
+            decimals: number;
+            name: string;
+            symbol: string;
+            isErc4626: boolean;
+        };
+    } = {};
 
     for (const token of tokens) {
         let response;
@@ -77,10 +74,33 @@ export async function getErc4626Tokens(
                 allowFailure: false,
             });
         } catch (e) {
-            token.isErc4626 = false;
             continue;
         }
-        token.isErc4626 = true;
-        token.underlyingTokenAddress = response[0].toLowerCase();
+        const underlyingTokenAddress = response[0].toLowerCase();
+
+        tokenData[token.address] = {
+            address: token.address,
+            decimals: token.decimals,
+            name: token.name,
+            symbol: token.symbol,
+            isErc4626: true,
+        };
+
+        if (!tokenData[underlyingTokenAddress]) {
+            const underlyingTokenDetail = await fetchErc20Headers(
+                [underlyingTokenAddress as `0x${string}`],
+                viemClient,
+            );
+
+            tokenData[underlyingTokenAddress] = {
+                address: underlyingTokenAddress,
+                decimals: underlyingTokenDetail[underlyingTokenAddress].decimals,
+                name: underlyingTokenDetail[underlyingTokenAddress].name,
+                symbol: underlyingTokenDetail[underlyingTokenAddress].symbol,
+                isErc4626: false,
+            };
+        }
     }
+
+    return [...Object.values(tokenData)];
 }

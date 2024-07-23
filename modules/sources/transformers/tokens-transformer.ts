@@ -18,8 +18,6 @@ export function tokensTransformer(vaultSubgraphPools: VaultSubgraphPoolFragment[
                 name: token.name,
                 symbol: token.symbol,
                 chain: chain,
-                isErc4626: false,
-                underlyingTokenAddress: undefined,
             })),
             {
                 address: pool.address,
@@ -27,8 +25,6 @@ export function tokensTransformer(vaultSubgraphPools: VaultSubgraphPoolFragment[
                 name: pool.name,
                 symbol: pool.symbol,
                 chain: chain,
-                isErc4626: false,
-                underlyingTokenAddress: undefined,
             },
         ];
     });

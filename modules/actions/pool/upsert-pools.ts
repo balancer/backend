@@ -4,7 +4,6 @@ import { tokensTransformer } from '../../sources/transformers/tokens-transformer
 import { JoinedSubgraphPool } from '../../sources/subgraphs';
 import { subgraphPoolUpsert, SubgraphPoolUpsertData } from '../../sources/transformers/subgraph-pool-upsert';
 import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
-import { getErc4626Tokens as tokensEnrichErc4626 } from '../../sources/enrichers/erc4626-tokens';
 import type { VaultClient } from '../../sources/contracts';
 
 /**
@@ -31,9 +30,6 @@ export const upsertPools = async (
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);
-
-    // Find possible ERC4626 tokens
-    await tokensEnrichErc4626(allTokens, chain);
 
     try {
         await prisma.prismaToken.createMany({
