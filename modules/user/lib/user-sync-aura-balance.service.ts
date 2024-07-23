@@ -61,41 +61,44 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
             },
         });
 
+        const operations: any[] = [];
+        for (const account of accounts) {
+            for (const poolAccount of account.poolAccounts) {
+                if (poolAccount.pool.chainId.toString() === this.chainId) {
+                    const pool = pools.find((pool) => pool.address === poolAccount.pool.lpToken.address);
+                    if (!pool) {
+                        continue;
+                    }
+
+                    const data = {
+                        id: `${poolAccount.pool.address}-${account.id}`,
+                        chain: this.chain,
+                        balance: formatEther(hexToBigInt(poolAccount.staked)),
+                        balanceNum: parseFloat(formatEther(hexToBigInt(poolAccount.staked))),
+                        userAddress: account.id,
+                        poolId: pool.id,
+                        tokenAddress: poolAccount.pool.lpToken.address,
+                        stakingId: poolAccount.pool.address,
+                    };
+
+                    operations.push(
+                        prisma.prismaUserStakedBalance.upsert({
+                            where: { id_chain: { id: `${poolAccount.pool.address}-${account.id}`, chain: this.chain } },
+                            create: data,
+                            update: data,
+                        }),
+                    );
+                }
+            }
+        }
+
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({
                     data: accounts.map((account) => ({ address: account.id })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'AURA' }, chain: this.chain } }),
-                prisma.prismaUserStakedBalance.createMany({
-                    data: accounts
-                        .map((account) =>
-                            account.poolAccounts
-                                .filter((share) => `${share.pool.chainId}` === this.chainId)
-                                .map((userPosition) => {
-                                    const pool = pools.find(
-                                        (pool) => pool.address === userPosition.pool.lpToken.address,
-                                    );
-                                    if (!pool) {
-                                        return undefined;
-                                    }
-
-                                    return {
-                                        id: `${userPosition.pool.address}-${account.id}`,
-                                        chain: this.chain,
-                                        balance: formatEther(hexToBigInt(userPosition.staked)),
-                                        balanceNum: parseFloat(formatEther(hexToBigInt(userPosition.staked))),
-                                        userAddress: account.id,
-                                        poolId: pool?.id,
-                                        tokenAddress: userPosition.pool.lpToken.address,
-                                        stakingId: userPosition.pool.address,
-                                    };
-                                }),
-                        )
-                        .flat()
-                        .filter((entry) => entry !== undefined) as Prisma.PrismaUserStakedBalanceCreateManyInput[],
-                }),
+                ...operations,
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'AURA', chain: this.chain } },
                     create: { type: 'AURA', chain: this.chain, blockNumber: blockNumber },
