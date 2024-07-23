@@ -2,13 +2,12 @@ import { Address, Hex, parseEther } from 'viem';
 import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 
-import { chainToIdMap } from '@/modules/network/network-config';
-import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
-import { GqlPoolType } from '@/schema';
-
+import { PrismaPoolWithDynamic } from '../../../../../../../prisma/prisma-types';
+import { GqlPoolType } from '../../../../../../../schema';
+import { chainToIdMap } from '../../../../../../network/network-config';
+import { TokenPairData } from '../../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { MathSol, WAD } from '../../../utils/math';
-import { BasePool } from '../../types';
+import { BasePool } from '../../basePool';
 import { WeightedPoolToken } from './weightedPoolToken';
 
 export class WeightedPool implements BasePool {

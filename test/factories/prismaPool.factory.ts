@@ -5,19 +5,21 @@ import { createRandomAddress } from '../utils';
 
 export const prismaPoolFactory = Factory.define<PrismaPoolWithDynamic>(({ params }) => {
     const poolAddress = params.address ?? createRandomAddress();
+    const type = params.type ?? 'WEIGHTED';
+    const typeData = params.typeData ?? {};
     return {
         id: poolAddress,
         address: poolAddress,
         symbol: 'TEST-POOL',
         name: 'test pool',
-        type: 'WEIGHTED',
+        type,
         decimals: 18,
         owner: createRandomAddress(),
         factory: createRandomAddress(),
         chain: 'SEPOLIA',
         version: 1,
         protocolVersion: 3,
-        typeData: {},
+        typeData,
         categories: [],
         createTime: 1708433018,
         dynamicData: prismaPoolDynamicDataFactory.build({ id: poolAddress, chain: params?.chain || 'SEPOLIA' }),

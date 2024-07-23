@@ -3,12 +3,11 @@ import { SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { Vault, Weighted, WeightedState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
-import { TokenPairData } from '@/modules/sources/contracts/fetch-tokenpair-data';
-import { chainToIdMap } from '@/modules/network/network-config';
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
-import { GqlPoolType } from '@/schema';
-
-import { BasePoolV3 } from '../types';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { GqlPoolType } from '../../../../../../schema';
+import { chainToIdMap } from '../../../../../network/network-config';
+import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-data';
+import { BasePoolV3 } from '../basePool';
 import { WeightedPoolToken } from '../v2/weighted/weightedPoolToken';
 
 export class WeightedPoolV3 implements BasePoolV3 {
@@ -153,11 +152,11 @@ export class WeightedPoolV3 implements BasePoolV3 {
             poolType: 'Weighted',
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
-            tokenRates: this.tokens.map((_) => WAD), // TODO: double check this, but I think weighetd pool always have rates = 1
+            tokenRates: this.tokens.map((_) => WAD),
             totalSupply: this.totalShares,
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),
-            scalingFactors: this.tokens.map((t) => t.scalar * WAD), // double check this math
+            scalingFactors: this.tokens.map((t) => t.scalar * WAD),
         };
     }
 

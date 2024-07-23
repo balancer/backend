@@ -101,8 +101,7 @@
         "ts-node": "^10.4.0",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5.3.3",
-        "vite-tsconfig-paths": "^4.3.2",
-        "vitest": "^0.32.4",
+        "vitest": "^2.0.4",
         "vitest-mock-extended": "^1.1.3"
     }
 }

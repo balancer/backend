@@ -4,13 +4,12 @@ import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk
 import { Stable, StableState, Vault } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
-import { TokenPairData } from '@/modules/sources/contracts/fetch-tokenpair-data';
-import { chainToIdMap } from '@/modules/network/network-config';
-import { StableData } from '@/modules/pool/subgraph-mapper';
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
-
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { chainToIdMap } from '../../../../../network/network-config';
+import { StableData } from '../../../../../pool/subgraph-mapper';
+import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-data';
 import { WAD } from '../../utils/math';
-import { BasePoolV3 } from '../types';
+import { BasePoolV3 } from '../basePool';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;

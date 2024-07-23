@@ -2,14 +2,13 @@ import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 
-import { chainToIdMap } from '@/modules/network/network-config';
-import { GyroData } from '@/modules/pool/subgraph-mapper';
-import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
-
-import { MathSol, WAD } from '../../../utils/math';
+import { PrismaPoolWithDynamic } from '../../../../../../../prisma/prisma-types';
+import { chainToIdMap } from '../../../../../../network/network-config';
+import { GyroData } from '../../../../../../pool/subgraph-mapper';
+import { TokenPairData } from '../../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
-import { BasePool } from '../../types';
+import { MathSol, WAD } from '../../../utils/math';
+import { BasePool } from '../../basePool';
 import { calculateInvariantWithError, calcOutGivenIn, calcInGivenOut } from './gyroEMath';
 import { balancesFromTokenInOut, virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';

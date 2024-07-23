@@ -11,10 +11,6 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "sourceMap": true,
-        "baseUrl": "./",
-        "paths": {
-            "@/*": ["./*"],
-        },
     },
     "exclude": ["node_modules", "debug", "**/*.spec.ts", "**/*.test.ts"]
 }

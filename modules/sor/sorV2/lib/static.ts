@@ -1,9 +1,9 @@
 import { SwapKind, Token } from '@balancer/sdk';
 
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
+import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 
 import { PathWithAmount } from './path';
-import { BasePool } from './pools/types';
+import { BasePool } from './pools/basePool';
 import {
     ComposableStablePool,
     FxPool,
@@ -43,13 +43,10 @@ export async function sorGetSwapsWithPools(
                 break;
             case 'COMPOSABLE_STABLE':
             case 'PHANTOM_STABLE':
-                {
-                    if (prismaPool.protocolVersion === 2) {
-                        basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
-                    } else {
-                        basePools.push(StablePool.fromPrismaPool(prismaPool));
-                    }
-                }
+                basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
+                break;
+            case 'STABLE':
+                basePools.push(StablePool.fromPrismaPool(prismaPool));
                 break;
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));

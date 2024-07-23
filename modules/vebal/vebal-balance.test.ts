@@ -1,3 +1,5 @@
+// yarn vitest vebal-balance.test.ts
+
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { veBalService } from './vebal.service';
 

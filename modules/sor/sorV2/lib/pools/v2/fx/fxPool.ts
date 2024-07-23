@@ -2,13 +2,13 @@ import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 
-import { PrismaPoolWithDynamic } from '@/prisma/prisma-types';
-import { FxData } from '@/modules/pool/subgraph-mapper';
-import { chainToIdMap } from '@/modules/network/network-config';
-import { TokenPairData } from '@/modules/pool/lib/pool-on-chain-tokenpair-data';
+import { PrismaPoolWithDynamic } from '../../../../../../../prisma/prisma-types';
+import { FxData } from '../../../../../../pool/subgraph-mapper';
+import { chainToIdMap } from '../../../../../../network/network-config';
+import { TokenPairData } from '../../../../../../pool/lib/pool-on-chain-tokenpair-data';
 
 import { RAY } from '../../../utils/math';
-import { BasePool } from '../../types';
+import { BasePool } from '../../basePool';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { FxPoolToken } from './fxPoolToken';
 import { MathFx, parseFixedCurveParam } from './helpers';

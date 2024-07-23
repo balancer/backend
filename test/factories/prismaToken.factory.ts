@@ -5,30 +5,33 @@ import { PrismaPoolTokenWithDynamicData } from '../../prisma/prisma-types';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 
 export const prismaPoolTokenFactory = Factory.define<PrismaPoolTokenWithDynamicData>(({ params }) => {
-    const tokenAddress = params?.address || createRandomAddress();
+    const address = params?.address || createRandomAddress();
     const poolId = params?.poolId || createRandomAddress();
+    const id = poolId + '-' + address;
     return {
-        id: poolId + '-' + tokenAddress,
-        address: tokenAddress,
+        id,
+        address,
         poolId: poolId,
         chain: 'SEPOLIA',
         index: 0,
         nestedPoolId: null,
         priceRateProvider: ZERO_ADDRESS,
         exemptFromProtocolYieldFee: false,
-        token: prismaTokenFactory.build({ address: tokenAddress }),
-        dynamicData: prismaPoolTokenDynamicDataFactory.build({ id: poolId + '-' + tokenAddress }),
+        token: prismaTokenFactory.build({ address }),
+        dynamicData: prismaPoolTokenDynamicDataFactory.build({ id }),
     };
 });
 
-export const prismaTokenFactory = Factory.define<PrismaToken>(() => {
+export const prismaTokenFactory = Factory.define<PrismaToken>(({ params }) => {
+    const address = params?.address || createRandomAddress();
+    const decimals = params?.decimals || 18;
     return {
-        address: createRandomAddress(),
+        address,
         chain: 'SEPOLIA',
         symbol: 'TestToken',
         name: 'testToken',
         description: '',
-        decimals: 18,
+        decimals,
         logoURI: '',
         websiteUrl: '',
         discordUrl: '',

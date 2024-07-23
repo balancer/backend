@@ -2,7 +2,7 @@ import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { MathSol, WAD, max, min } from './utils/math';
-import { BasePool } from './pools/types';
+import { BasePool } from './pools/basePool';
 import { PathLocal, PathWithAmount } from './path';
 import { parseEther } from 'viem';
 
