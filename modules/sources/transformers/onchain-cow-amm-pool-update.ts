@@ -19,7 +19,7 @@ export const onchainCowAmmPoolUpdate = (
             chain: chain,
             totalShares: formatEther(onchainPoolData.totalSupply),
             blockNumber: Number(blockNumber),
-            swapFee: String(onchainPoolData.swapFee ?? '0'),
+            swapFee: formatEther(onchainPoolData.swapFee),
         },
         poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
             id: `${id}-${tokenData.address.toLowerCase()}`,
