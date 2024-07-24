@@ -51,7 +51,6 @@ export class SorService {
         // TODO: check with Franz if this is correct - AND/OR mismatch on comments and code
         // we return an empty response if tokenIn and tokenOut are the same
         // also if tokenIn and tokenOut is weth/eth
-        // TODO: check with Franz why we are returning empty responses if tokenIn OR tokenOut is weth/eth
         if (
             tokenIn === tokenOut ||
             (wethIsEth &&

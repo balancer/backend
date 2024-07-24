@@ -4,7 +4,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../conte
 import { poolService } from '../pool/pool.service';
 import { sorService } from './sor.service';
 import { chainIdToChain } from '../network/chain-id-to-chain';
-// import { PoolController } from '../controllers/pool-controller'; // Add this import statement
+import { PoolController } from '../controllers/pool-controller'; // Add this import statement
 
 describe('sor debugging', () => {
     it('sor v2 arb eth->usdc', async () => {
@@ -44,8 +44,8 @@ describe('sor debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         //only do once before starting to debug
-        // await PoolController().addPoolsV3(chainId);
-        // await PoolController().syncPoolsV3(chainId);
+        await PoolController().addPoolsV3(chainId);
+        await PoolController().syncPoolsV3(chainId);
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
