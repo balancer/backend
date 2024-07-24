@@ -191,7 +191,7 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
         : undefined,
 });
 
-export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: string, batchSize = 1024) => {
+export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: string, batchSize = 400) => {
     if (pools.length === 0) {
         return {};
     }

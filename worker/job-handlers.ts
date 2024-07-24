@@ -24,6 +24,8 @@ import {
     AprsController,
     ContentController,
 } from '../modules/controllers';
+import { EventController } from '../modules/controllers/event-controller';
+import { PoolController } from '../modules/controllers/pool-controller';
 
 const runningJobs: Set<string> = new Set();
 
@@ -192,7 +194,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.syncJoinExitsV2(chainId),
+                    () => EventController().syncJoinExitsV2(chainId),
                     res,
                     next,
                 );
@@ -360,22 +362,34 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             // V3 Jobs
             case 'add-pools-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.addPools(chainId), res, next);
+                await runIfNotAlreadyRunning(job.name, chainId, () => PoolController().addPoolsV3(chainId), res, next);
                 break;
             case 'sync-pools-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncPools(chainId), res, next);
+                await runIfNotAlreadyRunning(job.name, chainId, () => PoolController().syncPoolsV3(chainId), res, next);
                 break;
             case 'sync-swaps-v3':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV3(chainId), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => EventController().syncSwapsV3(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-swaps-v2':
-                await runIfNotAlreadyRunning(job.name, chainId, () => jobsController.syncSwapsV2(chainId), res, next);
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => EventController().syncSwapsV2(chainId),
+                    res,
+                    next,
+                );
                 break;
             case 'sync-join-exits-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.syncJoinExitsV3(chainId),
+                    () => EventController().syncJoinExitsV3(chainId),
                     res,
                     next,
                 );
@@ -384,7 +398,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.updateLiquidity24hAgo(chainId),
+                    () => PoolController().updateLiquidity24hAgo(chainId),
                     res,
                     next,
                 );
@@ -402,7 +416,7 @@ export function configureWorkerRoutes(app: Express) {
                 await runIfNotAlreadyRunning(
                     job.name,
                     chainId,
-                    () => jobsController.syncSwapsUpdateVolumeAndFees(chainId),
+                    () => EventController().syncSwapsUpdateVolumeAndFeesV3(chainId),
                     res,
                     next,
                 );

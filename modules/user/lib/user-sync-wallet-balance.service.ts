@@ -92,7 +92,8 @@ export class UserSyncWalletBalanceService {
 
         let fbeetsHolders: BeetsBarUserFragment[] = [];
 
-        if (this.beetsBarService) {
+        if (this.isFantomNetwork && this.beetsBarService) {
+            console.log(`got beetsbar service`);
             fbeetsHolders = await this.beetsBarService.getAllUsers({ where: { fBeets_not: '0' } });
         }
 

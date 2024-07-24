@@ -1,5 +1,46 @@
 # backend
 
+## 1.5.1
+
+### Patch Changes
+
+-   40631b9: change fantom rpc
+-   0fd0952: change cow amm subgraph to deployment id
+-   64cdecc: more robust aura sync
+-   4cfbf0e: add gUSDC apr
+
+## 1.5.0
+
+### Minor Changes
+
+-   ed09091: split controllers, reload also syncs pool state
+
+### Patch Changes
+
+-   846b2ad: allow test env to use paid rpc
+-   0b421c5: fix exact_out with getBestSwapPathVersion
+-   2dbbb7c: fix initial cow amm sync
+-   2366ee3: add cow crons to mainnet and adapt cron intervalls
+-   f12b5b2: fix initUserBalances for local runs
+
+## 1.4.3
+
+### Patch Changes
+
+-   43735c9: fix sfrax apr on fraxtal
+
+## 1.4.2
+
+### Patch Changes
+
+-   3613c9f: reduce multicall batch size
+
+## 1.4.1
+
+### Patch Changes
+
+-   6daa985: smaller chunks for pool fetching
+
 ## 1.4.0
 
 ### Minor Changes
