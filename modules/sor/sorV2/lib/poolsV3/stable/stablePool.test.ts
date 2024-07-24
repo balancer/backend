@@ -1,8 +1,12 @@
 // yarn vitest stablePool.test.ts
 
 import { parseEther, parseUnits } from 'viem';
+import { Address, SwapKind, Token } from '@balancer/sdk';
 
-import { WAD } from '../utils/math';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { chainToIdMap } from '../../../../../network/network-config';
+import { sorGetPathsWithPools } from '../../static';
+import { WAD } from '../../utils/math';
 import { StablePool } from './stablePool';
 
 // keep factories imports at the end - moving up will break the test
@@ -12,17 +16,13 @@ import {
     prismaPoolFactory,
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
-} from '../../../../../test/factories';
-import { sorGetPathsWithPools } from '../static';
-import { Address, SwapKind, Token } from '@balancer/sdk';
-import { chainToIdMap } from '../../../../network/network-config';
-import { PrismaPoolWithDynamic } from '../../../../../prisma/prisma-types';
+} from '../../../../../../test/factories';
 
 describe('SOR V3 Weighted Pool Tests', () => {
     let amp: string;
-    let prismaStablePool: PrismaPoolWithDynamic;
     let scalingFactors: bigint[];
     let stablePool: StablePool;
+    let stablePrismaPool: PrismaPoolWithDynamic;
     let swapFee: string;
     let tokenAddresses: string[];
     let tokenBalances: string[];
@@ -56,7 +56,7 @@ describe('SOR V3 Weighted Pool Tests', () => {
 
         tokenAddresses = [poolToken1.address, poolToken2.address];
 
-        prismaStablePool = prismaPoolFactory.build({
+        stablePrismaPool = prismaPoolFactory.build({
             type: 'STABLE',
             protocolVersion: 3,
             typeData: {
@@ -65,7 +65,7 @@ describe('SOR V3 Weighted Pool Tests', () => {
             tokens: [poolToken1, poolToken2],
             dynamicData: prismaPoolDynamicDataFactory.build({ swapFee, totalShares }),
         });
-        stablePool = StablePool.fromPrismaPool(prismaStablePool);
+        stablePool = StablePool.fromPrismaPool(stablePrismaPool);
     });
 
     test('Get Pool State', () => {
@@ -93,14 +93,14 @@ describe('SOR V3 Weighted Pool Tests', () => {
 
         test('should find paths - given in', async () => {
             const paths = await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, parseUnits('0.1', tokenDecimals[0]), [
-                prismaStablePool,
+                stablePrismaPool,
             ]);
             expect(paths).not.toBeNull();
         });
 
         test('should find paths - given out', async () => {
             const paths = await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenOut, parseUnits('0.1', tOut.decimals), [
-                prismaStablePool,
+                stablePrismaPool,
             ]);
             expect(paths).not.toBeNull();
         });

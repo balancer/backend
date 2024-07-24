@@ -3,13 +3,13 @@ import { SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { Vault, Weighted, WeightedState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
-import { PrismaPoolWithDynamic } from '../../../../../prisma/prisma-types';
-import { GqlPoolType } from '../../../../../schema';
-import { TokenPairData } from '../../../../sources/contracts/fetch-tokenpair-data';
-import { chainToIdMap } from '../../../../network/network-config';
+import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { GqlPoolType } from '../../../../../../schema';
+import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-data';
+import { chainToIdMap } from '../../../../../network/network-config';
 
-import { BasePoolV3 } from '../poolsV2/basePool';
-import { WeightedPoolToken } from '../poolsV2/weighted/weightedPoolToken';
+import { BasePoolV3 } from '../../poolsV2/basePool';
+import { WeightedPoolToken } from '../../poolsV2/weighted/weightedPoolToken';
 
 export class WeightedPoolV3 implements BasePoolV3 {
     public readonly chain: Chain;

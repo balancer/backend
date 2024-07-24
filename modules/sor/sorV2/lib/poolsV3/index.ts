@@ -1,2 +1,2 @@
-export * from './stablePool';
-export * from './weightedPool';
+export * from './stable/stablePool';
+export * from './weighted/weightedPool';

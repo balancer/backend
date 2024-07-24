@@ -1,4 +1,4 @@
-// yarn vitest weightedPool.test.ts
+// yarn vitest poolsV2/weighted/weightedPool.test.ts
 
 import { parseEther } from 'viem';
 import { SwapKind, WAD } from '@balancer/sdk';
