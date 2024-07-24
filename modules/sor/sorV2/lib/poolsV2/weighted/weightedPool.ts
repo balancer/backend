@@ -16,7 +16,6 @@ export class WeightedPool implements BasePool {
     public readonly poolType: GqlPoolType = 'WEIGHTED';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly totalShares: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
@@ -61,7 +60,6 @@ export class WeightedPool implements BasePool {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
-            parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
         );
@@ -73,7 +71,6 @@ export class WeightedPool implements BasePool {
         chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
-        totalShares: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
     ) {
@@ -82,7 +79,6 @@ export class WeightedPool implements BasePool {
         this.poolTypeVersion = poolTypeVersion;
         this.address = address;
         this.swapFee = swapFee;
-        this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
         this.tokenPairs = tokenPairs;
