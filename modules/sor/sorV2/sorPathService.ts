@@ -453,6 +453,7 @@ class SorPathService implements SwapService {
                         'META_STABLE',
                         'PHANTOM_STABLE',
                         'COMPOSABLE_STABLE',
+                        'STABLE',
                         'FX',
                         'GYRO',
                         'GYRO3',

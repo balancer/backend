@@ -153,11 +153,11 @@ export class WeightedPoolV3 implements BasePoolV3 {
             poolType: 'Weighted',
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
-            tokenRates: this.tokens.map((_) => WAD), // TODO: double check this, but I think weighetd pool always have rates = 1
+            tokenRates: this.tokens.map((_) => WAD),
             totalSupply: this.totalShares,
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),
-            scalingFactors: this.tokens.map((t) => t.scalar * WAD), // double check this math
+            scalingFactors: this.tokens.map((t) => t.scalar * WAD),
         };
     }
 

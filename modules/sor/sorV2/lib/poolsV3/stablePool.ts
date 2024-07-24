@@ -180,7 +180,7 @@ export class StablePool implements BasePoolV3 {
             totalSupply: this.totalShares,
             amp: this.amp,
             tokens: this.tokens.map((t) => t.token.address),
-            scalingFactors: this.tokens.map((t) => t.scalar * WAD), // double check this math
+            scalingFactors: this.tokens.map((t) => t.scalar * WAD),
         };
     }
 }
