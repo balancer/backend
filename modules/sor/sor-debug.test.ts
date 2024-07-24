@@ -44,8 +44,8 @@ describe('sor debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         //only do once before starting to debug
-        await PoolController().addPoolsV3(chainId);
-        await PoolController().syncPoolsV3(chainId);
+        // await PoolController().addPoolsV3(chainId);
+        // await PoolController().syncPoolsV3(chainId);
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
