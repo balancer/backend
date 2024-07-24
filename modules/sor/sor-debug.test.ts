@@ -37,7 +37,7 @@ describe('sor debugging', () => {
         expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
     }, 5000000);
 
-    it('sor v3 sepolia eth->usdc', async () => {
+    it.only('sor v3 sepolia eth->usdc', async () => {
         const chain = Chain.SEPOLIA;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
@@ -49,8 +49,8 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75', // BAL
-            tokenOut: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9', // WETH
+            tokenIn: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e', // USDC (aave)
+            tokenOut: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17', // DAI (aave)
             swapType: 'EXACT_IN',
             swapAmount: '0.01',
             queryBatchSwap: false,
