@@ -29,7 +29,7 @@ model PrismaToken {
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
 
-    underlyingAddress   String?
+    underlyingTokenAddress   String?
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
