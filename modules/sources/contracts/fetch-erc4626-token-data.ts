@@ -12,6 +12,7 @@ export async function fetchErc4626AndUnderlyingTokenData(
         name: string;
         symbol: string;
         isErc4626: boolean;
+        underlyingAddress?: string;
     }[]
 > {
     const tokenData: {
@@ -21,6 +22,7 @@ export async function fetchErc4626AndUnderlyingTokenData(
             name: string;
             symbol: string;
             isErc4626: boolean;
+            underlyingAddress?: string;
         };
     } = {};
 
@@ -84,6 +86,7 @@ export async function fetchErc4626AndUnderlyingTokenData(
             name: token.name,
             symbol: token.symbol,
             isErc4626: true,
+            underlyingAddress: underlyingTokenAddress,
         };
 
         if (!tokenData[underlyingTokenAddress]) {
@@ -98,6 +101,7 @@ export async function fetchErc4626AndUnderlyingTokenData(
                 name: underlyingTokenDetail[underlyingTokenAddress].name,
                 symbol: underlyingTokenDetail[underlyingTokenAddress].symbol,
                 isErc4626: false,
+                underlyingAddress: undefined,
             };
         }
     }

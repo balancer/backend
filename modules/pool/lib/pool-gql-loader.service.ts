@@ -95,22 +95,32 @@ export class PoolGqlLoaderService {
 
     private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion) {
         for (const token of mappedPool.poolTokens) {
-            if (token.isErc4626 && token.underlyingTokenAddress) {
-                const tokenDefinition = await tokenService.getTokenDefinition(
-                    token.underlyingTokenAddress,
-                    mappedPool.chain,
-                );
-                token.underlyingToken = tokenDefinition;
-                mappedPool.displayTokens.push();
+            if (token.isErc4626) {
+                const underlyingTokenAddress = await prisma.prismaToken.findUnique({
+                    where: { address_chain: { address: token.address, chain: mappedPool.chain } },
+                });
+                if (underlyingTokenAddress) {
+                    const tokenDefinition = await tokenService.getTokenDefinition(
+                        underlyingTokenAddress.address,
+                        mappedPool.chain,
+                    );
+                    token.underlyingToken = tokenDefinition;
+                    mappedPool.displayTokens.push();
+                }
             }
             if (token.hasNestedPool) {
                 for (const nestedToken of token.nestedPool!.tokens) {
-                    if (nestedToken.isErc4626 && nestedToken.underlyingTokenAddress) {
-                        const tokenDefinition = await tokenService.getTokenDefinition(
-                            nestedToken.underlyingTokenAddress,
-                            mappedPool.chain,
-                        );
-                        nestedToken.underlyingToken = tokenDefinition;
+                    if (nestedToken.isErc4626) {
+                        const underlyingTokenAddress = await prisma.prismaToken.findUnique({
+                            where: { address_chain: { address: nestedToken.address, chain: mappedPool.chain } },
+                        });
+                        if (underlyingTokenAddress) {
+                            const tokenDefinition = await tokenService.getTokenDefinition(
+                                underlyingTokenAddress.address,
+                                mappedPool.chain,
+                            );
+                            nestedToken.underlyingToken = tokenDefinition;
+                        }
                     }
                 }
             }
