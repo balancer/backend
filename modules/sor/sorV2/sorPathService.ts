@@ -17,7 +17,7 @@ import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './lib/static';
+import { sorGetPathsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';

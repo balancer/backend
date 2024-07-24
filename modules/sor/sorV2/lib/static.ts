@@ -8,7 +8,7 @@ import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
 import { StablePool, WeightedPoolV3 } from './poolsV3';
 
-export async function sorGetSwapsWithPools(
+export async function sorGetPathsWithPools(
     tokenIn: Token,
     tokenOut: Token,
     swapKind: SwapKind,

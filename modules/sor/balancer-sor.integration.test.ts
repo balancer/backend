@@ -3,7 +3,7 @@
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address } from '@balancer/sdk';
 
 import { PathWithAmount } from './sorV2/lib/path';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './sorV2/lib/static';
+import { sorGetPathsWithPools } from './sorV2/lib/static';
 import { getOutputAmount } from './sorV2/lib/utils/helpers';
 import { chainToIdMap } from '../network/network-config';
 
