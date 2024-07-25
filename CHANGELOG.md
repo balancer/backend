@@ -1,5 +1,11 @@
 # backend
 
+## 1.5.3
+
+### Patch Changes
+
+-   22bc735: Update cow-amm subgraphs, add gnosis
+
 ## 1.5.2
 
 ### Patch Changes
