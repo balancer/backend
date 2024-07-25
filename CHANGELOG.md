@@ -1,5 +1,18 @@
 # backend
 
+## 1.5.3
+
+### Patch Changes
+
+-   22bc735: Update cow-amm subgraphs, add gnosis
+
+## 1.5.2
+
+### Patch Changes
+
+-   c31cef8: new cow amm subgraph, fix surplus calc
+-   d72fec7: fix scaling for cow pool data
+
 ## 1.5.1
 
 ### Patch Changes
