@@ -81,7 +81,7 @@ export async function fetchCowAmmData(
         const tokenBalances = balanceResults[pool]?.tokenBalances;
         const tokens =
             poolResults['tokenAddresses']?.map((token) => ({
-                address: token,
+                address: token.toLowerCase(),
                 balance: BigInt(tokenBalances[token]),
             })) ?? [];
         return {

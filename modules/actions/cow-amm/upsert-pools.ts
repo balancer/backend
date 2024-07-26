@@ -40,9 +40,27 @@ export const upsertPools = async (
     });
 
     // Add tokens if any are missing in the DB
-    const poolTokens = pools.map((pool) => pool.tokens).flat();
+    const poolTokens = pools.flatMap((pool) => {
+        return [
+            ...pool.tokens.map((token) => ({
+                address: token.address,
+                decimals: token.decimals,
+                name: token.name,
+                symbol: token.symbol,
+                chain: chain,
+            })),
+            {
+                address: pool.id,
+                decimals: 18,
+                name: pool.name,
+                symbol: pool.symbol,
+                chain: chain,
+            },
+        ];
+    });
+
     const missingTokens = poolTokens.filter(
-        (poolToken) => !allTokens.find((token) => token.address.toLowerCase() === poolToken.address.toLowerCase()),
+        (poolToken) => !allTokens.find((token) => token.address === poolToken.address),
     );
     if (missingTokens.length > 0) {
         await prisma.prismaToken.createMany({
