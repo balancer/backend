@@ -49,7 +49,6 @@ export class StablePool implements BasePoolV3 {
     public tokens: StablePoolToken[];
 
     private readonly tokenMap: Map<string, StablePoolToken>;
-    private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
         const poolTokens: StablePoolToken[] = [];
@@ -111,29 +110,30 @@ export class StablePool implements BasePoolV3 {
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
-        this.tokenIndexMap = new Map(this.tokens.map((token) => [token.token.address, token.index]));
 
         this.tokenPairs = tokenPairs;
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
         const poolState = this.getPoolState();
         const stableV3 = new Stable(poolState);
         return stableV3.getMaxSwapAmount({
             ...poolState,
             swapKind,
-            indexIn: this.tokens.findIndex((t) => t.token.isEqual(tokenIn)),
-            indexOut: this.tokens.findIndex((t) => t.token.isEqual(tokenOut)),
+            indexIn: tIn.index,
+            indexOut: tOut.index,
         });
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
         const vault = new Vault();
         const calculatedAmount = vault.swap(
             {
                 amountRaw: swapAmount.amount,
-                tokenIn: tokenIn.address,
-                tokenOut: tokenOut.address,
+                tokenIn: tIn.token.address,
+                tokenOut: tOut.token.address,
                 swapKind: SwapKind.GivenIn,
             },
             this.getPoolState(),
@@ -142,12 +142,13 @@ export class StablePool implements BasePoolV3 {
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
         const vault = new Vault();
         const calculatedAmount = vault.swap(
             {
                 amountRaw: swapAmount.amount,
-                tokenIn: tokenIn.address,
-                tokenOut: tokenOut.address,
+                tokenIn: tIn.token.address,
+                tokenOut: tOut.token.address,
                 swapKind: SwapKind.GivenOut,
             },
             this.getPoolState(),
@@ -156,13 +157,12 @@ export class StablePool implements BasePoolV3 {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
-            (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
         );
 
         if (tokenPair) {
@@ -183,5 +183,16 @@ export class StablePool implements BasePoolV3 {
             scalingFactors: this.tokens.map((t) => t.scalar * WAD),
             aggregateSwapFee: 0n, // TODO: double check this with John
         };
+    }
+
+    private getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }

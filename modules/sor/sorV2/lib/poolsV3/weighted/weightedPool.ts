@@ -94,7 +94,9 @@ export class WeightedPoolV3 implements BasePoolV3 {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
-            (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
+            (tokenPair) =>
+                (tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address) ||
+                (tokenPair.tokenA === tOut.token.address && tokenPair.tokenB === tIn.token.address),
         );
 
         if (tokenPair) {
@@ -111,8 +113,8 @@ export class WeightedPoolV3 implements BasePoolV3 {
         return weightedV3.getMaxSwapAmount({
             ...poolState,
             swapKind,
-            indexIn: this.tokens.indexOf(tIn),
-            indexOut: this.tokens.indexOf(tOut),
+            indexIn: tIn.index,
+            indexOut: tOut.index,
         });
     }
 
