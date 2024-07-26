@@ -87,6 +87,9 @@ export class WeightedPoolV3 implements BasePoolV3 {
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
+        // add BPT to tokenMap
+        const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
+        this.tokenMap.set(bpt.address, new WeightedPoolToken(bpt, totalShares, WAD, -1));
         this.tokenPairs = tokenPairs;
     }
 
@@ -105,11 +108,26 @@ export class WeightedPoolV3 implements BasePoolV3 {
         return 0n;
     }
 
+    // This method also considers limits on add/remove actions when tOut/tIn are the pool's BPT
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
+        const bptAmount = this.tokenMap.get(this.id) as WeightedPoolToken;
         const poolState = this.getPoolState();
         const weightedV3 = new Weighted(poolState);
+
+        if (tIn.token.isUnderlyingEqual(bptAmount.token)) {
+            return weightedV3.getMaxSingleTokenRemoveAmount(
+                swapKind === SwapKind.GivenIn,
+                poolState.totalSupply,
+                poolState.balancesLiveScaled18[tOut.index],
+                poolState.scalingFactors[tOut.index],
+                poolState.tokenRates[tOut.index],
+            );
+        }
+        if (tOut.token.isUnderlyingEqual(bptAmount.token)) {
+            return weightedV3.getMaxSingleTokenAddAmount();
+        }
+
         return weightedV3.getMaxSwapAmount({
             ...poolState,
             swapKind,

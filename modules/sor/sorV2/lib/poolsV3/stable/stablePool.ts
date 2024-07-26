@@ -110,14 +110,31 @@ export class StablePool implements BasePoolV3 {
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
+        // add BPT to tokenMap
+        const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
+        this.tokenMap.set(bpt.address, new StablePoolToken(bpt, totalShares, WAD, -1));
 
         this.tokenPairs = tokenPairs;
     }
 
+    // This method also considers limits on add/remove actions when tOut/tIn are the pool's BPT
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const bptAmount = this.tokenMap.get(this.id) as StablePoolToken;
         const poolState = this.getPoolState();
         const stableV3 = new Stable(poolState);
+        if (tIn.token.isUnderlyingEqual(bptAmount.token)) {
+            return stableV3.getMaxSingleTokenRemoveAmount(
+                swapKind === SwapKind.GivenIn,
+                poolState.totalSupply,
+                poolState.balancesLiveScaled18[tOut.index],
+                poolState.scalingFactors[tOut.index],
+                poolState.tokenRates[tOut.index],
+            );
+        }
+        if (tOut.token.isUnderlyingEqual(bptAmount.token)) {
+            return stableV3.getMaxSingleTokenAddAmount();
+        }
         return stableV3.getMaxSwapAmount({
             ...poolState,
             swapKind,
