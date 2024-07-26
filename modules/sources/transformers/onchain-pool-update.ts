@@ -26,7 +26,7 @@ export const onchainPoolUpdate = (
             id: `${id}-${tokenData.address.toLowerCase()}`,
             chain: chain,
             balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
-            priceRate: String(tokenData.rate),
+            priceRate: formatEther(tokenData.rate),
             blockNumber: Number(blockNumber),
         })),
     };
