@@ -9,6 +9,7 @@ import {
     PoolController,
     EventController,
 } from '../modules/controllers';
+import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
 
@@ -30,7 +31,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
-        return PoolController().reloadPoolsV3(chain);
+        return PoolController().reloadPoolsV3(chainIdToChain[chain]);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {

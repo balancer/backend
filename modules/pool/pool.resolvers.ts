@@ -4,7 +4,7 @@ import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { EventsQueryController, SnapshotsController } from '../controllers';
+import { EventsQueryController, PoolController, SnapshotsController } from '../controllers';
 import { chainToIdMap } from '../network/network-config';
 
 const balancerResolvers: Resolvers = {
@@ -277,6 +277,15 @@ const balancerResolvers: Resolvers = {
             isAdminRoute(context);
 
             await poolService.deletePool(poolId);
+
+            return 'success';
+        },
+        poolReloadPools: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            for (const chain of chains) {
+                await PoolController().reloadPoolsV3(chain);
+            }
 
             return 'success';
         },

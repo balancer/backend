@@ -6,12 +6,15 @@ import VaultV3Abi from './abis/VaultV3';
 // or can somehow get the correct type infered automatically from the viem's result set?
 type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
 type PoolTokenInfo = [
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][0]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][1]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][2]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][3]>,
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][0]>, // token address array
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][1]>, // tokenInfo (rateprovider etc)
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][2]>, // balancesRaw
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][3]>, // lastLiveBalances
 ];
-
+type PoolTokenRates = [
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][0]>, // decimalScalingFactors
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][1]>, // tokenRates
+];
 export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
@@ -77,7 +80,9 @@ export async function fetchPoolData(
                 ? (results[pointer + 2].result as unknown as PoolTokenInfo)
                 : undefined;
         const poolTokenRates =
-            results[pointer + 3].status === 'success' ? (results[pointer + 3].result as any) : undefined;
+            results[pointer + 3].status === 'success'
+                ? (results[pointer + 3].result as unknown as PoolTokenRates)
+                : undefined;
 
         return [
             pool.toLowerCase(),
@@ -91,7 +96,7 @@ export async function fetchPoolData(
                     balance: poolTokenInfo[2][i],
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
-                    rate: poolTokenRates[i],
+                    rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
                 })),
             },
         ];
