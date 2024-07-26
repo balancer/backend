@@ -19,6 +19,7 @@ fragment CowAmmPool on Pool {
         address
         decimals
         balance
+        weight
     }
 }
 

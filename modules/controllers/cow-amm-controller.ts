@@ -56,7 +56,7 @@ export function CowAmmController(tracer?: any) {
             const chain = chainIdToChain[chainId];
 
             const subgraphClient = getSubgraphClient(chain);
-            const allPools = await subgraphClient.getAllPools({});
+            const allPools = await subgraphClient.getAllPools({ isInitialized: true });
             const viemClient = getViemClient(chain);
 
             await upsertPools(
