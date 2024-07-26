@@ -46,6 +46,7 @@ describe('sor debugging', () => {
         //only do once before starting to debug
         await PoolController().addPoolsV3(chainId);
         await PoolController().syncPoolsV3(chainId);
+        await PoolController().reloadPoolsV3(chain);
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
