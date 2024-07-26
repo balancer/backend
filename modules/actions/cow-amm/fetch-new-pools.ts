@@ -3,7 +3,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 
 export const fetchNewPools = async (subgraphClient: CowAmmSubgraphClient, chain: Chain) => {
-    const subgraphPools = await subgraphClient.getAllPools({});
+    const subgraphPools = await subgraphClient.getAllPools({ isInitialized: true });
 
     const dbPoolIds = await prisma.prismaPool
         .findMany({
