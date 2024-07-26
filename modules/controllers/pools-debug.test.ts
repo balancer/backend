@@ -15,7 +15,7 @@ describe('pool controller debugging', () => {
 
         expect(pools.length).toBe(0);
 
-        await PoolController().reloadPoolsV3('11155111');
+        await PoolController().reloadPoolsV3('SEPOLIA');
 
         pools = await poolService.getGqlPools({ where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] } });
 
@@ -37,7 +37,7 @@ describe('pool controller debugging', () => {
             //only do once before starting to debug
             // await poolService.syncAllPoolsFromSubgraph();
             // await poolService.syncChangedPools();
-            await PoolController().reloadPoolsV3('11155111');
+            await PoolController().reloadPoolsV3('SEPOLIA');
         }, 5000000);
     });
 });
