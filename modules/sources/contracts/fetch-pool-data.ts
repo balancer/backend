@@ -96,7 +96,7 @@ export async function fetchPoolData(
                     balance: poolTokenInfo[2][i],
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
-                    rate: poolTokenRates ? poolTokenRates[0][i] : 1000000000000000000n,
+                    rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
                 })),
             },
         ];

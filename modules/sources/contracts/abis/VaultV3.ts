@@ -3204,6 +3204,7 @@ export default [
                                 name: 'enableRemoveLiquidityCustom',
                                 type: 'bool',
                             },
+                            { internalType: 'bool', name: 'enableDonation', type: 'bool' },
                         ],
                         internalType: 'struct LiquidityManagement',
                         name: 'liquidityManagement',

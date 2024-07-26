@@ -31,4 +31,13 @@ describe('pool controller debugging', () => {
         await CowAmmController().updateVolumeAndFees('1');
         await CowAmmController().updateSurplusAprs();
     }, 5000000);
+
+    describe('pool debugging', () => {
+        it('reload pools', async () => {
+            //only do once before starting to debug
+            // await poolService.syncAllPoolsFromSubgraph();
+            // await poolService.syncChangedPools();
+            await PoolController().reloadPoolsV3('11155111');
+        }, 5000000);
+    });
 });
