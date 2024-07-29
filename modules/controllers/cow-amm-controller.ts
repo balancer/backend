@@ -15,6 +15,7 @@ import {
 } from '../actions/cow-amm';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
+import moment from 'moment';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -160,8 +161,18 @@ export function CowAmmController(tracer?: any) {
         async syncSnapshots(chainId: string) {
             const chain = chainIdToChain[chainId];
             const subgraphClient = getSubgraphClient(chain);
-            const entries = await syncSnapshots(subgraphClient, chain);
-            return entries;
+            const timestamp = await syncSnapshots(subgraphClient, chain);
+            return timestamp;
+        },
+        async syncAllSnapshots(chainId: string) {
+            // Run in loop until we end up at todays snapshot (also sync todays)
+            let allSnapshotsSynced = false;
+            let timestamp = 0;
+            while (!allSnapshotsSynced) {
+                timestamp = await CowAmmController().syncSnapshots(chainId);
+                allSnapshotsSynced = timestamp === moment().utc().startOf('day').unix();
+            }
+            return timestamp;
         },
         async syncJoinExits(chainId: string) {
             const chain = chainIdToChain[chainId];
