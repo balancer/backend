@@ -26,9 +26,11 @@ export class PathGraph {
     public buildGraph({
         pools,
         maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
+        enableAddRemoveLiquidityPaths,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
+        enableAddRemoveLiquidityPaths: boolean;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
@@ -37,9 +39,9 @@ export class PathGraph {
 
         this.buildPoolAddressMap(pools);
 
-        this.addAllTokensAsGraphNodes(pools);
+        this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
 
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
+        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, enableAddRemoveLiquidityPaths });
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -168,12 +170,18 @@ export class PathGraph {
         }
     }
 
-    private addAllTokensAsGraphNodes(pools: BasePool[]) {
+    private addAllTokensAsGraphNodes({
+        pools,
+        enableAddRemoveLiquidityPaths,
+    }: {
+        pools: BasePool[];
+        enableAddRemoveLiquidityPaths: boolean;
+    }) {
         for (const pool of pools) {
-            const tokens = [
-                ...pool.tokens.map((t) => t.token),
-                new Token(pool.tokens[0].token.chainId, pool.address as Address, 18), // Add BPT as token nodes
-            ];
+            const tokens = [...pool.tokens.map((t) => t.token)];
+            if (enableAddRemoveLiquidityPaths) {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+            }
             for (const token of tokens) {
                 if (!this.nodes.has(token.wrapped)) {
                     this.addNode(token);
@@ -185,15 +193,17 @@ export class PathGraph {
     private addTokenPairsAsGraphEdges({
         pools,
         maxPathsPerTokenPair,
+        enableAddRemoveLiquidityPaths,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
+        enableAddRemoveLiquidityPaths: boolean;
     }) {
         for (const pool of pools) {
-            const tokens = [
-                ...pool.tokens.map((t) => t.token),
-                new Token(pool.tokens[0].token.chainId, pool.address as Address, 18), // Consider BPT when generating token edges
-            ];
+            const tokens = [...pool.tokens.map((t) => t.token)];
+            if (enableAddRemoveLiquidityPaths) {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+            }
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
                     if (tokenIn === tokenOut) continue;

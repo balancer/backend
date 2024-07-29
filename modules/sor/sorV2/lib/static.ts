@@ -61,7 +61,13 @@ export async function sorGetPathsWithPools(
 
     const router = new Router();
 
-    const candidatePaths = router.getCandidatePaths(tokenIn, tokenOut, basePools, swapOptions?.graphTraversalConfig);
+    const candidatePaths = router.getCandidatePaths(
+        tokenIn,
+        tokenOut,
+        basePools,
+        prismaPools[0].protocolVersion === 3,
+        swapOptions?.graphTraversalConfig,
+    );
 
     if (candidatePaths.length === 0) return null;
 
