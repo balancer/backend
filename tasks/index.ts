@@ -1,3 +1,5 @@
+import moment from 'moment';
+import { daysAgo } from '../modules/common/time';
 import {
     JobsController,
     SnapshotsController,
@@ -9,6 +11,7 @@ import {
     PoolController,
     EventController,
 } from '../modules/controllers';
+import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
 
@@ -30,7 +33,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
-        return PoolController().reloadPoolsV3(chain);
+        return PoolController().reloadPoolsV3(chainIdToChain[chain]);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {
@@ -66,16 +69,17 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     } else if (job === 'sync-cow-amm-pools') {
         return CowAmmController().syncPools(chain);
     } else if (job === 'reload-cow-amm-pools') {
-        return CowAmmController().reloadPools(chain);
+        return CowAmmController().reloadPools(chainIdToChain[chain]);
     } else if (job === 'sync-cow-amm-snapshots') {
         return CowAmmController().syncSnapshots(chain);
     } else if (job === 'sync-all-cow-amm-snapshots') {
-        // Run in loop until no new snapshots are returned
-        let run = true;
-        while (run === true) {
-            run = !!(await CowAmmController().syncSnapshots(chain)).length;
+        // Run in loop until we end up at todays snapshot (also sync todays)
+        let allSnapshotsSynced = false;
+        while (!allSnapshotsSynced) {
+            allSnapshotsSynced =
+                (await CowAmmController().syncSnapshots(chain)) === moment().utc().startOf('day').unix();
         }
-        return run;
+        return allSnapshotsSynced;
     } else if (job === 'sync-cow-amm-swaps') {
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'update-com-amm-volume-and-fees') {

@@ -11,6 +11,7 @@ import { getVaultClient } from '../sources/contracts';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
+import { Chain } from '@prisma/client';
 
 export function PoolController() {
     return {
@@ -57,8 +58,7 @@ export function PoolController() {
          *
          * @param chainId
          */
-        async reloadPoolsV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async reloadPoolsV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
                 balancer: {
