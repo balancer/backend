@@ -1,4 +1,4 @@
-import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
@@ -170,9 +170,11 @@ export class PathGraph {
 
     private addAllTokensAsGraphNodes(pools: BasePool[]) {
         for (const pool of pools) {
-            for (const tokenAmount of pool.tokens) {
-                const token = tokenAmount.token;
-
+            const tokens = [
+                ...pool.tokens.map((t) => t.token),
+                new Token(pool.tokens[0].token.chainId, pool.address as Address, 18), // Add BPT as token nodes
+            ];
+            for (const token of tokens) {
                 if (!this.nodes.has(token.wrapped)) {
                     this.addNode(token);
                 }
@@ -267,6 +269,8 @@ export class PathGraph {
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
+        // TODO: double check if the hasPhantomBpt issue is not affecting v3 liquidity more frequently (considering all
+        // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
             sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
