@@ -7,6 +7,7 @@ import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { Chain } from '@prisma/client';
 import { parseAbiItem } from 'abitype';
 import { getViemClient } from '../../../sources/viem-client';
+import { CHAINS } from '@balancer/sdk';
 
 const aaveTokens = {
     [Chain.MAINNET]: [
@@ -145,6 +146,20 @@ const aaveTokens = {
             wrappedToken: '0x4ea71a20e655794051d1ee8b6e4a3269b13ccacc',
             aToken: '0x4e65fe4dba92790696d040ac24aa414708f5c0ab ',
             underlying: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+        },
+    ],
+    [Chain.SEPOLIA]: [
+        {
+            // Static Aave USDC
+            wrappedToken: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+            aToken: '0x16da4541ad1807f4443d92d26044c1147406eb80',
+            underlying: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
+        },
+        {
+            // Static Aave DAI
+            wrappedToken: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
+            aToken: '0x29598b72eb5cebd806c5dcd549490fda35b13cd8',
+            underlying: '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357',
         },
     ],
 };
