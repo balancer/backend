@@ -52,9 +52,7 @@ export function CowAmmController(tracer?: any) {
          *
          * @param chainId
          */
-        async reloadPools(chainId: string) {
-            const chain = chainIdToChain[chainId];
-
+        async reloadPools(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);
             const allPools = await subgraphClient.getAllPools({ isInitialized: true });
             const viemClient = getViemClient(chain);
