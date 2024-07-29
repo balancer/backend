@@ -1,5 +1,11 @@
 # backend
 
+## 1.5.5
+
+### Patch Changes
+
+-   3f08512: subgraph patch
+
 ## 1.5.4
 
 ### Patch Changes
