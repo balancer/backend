@@ -16,7 +16,7 @@ import { getVaultClient } from '../sources/contracts';
  * @param chain - the chain to run the job on
  * @returns a controller with configured job handlers
  */
-export function PoolsMutationController(tracer?: any) {
+export function PoolMutationController(tracer?: any) {
     // Setup tracing
     // ...
     return {

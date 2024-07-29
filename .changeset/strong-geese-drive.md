@@ -2,4 +2,4 @@
 'backend': patch
 ---
 
-fix initial cow amm sync
+Fix cow user balances

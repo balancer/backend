@@ -1,5 +1,5 @@
 import { syncPools } from '../actions/pool/sync-pools';
-import { JobsController } from './jobs-controller';
+import { PoolController } from '../controllers/pool-controller'; // Add this import statement
 
 // Mock the action
 jest.mock('../actions/pool/sync-pools', () => ({
@@ -13,15 +13,13 @@ jest.mock('../sources/viem-client', () => ({
     }),
 }));
 
-describe('jobsController', () => {
-    const jobsController = JobsController();
-
+describe('poolController', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     it('should call syncPools', async () => {
-        await jobsController.syncPools('11155111');
+        await PoolController().syncPoolsV3('11155111');
 
         expect(syncPools).toHaveBeenCalled();
     });

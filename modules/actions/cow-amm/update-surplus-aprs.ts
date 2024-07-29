@@ -29,7 +29,10 @@ export const updateSurplusAPRs = async () => {
         title: `Surplus APR`,
         chain: pool.chain,
         poolId: pool.id,
-        apr: (pool.dynamicData.surplus24h * 365) / pool.dynamicData.totalLiquidity / 100,
+        apr:
+            pool.dynamicData.surplus24h === 0
+                ? 0
+                : (pool.dynamicData.surplus24h * 365) / pool.dynamicData.totalLiquidity / 100,
     }));
 
     await prisma.$transaction([
