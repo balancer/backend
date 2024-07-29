@@ -46,12 +46,14 @@ export function PoolController() {
             const vaultClient = getVaultClient(viemClient, vaultAddress);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(
+            const added = await upsertPools(
                 newPools.sort((a, b) => parseFloat(a.blockTimestamp) - parseFloat(b.blockTimestamp)),
                 vaultClient,
                 chain,
                 latestBlock,
             );
+
+            return added.map(({ id }) => id);
         },
         /**
          * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
@@ -78,13 +80,10 @@ export function PoolController() {
             const vaultClient = getVaultClient(viemClient, vaultAddress);
             const latestBlock = await viemClient.getBlockNumber();
 
-            await upsertPools(allPools, vaultClient, chain, latestBlock);
-            await syncPools(
-                allPools.map((pool) => pool.id),
-                vaultClient,
-                chain,
-                latestBlock,
-            );
+            const pools = await upsertPools(allPools, vaultClient, chain, latestBlock);
+            await syncPools(pools, viemClient, vaultAddress, chain, latestBlock);
+
+            return pools.map(({ id }) => id);
         },
         /**
          * Syncs database pools state with the onchain state
@@ -120,20 +119,25 @@ export function PoolController() {
             }
 
             const pools = await prisma.prismaPool.findMany({
-                where: { chain },
+                where: { chain, protocolVersion: 3 },
             });
-            const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
-            const vaultClient = getVaultClient(viemClient, vaultAddress);
 
             const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
-            const ids = changedPools.filter((id) => dbIds.includes(id.toLowerCase())); // only sync pools that are in the database
-            if (ids.length === 0) {
+            const changedPoolsIds = changedPools.map((id) => id.toLowerCase());
+            const poolsToSync = pools.filter((pool) => changedPoolsIds.includes(pool.id.toLowerCase())); // only sync pools that are in the database
+            if (poolsToSync.length === 0) {
                 return [];
             }
-            await syncPools(ids, vaultClient, chain, latestBlock);
-            await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            return ids;
+            await syncPools(poolsToSync, viemClient, vaultAddress, chain, latestBlock);
+            await syncTokenPairs(
+                poolsToSync.map(({ id }) => id),
+                viemClient,
+                routerAddress,
+                chain,
+            );
+
+            return poolsToSync.map(({ id }) => id);
         },
         async updateLiquidity24hAgo(chainId: string) {
             const chain = chainIdToChain[chainId];
