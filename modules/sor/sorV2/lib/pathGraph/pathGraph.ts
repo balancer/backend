@@ -190,27 +190,19 @@ export class PathGraph {
         maxPathsPerTokenPair: number;
     }) {
         for (const pool of pools) {
-            for (let i = 0; i < pool.tokens.length - 1; i++) {
-                for (let j = i + 1; j < pool.tokens.length; j++) {
-                    const tokenI = pool.tokens[i].token;
-                    const tokenJ = pool.tokens[j].token;
-
+            const tokens = [
+                ...pool.tokens.map((t) => t.token),
+                new Token(pool.tokens[0].token.chainId, pool.address as Address, 18), // Consider BPT when generating token edges
+            ];
+            for (const tokenIn of tokens) {
+                for (const tokenOut of tokens) {
+                    if (tokenIn === tokenOut) continue;
                     this.addEdge({
                         edgeProps: {
                             pool,
-                            tokenIn: tokenI,
-                            tokenOut: tokenJ,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                        },
-                        maxPathsPerTokenPair,
-                    });
-
-                    this.addEdge({
-                        edgeProps: {
-                            pool,
-                            tokenIn: tokenJ,
-                            tokenOut: tokenI,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenJ, tokenI),
+                            tokenIn,
+                            tokenOut,
+                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
                         },
                         maxPathsPerTokenPair,
                     });
