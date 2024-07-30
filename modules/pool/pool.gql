@@ -96,7 +96,30 @@ extend type Mutation {
     poolBlackListRemovePool(poolId: String!): String!
     poolDeletePool(poolId: String!): String!
     poolInitOnChainDataForAllPools: String!
-    poolReloadPools(chains: [GqlChain!]!): String!
+    poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
+    poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
+}
+
+"""
+Result of the poolReloadPools mutation
+"""
+type GqlPoolMutationResult {
+    """
+    The type of pools that were reloaded.
+    """
+    type: String!
+    """
+    The chain that was reloaded.
+    """
+    chain: GqlChain!
+    """
+    Whether it was successful or not.
+    """
+    success: Boolean!
+    """
+    The error message
+    """
+    error: String
 }
 
 """
