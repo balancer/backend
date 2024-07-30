@@ -7,7 +7,6 @@ import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { Chain } from '@prisma/client';
 import { parseAbiItem } from 'abitype';
 import { getViemClient } from '../../../sources/viem-client';
-import { CHAINS } from '@balancer/sdk';
 
 const aaveTokens = {
     [Chain.MAINNET]: [
@@ -217,14 +216,18 @@ export class AavePriceHandlerService implements TokenPriceHandler {
                 if (!underlying) {
                     throw new Error(`AavePriceHandlerService: Underlying token for ${token.address} not found`);
                 }
-                const price = Number((rateMap[token.address] * underlyingMap[underlying].price).toFixed(2));
+                try {
+                    const price = Number((rateMap[token.address] * underlyingMap[underlying].price).toFixed(2));
 
-                updatedTokens.push(token);
-                tokenAndPrices.push({
-                    address: token.address,
-                    chain: token.chain,
-                    price,
-                });
+                    updatedTokens.push(token);
+                    tokenAndPrices.push({
+                        address: token.address,
+                        chain: token.chain,
+                        price,
+                    });
+                } catch (e: any) {
+                    console.error('Aave price failed for', token.address, chain, e.message);
+                }
             }
         }
 
