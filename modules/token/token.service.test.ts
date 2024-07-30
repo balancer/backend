@@ -11,10 +11,10 @@ describe('Token service', () => {
 
     test('update prices', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '10');
+        setRequestScopedContextValue('chainId', '11155111');
 
         await tokenService.syncTokenContentData();
-        await tokenService.updateTokenPrices(['OPTIMISM']);
+        await tokenService.updateTokenPrices(['SEPOLIA']);
     }, 500000);
 
     test('sync tokens from pool tokens', async () => {

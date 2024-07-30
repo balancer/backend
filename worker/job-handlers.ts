@@ -469,6 +469,7 @@ export function configureWorkerRoutes(app: Express) {
                 break;
             case 'sync-merkl':
                 await runIfNotAlreadyRunning(job.name, chainId, () => AprsController().syncMerkl(), res, next);
+                break;
             case 'sync-categories':
                 await runIfNotAlreadyRunning(job.name, chainId, () => ContentController().syncCategories(), res, next);
                 break;

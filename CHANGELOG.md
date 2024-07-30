@@ -1,5 +1,22 @@
 # backend
 
+## 1.5.5
+
+### Patch Changes
+
+-   3f08512: subgraph patch
+
+## 1.5.4
+
+### Patch Changes
+
+-   5c02fa1: new cow-subgraphs, add weights to cow-pools, add reload mutation
+-   0959978: fix snapshot loading for cow
+-   ede18b9: fixed double execution of the merkl job
+-   6a8d02e: add aave wrapped tokens to sepolia handler
+-   fec4cac: Fix cow user balances
+-   975e058: fix token rate and config sync for v3, add reload mutation
+
 ## 1.5.3
 
 ### Patch Changes
