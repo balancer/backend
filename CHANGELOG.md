@@ -1,5 +1,15 @@
 # backend
 
+## 1.6.0
+
+### Minor Changes
+
+-   f9d50e4: syncing holders could on changed cow-amm pools
+
+### Patch Changes
+
+-   5f6fd67: handle failing aave pricing
+
 ## 1.5.5
 
 ### Patch Changes
