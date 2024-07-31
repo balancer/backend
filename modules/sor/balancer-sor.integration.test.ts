@@ -8,8 +8,12 @@ import { getOutputAmount } from './sorV2/lib/utils/helpers';
 import { chainToIdMap } from '../network/network-config';
 
 import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../test/anvil/anvil-global-setup';
-import { prismaPoolTokenDynamicDataFactory, prismaPoolTokenFactory } from '../../test/factories/prismaToken.factory';
-import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../test/factories/prismaPool.factory';
+import {
+    prismaPoolDynamicDataFactory,
+    prismaPoolFactory,
+    prismaPoolTokenDynamicDataFactory,
+    prismaPoolTokenFactory,
+} from '../../test/factories';
 
 describe('Balancer SOR Integration Tests', () => {
     let rpcUrl: string;
