@@ -30,7 +30,7 @@ export const updateSurplusAPRs = async () => {
         chain: pool.chain,
         poolId: pool.id,
         apr:
-            pool.dynamicData.surplus24h === 0
+            pool.dynamicData.surplus24h <= 0 || pool.dynamicData.totalLiquidity === 0
                 ? 0
                 : (pool.dynamicData.surplus24h * 365) / pool.dynamicData.totalLiquidity / 100,
     }));
