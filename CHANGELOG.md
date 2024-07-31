@@ -1,5 +1,12 @@
 # backend
 
+## 1.6.2
+
+### Patch Changes
+
+-   07fcf6a: fixed surplus APR calculation
+-   a72b08f: move rpcs from infura to alchemy
+
 ## 1.6.1
 
 ### Patch Changes
