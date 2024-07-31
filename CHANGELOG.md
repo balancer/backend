@@ -1,5 +1,11 @@
 # backend
 
+## 1.6.1
+
+### Patch Changes
+
+-   0627776: fixed sdai yield on fraxtal
+
 ## 1.6.0
 
 ### Minor Changes
