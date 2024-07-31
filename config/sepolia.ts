@@ -37,8 +37,6 @@ export default <NetworkData>{
     },
     rpcUrl: env.ALCHEMY_API_KEY
         ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.INFURA_API_KEY
-        ? `https://sepolia.infura.io/v3/${env.INFURA_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',

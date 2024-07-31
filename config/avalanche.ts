@@ -33,8 +33,8 @@ export default <NetworkData>{
         platformId: 'avalanche',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.INFURA_API_KEY
-        ? `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://avax-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : 'https://rpc.ankr.com/avalanche',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
