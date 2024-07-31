@@ -72,6 +72,12 @@ export default <NetworkData>{
                 path: 'data.smaApr',
                 isIbYield: true,
             },
+            rETH: {
+                tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
+                path: 'rethAPR',
+                isIbYield: true,
+            },
         },
     },
     gyro: {
