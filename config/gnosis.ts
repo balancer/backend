@@ -34,12 +34,9 @@ export default <NetworkData>{
         platformId: 'xdai',
         excludedTokenAddresses: [],
     },
-    rpcUrl:
-        env.GATEWAYFM_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.eu-central-2.gateway.fm/v4/gnosis/archival/mainnet?apiKey=${env.GATEWAYFM_API_KEY}`
-            : env.GROVE_CITY
-            ? `https://gnosischain-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
-            : 'https://gnosis.drpc.org',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://gnosis-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {

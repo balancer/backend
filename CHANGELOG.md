@@ -1,5 +1,28 @@
 # backend
 
+## 1.6.2
+
+### Patch Changes
+
+-   07fcf6a: fixed surplus APR calculation
+-   a72b08f: move rpcs from infura to alchemy
+
+## 1.6.1
+
+### Patch Changes
+
+-   0627776: fixed sdai yield on fraxtal
+
+## 1.6.0
+
+### Minor Changes
+
+-   f9d50e4: syncing holders could on changed cow-amm pools
+
+### Patch Changes
+
+-   5f6fd67: handle failing aave pricing
+
 ## 1.5.5
 
 ### Patch Changes

@@ -33,7 +33,9 @@ export default <NetworkData>{
         platformId: 'base',
         excludedTokenAddresses: [],
     },
-    rpcUrl: 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://base-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 500,
     protocolToken: 'bal',
     bal: {
