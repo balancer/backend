@@ -76,6 +76,12 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
+        maker: {
+            sdai: '0xaf204776c7245bf4147c2612bf6e5972ee483701',
+        },
+        stakewisegno: {
+            osgno: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
+        },
     },
     gyro: {
         config: '0x00a2a9bbd352ab46274433faa9fec35fe3abb4a8',
