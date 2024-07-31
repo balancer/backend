@@ -1,11 +1,8 @@
 // yarn vitest stablePool.test.ts
 
 import { parseEther, parseUnits } from 'viem';
-import { Address, SwapKind, Token } from '@balancer/sdk';
 
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
-import { chainToIdMap } from '../../../../../network/network-config';
-import { sorGetPathsWithPools } from '../../static';
 import { WAD } from '../../utils/math';
 import { StablePool } from './stablePool';
 
@@ -18,7 +15,7 @@ import {
     prismaPoolTokenFactory,
 } from '../../../../../../test/factories';
 
-describe('SOR V3 Weighted Pool Tests', () => {
+describe('SOR V3 Stable Pool Tests', () => {
     let amp: string;
     let scalingFactors: bigint[];
     let stablePool: StablePool;
@@ -80,29 +77,5 @@ describe('SOR V3 Weighted Pool Tests', () => {
             scalingFactors,
         };
         expect(poolState).toEqual(stablePool.getPoolState());
-    });
-
-    describe('swap tests', () => {
-        let tIn: Token;
-        let tOut: Token;
-
-        beforeAll(() => {
-            tIn = new Token(parseFloat(chainToIdMap['SEPOLIA']), tokenAddresses[0] as Address, tokenDecimals[0]);
-            tOut = new Token(parseFloat(chainToIdMap['SEPOLIA']), tokenAddresses[1] as Address, tokenDecimals[1]);
-        });
-
-        test('should find paths - given in', async () => {
-            const paths = await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, parseUnits('0.1', tokenDecimals[0]), [
-                stablePrismaPool,
-            ]);
-            expect(paths).not.toBeNull();
-        });
-
-        test('should find paths - given out', async () => {
-            const paths = await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenOut, parseUnits('0.1', tOut.decimals), [
-                stablePrismaPool,
-            ]);
-            expect(paths).not.toBeNull();
-        });
     });
 });

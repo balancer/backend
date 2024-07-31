@@ -59,7 +59,7 @@ export default <NetworkData>{
     },
     ybAprConfig: {
         maker: {
-            sdai: '0x09eadcbaa812a4c076c3a6cde765dC4a22e0d775',
+            sdai: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
         },
         defaultHandlers: {
             sfrxETH: {
