@@ -1,5 +1,11 @@
 # backend
 
+## 1.6.3
+
+### Patch Changes
+
+-   72cc583: add weETH APR on Arb and rETH APR on Gnosis
+
 ## 1.6.2
 
 ### Patch Changes
