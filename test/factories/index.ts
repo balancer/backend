@@ -3,3 +3,4 @@ export * from './pool_token.factory';
 export * from './prismaPool.factory';
 export * from './prismaPoolDynamicData.factory';
 export * from './prismaToken.factory';
+export * as SOR from './sor';
