@@ -15,7 +15,7 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
         case PoolType.Stable:
             type = PrismaPoolType.STABLE;
             typeData = {
-                amp: '10', // TODO just a place holder
+                amp: poolData.amp,
             } as StableData;
             break;
         case 'COW_AMM':

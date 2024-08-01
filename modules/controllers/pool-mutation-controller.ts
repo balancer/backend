@@ -51,14 +51,13 @@ export function PoolMutationController(tracer?: any) {
             }
 
             const pools = await prisma.prismaPool.findMany({
-                where: { chain },
+                where: { chain, protocolVersion: 3 },
             });
             const dbIds = pools.map((pool) => pool.id.toLowerCase());
             const viemClient = getViemClient(chain);
-            const vaultClient = getVaultClient(viemClient, vaultAddress);
             const blockNumber = await viemClient.getBlockNumber();
 
-            await syncPools(dbIds, vaultClient, chain, blockNumber);
+            await syncPools(pools, viemClient, vaultAddress, chain, blockNumber);
             await syncTokenPairs(dbIds, viemClient, routerAddress, chain);
             return dbIds;
         },

@@ -1,23 +1,15 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { onchainPoolUpdate } from '../../sources/transformers/onchain-pool-update';
 import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
-import type { VaultClient } from '../../sources/contracts';
+import { type VaultClient, getVaultClient, getPoolsClient } from '../../sources/contracts';
+import { syncDynamicTypeDataForPools } from './type-data-v3/sync-dynamic-type-data-for-pools';
+import { ViemClient } from '../../sources/viem-client';
 
-/**
- * Gets and syncs all the pools state with the database
- *
- * TODO: simplify the schema by merging the pool and poolDynamicData tables and the poolToken, poolTokenDynamicData, expandedToken tables
- *
- * @param ids - The pool ids to sync
- * @param vaultClient
- * @param chain
- * @param blockNumber
- */
-export const syncPools = async (
-    ids: string[],
+const syncVaultData = async (
     vaultClient: VaultClient,
     chain = 'SEPOLIA' as Chain,
+    ids: string[],
     blockNumber: bigint,
 ) => {
     // Enrich with onchain data for all the pools
@@ -68,4 +60,31 @@ export const syncPools = async (
     }
 
     return ids;
+};
+
+/**
+ * Gets and syncs all the pools state with the database
+ *
+ * TODO: simplify the schema by merging the pool and poolDynamicData tables and the poolToken, poolTokenDynamicData, expandedToken tables
+ *
+ * @param pools - The pools to sync
+ * @param viemClient
+ * @param vaultAddress
+ * @param chain
+ * @param blockNumber
+ */
+export const syncPools = async (
+    pools: {id: string, type: PrismaPoolType}[],
+    client: ViemClient,
+    vaultAddress: string,
+    chain = 'SEPOLIA' as Chain,
+    blockNumber: bigint,
+) => {
+    const vaultClient = getVaultClient(client, vaultAddress);
+    const poolsClient = getPoolsClient(client);
+
+    await syncVaultData(vaultClient, chain, pools.map(({id}) => id), blockNumber);
+    await syncDynamicTypeDataForPools(poolsClient, pools, blockNumber);
+
+    return pools.map(({id}) => id);
 };
