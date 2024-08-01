@@ -158,6 +158,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar * WAD),
+            aggregateSwapFee: 0n, // TODO: double check this with John
         };
     }
 
