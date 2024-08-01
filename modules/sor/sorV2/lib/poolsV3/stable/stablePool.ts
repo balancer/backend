@@ -125,13 +125,13 @@ export class StablePool implements BasePoolV3 {
 
         // remove liquidity
         if (tIn.token.isSameAddress(this.id)) {
-            return stableV3.getMaxSingleTokenRemoveAmount(
-                swapKind === SwapKind.GivenIn,
-                poolState.totalSupply,
-                poolState.balancesLiveScaled18[tOut.index],
-                poolState.scalingFactors[tOut.index],
-                poolState.tokenRates[tOut.index],
-            );
+            return stableV3.getMaxSingleTokenRemoveAmount({
+                isExactIn: swapKind === SwapKind.GivenIn,
+                totalSupply: poolState.totalSupply,
+                tokenOutBalance: poolState.balancesLiveScaled18[tOut.index],
+                tokenOutScalingFactor: poolState.scalingFactors[tOut.index],
+                tokenOutRate: poolState.tokenRates[tOut.index],
+            });
         }
         // add liquidity
         if (tOut.token.isSameAddress(this.id)) {
