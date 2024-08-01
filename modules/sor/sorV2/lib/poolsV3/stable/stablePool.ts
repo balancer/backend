@@ -181,7 +181,7 @@ export class StablePool implements BasePoolV3 {
             amp: this.amp,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar * WAD),
-            aggregateSwapFee: 0n, // TODO: double check this with John
+            aggregateSwapFee: 0n,
         };
     }
 }

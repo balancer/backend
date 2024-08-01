@@ -48,7 +48,6 @@ export class SorService {
             return emptyResponse;
         }
 
-        // TODO: check with Franz if this is correct - AND/OR mismatch on comments and code
         // we return an empty response if tokenIn and tokenOut are the same
         // also if tokenIn and tokenOut is weth/eth
         if (
