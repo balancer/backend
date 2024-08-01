@@ -96,6 +96,7 @@ describe('Balancer SOR Integration Tests', () => {
                 token: { decimals: 6 },
                 dynamicData: prismaPoolTokenDynamicDataFactory.build({
                     balance: '500',
+                    priceRate: '1.044655414868827618',
                 }),
             });
             const DAI = prismaPoolTokenFactory.build({
@@ -103,6 +104,7 @@ describe('Balancer SOR Integration Tests', () => {
                 token: { decimals: 18 },
                 dynamicData: prismaPoolTokenDynamicDataFactory.build({
                     balance: '500',
+                    priceRate: '1.100156688406029263',
                 }),
             });
             const prismaStablePool = prismaPoolFactory.stable('1000').build({
