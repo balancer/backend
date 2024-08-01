@@ -2446,10 +2446,10 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
-"@balancer-labs/balancer-maths@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@balancer-labs/balancer-maths/-/balancer-maths-0.0.7.tgz#be4d961f4d3ab9f3b926589ced4425672f055d0f"
-  integrity sha512-ooclzJJDcqwb4u01q9jtKGllgtRJxMkYiC/TjKYWMVEJGC8z+6LbFsOr2V/fDPMKT5cIK22YiB8EOYNVcdOYmA==
+"@balancer-labs/balancer-maths@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/balancer-maths/-/balancer-maths-0.0.8.tgz#0bca1eb93dae1d8401bbfac3307271ff5bc86764"
+  integrity sha512-pUYyNn/APbCgyzq+Nbi5xnkWALovoeHez9pCX3jOgAW6OgPGjZ7F/pps4iXvv5vtDhEW2FdiL+WTjZRwzQZt1A==
 
 "@balancer-labs/sdk@github:beethovenxfi/balancer-sdk#beethovenx-master":
   version "0.1.1"
