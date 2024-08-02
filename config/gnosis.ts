@@ -17,7 +17,7 @@ export default <NetworkData>{
         blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme9hQY1NZ8ReVDSSQb893s2fGpeLkgfwXd3YU5rndACaP`,
         aura: 'https://data.aura.finance/graphql',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcCLUtZXzfymZipKM1AZhb5oLgn2CQbAM8iU8czZ1xtqc`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVAZTFvvkCkkBvXQ2mrJfnW349UVSHJdgwA1u7QYau6iw`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -70,6 +70,12 @@ export default <NetworkData>{
                 tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                 path: 'data.smaApr',
+                isIbYield: true,
+            },
+            rETH: {
+                tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
+                path: 'rethAPR',
                 isIbYield: true,
             },
         },
