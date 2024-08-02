@@ -150,7 +150,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             const { amountsOut } = vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOut: Array(poolState.tokens.length).fill(0n),
+                    minAmountsOut: poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
                     maxBptAmountIn: swapAmount.amount,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
@@ -206,11 +206,10 @@ export class WeightedPoolV3 implements BasePoolV3 {
             calculatedAmount = bptAmountIn;
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const maxAmountsIn = poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n));
             const { amountsIn } = vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsIn,
+                    maxAmountsIn: poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
                     minBptAmountOut: swapAmount.amount,
                     kind: AddKind.SINGLE_TOKEN_EXACT_OUT,
                 },
