@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { env } from '../app/env';
+import { syncReliquaryStakingForPools } from '../modules/actions/pool/staking';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 const underlyingTokens = {
@@ -236,8 +237,15 @@ export default <NetworkData>{
                 },
             },
         },
-        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        },
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+        maple: {
+            url: 'https://api.maple.finance/v2/graphql',
+            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {
