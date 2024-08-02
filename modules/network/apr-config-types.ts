@@ -17,6 +17,10 @@ export interface YbAprConfig {
         url: string;
         token: string;
     };
+    maple?: {
+        url: string;
+        token: string;
+    };
     etherfi?: string;
     sveth?: boolean;
     defaultHandlers?: DefaultHandlerAprConfig;

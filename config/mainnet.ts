@@ -242,7 +242,10 @@ export default <NetworkData>{
             token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
         },
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
-        mapleSyrup: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        maple: {
+            url: 'https://api.maple.finance/v2/graphql',
+            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {
