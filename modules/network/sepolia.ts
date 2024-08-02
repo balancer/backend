@@ -64,6 +64,10 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'sync-snapshots-v3',
             interval: every(12, 'hours'),
         },
+        {
+            name: 'sync-tokens-from-pool-tokens',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+        },
         // COW AMM
         { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
         {

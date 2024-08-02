@@ -22,12 +22,13 @@ export const onchainPoolUpdate = (
             blockNumber: Number(blockNumber),
             swapFee: String(onchainPoolData.swapFee ?? '0'),
         },
-        poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
-            id: `${id}-${tokenData.address.toLowerCase()}`,
-            chain: chain,
-            balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
-            priceRate: formatEther(tokenData.rate),
-            blockNumber: Number(blockNumber),
-        })),
+        poolTokenDynamicData:
+            onchainPoolData.tokens?.map((tokenData) => ({
+                id: `${id}-${tokenData.address.toLowerCase()}`,
+                chain: chain,
+                balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
+                priceRate: formatEther(tokenData.rate),
+                blockNumber: Number(blockNumber),
+            })) || [],
     };
 };
