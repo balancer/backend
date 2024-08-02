@@ -13,7 +13,10 @@ export interface YbAprConfig {
     tetu?: TetuAprConfig;
     tranchess?: TranchessAprConfig;
     yearn?: YearnAprConfig;
-    stakewise?: string;
+    stakewise?: {
+        url: string;
+        token: string;
+    };
     etherfi?: string;
     sveth?: boolean;
     defaultHandlers?: DefaultHandlerAprConfig;
