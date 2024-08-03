@@ -15,5 +15,6 @@ export * from './maker-apr-handler';
 export * as MakerGnosis from './maker-gnosis-apr-handler';
 export * from './bloom-apr-handler';
 export * from './stakewise-apr-handler';
+export * from './maple-apr-handler';
 export * from './etherfi-apr-handler';
 export * from './sv-eth';
