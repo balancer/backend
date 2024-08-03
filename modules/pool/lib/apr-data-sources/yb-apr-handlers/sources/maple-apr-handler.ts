@@ -36,7 +36,7 @@ export class Maple {
             },
         } = (await response.json()) as Response;
 
-        const apr = parseFloat(apy) / 1e28;
+        const apr = parseFloat(apy) / 1e30;
 
         return {
             [this.config!.token]: { apr, isIbYield: true },
