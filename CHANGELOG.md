@@ -1,5 +1,11 @@
 # backend
 
+## 1.7.1
+
+### Patch Changes
+
+-   e102809: stakewise gnosis and maple syrup APRs
+
 ## 1.7.0
 
 ### Minor Changes
