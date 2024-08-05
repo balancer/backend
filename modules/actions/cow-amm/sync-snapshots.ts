@@ -5,10 +5,11 @@ import { OrderDirection, PoolSnapshot_OrderBy } from '../../sources/subgraphs/co
 import _ from 'lodash';
 import { daysAgo, roundToMidnight } from '../../common/time';
 import { snapshotsCowAmmTransformer } from '../../sources/transformers/snapshots-cowamm-transformer';
+import moment from 'moment';
 
 const protocolVersion = 1;
 
-export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> {
+export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<number> {
     // Get the latest snapshot from the DB (assuming there are no gaps)
     const latestStoredSnapshot = await prisma.prismaPoolSnapshot.findFirst({
         select: {
@@ -23,26 +24,30 @@ export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain:
         },
     });
 
-    let timestamp;
-    if (latestStoredSnapshot && latestStoredSnapshot.timestamp < daysAgo(1)) {
-        timestamp = latestStoredSnapshot.timestamp + 86400; // Try to get the next day
-    } else if (latestStoredSnapshot && latestStoredSnapshot.timestamp > daysAgo(1)) {
-        console.log('No new snapshots to sync for', chain);
-        return [];
+    const today = moment().utc().startOf('day').unix();
+    const yesterday = moment().utc().startOf('day').subtract(1, 'days').unix();
+
+    if (latestStoredSnapshot && latestStoredSnapshot.timestamp <= yesterday) {
+        // sync only the following one if we are still behind
+        console.log('Catching up: Syncing COW snapshots for', chain, latestStoredSnapshot.timestamp + 86400);
+        return syncSnapshotsForADayCowAmm(subgraphClient, chain, latestStoredSnapshot.timestamp + 86400);
+    } else if (latestStoredSnapshot && latestStoredSnapshot.timestamp === today) {
+        // sync the previous day and the current day if we are up to date
+        console.log('Syncing COW snapshots for', chain, latestStoredSnapshot.timestamp - 86400);
+        await syncSnapshotsForADayCowAmm(subgraphClient, chain, latestStoredSnapshot.timestamp - 86400);
+
+        console.log('Syncing COW snapshots for', chain, latestStoredSnapshot.timestamp);
+        return syncSnapshotsForADayCowAmm(subgraphClient, chain, latestStoredSnapshot.timestamp);
     } else {
-        // Get the earliest snapshot from the subgraph
+        // Get the earliest snapshot from the subgraph if there are none stored
         const { poolSnapshots } = await subgraphClient.Snapshots({
             first: 1,
             orderBy: PoolSnapshot_OrderBy.Timestamp,
             orderDirection: OrderDirection.Asc,
         });
 
-        timestamp = poolSnapshots[0].timestamp;
+        return syncSnapshotsForADayCowAmm(subgraphClient, chain, poolSnapshots[0].timestamp);
     }
-
-    console.log('Syncing COW snapshots for', chain, timestamp);
-
-    return syncSnapshotsForADayCowAmm(subgraphClient, chain, timestamp);
 }
 
 /**
@@ -54,9 +59,9 @@ export async function syncSnapshots(subgraphClient: CowAmmSubgraphClient, chain:
  */
 export async function syncSnapshotsForADayCowAmm(
     subgraphClient: CowAmmSubgraphClient,
-    chain = 'SEPOLIA' as Chain,
-    timestamp = daysAgo(0), // Current day by default
-): Promise<string[]> {
+    chain: Chain,
+    timestamp: number,
+): Promise<number> {
     const previous = roundToMidnight(timestamp - 86400); // Previous day stored in the DB
     const next = roundToMidnight(timestamp); // Day to fetch snapshots for
 
@@ -135,5 +140,5 @@ export async function syncSnapshotsForADayCowAmm(
         });
     }
 
-    return dbPools.map((p) => p.id);
+    return timestamp;
 }

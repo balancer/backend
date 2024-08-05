@@ -1,12 +1,10 @@
 import { YbAprConfig } from '../../../../../network/apr-config-types';
 
-const query = `
-  {
-    osTokens {
-      apy
-    }
+const query = `{
+  syrupGlobals {
+    apy
   }
-`;
+}`;
 
 const requestQuery = {
     query,
@@ -14,14 +12,14 @@ const requestQuery = {
 
 interface Response {
     data: {
-        osTokens: {
-            apy: string[];
-        }[];
+        syrupGlobals: {
+            apy: string;
+        };
     };
 }
 
-export class Stakewise {
-    constructor(private config: YbAprConfig['stakewise']) {}
+export class Maple {
+    constructor(private config: YbAprConfig['maple']) {}
 
     async getAprs() {
         const response = await fetch(this.config!.url, {
@@ -34,11 +32,11 @@ export class Stakewise {
 
         const {
             data: {
-                osTokens: [{ apy }],
+                syrupGlobals: { apy },
             },
         } = (await response.json()) as Response;
 
-        const apr = Number(apy) / 100;
+        const apr = parseFloat(apy) / 1e30;
 
         return {
             [this.config!.token]: { apr, isIbYield: true },

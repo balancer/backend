@@ -6,7 +6,6 @@ import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import {
     fetchChangedPools,
     fetchNewPools,
-    syncPools,
     upsertPools,
     syncSnapshots,
     syncSwaps,
@@ -15,6 +14,7 @@ import {
 } from '../actions/cow-amm';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
+import moment from 'moment';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -42,8 +42,9 @@ export function CowAmmController(tracer?: any) {
             const subgraphClient = getSubgraphClient(chain);
             const newPools = await fetchNewPools(subgraphClient, chain);
             const viemClient = getViemClient(chain);
+            const blockNumber = await viemClient.getBlockNumber();
 
-            const ids = await upsertPools(newPools, viemClient, subgraphClient, chain);
+            const ids = await upsertPools(newPools, viemClient, subgraphClient, chain, blockNumber);
 
             return ids;
         },
@@ -56,12 +57,14 @@ export function CowAmmController(tracer?: any) {
             const subgraphClient = getSubgraphClient(chain);
             const allPools = await subgraphClient.getAllPools({ isInitialized: true });
             const viemClient = getViemClient(chain);
+            const blockNumber = await viemClient.getBlockNumber();
 
             await upsertPools(
                 allPools.map((pool) => pool.id),
                 viemClient,
                 subgraphClient,
                 chain,
+                blockNumber,
             );
 
             return allPools.map((pool) => pool.id);
@@ -73,6 +76,7 @@ export function CowAmmController(tracer?: any) {
          */
         async syncPools(chainId: string) {
             const chain = chainIdToChain[chainId];
+            const subgraphClient = getSubgraphClient(chain);
             const viemClient = getViemClient(chain);
 
             // TODO: move prismaLastBlockSynced wrapping to an action
@@ -129,7 +133,7 @@ export function CowAmmController(tracer?: any) {
                 blockToSync = await viemClient.getBlockNumber();
             }
 
-            await syncPools(poolsToSync, viemClient, chain, blockToSync);
+            await upsertPools(poolsToSync, viemClient, subgraphClient, chain, blockToSync);
 
             await prisma.prismaLastBlockSynced.findFirst({
                 where: {
@@ -160,8 +164,18 @@ export function CowAmmController(tracer?: any) {
         async syncSnapshots(chainId: string) {
             const chain = chainIdToChain[chainId];
             const subgraphClient = getSubgraphClient(chain);
-            const entries = await syncSnapshots(subgraphClient, chain);
-            return entries;
+            const timestamp = await syncSnapshots(subgraphClient, chain);
+            return timestamp;
+        },
+        async syncAllSnapshots(chainId: string) {
+            // Run in loop until we end up at todays snapshot (also sync todays)
+            let allSnapshotsSynced = false;
+            let timestamp = 0;
+            while (!allSnapshotsSynced) {
+                timestamp = await CowAmmController().syncSnapshots(chainId);
+                allSnapshotsSynced = timestamp === moment().utc().startOf('day').unix();
+            }
+            return timestamp;
         },
         async syncJoinExits(chainId: string) {
             const chain = chainIdToChain[chainId];

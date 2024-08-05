@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { env } from '../app/env';
+import { syncReliquaryStakingForPools } from '../modules/actions/pool/staking';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 const underlyingTokens = {
@@ -20,7 +21,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQUXLs5xo1PuLA1NZmAsyacsB2muaiQ6h7o5MY9F6C2dr`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbdFdmYJwVVCfinA2y78eU6AHJjANWJU86zfm4MvESUsW`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
@@ -45,7 +46,9 @@ export default <NetworkData>{
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
-    rpcUrl: env.INFURA_API_KEY ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://rpc.ankr.com/eth',
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://eth-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+        : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -234,8 +237,15 @@ export default <NetworkData>{
                 },
             },
         },
-        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        },
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+        maple: {
+            url: 'https://api.maple.finance/v2/graphql',
+            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {

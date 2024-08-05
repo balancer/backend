@@ -88,4 +88,6 @@ export const upsertPools = async (
             console.error('Error upserting pool', e);
         }
     }
+
+    return dbPools.map(({ pool }) => ({ id: pool.id, type: pool.type }));
 };

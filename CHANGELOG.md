@@ -1,5 +1,69 @@
 # backend
 
+## 1.7.1
+
+### Patch Changes
+
+-   e102809: stakewise gnosis and maple syrup APRs
+
+## 1.7.0
+
+### Minor Changes
+
+-   0847dd4: syncing pool type specific data
+
+### Patch Changes
+
+-   af4417e: updated AAVE subgraph URLs for getting token APRs
+-   b08fa1e: update cow subgraphs
+-   b20c5fd: sync tokenlist for sepolia
+
+## 1.6.3
+
+### Patch Changes
+
+-   72cc583: add weETH APR on Arb and rETH APR on Gnosis
+
+## 1.6.2
+
+### Patch Changes
+
+-   07fcf6a: fixed surplus APR calculation
+-   a72b08f: move rpcs from infura to alchemy
+
+## 1.6.1
+
+### Patch Changes
+
+-   0627776: fixed sdai yield on fraxtal
+
+## 1.6.0
+
+### Minor Changes
+
+-   f9d50e4: syncing holders could on changed cow-amm pools
+
+### Patch Changes
+
+-   5f6fd67: handle failing aave pricing
+
+## 1.5.5
+
+### Patch Changes
+
+-   3f08512: subgraph patch
+
+## 1.5.4
+
+### Patch Changes
+
+-   5c02fa1: new cow-subgraphs, add weights to cow-pools, add reload mutation
+-   0959978: fix snapshot loading for cow
+-   ede18b9: fixed double execution of the merkl job
+-   6a8d02e: add aave wrapped tokens to sepolia handler
+-   fec4cac: Fix cow user balances
+-   975e058: fix token rate and config sync for v3, add reload mutation
+
 ## 1.5.3
 
 ### Patch Changes

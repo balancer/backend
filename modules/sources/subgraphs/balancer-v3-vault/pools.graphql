@@ -8,6 +8,7 @@ fragment VaultPool on Pool {
     pauseManager
     blockNumber
     blockTimestamp
+    holdersCount
     transactionHash
     tokens {
         id

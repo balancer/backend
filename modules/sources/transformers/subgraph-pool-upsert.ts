@@ -33,6 +33,7 @@ export const subgraphPoolUpsert = (
             blockNumber: Number(blockNumber || 0),
             swapFee: formatEther(onchainPoolData.swapFee),
             swapEnabled: true,
+            holdersCount: Number(subgraphPoolData.holdersCount),
             totalLiquidity: 0,
         },
         poolToken: poolTokensTransformer(subgraphPoolData, chain),
