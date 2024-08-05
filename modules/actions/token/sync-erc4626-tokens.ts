@@ -3,6 +3,10 @@ import { prisma } from '../../../prisma/prisma-client';
 import { ViemClient } from '../../sources/viem-client';
 import { fetchErc4626AndUnderlyingTokenData } from '../../sources/contracts/fetch-erc4626-token-data';
 
+/**
+ * Syncs erc4626 tokens and their underlying tokens
+ * Only needed to update this info on already created tokens
+ */
 export const syncErc4626Tokens = async (viemClient: ViemClient, chain: Chain) => {
     const allTokens = await prisma.prismaToken.findMany({
         where: {
@@ -29,7 +33,7 @@ export const syncErc4626Tokens = async (viemClient: ViemClient, chain: Chain) =>
             },
         });
 
-        if (token.isErc4626) {
+        if (token.underlyingTokenAddress) {
             await prisma.prismaTokenType.upsert({
                 where: {
                     id_chain: {
