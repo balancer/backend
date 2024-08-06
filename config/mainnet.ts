@@ -21,7 +21,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbdFdmYJwVVCfinA2y78eU6AHJjANWJU86zfm4MvESUsW`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUvfS6hqU3nGQxFFzxoMBkufYJ7Jh3cYdTUM64hucgqe7`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
