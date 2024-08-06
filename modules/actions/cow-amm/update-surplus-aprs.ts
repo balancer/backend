@@ -1,11 +1,4 @@
-import {
-    Chain,
-    Prisma,
-    PrismaPool,
-    PrismaPoolAprType,
-    PrismaPoolDynamicData,
-    PrismaPoolSnapshot,
-} from '@prisma/client';
+import { PrismaPool, PrismaPoolAprType, PrismaPoolDynamicData } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 
 export const updateSurplusAPRs = async () => {
@@ -32,7 +25,7 @@ export const updateSurplusAPRs = async () => {
         apr:
             pool.dynamicData.surplus24h <= 0 || pool.dynamicData.totalLiquidity === 0
                 ? 0
-                : (pool.dynamicData.surplus24h * 365) / pool.dynamicData.totalLiquidity / 100,
+                : (pool.dynamicData.surplus24h * 365) / pool.dynamicData.totalLiquidity,
     }));
 
     await prisma.$transaction([
