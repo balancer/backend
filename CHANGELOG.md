@@ -1,5 +1,11 @@
 # backend
 
+## 1.7.3
+
+### Patch Changes
+
+-   af11d6b: fix cow-surplus scaling, update cow volume sync
+
 ## 1.7.2
 
 ### Patch Changes
