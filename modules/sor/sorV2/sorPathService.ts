@@ -17,7 +17,7 @@ import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './lib/static';
+import { sorGetPathsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
@@ -153,6 +153,7 @@ class SorPathService implements SwapService {
             const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
+                // TODO: we should be able to refactor this 'retry' logic so it's configurable from outside instead of hardcoding it here
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return paths;
@@ -440,7 +441,7 @@ class SorPathService implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 100,
+                        gte: chain === 'SEPOLIA' ? 0 : 100,
                     },
                 },
                 id: {
@@ -452,6 +453,7 @@ class SorPathService implements SwapService {
                         'META_STABLE',
                         'PHANTOM_STABLE',
                         'COMPOSABLE_STABLE',
+                        'STABLE',
                         'FX',
                         'GYRO',
                         'GYRO3',

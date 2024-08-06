@@ -7,29 +7,7 @@ import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-
-export class WeightedPoolToken extends TokenAmount {
-    public readonly weight: bigint;
-    public readonly index: number;
-
-    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
-        super(token, amount);
-        this.weight = BigInt(weight);
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-}
+import { WeightedPoolToken } from './weightedPoolToken';
 
 export class WeightedPool implements BasePool {
     public readonly chain: Chain;
@@ -64,9 +42,8 @@ export class WeightedPool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            // TODO: parseFloat with toFixed changes the value, better use parseEther instead
-            const balance = parseFloat(poolToken.dynamicData.balance).toFixed(18);
-            const tokenAmount = TokenAmount.fromHumanAmount(token, balance as `${number}`);
+            const scale18 = parseEther(poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
             poolTokens.push(
                 new WeightedPoolToken(
                     token,

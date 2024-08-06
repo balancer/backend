@@ -1,13 +1,17 @@
-// yarn vitest weightedPool.test.ts
+// yarn vitest poolsV2/weighted/weightedPool.test.ts
+
+import { parseEther } from 'viem';
+import { SwapKind, WAD } from '@balancer/sdk';
 
 import { WeightedPool } from './weightedPool';
-import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../../../../../test/factories/prismaPool.factory';
-import { SwapKind, WAD } from '@balancer/sdk';
+
+// keep factories imports at the end - moving up will break the test
 import {
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
-} from '../../../../../../test/factories/prismaToken.factory';
-import { parseEther } from 'viem';
+    prismaPoolDynamicDataFactory,
+    prismaPoolFactory,
+} from '../../../../../../test/factories';
 
 describe('SOR V3 Weighted Pool Tests', () => {
     let weightedPool: WeightedPool;
