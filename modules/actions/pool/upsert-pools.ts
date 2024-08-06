@@ -5,6 +5,8 @@ import { JoinedSubgraphPool } from '../../sources/subgraphs';
 import { subgraphPoolUpsert, SubgraphPoolUpsertData } from '../../sources/transformers/subgraph-pool-upsert';
 import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 import type { VaultClient } from '../../sources/contracts';
+import { fetchErc4626AndUnderlyingTokenData } from '../../sources/contracts/fetch-erc4626-token-data';
+import { getViemClient } from '../../sources/viem-client';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -30,9 +32,12 @@ export const upsertPools = async (
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);
+
+    const enrichedTokensWithErc4626Data = await fetchErc4626AndUnderlyingTokenData(allTokens, getViemClient(chain));
+
     try {
         await prisma.prismaToken.createMany({
-            data: allTokens,
+            data: enrichedTokensWithErc4626Data,
             skipDuplicates: true,
         });
     } catch (e) {

@@ -703,6 +703,8 @@ model PrismaToken {
     expandedPools       PrismaPoolExpandedTokens[]
     poolTokens          PrismaPoolToken[]
 
+    underlyingTokenAddress   String?
+
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
 
@@ -787,6 +789,7 @@ enum PrismaTokenTypeOption {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
+    ERC4626
 }
 
 model PrismaPriceRateProviderData {

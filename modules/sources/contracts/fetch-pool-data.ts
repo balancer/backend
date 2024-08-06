@@ -1,4 +1,4 @@
-import { AbiParameterToPrimitiveType, ExtractAbiFunction, parseAbi } from 'abitype';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
 import VaultV3Abi from './abis/VaultV3';
 
@@ -27,6 +27,7 @@ export interface OnchainPoolData {
         balance: bigint;
         rateProvider: string;
         rate: bigint;
+        isErc4626: boolean;
     }[];
 }
 
@@ -97,6 +98,7 @@ export async function fetchPoolData(
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
                     rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
+                    isErc4626: false, // will be added later in the process
                 })),
             },
         ];

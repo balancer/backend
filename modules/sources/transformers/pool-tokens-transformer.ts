@@ -13,7 +13,7 @@ export function poolTokensTransformer(poolData: JoinedSubgraphPool, chain: Chain
         index: token.index,
         nestedPoolId: token.nestedPool?.id.toLowerCase() ?? null,
         priceRateProvider: poolData.rateProviders![i].address.toLowerCase(),
-        exemptFromProtocolYieldFee: token.totalProtocolYieldFee === '0' ? true : false,
+        exemptFromProtocolYieldFee: !token.paysYieldFees,
     }));
 }
 
