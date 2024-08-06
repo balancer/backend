@@ -17,7 +17,7 @@ export default <NetworkData>{
         blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme9hQY1NZ8ReVDSSQb893s2fGpeLkgfwXd3YU5rndACaP`,
         aura: 'https://data.aura.finance/graphql',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcCLUtZXzfymZipKM1AZhb5oLgn2CQbAM8iU8czZ1xtqc`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZ5RYZdrdSreBaMxjB65MUzW4WzVeSQU5tLwRskQNKnTW`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -65,6 +65,10 @@ export default <NetworkData>{
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
     ybAprConfig: {
+        stakewise: {
+            url: 'https://gnosis-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
+        },
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',

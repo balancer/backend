@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { env } from '../app/env';
+import { syncReliquaryStakingForPools } from '../modules/actions/pool/staking';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 const underlyingTokens = {
@@ -20,7 +21,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmY6Z5qjyZC1m7Eb53a5ooQWmeWmSCAzNmbC7DToiW8i2u`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUvfS6hqU3nGQxFFzxoMBkufYJ7Jh3cYdTUM64hucgqe7`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
@@ -236,8 +237,15 @@ export default <NetworkData>{
                 },
             },
         },
-        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        },
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+        maple: {
+            url: 'https://api.maple.finance/v2/graphql',
+            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {

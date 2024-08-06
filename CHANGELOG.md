@@ -1,5 +1,42 @@
 # backend
 
+## 1.7.4
+
+### Patch Changes
+
+-   1d3f265: v2 update interferes with cow
+
+## 1.7.3
+
+### Patch Changes
+
+-   af11d6b: fix cow-surplus scaling, update cow volume sync
+
+## 1.7.2
+
+### Patch Changes
+
+-   13f2416: update cow amm subgraphs
+-   956f28c: update masterchef subgraph
+
+## 1.7.1
+
+### Patch Changes
+
+-   e102809: stakewise gnosis and maple syrup APRs
+
+## 1.7.0
+
+### Minor Changes
+
+-   0847dd4: syncing pool type specific data
+
+### Patch Changes
+
+-   af4417e: updated AAVE subgraph URLs for getting token APRs
+-   b08fa1e: update cow subgraphs
+-   b20c5fd: sync tokenlist for sepolia
+
 ## 1.6.3
 
 ### Patch Changes
