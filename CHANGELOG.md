@@ -1,5 +1,12 @@
 # backend
 
+## 1.7.2
+
+### Patch Changes
+
+-   13f2416: update cow amm subgraphs
+-   956f28c: update masterchef subgraph
+
 ## 1.7.1
 
 ### Patch Changes
