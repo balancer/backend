@@ -1,0 +1,35 @@
+extend type Query {
+    """
+    Returns list of hooks.
+    """
+    hooks(chain: GqlChain): [Hook!]
+}
+
+"""
+Collection of hook specific data
+"""
+type HookData {
+    swapFeePercentage: String
+    addLiquidityFeePercentage: String
+    removeLiquidityFeePercentage: String
+}
+
+"""
+Hook data
+"""
+type Hook {
+    address: String!
+    chain: GqlChain!
+    enableHookAdjustedAmounts: Boolean!
+    shouldCallAfterSwap: Boolean!
+    shouldCallBeforeSwap: Boolean!
+    shouldCallAfterInitialize: Boolean!
+    shouldCallBeforeInitialize: Boolean!
+    shouldCallAfterAddLiquidity: Boolean!
+    shouldCallBeforeAddLiquidity: Boolean!
+    shouldCallAfterRemoveLiquidity: Boolean!
+    shouldCallBeforeRemoveLiquidity: Boolean!
+    shouldCallComputeDynamicSwapFee: Boolean!
+    dynamicData: HookData
+    poolsIds: [String]
+}

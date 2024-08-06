@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { OnchainPoolData } from '../contracts';
 import { JoinedSubgraphPool } from '../types';
-import { poolTransformer } from './pool-transformer';
+import { poolTransformer, hookTransformer } from './';
 import { formatEther, formatUnits } from 'viem';
 import { poolTokensDynamicDataTransformer, poolTokensTransformer } from './pool-tokens-transformer';
 
@@ -24,6 +24,7 @@ export const subgraphPoolUpsert = (
 
     return {
         pool: poolTransformer(subgraphPoolData, chain),
+        hook: hookTransformer(subgraphPoolData, chain),
         poolDynamicData: {
             id: subgraphPoolData.id,
             poolId: subgraphPoolData.id,

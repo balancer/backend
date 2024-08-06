@@ -34,6 +34,7 @@ import {
     GqlPoolAprItemType,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
+    HookData,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
@@ -238,6 +239,13 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            hook:
+                (pool.hook &&
+                    pool.hook.dynamicData && {
+                        ...pool.hook,
+                        dynamicData: pool.hook.dynamicData as HookData,
+                    }) ||
+                undefined,
             incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
@@ -557,6 +565,13 @@ export class PoolGqlLoaderService {
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
+            hook:
+                (pool.hook &&
+                    pool.hook.dynamicData && {
+                        ...pool.hook,
+                        dynamicData: pool.hook.dynamicData as HookData,
+                    }) ||
+                undefined,
         };
 
         //TODO: may need to build out the types here still
@@ -1300,6 +1315,7 @@ export class PoolGqlLoaderService {
                     },
                 },
                 userWalletBalances: false,
+                hook: true,
             };
         }
 
@@ -1328,6 +1344,7 @@ export class PoolGqlLoaderService {
                     balanceNum: { gt: 0 },
                 },
             },
+            hook: true,
         };
     }
 }

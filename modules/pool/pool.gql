@@ -214,6 +214,10 @@ type GqlPoolMinimal {
     List of tags assigned by the team based on external factors
     """
     tags: [String]
+    """
+    Hook assigned to a pool
+    """
+    hook: Hook
 }
 
 """
