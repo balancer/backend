@@ -121,29 +121,37 @@ export class StablePool implements BasePoolV3 {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         const poolState = this.getPoolState();
-        const stableV3 = new Stable(poolState);
+        const vault = new Vault();
 
         // remove liquidity
         if (tIn.token.isSameAddress(this.id)) {
-            return stableV3.getMaxSingleTokenRemoveAmount({
-                isExactIn: swapKind === SwapKind.GivenIn,
-                totalSupply: poolState.totalSupply,
-                tokenOutBalance: poolState.balancesLiveScaled18[tOut.index],
-                tokenOutScalingFactor: poolState.scalingFactors[tOut.index],
-                tokenOutRate: poolState.tokenRates[tOut.index],
-            });
+            return vault.getMaxSingleTokenRemoveAmount(
+                {
+                    isExactIn: swapKind === SwapKind.GivenIn,
+                    totalSupply: poolState.totalSupply,
+                    tokenOutBalance: poolState.balancesLiveScaled18[tOut.index],
+                    tokenOutScalingFactor: poolState.scalingFactors[tOut.index],
+                    tokenOutRate: poolState.tokenRates[tOut.index],
+                },
+                poolState,
+            );
         }
         // add liquidity
         if (tOut.token.isSameAddress(this.id)) {
-            return stableV3.getMaxSingleTokenAddAmount();
+            return vault.getMaxSingleTokenAddAmount(poolState);
         }
         // swap
-        return stableV3.getMaxSwapAmount({
-            ...poolState,
-            swapKind,
-            indexIn: tIn.index,
-            indexOut: tOut.index,
-        });
+        return vault.getMaxSwapAmount(
+            {
+                swapKind,
+                balancesLiveScaled18: poolState.balancesLiveScaled18,
+                tokenRates: poolState.tokenRates,
+                scalingFactors: poolState.scalingFactors,
+                indexIn: tIn.index,
+                indexOut: tOut.index,
+            },
+            poolState,
+        );
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
