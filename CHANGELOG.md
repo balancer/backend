@@ -1,5 +1,11 @@
 # backend
 
+## 1.7.4
+
+### Patch Changes
+
+-   1d3f265: v2 update interferes with cow
+
 ## 1.7.3
 
 ### Patch Changes
