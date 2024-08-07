@@ -1,5 +1,11 @@
 # backend
 
+## 1.8.2
+
+### Patch Changes
+
+-   55fa750: SOR should consider STABLE pools for v3 liquidity only
+
 ## 1.8.1
 
 ### Patch Changes
