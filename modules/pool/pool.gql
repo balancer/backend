@@ -1537,21 +1537,3 @@ type GqlPoolSwapEventV3 implements GqlPoolEvent {
     tokenIn: GqlPoolEventAmount!
     tokenOut: GqlPoolEventAmount!
 }
-
-type GqlPoolSwapEventCowAmm implements GqlPoolEvent {
-    chain: GqlChain!
-    id: ID!
-    tx: String!
-    logIndex: Int!
-    blockNumber: Int!
-    blockTimestamp: Int!
-    type: GqlPoolEventType!
-    sender: String!
-    userAddress: String!
-    poolId: String!
-    timestamp: Int!
-    valueUSD: Float!
-    tokenIn: GqlPoolEventAmount!
-    tokenOut: GqlPoolEventAmount!
-    surplus: GqlPoolEventAmount!
-}
