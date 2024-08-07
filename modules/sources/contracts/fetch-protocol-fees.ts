@@ -24,7 +24,6 @@ export async function fetchProtocolFees(
         },
     ];
 
-    // @ts-ignore – viem has some issues with the typings when using imported abis
     const results = await client.multicall({ contracts, blockNumber: blockNumber });
 
     return {

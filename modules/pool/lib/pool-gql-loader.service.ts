@@ -36,14 +36,13 @@ import {
     GqlPoolFilterCategory,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
-import _, { has, map } from 'lodash';
+import _, { has } from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import {
     Chain,
     Prisma,
     PrismaPoolAprType,
     PrismaPriceRateProviderData,
-    PrismaTokenTypeOption,
     PrismaUserStakedBalance,
     PrismaUserWalletBalance,
 } from '@prisma/client';
@@ -55,7 +54,6 @@ import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
-import { tokenService } from '../../token/token.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -82,60 +80,11 @@ export class PoolGqlLoaderService {
         );
 
         // load rate provider data into PoolTokenDetail model
-        await this.enrichWithRateproviderData(mappedPool);
-
-        // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
-        await this.enrichWithUnderlyingTokenData(mappedPool);
-
-        // load underlying token info into GqlPoolTokenDisplay model
-        await this.enrichWithUnderlyingTokenData(mappedPool);
-
-        return mappedPool;
-    }
-
-    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion) {
-        for (const token of mappedPool.poolTokens) {
-            if (token.isErc4626) {
-                const prismaToken = await prisma.prismaToken.findUnique({
-                    where: { address_chain: { address: token.address, chain: mappedPool.chain } },
-                });
-                if (prismaToken?.underlyingTokenAddress) {
-                    const underlyingTokenDefinition = await tokenService.getTokenDefinition(
-                        prismaToken.underlyingTokenAddress,
-                        mappedPool.chain,
-                    );
-                    token.underlyingToken = underlyingTokenDefinition;
-                    mappedPool.displayTokens.push();
-                }
-            }
-            if (token.hasNestedPool) {
-                for (const nestedToken of token.nestedPool!.tokens) {
-                    if (nestedToken.isErc4626) {
-                        const prismaToken = await prisma.prismaToken.findUnique({
-                            where: { address_chain: { address: nestedToken.address, chain: mappedPool.chain } },
-                        });
-                        if (prismaToken?.underlyingTokenAddress) {
-                            const tokenDefinition = await tokenService.getTokenDefinition(
-                                prismaToken.underlyingTokenAddress,
-                                mappedPool.chain,
-                            );
-                            nestedToken.underlyingToken = tokenDefinition;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion) {
         for (const token of mappedPool.poolTokens) {
             if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
                 const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
                     where: {
-                        chain_rateProviderAddress: {
-                            chain: mappedPool.chain,
-                            rateProviderAddress: token.priceRateProvider,
-                        },
+                        chain_rateProviderAddress: { chain: chain, rateProviderAddress: token.priceRateProvider },
                     },
                 });
                 if (rateproviderData) {
@@ -158,7 +107,7 @@ export class PoolGqlLoaderService {
                         const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
                             where: {
                                 chain_rateProviderAddress: {
-                                    chain: mappedPool.chain,
+                                    chain: chain,
                                     rateProviderAddress: nestedToken.priceRateProvider,
                                 },
                             },
@@ -179,6 +128,8 @@ export class PoolGqlLoaderService {
                 }
             }
         }
+
+        return mappedPool;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -251,7 +202,6 @@ export class PoolGqlLoaderService {
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
-            hasErc4626: pool.allTokens.some((token) => token.token.types.some((type) => type.type === 'ERC4626')),
         };
     }
 
@@ -632,10 +582,7 @@ export class PoolGqlLoaderService {
             const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
             const isNested = !poolToken;
             const isPhantomBpt = token.tokenAddress === pool.address;
-            const isMainToken = !token.token.types.some(
-                (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'ERC4626',
-            );
-            const isErc4626 = token.token.types.some((type) => type.type === 'ERC4626');
+            const isMainToken = !token.token.types.some((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT');
 
             return {
                 ...token.token,
@@ -644,7 +591,6 @@ export class PoolGqlLoaderService {
                 isNested,
                 isPhantomBpt,
                 isMainToken,
-                isErc4626,
             };
         });
     }
@@ -654,7 +600,7 @@ export class PoolGqlLoaderService {
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
                 const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address);
-                if (allToken?.nestedPool) {
+                if (allToken?.nestedPool?.type === 'COMPOSABLE_STABLE') {
                     const mainTokens =
                         allToken.nestedPool.allTokens.filter(
                             (nestedToken) =>
@@ -699,7 +645,6 @@ export class PoolGqlLoaderService {
             isAllowed: poolToken.token.types.some(
                 (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
             ),
-            isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
         };
     }
 
