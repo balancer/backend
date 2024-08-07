@@ -1,5 +1,11 @@
 # backend
 
+## 1.8.1
+
+### Patch Changes
+
+-   7d327cf: fix token query
+
 ## 1.8.0
 
 ### Minor Changes
