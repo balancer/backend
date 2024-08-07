@@ -23,13 +23,9 @@ export class SorService {
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = swapPathsZeroResponse(args.tokenIn, args.tokenOut);
 
-        let wethIsEth = false;
-        if (
+        const wethIsEth =
             tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address ||
-            tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address
-        ) {
-            wethIsEth = true;
-        }
+            tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address;
 
         // check if tokens addresses exist
         try {
@@ -66,32 +62,13 @@ export class SorService {
         // Use TokenAmount to help follow scaling requirements in later logic
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
-        if (!args.useProtocolVersion) {
-            return this.getBestSwapPathVersion({
-                chain: args.chain!,
-                swapAmount: amount,
-                swapType: args.swapType,
-                tokenIn: tokenIn,
-                tokenOut: tokenOut,
-                queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
-                callDataInput: args.callDataInput
-                    ? {
-                          receiver: args.callDataInput.receiver,
-                          sender: args.callDataInput.sender,
-                          slippagePercentage: args.callDataInput.slippagePercentage,
-                          deadline: args.callDataInput.deadline,
-                          wethIsEth: wethIsEth,
-                      }
-                    : undefined,
-            });
-        }
-        return sorV2Service.getSorSwapPaths({
+
+        const getSwapPathsInput: Omit<GetSwapPathsInput, 'protocolVersion'> = {
             chain: args.chain!,
             swapAmount: amount,
             swapType: args.swapType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            protocolVersion: args.useProtocolVersion,
             queryBatchSwap: args.queryBatchSwap ? args.queryBatchSwap : false,
             callDataInput: args.callDataInput
                 ? {
@@ -102,7 +79,16 @@ export class SorService {
                       wethIsEth: wethIsEth,
                   }
                 : undefined,
-        });
+        };
+
+        if (args.useProtocolVersion) {
+            return sorV2Service.getSorSwapPaths({
+                ...getSwapPathsInput,
+                protocolVersion: args.useProtocolVersion,
+            });
+        }
+
+        return this.getBestSwapPathVersion(getSwapPathsInput);
     }
 
     async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {

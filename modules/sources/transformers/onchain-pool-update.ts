@@ -20,7 +20,7 @@ export const onchainPoolUpdate = (
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: formatEther(onchainPoolData.totalSupply),
             blockNumber: Number(blockNumber),
-            swapFee: String(onchainPoolData.swapFee ?? '0'),
+            swapFee: formatEther(onchainPoolData.swapFee ?? '0'),
         },
         poolTokenDynamicData:
             onchainPoolData.tokens?.map((tokenData) => ({

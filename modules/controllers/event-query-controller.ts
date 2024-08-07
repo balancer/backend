@@ -1,4 +1,10 @@
-import { GqlPoolEventsDataRange, GqlPoolAddRemoveEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
+import {
+    GqlPoolEventsDataRange,
+    GqlPoolAddRemoveEventV3,
+    GqlPoolSwapEventV3,
+    QueryPoolEventsArgs,
+    GqlPoolSwapEventCowAmm,
+} from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Chain, PoolEventType, Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
@@ -38,6 +44,18 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
     };
 };
 
+const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
+    const regularSwap = parseSwap(event);
+    return {
+        ...regularSwap,
+        __typename: 'GqlPoolSwapEventCowAmm',
+        surplus: (event.payload.surplus && {
+            ...event.payload.surplus,
+            valueUSD: Number(event.payload.surplus.valueUSD),
+        }) || { address: '', amount: '0', valueUSD: 0 },
+    };
+};
+
 const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
     switch (range) {
         case 'SEVEN_DAYS':
@@ -63,7 +81,7 @@ export function EventsQueryController(tracer?: any) {
             first,
             skip,
             where,
-        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolAddRemoveEventV3)[]> => {
+        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolSwapEventCowAmm | GqlPoolAddRemoveEventV3)[]> => {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
@@ -126,7 +144,11 @@ export function EventsQueryController(tracer?: any) {
             });
 
             const results = dbEvents.map((event) =>
-                event.type === 'SWAP' ? parseSwap(event as SwapEvent) : parseJoinExit(event as JoinExitEvent),
+                event.type === 'SWAP' && event.protocolVersion === 1
+                    ? parseCowAmmSwap(event as SwapEvent)
+                    : event.type === 'SWAP'
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

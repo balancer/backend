@@ -147,6 +147,10 @@ type GqlPoolMinimal {
     """
     incentivized: Boolean!
     """
+    Whether at least one token in this pool is considered an ERC4626 token.
+    """
+    hasErc4626: Boolean!
+    """
     The name of the pool as per contract
     """
     name: String!
@@ -175,7 +179,7 @@ type GqlPoolMinimal {
     """
     createTime: Int!
     """
-    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
+    Only returns main or underlying tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
     displayTokens: [GqlPoolTokenDisplay!]!
     """
@@ -344,11 +348,11 @@ interface GqlPoolBase {
     """
     Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
-    displayTokens: [GqlPoolTokenDisplay!]!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     """
     Returns all pool tokens, including any nested tokens and phantom BPTs on one level.
     """
-    allTokens: [GqlPoolTokenExpanded!]!
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     """
     Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
     """
@@ -848,6 +852,14 @@ type GqlPoolTokenDetail {
     Whether the token is in the allow list.
     """
     isAllowed: Boolean!
+    """
+    Whether the token is considered an ERC4626 token.
+    """
+    isErc4626: Boolean!
+    """
+    If it is an Erc4262, this will be the underlying token if present in the API.
+    """
+    underlyingToken: GqlToken
 }
 
 """
@@ -1074,6 +1086,7 @@ type GqlPoolTokenExpanded {
     isNested: Boolean!
     isPhantomBpt: Boolean!
     isMainToken: Boolean!
+    isErc4626: Boolean!
 }
 
 type GqlPoolSwap {
@@ -1523,4 +1536,22 @@ type GqlPoolSwapEventV3 implements GqlPoolEvent {
     valueUSD: Float!
     tokenIn: GqlPoolEventAmount!
     tokenOut: GqlPoolEventAmount!
+}
+
+type GqlPoolSwapEventCowAmm implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+    tokenIn: GqlPoolEventAmount!
+    tokenOut: GqlPoolEventAmount!
+    surplus: GqlPoolEventAmount!
 }

@@ -1,71 +1,139 @@
 // yarn vitest balancer-sor.integration.test.ts
 
-import { ExactInQueryOutput, Swap, SwapKind, Token, Address } from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path } from '@balancer/sdk';
 
 import { PathWithAmount } from './sorV2/lib/path';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './sorV2/lib/static';
+import { sorGetPathsWithPools } from './sorV2/lib/static';
 import { getOutputAmount } from './sorV2/lib/utils/helpers';
 import { chainToIdMap } from '../network/network-config';
 
 import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../test/anvil/anvil-global-setup';
-import { prismaPoolTokenDynamicDataFactory, prismaPoolTokenFactory } from '../../test/factories/prismaToken.factory';
-import { prismaPoolDynamicDataFactory, prismaPoolFactory } from '../../test/factories/prismaPool.factory';
+import {
+    prismaPoolDynamicDataFactory,
+    prismaPoolFactory,
+    prismaPoolTokenDynamicDataFactory,
+    prismaPoolTokenFactory,
+} from '../../test/factories';
 
 describe('Balancer SOR Integration Tests', () => {
     let rpcUrl: string;
     let paths: PathWithAmount[];
     let sdkSwap: Swap;
+
     beforeAll(async () => {
-        // setup mock pool data
-        const poolAddress = '0xb0948D31C1a2C338C68402cd58CA7f2962aa14A9';
-        const WETH = '0x7b79995e5f793a07bc00c21412e50ecae098e7f9';
-        const BAL = '0xb19382073c7a0addbb56ac6af1808fa49e377b75';
-        const prismaWeightedPool = prismaPoolFactory.build({
-            address: poolAddress,
-            type: 'WEIGHTED',
-            vaultVersion: 3,
-            tokens: [
-                prismaPoolTokenFactory.build({
-                    address: WETH,
-                    dynamicData: prismaPoolTokenDynamicDataFactory.build({
-                        balance: '0.009997501561329177',
-                        weight: '0.8',
-                    }),
+        // start fork to run queries against
+        const fork = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, BigInt(6411431));
+        rpcUrl = fork.rpcUrl;
+    });
+
+    describe('Weighted Pool Path', () => {
+        beforeAll(async () => {
+            // setup mock pool data
+            const WETH = prismaPoolTokenFactory.build({
+                address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '0.005',
+                    weight: '0.5',
                 }),
-                prismaPoolTokenFactory.build({
-                    address: BAL,
-                    dynamicData: prismaPoolTokenDynamicDataFactory.build({
-                        balance: '10.010000000000000000',
-                        weight: '0.2',
-                    }),
+            });
+            const BAL = prismaPoolTokenFactory.build({
+                address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75',
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '5',
+                    weight: '0.5',
                 }),
-            ],
-            dynamicData: prismaPoolDynamicDataFactory.build({ totalShares: '0.039810717055348925', swapFee: '0' }),
+            });
+            const prismaWeightedPool = prismaPoolFactory.build({
+                address: '0x03bf996c7bd45b3386cb41875761d45e27eab284',
+                type: 'WEIGHTED',
+                protocolVersion: 3,
+                tokens: [WETH, BAL],
+                dynamicData: prismaPoolDynamicDataFactory.build({
+                    totalShares: '0.158113883008415798',
+                    swapFee: '0.1',
+                }),
+            });
+
+            // get SOR paths
+            const tIn = new Token(parseFloat(chainToIdMap['SEPOLIA']), BAL.address as Address, 18);
+            const tOut = new Token(parseFloat(chainToIdMap['SEPOLIA']), WETH.address as Address, 18);
+            const amountIn = BigInt(0.1e18);
+            paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
+                prismaWeightedPool,
+            ])) as PathWithAmount[];
+
+            // build SDK swap from SOR paths
+            sdkSwap = new Swap({
+                chainId: parseFloat(chainToIdMap['SEPOLIA']),
+                paths: paths.map((path) => ({
+                    protocolVersion: 3,
+                    inputAmountRaw: path.inputAmount.amount,
+                    outputAmountRaw: path.outputAmount.amount,
+                    tokens: path.tokens.map((token) => ({
+                        address: token.address,
+                        decimals: token.decimals,
+                    })),
+                    pools: path.pools.map((pool) => pool.id),
+                })),
+                swapKind: SwapKind.GivenIn,
+            });
         });
 
-        // get SOR paths
-        const tIn = new Token(parseFloat(chainToIdMap['SEPOLIA']), BAL as Address, 18);
-        const tOut = new Token(parseFloat(chainToIdMap['SEPOLIA']), WETH as Address, 18);
-        const amountIn = BigInt(0.1e18);
-        const sorConfig = {
-            graphTraversalConfig: {
-                maxNonBoostedPathDepth: 4,
-            },
-        };
-        paths = (await sorGetPathsWithPools(
-            tIn,
-            tOut,
-            SwapKind.GivenIn,
-            amountIn,
-            [prismaWeightedPool],
-            sorConfig,
-        )) as PathWithAmount[];
+        test('SOR quote should match swap query', async () => {
+            const returnAmountSOR = getOutputAmount(paths);
+            const queryOutput = await sdkSwap.query(rpcUrl);
+            const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+        });
+    });
 
-        // build SDK swap from SOR paths
-        sdkSwap = new Swap({
-            chainId: parseFloat(chainToIdMap['SEPOLIA']),
-            paths: paths.map((path) => ({
-                vaultVersion: 3,
+    describe('Stable Pool Path', () => {
+        beforeAll(async () => {
+            // setup mock pool data
+            const poolAddress = '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c';
+            const USDC = prismaPoolTokenFactory.build({
+                address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+                token: { decimals: 6 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '500',
+                    priceRate: '1.044655414868827618',
+                }),
+            });
+            const DAI = prismaPoolTokenFactory.build({
+                address: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
+                token: { decimals: 18 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '500',
+                    priceRate: '1.100156688406029263',
+                }),
+            });
+            const prismaStablePool = prismaPoolFactory.stable('1000').build({
+                address: poolAddress,
+                tokens: [USDC, DAI],
+                dynamicData: prismaPoolDynamicDataFactory.build({
+                    totalShares: '1054.451151293881721519',
+                    swapFee: '0.01',
+                }),
+            });
+
+            // get SOR paths
+            const tIn = new Token(
+                parseFloat(chainToIdMap[USDC.token.chain]),
+                USDC.address as Address,
+                USDC.token.decimals,
+            );
+            const tOut = new Token(
+                parseFloat(chainToIdMap[DAI.token.chain]),
+                DAI.address as Address,
+                DAI.token.decimals,
+            );
+            const amountIn = BigInt(1000e6);
+            paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
+                prismaStablePool,
+            ])) as PathWithAmount[];
+
+            const swapPaths: Path[] = paths.map((path) => ({
+                protocolVersion: 3,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -73,20 +141,22 @@ describe('Balancer SOR Integration Tests', () => {
                     decimals: token.decimals,
                 })),
                 pools: path.pools.map((pool) => pool.id),
-            })),
-            swapKind: SwapKind.GivenIn,
+            }));
+
+            // build SDK swap from SOR paths
+            sdkSwap = new Swap({
+                chainId: parseFloat(chainToIdMap['SEPOLIA']),
+                paths: swapPaths,
+                swapKind: SwapKind.GivenIn,
+            });
         });
 
-        // start fork to run query against
-        const fork = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, BigInt(5949195));
-        rpcUrl = fork.rpcUrl;
-    });
-
-    test('SOR quote should match swap query', async () => {
-        const returnAmountSOR = getOutputAmount(paths);
-        const queryOutput = await sdkSwap.query(rpcUrl);
-        const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-        expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+        test('SOR quote should match swap query', async () => {
+            const returnAmountSOR = getOutputAmount(paths);
+            const queryOutput = await sdkSwap.query(rpcUrl);
+            const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+        });
     });
 
     afterAll(async () => {
