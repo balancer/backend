@@ -17,9 +17,9 @@ phases:
         runtime-versions:
             nodejs: 18
         commands:
-            - mkdir -p cached_node_modules
-            - cp -r cached_node_modules/ node_modules
+            - tar -xzf node_modules.tar.gz || true # Extract node_modules from cache if exists
             - yarn install
+            - tar -czf node_modules.tar.gz node_modules # Archive
     build:
         commands:
             - yarn generate
@@ -29,14 +29,13 @@ phases:
             - yarn cleanup-console
     post_build:
         commands:
-            - cp -r node_modules cached_node_modules
             - yarn install --prod
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn
 #      - npx graphcdn push
 cache:
     paths:
-        - 'cached_node_modules/**/*'
+        - 'node_modules.tar.gz' # Cache the archive of node_modules
 artifacts:
     files:
         - node_modules/**/*
