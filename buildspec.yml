@@ -17,16 +17,17 @@ phases:
         runtime-versions:
             nodejs: 18
         commands:
-            - mkdir -p node_modules
-            - PROJECT_NAME=$(echo $CODEBUILD_BUILD_ID | cut -d ':' -f 1)
-            - echo "Project name: $PROJECT_NAME"
-            - CACHE_LOCATION=$(aws codebuild batch-get-projects --names $PROJECT_NAME --query "projects[0].cache.location" --output text)
-            - echo "Cache location: $CACHE_LOCATION"
-            - BUCKET_NAME=$(echo $CACHE_LOCATION | cut -d '/' -f 1)
-            - echo "Bucket name: $BUCKET_NAME"
-            - aws s3 cp s3://$BUCKET_NAME/node_modules_cache/ node_modules --recursive # Download node_modules from S3 if exists
-            - yarn install
-            - aws s3 cp node_modules s3://$BUCKET_NAME/node_modules_cache/ --recursive # Upload node_modules to S3
+            - |
+                mkdir -p node_modules
+                PROJECT_NAME=$(echo $CODEBUILD_BUILD_ID | cut -d ':' -f 1)
+                echo "Project name: $PROJECT_NAME"
+                CACHE_LOCATION=$(aws codebuild batch-get-projects --names $PROJECT_NAME --query "projects[0].cache.location" --output text)
+                echo "Cache location: $CACHE_LOCATION"
+                BUCKET_NAME=$(echo $CACHE_LOCATION | cut -d '/' -f 1)
+                echo "Bucket name: $BUCKET_NAME"
+                aws s3 cp s3://$BUCKET_NAME/node_modules_cache/ node_modules --recursive
+                yarn install
+                aws s3 cp node_modules s3://$BUCKET_NAME/node_modules_cache/ --recursive
     build:
         commands:
             - yarn generate
