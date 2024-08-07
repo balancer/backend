@@ -37,7 +37,8 @@ export class MetaStablePool implements BasePool {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const tokenAmount = TokenAmount.fromHumanAmount(token, `${parseFloat(poolToken.dynamicData.balance)}`);
+            const scale18 = parseEther(poolToken.dynamicData.balance);
+            const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
             poolTokens.push(
                 new ComposableStablePoolToken(
