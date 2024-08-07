@@ -17,6 +17,7 @@ phases:
         runtime-versions:
             nodejs: 18
         commands:
+            - mkdir -p cached_node_modules
             - cp -r cached_node_modules/ node_modules
             - yarn install
     build:
