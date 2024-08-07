@@ -22,4 +22,11 @@ describe('Token service', () => {
         setRequestScopedContextValue('chainId', '34443');
         await tokenService.syncTokenContentData();
     });
+
+    test('get tokens', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '250');
+        const list = await tokenService.getTokenDefinitions(['FANTOM']);
+        expect(list.length).toBeGreaterThan(0);
+    });
 });
