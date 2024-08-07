@@ -17,12 +17,7 @@ phases:
         runtime-versions:
             nodejs: 18
         commands:
-            - mkdir -p cached_node_modules
-            - mv cached_node_modules node_modules
-            - ls node_modules/ | wc -l
             - yarn install
-            - mkdir -p cached_node_modules
-            - rsync -a node_modules/ cached_node_modules
     build:
         commands:
             - yarn generate
@@ -38,7 +33,7 @@ phases:
 #      - npx graphcdn push
 cache:
     paths:
-        - 'cached_node_modules/**/*'
+        - 'node_modules/**/*'
 artifacts:
     files:
         - node_modules/**/*
