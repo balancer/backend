@@ -87,9 +87,6 @@ export class PoolGqlLoaderService {
         // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
         await this.enrichWithUnderlyingTokenData(mappedPool);
 
-        // load underlying token info into GqlPoolTokenDisplay model
-        await this.enrichWithUnderlyingTokenData(mappedPool);
-
         return mappedPool;
     }
 
