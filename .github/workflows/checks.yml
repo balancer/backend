@@ -24,14 +24,6 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: '18.x'
-
-            - name: Cache node_modules
-              uses: actions/cache@v3
-              id: cache
-              with:
-                  path: node_modules
-                  key: node-modules
-
             - name: Install deps
               run: yarn
             - name: Generate Schema
