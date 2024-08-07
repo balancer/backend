@@ -1,5 +1,28 @@
 # backend
 
+## 1.8.2
+
+### Patch Changes
+
+-   55fa750: SOR should consider STABLE pools for v3 liquidity only
+
+## 1.8.1
+
+### Patch Changes
+
+-   7d327cf: fix token query
+
+## 1.8.0
+
+### Minor Changes
+
+-   7720c09: add support for boosted pools for v3
+
+### Patch Changes
+
+-   116cf21: expose surplus in the events query
+-   421a48e: Refactor SOR to use Balancer Maths for v3 liquidity
+
 ## 1.7.4
 
 ### Patch Changes
