@@ -17,6 +17,7 @@ phases:
         runtime-versions:
             nodejs: 18
         commands:
+            - cp -r cached_node_modules/ node_modules
             - yarn install
     build:
         commands:
@@ -27,14 +28,14 @@ phases:
             - yarn cleanup-console
     post_build:
         commands:
-            - rm -fr node_modules
+            - cp -r node_modules cached_node_modules
             - yarn install --prod
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn
 #      - npx graphcdn push
 cache:
     paths:
-        - 'node_modules/**/*'
+        - 'cached_node_modules/**/*'
 artifacts:
     files:
         - node_modules/**/*
