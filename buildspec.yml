@@ -27,7 +27,6 @@ phases:
             - yarn cleanup-console
     post_build:
         commands:
-            - rm -fr node_modules
             - yarn install --prod
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn

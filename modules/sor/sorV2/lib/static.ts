@@ -36,7 +36,11 @@ export async function sorGetPathsWithPools(
                 basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
                 break;
             case 'STABLE':
-                basePools.push(StablePool.fromPrismaPool(prismaPool));
+                {
+                    if (prismaPool.protocolVersion === 3) {
+                        basePools.push(StablePool.fromPrismaPool(prismaPool));
+                    }
+                }
                 break;
             case 'META_STABLE':
                 basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
