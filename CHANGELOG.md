@@ -1,5 +1,11 @@
 # backend
 
+## 1.9.1
+
+### Patch Changes
+
+-   a3ab47e: workaround for streamed BAL on mainnet
+
 ## 1.9.0
 
 ### Minor Changes
