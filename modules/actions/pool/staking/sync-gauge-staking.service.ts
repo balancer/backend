@@ -140,15 +140,15 @@ export const syncGaugeStakingForPools = async (
     );
 
     // TODO remove this once we have a better solution
-    let duplicateId = '';
+    let duplicateIds: string[] = [];
     for (const rate of onchainRates) {
         const duplicates = onchainRates.filter((r) => r.id === rate.id);
         if (duplicates.length > 1) {
-            duplicateId = duplicates[0].id;
+            duplicateIds.push(duplicates[0].id);
         }
     }
     const filteredOnchainRates = onchainRates.filter(
-        (rate) => rate.id !== duplicateId || parseFloat(rate.rewardPerSecond) > 0,
+        (rate) => !duplicateIds.includes(rate.id) || parseFloat(rate.rewardPerSecond) > 0,
     );
     // Prepare DB operations
     const operations: any[] = [];
