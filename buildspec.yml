@@ -18,6 +18,8 @@ phases:
             nodejs: 18
         commands:
             - yarn install
+            - rm -rf node_modules/@balancer-labs/sor/test
+            - rm -rf node_modules/@balancer-labs/sor/src
     build:
         commands:
             - yarn generate
