@@ -1106,12 +1106,15 @@ export class PoolGqlLoaderService {
                     apr: aprItem.range.min,
                     type: type,
                 });
-                aprItems.push({
-                    id: aprItem.id,
-                    title: aprItem.title,
-                    apr: aprItem.range.max - aprItem.range.min,
-                    type: 'STAKING_BOOST',
-                });
+                if (pool.type !== 'COW_AMM') {
+                    // TODO remove this when we have a better solution
+                    aprItems.push({
+                        id: aprItem.id,
+                        title: aprItem.title,
+                        apr: aprItem.range.max - aprItem.range.min,
+                        type: 'STAKING_BOOST',
+                    });
+                }
             } else {
                 aprItems.push({
                     id: aprItem.id,
