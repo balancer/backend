@@ -13,7 +13,6 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../../network/network-context.service';
 import { GaugeSubgraphService, LiquidityGaugeStatus } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import type { LiquidityGauge } from '../../../subgraphs/gauge-subgraph/generated/gauge-subgraph-types';
 import gaugeControllerAbi from '../../../vebal/abi/gaugeController.json';
 import childChainGaugeV2Abi from './abi/ChildChainGaugeV2.json';
 import childChainGaugeV1Abi from './abi/ChildChainGaugeV1.json';
@@ -23,6 +22,7 @@ import type { JsonFragment } from '@ethersproject/abi';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
+import * as Sentry from '@sentry/node';
 
 interface GaugeRate {
     /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
@@ -82,30 +82,38 @@ export const syncGaugeStakingForPools = async (
         where: { chain: networkContext.chain },
         include: { staking: { include: { gauge: { include: { rewards: true } } } } },
     });
-    const poolIds = dbPools.map((pool) => pool.id);
-    const { pools: subgraphPoolsWithGauges } = await gaugeSubgraphService.getPoolsWithGauges(poolIds);
 
-    const subgraphGauges = subgraphPoolsWithGauges
-        .map((pool) => pool.gauges)
-        .flat()
-        .filter((gauge): gauge is LiquidityGauge => !!gauge);
+    const poolAddresses = dbPools.map((pool) => pool.address);
+    const { liquidityGauges: subgraphGauges } = await gaugeSubgraphService.getAllGaugesForPoolAddresses(poolAddresses);
 
-    const uniquePreferentialIds = subgraphPoolsWithGauges
-        .filter((pool) => pool.preferentialGauge)
-        .map((pool) => pool.preferentialGauge!.id);
-
+    /*
+    TODO This can result in multiple preferential gauges for a pool 
+    because its a manual two-step process to set them (set new preferential and unset old preferential)
+    We are logginga sentry error if that happens.
+    */
     const gaugesForDb = subgraphGauges.map((gauge) => ({
         id: gauge.id,
-        poolId: gauge.poolId!,
-        // we need to set the status based on the preferentialGauge entity on the gaugePool. If it's set there, it's preferential, otherwise it's active (or killed)
+        poolId: gauge.poolId ? gauge.poolId : gauge.poolAddress,
         status: gauge.isKilled
             ? 'KILLED'
-            : !uniquePreferentialIds.includes(gauge.id)
+            : !gauge.isPreferentialGauge
             ? 'ACTIVE'
             : ('PREFERRED' as LiquidityGaugeStatus),
         version: gauge.streamer || networkContext.chain == 'MAINNET' ? 1 : (2 as 1 | 2),
         tokens: gauge.tokens || [],
+        createTime: gauge.gauge?.addedTimestamp,
     }));
+
+    for (const gauge of gaugesForDb) {
+        const preferredGaugesForPool = gaugesForDb.filter((g) => gauge.poolId === g.poolId && g.status === 'PREFERRED');
+        if (preferredGaugesForPool.length > 1) {
+            Sentry.captureException(
+                `Pool ${gauge.poolId} on ${
+                    networkContext.chain
+                } has multiple preferred gauges: ${preferredGaugesForPool.map((gauge) => gauge.id)}`,
+            );
+        }
+    }
 
     // Get tokens used for all reward tokens including native BAL address, which might not be on the list of tokens stored in the gauge
     const prismaTokens = await prisma.prismaToken.findMany({
