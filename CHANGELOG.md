@@ -1,5 +1,11 @@
 # backend
 
+## 1.8.3
+
+### Patch Changes
+
+-   29f0beb: using pool addresses to match gauges instead of pool id
+
 ## 1.8.2
 
 ### Patch Changes
