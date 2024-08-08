@@ -1,5 +1,16 @@
 # backend
 
+## 1.9.0
+
+### Minor Changes
+
+-   ad5c843: Add support for SOR paths with add/remove liquidity steps
+
+### Patch Changes
+
+-   ff80266: adding mutation to reload erc4626
+-   0cb2dbb: quick workaround to remove cow apr boost
+
 ## 1.8.3
 
 ### Patch Changes
