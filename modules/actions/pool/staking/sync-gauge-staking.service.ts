@@ -93,7 +93,7 @@ export const syncGaugeStakingForPools = async (
     */
     const gaugesForDb = subgraphGauges.map((gauge) => ({
         id: gauge.id,
-        poolId: gauge.poolId ? gauge.poolId : gauge.poolAddress,
+        poolId: gauge.poolId || gauge.poolAddress,
         status: gauge.isKilled
             ? 'KILLED'
             : !gauge.isPreferentialGauge
