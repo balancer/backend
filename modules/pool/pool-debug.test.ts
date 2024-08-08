@@ -5,6 +5,9 @@ import { userService } from '../user/user.service';
 import { tokenService } from '../token/token.service';
 import mainnet from '../../config/mainnet';
 import { prisma } from '../../prisma/prisma-client';
+import { CowAmmController } from '../controllers/cow-amm-controller';
+import { ContentController } from '../controllers/content-controller';
+import { chainToIdMap } from '../network/network-config';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -15,11 +18,94 @@ describe('pool debugging', () => {
     }, 5000000);
 
     it('sync aprs', async () => {
+        // initRequestScopedContext();
+        // setRequestScopedContextValue('chainId', '1');
+        // //only do once before starting to debug
+        // // await poolService.syncAllPoolsFromSubgraph();
+        // // await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
+        // // await CowAmmController().reloadPools('MAINNET');
+        // // await CowAmmController().syncSwaps('1');
+        // // await tokenService.updateTokenPrices(['MAINNET']);
+        // await poolService.updatePoolAprs('MAINNET');
+        // const aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' },
+        // });
+        // console.log(aprs);
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '137');
-        //only do once before starting to debug
-        // await poolService.syncAllPoolsFromSubgraph();
-        await poolService.updatePoolAprs('POLYGON');
+        setRequestScopedContextValue('chainId', chainToIdMap['MAINNET']);
+
+        await poolService.syncStakingForPools(['MAINNET']);
+        await poolService.updatePoolAprs('MAINNET');
+        let aprs = await prisma.prismaPoolAprItem.findMany({
+            where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        });
+        expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await poolService.syncChangedPools();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await ContentController().syncCategories();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().addPools('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncJoinExits('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncPools('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncSnapshots('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncSwaps('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().updateSurplusAprs();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().updateVolumeAndFees('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+        // await CowAmmController().updateVolumeAndFees('1');
+        // await CowAmmController().updateSurplusAprs();
+
+        // const aprs2 = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' },
+        // });
+        // console.log(aprs2);
     }, 5000000);
 
     it('get new apr items', async () => {
