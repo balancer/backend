@@ -104,6 +104,17 @@ describe('pool debugging', () => {
         expect(pool.staking).toBeDefined();
     }, 5000000);
 
+    it('sync gauge staking for cow', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
+        const pool = await poolService.getGqlPool('0xc9d5204e7c04a1be300b33e3979479be75132ac5', 'MAINNET');
+        expect(pool.staking).toBeDefined();
+    }, 5000000);
+
     it('sync user staking', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '1');
