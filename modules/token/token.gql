@@ -69,6 +69,26 @@ extend type Mutation {
     tokenSyncLatestFxPrices(chain: GqlChain!): String!
     tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
     tokenReloadAllTokenTypes: String!
+
+    tokenReloadErc4626Tokens(chains: [GqlChain!]!): [GqlTokenMutationResult!]!
+}
+
+"""
+Result of the poolReloadPools mutation
+"""
+type GqlTokenMutationResult {
+    """
+    The chain that was reloaded.
+    """
+    chain: GqlChain!
+    """
+    Whether it was successful or not.
+    """
+    success: Boolean!
+    """
+    The error message
+    """
+    error: String
 }
 
 type GqlTokenPrice {

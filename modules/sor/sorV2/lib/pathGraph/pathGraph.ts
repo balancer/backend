@@ -1,4 +1,4 @@
-import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
@@ -26,9 +26,11 @@ export class PathGraph {
     public buildGraph({
         pools,
         maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
+        enableAddRemoveLiquidityPaths,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
+        enableAddRemoveLiquidityPaths: boolean;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
@@ -37,9 +39,9 @@ export class PathGraph {
 
         this.buildPoolAddressMap(pools);
 
-        this.addAllTokensAsGraphNodes(pools);
+        this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
 
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
+        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, enableAddRemoveLiquidityPaths });
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -168,11 +170,19 @@ export class PathGraph {
         }
     }
 
-    private addAllTokensAsGraphNodes(pools: BasePool[]) {
+    private addAllTokensAsGraphNodes({
+        pools,
+        enableAddRemoveLiquidityPaths,
+    }: {
+        pools: BasePool[];
+        enableAddRemoveLiquidityPaths: boolean;
+    }) {
         for (const pool of pools) {
-            for (const tokenAmount of pool.tokens) {
-                const token = tokenAmount.token;
-
+            const tokens = [...pool.tokens.map((t) => t.token)];
+            if (enableAddRemoveLiquidityPaths) {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+            }
+            for (const token of tokens) {
                 if (!this.nodes.has(token.wrapped)) {
                     this.addNode(token);
                 }
@@ -183,32 +193,26 @@ export class PathGraph {
     private addTokenPairsAsGraphEdges({
         pools,
         maxPathsPerTokenPair,
+        enableAddRemoveLiquidityPaths,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
+        enableAddRemoveLiquidityPaths: boolean;
     }) {
         for (const pool of pools) {
-            for (let i = 0; i < pool.tokens.length - 1; i++) {
-                for (let j = i + 1; j < pool.tokens.length; j++) {
-                    const tokenI = pool.tokens[i].token;
-                    const tokenJ = pool.tokens[j].token;
-
+            const tokens = [...pool.tokens.map((t) => t.token)];
+            if (enableAddRemoveLiquidityPaths) {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+            }
+            for (const tokenIn of tokens) {
+                for (const tokenOut of tokens) {
+                    if (tokenIn === tokenOut) continue;
                     this.addEdge({
                         edgeProps: {
                             pool,
-                            tokenIn: tokenI,
-                            tokenOut: tokenJ,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
-                        },
-                        maxPathsPerTokenPair,
-                    });
-
-                    this.addEdge({
-                        edgeProps: {
-                            pool,
-                            tokenIn: tokenJ,
-                            tokenOut: tokenI,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenJ, tokenI),
+                            tokenIn,
+                            tokenOut,
+                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
                         },
                         maxPathsPerTokenPair,
                     });
@@ -267,6 +271,8 @@ export class PathGraph {
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
+        // TODO: double check if the hasPhantomBpt issue is not affecting v3 liquidity more frequently (considering all
+        // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
             sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
