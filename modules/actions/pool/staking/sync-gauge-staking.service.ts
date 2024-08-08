@@ -139,6 +139,17 @@ export const syncGaugeStakingForPools = async (
         rewardsMulticallerV2,
     );
 
+    // TODO remove this once we have a better solution
+    let duplicateIds: string[] = [];
+    for (const rate of onchainRates) {
+        const duplicates = onchainRates.filter((r) => r.id === rate.id);
+        if (duplicates.length > 1) {
+            duplicateIds.push(duplicates[0].id);
+        }
+    }
+    const filteredOnchainRates = onchainRates.filter(
+        (rate) => !duplicateIds.includes(rate.id) || parseFloat(rate.rewardPerSecond) > 0,
+    );
     // Prepare DB operations
     const operations: any[] = [];
 
@@ -168,8 +179,8 @@ export const syncGaugeStakingForPools = async (
         }
 
         const dbStakingGauge = allDbStakingGauges.find((stakingGauge) => stakingGauge?.id === gauge.id);
-        const workingSupply = onchainRates.find(({ id }) => `${gauge.id}-${balAddress}` === id)?.workingSupply;
-        const totalSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
+        const workingSupply = filteredOnchainRates.find(({ id }) => `${gauge.id}-${balAddress}` === id)?.workingSupply;
+        const totalSupply = filteredOnchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
         if (
             !dbStakingGauge ||
             dbStakingGauge.status !== gauge.status ||
@@ -204,7 +215,7 @@ export const syncGaugeStakingForPools = async (
     const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
     // DB operations for gauge reward tokens
-    for (const { id, rewardPerSecond } of onchainRates) {
+    for (const { id, rewardPerSecond } of filteredOnchainRates) {
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
