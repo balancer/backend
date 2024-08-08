@@ -1488,6 +1488,14 @@ input GqlPoolEventsFilter {
     typeIn: [GqlPoolEventType]
     userAddress: String
     range: GqlPoolEventsDataRange
+    """
+    USD value of the event
+    """
+    valueUSD_gt: Float
+    """
+    USD value of the event
+    """
+    valueUSD_gte: Float
 }
 
 type GqlPoolEventAmount {
