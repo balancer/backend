@@ -14,6 +14,8 @@ export const prismaPoolDynamicDataFactory = PrismaPoolDynamicDataFactory.define(
         blockNumber: 1,
         updatedAt: new Date(),
         swapFee: '0.01',
+        aggregateSwapFee: '0',
+        aggregateYieldFee: '0',
         swapEnabled: true,
         totalShares: '10000.000000000000000000',
         totalLiquidity: 10000,

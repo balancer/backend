@@ -18,6 +18,8 @@ type PoolTokenRates = [
 export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
+    aggregateSwapFee?: bigint;
+    aggregateYieldFee?: bigint;
     // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
@@ -90,6 +92,8 @@ export async function fetchPoolData(
             {
                 totalSupply: results[pointer].status === 'success' ? (results[pointer].result as bigint) : undefined,
                 swapFee: config?.staticSwapFeePercentage,
+                aggregateSwapFee: config?.aggregateSwapFeePercentage,
+                aggregateYieldFee: config?.aggregateYieldFeePercentage,
                 isPoolPaused: config?.isPoolPaused,
                 isPoolInRecoveryMode: config?.isPoolInRecoveryMode,
                 tokens: poolTokenInfo?.[0].map((token: string, i: number) => ({
