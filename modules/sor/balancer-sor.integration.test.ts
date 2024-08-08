@@ -14,16 +14,32 @@ import {
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
 } from '../../test/factories';
+import { createTestClient, Hex, http, parseEther, TestClient } from 'viem';
+import { sepolia } from 'viem/chains';
 
 describe('Balancer SOR Integration Tests', () => {
     let rpcUrl: string;
     let paths: PathWithAmount[];
     let sdkSwap: Swap;
+    let snapshot: Hex;
+    let client: TestClient;
 
     beforeAll(async () => {
         // start fork to run queries against
-        const fork = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, BigInt(6411431));
-        rpcUrl = fork.rpcUrl;
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, BigInt(6422808)));
+        client = createTestClient({
+            mode: 'anvil',
+            chain: sepolia,
+            transport: http(rpcUrl),
+        });
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     describe('Weighted Pool Path', () => {
@@ -83,7 +99,7 @@ describe('Balancer SOR Integration Tests', () => {
             const returnAmountSOR = getOutputAmount(paths);
             const queryOutput = await sdkSwap.query(rpcUrl);
             const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-            expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+            expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
         });
     });
 
@@ -96,7 +112,7 @@ describe('Balancer SOR Integration Tests', () => {
                 token: { decimals: 6 },
                 dynamicData: prismaPoolTokenDynamicDataFactory.build({
                     balance: '500',
-                    priceRate: '1.044655414868827618',
+                    priceRate: '1.046992819427282715',
                 }),
             });
             const DAI = prismaPoolTokenFactory.build({
@@ -104,7 +120,7 @@ describe('Balancer SOR Integration Tests', () => {
                 token: { decimals: 18 },
                 dynamicData: prismaPoolTokenDynamicDataFactory.build({
                     balance: '500',
-                    priceRate: '1.100156688406029263',
+                    priceRate: '1.101882285912091736',
                 }),
             });
             const prismaStablePool = prismaPoolFactory.stable('1000').build({
@@ -155,7 +171,161 @@ describe('Balancer SOR Integration Tests', () => {
             const returnAmountSOR = getOutputAmount(paths);
             const queryOutput = await sdkSwap.query(rpcUrl);
             const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-            expect(returnAmountQuery.scale18).toEqual(returnAmountSOR.scale18);
+            expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
+        });
+    });
+
+    describe('Add/Remove Liquidity Paths', () => {
+        let USDC: ReturnType<typeof prismaPoolTokenFactory.build>;
+        let WETH: ReturnType<typeof prismaPoolTokenFactory.build>;
+        let nestedPool: ReturnType<typeof prismaPoolFactory.build>;
+        let weightedPool: ReturnType<typeof prismaPoolFactory.build>;
+
+        beforeAll(async () => {
+            // setup mock pool data
+            const nestedPoolAddress = '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c';
+            USDC = prismaPoolTokenFactory.build({
+                address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+                token: { decimals: 6 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '500',
+                    priceRate: '1.046992819427282715',
+                }),
+            });
+            const DAI = prismaPoolTokenFactory.build({
+                address: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
+                token: { decimals: 18 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '500',
+                    priceRate: '1.101882285912091736',
+                }),
+            });
+            nestedPool = prismaPoolFactory.stable('1000').build({
+                address: nestedPoolAddress,
+                tokens: [USDC, DAI],
+                dynamicData: prismaPoolDynamicDataFactory.build({
+                    totalShares: '1054.451151293881721519',
+                    swapFee: '0.01',
+                }),
+            });
+
+            const weightedPoolAddress = '0x9e4fd17682b3f15e50c9fddfa08aa12974d0acf5';
+            const DAI_USDC_BPT = prismaPoolTokenFactory.build({
+                address: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
+                token: { decimals: 18 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '100',
+                }),
+            });
+            WETH = prismaPoolTokenFactory.build({
+                address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+                token: { decimals: 18 },
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '0.03',
+                }),
+            });
+            weightedPool = prismaPoolFactory.build({
+                address: weightedPoolAddress,
+                tokens: [DAI_USDC_BPT, WETH],
+                dynamicData: prismaPoolDynamicDataFactory.build({
+                    totalShares: '1.732050807568842627',
+                    swapFee: '0.01',
+                }),
+            });
+        });
+
+        // usdc [add] bpt [swap] weth
+        describe('Add Liquidity Path', () => {
+            beforeAll(async () => {
+                // get SOR paths
+                const tIn = new Token(
+                    parseFloat(chainToIdMap[USDC.token.chain]),
+                    USDC.address as Address,
+                    USDC.token.decimals,
+                );
+                const tOut = new Token(
+                    parseFloat(chainToIdMap[WETH.token.chain]),
+                    WETH.address as Address,
+                    WETH.token.decimals,
+                );
+                const amountIn = BigInt(10e6);
+                paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
+                    nestedPool,
+                    weightedPool,
+                ])) as PathWithAmount[];
+
+                const swapPaths: Path[] = paths.map((path) => ({
+                    protocolVersion: 3,
+                    inputAmountRaw: path.inputAmount.amount,
+                    outputAmountRaw: path.outputAmount.amount,
+                    tokens: path.tokens.map((token) => ({
+                        address: token.address,
+                        decimals: token.decimals,
+                    })),
+                    pools: path.pools.map((pool) => pool.id),
+                }));
+
+                // build SDK swap from SOR paths
+                sdkSwap = new Swap({
+                    chainId: parseFloat(chainToIdMap['SEPOLIA']),
+                    paths: swapPaths,
+                    swapKind: SwapKind.GivenIn,
+                });
+            });
+
+            test('SOR quote should match swap query', async () => {
+                const returnAmountSOR = getOutputAmount(paths);
+                const queryOutput = await sdkSwap.query(rpcUrl);
+                const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+                expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
+            });
+        });
+
+        // weth [swap] bpt [remove] usdc
+        describe('Remove Liquidity Path', () => {
+            beforeAll(async () => {
+                // get SOR paths
+                const tIn = new Token(
+                    parseFloat(chainToIdMap[WETH.token.chain]),
+                    WETH.address as Address,
+                    WETH.token.decimals,
+                );
+                const tOut = new Token(
+                    parseFloat(chainToIdMap[USDC.token.chain]),
+                    USDC.address as Address,
+                    USDC.token.decimals,
+                );
+                const amountIn = parseEther('0.0001');
+                paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
+                    nestedPool,
+                    weightedPool,
+                ])) as PathWithAmount[];
+
+                const swapPaths: Path[] = paths.map((path) => ({
+                    protocolVersion: 3,
+                    inputAmountRaw: path.inputAmount.amount,
+                    outputAmountRaw: path.outputAmount.amount,
+                    tokens: path.tokens.map((token) => ({
+                        address: token.address,
+                        decimals: token.decimals,
+                    })),
+                    pools: path.pools.map((pool) => pool.id),
+                }));
+
+                // build SDK swap from SOR paths
+                sdkSwap = new Swap({
+                    chainId: parseFloat(chainToIdMap['SEPOLIA']),
+                    paths: swapPaths,
+                    swapKind: SwapKind.GivenIn,
+                });
+            });
+
+            test('SOR quote should match swap query', async () => {
+                const returnAmountSOR = getOutputAmount(paths);
+                const queryOutput = await sdkSwap.query(rpcUrl);
+                const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+                expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
+            });
         });
     });
 
