@@ -86,7 +86,7 @@ export const getEvents = async (
                 }
 
                 // Handle missing block in the RPC logs by retrying the request after 1s
-                if (e.includes && e.includes('unknown block')) {
+                if (e.includes && (e.includes('unknown block') || e.includes('after last accepted block'))) {
                     console.log(`Retrying getEvents for block ${from}-${to} on ${rpcUrl}`);
                     return new Promise<Event[]>((resolve) => {
                         setTimeout(() => {

@@ -119,7 +119,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log(`user-sync-staked-balances-${this.chainId} got data from db.`);
 
         const latestBlock = await this.provider.getBlockNumber();
-        console.log(`user-sync-staked-balances-${this.chainId} got latest block.`);
+        console.log(`user-sync-staked-balances-${this.chainId} got latest block ${latestBlock}.`);
 
         // Get gauge addresses
         const gaugeAddresses = (
