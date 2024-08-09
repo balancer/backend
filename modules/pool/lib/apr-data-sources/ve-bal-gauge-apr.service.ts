@@ -87,7 +87,7 @@ export class GaugeAprService implements PoolAprService {
             const bptPrice = pool.dynamicData.totalLiquidity / totalShares;
             const gaugeTvl = totalShares > 0 ? parseFloat(gauge.totalSupply) * bptPrice : 0;
             const workingSupply = parseFloat(gauge.workingSupply);
-            const workingSupplyTvl = ((workingSupply + 0.4) / 0.4) * bptPrice;
+            const workingSupplyTvl = workingSupply === 0 ? 0 : ((workingSupply + 0.4) / 0.4) * bptPrice;
 
             const aprItems = rewards
                 .map((reward) => {
