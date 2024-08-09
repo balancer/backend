@@ -44,8 +44,8 @@ export class MetaStablePool implements BasePool {
                 new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.priceRate),
                     poolToken.index,
+                    parseEther(poolToken.dynamicData.priceRate),
                 ),
             );
         }

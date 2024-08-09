@@ -62,11 +62,11 @@ export class FxPool implements BasePool {
                 new FxPoolToken(
                     token,
                     tokenAmount.amount,
+                    poolToken.index,
                     `${poolToken.dynamicData.latestFxPrice}`,
                     // TODO query fxOracleDecimals
                     // poolToken.token.fxOracleDecimals || 8,
                     8,
-                    poolToken.index,
                 ),
             );
         }
@@ -210,8 +210,8 @@ export class FxPool implements BasePool {
 
         const givenToken =
             swapKind === SwapKind.GivenIn
-                ? new FxPoolToken(tIn.token, swapAmount, tIn.latestFXPrice, tIn.fxOracleDecimals, tIn.index)
-                : new FxPoolToken(tOut.token, swapAmount, tOut.latestFXPrice, tOut.fxOracleDecimals, tOut.index);
+                ? new FxPoolToken(tIn.token, swapAmount, tIn.index, tIn.latestFXPrice, tIn.fxOracleDecimals)
+                : new FxPoolToken(tOut.token, swapAmount, tOut.index, tOut.latestFXPrice, tOut.fxOracleDecimals);
 
         return {
             tIn,

@@ -9,7 +9,10 @@ import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-
 import { chainToIdMap } from '../../../../../network/network-config';
 
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { WeightedPoolToken } from '../../poolsV2/weighted/weightedPoolToken';
+import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
+import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
+
+type WeightedPoolToken = WeightedBasePoolToken | WeightedErc4626PoolToken;
 
 export class WeightedPoolV3 implements BasePoolV3 {
     public readonly chain: Chain;
@@ -47,14 +50,28 @@ export class WeightedPoolV3 implements BasePoolV3 {
             );
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
-            poolTokens.push(
-                new WeightedPoolToken(
-                    token,
-                    tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.weight),
-                    poolToken.index,
-                ),
-            );
+            if (poolToken.token.underlyingTokenAddress) {
+                // erc4626 token
+                poolTokens.push(
+                    new WeightedErc4626PoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.priceRate),
+                        poolToken.token.underlyingTokenAddress,
+                        parseEther(poolToken.dynamicData.weight),
+                    ),
+                );
+            } else {
+                poolTokens.push(
+                    new WeightedBasePoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.weight),
+                    ),
+                );
+            }
         }
 
         return new WeightedPoolV3(
@@ -91,7 +108,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new WeightedPoolToken(bpt, totalShares, WAD, -1));
+        this.tokenMap.set(bpt.address, new WeightedBasePoolToken(bpt, totalShares, -1, 0n));
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {

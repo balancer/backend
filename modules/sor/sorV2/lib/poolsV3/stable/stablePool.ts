@@ -1,7 +1,7 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 
-import { BigintIsh, MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { AddKind, RemoveKind, Stable, StableState, Vault } from '@balancer-labs/balancer-maths';
+import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { AddKind, RemoveKind, StableState, Vault } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
@@ -11,30 +11,10 @@ import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-
 
 import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
+import { StableBasePoolToken } from './stableBasePoolToken';
+import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
 
-export class StablePoolToken extends TokenAmount {
-    public readonly rate: bigint;
-    public readonly index: number;
-
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
-        super(token, amount);
-        this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-}
+type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
 
 export class StablePool implements BasePoolV3 {
     public readonly chain: Chain;
@@ -67,14 +47,26 @@ export class StablePool implements BasePoolV3 {
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(
-                new StablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.priceRate),
-                    poolToken.index,
-                ),
-            );
+            if (poolToken.token.underlyingTokenAddress) {
+                poolTokens.push(
+                    new Erc4626PoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.priceRate),
+                        poolToken.token.underlyingTokenAddress,
+                    ),
+                );
+            } else {
+                poolTokens.push(
+                    new StableBasePoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.priceRate),
+                    ),
+                );
+            }
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
@@ -115,7 +107,7 @@ export class StablePool implements BasePoolV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new StablePoolToken(bpt, totalShares, WAD, -1));
+        this.tokenMap.set(bpt.address, new StableBasePoolToken(bpt, totalShares, -1, WAD));
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {

@@ -7,7 +7,7 @@ import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { WeightedPoolToken } from './weightedPoolToken';
+import { WeightedBasePoolToken as WeightedPoolToken } from './weightedBasePoolToken';
 
 export class WeightedPool implements BasePool {
     public readonly chain: Chain;
@@ -48,8 +48,8 @@ export class WeightedPool implements BasePool {
                 new WeightedPoolToken(
                     token,
                     tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.weight),
                     poolToken.index,
+                    parseEther(poolToken.dynamicData.weight),
                 ),
             );
         }

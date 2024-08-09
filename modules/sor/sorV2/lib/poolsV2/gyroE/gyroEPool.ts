@@ -11,16 +11,15 @@ import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
+import { BasePoolToken } from '../basePoolToken';
 
-export class GyroEPoolToken extends TokenAmount {
+export class GyroEPoolToken extends BasePoolToken {
     public readonly rate: bigint;
-    public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
-        super(token, amount);
+    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
+        super(token, amount, index);
         this.rate = BigInt(rate);
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        this.index = index;
     }
 
     public increase(amount: bigint): TokenAmount {
@@ -73,7 +72,7 @@ export class GyroEPool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
             const tokenRate = poolToken.dynamicData.priceRate;
 
-            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, parseEther(tokenRate), poolToken.index));
+            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate)));
         }
 
         const gyroData = pool.typeData as GyroData;

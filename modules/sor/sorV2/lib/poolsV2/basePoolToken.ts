@@ -1,12 +1,10 @@
 import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
 
-export class WeightedPoolToken extends TokenAmount {
-    public readonly weight: bigint;
+export class BasePoolToken extends TokenAmount {
     public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
+    public constructor(token: Token, amount: BigintIsh, index: number) {
         super(token, amount);
-        this.weight = BigInt(weight);
         this.index = index;
     }
 
