@@ -337,15 +337,15 @@ export class DatastudioService {
 
         console.log(`Appending ${allPoolDataRows.length} rows to ${databaseTabName}.`);
 
-        // this.appendDataInSheet(databaseTabName, sheetId, 'A1:Z1', allPoolDataRows, jwtClient);
+        this.appendDataInSheet(databaseTabName, sheetId, 'A1:Z1', allPoolDataRows, jwtClient);
 
         console.log(`Appending ${allPoolCompositionRows.length} rows to ${compositionTabName}.`);
 
-        // this.appendDataInSheet(compositionTabName, sheetId, `A1:L1`, allPoolCompositionRows, jwtClient);
+        this.appendDataInSheet(compositionTabName, sheetId, `A1:L1`, allPoolCompositionRows, jwtClient);
 
         console.log(`Appending ${allEmissionDataRows.length} rows to ${emissionDataTabName}.`);
 
-        // this.appendDataInSheet(emissionDataTabName, sheetId, 'A1:J1', allEmissionDataRows, jwtClient);
+        this.appendDataInSheet(emissionDataTabName, sheetId, 'A1:J1', allEmissionDataRows, jwtClient);
     }
 
     private async appendDataInSheet(
