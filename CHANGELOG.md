@@ -1,5 +1,11 @@
 # backend
 
+## 1.9.2
+
+### Patch Changes
+
+-   aff6246: update env file
+
 ## 1.9.1
 
 ### Patch Changes
