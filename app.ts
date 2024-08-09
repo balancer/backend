@@ -1,9 +1,7 @@
 import { loadRestRoutes } from './modules/common/loadRestRoutes';
 import { env } from './app/env';
 import createExpressApp from 'express';
-import { corsMiddleware } from './app/middleware/corsMiddleware';
-import { contextMiddleware } from './app/middleware/contextMiddleware';
-import { sessionMiddleware } from './app/middleware/sessionMiddleware';
+import { corsMiddleware, contextMiddleware, sessionMiddleware, lowerCaseMiddleware } from './app/middleware';
 import * as http from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import {
@@ -80,6 +78,7 @@ async function startServer() {
     app.use(corsMiddleware);
     app.use(contextMiddleware);
     app.use(sessionMiddleware);
+    app.use(lowerCaseMiddleware);
 
     loadRestRoutes(app);
 
