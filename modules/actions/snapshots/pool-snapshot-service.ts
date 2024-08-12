@@ -78,7 +78,7 @@ export class PoolSnapshotService {
             if (!latestSyncedSnapshot && pool.createTime < daysAgoStartOfDay) {
                 // in this instance, this pool should already have snapshots stored.
                 // since that's not the case, we reload from the subgraph and bail.
-                await this.loadAllSnapshotsForPools([pool.id]);
+                await this.loadAllSnapshotsForPools([pool.id], false);
                 continue;
             }
 
@@ -122,7 +122,7 @@ export class PoolSnapshotService {
         }
     }
 
-    public async loadAllSnapshotsForPools(poolIds: string[]) {
+    public async loadAllSnapshotsForPools(poolIds: string[], reload: boolean) {
         //assuming the pool does not have more than 5,000 snapshots, we should be ok.
         const allSnapshots = await this.balancerSubgraphService.legacyService.getAllPoolSnapshots({
             where: { pool_in: poolIds },
@@ -139,20 +139,23 @@ export class PoolSnapshotService {
                 select: { address: true, index: true },
             });
 
-            await prisma.prismaPoolSnapshot.createMany({
-                data: snapshots.map((snapshot, index) => {
-                    let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].swapVolume;
-                    let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].swapFees;
+            await prisma.$transaction([
+                ...((reload && [prisma.prismaPoolSnapshot.deleteMany({ where: { poolId, chain: this.chain } })]) || []),
+                prisma.prismaPoolSnapshot.createMany({
+                    data: snapshots.map((snapshot, index) => {
+                        let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].swapVolume;
+                        let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].swapFees;
 
-                    return this.getPrismaPoolSnapshotFromSubgraphData(
-                        snapshot,
-                        prevTotalSwapVolume,
-                        prevTotalSwapFee,
-                        tokens,
-                    );
+                        return this.getPrismaPoolSnapshotFromSubgraphData(
+                            snapshot,
+                            prevTotalSwapVolume,
+                            prevTotalSwapFee,
+                            tokens,
+                        );
+                    }),
+                    skipDuplicates: true,
                 }),
-                skipDuplicates: true,
-            });
+            ]);
         }
     }
 
@@ -300,7 +303,8 @@ export class PoolSnapshotService {
             const prices = this.prices;
             try {
                 totalLiquidity = snapshot.amounts.reduce((acc, amount, index) => {
-                    const address = poolTokens.findIndex((token) => token.index === index);
+                    const addressIndex = poolTokens.findIndex((token) => token.index === index);
+                    const { address } = poolTokens[addressIndex];
                     if (!prices[address]) {
                         throw 'Price not found';
                     }
@@ -319,7 +323,7 @@ export class PoolSnapshotService {
             poolId: snapshot.pool.id,
             timestamp: snapshot.timestamp,
             protocolVersion: 2,
-            totalLiquidity: parseFloat(snapshot.liquidity),
+            totalLiquidity: totalLiquidity,
             totalShares: snapshot.totalShares,
             totalSharesNum: parseFloat(snapshot.totalShares),
             totalSwapVolume: parseFloat(snapshot.swapVolume),

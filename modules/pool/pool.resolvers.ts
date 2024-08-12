@@ -224,7 +224,7 @@ const balancerResolvers: Resolvers = {
         poolLoadSnapshotsForPools: async (parent, { poolIds, reload }, context) => {
             isAdminRoute(context);
 
-            await SnapshotsController().syncSnapshotForPools(poolIds, networkContext.chainId);
+            await SnapshotsController().syncSnapshotForPools(poolIds, networkContext.chainId, reload || false);
 
             return 'success';
         },
