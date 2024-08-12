@@ -1,0 +1,292 @@
+type APRGroupHistoricSchema {
+    breakdown: JSON!
+    timestamp: Int!
+    total: Float!
+}
+
+type APRGroupSchema {
+    breakdown: [APRSchema!]!
+    id: ID!
+    projectedBreakdown: [APRSchema!]
+    projectedTotal: Float
+    stakingToken: TokenSchema!
+    total: Float!
+    totalHistoric(range: DateRangeIntervalInput!): [APRGroupHistoricSchema!]!
+}
+
+type APRSchema {
+    id: ID!
+
+    """
+    Yield on underlying tokens (e.g. stETH)
+    """
+    isBalancerYield: Boolean
+
+    """
+    Extra rewards on Aura
+    """
+    isExtraAuraRewards: Boolean
+
+    """
+    Extra claimable rewards forwarded from Balancer
+    """
+    isExtraBalancerRewards: Boolean
+    name: String!
+    token: TokenSchema
+    value: Float!
+}
+
+type AccountRewardSchema {
+    earned: BigNumber!
+    earnedUSD: Float!
+    reward: RewardSchema!
+}
+
+type AccountSchema {
+    id: String!
+    lockerAccount: LockerAccountSchema
+    meditators: [Int!]!
+    poolAccounts: [PoolAccountSchema!]!
+    vaultAccount: VaultAccountSchema
+}
+
+"""
+Ethereum address
+"""
+scalar Address
+
+type AuraAccountEdge {
+    node: AccountSchema!
+}
+
+type AuraAccounts {
+    edges: [AuraAccountEdge!]!
+}
+
+type BalancerPoolSchema {
+    balancerTokenIds: [Address!]!
+    data: JSON!
+    factory: Address
+    poolAPRs: JSON!
+    totalLiquidity: JSON!
+}
+
+"""
+Big Number
+"""
+scalar BigNumber
+
+"""
+Block
+"""
+type BlockSchema {
+    chainId: Int!
+    number: Int!
+    timestamp: Int!
+}
+
+input DateRangeIntervalInput {
+    end: Int!
+    frequency: Int!
+    start: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ExtraRewardSchema {
+    amount: BigNumber!
+    funded: [FundedSchema!]!
+    id: ID!
+    queued: [QueuedSchema!]!
+    token: TokenSchema!
+}
+
+type FundedSchema {
+    amount: BigNumber!
+    epoch: BigNumber!
+    id: ID!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type LockerAccountLockSchema {
+    amount: BigNumber!
+    id: ID!
+    relockTime: DateTime!
+    unlockTime: DateTime!
+}
+
+type LockerAccountSchema {
+    balance: BigNumber!
+    balanceLocked: BigNumber!
+    balanceNextUnlockIndex: BigNumber!
+    currentVotingPower: BigNumber!
+    delegate: Address
+    id: Address!
+    locked: BigNumber!
+    locks: [LockerAccountLockSchema!]!
+    nextVotingPower: BigNumber!
+    rewards: [AccountRewardSchema!]!
+    total: BigNumber!
+    unlockable: BigNumber!
+}
+
+type LockerSchema {
+    account(id: String!): LockerAccountSchema
+    address: Address!
+    aprs: APRGroupSchema!
+    chainId: Int!
+    epoch: Int!
+    id: ID!
+    lockedSupply: BigNumber!
+    rewards: [RewardSchema!]!
+    totalLocked: BigNumber!
+}
+
+type Mutation {
+    createHistoricVaultAPRs(chainId: Int! = 1, range: DateRangeIntervalInput!): Boolean!
+    generateAdminToken(password: String!): String!
+    removeHistoricVaultAPRs(chainId: Int! = 1, range: DateRangeIntervalInput!): Boolean!
+    syncAllMeditators: Boolean!
+    updatePrices: Boolean!
+    updateVaultDepositTransactions: Boolean!
+}
+
+input PagingInput {
+    first: Int!
+}
+
+type PoolAccountSchema {
+    id: ID!
+    pool: PoolSchema!
+    rewards: [AccountRewardSchema!]!
+    staked: BigNumber!
+}
+
+type PoolSchema {
+    account(id: String!): PoolAccountSchema
+    addedAt: DateTime
+    address: Address!
+    aprs: APRGroupSchema!
+    balancerPool: BalancerPoolSchema
+    balancerPoolId: String
+    boost: Float
+    chainId: Int!
+    depositToken: TokenSchema!
+    extraRewards: [ExtraRewardSchema!]!
+    gauge: String
+    id: ID!
+    isPhantomPool: Boolean!
+    isShutdown: Boolean!
+    lpToken: TokenSchema!
+    name: String!
+    poolId: ID!
+    prevPoolIds: [ID!]!
+    price: Float
+    rewardPool: Address!
+    rewards: [RewardSchema!]!
+    stash: String
+    token: TokenSchema!
+
+    """
+    Underlying token weights
+    """
+    tokenWeights: [Float!]!
+
+    """
+    Underlying tokens
+    """
+    tokens: [TokenSchema!]!
+    totalStaked: BigNumber!
+    totalSupply: BigNumber!
+    tvl: Float
+    version: Int!
+}
+
+type Query {
+    account(chainId: Int! = 1, id: String!): AccountSchema
+    accounts(ids: [String!]): [AccountSchema!]!
+    allBlocks(chainIds: [Int!] = [1, 10, 100, 137, 252, 1101, 8453, 42161, 43114]): [BlockSchema!]
+    allPools(chainIds: [Int!] = [1, 10, 100, 137, 252, 1101, 8453, 42161, 43114]): [PoolSchema!]!
+    allSystem(chainIds: [Int!] = [1, 10, 100, 137, 252, 1101, 8453, 42161, 43114]): [SystemSchema!]
+    allTokens: [TokenSchema!]!
+    allVaults(chainIds: [Int!]! = [1, 137, 8453, 42161]): [VaultSchema!]
+    auraAccounts(paging: PagingInput!): AuraAccounts! @deprecated(reason: "Deprecated in favour of `accounts` query")
+    block(chainId: Int! = 1): BlockSchema!
+    locker(chainId: Int = 1): LockerSchema
+    lockers(chainIds: [Int!] = [1, 8453]): [LockerSchema!]!
+    pool(chainId: Int = 1, id: String!): PoolSchema
+    pools(chainId: Int = 1): [PoolSchema!]!
+    system(chainId: Int = 1): SystemSchema
+    token(address: String!, chainId: Int = 1): TokenSchema
+    tokens(chainId: Int = 1): [TokenSchema!]!
+    vault(chainId: Int! = 1): VaultSchema
+}
+
+type QueuedSchema {
+    amount: BigNumber!
+    epoch: BigNumber!
+    id: ID!
+}
+
+type RewardSchema {
+    address: Address
+    expired: Boolean!
+    id: ID!
+    isMintedAura: Boolean
+    lastUpdateTime: Int!
+    periodFinish: Int!
+    queuedRewards: BigNumber!
+    rewardPerTokenStored: BigNumber!
+    rewardPerYear: BigNumber!
+    rewardRate: BigNumber!
+    token: TokenSchema!
+}
+
+type SystemSchema {
+    auraBalTotalSupply: BigNumber!
+    chainId: Int!
+    isShutdown: Boolean!
+}
+
+"""
+ERC20 Token
+"""
+type TokenSchema {
+    address: Address!
+    chainId: Int!
+    decimals: Int!
+    l1Token: TokenSchema
+    name: String!
+    price: Float
+    symbol: String!
+}
+
+type VaultAccountSchema {
+    id: Address!
+    rewards: [AccountRewardSchema!]!
+    shares: BigNumber!
+    staked: BigNumber!
+}
+
+type VaultSchema {
+    account(id: String!): VaultAccountSchema
+    address: Address!
+    aprs: APRGroupSchema!
+    asset: TokenSchema!
+    chainId: Int!
+    historicAPRs(range: DateRangeIntervalInput!): [APRGroupHistoricSchema!]!
+    id: ID!
+    price: Float
+    rewards: [RewardSchema!]!
+    token: TokenSchema!
+    totalSupply: BigNumber!
+    totalUnderlying: BigNumber!
+    tvl: Float
+}
