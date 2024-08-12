@@ -1525,6 +1525,10 @@ interface GqlPoolEvent {
     """
     surplus: GqlPoolEventAmount
     """
+    Swap fee
+    """
+    fee: GqlPoolEventAmount
+    """
     List of added or removed token amounts to the pool
     """
     tokens: [GqlPoolEventAmount!]
@@ -1546,6 +1550,7 @@ type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
     tokenIn: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenIn instead")
     tokenOut: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenOut instead")
     surplus: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
+    fee: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
     tokens: [GqlPoolEventAmount!] @deprecated(reason: "Use flat .tokens instead")
 }
 
@@ -1565,5 +1570,6 @@ type GqlPoolSwapEventV3 implements GqlPoolEvent {
     tokenIn: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenIn instead")
     tokenOut: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenOut instead")
     surplus: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
+    fee: GqlPoolEventAmount @deprecated(reason: "Use flat .fee instead")
     tokens: [GqlPoolEventAmount!] @deprecated(reason: "Use flat .tokens instead")
 }

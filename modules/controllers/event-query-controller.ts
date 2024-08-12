@@ -41,6 +41,10 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
             ...event.payload.tokenOut,
             valueUSD: event.valueUSD,
         },
+        fee: {
+            ...event.payload.fee,
+            valueUSD: event.valueUSD,
+        },
     };
 };
 
