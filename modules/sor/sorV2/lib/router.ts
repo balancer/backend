@@ -41,7 +41,7 @@ export class Router {
         // Check if PathWithAmount is valid (each hop pool swap limit)
         paths.forEach((path) => {
             try {
-                quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
+                quotePaths.push(new PathWithAmount(path.tokens, path.pools, path.isBuffer, swapAmount));
             } catch {
                 // logger.trace('Invalid path:');
                 // logger.trace(path.tokens.map((token) => token.symbol).join(' -> '));
@@ -128,8 +128,13 @@ export class Router {
         const swapAmountUp = swapAmount.mulDownFixed(ratio);
         const swapAmountDown = swapAmount.sub(swapAmountUp);
 
-        const pathUp = new PathWithAmount(bestPath.tokens, bestPath.pools, swapAmountUp);
-        const pathDown = new PathWithAmount(secondBestPath.tokens, secondBestPath.pools, swapAmountDown);
+        const pathUp = new PathWithAmount(bestPath.tokens, bestPath.pools, bestPath.isBuffer, swapAmountUp);
+        const pathDown = new PathWithAmount(
+            secondBestPath.tokens,
+            secondBestPath.pools,
+            secondBestPath.isBuffer,
+            swapAmountDown,
+        );
 
         return [pathUp, pathDown];
     }
@@ -167,8 +172,13 @@ export class Router {
         const swapAmountNormUp = swapAmount.mulDownFixed(bestPathNL).divDownFixed(bestPathNL + secondBestPathNL);
         const swapAmountNormDown = swapAmount.sub(swapAmountNormUp);
 
-        const pathNormUp = new PathWithAmount(bestPath.tokens, bestPath.pools, swapAmountNormUp);
-        const pathNormDown = new PathWithAmount(secondBestPath.tokens, secondBestPath.pools, swapAmountNormDown);
+        const pathNormUp = new PathWithAmount(bestPath.tokens, bestPath.pools, bestPath.isBuffer, swapAmountNormUp);
+        const pathNormDown = new PathWithAmount(
+            secondBestPath.tokens,
+            secondBestPath.pools,
+            secondBestPath.isBuffer,
+            swapAmountNormDown,
+        );
 
         return [pathNormUp, pathNormDown];
     }

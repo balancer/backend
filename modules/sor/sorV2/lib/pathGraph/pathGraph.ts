@@ -2,6 +2,8 @@ import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
+import { BufferPool } from '../poolsV3/buffer/bufferPool';
+import { Erc4626PoolToken } from '../poolsV2/erc4626PoolToken';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
@@ -36,6 +38,8 @@ export class PathGraph {
         this.nodes = new Map();
         this.edges = new Map();
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
+
+        this.insertBufferPools(pools); // Add buffer pools to the pool list
 
         this.buildPoolAddressMap(pools);
 
@@ -122,6 +126,7 @@ export class PathGraph {
             return new PathLocal(
                 pathTokens,
                 path.map((segment) => segment.pool),
+                path.map((segment) => segment.isBuffer),
             );
         });
     }
@@ -164,6 +169,19 @@ export class PathGraph {
         return filtered;
     }
 
+    private insertBufferPools(pools: BasePool[]) {
+        const bufferPools = new Set<BufferPool>();
+        for (const pool of pools) {
+            for (const token of pool.tokens) {
+                if ('underlyingTokenAddress' in token) {
+                    const erc4626Token = token as Erc4626PoolToken;
+                    bufferPools.add(BufferPool.fromErc4626Token(erc4626Token));
+                }
+            }
+        }
+        pools.push(...bufferPools);
+    }
+
     private buildPoolAddressMap(pools: BasePool[]) {
         for (const pool of pools) {
             this.poolAddressMap.set(pool.address, pool);
@@ -179,8 +197,8 @@ export class PathGraph {
     }) {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
-            if (enableAddRemoveLiquidityPaths) {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+            if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes
             }
             for (const token of tokens) {
                 if (!this.nodes.has(token.wrapped)) {
@@ -202,7 +220,7 @@ export class PathGraph {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
             if (enableAddRemoveLiquidityPaths) {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes)
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Also consider BPT token pairs
             }
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
@@ -213,6 +231,7 @@ export class PathGraph {
                             tokenIn,
                             tokenOut,
                             normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
+                            isBuffer: pool.poolType === 'Buffer',
                         },
                         maxPathsPerTokenPair,
                     });
