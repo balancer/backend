@@ -78,6 +78,8 @@ model PrismaPoolDynamicData {
     protocolYieldFee        String?             
     protocolSwapFee         String              @default("0")
     swapFee                 String
+    aggregateSwapFee        String              @default("0")
+    aggregateYieldFee       String              @default("0")
     swapEnabled             Boolean
     isPaused                Boolean             @default(false)
     isInRecoveryMode        Boolean             @default(false)

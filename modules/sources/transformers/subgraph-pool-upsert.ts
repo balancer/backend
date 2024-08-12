@@ -32,6 +32,8 @@ export const subgraphPoolUpsert = (
             totalSharesNum: Number(formatUnits(onchainPoolData.totalSupply, 18)),
             blockNumber: Number(blockNumber || 0),
             swapFee: formatEther(onchainPoolData.swapFee),
+            aggregateSwapFee: formatEther(onchainPoolData.aggregateSwapFee || 0n),
+            aggregateYieldFee: formatEther(onchainPoolData.aggregateYieldFee || 0n),
             swapEnabled: true,
             holdersCount: Number(subgraphPoolData.holdersCount),
             totalLiquidity: 0,

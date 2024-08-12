@@ -384,6 +384,8 @@ type GqlPoolDynamicData {
 
     #fields that change rarely
     swapFee: BigDecimal!
+    aggregateSwapFee: BigDecimal!
+    aggregateYieldFee: BigDecimal!
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!
