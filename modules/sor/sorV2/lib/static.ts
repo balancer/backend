@@ -14,6 +14,7 @@ export async function sorGetPathsWithPools(
     swapKind: SwapKind,
     swapAmountEvm: bigint,
     prismaPools: PrismaPoolWithDynamic[],
+    protocolVersion: number,
     swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
 ): Promise<PathWithAmount[] | null> {
     const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
@@ -69,7 +70,7 @@ export async function sorGetPathsWithPools(
         tokenIn,
         tokenOut,
         basePools,
-        prismaPools[0].protocolVersion === 3,
+        protocolVersion === 3,
         swapOptions?.graphTraversalConfig,
     );
 

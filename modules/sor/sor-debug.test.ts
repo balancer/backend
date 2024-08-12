@@ -1,14 +1,13 @@
 // yarn vitest sor-debug.test.ts
 import { Chain } from '@prisma/client';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
-import { poolService } from '../pool/pool.service';
-import { sorService } from './sor.service';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { PoolController } from '../controllers/pool-controller'; // Add this import statement
+import { sorService } from './sor.service';
 
 describe('sor debugging', () => {
     it('sor v2 arb eth->usdc', async () => {
-        const chain = Chain.MAINNET;
+        const chain = Chain.FANTOM;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -20,12 +19,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xba100000625a3754423978a60c9317c58a424e3d', // BAL
-            tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+            tokenIn: '0xf24bcf4d1e507740041c9cfd2dddb29585adce1e', // BAL
+            tokenOut: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83', // WETH
             swapType: 'EXACT_IN',
-            swapAmount: '1000000',
+            swapAmount: '1',
             queryBatchSwap: false,
-            useProtocolVersion: 2,
+            // useProtocolVersion: 2,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
@@ -37,7 +36,7 @@ describe('sor debugging', () => {
         expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
     }, 5000000);
 
-    it.only('sor v3 sepolia eth->usdc', async () => {
+    it('sor v3 sepolia eth->usdc', async () => {
         const chain = Chain.SEPOLIA;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
