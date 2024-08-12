@@ -1,5 +1,7 @@
 import config from '../../config';
+import { prisma } from '../../prisma/prisma-client';
 import { syncSnapshotsV3, syncSnapshotsV2, fillMissingSnapshotsV3, fillMissingSnapshotsV2 } from '../actions/snapshots';
+import { PoolSnapshotService } from '../actions/snapshots/pool-snapshot-service';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
@@ -34,6 +36,35 @@ export function SnapshotsController(tracer?: any) {
 
             const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
             const entries = await syncSnapshotsV2(subgraphClient, chain);
+            return entries;
+        },
+        async syncSnapshotForPools(poolIds: string[], chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const prices = await prisma.prismaTokenCurrentPrice
+                .findMany({
+                    where: {
+                        chain,
+                    },
+                    select: {
+                        tokenAddress: true,
+                        price: true,
+                    },
+                })
+                .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
+
+            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
+            const service = new PoolSnapshotService(subgraphClient, chain, prices);
+            const entries = await service.loadAllSnapshotsForPools(poolIds);
+
             return entries;
         },
         async syncSnapshotsV3(chainId: string) {

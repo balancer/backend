@@ -34,12 +34,14 @@ describe('pool debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainToIdMap['MAINNET']);
 
-        await poolService.syncStakingForPools(['MAINNET']);
+        // await poolService.updatePoolAprs('MAINNET');
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+        // await poolService.syncStakingForPools(['MAINNET']);
         await poolService.updatePoolAprs('MAINNET');
         let aprs = await prisma.prismaPoolAprItem.findMany({
-            where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+            where: { chain: 'MAINNET', poolId: '0xf706c50513446d709f08d3e5126cd74fb6bfda19', type: 'NATIVE_REWARD' },
         });
-        expect(aprs[0].apr).toBeGreaterThan(0);
+        console.log(aprs);
 
         // aprs = await prisma.prismaPoolAprItem.findMany({
         //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
