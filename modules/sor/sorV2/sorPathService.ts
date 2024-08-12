@@ -49,8 +49,10 @@ class SorPathService implements SwapService {
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
+        const protocolVersion = 2;
+
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain, 2);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -66,7 +68,15 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
@@ -150,7 +160,15 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
                 // TODO: we should be able to refactor this 'retry' logic so it's configurable from outside instead of hardcoding it here
