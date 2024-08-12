@@ -21,6 +21,9 @@ export interface YbAprConfig {
         url: string;
         token: string;
     };
+    dforce?: {
+        token: string;
+    };
     etherfi?: string;
     sveth?: boolean;
     defaultHandlers?: DefaultHandlerAprConfig;
