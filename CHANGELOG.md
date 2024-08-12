@@ -1,5 +1,12 @@
 # backend
 
+## 1.9.3
+
+### Patch Changes
+
+-   cd94cd1: Using API prices to calculate totalLiquidity in snapshots
+-   31d93a1: passing protocol version to sor lib
+
 ## 1.9.2
 
 ### Patch Changes
