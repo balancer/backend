@@ -6,7 +6,7 @@ extend type Query {
 }
 
 """
-Collection of hook specific data
+Collection of hook specific data in 0.05% format
 """
 type HookData {
     swapFeePercentage: String
@@ -20,6 +20,9 @@ Hook data
 type Hook {
     address: String!
     chain: GqlChain!
+    """
+    True when hook can change the amounts send to the vault. Necessary to deduct the fees.
+    """
     enableHookAdjustedAmounts: Boolean!
     shouldCallAfterSwap: Boolean!
     shouldCallBeforeSwap: Boolean!
@@ -30,6 +33,12 @@ type Hook {
     shouldCallAfterRemoveLiquidity: Boolean!
     shouldCallBeforeRemoveLiquidity: Boolean!
     shouldCallComputeDynamicSwapFee: Boolean!
+    """
+    Data points changing over time
+    """
     dynamicData: HookData
+    """
+    List of pools using the hook
+    """
     poolsIds: [String]
 }
