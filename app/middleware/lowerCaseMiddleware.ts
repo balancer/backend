@@ -1,29 +1,33 @@
 import { NextFunction, Request, Response, json } from 'express';
 import { parse, print, visit } from 'graphql';
 
-const PARAMS_REGEX =
+const LOWER_REGEX =
     /id|poolId|poolIdIn|address|addresses|userAddress|tokensIn|tokensNotIn|tokenInIn|tokenOutIn|tokenIn|tokenOut|idIn|idNotIn/i;
+
+const UPPER_REGEX = /categories/i;
 
 // Recursively convert values of poolId, address, id to lowercase
 // Used when passing variables to queries
-const convertToLowerCase = (obj: Record<string, any>) => {
+const convertLetterCase = (obj: Record<string, any>) => {
     for (let key in obj) {
-        if (typeof obj[key] === 'string' && PARAMS_REGEX.test(key)) {
+        if (typeof obj[key] === 'string' && LOWER_REGEX.test(key)) {
             obj[key] = obj[key].toLowerCase();
+        } else if (typeof obj[key] === 'string' && UPPER_REGEX.test(key)) {
+            obj[key] = obj[key].toUpperCase();
         } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-            convertToLowerCase(obj[key]);
+            convertLetterCase(obj[key]);
         }
     }
 };
 
-const lowerCaseQueryParams = (query: string): string => {
+const casedQueryParams = (query: string): string => {
     // Parse the query into an AST
     const ast = parse(query);
 
     // Visit each node in the AST
     const modifiedAst = visit(ast, {
         ObjectField(node) {
-            if (node.value.kind === 'ListValue' && PARAMS_REGEX.test(node.name.value)) {
+            if (node.value.kind === 'ListValue' && LOWER_REGEX.test(node.name.value)) {
                 const values = node.value.values.map((value) => {
                     if (value.kind === 'StringValue') {
                         return {
@@ -40,18 +44,47 @@ const lowerCaseQueryParams = (query: string): string => {
                         values,
                     },
                 };
+            } else if (node.value.kind === 'ListValue' && UPPER_REGEX.test(node.name.value)) {
+                const values = node.value.values.map((value) => {
+                    if (value.kind === 'StringValue') {
+                        return {
+                            ...value,
+                            value: value.value.toUpperCase(),
+                        };
+                    }
+                    return value;
+                });
+                return {
+                    ...node,
+                    value: {
+                        ...node.value,
+                        values,
+                    },
+                };
             }
         },
         Argument(node) {
-            if (PARAMS_REGEX.test(node.name.value)) {
+            if (LOWER_REGEX.test(node.name.value)) {
                 if (node.value.kind === 'StringValue') {
                     // Convert the argument value to lowercase
-                    const lowercasedValue = node.value.value.toLowerCase();
+                    const value = node.value.value.toLowerCase();
                     return {
                         ...node,
                         value: {
                             ...node.value,
-                            value: lowercasedValue,
+                            value,
+                        },
+                    };
+                }
+            } else if (UPPER_REGEX.test(node.name.value)) {
+                if (node.value.kind === 'StringValue') {
+                    // Convert the argument value to lowercase
+                    const value = node.value.value.toUpperCase();
+                    return {
+                        ...node,
+                        value: {
+                            ...node.value,
+                            value,
                         },
                     };
                 }
@@ -79,12 +112,12 @@ export async function lowerCaseMiddleware(req: Request, res: Response, next: Nex
             const { query, variables } = req.body;
 
             if (variables) {
-                convertToLowerCase(variables);
+                convertLetterCase(variables);
             }
 
             if (query) {
                 // Replacing the original query with the lowercase one
-                req.body.query = lowerCaseQueryParams(query);
+                req.body.query = casedQueryParams(query);
             }
         }
 
