@@ -139,7 +139,7 @@ export function EventsQueryController(tracer?: any) {
             });
 
             const results = dbEvents.map((event) =>
-                event.type === 'SWAP' && event.protocolVersion === 1
+                event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
                     ? parseSwap(event as SwapEvent)
