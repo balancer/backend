@@ -2,8 +2,8 @@ import {
     GqlPoolEventsDataRange,
     GqlPoolAddRemoveEventV3,
     GqlPoolSwapEventV3,
-    GqlPoolEvent,
     QueryPoolEventsArgs,
+    GqlPoolSwapEventCowAmm,
 } from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Chain, PoolEventType, Prisma } from '@prisma/client';
@@ -48,10 +48,11 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
     };
 };
 
-const parseCowAmmSwap = (event: SwapEvent): GqlPoolEvent => {
+const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
     const regularSwap = parseSwap(event);
     return {
         ...regularSwap,
+        __typename: 'GqlPoolSwapEventCowAmm',
         surplus: (event.payload.surplus && {
             ...event.payload.surplus,
             valueUSD: Number(event.payload.surplus.valueUSD),
@@ -61,12 +62,12 @@ const parseCowAmmSwap = (event: SwapEvent): GqlPoolEvent => {
 
 const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
     switch (range) {
-        case 'SEVEN_DAYS':
-            return daysAgo(7);
         case 'THIRTY_DAYS':
             return daysAgo(30);
         case 'NINETY_DAYS':
             return daysAgo(90);
+        default:
+            return daysAgo(7);
     }
 };
 
@@ -80,7 +81,11 @@ export function EventsQueryController(tracer?: any) {
          * @param param.where - filtering conditions
          * @returns
          */
-        getEvents: async ({ first, skip, where }: QueryPoolEventsArgs): Promise<GqlPoolEvent[]> => {
+        getEvents: async ({
+            first,
+            skip,
+            where,
+        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolSwapEventCowAmm | GqlPoolAddRemoveEventV3)[]> => {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;

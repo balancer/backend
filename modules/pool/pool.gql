@@ -1547,11 +1547,7 @@ type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
     poolId: String!
     timestamp: Int!
     valueUSD: Float!
-    tokenIn: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenIn instead")
-    tokenOut: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenOut instead")
-    surplus: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
-    fee: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
-    tokens: [GqlPoolEventAmount!] @deprecated(reason: "Use flat .tokens instead")
+    tokens: [GqlPoolEventAmount!]
 }
 
 type GqlPoolSwapEventV3 implements GqlPoolEvent {
@@ -1567,9 +1563,26 @@ type GqlPoolSwapEventV3 implements GqlPoolEvent {
     poolId: String!
     timestamp: Int!
     valueUSD: Float!
-    tokenIn: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenIn instead")
-    tokenOut: GqlPoolEventAmount @deprecated(reason: "Use flat .tokenOut instead")
-    surplus: GqlPoolEventAmount @deprecated(reason: "Use flat .surplus instead")
-    fee: GqlPoolEventAmount @deprecated(reason: "Use flat .fee instead")
-    tokens: [GqlPoolEventAmount!] @deprecated(reason: "Use flat .tokens instead")
+    tokenIn: GqlPoolEventAmount!
+    tokenOut: GqlPoolEventAmount!
+    fee: GqlPoolEventAmount!
+}
+
+type GqlPoolSwapEventCowAmm implements GqlPoolEvent {
+    chain: GqlChain!
+    id: ID!
+    tx: String!
+    logIndex: Int!
+    blockNumber: Int!
+    blockTimestamp: Int!
+    type: GqlPoolEventType!
+    sender: String!
+    userAddress: String!
+    poolId: String!
+    timestamp: Int!
+    valueUSD: Float!
+    tokenIn: GqlPoolEventAmount!
+    tokenOut: GqlPoolEventAmount!
+    fee: GqlPoolEventAmount!
+    surplus: GqlPoolEventAmount!
 }
