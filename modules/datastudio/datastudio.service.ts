@@ -1,5 +1,5 @@
 import { prisma } from '../../prisma/prisma-client';
-import { google } from 'googleapis';
+import { sheets } from '@googleapis/sheets';
 import { env } from '../../app/env';
 import moment from 'moment-timezone';
 import { JWT } from 'google-auth-library';
@@ -32,14 +32,12 @@ export class DatastudioService {
             networkContext.data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].emissionDataTabName;
         const chainSlug = networkContext.data.chain.slug;
 
-        const sheets = google.sheets({ version: 'v4' });
-
         const timestampRange = `${databaseTabName}!B:B`;
         const poolAddressRange = `${databaseTabName}!D:D`;
         const totalSwapRange = `${databaseTabName}!J:J`;
         const chainRange = `${databaseTabName}!Y:Y`;
         let currentSheetValues;
-        currentSheetValues = await sheets.spreadsheets.values.batchGet({
+        currentSheetValues = await sheets('v4').spreadsheets.values.batchGet({
             auth: jwtClient,
             spreadsheetId: sheetId,
             ranges: [timestampRange, poolAddressRange, totalSwapRange, chainRange],
@@ -350,28 +348,6 @@ export class DatastudioService {
         this.appendDataInSheet(emissionDataTabName, sheetId, 'A1:J1', allEmissionDataRows, jwtClient);
     }
 
-    private async updateDataInSheet(
-        tabName: string,
-        sheetId: string,
-        rowRange: string,
-        rows: string[][],
-        jwtClient: JWT,
-    ) {
-        const sheets = google.sheets({ version: 'v4' });
-
-        await sheets.spreadsheets.values.update({
-            auth: jwtClient,
-            spreadsheetId: sheetId,
-            range: `${tabName}!${rowRange}`,
-            valueInputOption: 'USER_ENTERED',
-            requestBody: {
-                majorDimension: 'ROWS',
-                range: `${tabName}!${rowRange}`,
-                values: rows,
-            },
-        });
-    }
-
     private async appendDataInSheet(
         tabName: string,
         sheetId: string,
@@ -379,9 +355,7 @@ export class DatastudioService {
         rows: string[][],
         jwtClient: JWT,
     ) {
-        const sheets = google.sheets({ version: 'v4' });
-
-        await sheets.spreadsheets.values.append({
+        await sheets('v4').spreadsheets.values.append({
             auth: jwtClient,
             spreadsheetId: sheetId,
             range: `${tabName}!${rowRange}`,

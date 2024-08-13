@@ -1,10 +1,10 @@
 import { poolService } from './pool.service';
-import { Resolvers } from '../../schema';
+import { GqlChain, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { EventsQueryController, SnapshotsController } from '../controllers';
+import { CowAmmController, EventsQueryController, PoolController, SnapshotsController } from '../controllers';
 import { chainToIdMap } from '../network/network-config';
 
 const balancerResolvers: Resolvers = {
@@ -227,7 +227,7 @@ const balancerResolvers: Resolvers = {
         poolLoadSnapshotsForPools: async (parent, { poolIds, reload }, context) => {
             isAdminRoute(context);
 
-            await poolService.loadSnapshotsForPools(poolIds, reload || false);
+            await SnapshotsController().syncSnapshotForPools(poolIds, networkContext.chainId, reload || false);
 
             return 'success';
         },
@@ -282,6 +282,47 @@ const balancerResolvers: Resolvers = {
             await poolService.deletePool(poolId);
 
             return 'success';
+        },
+        poolReloadPools: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
+
+            for (const chain of chains) {
+                try {
+                    await PoolController().reloadPoolsV3(chain);
+                    result.push({ type: 'v3', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'v3', chain, success: false, error: `${e}` });
+                    console.log(`Could not reload v3 pools for chain ${chain}: ${e}`);
+                }
+                try {
+                    await CowAmmController().reloadPools(chain);
+                    result.push({ type: 'cow', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'cow', chain, success: false, error: `${e}` });
+                    console.log(`Could not reload COW pools for chain ${chain}: ${e}`);
+                }
+            }
+
+            return result;
+        },
+        poolSyncAllCowSnapshots: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
+
+            for (const chain of chains) {
+                try {
+                    await CowAmmController().syncAllSnapshots(chainToIdMap[chain]);
+                    result.push({ type: 'cow', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'cow', chain, success: false, error: `${e}` });
+                    console.log(`Could not sync cow amm snapshots for chain ${chain}: ${e}`);
+                }
+            }
+
+            return result;
         },
     },
 };

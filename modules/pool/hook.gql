@@ -1,0 +1,44 @@
+extend type Query {
+    """
+    Returns list of hooks.
+    """
+    hooks(chain: GqlChain): [Hook!]
+}
+
+"""
+Collection of hook specific data. Percentage format is 0.01 -> 0.01%.
+"""
+type HookData {
+    swapFeePercentage: String
+    addLiquidityFeePercentage: String
+    removeLiquidityFeePercentage: String
+}
+
+"""
+Hook data
+"""
+type Hook {
+    address: String!
+    chain: GqlChain!
+    """
+    True when hook can change the amounts send to the vault. Necessary to deduct the fees.
+    """
+    enableHookAdjustedAmounts: Boolean!
+    shouldCallAfterSwap: Boolean!
+    shouldCallBeforeSwap: Boolean!
+    shouldCallAfterInitialize: Boolean!
+    shouldCallBeforeInitialize: Boolean!
+    shouldCallAfterAddLiquidity: Boolean!
+    shouldCallBeforeAddLiquidity: Boolean!
+    shouldCallAfterRemoveLiquidity: Boolean!
+    shouldCallBeforeRemoveLiquidity: Boolean!
+    shouldCallComputeDynamicSwapFee: Boolean!
+    """
+    Data points changing over time
+    """
+    dynamicData: HookData
+    """
+    List of pools using the hook
+    """
+    poolsIds: [String]
+}

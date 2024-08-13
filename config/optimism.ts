@@ -34,8 +34,8 @@ export default <NetworkData>{
         platformId: 'optimistic-ethereum',
         excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
-    rpcUrl: env.INFURA_API_KEY
-        ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+    rpcUrl: env.ALCHEMY_API_KEY
+        ? `https://opt-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
         : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
     protocolToken: 'beets',

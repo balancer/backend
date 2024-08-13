@@ -119,7 +119,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log(`user-sync-staked-balances-${this.chainId} got data from db.`);
 
         const latestBlock = await this.provider.getBlockNumber();
-        console.log(`user-sync-staked-balances-${this.chainId} got latest block.`);
+        console.log(`user-sync-staked-balances-${this.chainId} got latest block ${latestBlock}.`);
 
         // Get gauge addresses
         const gaugeAddresses = (
@@ -131,10 +131,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock;
 
         // no new blocks have been minted, needed for slow networks
-        if (startBlock > endBlock) {
+        if (startBlock > latestBlock) {
             return;
         }
 

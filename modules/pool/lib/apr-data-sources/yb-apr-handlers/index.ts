@@ -21,6 +21,7 @@ const sourceToHandler = {
     yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
     stakewise: sources.Stakewise,
+    maple: sources.Maple,
     etherfi: sources.Etherfi,
     sveth: sources.svEthAprHandler,
 };

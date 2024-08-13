@@ -4,7 +4,6 @@ import { abi as makerPotAbi } from './abis/maker-pot';
 import config from '../../../../../../config';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
-import { Chain } from '@prisma/client';
 
 const client = createPublicClient({
     chain: mainnet,
@@ -12,11 +11,6 @@ const client = createPublicClient({
 });
 
 const potAddress = '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7';
-const sdai = {
-    [Chain.MAINNET]: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-    [Chain.BASE]: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
-    [Chain.OPTIMISM]: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
-};
 
 export class MakerAprHandler implements AprHandler {
     group = 'MAKER';

@@ -9,7 +9,10 @@ import { Chain } from '@prisma/client';
  * @param chain
  * @returns All tokens from the pools including the BPT token
  */
-export function tokensTransformer(vaultSubgraphPools: VaultSubgraphPoolFragment[], chain: Chain) {
+export function tokensTransformer(
+    vaultSubgraphPools: Pick<VaultSubgraphPoolFragment, 'tokens' | 'name' | 'symbol' | 'address'>[],
+    chain: Chain,
+) {
     return vaultSubgraphPools.flatMap((pool) => {
         return [
             ...pool.tokens.map((token) => ({

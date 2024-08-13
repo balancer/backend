@@ -20,11 +20,11 @@ export const upsertPools = async (
     viemClient: ViemClient,
     cowAmmSubgraphClient: CowAmmSubgraphClient,
     chain: Chain,
+    blockNumber?: bigint,
 ) => {
     const pools = await cowAmmSubgraphClient.getAllPools({ id_in: ids });
 
     // Get onchain data for the pools
-    const blockNumber = await viemClient.getBlockNumber();
     const onchainData = await fetchCowAmmData(
         pools.map((pool) => pool.id),
         viemClient,
@@ -40,9 +40,27 @@ export const upsertPools = async (
     });
 
     // Add tokens if any are missing in the DB
-    const poolTokens = pools.map((pool) => pool.tokens).flat();
+    const poolTokens = pools.flatMap((pool) => {
+        return [
+            ...pool.tokens.map((token) => ({
+                address: token.address,
+                decimals: token.decimals,
+                name: token.name,
+                symbol: token.symbol,
+                chain: chain,
+            })),
+            {
+                address: pool.id,
+                decimals: 18,
+                name: pool.name,
+                symbol: pool.symbol,
+                chain: chain,
+            },
+        ];
+    });
+
     const missingTokens = poolTokens.filter(
-        (poolToken) => !allTokens.find((token) => token.address.toLowerCase() === poolToken.address.toLowerCase()),
+        (poolToken) => !allTokens.find((token) => token.address === poolToken.address),
     );
     if (missingTokens.length > 0) {
         await prisma.prismaToken.createMany({
@@ -79,6 +97,7 @@ export const upsertPools = async (
                         ...token,
                         totalProtocolSwapFee: '0',
                         totalProtocolYieldFee: '0',
+                        paysYieldFees: false,
                     })),
                 },
                 {
@@ -89,6 +108,8 @@ export const upsertPools = async (
                         ...token,
                         rateProvider: '',
                         rate: 1n,
+                        paysYieldFees: false,
+                        isErc4626: false,
                     })),
                 },
                 chain,

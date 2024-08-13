@@ -1,4 +1,4 @@
-import { AbiParameterToPrimitiveType, ExtractAbiFunction, parseAbi } from 'abitype';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
 import VaultV3Abi from './abis/VaultV3';
 
@@ -6,15 +6,20 @@ import VaultV3Abi from './abis/VaultV3';
 // or can somehow get the correct type infered automatically from the viem's result set?
 type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
 type PoolTokenInfo = [
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][0]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][1]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][2]>,
-    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][3]>,
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][0]>, // token address array
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][1]>, // tokenInfo (rateprovider etc)
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][2]>, // balancesRaw
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][3]>, // lastLiveBalances
 ];
-
+type PoolTokenRates = [
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][0]>, // decimalScalingFactors
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][1]>, // tokenRates
+];
 export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
+    aggregateSwapFee?: bigint;
+    aggregateYieldFee?: bigint;
     // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
@@ -24,6 +29,7 @@ export interface OnchainPoolData {
         balance: bigint;
         rateProvider: string;
         rate: bigint;
+        isErc4626: boolean;
     }[];
 }
 
@@ -77,13 +83,17 @@ export async function fetchPoolData(
                 ? (results[pointer + 2].result as unknown as PoolTokenInfo)
                 : undefined;
         const poolTokenRates =
-            results[pointer + 3].status === 'success' ? (results[pointer + 3].result as any) : undefined;
+            results[pointer + 3].status === 'success'
+                ? (results[pointer + 3].result as unknown as PoolTokenRates)
+                : undefined;
 
         return [
             pool.toLowerCase(),
             {
                 totalSupply: results[pointer].status === 'success' ? (results[pointer].result as bigint) : undefined,
                 swapFee: config?.staticSwapFeePercentage,
+                aggregateSwapFee: config?.aggregateSwapFeePercentage,
+                aggregateYieldFee: config?.aggregateYieldFeePercentage,
                 isPoolPaused: config?.isPoolPaused,
                 isPoolInRecoveryMode: config?.isPoolInRecoveryMode,
                 tokens: poolTokenInfo?.[0].map((token: string, i: number) => ({
@@ -91,7 +101,8 @@ export async function fetchPoolData(
                     balance: poolTokenInfo[2][i],
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
-                    rate: poolTokenRates[i],
+                    rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
+                    isErc4626: false, // will be added later in the process
                 })),
             },
         ];

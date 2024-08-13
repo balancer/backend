@@ -4,6 +4,10 @@ import { poolService } from '../pool/pool.service';
 import { userService } from '../user/user.service';
 import { tokenService } from '../token/token.service';
 import mainnet from '../../config/mainnet';
+import { prisma } from '../../prisma/prisma-client';
+import { CowAmmController } from '../controllers/cow-amm-controller';
+import { ContentController } from '../controllers/content-controller';
+import { chainToIdMap } from '../network/network-config';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -14,11 +18,96 @@ describe('pool debugging', () => {
     }, 5000000);
 
     it('sync aprs', async () => {
+        // initRequestScopedContext();
+        // setRequestScopedContextValue('chainId', '1');
+        // //only do once before starting to debug
+        // // await poolService.syncAllPoolsFromSubgraph();
+        // // await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
+        // // await CowAmmController().reloadPools('MAINNET');
+        // // await CowAmmController().syncSwaps('1');
+        // // await tokenService.updateTokenPrices(['MAINNET']);
+        // await poolService.updatePoolAprs('MAINNET');
+        // const aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' },
+        // });
+        // console.log(aprs);
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '137');
-        //only do once before starting to debug
-        // await poolService.syncAllPoolsFromSubgraph();
-        await poolService.updatePoolAprs('POLYGON');
+        setRequestScopedContextValue('chainId', chainToIdMap['MAINNET']);
+
+        // await poolService.updatePoolAprs('MAINNET');
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+        // await poolService.syncStakingForPools(['MAINNET']);
+        await poolService.updatePoolAprs('MAINNET');
+        let aprs = await prisma.prismaPoolAprItem.findMany({
+            where: { chain: 'MAINNET', poolId: '0xf706c50513446d709f08d3e5126cd74fb6bfda19', type: 'NATIVE_REWARD' },
+        });
+        console.log(aprs);
+
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await poolService.syncChangedPools();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await ContentController().syncCategories();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().addPools('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncJoinExits('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncPools('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncSnapshots('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().syncSwaps('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().updateSurplusAprs();
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+
+        // await CowAmmController().updateVolumeAndFees('1');
+        // aprs = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91', type: 'NATIVE_REWARD' },
+        // });
+        // // expect(aprs[0].apr).toBeGreaterThan(0);
+        // await CowAmmController().updateVolumeAndFees('1');
+        // await CowAmmController().updateSurplusAprs();
+
+        // const aprs2 = await prisma.prismaPoolAprItem.findMany({
+        //     where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' },
+        // });
+        // console.log(aprs2);
     }, 5000000);
 
     it('get new apr items', async () => {
@@ -100,6 +189,17 @@ describe('pool debugging', () => {
             '0x39965c9dab5448482cf7e002f583c812ceb53046000100000000000000000003',
             'OPTIMISM',
         );
+        expect(pool.staking).toBeDefined();
+    }, 5000000);
+
+    it('sync gauge staking for cow', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '1');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        // await poolService.loadOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
+        const pool = await poolService.getGqlPool('0xc9d5204e7c04a1be300b33e3979479be75132ac5', 'MAINNET');
         expect(pool.staking).toBeDefined();
     }, 5000000);
 
@@ -210,22 +310,30 @@ describe('pool debugging', () => {
         expect(pool.dynamicData.totalLiquidity).not.toBe('0');
     }, 5000000);
 
-    it('time pool lists', async () => {
+    it('delete and sync pools', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '250');
+        setRequestScopedContextValue('chainId', '252');
+
+        await prisma.prismaPool.deleteMany({
+            where: { chain: 'FRAXTAL' },
+        });
+
+        let pools = await poolService.getGqlPools({ where: { chainIn: ['FRAXTAL'] } });
+
+        expect(pools.length).toBe(0);
+
+        await poolService.syncAllPoolsFromSubgraph();
+        await poolService.initOnChainDataForAllPools();
+        await poolService.reloadStakingForAllPools(['GAUGE'], 'FRAXTAL');
+        await userService.initWalletBalancesForAllPools();
+        await userService.initStakedBalances(['GAUGE']);
+
+        pools = await poolService.getGqlPools({ where: { chainIn: ['FRAXTAL'] } });
+
+        expect(pools.length).toBeGreaterThan(0);
+
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
-        // await tokenService.syncTokenContentData();
-        // await poolService.loadOnChainDataForAllPools();
-        // await tokenService.updateTokenPrices(['FANTOM']);
-        console.time('getBasePools');
-        const poolsBase = await poolService.getBasePools({ where: { chainIn: ['FANTOM'] } });
-        console.timeEnd('getBasePools');
-
-        console.time('getPools');
-        const poolsGql = await poolService.getGqlPools({ where: { chainIn: ['FANTOM'] } });
-        console.timeEnd('getPools');
-
-        expect(poolsBase.length).toEqual(poolsGql.length);
+        // await poolService.syncChangedPools();
     }, 5000000);
 });

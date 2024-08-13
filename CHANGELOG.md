@@ -1,5 +1,223 @@
 # backend
 
+## 1.9.3
+
+### Patch Changes
+
+-   cd94cd1: Using API prices to calculate totalLiquidity in snapshots
+-   31d93a1: passing protocol version to sor lib
+
+## 1.9.2
+
+### Patch Changes
+
+-   aff6246: update env file
+
+## 1.9.1
+
+### Patch Changes
+
+-   a3ab47e: workaround for streamed BAL on mainnet
+
+## 1.9.0
+
+### Minor Changes
+
+-   ad5c843: Add support for SOR paths with add/remove liquidity steps
+
+### Patch Changes
+
+-   ff80266: adding mutation to reload erc4626
+-   0cb2dbb: quick workaround to remove cow apr boost
+
+## 1.8.3
+
+### Patch Changes
+
+-   29f0beb: using pool addresses to match gauges instead of pool id
+
+## 1.8.2
+
+### Patch Changes
+
+-   55fa750: SOR should consider STABLE pools for v3 liquidity only
+
+## 1.8.1
+
+### Patch Changes
+
+-   7d327cf: fix token query
+
+## 1.8.0
+
+### Minor Changes
+
+-   7720c09: add support for boosted pools for v3
+
+### Patch Changes
+
+-   116cf21: expose surplus in the events query
+-   421a48e: Refactor SOR to use Balancer Maths for v3 liquidity
+
+## 1.7.4
+
+### Patch Changes
+
+-   1d3f265: v2 update interferes with cow
+
+## 1.7.3
+
+### Patch Changes
+
+-   af11d6b: fix cow-surplus scaling, update cow volume sync
+
+## 1.7.2
+
+### Patch Changes
+
+-   13f2416: update cow amm subgraphs
+-   956f28c: update masterchef subgraph
+
+## 1.7.1
+
+### Patch Changes
+
+-   e102809: stakewise gnosis and maple syrup APRs
+
+## 1.7.0
+
+### Minor Changes
+
+-   0847dd4: syncing pool type specific data
+
+### Patch Changes
+
+-   af4417e: updated AAVE subgraph URLs for getting token APRs
+-   b08fa1e: update cow subgraphs
+-   b20c5fd: sync tokenlist for sepolia
+
+## 1.6.3
+
+### Patch Changes
+
+-   72cc583: add weETH APR on Arb and rETH APR on Gnosis
+
+## 1.6.2
+
+### Patch Changes
+
+-   07fcf6a: fixed surplus APR calculation
+-   a72b08f: move rpcs from infura to alchemy
+
+## 1.6.1
+
+### Patch Changes
+
+-   0627776: fixed sdai yield on fraxtal
+
+## 1.6.0
+
+### Minor Changes
+
+-   f9d50e4: syncing holders could on changed cow-amm pools
+
+### Patch Changes
+
+-   5f6fd67: handle failing aave pricing
+
+## 1.5.5
+
+### Patch Changes
+
+-   3f08512: subgraph patch
+
+## 1.5.4
+
+### Patch Changes
+
+-   5c02fa1: new cow-subgraphs, add weights to cow-pools, add reload mutation
+-   0959978: fix snapshot loading for cow
+-   ede18b9: fixed double execution of the merkl job
+-   6a8d02e: add aave wrapped tokens to sepolia handler
+-   fec4cac: Fix cow user balances
+-   975e058: fix token rate and config sync for v3, add reload mutation
+
+## 1.5.3
+
+### Patch Changes
+
+-   22bc735: Update cow-amm subgraphs, add gnosis
+
+## 1.5.2
+
+### Patch Changes
+
+-   c31cef8: new cow amm subgraph, fix surplus calc
+-   d72fec7: fix scaling for cow pool data
+
+## 1.5.1
+
+### Patch Changes
+
+-   40631b9: change fantom rpc
+-   0fd0952: change cow amm subgraph to deployment id
+-   64cdecc: more robust aura sync
+-   4cfbf0e: add gUSDC apr
+
+## 1.5.0
+
+### Minor Changes
+
+-   ed09091: split controllers, reload also syncs pool state
+
+### Patch Changes
+
+-   846b2ad: allow test env to use paid rpc
+-   0b421c5: fix exact_out with getBestSwapPathVersion
+-   2dbbb7c: fix initial cow amm sync
+-   2366ee3: add cow crons to mainnet and adapt cron intervalls
+-   f12b5b2: fix initUserBalances for local runs
+
+## 1.4.3
+
+### Patch Changes
+
+-   43735c9: fix sfrax apr on fraxtal
+
+## 1.4.2
+
+### Patch Changes
+
+-   3613c9f: reduce multicall batch size
+
+## 1.4.1
+
+### Patch Changes
+
+-   6daa985: smaller chunks for pool fetching
+
+## 1.4.0
+
+### Minor Changes
+
+-   d4caec8: Cow AMM aprs calculated from daily surplus
+
+### Patch Changes
+
+-   812bdba: return filename only for rateprovider review
+
+## 1.3.2
+
+### Patch Changes
+
+-   6429e7a: Adding new pool filter tags tagIn and tagNotIn. These replace categoryIn/categoryNotIn removing enum constraint.
+-   f816e93: changed the events query ordering from blockNumber to blockTimestamp to mitigate different chain height.
+-   21da677: adding gyro config on gnosis chain
+-   8389be2: using pool instead of global variables in ybTokenService
+-   34a7a8c: fix aura and gauge user balance sync
+-   5604fd9: exposing tags
+-   57bbc2a: fix tracking of balance if last relic was transferred
+
 ## 1.3.1
 
 ### Patch Changes

@@ -20,14 +20,17 @@ export const onchainPoolUpdate = (
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: formatEther(onchainPoolData.totalSupply),
             blockNumber: Number(blockNumber),
-            swapFee: String(onchainPoolData.swapFee ?? '0'),
+            swapFee: formatEther(onchainPoolData.swapFee ?? 0n),
+            aggregateSwapFee: formatEther(onchainPoolData.aggregateSwapFee ?? 0n),
+            aggregateYieldFee: formatEther(onchainPoolData.aggregateYieldFee ?? 0n),
         },
-        poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
-            id: `${id}-${tokenData.address.toLowerCase()}`,
-            chain: chain,
-            balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
-            priceRate: String(tokenData.rate),
-            blockNumber: Number(blockNumber),
-        })),
+        poolTokenDynamicData:
+            onchainPoolData.tokens?.map((tokenData) => ({
+                id: `${id}-${tokenData.address.toLowerCase()}`,
+                chain: chain,
+                balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
+                priceRate: formatEther(tokenData.rate),
+                blockNumber: Number(blockNumber),
+            })) || [],
     };
 };

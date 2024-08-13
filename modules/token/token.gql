@@ -69,6 +69,26 @@ extend type Mutation {
     tokenSyncLatestFxPrices(chain: GqlChain!): String!
     tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
     tokenReloadAllTokenTypes: String!
+
+    tokenReloadErc4626Tokens(chains: [GqlChain!]!): [GqlTokenMutationResult!]!
+}
+
+"""
+Result of the poolReloadPools mutation
+"""
+type GqlTokenMutationResult {
+    """
+    The chain that was reloaded.
+    """
+    chain: GqlChain!
+    """
+    Whether it was successful or not.
+    """
+    success: Boolean!
+    """
+    The error message
+    """
+    error: String
 }
 
 type GqlTokenPrice {
@@ -159,6 +179,10 @@ type GqlToken {
     The rate provider data for the token
     """
     priceRateProviderData: GqlPriceRateProviderData
+    """
+    Whether the token is considered an ERC4626 token.
+    """
+    isErc4626: Boolean!
 }
 """
 Represents additional data for a token
@@ -247,9 +271,9 @@ type GqlPriceRateProviderData {
     """
     summary: String
     """
-    The URL of the review of the price rate provider
+    The filename of the review of the price rate provider
     """
-    reviewUrl: String
+    reviewFile: String
     """
     Warnings associated with the price rate provider
     """
@@ -342,6 +366,10 @@ type GqlToken {
     The rate provider data for the token
     """
     rateProviderData: GqlPriceRateProviderData
+    """
+    Whether the token is considered an ERC4626 token.
+    """
+    isErc4626: Boolean!
 }
 
 type GqlTokenDynamicData {

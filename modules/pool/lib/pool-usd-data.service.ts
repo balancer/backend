@@ -170,7 +170,7 @@ export class PoolUsdDataService {
         const yesterday = moment().subtract(1, 'day').unix();
         const twoDaysAgo = moment().subtract(2, 'day').unix();
         const pools = await prisma.prismaPool.findMany({
-            where: poolIds ? { id: { in: poolIds }, chain: this.chain } : { chain: this.chain },
+            where: poolIds ? { id: { in: poolIds }, chain: this.chain } : { chain: this.chain, protocolVersion: 2 },
             include: {
                 swaps: { where: { timestamp: { gte: twoDaysAgo } } },
                 dynamicData: true,

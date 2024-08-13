@@ -2,7 +2,7 @@ version: 0.2
 env:
     variables:
         COW_AMM_SUBGRAPH: https://api.studio.thegraph.com/proxy/75376/balancer-cow-amm-sepolia/version/latest
-        V3_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-5th/version/latest
+        V3_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-6th/version/latest
         V3_POOLS_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-5th/version/latest
         BALANCER_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-v2/version/latest
         MASTERCHEF_SUBGRAPH: https://api.studio.thegraph.com/query/73674/masterchefv2/version/latest
@@ -18,6 +18,8 @@ phases:
             nodejs: 18
         commands:
             - yarn install
+            - rm -rf node_modules/@balancer-labs/sor/test
+            - rm -rf node_modules/@balancer-labs/sor/src
     build:
         commands:
             - yarn generate
@@ -27,7 +29,6 @@ phases:
             - yarn cleanup-console
     post_build:
         commands:
-            - rm -fr node_modules
             - yarn install --prod
             - echo Build completed on `date`
 #      - echo Pushing to graph cdn

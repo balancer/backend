@@ -54,7 +54,10 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, networkContext.chain === 'ZKEVM' ? 190 : 1024);
+        const state = await fetchOnChainPoolState(
+            filteredPools,
+            networkContext.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
+        );
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -100,15 +103,19 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            this.options.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
         );
         const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
-            this.options.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
         );
         const gyroFees = await (this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, networkContext.chain === 'ZKEVM' ? 190 : 1024)
+            ? fetchOnChainGyroFees(
+                  gyroPools,
+                  this.options.gyroConfig,
+                  networkContext.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 1024,
+              )
             : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];

@@ -1,4 +1,4 @@
-const url = 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise';
+import { YbAprConfig } from '../../../../../network/apr-config-types';
 
 const query = `
   {
@@ -21,10 +21,10 @@ interface Response {
 }
 
 export class Stakewise {
-    constructor(private tokenAddress: string) {}
+    constructor(private config: YbAprConfig['stakewise']) {}
 
     async getAprs() {
-        const response = await fetch(url, {
+        const response = await fetch(this.config!.url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,11 +38,10 @@ export class Stakewise {
             },
         } = (await response.json()) as Response;
 
+        const apr = Number(apy) / 100;
+
         return {
-            [this.tokenAddress]: {
-                apr: Number(apy) / 100,
-                isIbYield: true,
-            },
+            [this.config!.token]: { apr, isIbYield: true },
         };
     }
 }

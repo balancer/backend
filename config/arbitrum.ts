@@ -33,11 +33,7 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.INFURA_API_KEY
-        ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-        : 'https://1rpc.io/arb',
+    rpcUrl: env.ALCHEMY_API_KEY ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}` : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -130,8 +126,22 @@ export default <NetworkData>{
                 },
             },
         },
-        stakewise: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
+        },
+        etherfi: '0x35751007a407ca6feffe80b3cb397736d2cf4dbe',
+        dforce: {
+            token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
+        },
         defaultHandlers: {
+            usdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
+            },
             wstETH: {
                 tokenAddress: '0x5979d7b546e38e414f7e9822514be443a4800529',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
@@ -204,6 +214,12 @@ export default <NetworkData>{
                 tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
                 sourceUrl: 'https://universe.staderlabs.com/eth/apy',
                 path: 'value',
+                isIbYield: true,
+            },
+            gUSDC: {
+                tokenAddress: '0xd3443ee1e91af28e5fb858fbd0d72a63ba8046e0',
+                sourceUrl: 'https://backend-arbitrum.gains.trade/apr',
+                path: 'collateralRewards.{symbol == "USDC"}.vaultApr',
                 isIbYield: true,
             },
         },
