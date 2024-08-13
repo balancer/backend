@@ -39,6 +39,9 @@ model PrismaPool {
 
     userPoolBalanceSnapshots    PrismaUserPoolBalanceSnapshot[]
 
+    hook               Hook? @relation(fields: [hookId], references: [id])
+    hookId             Int?
+
     @@index([categories(ops: ArrayOps)], type: Gin)
 }
 
@@ -75,7 +78,7 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
-    protocolYieldFee        String?             
+    protocolYieldFee        String?
     protocolSwapFee         String              @default("0")
     swapFee                 String
     aggregateSwapFee        String              @default("0")

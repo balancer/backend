@@ -12,6 +12,8 @@ import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
 import { Chain } from '@prisma/client';
+import { syncHookData } from '../actions/pool/sync-hook-data';
+import { HookType } from '../network/network-config-types';
 
 export function PoolController() {
     return {
@@ -169,6 +171,39 @@ export function PoolController() {
             );
 
             return updates;
+        },
+        async syncHookData(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const { hooks } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!hooks) {
+                // Chain doesn't have hooks
+                return;
+            }
+
+            // Get hook addresses from the database
+            const addresses = await prisma.hook
+                .findMany({
+                    where: { chain },
+                    select: { address: true },
+                })
+                .then((hooks) => hooks.map(({ address }) => address));
+
+            // Map hooks to their config names
+            const mappedHooks = addresses.reduce((acc, address) => {
+                // find key in config object that has the same value as address
+                const keys = Object.keys(hooks) as HookType[];
+                const key = keys.find((key) => hooks[key]?.includes(address));
+                if (key) {
+                    acc[address] = key;
+                }
+                return acc;
+            }, {} as Record<string, HookType>);
+
+            const viemClient = getViemClient(chain);
+
+            await syncHookData(mappedHooks, viemClient, chain);
         },
     };
 }

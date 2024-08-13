@@ -31,6 +31,21 @@ fragment VaultPool on Pool {
             address
         }
     }
+    hookConfig {
+        hook {
+            address
+        }
+        enableHookAdjustedAmounts
+        shouldCallAfterSwap
+        shouldCallBeforeSwap
+        shouldCallAfterInitialize
+        shouldCallBeforeInitialize
+        shouldCallAfterAddLiquidity
+        shouldCallBeforeAddLiquidity
+        shouldCallAfterRemoveLiquidity
+        shouldCallBeforeRemoveLiquidity
+        shouldCallComputeDynamicSwapFee
+    }
 }
 
 query Pools(

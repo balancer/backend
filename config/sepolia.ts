@@ -61,6 +61,10 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.5',
         },
     },
+    hooks: {
+        feeTakingHook: ['0xcc4a97bb41dc77013d625fc2a5e7867603d4c78b'],
+        removeLiquidityFeeHook: ['0x04d584195a96dffc7f8b695aa3c9d3c1606b69d1'],
+    },
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
