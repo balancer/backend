@@ -16,15 +16,7 @@ export type Scalars = {
     BigDecimal: string;
     BigInt: string;
     Bytes: string;
-    /**
-     * 8 bytes signed integer
-     *
-     */
     Int8: any;
-    /**
-     * A string representation of microseconds UNIX timestamp (16 digits)
-     *
-     */
     Timestamp: any;
 };
 

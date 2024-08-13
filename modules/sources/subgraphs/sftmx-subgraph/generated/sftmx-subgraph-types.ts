@@ -16,15 +16,7 @@ export type Scalars = {
     BigDecimal: string;
     BigInt: string;
     Bytes: string;
-    /**
-     * 8 bytes signed integer
-     *
-     */
     Int8: any;
-    /**
-     * A string representation of microseconds UNIX timestamp (16 digits)
-     *
-     */
     Timestamp: any;
 };
 
@@ -42,6 +34,87 @@ export type Block_Height = {
     number?: InputMaybe<Scalars['Int']>;
     number_gte?: InputMaybe<Scalars['Int']>;
 };
+
+export type Deposit = {
+    __typename?: 'Deposit';
+    ftmAmount: Scalars['BigDecimal'];
+    id: Scalars['Bytes'];
+    sftmxAmount: Scalars['BigDecimal'];
+    timestamp: Scalars['Int'];
+    user: User;
+};
+
+export type Deposit_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    and?: InputMaybe<Array<InputMaybe<Deposit_Filter>>>;
+    ftmAmount?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_gt?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_gte?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    ftmAmount_lt?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_not?: InputMaybe<Scalars['BigDecimal']>;
+    ftmAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    or?: InputMaybe<Array<InputMaybe<Deposit_Filter>>>;
+    sftmxAmount?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_gt?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_gte?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    sftmxAmount_lt?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_not?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    timestamp?: InputMaybe<Scalars['Int']>;
+    timestamp_gt?: InputMaybe<Scalars['Int']>;
+    timestamp_gte?: InputMaybe<Scalars['Int']>;
+    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
+    timestamp_lt?: InputMaybe<Scalars['Int']>;
+    timestamp_lte?: InputMaybe<Scalars['Int']>;
+    timestamp_not?: InputMaybe<Scalars['Int']>;
+    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
+    user?: InputMaybe<Scalars['String']>;
+    user_?: InputMaybe<User_Filter>;
+    user_contains?: InputMaybe<Scalars['String']>;
+    user_contains_nocase?: InputMaybe<Scalars['String']>;
+    user_ends_with?: InputMaybe<Scalars['String']>;
+    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    user_gt?: InputMaybe<Scalars['String']>;
+    user_gte?: InputMaybe<Scalars['String']>;
+    user_in?: InputMaybe<Array<Scalars['String']>>;
+    user_lt?: InputMaybe<Scalars['String']>;
+    user_lte?: InputMaybe<Scalars['String']>;
+    user_not?: InputMaybe<Scalars['String']>;
+    user_not_contains?: InputMaybe<Scalars['String']>;
+    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    user_not_ends_with?: InputMaybe<Scalars['String']>;
+    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    user_not_in?: InputMaybe<Array<Scalars['String']>>;
+    user_not_starts_with?: InputMaybe<Scalars['String']>;
+    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    user_starts_with?: InputMaybe<Scalars['String']>;
+    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
+};
+
+export enum Deposit_OrderBy {
+    ftmAmount = 'ftmAmount',
+    id = 'id',
+    sftmxAmount = 'sftmxAmount',
+    timestamp = 'timestamp',
+    user = 'user',
+    user__id = 'user__id',
+    user__sftmxBalance = 'user__sftmxBalance',
+}
 
 export type FtmStaking = {
     __typename?: 'FtmStaking';
@@ -215,6 +288,8 @@ export type Query = {
     __typename?: 'Query';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
+    deposit?: Maybe<Deposit>;
+    deposits: Array<Deposit>;
     ftmStaking?: Maybe<FtmStaking>;
     ftmStakingSnapshot?: Maybe<FtmStakingSnapshot>;
     ftmStakingSnapshots: Array<FtmStakingSnapshot>;
@@ -229,6 +304,22 @@ export type Query = {
 
 export type Query_MetaArgs = {
     block?: InputMaybe<Block_Height>;
+};
+
+export type QueryDepositArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryDepositsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Deposit_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Deposit_Filter>;
 };
 
 export type QueryFtmStakingArgs = {
@@ -315,6 +406,8 @@ export type Subscription = {
     __typename?: 'Subscription';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
+    deposit?: Maybe<Deposit>;
+    deposits: Array<Deposit>;
     ftmStaking?: Maybe<FtmStaking>;
     ftmStakingSnapshot?: Maybe<FtmStakingSnapshot>;
     ftmStakingSnapshots: Array<FtmStakingSnapshot>;
@@ -329,6 +422,22 @@ export type Subscription = {
 
 export type Subscription_MetaArgs = {
     block?: InputMaybe<Block_Height>;
+};
+
+export type SubscriptionDepositArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionDepositsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Deposit_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Deposit_Filter>;
 };
 
 export type SubscriptionFtmStakingArgs = {
@@ -413,9 +522,19 @@ export type SubscriptionWithdrawalRequestsArgs = {
 
 export type User = {
     __typename?: 'User';
+    deposits?: Maybe<Array<Deposit>>;
     ftmStaking: FtmStaking;
     id: Scalars['Bytes'];
+    sftmxBalance: Scalars['BigDecimal'];
     withdrawalRequests?: Maybe<Array<WithdrawalRequest>>;
+};
+
+export type UserDepositsArgs = {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Deposit_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<Deposit_Filter>;
 };
 
 export type UserWithdrawalRequestsArgs = {
@@ -430,6 +549,7 @@ export type User_Filter = {
     /** Filter for the block changed event. */
     _change_block?: InputMaybe<BlockChangedFilter>;
     and?: InputMaybe<Array<InputMaybe<User_Filter>>>;
+    deposits_?: InputMaybe<Deposit_Filter>;
     ftmStaking?: InputMaybe<Scalars['String']>;
     ftmStaking_?: InputMaybe<FtmStaking_Filter>;
     ftmStaking_contains?: InputMaybe<Scalars['String']>;
@@ -462,10 +582,19 @@ export type User_Filter = {
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     or?: InputMaybe<Array<InputMaybe<User_Filter>>>;
+    sftmxBalance?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_gt?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_gte?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    sftmxBalance_lt?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_lte?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_not?: InputMaybe<Scalars['BigDecimal']>;
+    sftmxBalance_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     withdrawalRequests_?: InputMaybe<WithdrawalRequest_Filter>;
 };
 
 export enum User_OrderBy {
+    deposits = 'deposits',
     ftmStaking = 'ftmStaking',
     ftmStaking__id = 'ftmStaking__id',
     ftmStaking__maintenancePaused = 'ftmStaking__maintenancePaused',
@@ -474,6 +603,7 @@ export enum User_OrderBy {
     ftmStaking__undelegatePaused = 'ftmStaking__undelegatePaused',
     ftmStaking__withdrawPaused = 'ftmStaking__withdrawPaused',
     id = 'id',
+    sftmxBalance = 'sftmxBalance',
     withdrawalRequests = 'withdrawalRequests',
 }
 
@@ -690,6 +820,7 @@ export enum WithdrawalRequest_OrderBy {
     requestTime = 'requestTime',
     user = 'user',
     user__id = 'user__id',
+    user__sftmxBalance = 'user__sftmxBalance',
 }
 
 export type _Block_ = {

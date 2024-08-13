@@ -5,18 +5,6 @@ on:
 
 jobs:
     Build:
-        env:
-            COW_AMM_SUBGRAPH: https://api.studio.thegraph.com/proxy/75376/balancer-cow-amm-sepolia/version/latest
-            V3_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-6th/version/latest
-            V3_POOLS_SUBGRAPH: https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-6th/version/latest
-            BALANCER_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-v2/version/latest
-            MASTERCHEF_SUBGRAPH: https://api.studio.thegraph.com/query/73674/masterchefv2/version/latest
-            BLOCKS_SUBGRAPH: https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest
-            BEETS_BAR_SUBGRAPH: https://api.studio.thegraph.com/query/73674/beets-bar/version/latest
-            GAUGE_SUBGRAPH: https://api.studio.thegraph.com/query/75376/balancer-gauges/version/latest
-            RELIQUARY_SUBGRAPH: https://api.studio.thegraph.com/query/73674/reliquary/version/latest
-            SFTMX_SUBGRAPH: https://api.studio.thegraph.com/query/73674/sftmx/version/latest
-            AURA_SUBGRAPH: https://data.aura.finance/graphql
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3

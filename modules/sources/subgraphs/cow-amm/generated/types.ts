@@ -16,19 +16,12 @@ export type Scalars = {
     BigDecimal: string;
     BigInt: string;
     Bytes: string;
-    /**
-     * 8 bytes signed integer
-     *
-     */
     Int8: any;
-    /**
-     * A string representation of microseconds UNIX timestamp (16 digits)
-     *
-     */
     Timestamp: any;
 };
 
 export type AddRemove = {
+    __typename?: 'AddRemove';
     amounts: Array<Scalars['BigDecimal']>;
     blockNumber: Scalars['BigInt'];
     blockTimestamp: Scalars['BigInt'];
@@ -196,6 +189,7 @@ export type Block_Height = {
 };
 
 export type Factory = {
+    __typename?: 'Factory';
     id: Scalars['Bytes'];
     pools?: Maybe<Array<Pool>>;
 };
@@ -243,6 +237,7 @@ export enum OrderDirection {
 }
 
 export type Pool = {
+    __typename?: 'Pool';
     address: Scalars['Bytes'];
     blockNumber: Scalars['BigInt'];
     blockTimestamp: Scalars['BigInt'];
@@ -287,6 +282,7 @@ export type PoolTokensArgs = {
 };
 
 export type PoolShare = {
+    __typename?: 'PoolShare';
     balance: Scalars['BigDecimal'];
     id: Scalars['Bytes'];
     pool: Pool;
@@ -381,6 +377,7 @@ export enum PoolShare_OrderBy {
 }
 
 export type PoolSnapshot = {
+    __typename?: 'PoolSnapshot';
     balances: Array<Scalars['BigDecimal']>;
     holdersCount: Scalars['BigInt'];
     id: Scalars['Bytes'];
@@ -513,6 +510,7 @@ export enum PoolSnapshot_OrderBy {
 }
 
 export type PoolToken = {
+    __typename?: 'PoolToken';
     address: Scalars['Bytes'];
     balance: Scalars['BigDecimal'];
     decimals: Scalars['Int'];
@@ -907,6 +905,7 @@ export enum Pool_OrderBy {
 }
 
 export type Query = {
+    __typename?: 'Query';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
     addRemove?: Maybe<AddRemove>;
@@ -1078,6 +1077,7 @@ export type QueryUsersArgs = {
 };
 
 export type Subscription = {
+    __typename?: 'Subscription';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
     addRemove?: Maybe<AddRemove>;
@@ -1249,6 +1249,7 @@ export type SubscriptionUsersArgs = {
 };
 
 export type Swap = {
+    __typename?: 'Swap';
     blockNumber: Scalars['BigInt'];
     blockTimestamp: Scalars['BigInt'];
     id: Scalars['Bytes'];
@@ -1507,6 +1508,7 @@ export enum Swap_OrderBy {
 }
 
 export type Token = {
+    __typename?: 'Token';
     address: Scalars['Bytes'];
     decimals: Scalars['Int'];
     id: Scalars['Bytes'];
@@ -1598,6 +1600,7 @@ export enum Token_OrderBy {
 }
 
 export type User = {
+    __typename?: 'User';
     addRemoves?: Maybe<Array<AddRemove>>;
     id: Scalars['Bytes'];
     shares?: Maybe<Array<PoolShare>>;
@@ -1656,6 +1659,7 @@ export enum User_OrderBy {
 }
 
 export type _Block_ = {
+    __typename?: '_Block_';
     /** The hash of the block */
     hash?: Maybe<Scalars['Bytes']>;
     /** The block number */
@@ -1668,6 +1672,7 @@ export type _Block_ = {
 
 /** The type for the top-level _meta field */
 export type _Meta_ = {
+    __typename?: '_Meta_';
     /**
      * Information about a specific subgraph block. The hash of the block
      * will be null if the _meta field has a block constraint that asks for
@@ -1690,6 +1695,7 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type CowAmmAddRemoveFragment = {
+    __typename?: 'AddRemove';
     id: string;
     type: InvestType;
     sender: string;
@@ -1698,8 +1704,12 @@ export type CowAmmAddRemoveFragment = {
     blockTimestamp: string;
     transactionHash: string;
     logIndex: string;
-    pool: { id: string; tokens: Array<{ index: number; address: string; decimals: number }> };
-    user: { id: string };
+    pool: {
+        __typename?: 'Pool';
+        id: string;
+        tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string; decimals: number }>;
+    };
+    user: { __typename?: 'User'; id: string };
 };
 
 export type AddRemovesQueryVariables = Exact<{
@@ -1712,7 +1722,9 @@ export type AddRemovesQueryVariables = Exact<{
 }>;
 
 export type AddRemovesQuery = {
+    __typename?: 'Query';
     addRemoves: Array<{
+        __typename?: 'AddRemove';
         id: string;
         type: InvestType;
         sender: string;
@@ -1721,12 +1733,17 @@ export type AddRemovesQuery = {
         blockTimestamp: string;
         transactionHash: string;
         logIndex: string;
-        pool: { id: string; tokens: Array<{ index: number; address: string; decimals: number }> };
-        user: { id: string };
+        pool: {
+            __typename?: 'Pool';
+            id: string;
+            tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string; decimals: number }>;
+        };
+        user: { __typename?: 'User'; id: string };
     }>;
 };
 
 export type CowAmmSwapFragment = {
+    __typename?: 'Swap';
     id: string;
     tokenInSymbol: string;
     tokenOutSymbol: string;
@@ -1742,8 +1759,12 @@ export type CowAmmSwapFragment = {
     surplusToken?: string | null | undefined;
     swapFeeAmount?: string | null | undefined;
     swapFeeToken?: string | null | undefined;
-    pool: { id: string; tokens: Array<{ index: number; address: string; decimals: number }> };
-    user: { id: string };
+    pool: {
+        __typename?: 'Pool';
+        id: string;
+        tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string; decimals: number }>;
+    };
+    user: { __typename?: 'User'; id: string };
 };
 
 export type SwapsQueryVariables = Exact<{
@@ -1756,7 +1777,9 @@ export type SwapsQueryVariables = Exact<{
 }>;
 
 export type SwapsQuery = {
+    __typename?: 'Query';
     swaps: Array<{
+        __typename?: 'Swap';
         id: string;
         tokenInSymbol: string;
         tokenOutSymbol: string;
@@ -1772,12 +1795,17 @@ export type SwapsQuery = {
         surplusToken?: string | null | undefined;
         swapFeeAmount?: string | null | undefined;
         swapFeeToken?: string | null | undefined;
-        pool: { id: string; tokens: Array<{ index: number; address: string; decimals: number }> };
-        user: { id: string };
+        pool: {
+            __typename?: 'Pool';
+            id: string;
+            tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string; decimals: number }>;
+        };
+        user: { __typename?: 'User'; id: string };
     }>;
 };
 
 export type CowAmmPoolFragment = {
+    __typename?: 'Pool';
     id: string;
     name: string;
     symbol: string;
@@ -1788,8 +1816,9 @@ export type CowAmmPoolFragment = {
     swapsCount: string;
     holdersCount: string;
     weights: Array<string>;
-    factory: { id: string };
+    factory: { __typename?: 'Factory'; id: string };
     tokens: Array<{
+        __typename?: 'PoolToken';
         id: string;
         index: number;
         name: string;
@@ -1810,7 +1839,9 @@ export type PoolsQueryVariables = Exact<{
 }>;
 
 export type PoolsQuery = {
+    __typename?: 'Query';
     pools: Array<{
+        __typename?: 'Pool';
         id: string;
         name: string;
         symbol: string;
@@ -1821,8 +1852,9 @@ export type PoolsQuery = {
         swapsCount: string;
         holdersCount: string;
         weights: Array<string>;
-        factory: { id: string };
+        factory: { __typename?: 'Factory'; id: string };
         tokens: Array<{
+            __typename?: 'PoolToken';
             id: string;
             index: number;
             name: string;
@@ -1844,7 +1876,9 @@ export type SnapshotsQueryVariables = Exact<{
 }>;
 
 export type SnapshotsQuery = {
+    __typename?: 'Query';
     poolSnapshots: Array<{
+        __typename?: 'PoolSnapshot';
         id: string;
         balances: Array<string>;
         totalSurpluses: Array<string>;
@@ -1855,14 +1889,16 @@ export type SnapshotsQuery = {
         swapsCount: string;
         holdersCount: string;
         pool: {
+            __typename?: 'Pool';
             id: string;
             swapFee: string;
-            tokens: Array<{ id: string; index: number; address: string; decimals: number }>;
+            tokens: Array<{ __typename?: 'PoolToken'; id: string; index: number; address: string; decimals: number }>;
         };
     }>;
 };
 
 export type CowAmmSnapshotFragment = {
+    __typename?: 'PoolSnapshot';
     id: string;
     balances: Array<string>;
     totalSurpluses: Array<string>;
@@ -1873,9 +1909,10 @@ export type CowAmmSnapshotFragment = {
     swapsCount: string;
     holdersCount: string;
     pool: {
+        __typename?: 'Pool';
         id: string;
         swapFee: string;
-        tokens: Array<{ id: string; index: number; address: string; decimals: number }>;
+        tokens: Array<{ __typename?: 'PoolToken'; id: string; index: number; address: string; decimals: number }>;
     };
 };
 

@@ -16,15 +16,7 @@ export type Scalars = {
     BigDecimal: string;
     BigInt: string;
     Bytes: string;
-    /**
-     * 8 bytes signed integer
-     *
-     */
     Int8: any;
-    /**
-     * A string representation of microseconds UNIX timestamp (16 digits)
-     *
-     */
     Timestamp: any;
 };
 
@@ -44,6 +36,7 @@ export type Block_Height = {
 };
 
 export type Factory = {
+    __typename?: 'Factory';
     address: Scalars['Bytes'];
     id: Scalars['Bytes'];
     pools?: Maybe<Array<Pool>>;
@@ -114,6 +107,7 @@ export enum OrderDirection {
 }
 
 export type Pool = {
+    __typename?: 'Pool';
     address: Scalars['Bytes'];
     amp?: Maybe<Scalars['BigInt']>;
     factory: Factory;
@@ -201,6 +195,7 @@ export enum Pool_OrderBy {
 }
 
 export type Query = {
+    __typename?: 'Query';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
     factories: Array<Factory>;
@@ -246,6 +241,7 @@ export type QueryPoolsArgs = {
 };
 
 export type Subscription = {
+    __typename?: 'Subscription';
     /** Access to subgraph metadata */
     _meta?: Maybe<_Meta_>;
     factories: Array<Factory>;
@@ -291,6 +287,7 @@ export type SubscriptionPoolsArgs = {
 };
 
 export type _Block_ = {
+    __typename?: '_Block_';
     /** The hash of the block */
     hash?: Maybe<Scalars['Bytes']>;
     /** The block number */
@@ -303,6 +300,7 @@ export type _Block_ = {
 
 /** The type for the top-level _meta field */
 export type _Meta_ = {
+    __typename?: '_Meta_';
     /**
      * Information about a specific subgraph block. The hash of the block
      * will be null if the _meta field has a block constraint that asks for
@@ -325,18 +323,23 @@ export enum _SubgraphErrorPolicy_ {
 }
 
 export type FactoryFragment = {
+    __typename?: 'Factory';
     id: string;
     type: PoolType;
     version: number;
-    pools?: Array<{ id: string; address: string; weights?: Array<string> | null | undefined }> | null | undefined;
+    pools?:
+        | Array<{ __typename?: 'Pool'; id: string; address: string; weights?: Array<string> | null | undefined }>
+        | null
+        | undefined;
 };
 
 export type TypePoolFragment = {
+    __typename?: 'Pool';
     id: string;
     address: string;
     weights?: Array<string> | null | undefined;
     amp?: string | null | undefined;
-    factory: { id: string; type: PoolType; version: number };
+    factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
 };
 
 export type PoolsQueryVariables = Exact<{
@@ -349,12 +352,14 @@ export type PoolsQueryVariables = Exact<{
 }>;
 
 export type PoolsQuery = {
+    __typename?: 'Query';
     pools: Array<{
+        __typename?: 'Pool';
         id: string;
         address: string;
         weights?: Array<string> | null | undefined;
         amp?: string | null | undefined;
-        factory: { id: string; type: PoolType; version: number };
+        factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
     }>;
 };
 
