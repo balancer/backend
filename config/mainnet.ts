@@ -373,6 +373,21 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            cdcETH: {
+                tokenAddress: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
+                sourceUrl: 'https://api.crypto.com/pos/v1/public/get-staking-instruments',
+                path: 'result.data.{instrument_name == "ETH.staked"}.est_rewards',
+                isIbYield: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: {
+                    params: {
+                        country_code: 'POL',
+                    },
+                },
+                scale: 1,
+            },
         },
     },
     datastudio: {
