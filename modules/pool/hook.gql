@@ -6,7 +6,7 @@ extend type Query {
 }
 
 """
-Collection of hook specific data in 0.05% format
+Collection of hook specific data. Percentage format is 0.01 -> 0.01%.
 """
 type HookData {
     swapFeePercentage: String
