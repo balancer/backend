@@ -34,7 +34,7 @@ export class DForce implements AprHandler {
                 [this.config!.token.toLowerCase()]: {
                     apr,
                     isIbYield,
-                }, // Convert to a percentage string with 2 decimal places
+                },
             };
         } catch (error) {
             console.error('Error fetching APY:', error);
