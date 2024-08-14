@@ -156,28 +156,28 @@ export class StablePool implements BasePoolV3 {
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { amountsOut } = vault.removeLiquidity(
+            const { amountsOutRaw } = vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOut: poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
-                    maxBptAmountIn: swapAmount.amount,
+                    minAmountsOutRaw: poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
+                    maxBptAmountInRaw: swapAmount.amount,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
                 poolState,
             );
-            calculatedAmount = amountsOut[tOut.index];
+            calculatedAmount = amountsOutRaw[tOut.index];
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { bptAmountOut } = vault.addLiquidity(
+            const { bptAmountOutRaw } = vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsIn: poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
-                    minBptAmountOut: 0n,
+                    maxAmountsInRaw: poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
+                    minBptAmountOutRaw: 0n,
                     kind: AddKind.UNBALANCED,
                 },
                 poolState,
             );
-            calculatedAmount = bptAmountOut;
+            calculatedAmount = bptAmountOutRaw;
         } else {
             // swap
             calculatedAmount = vault.swap(
@@ -203,28 +203,28 @@ export class StablePool implements BasePoolV3 {
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { bptAmountIn } = vault.removeLiquidity(
+            const { bptAmountInRaw } = vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOut: poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
-                    maxBptAmountIn: MAX_UINT256,
+                    minAmountsOutRaw: poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
+                    maxBptAmountInRaw: MAX_UINT256,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_OUT,
                 },
                 poolState,
             );
-            calculatedAmount = bptAmountIn;
+            calculatedAmount = bptAmountInRaw;
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { amountsIn } = vault.addLiquidity(
+            const { amountsInRaw } = vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsIn: poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
-                    minBptAmountOut: swapAmount.amount,
+                    maxAmountsInRaw: poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
+                    minBptAmountOutRaw: swapAmount.amount,
                     kind: AddKind.SINGLE_TOKEN_EXACT_OUT,
                 },
                 poolState,
             );
-            calculatedAmount = amountsIn[tIn.index];
+            calculatedAmount = amountsInRaw[tIn.index];
         } else {
             // swap
             calculatedAmount = vault.swap(

@@ -32,7 +32,7 @@ export class BufferPool implements BasePoolV3 {
             erc4626Token.token.address,
             erc4626Token.token.address,
             erc4626Token.token.chainId,
-            erc4626Token.rate * 10n ** 9n, // scaling up to 27 decimals
+            erc4626Token.rate,
             [mainToken, underlyingToken],
         );
     }
