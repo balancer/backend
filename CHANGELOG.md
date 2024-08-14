@@ -1,5 +1,20 @@
 # backend
 
+## 1.10.0
+
+### Minor Changes
+
+-   ad09bfd: susx and usdm APRs on Arb
+-   5a023cb: adding support for hooks
+-   aae66a9: cdcETH APR
+
+### Patch Changes
+
+-   5ec208f: Fix scientific notation issue caused by parseFloat
+-   8a7c851: Adding aggregate fee fields to pools dynamic data
+-   01a1b1a: accept any letter casing in queries
+-   6782183: SOR - Replace parseFloat with parseEther
+
 ## 1.9.3
 
 ### Patch Changes
