@@ -24,7 +24,7 @@ const sourceToHandler = {
     maple: sources.Maple,
     etherfi: sources.Etherfi,
     sveth: sources.svEthAprHandler,
-    gforce: sources.DForce,
+    dforce: sources.DForce,
 };
 
 export class YbAprHandlers {

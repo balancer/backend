@@ -12,7 +12,6 @@ const convertLetterCase = (obj: Record<string, any>) => {
     for (let key in obj) {
         if (typeof obj[key] === 'string' && LOWER_REGEX.test(key)) {
             obj[key] = obj[key].toLowerCase();
-            console.log('key', key, obj[key]);
         } else if (typeof obj[key] === 'string' && UPPER_REGEX.test(key)) {
             obj[key] = obj[key].toUpperCase();
         } else if (Array.isArray(obj[key]) && LOWER_REGEX.test(key)) {
@@ -124,8 +123,6 @@ export async function lowerCaseMiddleware(req: Request, res: Response, next: Nex
                 // Replacing the original query with the lowercase one
                 req.body.query = casedQueryParams(query);
             }
-
-            console.log(req.body.query, variables);
         }
 
         next();
