@@ -38,7 +38,7 @@ export function SnapshotsController(tracer?: any) {
             const entries = await syncSnapshotsV2(subgraphClient, chain);
             return entries;
         },
-        async syncSnapshotForPools(poolIds: string[], chainId: string) {
+        async syncSnapshotForPools(poolIds: string[], chainId: string, reload = false) {
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancer },
@@ -63,7 +63,7 @@ export function SnapshotsController(tracer?: any) {
 
             const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
             const service = new PoolSnapshotService(subgraphClient, chain, prices);
-            const entries = await service.loadAllSnapshotsForPools(poolIds);
+            const entries = await service.loadAllSnapshotsForPools(poolIds, reload);
 
             return entries;
         },

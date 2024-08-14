@@ -1,5 +1,7 @@
 //******** AUTO GENERATED FILE, DO NOT EDIT.  *********
 
+
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -48,65 +50,27 @@ model PrismaFbeets {
     ratio               String
 }
 
+model Hook {
+  id                              Int          @id @default(autoincrement())
+  address                         String
+  chain                           Chain
+  enableHookAdjustedAmounts       Boolean      @default(false)
+  shouldCallAfterSwap             Boolean      @default(false)
+  shouldCallBeforeSwap            Boolean      @default(false)
+  shouldCallAfterInitialize       Boolean      @default(false)
+  shouldCallBeforeInitialize      Boolean      @default(false)
+  shouldCallAfterAddLiquidity     Boolean      @default(false)
+  shouldCallBeforeAddLiquidity    Boolean      @default(false)
+  shouldCallAfterRemoveLiquidity  Boolean      @default(false)
+  shouldCallBeforeRemoveLiquidity Boolean      @default(false)
+  shouldCallComputeDynamicSwapFee Boolean      @default(false)
+  dynamicData                     Json         @default("{}")
+  pools                           PrismaPool[]
 
-model PrismaSftmxStakingData {
-    id                      String              @id
-    totalFtm                String
-    totalFtmStaked          String
-    totalFtmInPool          String
-    numberOfVaults          Int
-    stakingApr              String
-    exchangeRate            String
-
-    maxDepositLimit         String
-    minDepositLimit         String
-    withdrawalDelay         Int
-
-    undelegatePaused        Boolean
-    withdrawPaused          Boolean
-    maintenancePaused       Boolean
-
-    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
-    vaults                  PrismaSftmxVault[]
-
-    snapshots               PrismaSftmxStakingDataSnapshot[]
+  @@unique([address, chain])
+  @@index(id)
 }
 
-model PrismaSftmxVault {
-    id                      String          @id
-    vaultIndex              Int
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    ftmStaked               String
-    matured                 Boolean
-    unlockTimestamp         Int
-    validatorId             String
-    validatorAddress        String
-}
-
-model PrismaSftmxWithdrawalRequest {
-    id                      String                  @id
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    user                    String
-    amountSftmx             String
-    requestTimestamp        Int
-    isWithdrawn             Boolean
-}
-
-model PrismaSftmxStakingDataSnapshot {
-    id                      String                  @id
-    ftmStakingId            String
-    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
-
-    timestamp               Int
-    freePoolFtmAmount       String
-    lockedFtmAmount         String
-    totalFtmAmount          String
-    exchangeRate            String
-}
 
 model PrismaPool {
     @@id([id, chain])
@@ -149,6 +113,9 @@ model PrismaPool {
 
     userPoolBalanceSnapshots    PrismaUserPoolBalanceSnapshot[]
 
+    hook               Hook? @relation(fields: [hookId], references: [id])
+    hookId             Int?
+
     @@index([categories(ops: ArrayOps)], type: Gin)
 }
 
@@ -185,9 +152,11 @@ model PrismaPoolDynamicData {
     blockNumber             Int
     updatedAt               DateTime            @updatedAt
 
-    protocolYieldFee        String?             
+    protocolYieldFee        String?
     protocolSwapFee         String              @default("0")
     swapFee                 String
+    aggregateSwapFee        String              @default("0")
+    aggregateYieldFee       String              @default("0")
     swapEnabled             Boolean
     isPaused                Boolean             @default(false)
     isInRecoveryMode        Boolean             @default(false)
@@ -671,6 +640,66 @@ model PrismaPoolEvent {
     @@map("PartitionedPoolEvent")
 }
 
+
+
+model PrismaSftmxStakingData {
+    id                      String              @id
+    totalFtm                String
+    totalFtmStaked          String
+    totalFtmInPool          String
+    numberOfVaults          Int
+    stakingApr              String
+    exchangeRate            String
+
+    maxDepositLimit         String
+    minDepositLimit         String
+    withdrawalDelay         Int
+
+    undelegatePaused        Boolean
+    withdrawPaused          Boolean
+    maintenancePaused       Boolean
+
+    withdrawalRequests      PrismaSftmxWithdrawalRequest[]
+    vaults                  PrismaSftmxVault[]
+
+    snapshots               PrismaSftmxStakingDataSnapshot[]
+}
+
+model PrismaSftmxVault {
+    id                      String          @id
+    vaultIndex              Int
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    ftmStaked               String
+    matured                 Boolean
+    unlockTimestamp         Int
+    validatorId             String
+    validatorAddress        String
+}
+
+model PrismaSftmxWithdrawalRequest {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    user                    String
+    amountSftmx             String
+    requestTimestamp        Int
+    isWithdrawn             Boolean
+}
+
+model PrismaSftmxStakingDataSnapshot {
+    id                      String                  @id
+    ftmStakingId            String
+    ftmStaking              PrismaSftmxStakingData  @relation(fields:[ftmStakingId], references: [id])
+
+    timestamp               Int
+    freePoolFtmAmount       String
+    lockedFtmAmount         String
+    totalFtmAmount          String
+    exchangeRate            String
+}
 
 model PrismaToken {
     @@id([address, chain])

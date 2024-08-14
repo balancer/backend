@@ -65,6 +65,10 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(12, 'hours'),
         },
         {
+            name: 'sync-hook-data',
+            interval: every(1, 'hours'),
+        },
+        {
             name: 'sync-tokens-from-pool-tokens',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },

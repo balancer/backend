@@ -214,6 +214,10 @@ type GqlPoolMinimal {
     List of tags assigned by the team based on external factors
     """
     tags: [String]
+    """
+    Hook assigned to a pool
+    """
+    hook: Hook
 }
 
 """
@@ -384,6 +388,8 @@ type GqlPoolDynamicData {
 
     #fields that change rarely
     swapFee: BigDecimal!
+    aggregateSwapFee: BigDecimal!
+    aggregateYieldFee: BigDecimal!
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!

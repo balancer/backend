@@ -367,6 +367,15 @@ export function configureWorkerRoutes(app: Express) {
             case 'sync-pools-v3':
                 await runIfNotAlreadyRunning(job.name, chainId, () => PoolController().syncPoolsV3(chainId), res, next);
                 break;
+            case 'sync-hook-data':
+                await runIfNotAlreadyRunning(
+                    job.name,
+                    chainId,
+                    () => PoolController().syncHookData(chainId),
+                    res,
+                    next,
+                );
+                break;
             case 'sync-swaps-v3':
                 await runIfNotAlreadyRunning(
                     job.name,
