@@ -41,5 +41,6 @@ type GqlVotingGauge {
     childGaugeAddress: Bytes
     relativeWeightCap: String
     isKilled: Boolean!
+    relativeWeight: String!
     addedTimestamp: Int
 }
