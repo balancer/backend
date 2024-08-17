@@ -21,11 +21,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbdFdmYJwVVCfinA2y78eU6AHJjANWJU86zfm4MvESUsW`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUvfS6hqU3nGQxFFzxoMBkufYJ7Jh3cYdTUM64hucgqe7`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdV2TaFESPiEB9xcLJarbganJxVzu7u4GYGbhTies43EM`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdmQBHbBtwD6wNypHbuGKB1uKHpHNVuSHbo9FsvrMhXSn`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
@@ -372,6 +372,21 @@ export default <NetworkData>{
                 sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
                 path: 'apr',
                 isIbYield: true,
+            },
+            cdcETH: {
+                tokenAddress: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
+                sourceUrl: 'https://api.crypto.com/pos/v1/public/get-staking-instruments',
+                path: 'result.data.{instrument_name == "ETH.staked"}.est_rewards',
+                isIbYield: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: {
+                    params: {
+                        country_code: 'POL',
+                    },
+                },
+                scale: 1,
             },
         },
     },

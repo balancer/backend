@@ -1,4 +1,4 @@
-import { AbiParameterToPrimitiveType, ExtractAbiFunction, parseAbi } from 'abitype';
+import { AbiParameterToPrimitiveType, ExtractAbiFunction } from 'abitype';
 import { ViemClient } from '../types';
 import VaultV3Abi from './abis/VaultV3';
 
@@ -18,6 +18,8 @@ type PoolTokenRates = [
 export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
+    aggregateSwapFee?: bigint;
+    aggregateYieldFee?: bigint;
     // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
@@ -27,6 +29,7 @@ export interface OnchainPoolData {
         balance: bigint;
         rateProvider: string;
         rate: bigint;
+        isErc4626: boolean;
     }[];
 }
 
@@ -89,6 +92,8 @@ export async function fetchPoolData(
             {
                 totalSupply: results[pointer].status === 'success' ? (results[pointer].result as bigint) : undefined,
                 swapFee: config?.staticSwapFeePercentage,
+                aggregateSwapFee: config?.aggregateSwapFeePercentage,
+                aggregateYieldFee: config?.aggregateYieldFeePercentage,
                 isPoolPaused: config?.isPoolPaused,
                 isPoolInRecoveryMode: config?.isPoolInRecoveryMode,
                 tokens: poolTokenInfo?.[0].map((token: string, i: number) => ({
@@ -97,6 +102,7 @@ export async function fetchPoolData(
                     paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
                     rateProvider: poolTokenInfo[1][i].rateProvider,
                     rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
+                    isErc4626: false, // will be added later in the process
                 })),
             },
         ];

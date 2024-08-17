@@ -16,7 +16,7 @@ export default <NetworkData>{
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
         beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXcxzZioHXV5ts2UcG6gNNEayoaZ9ip7D9JvPS88K2HXe`,
         blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
-        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmcUVq8VZtaTPqCQ3mBbaLKoWyL3u2KokCiNZLuzXfjEnw`,
+        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmZQJu1rxMEDwzZb5TSqDXjcFiS1DN8BRKCLKRv6ifEBhA`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmQB4iZpeX9eYgLUaiBt2HwkobqE3NzVUiupXF6Ha9Nzbk`,
         sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmaD9zWMc6kQrBVbtjXNjNjbhpGWUHQFQdxABBEaVJqK5s`,
     },

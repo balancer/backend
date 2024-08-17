@@ -134,12 +134,8 @@ export function CowAmmController(tracer?: any) {
             }
 
             await upsertPools(poolsToSync, viemClient, subgraphClient, chain, blockToSync);
-
-            await prisma.prismaLastBlockSynced.findFirst({
-                where: {
-                    category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
-                },
-            });
+            await updateVolumeAndFees(chain, poolsToSync);
+            await updateSurplusAPRs();
 
             const toBlock = await viemClient.getBlockNumber();
             await prisma.prismaLastBlockSynced.upsert({
@@ -198,7 +194,11 @@ export function CowAmmController(tracer?: any) {
         },
         async updateVolumeAndFees(chainId: string) {
             const chain = chainIdToChain[chainId];
-            await updateVolumeAndFees(chain);
+            const cowPools = await prisma.prismaPool.findMany({ where: { chain, type: 'COW_AMM' } });
+            await updateVolumeAndFees(
+                chain,
+                cowPools.map((pool) => pool.id),
+            );
             return true;
         },
     };

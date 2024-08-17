@@ -108,6 +108,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return AprsController().syncMerkl();
     } else if (job === 'sync-rate-provider-reviews') {
         return ContentController().syncRateProviderReviews();
+    } else if (job === 'sync-hook-data') {
+        return PoolController().syncHookData(chain);
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }

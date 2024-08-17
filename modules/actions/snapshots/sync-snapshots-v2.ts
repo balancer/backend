@@ -24,12 +24,24 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
     });
     const storedTimestamp = storedSnapshot?.timestamp || 0;
 
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
+                chain,
+            },
+            select: {
+                tokenAddress: true,
+                price: true,
+            },
+        })
+        .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
+
     // How many day ago was the last snapshot
     const daysAgo = Math.floor((Date.now() / 1000 - storedTimestamp) / 86400);
 
     console.log('Syncing snapshots for', chain, 'from', daysAgo, 'days ago');
 
-    const service = new PoolSnapshotService(subgraphClient, chain);
+    const service = new PoolSnapshotService(subgraphClient, chain, prices);
     await service.syncLatestSnapshotsForAllPools(Math.max(daysAgo, 2));
 
     return [];

@@ -20,6 +20,7 @@ fragment VaultPool on Pool {
         balance
         totalProtocolSwapFee
         totalProtocolYieldFee
+        paysYieldFees
         nestedPool {
             id
         }
@@ -29,6 +30,21 @@ fragment VaultPool on Pool {
         token {
             address
         }
+    }
+    hookConfig {
+        hook {
+            address
+        }
+        enableHookAdjustedAmounts
+        shouldCallAfterSwap
+        shouldCallBeforeSwap
+        shouldCallAfterInitialize
+        shouldCallBeforeInitialize
+        shouldCallAfterAddLiquidity
+        shouldCallBeforeAddLiquidity
+        shouldCallAfterRemoveLiquidity
+        shouldCallBeforeRemoveLiquidity
+        shouldCallComputeDynamicSwapFee
     }
 }
 

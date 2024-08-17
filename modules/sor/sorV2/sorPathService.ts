@@ -17,7 +17,7 @@ import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './lib/static';
+import { sorGetPathsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
@@ -49,8 +49,10 @@ class SorPathService implements SwapService {
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
+        const protocolVersion = 2;
+
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain, 2);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -66,7 +68,15 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
@@ -150,9 +160,18 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
+                // TODO: we should be able to refactor this 'retry' logic so it's configurable from outside instead of hardcoding it here
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return paths;
@@ -254,7 +273,7 @@ class SorPathService implements SwapService {
                         swapKind,
                         expectedAmountIn: inputAmount,
                     },
-                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    slippage: Slippage.fromPercentage(callDataInput.slippagePercentage as `${number}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactOut;
                 callData = {
@@ -440,7 +459,7 @@ class SorPathService implements SwapService {
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 100,
+                        gte: chain === 'SEPOLIA' ? 0 : 100,
                     },
                 },
                 id: {
@@ -452,6 +471,7 @@ class SorPathService implements SwapService {
                         'META_STABLE',
                         'PHANTOM_STABLE',
                         'COMPOSABLE_STABLE',
+                        'STABLE',
                         'FX',
                         'GYRO',
                         'GYRO3',

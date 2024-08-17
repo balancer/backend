@@ -2,7 +2,7 @@ import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { MathSol, WAD, max, min } from './utils/math';
-import { BasePool } from './pools/basePool';
+import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
 import { parseEther } from 'viem';
 
@@ -17,9 +17,10 @@ export class Router {
         tokenIn: Token,
         tokenOut: Token,
         pools: BasePool[],
+        enableAddRemoveLiquidityPaths: boolean,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): PathLocal[] {
-        this.pathGraph.buildGraph({ pools });
+        this.pathGraph.buildGraph({ pools, enableAddRemoveLiquidityPaths });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
             tokenIn,
@@ -112,7 +113,7 @@ export class Router {
             bestSplitPaths = splitPaths[minAmountInIndex];
         }
 
-        console.log('SOR_SPLIT_PATHS_', splitPaths.indexOf(bestSplitPaths));
+        console.log(`SOR_SPLIT_PATHS_${splitPaths.indexOf(bestSplitPaths)}`);
 
         return bestSplitPaths;
     }

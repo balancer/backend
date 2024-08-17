@@ -116,6 +116,10 @@ export interface NetworkData {
             tokenAdmin?: string;
         };
     };
+    hooks?: {
+        feeTakingHook?: string[];
+        removeLiquidityFeeHook?: string[];
+    };
     multicall: string;
     multicall3: string;
     masterchef?: {
@@ -155,3 +159,5 @@ export interface NetworkData {
         };
     };
 }
+
+export type HookType = keyof NonNullable<NetworkData['hooks']>;

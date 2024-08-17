@@ -1,5 +1,98 @@
 # backend
 
+## 1.10.0
+
+### Minor Changes
+
+-   ad09bfd: susx and usdm APRs on Arb
+-   5a023cb: adding support for hooks
+-   aae66a9: cdcETH APR
+
+### Patch Changes
+
+-   5ec208f: Fix scientific notation issue caused by parseFloat
+-   8a7c851: Adding aggregate fee fields to pools dynamic data
+-   01a1b1a: accept any letter casing in queries
+-   6782183: SOR - Replace parseFloat with parseEther
+
+## 1.9.3
+
+### Patch Changes
+
+-   cd94cd1: Using API prices to calculate totalLiquidity in snapshots
+-   31d93a1: passing protocol version to sor lib
+
+## 1.9.2
+
+### Patch Changes
+
+-   aff6246: update env file
+
+## 1.9.1
+
+### Patch Changes
+
+-   a3ab47e: workaround for streamed BAL on mainnet
+
+## 1.9.0
+
+### Minor Changes
+
+-   ad5c843: Add support for SOR paths with add/remove liquidity steps
+
+### Patch Changes
+
+-   ff80266: adding mutation to reload erc4626
+-   0cb2dbb: quick workaround to remove cow apr boost
+
+## 1.8.3
+
+### Patch Changes
+
+-   29f0beb: using pool addresses to match gauges instead of pool id
+
+## 1.8.2
+
+### Patch Changes
+
+-   55fa750: SOR should consider STABLE pools for v3 liquidity only
+
+## 1.8.1
+
+### Patch Changes
+
+-   7d327cf: fix token query
+
+## 1.8.0
+
+### Minor Changes
+
+-   7720c09: add support for boosted pools for v3
+
+### Patch Changes
+
+-   116cf21: expose surplus in the events query
+-   421a48e: Refactor SOR to use Balancer Maths for v3 liquidity
+
+## 1.7.4
+
+### Patch Changes
+
+-   1d3f265: v2 update interferes with cow
+
+## 1.7.3
+
+### Patch Changes
+
+-   af11d6b: fix cow-surplus scaling, update cow volume sync
+
+## 1.7.2
+
+### Patch Changes
+
+-   13f2416: update cow amm subgraphs
+-   956f28c: update masterchef subgraph
+
 ## 1.7.1
 
 ### Patch Changes

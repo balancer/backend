@@ -65,6 +65,27 @@ export class TokenService {
         return tokens;
     }
 
+    public async getTokenDefinition(address: string, chain: Chain): Promise<GqlToken | undefined> {
+        const token = await prisma.prismaToken.findUnique({
+            where: { address_chain: { address: address, chain: chain } },
+            include: { types: true },
+        });
+
+        if (token) {
+            const rateProviderData = await this.getPriceRateProviderData([token]);
+            return {
+                ...token,
+                chainId: AllNetworkConfigsKeyedOnChain[token.chain].data.chain.id,
+                tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
+                rateProviderData: rateProviderData[token.address],
+                coingeckoId: token.coingeckoTokenId,
+                isErc4626: token.types.some((type) => type.type === 'ERC4626'),
+            };
+        }
+
+        return undefined;
+    }
+
     public async getTokenDefinitions(chains: Chain[]): Promise<GqlToken[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: { types: { some: { type: 'WHITE_LISTED' } }, chain: { in: chains } },
@@ -113,6 +134,7 @@ export class TokenService {
             tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
             rateProviderData: rateProviderData[token.address],
             coingeckoId: token.coingeckoTokenId,
+            isErc4626: token.types.some((type) => type.type === 'ERC4626'),
         }));
     }
 

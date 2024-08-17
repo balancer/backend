@@ -17,7 +17,7 @@ export default <NetworkData>{
         blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme9hQY1NZ8ReVDSSQb893s2fGpeLkgfwXd3YU5rndACaP`,
         aura: 'https://data.aura.finance/graphql',
-        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVAZTFvvkCkkBvXQ2mrJfnW349UVSHJdgwA1u7QYau6iw`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZ5RYZdrdSreBaMxjB65MUzW4WzVeSQU5tLwRskQNKnTW`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

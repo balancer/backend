@@ -8,13 +8,10 @@ import {
     LiquidityGauge_OrderBy,
     OrderDirection,
     VotingEscrowLock_OrderBy,
-    PoolsQueryVariables,
-    PoolsQuery,
-    RootGaugesQuery,
     RootGaugeFragment,
+    GaugeLiquidityGaugesQuery,
 } from './generated/gauge-subgraph-types';
 import { GraphQLClient } from 'graphql-request';
-import { networkContext } from '../../network/network-context.service';
 import moment from 'moment';
 import _ from 'lodash';
 
@@ -186,19 +183,19 @@ export class GaugeSubgraphService {
         return locks;
     }
 
-    public async getPoolsWithGauges(poolIds: string[]): Promise<PoolsQuery> {
-        const chunks = _.chunk(poolIds, 1000);
-        const allPoolsWithGauges: PoolsQuery = { pools: [] };
+    public async getAllGaugesForPoolAddresses(poolAddresses: string[]): Promise<GaugeLiquidityGaugesQuery> {
+        const chunks = _.chunk(poolAddresses, 1000);
+        const allPoolsWithGauges: GaugeLiquidityGaugesQuery = { liquidityGauges: [] };
 
         for (const chunk of chunks) {
-            const poolsWithGauges = await this.sdk.Pools({
+            const gauges = await this.sdk.GaugeLiquidityGauges({
                 where: {
-                    poolId_in: chunk,
+                    poolAddress_in: chunk,
                 },
                 first: 1000,
             });
 
-            allPoolsWithGauges.pools.push(...poolsWithGauges.pools);
+            allPoolsWithGauges.liquidityGauges.push(...gauges.liquidityGauges);
         }
 
         return allPoolsWithGauges;
