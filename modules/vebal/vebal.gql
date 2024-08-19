@@ -1,5 +1,6 @@
 extend type Query {
     veBalGetUserBalance(chain: GqlChain, address: String): AmountHumanReadable!
+    veBalGetUserBalances(address: String): [GqlVeBalBalance!]!
     veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
     veBalGetVotingList: [GqlVotingPool!]!
     veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!
@@ -8,6 +9,13 @@ extend type Query {
 extend type Mutation {
     veBalSyncAllUserBalances: String!
     veBalSyncTotalSupply: String!
+}
+
+type GqlVeBalBalance {
+    chain: GqlChain!
+    balance: AmountHumanReadable!
+    locked: AmountHumanReadable!
+    lockedUsd: AmountHumanReadable!
 }
 
 type GqlVeBalUserData {
