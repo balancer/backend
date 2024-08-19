@@ -1,9 +1,10 @@
-import { PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolType } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 export interface PoolInput {
     id: string;
     address: string;
+    chain: Chain;
     type: PrismaPoolType | 'COMPOSABLE_STABLE';
     typeData: any;
     version: number;

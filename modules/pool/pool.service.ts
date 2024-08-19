@@ -200,7 +200,7 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 100);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainStatus(chunk);
+            await this.poolOnChainDataService.updateOnChainStatus(chunk, this.chain);
             await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber, this.chain);
         }
     }
@@ -209,7 +209,7 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 1000);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainStatus(chunk);
+            await this.poolOnChainDataService.updateOnChainStatus(chunk, this.chain);
         }
     }
 
