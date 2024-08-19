@@ -56,7 +56,7 @@ export class PoolOnChainDataService {
 
         const state = await fetchOnChainPoolState(
             filteredPools,
-            networkContext.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
+            this.options.chain === 'ZKEVM' || this.options.chain === 'FANTOM' ? 190 : 400,
         );
 
         const operations = [];
