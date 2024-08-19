@@ -201,7 +201,7 @@ export class PoolService {
 
         for (const chunk of chunks) {
             await this.poolOnChainDataService.updateOnChainStatus(chunk);
-            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
+            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber, this.chain);
         }
     }
 
@@ -217,7 +217,7 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 50);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
+            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber, this.chain);
         }
     }
 
@@ -226,7 +226,7 @@ export class PoolService {
         const timestamp = moment().subtract(5, 'minutes').unix();
         const poolIds = await this.balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
 
-        await this.poolOnChainDataService.updateOnChainData(poolIds, blockNumber);
+        await this.poolOnChainDataService.updateOnChainData(poolIds, blockNumber, this.chain);
     }
 
     public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {

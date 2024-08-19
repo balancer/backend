@@ -1,7 +1,6 @@
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 import { Multicaller3 } from '../../web3/multicaller3';
-import { PrismaPoolType } from '@prisma/client';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
@@ -14,36 +13,7 @@ import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import FxPoolAbi from '../abi/FxPool.json';
 import { JsonFragment } from '@ethersproject/abi';
-
-interface PoolInput {
-    id: string;
-    address: string;
-    type: PrismaPoolType | 'COMPOSABLE_STABLE';
-    tokens: {
-        address: string;
-        token: {
-            decimals: number;
-        };
-    }[];
-    version: number;
-}
-
-interface OnchainData {
-    poolTokens: [string[], BigNumber[]];
-    totalSupply: BigNumber;
-    swapFee: BigNumber;
-    swapEnabled?: boolean;
-    protocolYieldFeePercentageCache?: BigNumber;
-    protocolSwapFeePercentageCache?: BigNumber;
-    rate?: BigNumber;
-    weights?: BigNumber[];
-    targets?: [BigNumber, BigNumber];
-    wrappedTokenRate?: BigNumber;
-    amp?: [BigNumber, boolean, BigNumber];
-    tokenRates?: [BigNumber, BigNumber];
-    tokenRate?: BigNumber[];
-    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
-}
+import { PoolInput, ParsedOnchainData, RawOnchainData } from './types';
 
 const abi: JsonFragment[] = Object.values(
     // Remove duplicate entries using their names
@@ -157,7 +127,7 @@ const addPoolTypeSpecificCallsToMulticaller = (type: PoolInput['type'], version 
     }
 };
 
-const parse = (result: OnchainData, decimalsLookup: { [address: string]: number }) => ({
+const parse = (result: RawOnchainData, decimalsLookup: { [address: string]: number }): ParsedOnchainData => ({
     amp: result.amp ? formatFixed(result.amp[0], String(result.amp[2]).length - 1) : undefined,
     swapFee: formatEther(result.swapFee ?? '0'),
     totalShares: formatEther(result.totalSupply || '0'),
@@ -204,7 +174,7 @@ export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: str
     });
 
     const results = (await multicaller.execute()) as {
-        [id: string]: OnchainData;
+        [id: string]: RawOnchainData;
     };
 
     const decimalsLookup = Object.fromEntries(

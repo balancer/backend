@@ -1,68 +1,8 @@
 import { Multicaller3 } from '../../web3/multicaller3';
-import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
-
-interface PoolInput {
-    id: string;
-    address: string;
-    tokens: {
-        address: string;
-        token: {
-            decimals: number;
-        };
-        dynamicData: {
-            balance: string;
-            balanceUSD: number;
-        } | null;
-    }[];
-    dynamicData: {
-        totalShares: string;
-        totalLiquidity: number;
-    } | null;
-}
-
-interface PoolTokenPairsOutput {
-    [poolId: string]: {
-        tokenPairs: TokenPairData[];
-    };
-}
-
-export type TokenPairData = {
-    tokenA: string;
-    tokenB: string;
-    normalizedLiquidity: string;
-    spotPrice: string;
-};
-
-interface TokenPair {
-    poolId: string;
-    poolTvl: number;
-    valid: boolean;
-    tokenA: Token;
-    tokenB: Token;
-    normalizedLiqudity: bigint;
-    spotPrice: bigint;
-    aToBAmountIn: bigint;
-    aToBAmountOut: bigint;
-    bToAAmountOut: bigint;
-    effectivePrice: bigint;
-    effectivePriceAmountIn: bigint;
-}
-
-interface Token {
-    address: string;
-    decimals: number;
-    balance: string;
-    balanceUsd: number;
-}
-
-interface OnchainData {
-    effectivePriceAmountOut: BigNumber;
-    aToBAmountOut: BigNumber;
-    bToAAmountOut: BigNumber;
-}
+import { AToBOnchainData, BToAOnchainData, PoolInput, PoolTokenPairsOutput, TokenPair } from './types';
 
 export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
     if (pools.length === 0) {
@@ -96,7 +36,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
     });
 
     const resultOne = (await multicaller.execute()) as {
-        [id: string]: OnchainData;
+        [id: string]: AToBOnchainData;
     };
 
     tokenPairs.forEach((tokenPair) => {
@@ -112,7 +52,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
     });
 
     const resultTwo = (await multicaller.execute()) as {
-        [id: string]: OnchainData;
+        [id: string]: BToAOnchainData;
     };
 
     tokenPairs.forEach((tokenPair) => {
@@ -285,7 +225,10 @@ function addBToAPriceCallsToMulticaller(
     );
 }
 
-function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
+function getAmountOutAndEffectivePriceFromResult(
+    tokenPair: TokenPair,
+    onchainResults: { [id: string]: AToBOnchainData },
+) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
     if (result?.effectivePriceAmountOut && result.effectivePriceAmountOut.gt(0) && result.aToBAmountOut) {
@@ -298,7 +241,7 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
     }
 }
 
-function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
+function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: BToAOnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
     if (result.bToAAmountOut) {

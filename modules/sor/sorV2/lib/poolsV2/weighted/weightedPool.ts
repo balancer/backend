@@ -5,7 +5,7 @@ import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
 import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
-import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
+import { TokenPairData } from '../../../../../pool/lib/types';
 import { BasePool } from '../basePool';
 import { WeightedPoolToken } from './weightedPoolToken';
 
