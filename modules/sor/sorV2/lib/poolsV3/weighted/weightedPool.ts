@@ -29,6 +29,9 @@ export class WeightedPoolV3 implements BasePoolV3 {
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
 
+    private vault: Vault;
+    private poolState: WeightedState;
+
     static fromPrismaPool(pool: PrismaPoolWithDynamic): WeightedPoolV3 {
         const poolTokens: WeightedPoolToken[] = [];
 
@@ -109,6 +112,9 @@ export class WeightedPoolV3 implements BasePoolV3 {
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new WeightedBasePoolToken(bpt, totalShares, -1, 0n));
+
+        this.vault = new Vault();
+        this.poolState = this.getPoolState();
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -129,81 +135,76 @@ export class WeightedPoolV3 implements BasePoolV3 {
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
-
         // remove liquidity
         if (tIn.token.isSameAddress(this.id)) {
-            return vault.getMaxSingleTokenRemoveAmount(
+            return this.vault.getMaxSingleTokenRemoveAmount(
                 {
                     isExactIn: swapKind === SwapKind.GivenIn,
-                    totalSupply: poolState.totalSupply,
-                    tokenOutBalance: poolState.balancesLiveScaled18[tOut.index],
-                    tokenOutScalingFactor: poolState.scalingFactors[tOut.index],
-                    tokenOutRate: poolState.tokenRates[tOut.index],
+                    totalSupply: this.poolState.totalSupply,
+                    tokenOutBalance: this.poolState.balancesLiveScaled18[tOut.index],
+                    tokenOutScalingFactor: this.poolState.scalingFactors[tOut.index],
+                    tokenOutRate: this.poolState.tokenRates[tOut.index],
                 },
-                poolState,
+                this.poolState,
             );
         }
         // add liquidity
         if (tOut.token.isSameAddress(this.id)) {
-            return vault.getMaxSingleTokenAddAmount(poolState);
+            return this.vault.getMaxSingleTokenAddAmount(this.poolState);
         }
         // swap
-        return vault.getMaxSwapAmount(
+        return this.vault.getMaxSwapAmount(
             {
                 swapKind,
-                balancesLiveScaled18: poolState.balancesLiveScaled18,
-                tokenRates: poolState.tokenRates,
-                scalingFactors: poolState.scalingFactors,
+                balancesLiveScaled18: this.poolState.balancesLiveScaled18,
+                tokenRates: this.poolState.tokenRates,
+                scalingFactors: this.poolState.scalingFactors,
                 indexIn: tIn.index,
                 indexOut: tOut.index,
             },
-            poolState,
+            this.poolState,
         );
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
         let calculatedAmount: bigint;
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { amountsOutRaw } = vault.removeLiquidity(
+            const { amountsOutRaw } = this.vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOutRaw: poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
+                    minAmountsOutRaw: this.poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
                     maxBptAmountInRaw: swapAmount.amount,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
-                poolState,
+                this.poolState,
             );
             calculatedAmount = amountsOutRaw[tOut.index];
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { bptAmountOutRaw } = vault.addLiquidity(
+            const { bptAmountOutRaw } = this.vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsInRaw: poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
+                    maxAmountsInRaw: this.poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
                     minBptAmountOutRaw: 0n,
                     kind: AddKind.UNBALANCED,
                 },
-                poolState,
+                this.poolState,
             );
             calculatedAmount = bptAmountOutRaw;
         } else {
             // swap
-            calculatedAmount = vault.swap(
+            calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
                     tokenOut: tOut.token.address,
                     swapKind: SwapKind.GivenIn,
                 },
-                poolState,
+                this.poolState,
             );
         }
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
@@ -212,45 +213,42 @@ export class WeightedPoolV3 implements BasePoolV3 {
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
-
         let calculatedAmount: bigint;
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { bptAmountInRaw } = vault.removeLiquidity(
+            const { bptAmountInRaw } = this.vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOutRaw: poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
+                    minAmountsOutRaw: this.poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
                     maxBptAmountInRaw: MAX_UINT256,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_OUT,
                 },
-                poolState,
+                this.poolState,
             );
             calculatedAmount = bptAmountInRaw;
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { amountsInRaw } = vault.addLiquidity(
+            const { amountsInRaw } = this.vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsInRaw: poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
+                    maxAmountsInRaw: this.poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
                     minBptAmountOutRaw: swapAmount.amount,
                     kind: AddKind.SINGLE_TOKEN_EXACT_OUT,
                 },
-                poolState,
+                this.poolState,
             );
             calculatedAmount = amountsInRaw[tIn.index];
         } else {
             // swap
-            calculatedAmount = vault.swap(
+            calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
                     tokenOut: tOut.token.address,
                     swapKind: SwapKind.GivenOut,
                 },
-                poolState,
+                this.poolState,
             );
         }
         return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);

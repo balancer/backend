@@ -17,6 +17,9 @@ export class BufferPool implements BasePoolV3 {
 
     private readonly tokenMap: Map<string, BasePoolToken>;
 
+    private vault: Vault;
+    private poolState: BufferState;
+
     static fromErc4626Token(erc4626Token: Erc4626PoolToken): BufferPool {
         const mainToken = new BasePoolToken(erc4626Token.token, MAX_UINT256, 0);
         const underlyingToken = new BasePoolToken(
@@ -52,6 +55,9 @@ export class BufferPool implements BasePoolV3 {
         this.rate = rate;
         this.tokens = [mainToken, underlyingToken];
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
+
+        this.vault = new Vault();
+        this.poolState = this.getPoolState();
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -65,17 +71,14 @@ export class BufferPool implements BasePoolV3 {
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
-
-        const calculatedAmount = vault.swap(
+        const calculatedAmount = this.vault.swap(
             {
                 amountRaw: swapAmount.amount,
                 tokenIn: tIn.token.address,
                 tokenOut: tOut.token.address,
                 swapKind: SwapKind.GivenIn,
             },
-            poolState,
+            this.poolState,
         );
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
     }
@@ -83,18 +86,15 @@ export class BufferPool implements BasePoolV3 {
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
-
         // swap
-        const calculatedAmount = vault.swap(
+        const calculatedAmount = this.vault.swap(
             {
                 amountRaw: swapAmount.amount,
                 tokenIn: tIn.token.address,
                 tokenOut: tOut.token.address,
                 swapKind: SwapKind.GivenOut,
             },
-            poolState,
+            this.poolState,
         );
         return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
     }
