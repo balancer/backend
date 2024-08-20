@@ -5974,10 +5974,20 @@ export type BalancerPoolSharesQueryVariables = Exact<{
 
 export type BalancerPoolSharesQuery = {
     __typename?: 'Query';
-    poolShares: Array<{ __typename?: 'PoolShare'; id: string; balance: string }>;
+    poolShares: Array<{
+        __typename?: 'PoolShare';
+        id: string;
+        balance: string;
+        poolId: { __typename?: 'Pool'; id: string };
+    }>;
 };
 
-export type BalancerPoolShareFragment = { __typename?: 'PoolShare'; id: string; balance: string };
+export type BalancerPoolShareFragment = {
+    __typename?: 'PoolShare';
+    id: string;
+    balance: string;
+    poolId: { __typename?: 'Pool'; id: string };
+};
 
 export type BalancerTokenPricesQueryVariables = Exact<{
     skip?: Maybe<Scalars['Int']>;
@@ -6894,6 +6904,9 @@ export const BalancerPoolShareFragmentDoc = gql`
     fragment BalancerPoolShare on PoolShare {
         id
         balance
+        poolId {
+            id
+        }
     }
 `;
 export const BalancerTokenPriceFragmentDoc = gql`

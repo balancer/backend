@@ -409,7 +409,9 @@ export interface GqlPoolComposableStableNested {
 
 export interface GqlPoolDynamicData {
     __typename?: 'GqlPoolDynamicData';
+    /** Protocol and pool creator fees combined */
     aggregateSwapFee: Scalars['BigDecimal'];
+    /** Protocol and pool creator fees combined */
     aggregateYieldFee: Scalars['BigDecimal'];
     /** @deprecated Use aprItems instead */
     apr: GqlPoolApr;
@@ -421,6 +423,7 @@ export interface GqlPoolDynamicData {
     fees24hAtlTimestamp: Scalars['Int'];
     fees48h: Scalars['BigDecimal'];
     holdersCount: Scalars['BigInt'];
+    /** True for bricked pools */
     isInRecoveryMode: Scalars['Boolean'];
     isPaused: Scalars['Boolean'];
     lifetimeSwapFees: Scalars['BigDecimal'];
@@ -430,8 +433,11 @@ export interface GqlPoolDynamicData {
     sharePriceAthTimestamp: Scalars['Int'];
     sharePriceAtl: Scalars['BigDecimal'];
     sharePriceAtlTimestamp: Scalars['Int'];
+    /** CowAmm specific, equivalent of swap fees */
     surplus24h: Scalars['BigDecimal'];
+    /** CowAmm specific, equivalent of swap fees */
     surplus48h: Scalars['BigDecimal'];
+    /** Disabled for bricked pools */
     swapEnabled: Scalars['Boolean'];
     swapFee: Scalars['BigDecimal'];
     swapsCount: Scalars['BigInt'];
@@ -520,6 +526,10 @@ export interface GqlPoolEventsFilter {
     range?: InputMaybe<GqlPoolEventsDataRange>;
     typeIn?: InputMaybe<Array<InputMaybe<GqlPoolEventType>>>;
     userAddress?: InputMaybe<Scalars['String']>;
+    /** USD value of the event */
+    valueUSD_gt?: InputMaybe<Scalars['Float']>;
+    /** USD value of the event */
+    valueUSD_gte?: InputMaybe<Scalars['Float']>;
 }
 
 export interface GqlPoolFeaturedPool {
@@ -1812,6 +1822,14 @@ export interface GqlUserSwapVolumeFilter {
     tokenOutIn?: InputMaybe<Array<Scalars['String']>>;
 }
 
+export interface GqlVeBalBalance {
+    __typename?: 'GqlVeBalBalance';
+    balance: Scalars['AmountHumanReadable'];
+    chain: GqlChain;
+    locked: Scalars['AmountHumanReadable'];
+    lockedUsd: Scalars['AmountHumanReadable'];
+}
+
 export interface GqlVeBalUserData {
     __typename?: 'GqlVeBalUserData';
     balance: Scalars['AmountHumanReadable'];
@@ -1820,31 +1838,52 @@ export interface GqlVeBalUserData {
     rank?: Maybe<Scalars['Int']>;
 }
 
+/** The Gauge that can be voted on through veBAL and that will ultimately receive the rewards. */
 export interface GqlVotingGauge {
     __typename?: 'GqlVotingGauge';
+    /** The timestamp the gauge was added. */
     addedTimestamp?: Maybe<Scalars['Int']>;
+    /** The address of the root gauge on Ethereum mainnet. */
     address: Scalars['Bytes'];
+    /** The address of the child gauge on the specific chain. */
     childGaugeAddress?: Maybe<Scalars['Bytes']>;
+    /** Whether the gauge is killed or not. */
     isKilled: Scalars['Boolean'];
+    /** The relative weight the gauge received this epoch (not more than 1.0). */
+    relativeWeight: Scalars['String'];
+    /** The relative weight cap. 1.0 for uncapped. */
     relativeWeightCap?: Maybe<Scalars['String']>;
 }
 
+/** A token inside of a pool with a voting gauge. */
 export interface GqlVotingGaugeToken {
     __typename?: 'GqlVotingGaugeToken';
+    /** The address of the token. */
     address: Scalars['String'];
+    /** The URL to the token logo. */
     logoURI: Scalars['String'];
+    /** The symbol of the token. */
     symbol: Scalars['String'];
+    /** If it is a weighted pool, the weigh of the token is shown here in %. 0.5 = 50%. */
     weight?: Maybe<Scalars['String']>;
 }
 
+/** The pool that can be voted on through veBAL */
 export interface GqlVotingPool {
     __typename?: 'GqlVotingPool';
+    /** The address of the pool. */
     address: Scalars['Bytes'];
+    /** The chain this pool is on. */
     chain: GqlChain;
+    /** The gauge that is connected to the pool and that will receive the rewards. */
     gauge: GqlVotingGauge;
+    /** Pool ID */
     id: Scalars['ID'];
+    /** The symbol of the pool. */
     symbol: Scalars['String'];
+    /** The tokens inside the pool. */
     tokens: Array<GqlVotingGaugeToken>;
+    /** The type of the pool. */
     type: GqlPoolType;
 }
 
@@ -2114,6 +2153,8 @@ export interface Query {
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;
     veBalGetUserBalance: Scalars['AmountHumanReadable'];
+    veBalGetUserBalances: Array<GqlVeBalBalance>;
+    /** Returns all pools with veBAL gauges that can be voted on. */
     veBalGetVotingList: Array<GqlVotingPool>;
 }
 
@@ -2330,6 +2371,11 @@ export interface QueryVeBalGetUserArgs {
 export interface QueryVeBalGetUserBalanceArgs {
     address?: InputMaybe<Scalars['String']>;
     chain?: InputMaybe<GqlChain>;
+}
+
+export interface QueryVeBalGetUserBalancesArgs {
+    address: Scalars['String'];
+    chains?: InputMaybe<Array<GqlChain>>;
 }
 
 export interface Token {
@@ -2588,6 +2634,7 @@ export type ResolversTypes = ResolversObject<{
     GqlUserPoolBalance: ResolverTypeWrapper<GqlUserPoolBalance>;
     GqlUserStakedBalance: ResolverTypeWrapper<GqlUserStakedBalance>;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
+    GqlVeBalBalance: ResolverTypeWrapper<GqlVeBalBalance>;
     GqlVeBalUserData: ResolverTypeWrapper<GqlVeBalUserData>;
     GqlVotingGauge: ResolverTypeWrapper<GqlVotingGauge>;
     GqlVotingGaugeToken: ResolverTypeWrapper<GqlVotingGaugeToken>;
@@ -2750,6 +2797,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlUserPoolBalance: GqlUserPoolBalance;
     GqlUserStakedBalance: GqlUserStakedBalance;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
+    GqlVeBalBalance: GqlVeBalBalance;
     GqlVeBalUserData: GqlVeBalUserData;
     GqlVotingGauge: GqlVotingGauge;
     GqlVotingGaugeToken: GqlVotingGaugeToken;
@@ -4365,6 +4413,17 @@ export type GqlUserStakedBalanceResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type GqlVeBalBalanceResolvers<
+    ContextType = Context,
+    ParentType extends ResolversParentTypes['GqlVeBalBalance'] = ResolversParentTypes['GqlVeBalBalance'],
+> = ResolversObject<{
+    balance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
+    locked?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    lockedUsd?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type GqlVeBalUserDataResolvers<
     ContextType = Context,
     ParentType extends ResolversParentTypes['GqlVeBalUserData'] = ResolversParentTypes['GqlVeBalUserData'],
@@ -4384,6 +4443,7 @@ export type GqlVotingGaugeResolvers<
     address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
     childGaugeAddress?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     isKilled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    relativeWeight?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     relativeWeightCap?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -4838,6 +4898,12 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryVeBalGetUserBalanceArgs, never>
     >;
+    veBalGetUserBalances?: Resolver<
+        Array<ResolversTypes['GqlVeBalBalance']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryVeBalGetUserBalancesArgs, 'address'>
+    >;
     veBalGetVotingList?: Resolver<Array<ResolversTypes['GqlVotingPool']>, ParentType, ContextType>;
 }>;
 
@@ -4954,6 +5020,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
     GqlUserFbeetsBalance?: GqlUserFbeetsBalanceResolvers<ContextType>;
     GqlUserPoolBalance?: GqlUserPoolBalanceResolvers<ContextType>;
     GqlUserStakedBalance?: GqlUserStakedBalanceResolvers<ContextType>;
+    GqlVeBalBalance?: GqlVeBalBalanceResolvers<ContextType>;
     GqlVeBalUserData?: GqlVeBalUserDataResolvers<ContextType>;
     GqlVotingGauge?: GqlVotingGaugeResolvers<ContextType>;
     GqlVotingGaugeToken?: GqlVotingGaugeTokenResolvers<ContextType>;

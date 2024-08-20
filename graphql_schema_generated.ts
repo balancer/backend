@@ -536,7 +536,14 @@ export const schema = gql`
     }
 
     type GqlPoolDynamicData {
+        """
+        Protocol and pool creator fees combined
+        """
         aggregateSwapFee: BigDecimal!
+
+        """
+        Protocol and pool creator fees combined
+        """
         aggregateYieldFee: BigDecimal!
         apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
         aprItems: [GqlPoolAprItem!]!
@@ -547,6 +554,10 @@ export const schema = gql`
         fees24hAtlTimestamp: Int!
         fees48h: BigDecimal!
         holdersCount: BigInt!
+
+        """
+        True for bricked pools
+        """
         isInRecoveryMode: Boolean!
         isPaused: Boolean!
         lifetimeSwapFees: BigDecimal!
@@ -556,8 +567,20 @@ export const schema = gql`
         sharePriceAthTimestamp: Int!
         sharePriceAtl: BigDecimal!
         sharePriceAtlTimestamp: Int!
+
+        """
+        CowAmm specific, equivalent of swap fees
+        """
         surplus24h: BigDecimal!
+
+        """
+        CowAmm specific, equivalent of swap fees
+        """
         surplus48h: BigDecimal!
+
+        """
+        Disabled for bricked pools
+        """
         swapEnabled: Boolean!
         swapFee: BigDecimal!
         swapsCount: BigInt!
@@ -648,6 +671,16 @@ export const schema = gql`
         range: GqlPoolEventsDataRange
         typeIn: [GqlPoolEventType]
         userAddress: String
+
+        """
+        USD value of the event
+        """
+        valueUSD_gt: Float
+
+        """
+        USD value of the event
+        """
+        valueUSD_gte: Float
     }
 
     type GqlPoolFeaturedPool {
@@ -2447,6 +2480,13 @@ export const schema = gql`
         tokenOutIn: [String!]
     }
 
+    type GqlVeBalBalance {
+        balance: AmountHumanReadable!
+        chain: GqlChain!
+        locked: AmountHumanReadable!
+        lockedUsd: AmountHumanReadable!
+    }
+
     type GqlVeBalUserData {
         balance: AmountHumanReadable!
         locked: AmountHumanReadable!
@@ -2454,28 +2494,103 @@ export const schema = gql`
         rank: Int
     }
 
+    """
+    The Gauge that can be voted on through veBAL and that will ultimately receive the rewards.
+    """
     type GqlVotingGauge {
+        """
+        The timestamp the gauge was added.
+        """
         addedTimestamp: Int
+
+        """
+        The address of the root gauge on Ethereum mainnet.
+        """
         address: Bytes!
+
+        """
+        The address of the child gauge on the specific chain.
+        """
         childGaugeAddress: Bytes
+
+        """
+        Whether the gauge is killed or not.
+        """
         isKilled: Boolean!
+
+        """
+        The relative weight the gauge received this epoch (not more than 1.0).
+        """
+        relativeWeight: String!
+
+        """
+        The relative weight cap. 1.0 for uncapped.
+        """
         relativeWeightCap: String
     }
 
+    """
+    A token inside of a pool with a voting gauge.
+    """
     type GqlVotingGaugeToken {
+        """
+        The address of the token.
+        """
         address: String!
+
+        """
+        The URL to the token logo.
+        """
         logoURI: String!
+
+        """
+        The symbol of the token.
+        """
         symbol: String!
+
+        """
+        If it is a weighted pool, the weigh of the token is shown here in %. 0.5 = 50%.
+        """
         weight: String
     }
 
+    """
+    The pool that can be voted on through veBAL
+    """
     type GqlVotingPool {
+        """
+        The address of the pool.
+        """
         address: Bytes!
+
+        """
+        The chain this pool is on.
+        """
         chain: GqlChain!
+
+        """
+        The gauge that is connected to the pool and that will receive the rewards.
+        """
         gauge: GqlVotingGauge!
+
+        """
+        Pool ID
+        """
         id: ID!
+
+        """
+        The symbol of the pool.
+        """
         symbol: String!
+
+        """
+        The tokens inside the pool.
+        """
         tokens: [GqlVotingGaugeToken!]!
+
+        """
+        The type of the pool.
+        """
         type: GqlPoolType!
     }
 
@@ -2860,6 +2975,11 @@ export const schema = gql`
         veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
         veBalGetUser(address: String!, chain: GqlChain): GqlVeBalUserData!
         veBalGetUserBalance(address: String, chain: GqlChain): AmountHumanReadable!
+        veBalGetUserBalances(address: String!, chains: [GqlChain!]): [GqlVeBalBalance!]!
+
+        """
+        Returns all pools with veBAL gauges that can be voted on.
+        """
         veBalGetVotingList: [GqlVotingPool!]!
     }
 
