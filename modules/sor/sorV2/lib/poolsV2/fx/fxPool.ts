@@ -197,13 +197,19 @@ export class FxPool implements BasePool {
         return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
     }
 
-    public getPoolPairData(tokenIn: Token, tokenOut: Token, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
+    public getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: FxPoolToken; tOut: FxPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Token not found');
         }
+
+        return { tIn, tOut };
+    }
+
+    public getPoolPairData(tokenIn: Token, tokenOut: Token, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         const usdcToken = isUSDC(tokenIn.address) ? tIn : tOut;
         const baseToken = isUSDC(tokenIn.address) ? tOut : tIn;

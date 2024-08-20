@@ -187,6 +187,17 @@ export class Gyro2Pool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
+    public getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
+    }
+
     public getPoolPairData(
         tokenIn: Token,
         tokenOut: Token,
@@ -196,12 +207,7 @@ export class Gyro2Pool implements BasePool {
         sqrtAlpha: bigint;
         sqrtBeta: bigint;
     } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) {
-            throw new Error('Pool does not contain the tokens provided');
-        }
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         const sqrtAlpha = tIn.index === 0 ? this.sqrtAlpha : MathSol.divDownFixed(WAD, this.sqrtBeta);
         const sqrtBeta = tIn.index === 0 ? this.sqrtBeta : MathSol.divDownFixed(WAD, this.sqrtAlpha);

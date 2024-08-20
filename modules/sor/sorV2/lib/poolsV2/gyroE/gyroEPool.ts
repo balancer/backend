@@ -267,7 +267,7 @@ export class GyroEPool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    getRequiredTokenPair(
+    public getRequiredTokenPair(
         tokenIn: Token,
         tokenOut: Token,
     ): {
