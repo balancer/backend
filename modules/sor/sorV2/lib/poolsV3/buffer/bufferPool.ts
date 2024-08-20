@@ -20,6 +20,15 @@ export class BufferPool implements BasePoolV3 {
     private vault: Vault;
     private poolState: BufferState;
 
+    /**
+     * Instantiates a buffer pool from an ERC-4626 Token
+     *
+     * For context: buffer pool within the SOR is an abstraction that works like
+     * a pool where users can trade yield bearing tokens with their underlying token.
+     * @param erc4626Token
+     * @returns Buffer pool
+     */
+
     static fromErc4626Token(erc4626Token: Erc4626PoolToken): BufferPool {
         const mainToken = new BasePoolToken(erc4626Token.token, MAX_UINT256, 0);
         const underlyingToken = new BasePoolToken(

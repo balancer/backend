@@ -169,6 +169,10 @@ export class PathGraph {
         return filtered;
     }
 
+    /**
+     * Create buffer pools from ERC4626 tokens and add them to the pool list
+     * @param pools
+     */
     private insertBufferPools(pools: BasePool[]) {
         const bufferPools = new Set<BufferPool>();
         for (const pool of pools) {
