@@ -17,6 +17,8 @@ import {
 import { createTestClient, Hex, http, parseEther, TestClient } from 'viem';
 import { sepolia } from 'viem/chains';
 
+const protocolVersion = 3;
+
 describe('Balancer SOR Integration Tests', () => {
     let rpcUrl: string;
     let paths: PathWithAmount[];
@@ -62,7 +64,7 @@ describe('Balancer SOR Integration Tests', () => {
             const prismaWeightedPool = prismaPoolFactory.build({
                 address: '0x03bf996c7bd45b3386cb41875761d45e27eab284',
                 type: 'WEIGHTED',
-                protocolVersion: 3,
+                protocolVersion,
                 tokens: [WETH, BAL],
                 dynamicData: prismaPoolDynamicDataFactory.build({
                     totalShares: '0.158113883008415798',
@@ -74,15 +76,20 @@ describe('Balancer SOR Integration Tests', () => {
             const tIn = new Token(parseFloat(chainToIdMap['SEPOLIA']), BAL.address as Address, 18);
             const tOut = new Token(parseFloat(chainToIdMap['SEPOLIA']), WETH.address as Address, 18);
             const amountIn = BigInt(0.1e18);
-            paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
-                prismaWeightedPool,
-            ])) as PathWithAmount[];
+            paths = (await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                SwapKind.GivenIn,
+                amountIn,
+                [prismaWeightedPool],
+                protocolVersion,
+            )) as PathWithAmount[];
 
             // build SDK swap from SOR paths
             sdkSwap = new Swap({
                 chainId: parseFloat(chainToIdMap['SEPOLIA']),
                 paths: paths.map((path) => ({
-                    protocolVersion: 3,
+                    protocolVersion,
                     inputAmountRaw: path.inputAmount.amount,
                     outputAmountRaw: path.outputAmount.amount,
                     tokens: path.tokens.map((token) => ({
@@ -144,12 +151,17 @@ describe('Balancer SOR Integration Tests', () => {
                 stataDAI.token.decimals,
             );
             const amountIn = BigInt(1000e6);
-            paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
-                prismaStablePool,
-            ])) as PathWithAmount[];
+            paths = (await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                SwapKind.GivenIn,
+                amountIn,
+                [prismaStablePool],
+                protocolVersion,
+            )) as PathWithAmount[];
 
             const swapPaths: Path[] = paths.map((path) => ({
-                protocolVersion: 3,
+                protocolVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -249,13 +261,17 @@ describe('Balancer SOR Integration Tests', () => {
                     WETH.token.decimals,
                 );
                 const amountIn = BigInt(10e6);
-                paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
-                    nestedPool,
-                    weightedPool,
-                ])) as PathWithAmount[];
+                paths = (await sorGetPathsWithPools(
+                    tIn,
+                    tOut,
+                    SwapKind.GivenIn,
+                    amountIn,
+                    [nestedPool, weightedPool],
+                    protocolVersion,
+                )) as PathWithAmount[];
 
                 const swapPaths: Path[] = paths.map((path) => ({
-                    protocolVersion: 3,
+                    protocolVersion,
                     inputAmountRaw: path.inputAmount.amount,
                     outputAmountRaw: path.outputAmount.amount,
                     tokens: path.tokens.map((token) => ({
@@ -296,13 +312,17 @@ describe('Balancer SOR Integration Tests', () => {
                     stataUSDC.token.decimals,
                 );
                 const amountIn = parseEther('0.0001');
-                paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
-                    nestedPool,
-                    weightedPool,
-                ])) as PathWithAmount[];
+                paths = (await sorGetPathsWithPools(
+                    tIn,
+                    tOut,
+                    SwapKind.GivenIn,
+                    amountIn,
+                    [nestedPool, weightedPool],
+                    protocolVersion,
+                )) as PathWithAmount[];
 
                 const swapPaths: Path[] = paths.map((path) => ({
-                    protocolVersion: 3,
+                    protocolVersion,
                     inputAmountRaw: path.inputAmount.amount,
                     outputAmountRaw: path.outputAmount.amount,
                     tokens: path.tokens.map((token) => ({
@@ -370,12 +390,17 @@ describe('Balancer SOR Integration Tests', () => {
                 stataDAI.token.decimals,
             );
             const amountIn = BigInt(10e6);
-            paths = (await sorGetPathsWithPools(tIn, tOut, SwapKind.GivenIn, amountIn, [
-                prismaStablePool,
-            ])) as PathWithAmount[];
+            paths = (await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                SwapKind.GivenIn,
+                amountIn,
+                [prismaStablePool],
+                protocolVersion,
+            )) as PathWithAmount[];
 
             const swapPaths: Path[] = paths.map((path) => ({
-                protocolVersion: 3,
+                protocolVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
