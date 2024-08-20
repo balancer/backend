@@ -1,6 +1,9 @@
 extend type Query {
     veBalGetUserBalance(chain: GqlChain, address: String): AmountHumanReadable!
     veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
+    """
+    Returns all pools with veBAL gauges that can be voted on.
+    """
     veBalGetVotingList: [GqlVotingPool!]!
     veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!
 }
@@ -17,29 +20,90 @@ type GqlVeBalUserData {
     rank: Int
 }
 
+"""
+The pool that can be voted on through veBAL
+"""
 type GqlVotingPool {
+    """
+    Pool ID
+    """
     id: ID!
+    """
+    The chain this pool is on.
+    """
     chain: GqlChain!
+    """
+    The symbol of the pool.
+    """
     symbol: String!
+    """
+    The address of the pool.
+    """
     address: Bytes!
+    """
+    The type of the pool.
+    """
     type: GqlPoolType!
 
+    """
+    The tokens inside the pool.
+    """
     tokens: [GqlVotingGaugeToken!]!
 
+    """
+    The gauge that is connected to the pool and that will receive the rewards.
+    """
     gauge: GqlVotingGauge!
 }
 
+"""
+A token inside of a pool with a voting gauge.
+"""
 type GqlVotingGaugeToken {
+    """
+    The address of the token.
+    """
     address: String!
+    """
+    If it is a weighted pool, the weigh of the token is shown here in %. 0.5 = 50%.
+    """
     weight: String
+    """
+    The symbol of the token.
+    """
     symbol: String!
+    """
+    The URL to the token logo.
+    """
     logoURI: String!
 }
 
+"""
+The Gauge that can be voted on through veBAL and that will ultimately receive the rewards.
+"""
 type GqlVotingGauge {
+    """
+    The address of the root gauge on Ethereum mainnet.
+    """
     address: Bytes!
+    """
+    The address of the child gauge on the specific chain.
+    """
     childGaugeAddress: Bytes
+    """
+    The relative weight the gauge received this epoch (not more than 1.0).
+    """
+    relativeWeight: String!
+    """
+    The relative weight cap. 1.0 for uncapped.
+    """
     relativeWeightCap: String
+    """
+    Whether the gauge is killed or not.
+    """
     isKilled: Boolean!
+    """
+    The timestamp the gauge was added.
+    """
     addedTimestamp: Int
 }

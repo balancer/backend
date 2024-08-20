@@ -32,6 +32,7 @@ const cronPool1: GqlVotingPool = {
     gauge: {
         address: cron1VotingGaugeAddress,
         relativeWeightCap: null,
+        relativeWeight: '0',
         isKilled: false,
         addedTimestamp: 1663017781,
     },
@@ -62,6 +63,7 @@ const cronPool2: GqlVotingPool = {
     gauge: {
         address: cron2VotingGaugeAddress,
         relativeWeightCap: '0.02',
+        relativeWeight: '0',
         isKilled: false,
         addedTimestamp: 1690387253,
     },
