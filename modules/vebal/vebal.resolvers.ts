@@ -17,6 +17,17 @@ const resolvers: Resolvers = {
             const accountAddress = address || getRequiredAccountAddress(context);
             return veBalService.getVeBalUserBalance(chain, accountAddress);
         },
+        veBalGetUserBalances: async (parent, { chains, address }, context) => {
+            if (!address) {
+                return [];
+            }
+
+            if (chains === null || chains?.length === 0) {
+                chains = undefined;
+            }
+
+            return veBalService.readBalances(address, chains);
+        },
         veBalGetUser: async (parent, { chain, address }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
