@@ -88,25 +88,34 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                     const pool = pools.find((pool) => pool.staking.some((stake) => stake.id === update.farmId));
                     const farm = farms.find((farm) => farm.id === update.farmId);
 
-                    return prisma.prismaUserStakedBalance.upsert({
-                        where: {
-                            id_chain: { id: `${update.farmId}-${update.userAddress}`, chain: networkContext.chain },
-                        },
-                        update: {
-                            balance: update.amount,
-                            balanceNum: parseFloat(update.amount),
-                        },
-                        create: {
-                            id: `${update.farmId}-${update.userAddress}`,
-                            chain: networkContext.chain,
-                            balance: update.amount,
-                            balanceNum: parseFloat(update.amount),
-                            userAddress: update.userAddress,
-                            poolId: update.farmId !== this.fbeetsFarmId ? pool?.id : null,
-                            tokenAddress: farm!.pair,
-                            stakingId: update.farmId,
-                        },
-                    });
+                    if (update.amount === '0') {
+                        return prisma.prismaUserStakedBalance.deleteMany({
+                            where: {
+                                id: `${update.farmId}-${update.userAddress}`,
+                                chain: networkContext.chain,
+                            },
+                        });
+                    } else {
+                        return prisma.prismaUserStakedBalance.upsert({
+                            where: {
+                                id_chain: { id: `${update.farmId}-${update.userAddress}`, chain: networkContext.chain },
+                            },
+                            update: {
+                                balance: update.amount,
+                                balanceNum: parseFloat(update.amount),
+                            },
+                            create: {
+                                id: `${update.farmId}-${update.userAddress}`,
+                                chain: networkContext.chain,
+                                balance: update.amount,
+                                balanceNum: parseFloat(update.amount),
+                                userAddress: update.userAddress,
+                                poolId: update.farmId !== this.fbeetsFarmId ? pool?.id : null,
+                                tokenAddress: farm!.pair,
+                                stakingId: update.farmId,
+                            },
+                        });
+                    }
                 }),
                 prisma.prismaUserBalanceSyncStatus.update({
                     where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },

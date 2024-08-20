@@ -67,6 +67,7 @@ export class GaugeSubgraphService {
             const gauges = await this.sdk.GaugeShares({
                 where: {
                     id_gt: id,
+                    balance_gt: '0',
                 },
                 orderBy: GaugeShare_OrderBy.id,
                 orderDirection: OrderDirection.asc,

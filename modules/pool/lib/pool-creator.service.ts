@@ -1,4 +1,8 @@
-import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import {
+    BalancerPoolFragment,
+    OrderDirection,
+    Pool_OrderBy,
+} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { nestedPoolWithSingleLayerNesting } from '../../../prisma/prisma-types';
@@ -20,7 +24,9 @@ export class PoolCreatorService {
 
     public async syncAllPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
         const existingPools = await prisma.prismaPool.findMany({ where: { chain: this.chain } });
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService
+            .getAllPools({}, false)
+            .then((pools) => _.orderBy(pools, ['createTime'], 'asc'));
 
         // any pool can be nested
         const allNestedTypePools = [
@@ -54,7 +60,9 @@ export class PoolCreatorService {
             (pool) => pool.id,
         );
 
-        const subgraphPools = await this.balancerSubgraphService.getAllPools({}, false);
+        const subgraphPools = await this.balancerSubgraphService
+            .getAllPools({}, false)
+            .then((pools) => _.orderBy(pools, ['createTime'], 'asc'));
 
         const missing = subgraphPools.filter((pool) => !existing.includes(pool.id));
 
