@@ -67,7 +67,7 @@ export function EventsQueryController(tracer?: any) {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, userAddress, typeIn, range } = where || {};
+            let { chainIn, poolIdIn, userAddress, typeIn, range, valueUSD_gt, valueUSD_gte } = where || {};
 
             const conditions: Prisma.PrismaPoolEventWhereInput = {};
 
@@ -99,15 +99,29 @@ export function EventsQueryController(tracer?: any) {
                     in: dbTypes,
                 };
             }
+
             if (userAddress) {
                 conditions.userAddress = {
                     equals: userAddress,
                     mode: 'insensitive',
                 };
             }
+
             if (range) {
                 conditions.blockTimestamp = {
                     gte: rangeToTimestamp(range),
+                };
+            }
+
+            if (typeof valueUSD_gt === 'number' && !isNaN(valueUSD_gt) && valueUSD_gte === undefined) {
+                conditions.valueUSD = {
+                    gt: valueUSD_gt,
+                };
+            }
+
+            if (typeof valueUSD_gte === 'number' && !isNaN(valueUSD_gte) && valueUSD_gt === undefined) {
+                conditions.valueUSD = {
+                    gte: valueUSD_gte,
                 };
             }
 

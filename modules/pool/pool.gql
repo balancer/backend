@@ -388,8 +388,17 @@ type GqlPoolDynamicData {
 
     #fields that change rarely
     swapFee: BigDecimal!
+    """
+    Protocol and pool creator fees combined
+    """
     aggregateSwapFee: BigDecimal!
+    """
+    Protocol and pool creator fees combined
+    """
     aggregateYieldFee: BigDecimal!
+    """
+    Disabled for bricked pools
+    """
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!
@@ -397,11 +406,17 @@ type GqlPoolDynamicData {
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    """
+    CowAmm specific, equivalent of swap fees
+    """
     surplus24h: BigDecimal!
     yieldCapture24h: BigDecimal!
     apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
 
+    """
+    True for bricked pools
+    """
     isInRecoveryMode: Boolean!
     isPaused: Boolean!
 
@@ -409,6 +424,9 @@ type GqlPoolDynamicData {
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+    """
+    CowAmm specific, equivalent of swap fees
+    """
     surplus48h: BigDecimal!
     yieldCapture48h: BigDecimal!
 
@@ -1488,6 +1506,14 @@ input GqlPoolEventsFilter {
     typeIn: [GqlPoolEventType]
     userAddress: String
     range: GqlPoolEventsDataRange
+    """
+    USD value of the event
+    """
+    valueUSD_gt: Float
+    """
+    USD value of the event
+    """
+    valueUSD_gte: Float
 }
 
 type GqlPoolEventAmount {
