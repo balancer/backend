@@ -1495,6 +1495,7 @@ type GqlPoolEventAmount {
     amount: String!
     valueUSD: Float!
 }
+
 """
 Represents an event that occurs in a pool.
 """
@@ -1543,7 +1544,12 @@ interface GqlPoolEvent {
     The timestamp of the event.
     """
     timestamp: Int!
+    """
+    The USD value of this event.
+    """
+    valueUSD: Float!
 }
+
 """
 Represents an event that occurs when liquidity is added or removed from a pool.
 """
@@ -1599,8 +1605,9 @@ type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
     """
     The tokens involved in the event. Ordered by poolToken index.
     """
-    tokens: [GqlPoolEventAmount!]
+    tokens: [GqlPoolEventAmount!]!
 }
+
 """
 Represents an event that occurs when a swap is made in a pool.
 """
@@ -1666,6 +1673,7 @@ type GqlPoolSwapEventV3 implements GqlPoolEvent {
     """
     fee: GqlPoolEventAmount!
 }
+
 """
 Represents an event that occurs when a swap is made in a pool using the CowAmm protocol.
 """
