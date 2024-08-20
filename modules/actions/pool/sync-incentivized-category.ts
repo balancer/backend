@@ -6,7 +6,7 @@ export const syncIncentivizedCategory = async () => {
         select: { poolId: true },
         where: {
             type: {
-                in: ['NATIVE_REWARD', 'THIRD_PARTY_REWARD'],
+                in: ['NATIVE_REWARD', 'THIRD_PARTY_REWARD', 'MERKL', 'VOTING', 'LOCKING'],
             },
             apr: {
                 gt: 0,

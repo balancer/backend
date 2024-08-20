@@ -2,9 +2,9 @@ import { NextFunction, Request, Response, json } from 'express';
 import { parse, print, visit } from 'graphql';
 
 const LOWER_REGEX =
-    /id|poolId|poolIdIn|address|addresses|userAddress|tokensIn|tokensNotIn|tokenInIn|tokenOutIn|tokenIn|tokenOut|idIn|idNotIn/i;
+    /id|poolId|poolIdIn|address|addresses|userAddress|tokensIn|tokensNotIn|tokenInIn|tokenOutIn|tokenIn|tokenOut|idIn|idNotIn/;
 
-const UPPER_REGEX = /categories/i;
+const UPPER_REGEX = /categories/;
 
 // Recursively convert values of poolId, address, id to lowercase
 // Used when passing variables to queries
@@ -14,6 +14,10 @@ const convertLetterCase = (obj: Record<string, any>) => {
             obj[key] = obj[key].toLowerCase();
         } else if (typeof obj[key] === 'string' && UPPER_REGEX.test(key)) {
             obj[key] = obj[key].toUpperCase();
+        } else if (Array.isArray(obj[key]) && LOWER_REGEX.test(key)) {
+            obj[key] = obj[key].map((item: string) => item.toLowerCase());
+        } else if (Array.isArray(obj[key]) && UPPER_REGEX.test(key)) {
+            obj[key] = obj[key].map((item: string) => item.toUpperCase());
         } else if (typeof obj[key] === 'object' && obj[key] !== null) {
             convertLetterCase(obj[key]);
         }
