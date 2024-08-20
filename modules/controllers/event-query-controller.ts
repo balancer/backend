@@ -43,7 +43,7 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
         },
         fee: {
             ...event.payload.fee,
-            valueUSD: event.valueUSD,
+            valueUSD: Number(event.payload.fee.valueUSD),
         },
     };
 };
