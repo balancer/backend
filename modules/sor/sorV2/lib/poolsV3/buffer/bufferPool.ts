@@ -33,17 +33,25 @@ export class BufferPool implements BasePoolV3 {
             erc4626Token.token.address,
             erc4626Token.token.chainId,
             erc4626Token.rate,
-            [mainToken, underlyingToken],
+            mainToken,
+            underlyingToken,
         );
     }
 
-    constructor(id: Hex, address: string, chainId: number, rate: bigint, tokens: BasePoolToken[]) {
+    constructor(
+        id: Hex,
+        address: string,
+        chainId: number,
+        rate: bigint,
+        mainToken: BasePoolToken,
+        underlyingToken: BasePoolToken,
+    ) {
         this.chainId = chainId;
         this.id = id;
         this.address = address;
         this.rate = rate;
-        this.tokens = tokens;
-        this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
+        this.tokens = [mainToken, underlyingToken];
+        this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
