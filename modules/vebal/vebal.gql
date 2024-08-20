@@ -1,6 +1,6 @@
 extend type Query {
     veBalGetUserBalance(chain: GqlChain, address: String): AmountHumanReadable!
-    veBalGetUserBalances(address: String): [GqlVeBalBalance!]!
+    veBalGetUserBalances(chains: [GqlChain!], address: String!): [GqlVeBalBalance!]!
     veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
     veBalGetVotingList: [GqlVotingPool!]!
     veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!

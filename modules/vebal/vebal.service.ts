@@ -27,9 +27,9 @@ export class VeBalService {
         return '0.0';
     }
 
-    public async readBalances(address: string): Promise<GqlVeBalBalance[]> {
+    public async readBalances(address: string, chains?: Chain[]): Promise<GqlVeBalBalance[]> {
         const balances = await prisma.prismaVeBalUserBalance.findMany({
-            where: { userAddress: address.toLowerCase() },
+            where: { userAddress: address.toLowerCase(), chain: { in: chains } },
         });
 
         const veBalPrice = await prisma.prismaTokenCurrentPrice.findFirstOrThrow({
