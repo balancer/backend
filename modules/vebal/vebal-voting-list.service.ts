@@ -30,7 +30,7 @@ export class VeBalVotingListService {
         const pools = await this.getPoolsForVotingList(poolIds);
         const poolsById = keyBy(pools, 'id');
 
-        const allGauges = [...validGauges, ...getVeVotingGauges()];
+        const allGauges = [...validGauges, ...(await getVeVotingGauges())];
 
         // For each voting gauge returns a pool with its gauge info inside
         return allGauges.map((votingGauge) => {
@@ -53,6 +53,7 @@ export class VeBalVotingListService {
                     address: votingGauge.id,
                     relativeWeightCap: votingGauge.relativeWeightCap,
                     isKilled: votingGauge.status !== 'ACTIVE',
+                    relativeWeight: votingGauge.relativeWeight || '0',
                     addedTimestamp: votingGauge.addedTimestamp,
                     childGaugeAddress,
                 },

@@ -186,6 +186,7 @@ export class BalancerSubgraphService {
             ...shares,
             //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
             balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+            poolId: shares.poolId.id,
             poolAddress: shares.id.split('-')[0],
             userAddress: shares.id.split('-')[1],
         }));
@@ -204,8 +205,9 @@ export class BalancerSubgraphService {
             const shares = await this.sdk.BalancerPoolShares({
                 where: {
                     id_gt: id,
-                    poolId_in: poolIds,
+                    poolId_in: poolIds.length > 0 ? poolIds : undefined,
                     userAddress_not_in: excludedAddresses,
+                    balance_gt: '0',
                 },
                 orderBy: PoolShare_OrderBy.Id,
                 orderDirection: OrderDirection.Asc,
@@ -228,6 +230,7 @@ export class BalancerSubgraphService {
             ...shares,
             //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
             balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
+            poolId: shares.poolId.id,
             poolAddress: shares.id.split('-')[0],
             userAddress: shares.id.split('-')[1],
         }));
