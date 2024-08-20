@@ -1,5 +1,11 @@
 # backend
 
+## 1.11.1
+
+### Patch Changes
+
+-   b0eef3d: flatten the event type in the events query
+
 ## 1.11.0
 
 ### Minor Changes
