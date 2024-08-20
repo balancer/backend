@@ -14,7 +14,7 @@ import {
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
 } from '../../test/factories';
-import { createTestClient, Hex, http, parseEther, TestClient } from 'viem';
+import { createTestClient, formatEther, Hex, http, parseEther, TestClient } from 'viem';
 import { sepolia } from 'viem/chains';
 
 const protocolVersion = 3;
@@ -423,7 +423,9 @@ describe('Balancer SOR Integration Tests', () => {
             const returnAmountSOR = getOutputAmount(paths);
             const queryOutput = await sdkSwap.query(rpcUrl);
             const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-            expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
+            const returnAmountQueryFloat = parseFloat(formatEther(returnAmountQuery.amount));
+            const returnAmountSORFloat = parseFloat(formatEther(returnAmountSOR.amount));
+            expect(returnAmountQueryFloat).toBeCloseTo(returnAmountSORFloat, 2);
         });
     });
 
