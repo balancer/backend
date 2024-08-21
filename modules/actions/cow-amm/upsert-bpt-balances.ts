@@ -1,7 +1,6 @@
 import { Chain, PrismaUserWalletBalance } from '@prisma/client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
-import { parseEther } from 'viem';
 
 export const upsertBptBalances = async (subgraphClient: CowAmmSubgraphClient, chain: Chain) => {
     const poolShares = await subgraphClient.getAllPoolShares();
@@ -20,7 +19,7 @@ export const upsertBptBalances = async (subgraphClient: CowAmmSubgraphClient, ch
                 userAddress,
                 chain: chain,
                 tokenAddress: poolId,
-                balance: String(parseEther(poolShare.balance)),
+                balance: poolShare.balance,
                 balanceNum: Number(poolShare.balance),
             };
         })
