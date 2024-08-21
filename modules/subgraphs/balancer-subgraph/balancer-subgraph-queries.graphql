@@ -82,6 +82,9 @@ query BalancerPoolShares(
 fragment BalancerPoolShare on PoolShare {
     id
     balance
+    poolId {
+        id
+    }
 }
 
 query BalancerTokenPrices(

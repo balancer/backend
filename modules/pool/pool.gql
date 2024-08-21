@@ -400,8 +400,17 @@ type GqlPoolDynamicData {
 
     #fields that change rarely
     swapFee: BigDecimal!
+    """
+    Protocol and pool creator fees combined
+    """
     aggregateSwapFee: BigDecimal!
+    """
+    Protocol and pool creator fees combined
+    """
     aggregateYieldFee: BigDecimal!
+    """
+    Disabled for bricked pools
+    """
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!
@@ -409,11 +418,17 @@ type GqlPoolDynamicData {
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
     fees24h: BigDecimal!
+    """
+    CowAmm specific, equivalent of swap fees
+    """
     surplus24h: BigDecimal!
     yieldCapture24h: BigDecimal!
     apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
 
+    """
+    True for bricked pools
+    """
     isInRecoveryMode: Boolean!
     isPaused: Boolean!
 
@@ -421,6 +436,9 @@ type GqlPoolDynamicData {
     totalShares24hAgo: BigDecimal!
     volume48h: BigDecimal!
     fees48h: BigDecimal!
+    """
+    CowAmm specific, equivalent of swap fees
+    """
     surplus48h: BigDecimal!
     yieldCapture48h: BigDecimal!
 
@@ -1500,6 +1518,14 @@ input GqlPoolEventsFilter {
     typeIn: [GqlPoolEventType]
     userAddress: String
     range: GqlPoolEventsDataRange
+    """
+    USD value of the event
+    """
+    valueUSD_gt: Float
+    """
+    USD value of the event
+    """
+    valueUSD_gte: Float
 }
 
 type GqlPoolEventAmount {
@@ -1508,50 +1534,250 @@ type GqlPoolEventAmount {
     valueUSD: Float!
 }
 
+"""
+Represents an event that occurs in a pool.
+"""
 interface GqlPoolEvent {
+    """
+    The chain on which the event occurred.
+    """
     chain: GqlChain!
+    """
+    The unique identifier of the event.
+    """
     id: ID!
+    """
+    The transaction hash of the event.
+    """
     tx: String!
+    """
+    The log index of the event.
+    """
     logIndex: Int!
+    """
+    The block number of the event.
+    """
     blockNumber: Int!
+    """
+    The block timestamp of the event.
+    """
     blockTimestamp: Int!
+    """
+    The type of the event.
+    """
     type: GqlPoolEventType!
+    """
+    The sender of the event.
+    """
     sender: String!
+    """
+    The user address associated with the event.
+    """
     userAddress: String!
+    """
+    The pool ID associated with the event.
+    """
     poolId: String!
+    """
+    The timestamp of the event.
+    """
     timestamp: Int!
+    """
+    The USD value of this event.
+    """
     valueUSD: Float!
 }
 
+"""
+Represents an event that occurs when liquidity is added or removed from a pool.
+"""
 type GqlPoolAddRemoveEventV3 implements GqlPoolEvent {
+    """
+    The chain on which the event occurred.
+    """
     chain: GqlChain!
+    """
+    The unique identifier of the event.
+    """
     id: ID!
+    """
+    The transaction hash of the event.
+    """
     tx: String!
+    """
+    The log index of the event.
+    """
     logIndex: Int!
+    """
+    The block number of the event.
+    """
     blockNumber: Int!
+    """
+    The block timestamp of the event.
+    """
     blockTimestamp: Int!
+    """
+    The type of the event.
+    """
     type: GqlPoolEventType!
+    """
+    The sender of the event.
+    """
     sender: String!
+    """
+    The user address associated with the event.
+    """
     userAddress: String!
+    """
+    The pool ID associated with the event.
+    """
     poolId: String!
+    """
+    The timestamp of the event.
+    """
     timestamp: Int!
+    """
+    The value of the event in USD.
+    """
     valueUSD: Float!
+    """
+    The tokens involved in the event. Ordered by poolToken index.
+    """
     tokens: [GqlPoolEventAmount!]!
 }
 
+"""
+Represents an event that occurs when a swap is made in a pool.
+"""
 type GqlPoolSwapEventV3 implements GqlPoolEvent {
+    """
+    The chain on which the event occurred.
+    """
     chain: GqlChain!
+    """
+    The unique identifier of the event.
+    """
     id: ID!
+    """
+    The transaction hash of the event.
+    """
     tx: String!
+    """
+    The log index of the event.
+    """
     logIndex: Int!
+    """
+    The block number of the event.
+    """
     blockNumber: Int!
+    """
+    The block timestamp of the event.
+    """
     blockTimestamp: Int!
+    """
+    The type of the event.
+    """
     type: GqlPoolEventType!
+    """
+    The sender of the event.
+    """
     sender: String!
+    """
+    The user address associated with the event.
+    """
     userAddress: String!
+    """
+    The pool ID associated with the event.
+    """
     poolId: String!
+    """
+    The timestamp of the event.
+    """
     timestamp: Int!
+    """
+    The value of the event in USD.
+    """
     valueUSD: Float!
+    """
+    The token that was swapped in the event.
+    """
     tokenIn: GqlPoolEventAmount!
+    """
+    The token that was swapped out in the event.
+    """
     tokenOut: GqlPoolEventAmount!
+    """
+    The fee that this swap generated.
+    """
+    fee: GqlPoolEventAmount!
+}
+
+"""
+Represents an event that occurs when a swap is made in a pool using the CowAmm protocol.
+"""
+type GqlPoolSwapEventCowAmm implements GqlPoolEvent {
+    """
+    The chain on which the event occurred.
+    """
+    chain: GqlChain!
+    """
+    The unique identifier of the event.
+    """
+    id: ID!
+    """
+    The transaction hash of the event.
+    """
+    tx: String!
+    """
+    The log index of the event.
+    """
+    logIndex: Int!
+    """
+    The block number of the event.
+    """
+    blockNumber: Int!
+    """
+    The block timestamp of the event.
+    """
+    blockTimestamp: Int!
+    """
+    The type of the event.
+    """
+    type: GqlPoolEventType!
+    """
+    The sender of the event.
+    """
+    sender: String!
+    """
+    The user address associated with the event.
+    """
+    userAddress: String!
+    """
+    The pool ID associated with the event.
+    """
+    poolId: String!
+    """
+    The timestamp of the event.
+    """
+    timestamp: Int!
+    """
+    The value of the event in USD.
+    """
+    valueUSD: Float!
+    """
+    The token that was swapped in the event.
+    """
+    tokenIn: GqlPoolEventAmount!
+    """
+    The token that was swapped out in the event.
+    """
+    tokenOut: GqlPoolEventAmount!
+    """
+    The fee that this swap generated.
+    """
+    fee: GqlPoolEventAmount!
+    """
+    The surplus generated by the swap.
+    """
+    surplus: GqlPoolEventAmount!
 }

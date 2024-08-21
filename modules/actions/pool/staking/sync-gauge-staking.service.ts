@@ -378,6 +378,6 @@ export const deleteGaugeStakingForAllPools = async (
         });
         await prisma.prismaPoolStakingGaugeReward.deleteMany({ where: { chain: chain } });
         await prisma.prismaPoolStakingGauge.deleteMany({ where: { chain: chain } });
-        await prisma.prismaPoolStaking.deleteMany({ where: { chain: chain } });
+        await prisma.prismaPoolStaking.deleteMany({ where: { chain: chain, type: 'GAUGE' } });
     }
 };

@@ -1,5 +1,39 @@
 # backend
 
+## 1.11.1
+
+### Patch Changes
+
+-   b0eef3d: flatten the event type in the events query
+
+## 1.11.0
+
+### Minor Changes
+
+-   570a67b: adding a query for getting multichain vebal balances
+
+### Patch Changes
+
+-   9f7d395: add merkl, voting and locking as incentivized pool
+-   e0fa5d8: Prune records with zero values in balance tables
+-   ddf8be9: filtering events by value in USD
+-   ed9747b: adding relative weigth to the voting list query
+
+## 1.10.0
+
+### Minor Changes
+
+-   ad09bfd: susx and usdm APRs on Arb
+-   5a023cb: adding support for hooks
+-   aae66a9: cdcETH APR
+
+### Patch Changes
+
+-   5ec208f: Fix scientific notation issue caused by parseFloat
+-   8a7c851: Adding aggregate fee fields to pools dynamic data
+-   01a1b1a: accept any letter casing in queries
+-   6782183: SOR - Replace parseFloat with parseEther
+
 ## 1.9.3
 
 ### Patch Changes

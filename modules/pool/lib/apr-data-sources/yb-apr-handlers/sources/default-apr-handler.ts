@@ -1,4 +1,3 @@
-import axios from 'axios';
 import type { AprHandler } from '../types';
 
 export class DefaultAprHandler implements AprHandler {
@@ -8,6 +7,8 @@ export class DefaultAprHandler implements AprHandler {
     scale: number;
     group?: string;
     isIbYield?: boolean;
+    headers?: any;
+    body?: any;
 
     constructor(aprHandlerConfig: {
         sourceUrl: string;
@@ -16,6 +17,8 @@ export class DefaultAprHandler implements AprHandler {
         scale?: number;
         group?: string;
         isIbYield?: boolean;
+        headers?: any;
+        body?: any;
     }) {
         this.tokenAddress = aprHandlerConfig.tokenAddress;
         this.url = aprHandlerConfig.sourceUrl;
@@ -23,11 +26,24 @@ export class DefaultAprHandler implements AprHandler {
         this.scale = aprHandlerConfig.scale ?? 100;
         this.group = aprHandlerConfig.group;
         this.isIbYield = aprHandlerConfig.isIbYield;
+        this.headers = aprHandlerConfig.headers ?? { 'User-Agent': 'cf' };
+        this.body = aprHandlerConfig.body;
     }
 
     async getAprs() {
         try {
-            const { data } = await axios.get(this.url, { headers: { 'User-Agent': 'cf' } });
+            let data = {};
+            if (this.body) {
+                data = await fetch(this.url, {
+                    method: 'POST',
+                    headers: this.headers,
+                    body: JSON.stringify(this.body),
+                }).then((res) => res.json() as any);
+            } else {
+                data = await fetch(this.url, {
+                    headers: this.headers,
+                }).then((res) => res.json() as any);
+            }
             const value = this.path === '' ? data : this.getValueFromPath(data, this.path);
             const scaledValue = parseFloat(value) / this.scale;
 
@@ -46,7 +62,7 @@ export class DefaultAprHandler implements AprHandler {
 
     // Get a specific value from a JSON object based on a path
     getValueFromPath = (obj: any, path: string) => {
-        const parts = path.split('.');
+        const parts = path.split(/(?<!")\.(?!\w*")/);
         let value = obj;
         for (const part of parts) {
             if (part[0] === '{' && part[part.length - 1] === '}') {
