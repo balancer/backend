@@ -12,6 +12,7 @@ import ERC20Abi from '../../web3/abi/ERC20.json';
 import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
 import { getEvents } from '../../web3/events';
+import { CowAmmController } from '../../controllers';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -127,6 +128,11 @@ export class UserSyncWalletBalanceService {
             true,
         );
         console.log('initBalancesForPools: finished performing db operations...');
+
+        // Attach CowAMM syncing
+        console.log('initBalancesForPools: syncing CowAMM balances...');
+        await CowAmmController().syncBalances(this.chainId);
+        console.log('initBalancesForPools: finished syncing CowAMM balances');
     }
 
     public async syncChangedBalancesForAllPools() {
