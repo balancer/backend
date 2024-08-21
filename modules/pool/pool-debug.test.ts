@@ -23,8 +23,8 @@ describe('pool debugging', () => {
         // //only do once before starting to debug
         // // await poolService.syncAllPoolsFromSubgraph();
         // await userService.initWalletBalancesForAllPools();
-        await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
-        await userService.initStakedBalances(['GAUGE']);
+        // await poolService.reloadStakingForAllPools(['GAUGE'], 'MAINNET');
+        // await userService.initStakedBalances(['GAUGE']);
         // // await CowAmmController().reloadPools('MAINNET');
         // // await CowAmmController().syncSwaps('1');
         // // await tokenService.updateTokenPrices(['MAINNET']);
@@ -41,14 +41,12 @@ describe('pool debugging', () => {
 
     it('get new apr items', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '42161');
+        setRequestScopedContextValue('chainId', '1');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
-        await poolService.updatePoolAprs('ARBITRUM');
-        const pool = await poolService.getGqlPool(
-            '0x2ce4457acac29da4736ae6f5cd9f583a6b335c270000000000000000000004dc',
-            'ARBITRUM',
-        );
+        // await poolService.updatePoolAprs('ARBITRUM');
+        await poolService.reloadAllPoolAprs('MAINNET');
+        const pool = await poolService.getGqlPool('0xf08d4dea369c456d26a3168ff0024b904f2d8b91', 'MAINNET');
         expect(pool.dynamicData.aprItems).toBeDefined();
         expect(pool.dynamicData.aprItems.length).toBeGreaterThan(0);
     }, 5000000);

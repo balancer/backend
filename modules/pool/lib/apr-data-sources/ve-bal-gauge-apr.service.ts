@@ -115,7 +115,7 @@ export class GaugeAprService implements PoolAprService {
 
                     // veBAL rewards have a range associated with the item
                     if (
-                        address.toLowerCase() === networkContext.data.bal!.address.toLowerCase() &&
+                        itemData.id.includes('balgauge') &&
                         (networkContext.chain === 'MAINNET' || gauge.version === 2)
                     ) {
                         let minApr = 0;
