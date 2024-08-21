@@ -388,6 +388,12 @@ export default <NetworkData>{
                 },
                 scale: 1,
             },
+            agETH: {
+                tokenAddress: '0xe1b4d34e8754600962cd944b535180bd758e6c2e',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
