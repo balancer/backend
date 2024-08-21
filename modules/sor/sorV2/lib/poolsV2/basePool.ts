@@ -17,7 +17,7 @@ export interface BasePool {
     /**
      * Validate that pool contains tokenIn and tokenOut provided and returns pool specific token data (e.g. balance, index, weight, rate, etc.)
      */
-    getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken };
+    getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken };
 }
 
 export interface BasePoolV3 extends BasePool {

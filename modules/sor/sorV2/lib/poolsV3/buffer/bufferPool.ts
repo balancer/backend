@@ -78,7 +78,7 @@ export class BufferPool implements BasePoolV3 {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const calculatedAmount = this.vault.swap(
             {
@@ -93,7 +93,7 @@ export class BufferPool implements BasePoolV3 {
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         // swap
         const calculatedAmount = this.vault.swap(
@@ -119,7 +119,7 @@ export class BufferPool implements BasePoolV3 {
 
     // Helper methods
 
-    public getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

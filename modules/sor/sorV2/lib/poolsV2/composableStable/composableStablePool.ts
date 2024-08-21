@@ -124,10 +124,7 @@ export class ComposableStablePool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -145,7 +142,7 @@ export class ComposableStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const balancesNoBpt = this.dropBptItem(this.tokens.map((t) => t.scale18));
 
@@ -222,7 +219,7 @@ export class ComposableStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const balancesNoBpt = this.dropBptItem(this.tokens.map((t) => t.scale18));
 
@@ -304,7 +301,7 @@ export class ComposableStablePool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
@@ -328,7 +325,7 @@ export class ComposableStablePool implements BasePool {
         return amountsWithoutBpt;
     }
 
-    public getRequiredTokenPair(
+    public getPoolTokens(
         tokenIn: Token,
         tokenOut: Token,
     ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {

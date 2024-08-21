@@ -117,7 +117,7 @@ export class StablePool implements BasePoolV3 {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         // remove liquidity
         if (tIn.token.isSameAddress(this.id)) {
@@ -151,7 +151,7 @@ export class StablePool implements BasePoolV3 {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         let calculatedAmount: bigint;
 
@@ -195,7 +195,7 @@ export class StablePool implements BasePoolV3 {
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         let calculatedAmount: bigint;
 
@@ -239,7 +239,7 @@ export class StablePool implements BasePoolV3 {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) =>
@@ -267,7 +267,7 @@ export class StablePool implements BasePoolV3 {
         };
     }
 
-    public getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

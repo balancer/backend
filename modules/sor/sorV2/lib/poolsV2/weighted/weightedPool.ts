@@ -85,7 +85,7 @@ export class WeightedPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -98,7 +98,7 @@ export class WeightedPool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
             return (tIn.amount * this.MAX_IN_RATIO) / WAD;
@@ -107,7 +107,7 @@ export class WeightedPool implements BasePool {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn)) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -130,7 +130,7 @@ export class WeightedPool implements BasePool {
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut)) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -159,7 +159,7 @@ export class WeightedPool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

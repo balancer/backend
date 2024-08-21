@@ -85,10 +85,7 @@ export class MetaStablePool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -106,7 +103,7 @@ export class MetaStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > tIn.amount) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -146,7 +143,7 @@ export class MetaStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > tOut.amount) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -191,10 +188,7 @@ export class MetaStablePool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
@@ -205,7 +199,7 @@ export class MetaStablePool implements BasePool {
         return (tOut.amount * WAD) / tOut.rate;
     }
 
-    public getRequiredTokenPair(
+    public getPoolTokens(
         tokenIn: Token,
         tokenOut: Token,
     ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {
