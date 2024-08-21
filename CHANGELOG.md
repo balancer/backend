@@ -1,5 +1,11 @@
 # backend
 
+## 1.13.0
+
+### Minor Changes
+
+-   ce47937: adding cow amm SG balance syncing
+
 ## 1.12.0
 
 ### Minor Changes
