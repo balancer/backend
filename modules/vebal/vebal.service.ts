@@ -9,8 +9,8 @@ import { Multicaller } from '../web3/multicaller';
 import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
 import { getContractAt } from '../web3/contract';
 import { AmountHumanReadable } from '../common/global-types';
-import { GqlVeBalUserData } from '../../schema';
-import { AllNetworkConfigs } from '../network/network-config';
+import { GqlVeBalBalance, GqlVeBalUserData } from '../../schema';
+import mainnet from '../../config/mainnet';
 import VeBalABI from './abi/vebal.json';
 import { Chain } from '@prisma/client';
 
@@ -25,6 +25,21 @@ export class VeBalService {
             }
         }
         return '0.0';
+    }
+
+    public async readBalances(address: string, chains?: Chain[]): Promise<GqlVeBalBalance[]> {
+        const balances = await prisma.prismaVeBalUserBalance.findMany({
+            where: { userAddress: address.toLowerCase(), chain: { in: chains } },
+        });
+
+        const veBalPrice = await prisma.prismaTokenCurrentPrice.findFirstOrThrow({
+            where: { chain: 'MAINNET', tokenAddress: mainnet.veBal!.bptAddress },
+        });
+
+        return balances.map((balance) => ({
+            ...balance,
+            lockedUsd: (parseFloat(balance.locked) * veBalPrice.price).toFixed(2),
+        }));
     }
 
     public async getVeBalUserData(chain: Chain, userAddress: string): Promise<GqlVeBalUserData> {
@@ -58,7 +73,7 @@ export class VeBalService {
 
         if (locked !== '0.0') {
             veBalPrice = await prisma.prismaTokenCurrentPrice.findFirstOrThrow({
-                where: { chain: chain, tokenAddress: AllNetworkConfigs['1'].data.veBal!.bptAddress },
+                where: { chain: chain, tokenAddress: mainnet.veBal!.bptAddress },
             });
         }
 

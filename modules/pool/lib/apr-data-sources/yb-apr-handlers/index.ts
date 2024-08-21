@@ -22,6 +22,7 @@ const sourceToHandler = {
     defaultHandlers: sources.DefaultAprHandler,
     stakewise: sources.Stakewise,
     maple: sources.Maple,
+    yieldnest: sources.Yieldnest,
     etherfi: sources.Etherfi,
     sveth: sources.svEthAprHandler,
     dforce: sources.DForce,

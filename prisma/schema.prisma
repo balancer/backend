@@ -633,6 +633,7 @@ model PrismaPoolEvent {
     @@id([id, chain])
     @@index([type])
     @@index([poolId])
+    @@index([valueUSD])
     @@index([userAddress])
     @@index([protocolVersion])
     @@index([blockTimestamp(sort: Desc)])

@@ -4,7 +4,7 @@ import { poolService } from '../pool/pool.service';
 
 import { GqlSorSwapType } from '../../schema';
 
-// npx jest --testPathPattern=modules/beethoven/balancer-sor.test.ts
+// npx jest --testPathPattern=modules/sor/balancer-sor.test.ts
 describe('SmartOrderRouter', () => {
     test('swap with mixed decimals', async () => {
         const tokens = await tokenService.getTokens();

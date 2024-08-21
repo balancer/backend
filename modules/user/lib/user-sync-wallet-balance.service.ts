@@ -12,6 +12,7 @@ import ERC20Abi from '../../web3/abi/ERC20.json';
 import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
 import { getEvents } from '../../web3/events';
+import { CowAmmController } from '../../controllers';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -77,17 +78,11 @@ export class UserSyncWalletBalanceService {
             endBlock = Math.min(endBlock, beetsBarBlock.number);
         }
 
-        const pools = await prisma.prismaPool.findMany({
-            select: { id: true, address: true },
-            where: { dynamicData: { totalSharesNum: { gt: 0.000000000001 } }, chain: this.chain },
-        });
-        const poolIdsToInit = pools.map((pool) => pool.id);
-        const shares = await this.balancerSubgraphService.getAllPoolSharesWithBalance(poolIdsToInit, [
-            AddressZero,
-            this.vaultAddress,
-        ]);
+        const shares = await this.balancerSubgraphService.getAllPoolSharesWithBalance(
+            [],
+            [AddressZero, this.vaultAddress],
+        );
 
-        console.log(`Found ${poolIdsToInit.length} pools to init`);
         console.log(`Found ${shares.length} shares to sync`);
 
         let fbeetsHolders: BeetsBarUserFragment[] = [];
@@ -97,21 +92,22 @@ export class UserSyncWalletBalanceService {
             fbeetsHolders = await this.beetsBarService.getAllUsers({ where: { fBeets_not: '0' } });
         }
 
-        let operations: any[] = [];
-        operations.push(prisma.prismaUserWalletBalance.deleteMany({ where: { chain: this.chain } }));
+        // Filter shares for the pools not yet in the DB
+        const poolIds = await prisma.prismaPool
+            .findMany({ select: { id: true }, where: { chain: this.chain } })
+            .then((pools) => pools.map((pool) => pool.id));
 
-        for (const pool of pools) {
-            const poolShares = shares.filter((share) => share.poolAddress.toLowerCase() === pool.address);
+        console.log(`initBalancesForPools: found ${poolIds.length} pools in the DB`);
 
-            if (poolShares.length > 0) {
-                operations = [
-                    ...operations,
-                    ...poolShares.map((share) => this.getPrismaUpsertForPoolShare(pool.id, share)),
-                ];
-            }
-        }
+        const operations: any[] = [
+            prisma.prismaUserWalletBalance.deleteMany({ where: { chain: this.chain } }),
+            ...shares
+                .filter((share) => poolIds.includes(share.poolId))
+                .map((share) => this.getPrismaUpsertForPoolShare(share.poolId, share)),
+        ];
 
         console.log(`initBalancesForPools: performing ${operations.length} db operations...`);
+
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({
@@ -132,6 +128,11 @@ export class UserSyncWalletBalanceService {
             true,
         );
         console.log('initBalancesForPools: finished performing db operations...');
+
+        // Attach CowAMM syncing
+        console.log('initBalancesForPools: syncing CowAMM balances...');
+        await CowAmmController().syncBalances(this.chainId);
+        console.log('initBalancesForPools: finished syncing CowAMM balances');
     }
 
     public async syncChangedBalancesForAllPools() {
@@ -325,21 +326,28 @@ export class UserSyncWalletBalanceService {
     private getUserWalletBalanceUpsert(userBalance: MulticallUserBalance, poolId: string) {
         const { userAddress, balance, erc20Address } = userBalance;
 
-        return prisma.prismaUserWalletBalance.upsert({
-            where: { id_chain: { id: `${poolId}-${userAddress}`, chain: this.chain } },
-            create: {
-                id: `${poolId}-${userAddress}`,
-                chain: this.chain,
-                userAddress,
-                poolId,
-                tokenAddress: erc20Address,
-                balance: formatFixed(balance, 18),
-                balanceNum: parseFloat(formatFixed(balance, 18)),
-            },
-            update: {
-                balance: formatFixed(balance, 18),
-                balanceNum: parseFloat(formatFixed(balance, 18)),
-            },
-        });
+        if (balance.eq(0)) {
+            // Using deleteMany, because delete throws when the record does not exist
+            return prisma.prismaUserWalletBalance.deleteMany({
+                where: { id: `${poolId}-${userAddress}`, chain: this.chain },
+            });
+        } else {
+            return prisma.prismaUserWalletBalance.upsert({
+                where: { id_chain: { id: `${poolId}-${userAddress}`, chain: this.chain } },
+                create: {
+                    id: `${poolId}-${userAddress}`,
+                    chain: this.chain,
+                    userAddress,
+                    poolId,
+                    tokenAddress: erc20Address,
+                    balance: formatFixed(balance, 18),
+                    balanceNum: parseFloat(formatFixed(balance, 18)),
+                },
+                update: {
+                    balance: formatFixed(balance, 18),
+                    balanceNum: parseFloat(formatFixed(balance, 18)),
+                },
+            });
+        }
     }
 }

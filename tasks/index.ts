@@ -90,6 +90,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateSurplusAprs();
     } else if (job === 'update-cow-amm-volume-and-fees') {
         return CowAmmController().updateVolumeAndFees(chain);
+    } else if (job === 'sync-cow-amm-balances') {
+        return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'backsync-swaps') {

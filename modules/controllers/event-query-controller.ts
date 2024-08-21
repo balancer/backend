@@ -1,4 +1,10 @@
-import { GqlPoolEventsDataRange, GqlPoolAddRemoveEventV3, GqlPoolSwapEventV3, QueryPoolEventsArgs } from '../../schema';
+import {
+    GqlPoolEventsDataRange,
+    GqlPoolAddRemoveEventV3,
+    GqlPoolSwapEventV3,
+    QueryPoolEventsArgs,
+    GqlPoolSwapEventCowAmm,
+} from '../../schema';
 import { prisma } from '../../prisma/prisma-client';
 import { Chain, PoolEventType, Prisma } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
@@ -35,17 +41,33 @@ const parseSwap = (event: SwapEvent): GqlPoolSwapEventV3 => {
             ...event.payload.tokenOut,
             valueUSD: event.valueUSD,
         },
+        fee: {
+            ...event.payload.fee,
+            valueUSD: Number(event.payload.fee.valueUSD),
+        },
+    };
+};
+
+const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
+    const regularSwap = parseSwap(event);
+    return {
+        ...regularSwap,
+        __typename: 'GqlPoolSwapEventCowAmm',
+        surplus: (event.payload.surplus && {
+            ...event.payload.surplus,
+            valueUSD: Number(event.payload.surplus.valueUSD),
+        }) || { address: '', amount: '0', valueUSD: 0 },
     };
 };
 
 const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
     switch (range) {
-        case 'SEVEN_DAYS':
-            return daysAgo(7);
         case 'THIRTY_DAYS':
             return daysAgo(30);
         case 'NINETY_DAYS':
             return daysAgo(90);
+        default:
+            return daysAgo(7);
     }
 };
 
@@ -63,11 +85,11 @@ export function EventsQueryController(tracer?: any) {
             first,
             skip,
             where,
-        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolAddRemoveEventV3)[]> => {
+        }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolSwapEventCowAmm | GqlPoolAddRemoveEventV3)[]> => {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, userAddress, typeIn, range } = where || {};
+            let { chainIn, poolIdIn, userAddress, typeIn, range, valueUSD_gt, valueUSD_gte } = where || {};
 
             const conditions: Prisma.PrismaPoolEventWhereInput = {};
 
@@ -99,15 +121,29 @@ export function EventsQueryController(tracer?: any) {
                     in: dbTypes,
                 };
             }
+
             if (userAddress) {
                 conditions.userAddress = {
                     equals: userAddress,
                     mode: 'insensitive',
                 };
             }
+
             if (range) {
                 conditions.blockTimestamp = {
                     gte: rangeToTimestamp(range),
+                };
+            }
+
+            if (typeof valueUSD_gt === 'number' && !isNaN(valueUSD_gt) && valueUSD_gte === undefined) {
+                conditions.valueUSD = {
+                    gt: valueUSD_gt,
+                };
+            }
+
+            if (typeof valueUSD_gte === 'number' && !isNaN(valueUSD_gte) && valueUSD_gt === undefined) {
+                conditions.valueUSD = {
+                    gte: valueUSD_gte,
                 };
             }
 
@@ -126,7 +162,11 @@ export function EventsQueryController(tracer?: any) {
             });
 
             const results = dbEvents.map((event) =>
-                event.type === 'SWAP' ? parseSwap(event as SwapEvent) : parseJoinExit(event as JoinExitEvent),
+                event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
+                    ? parseCowAmmSwap(event as SwapEvent)
+                    : event.type === 'SWAP'
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

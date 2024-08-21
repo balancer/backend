@@ -196,6 +196,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 }),
                 ...balances
                     .filter(({ userAddress }) => userAddress !== AddressZero)
+                    .filter(({ balance }) => balance.gt(0))
                     .map((userBalance) => {
                         const pool = pools.find((pool) =>
                             pool.staking.some((stake) => stake.id === userBalance.erc20Address),
@@ -224,6 +225,17 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             },
                         });
                     }),
+                ...balances
+                    .filter(({ userAddress }) => userAddress !== AddressZero)
+                    .filter(({ balance }) => balance.eq(0))
+                    .map((userBalance) => {
+                        return prisma.prismaUserStakedBalance.deleteMany({
+                            where: {
+                                id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
+                                chain: this.chain,
+                            },
+                        });
+                    }),
                 prisma.prismaUserBalanceSyncStatus.update({
                     where: {
                         type_chain: {
@@ -243,22 +255,31 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const balance = await contract.balanceOf(userAddress);
         const amount = formatFixed(balance, 18);
 
-        await prisma.prismaUserStakedBalance.upsert({
-            where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
-            update: {
-                balance: amount,
-                balanceNum: parseFloat(amount),
-            },
-            create: {
-                id: `${staking.address}-${userAddress}`,
-                chain: this.chain,
-                balance: amount,
-                balanceNum: parseFloat(amount),
-                userAddress: userAddress,
-                poolId: poolId,
-                tokenAddress: poolAddress,
-                stakingId: staking.address,
-            },
-        });
+        if (amount != '0') {
+            await prisma.prismaUserStakedBalance.upsert({
+                where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
+                update: {
+                    balance: amount,
+                    balanceNum: parseFloat(amount),
+                },
+                create: {
+                    id: `${staking.address}-${userAddress}`,
+                    chain: this.chain,
+                    balance: amount,
+                    balanceNum: parseFloat(amount),
+                    userAddress: userAddress,
+                    poolId: poolId,
+                    tokenAddress: poolAddress,
+                    stakingId: staking.address,
+                },
+            });
+        } else {
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: {
+                    id: `${staking.address}-${userAddress}`,
+                    chain: this.chain,
+                },
+            });
+        }
     }
 }
