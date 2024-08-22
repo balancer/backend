@@ -163,22 +163,12 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolReloadAllPoolAprs: async (parent, { chains }, context) => {
+        poolReloadAllPoolAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
+            await poolService.reloadAllPoolAprs(chain);
 
-            for (const chain of chains) {
-                try {
-                    await poolService.reloadAllPoolAprs(chain);
-                    result.push({ type: '', chain, success: true, error: undefined });
-                } catch (e) {
-                    result.push({ type: '', chain, success: false, error: `${e}` });
-                    console.log(`Could not reload APRs for chain ${chain}: ${e}`);
-                }
-            }
-
-            return result;
+            return 'success';
         },
         poolSyncTotalShares: async (parent, {}, context) => {
             isAdminRoute(context);
@@ -196,19 +186,15 @@ const balancerResolvers: Resolvers = {
         },
         poolReloadStakingForAllPools: async (parent, args, context) => {
             isAdminRoute(context);
-            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
 
-            for (const chain of args.chains) {
-                try {
-                    await poolService.reloadStakingForAllPools(args.stakingTypes, chain);
-                    result.push({ type: args.stakingTypes.join(','), chain, success: true, error: undefined });
-                } catch (e) {
-                    result.push({ type: args.stakingTypes.join(','), chain, success: false, error: `${e}` });
-                    console.log(`Could not reload staking (${args.stakingTypes.join(',')}) for chain ${chain}: ${e}`);
-                }
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolReloadStakingForAllPools error: Provide chain header');
             }
 
-            return result;
+            await poolService.reloadStakingForAllPools(args.stakingTypes, currentChain);
+
+            return 'success';
         },
         poolSyncStakingForPools: async (parent, args, context) => {
             isAdminRoute(context);

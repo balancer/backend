@@ -1876,17 +1876,6 @@ export interface GqlUserFbeetsBalance {
     walletBalance: Scalars['AmountHumanReadable'];
 }
 
-/** Result of the poolReloadPools mutation */
-export interface GqlUserMutationResult {
-    __typename?: 'GqlUserMutationResult';
-    /** The chain that was reloaded. */
-    chain: GqlChain;
-    /** The error message */
-    error?: Maybe<Scalars['String']>;
-    /** Whether it was successful or not. */
-    success: Scalars['Boolean'];
-}
-
 export interface GqlUserPoolBalance {
     __typename?: 'GqlUserPoolBalance';
     chain: GqlChain;
@@ -2025,10 +2014,10 @@ export interface Mutation {
     poolLoadOnChainDataForPoolsWithActiveUpdates: Scalars['String'];
     poolLoadSnapshotsForAllPools: Scalars['String'];
     poolLoadSnapshotsForPools: Scalars['String'];
-    poolReloadAllPoolAprs: Array<GqlPoolMutationResult>;
+    poolReloadAllPoolAprs: Scalars['String'];
     poolReloadAllTokenNestedPoolIds: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
-    poolReloadStakingForAllPools: Array<GqlPoolMutationResult>;
+    poolReloadStakingForAllPools: Scalars['String'];
     poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncLatestSnapshotsForAllPools: Scalars['String'];
@@ -2053,7 +2042,7 @@ export interface Mutation {
     tokenReloadTokenPrices?: Maybe<Scalars['Boolean']>;
     tokenSyncLatestFxPrices: Scalars['String'];
     tokenSyncTokenDefinitions: Scalars['String'];
-    userInitStakedBalances: Array<GqlUserMutationResult>;
+    userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
     userInitWalletBalancesForPool: Scalars['String'];
     userSyncBalance: Scalars['String'];
@@ -2086,7 +2075,7 @@ export interface MutationPoolLoadSnapshotsForPoolsArgs {
 }
 
 export interface MutationPoolReloadAllPoolAprsArgs {
-    chains: Array<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface MutationPoolReloadPoolsArgs {
@@ -2094,7 +2083,6 @@ export interface MutationPoolReloadPoolsArgs {
 }
 
 export interface MutationPoolReloadStakingForAllPoolsArgs {
-    chains: Array<GqlChain>;
     stakingTypes: Array<GqlPoolStakingType>;
 }
 
@@ -2132,7 +2120,6 @@ export interface MutationTokenSyncLatestFxPricesArgs {
 }
 
 export interface MutationUserInitStakedBalancesArgs {
-    chains: Array<GqlChain>;
     stakingTypes: Array<GqlPoolStakingType>;
 }
 
@@ -2731,7 +2718,6 @@ export type ResolversTypes = ResolversObject<{
     GqlTokenPriceChartDataItem: ResolverTypeWrapper<GqlTokenPriceChartDataItem>;
     GqlTokenType: GqlTokenType;
     GqlUserFbeetsBalance: ResolverTypeWrapper<GqlUserFbeetsBalance>;
-    GqlUserMutationResult: ResolverTypeWrapper<GqlUserMutationResult>;
     GqlUserPoolBalance: ResolverTypeWrapper<GqlUserPoolBalance>;
     GqlUserStakedBalance: ResolverTypeWrapper<GqlUserStakedBalance>;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
@@ -2899,7 +2885,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlTokenPrice: GqlTokenPrice;
     GqlTokenPriceChartDataItem: GqlTokenPriceChartDataItem;
     GqlUserFbeetsBalance: GqlUserFbeetsBalance;
-    GqlUserMutationResult: GqlUserMutationResult;
     GqlUserPoolBalance: GqlUserPoolBalance;
     GqlUserStakedBalance: GqlUserStakedBalance;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
@@ -4523,16 +4508,6 @@ export type GqlUserFbeetsBalanceResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GqlUserMutationResultResolvers<
-    ContextType = Context,
-    ParentType extends ResolversParentTypes['GqlUserMutationResult'] = ResolversParentTypes['GqlUserMutationResult'],
-> = ResolversObject<{
-    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
-    error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type GqlUserPoolBalanceResolvers<
     ContextType = Context,
     ParentType extends ResolversParentTypes['GqlUserPoolBalance'] = ResolversParentTypes['GqlUserPoolBalance'],
@@ -4695,10 +4670,10 @@ export type MutationResolvers<
         RequireFields<MutationPoolLoadSnapshotsForPoolsArgs, 'poolIds'>
     >;
     poolReloadAllPoolAprs?: Resolver<
-        Array<ResolversTypes['GqlPoolMutationResult']>,
+        ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationPoolReloadAllPoolAprsArgs, 'chains'>
+        RequireFields<MutationPoolReloadAllPoolAprsArgs, 'chain'>
     >;
     poolReloadAllTokenNestedPoolIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolReloadPools?: Resolver<
@@ -4708,10 +4683,10 @@ export type MutationResolvers<
         RequireFields<MutationPoolReloadPoolsArgs, 'chains'>
     >;
     poolReloadStakingForAllPools?: Resolver<
-        Array<ResolversTypes['GqlPoolMutationResult']>,
+        ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'chains' | 'stakingTypes'>
+        RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'stakingTypes'>
     >;
     poolSyncAllCowSnapshots?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
@@ -4778,10 +4753,10 @@ export type MutationResolvers<
     >;
     tokenSyncTokenDefinitions?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userInitStakedBalances?: Resolver<
-        Array<ResolversTypes['GqlUserMutationResult']>,
+        ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationUserInitStakedBalancesArgs, 'chains' | 'stakingTypes'>
+        RequireFields<MutationUserInitStakedBalancesArgs, 'stakingTypes'>
     >;
     userInitWalletBalancesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userInitWalletBalancesForPool?: Resolver<
@@ -5164,7 +5139,6 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
     GqlTokenPrice?: GqlTokenPriceResolvers<ContextType>;
     GqlTokenPriceChartDataItem?: GqlTokenPriceChartDataItemResolvers<ContextType>;
     GqlUserFbeetsBalance?: GqlUserFbeetsBalanceResolvers<ContextType>;
-    GqlUserMutationResult?: GqlUserMutationResultResolvers<ContextType>;
     GqlUserPoolBalance?: GqlUserPoolBalanceResolvers<ContextType>;
     GqlUserStakedBalance?: GqlUserStakedBalanceResolvers<ContextType>;
     GqlVeBalBalance?: GqlVeBalBalanceResolvers<ContextType>;
