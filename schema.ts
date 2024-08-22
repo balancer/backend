@@ -1648,6 +1648,8 @@ export interface GqlSorPath {
     __typename?: 'GqlSorPath';
     /** Input amount of this path in scaled form */
     inputAmountRaw: Scalars['String'];
+    /** A sorted list of booleans that indicate if the respective pool is a buffer */
+    isBuffer: Array<Maybe<Scalars['Boolean']>>;
     /** Output amount of this path in scaled form */
     outputAmountRaw: Scalars['String'];
     /** A sorted list of pool ids that are used in this path */
@@ -4342,6 +4344,7 @@ export type GqlSorPathResolvers<
     ParentType extends ResolversParentTypes['GqlSorPath'] = ResolversParentTypes['GqlSorPath'],
 > = ResolversObject<{
     inputAmountRaw?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    isBuffer?: Resolver<Array<Maybe<ResolversTypes['Boolean']>>, ParentType, ContextType>;
     outputAmountRaw?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     pools?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

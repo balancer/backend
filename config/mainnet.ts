@@ -246,6 +246,10 @@ export default <NetworkData>{
             url: 'https://api.maple.finance/v2/graphql',
             token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
         },
+        yieldnest: {
+            url: 'https://gateway.yieldnest.finance/api/v1/graphql',
+            token: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {
@@ -387,6 +391,12 @@ export default <NetworkData>{
                     },
                 },
                 scale: 1,
+            },
+            agETH: {
+                tokenAddress: '0xe1b4d34e8754600962cd944b535180bd758e6c2e',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
             },
         },
     },

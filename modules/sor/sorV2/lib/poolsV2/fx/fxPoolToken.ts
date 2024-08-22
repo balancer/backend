@@ -2,9 +2,9 @@ import { parseUnits } from 'viem';
 import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
 import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
+import { BasePoolToken } from '../basePoolToken';
 
-export class FxPoolToken extends TokenAmount {
-    public readonly index: number;
+export class FxPoolToken extends BasePoolToken {
     public readonly latestFXPrice: string;
     public readonly fxOracleDecimals: number;
     public numeraire: bigint; // in 36 decimals
@@ -13,11 +13,11 @@ export class FxPoolToken extends TokenAmount {
     public constructor(
         token: Token,
         amount: BigintIsh,
+        index: number,
         latestFXPrice: string,
         fxOracleDecimals: number,
-        index: number,
     ) {
-        super(token, amount);
+        super(token, amount, index);
         this.latestFXPrice = latestFXPrice;
         this.fxOracleDecimals = fxOracleDecimals;
         const truncatedNumeraire = MathFx.mulDownFixed(
@@ -26,7 +26,6 @@ export class FxPoolToken extends TokenAmount {
             this.fxOracleDecimals,
         );
         this.numeraire = truncatedNumeraire * this.scalar36;
-        this.index = index;
     }
 
     public increase(amount: bigint): TokenAmount {
@@ -69,9 +68,9 @@ export class FxPoolToken extends TokenAmount {
         return new FxPoolToken(
             poolToken.token,
             amount,
+            poolToken.index,
             poolToken.latestFXPrice,
             poolToken.fxOracleDecimals,
-            poolToken.index,
         );
     }
 }

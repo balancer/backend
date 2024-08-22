@@ -7,6 +7,9 @@ import {
     getSdk,
     CowAmmSnapshotFragment,
     PoolSnapshot_OrderBy,
+    PoolShareFragment,
+    PoolShare_OrderBy,
+    PoolSharesQueryVariables,
 } from './generated/types';
 
 /**
@@ -45,6 +48,31 @@ export const getCowAmmSubgraphClient = (subgraphUrl: string) => {
             }
 
             return pools;
+        },
+        async getAllPoolShares(where?: PoolSharesQueryVariables['where']): Promise<PoolShareFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let poolShares: PoolShareFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.PoolShares({
+                    where: { ...where, id_gt: id, user_not: '0x0000000000000000000000000000000000000000' },
+                    orderBy: PoolShare_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                poolShares = [...poolShares, ...response.poolShares];
+
+                if (response.poolShares.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = response.poolShares[response.poolShares.length - 1].id;
+                }
+            }
+
+            return poolShares;
         },
         async getSnapshotsForTimestamp(timestamp: number): Promise<CowAmmSnapshotFragment[]> {
             const limit = 1000;

@@ -15,6 +15,7 @@ import {
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
 import moment from 'moment';
+import { upsertBptBalances } from '../actions/cow-amm/upsert-bpt-balances';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -45,6 +46,8 @@ export function CowAmmController(tracer?: any) {
             const blockNumber = await viemClient.getBlockNumber();
 
             const ids = await upsertPools(newPools, viemClient, subgraphClient, chain, blockNumber);
+            // Initialize balances for the new pools
+            await upsertBptBalances(subgraphClient, chain, ids);
 
             return ids;
         },
@@ -199,6 +202,13 @@ export function CowAmmController(tracer?: any) {
                 chain,
                 cowPools.map((pool) => pool.id),
             );
+            return true;
+        },
+        async syncBalances(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const subgraphClient = getSubgraphClient(chain);
+            await upsertBptBalances(subgraphClient, chain);
+
             return true;
         },
     };
