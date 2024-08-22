@@ -21,8 +21,8 @@ const balancerResolvers: Resolvers = {
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
         },
-        poolGetBasePools: async (parent, args, context) => {
-            return poolService.getBasePools(args);
+        poolGetAggregatorPools: async (parent, args, context) => {
+            return poolService.getAggregatorPools(args);
         },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);

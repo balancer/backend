@@ -16,16 +16,15 @@ extend type Query {
     ): [GqlPoolMinimal!]!
 
     """
-    Returns all pools for a given filter, agg edition
+    Returns all pools for a given filter, specific for aggregators
     """
-    poolGetBasePools(
+    poolGetAggregatorPools(
         first: Int
         skip: Int
         orderBy: GqlPoolOrderBy
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
-        textSearch: String
-    ): [GqlPoolBase!]!
+    ): [GqlPoolAggregator!]!
     """
     Returns the number of pools for a given filter.
     """
@@ -295,6 +294,145 @@ enum GqlPoolType {
     GYROE
     FX
     COW_AMM
+}
+
+type GqlPoolAggregator {
+    """
+    The pool id. This is equal to the address for protocolVersion 3 pools
+    """
+    id: ID!
+    """
+    The chain on which the pool is deployed
+    """
+    chain: GqlChain!
+    """
+    The protocol version on which the pool is deployed, 1, 2 or 3
+    """
+    protocolVersion: Int!
+    """
+    The pool type, such as weighted, stable, etc.
+    """
+    type: GqlPoolType!
+    """
+    The name of the pool as per contract
+    """
+    name: String!
+    """
+    The token symbol of the pool as per contract
+    """
+    symbol: String!
+    """
+    The contract address of the pool.
+    """
+    address: Bytes!
+    """
+    The decimals of the BPT, usually 18
+    """
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes
+    """
+    The factory contract address from which the pool was created.
+    """
+    factory: Bytes
+    """
+    The timestamp the pool was created.
+    """
+    createTime: Int!
+    """
+    The version of the pool type.
+    """
+    version: Int!
+    """
+    Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+    """
+    poolTokens: [GqlPoolTokenDetail!]!
+    """
+    Dynamic data such as token balances, swap fees or volume
+    """
+    dynamicData: GqlPoolDynamicData!
+    """
+    Data specific to gyro/fx pools
+    """
+    alpha: String
+    """
+    Data specific to gyro/fx pools
+    """
+    beta: String
+    """
+    Data specific to gyro pools
+    """
+    sqrtAlpha: String
+    """
+    Data specific to gyro pools
+    """
+    sqrtBeta: String
+    """
+    Data specific to gyro pools
+    """
+    root3Alpha: String
+    """
+    Data specific to gyro pools
+    """
+    c: String
+    """
+    Data specific to gyro pools
+    """
+    s: String
+    """
+    Data specific to gyro/fx pools
+    """
+    lambda: String
+    """
+    Data specific to gyro pools
+    """
+    tauAlphaX: String
+    """
+    Data specific to gyro pools
+    """
+    tauAlphaY: String
+    """
+    Data specific to gyro pools
+    """
+    tauBetaX: String
+    """
+    Data specific to gyro pools
+    """
+    tauBetaY: String
+    """
+    Data specific to gyro pools
+    """
+    u: String
+    """
+    Data specific to gyro pools
+    """
+    v: String
+    """
+    Data specific to gyro pools
+    """
+    w: String
+    """
+    Data specific to gyro pools
+    """
+    z: String
+    """
+    Data specific to gyro pools
+    """
+    dSq: String
+    """
+    Data specific to fx pools
+    """
+    delta: String
+    """
+    Data specific to fx pools
+    """
+    epsilon: String
+    """
+    Data specific to stable pools
+    """
+    amp: BigInt
 }
 
 """
