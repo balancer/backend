@@ -168,6 +168,10 @@ type GqlSorPath {
     """
     pools: [String]!
     """
+    A sorted list of booleans that indicate if the respective pool is a buffer
+    """
+    isBuffer: [Boolean]!
+    """
     A sorted list of tokens that are ussed in this path
     """
     tokens: [Token]!

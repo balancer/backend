@@ -11,16 +11,15 @@ import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
+import { BasePoolToken } from '../basePoolToken';
 
-export class GyroEPoolToken extends TokenAmount {
+export class GyroEPoolToken extends BasePoolToken {
     public readonly rate: bigint;
-    public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
-        super(token, amount);
+    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
+        super(token, amount, index);
         this.rate = BigInt(rate);
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        this.index = index;
     }
 
     public increase(amount: bigint): TokenAmount {
@@ -73,7 +72,7 @@ export class GyroEPool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
             const tokenRate = poolToken.dynamicData.priceRate;
 
-            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, parseEther(tokenRate), poolToken.index));
+            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate)));
         }
 
         const gyroData = pool.typeData as GyroData;
@@ -139,10 +138,7 @@ export class GyroEPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -160,7 +156,7 @@ export class GyroEPool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
         const [currentInvariant, invErr] = calculateInvariantWithError(
             orderedNormalizedBalances,
@@ -202,7 +198,7 @@ export class GyroEPool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
         const [currentInvariant, invErr] = calculateInvariantWithError(
             orderedNormalizedBalances,
@@ -236,7 +232,7 @@ export class GyroEPool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         if (swapKind === SwapKind.GivenIn) {
             const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
             const [currentInvariant, invErr] = calculateInvariantWithError(
@@ -268,7 +264,7 @@ export class GyroEPool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    getRequiredTokenPair(
+    public getPoolTokens(
         tokenIn: Token,
         tokenOut: Token,
     ): {
