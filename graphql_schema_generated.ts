@@ -2871,6 +2871,26 @@ export const schema = gql`
         walletBalance: AmountHumanReadable!
     }
 
+    """
+    Result of the poolReloadPools mutation
+    """
+    type GqlUserMutationResult {
+        """
+        The chain that was reloaded.
+        """
+        chain: GqlChain!
+
+        """
+        The error message
+        """
+        error: String
+
+        """
+        Whether it was successful or not.
+        """
+        success: Boolean!
+    }
+
     type GqlUserPoolBalance {
         chain: GqlChain!
         poolId: String!
@@ -3079,10 +3099,13 @@ export const schema = gql`
         poolLoadOnChainDataForPoolsWithActiveUpdates: String!
         poolLoadSnapshotsForAllPools: String!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-        poolReloadAllPoolAprs(chain: GqlChain!): String!
+        poolReloadAllPoolAprs(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadAllTokenNestedPoolIds: String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
+        poolReloadStakingForAllPools(
+            chains: [GqlChain!]!
+            stakingTypes: [GqlPoolStakingType!]!
+        ): [GqlPoolMutationResult!]!
         poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
@@ -3107,7 +3130,7 @@ export const schema = gql`
         tokenReloadTokenPrices(chains: [GqlChain!]!): Boolean
         tokenSyncLatestFxPrices(chain: GqlChain!): String!
         tokenSyncTokenDefinitions: String!
-        userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
+        userInitStakedBalances(chains: [GqlChain!]!, stakingTypes: [GqlPoolStakingType!]!): [GqlUserMutationResult!]!
         userInitWalletBalancesForAllPools: String!
         userInitWalletBalancesForPool(poolId: String!): String!
         userSyncBalance(poolId: String!): String!

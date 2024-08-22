@@ -1,8 +1,10 @@
-import { Resolvers } from '../../schema';
+import { GqlChain, Resolvers } from '../../schema';
 import { userService } from './user.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../auth/auth-context';
 import { tokenService } from '../token/token.service';
 import { headerChain } from '../context/header-chain';
+import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
+import { chainToIdMap } from '../network/network-config';
 
 const resolvers: Resolvers = {
     Query: {
@@ -83,12 +85,24 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userInitStakedBalances: async (parent, { stakingTypes }, context) => {
+        userInitStakedBalances: async (parent, { stakingTypes, chains }, context) => {
             isAdminRoute(context);
 
-            await userService.initStakedBalances(stakingTypes);
+            const result: { chain: GqlChain; success: boolean; error: string | undefined }[] = [];
 
-            return 'success';
+            for (const chain of chains) {
+                initRequestScopedContext();
+                setRequestScopedContextValue('chainId', chainToIdMap[chain]);
+                try {
+                    await userService.initStakedBalances(stakingTypes);
+                    result.push({ chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ chain, success: false, error: `${e}` });
+                    console.log(`Could not reload staked balances for users for chain ${chain}: ${e}`);
+                }
+            }
+
+            return result;
         },
         userSyncChangedStakedBalances: async (parent, {}, context) => {
             isAdminRoute(context);
