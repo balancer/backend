@@ -17,6 +17,22 @@ describe('pool debugging', () => {
         await poolService.syncChangedPools();
     }, 5000000);
 
+    it('time new query', async () => {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', '250');
+        //only do once before starting to debug
+        // await poolService.syncAllPoolsFromSubgraph();
+        console.time('old query');
+        const poolsOld = await poolService.getGqlPools({ where: { chainIn: ['FANTOM'] } });
+        console.timeEnd('old query');
+
+        // console.time('new query');
+        // const poolsNew = await poolService.getAggregatorPools({ where: { chainIn: ['FANTOM'] } });
+        // console.timeEnd('new query');
+
+        // expect(poolsOld.length).toBe(poolsNew.length);
+    }, 5000000);
+
     it('sync aprs', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '1');
