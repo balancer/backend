@@ -46,6 +46,8 @@ export function CowAmmController(tracer?: any) {
             const blockNumber = await viemClient.getBlockNumber();
 
             const ids = await upsertPools(newPools, viemClient, subgraphClient, chain, blockNumber);
+            // Initialize balances for the new pools
+            await upsertBptBalances(subgraphClient, chain, ids);
 
             return ids;
         },
