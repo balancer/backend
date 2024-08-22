@@ -151,9 +151,10 @@ export function EventsQueryController(tracer?: any) {
                 where: conditions,
                 take: first,
                 skip,
+                // Watch out to order by the indexed [blockNumber, logIndex] fields
                 orderBy: [
                     {
-                        blockTimestamp: 'desc',
+                        blockNumber: 'desc',
                     },
                     {
                         logIndex: 'desc',
