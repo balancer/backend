@@ -25,7 +25,7 @@ extend type Mutation {
     userInitWalletBalancesForPool(poolId: String!): String!
     userSyncChangedWalletBalancesForAllPools: String!
 
-    userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!, chains: [GqlChain!]!): [GqlUserMutationResult!]!
+    userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
     userSyncChangedStakedBalances: String!
 }
 
@@ -37,22 +37,4 @@ type GqlUserPoolBalance {
     walletBalance: AmountHumanReadable!
     stakedBalance: AmountHumanReadable!
     chain: GqlChain!
-}
-
-"""
-Result of the poolReloadPools mutation
-"""
-type GqlUserMutationResult {
-    """
-    The chain that was reloaded.
-    """
-    chain: GqlChain!
-    """
-    Whether it was successful or not.
-    """
-    success: Boolean!
-    """
-    The error message
-    """
-    error: String
 }
