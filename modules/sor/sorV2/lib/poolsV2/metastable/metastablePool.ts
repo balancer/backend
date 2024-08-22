@@ -203,8 +203,8 @@ export class MetaStablePool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

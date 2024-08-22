@@ -195,8 +195,8 @@ export class FxPool implements BasePool {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: FxPoolToken; tOut: FxPoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) {
             throw new Error('Token not found');
