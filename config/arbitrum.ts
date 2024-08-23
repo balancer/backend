@@ -108,8 +108,8 @@ export default <NetworkData>{
                         },
                     },
                     FRAX: {
-                        underlyingAssetAddress: '0x17fc002b466eec40Dae837fc4be5c67993ddbd6f',
-                        aTokenAddress: '0x38d693cE1dF5AaDF7bC62595A37D667aD57922e5',
+                        underlyingAssetAddress: '0x17fc002b466eec40dae837fc4be5c67993ddbd6f',
+                        aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
                         wrappedTokens: {
                             stataArbFRAX: '0x89aec2023f89e26dbb7eaa7a98fe3996f9d112a8',
                         },
