@@ -4,32 +4,12 @@ import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualParams } from './gyro2Math';
 import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
-import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-
-export class Gyro2PoolToken extends TokenAmount {
-    public readonly index: number;
-
-    public constructor(token: Token, amount: BigintIsh, index: number) {
-        super(token, amount);
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = this.amount * this.scalar;
-        return this;
-    }
-}
+import { BasePoolToken } from '../basePoolToken';
 
 export class Gyro2Pool implements BasePool {
     public readonly chain: Chain;
@@ -38,15 +18,15 @@ export class Gyro2Pool implements BasePool {
     public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly tokens: Gyro2PoolToken[];
+    public readonly tokens: BasePoolToken[];
     public readonly tokenPairs: TokenPairData[];
 
     private readonly sqrtAlpha: bigint;
     private readonly sqrtBeta: bigint;
-    private readonly tokenMap: Map<string, Gyro2PoolToken>;
+    private readonly tokenMap: Map<string, BasePoolToken>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro2Pool {
-        const poolTokens: Gyro2PoolToken[] = [];
+        const poolTokens: BasePoolToken[] = [];
 
         if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
@@ -66,7 +46,7 @@ export class Gyro2Pool implements BasePool {
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index));
+            poolTokens.push(new BasePoolToken(token, tokenAmount.amount, poolToken.index));
         }
 
         const gyroData = pool.typeData as GyroData;
@@ -92,7 +72,7 @@ export class Gyro2Pool implements BasePool {
         swapFee: bigint,
         sqrtAlpha: bigint,
         sqrtBeta: bigint,
-        tokens: Gyro2PoolToken[],
+        tokens: BasePoolToken[],
         tokenPairs: TokenPairData[],
     ) {
         this.id = id;
@@ -108,10 +88,7 @@ export class Gyro2Pool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -207,21 +184,27 @@ export class Gyro2Pool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getPoolPairData(
-        tokenIn: Token,
-        tokenOut: Token,
-    ): {
-        tIn: Gyro2PoolToken;
-        tOut: Gyro2PoolToken;
-        sqrtAlpha: bigint;
-        sqrtBeta: bigint;
-    } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');
         }
+
+        return { tIn, tOut };
+    }
+
+    public getPoolPairData(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): {
+        tIn: BasePoolToken;
+        tOut: BasePoolToken;
+        sqrtAlpha: bigint;
+        sqrtBeta: bigint;
+    } {
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const sqrtAlpha = tIn.index === 0 ? this.sqrtAlpha : MathSol.divDownFixed(WAD, this.sqrtBeta);
         const sqrtBeta = tIn.index === 0 ? this.sqrtBeta : MathSol.divDownFixed(WAD, this.sqrtAlpha);

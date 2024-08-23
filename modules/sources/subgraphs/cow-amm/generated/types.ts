@@ -1804,6 +1804,22 @@ export type SwapsQuery = {
     }>;
 };
 
+export type PoolShareFragment = { __typename?: 'PoolShare'; id: string; balance: string };
+
+export type PoolSharesQueryVariables = Exact<{
+    skip?: Maybe<Scalars['Int']>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<PoolShare_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    where?: Maybe<PoolShare_Filter>;
+    block?: Maybe<Block_Height>;
+}>;
+
+export type PoolSharesQuery = {
+    __typename?: 'Query';
+    poolShares: Array<{ __typename?: 'PoolShare'; id: string; balance: string }>;
+};
+
 export type CowAmmPoolFragment = {
     __typename?: 'Pool';
     id: string;
@@ -1969,6 +1985,12 @@ export const CowAmmSwapFragmentDoc = gql`
         }
     }
 `;
+export const PoolShareFragmentDoc = gql`
+    fragment PoolShare on PoolShare {
+        id
+        balance
+    }
+`;
 export const CowAmmPoolFragmentDoc = gql`
     fragment CowAmmPool on Pool {
         id
@@ -2062,6 +2084,28 @@ export const SwapsDocument = gql`
     }
     ${CowAmmSwapFragmentDoc}
 `;
+export const PoolSharesDocument = gql`
+    query PoolShares(
+        $skip: Int
+        $first: Int
+        $orderBy: PoolShare_orderBy
+        $orderDirection: OrderDirection
+        $where: PoolShare_filter
+        $block: Block_height
+    ) {
+        poolShares(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...PoolShare
+        }
+    }
+    ${PoolShareFragmentDoc}
+`;
 export const PoolsDocument = gql`
     query Pools(
         $skip: Int
@@ -2137,6 +2181,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'Swaps',
+            );
+        },
+        PoolShares(
+            variables?: PoolSharesQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<PoolSharesQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<PoolSharesQuery>(PoolSharesDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'PoolShares',
             );
         },
         Pools(variables?: PoolsQueryVariables, requestHeaders?: Dom.RequestInit['headers']): Promise<PoolsQuery> {

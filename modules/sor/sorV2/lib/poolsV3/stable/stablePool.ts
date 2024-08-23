@@ -1,7 +1,7 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 
-import { BigintIsh, MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { AddKind, RemoveKind, Stable, StableState, Vault } from '@balancer-labs/balancer-maths';
+import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { AddKind, RemoveKind, StableState, Vault } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
@@ -11,30 +11,10 @@ import { TokenPairData } from '../../../../../sources/contracts/fetch-tokenpair-
 
 import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
+import { StableBasePoolToken } from './stableBasePoolToken';
+import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
 
-export class StablePoolToken extends TokenAmount {
-    public readonly rate: bigint;
-    public readonly index: number;
-
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
-        super(token, amount);
-        this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-}
+type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
 
 export class StablePool implements BasePoolV3 {
     public readonly chain: Chain;
@@ -49,6 +29,9 @@ export class StablePool implements BasePoolV3 {
     public tokens: StablePoolToken[];
 
     private readonly tokenMap: Map<string, StablePoolToken>;
+
+    private vault: Vault;
+    private poolState: StableState;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
         const poolTokens: StablePoolToken[] = [];
@@ -67,14 +50,26 @@ export class StablePool implements BasePoolV3 {
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(
-                new StablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.priceRate),
-                    poolToken.index,
-                ),
-            );
+            if (poolToken.token.underlyingTokenAddress) {
+                poolTokens.push(
+                    new Erc4626PoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.priceRate),
+                        poolToken.token.underlyingTokenAddress,
+                    ),
+                );
+            } else {
+                poolTokens.push(
+                    new StableBasePoolToken(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.dynamicData.priceRate),
+                    ),
+                );
+            }
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
@@ -115,141 +110,136 @@ export class StablePool implements BasePoolV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new StablePoolToken(bpt, totalShares, WAD, -1));
+        this.tokenMap.set(bpt.address, new StableBasePoolToken(bpt, totalShares, -1, WAD));
+
+        this.vault = new Vault();
+        this.poolState = this.getPoolState();
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
-        const poolState = this.getPoolState();
-        const vault = new Vault();
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         // remove liquidity
         if (tIn.token.isSameAddress(this.id)) {
-            return vault.getMaxSingleTokenRemoveAmount(
+            return this.vault.getMaxSingleTokenRemoveAmount(
                 {
                     isExactIn: swapKind === SwapKind.GivenIn,
-                    totalSupply: poolState.totalSupply,
-                    tokenOutBalance: poolState.balancesLiveScaled18[tOut.index],
-                    tokenOutScalingFactor: poolState.scalingFactors[tOut.index],
-                    tokenOutRate: poolState.tokenRates[tOut.index],
+                    totalSupply: this.poolState.totalSupply,
+                    tokenOutBalance: this.poolState.balancesLiveScaled18[tOut.index],
+                    tokenOutScalingFactor: this.poolState.scalingFactors[tOut.index],
+                    tokenOutRate: this.poolState.tokenRates[tOut.index],
                 },
-                poolState,
+                this.poolState,
             );
         }
         // add liquidity
         if (tOut.token.isSameAddress(this.id)) {
-            return vault.getMaxSingleTokenAddAmount(poolState);
+            return this.vault.getMaxSingleTokenAddAmount(this.poolState);
         }
         // swap
-        return vault.getMaxSwapAmount(
+        return this.vault.getMaxSwapAmount(
             {
                 swapKind,
-                balancesLiveScaled18: poolState.balancesLiveScaled18,
-                tokenRates: poolState.tokenRates,
-                scalingFactors: poolState.scalingFactors,
+                balancesLiveScaled18: this.poolState.balancesLiveScaled18,
+                tokenRates: this.poolState.tokenRates,
+                scalingFactors: this.poolState.scalingFactors,
                 indexIn: tIn.index,
                 indexOut: tOut.index,
             },
-            poolState,
+            this.poolState,
         );
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        const poolState = this.getPoolState();
-        const vault = new Vault();
         let calculatedAmount: bigint;
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { amountsOut } = vault.removeLiquidity(
+            const { amountsOutRaw } = this.vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOut: poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
-                    maxBptAmountIn: swapAmount.amount,
+                    minAmountsOutRaw: this.poolState.tokens.map((_, i) => (i === tOut.index ? 1n : 0n)),
+                    maxBptAmountInRaw: swapAmount.amount,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
-                poolState,
+                this.poolState,
             );
-            calculatedAmount = amountsOut[tOut.index];
+            calculatedAmount = amountsOutRaw[tOut.index];
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { bptAmountOut } = vault.addLiquidity(
+            const { bptAmountOutRaw } = this.vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsIn: poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
-                    minBptAmountOut: 0n,
+                    maxAmountsInRaw: this.poolState.tokens.map((_, i) => (i === tIn.index ? swapAmount.amount : 0n)),
+                    minBptAmountOutRaw: 0n,
                     kind: AddKind.UNBALANCED,
                 },
-                poolState,
+                this.poolState,
             );
-            calculatedAmount = bptAmountOut;
+            calculatedAmount = bptAmountOutRaw;
         } else {
             // swap
-            calculatedAmount = vault.swap(
+            calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
                     tokenOut: tOut.token.address,
                     swapKind: SwapKind.GivenIn,
                 },
-                poolState,
+                this.poolState,
             );
         }
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
-        const poolState = this.getPoolState();
-        const vault = new Vault();
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         let calculatedAmount: bigint;
 
         if (tIn.token.isSameAddress(this.id)) {
             // remove liquidity
-            const { bptAmountIn } = vault.removeLiquidity(
+            const { bptAmountInRaw } = this.vault.removeLiquidity(
                 {
                     pool: this.id,
-                    minAmountsOut: poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
-                    maxBptAmountIn: MAX_UINT256,
+                    minAmountsOutRaw: this.poolState.tokens.map((_, i) => (i === tOut.index ? swapAmount.amount : 0n)),
+                    maxBptAmountInRaw: MAX_UINT256,
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_OUT,
                 },
-                poolState,
+                this.poolState,
             );
-            calculatedAmount = bptAmountIn;
+            calculatedAmount = bptAmountInRaw;
         } else if (tOut.token.isSameAddress(this.id)) {
             // add liquidity
-            const { amountsIn } = vault.addLiquidity(
+            const { amountsInRaw } = this.vault.addLiquidity(
                 {
                     pool: this.id,
-                    maxAmountsIn: poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
-                    minBptAmountOut: swapAmount.amount,
+                    maxAmountsInRaw: this.poolState.tokens.map((_, i) => (i === tIn.index ? MAX_UINT256 : 0n)),
+                    minBptAmountOutRaw: swapAmount.amount,
                     kind: AddKind.SINGLE_TOKEN_EXACT_OUT,
                 },
-                poolState,
+                this.poolState,
             );
-            calculatedAmount = amountsIn[tIn.index];
+            calculatedAmount = amountsInRaw[tIn.index];
         } else {
             // swap
-            calculatedAmount = vault.swap(
+            calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
                     tokenOut: tOut.token.address,
                     swapKind: SwapKind.GivenOut,
                 },
-                poolState,
+                this.poolState,
             );
         }
         return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) =>
@@ -277,7 +267,7 @@ export class StablePool implements BasePoolV3 {
         };
     }
 
-    private getRequiredTokenPair(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

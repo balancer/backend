@@ -1,5 +1,22 @@
 # backend
 
+## 1.13.0
+
+### Minor Changes
+
+-   ce47937: adding cow amm SG balance syncing
+
+## 1.12.0
+
+### Minor Changes
+
+-   2141ceb: APR source for yieldnest ETH (ynETH)
+
+### Patch Changes
+
+-   93e44ae: add agETH APR for mainnet
+-   b381a08: committing generate graphql schemas
+
 ## 1.11.1
 
 ### Patch Changes
