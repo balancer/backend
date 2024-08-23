@@ -108,7 +108,7 @@ async function startServer() {
         typeDefs: schema,
         introspection: true,
         plugins,
-        context: ({ req }) => req.context,
+        context: ({ req }) => ({ ...req.context, ip: req.ip }),
     });
     await server.start();
     server.applyMiddleware({ app });
