@@ -2278,6 +2278,11 @@ export const schema = gql`
         inputAmountRaw: String!
 
         """
+        A sorted list of booleans that indicate if the respective pool is a buffer
+        """
+        isBuffer: [Boolean]!
+
+        """
         Output amount of this path in scaled form
         """
         outputAmountRaw: String!

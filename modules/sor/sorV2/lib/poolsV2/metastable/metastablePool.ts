@@ -44,8 +44,8 @@ export class MetaStablePool implements BasePool {
                 new ComposableStablePoolToken(
                     token,
                     tokenAmount.amount,
-                    parseEther(poolToken.dynamicData.priceRate),
                     poolToken.index,
+                    parseEther(poolToken.dynamicData.priceRate),
                 ),
             );
         }
@@ -85,10 +85,7 @@ export class MetaStablePool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -106,19 +103,14 @@ export class MetaStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tInIndex = this.tokenIndexMap.get(tokenIn.address);
-        const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
-            throw new Error('Pool does not contain the tokens provided');
-        }
-
-        if (swapAmount.amount > this.tokens[tInIndex].amount) {
+        if (swapAmount.amount > tIn.amount) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
         const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
-        const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
+        const amountInWithRate = amountInWithFee.mulDownFixed(tIn.rate);
         const balances = this.tokens.map((t) => t.scale18);
 
         const invariant = _calculateInvariant(this.amp, [...balances], true);
@@ -126,20 +118,20 @@ export class MetaStablePool implements BasePool {
         const tokenOutScale18 = _calcOutGivenIn(
             this.amp,
             [...balances],
-            tInIndex,
-            tOutIndex,
+            tIn.index,
+            tOut.index,
             amountInWithRate.scale18,
             invariant,
         );
 
         const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
-        const amountOutWithRate = amountOut.divDownFixed(this.tokens[tOutIndex].rate);
+        const amountOutWithRate = amountOut.divDownFixed(tOut.rate);
 
         if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            this.tokens[tInIndex].increase(swapAmount.amount);
-            this.tokens[tOutIndex].decrease(amountOutWithRate.amount);
+            tIn.increase(swapAmount.amount);
+            tOut.decrease(amountOutWithRate.amount);
         }
 
         return amountOutWithRate;
@@ -151,18 +143,13 @@ export class MetaStablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tInIndex = this.tokenIndexMap.get(tokenIn.address);
-        const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
-            throw new Error('Pool does not contain the tokens provided');
-        }
-
-        if (swapAmount.amount > this.tokens[tOutIndex].amount) {
+        if (swapAmount.amount > tOut.amount) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
+        const amountOutWithRate = swapAmount.mulDownFixed(tOut.rate);
 
         const balances = this.tokens.map((t) => t.scale18);
 
@@ -171,21 +158,21 @@ export class MetaStablePool implements BasePool {
         const tokenInScale18 = _calcInGivenOut(
             this.amp,
             [...balances],
-            tInIndex,
-            tOutIndex,
+            tIn.index,
+            tOut.index,
             amountOutWithRate.scale18,
             invariant,
         );
 
         const amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
         const amountInWithFee = this.addSwapFeeAmount(amountIn);
-        const amountInWithRate = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
+        const amountInWithRate = amountInWithFee.divDownFixed(tIn.rate);
 
         if (amountInWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            this.tokens[tInIndex].increase(amountInWithRate.amount);
-            this.tokens[tOutIndex].decrease(swapAmount.amount);
+            tIn.increase(amountInWithRate.amount);
+            tOut.decrease(swapAmount.amount);
         }
 
         return amountInWithRate;
@@ -201,10 +188,7 @@ export class MetaStablePool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
@@ -213,5 +197,19 @@ export class MetaStablePool implements BasePool {
         }
         // Return max amount of tokenOut - approx is almost all balance
         return (tOut.amount * WAD) / tOut.rate;
+    }
+
+    public getPoolTokens(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }

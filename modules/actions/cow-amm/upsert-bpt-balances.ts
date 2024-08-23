@@ -2,8 +2,9 @@ import { Chain, PrismaUserWalletBalance } from '@prisma/client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
 
-export const upsertBptBalances = async (subgraphClient: CowAmmSubgraphClient, chain: Chain) => {
-    const poolShares = await subgraphClient.getAllPoolShares();
+export const upsertBptBalances = async (subgraphClient: CowAmmSubgraphClient, chain: Chain, poolIds?: string[]) => {
+    const where = poolIds ? { pool_in: poolIds } : undefined;
+    const poolShares = await subgraphClient.getAllPoolShares(where);
 
     const dbEntries = poolShares
         .map((poolShare) => {

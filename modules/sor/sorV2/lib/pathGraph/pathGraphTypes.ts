@@ -45,4 +45,5 @@ export interface PathGraphEdgeData {
     normalizedLiquidity: bigint;
     tokenIn: Token;
     tokenOut: Token;
+    isBuffer: boolean;
 }
