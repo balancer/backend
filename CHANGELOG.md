@@ -1,5 +1,11 @@
 # backend
 
+## 1.14.2
+
+### Patch Changes
+
+-   0e599cb: adding event query logging to triage db issues
+
 ## 1.14.1
 
 ### Patch Changes
