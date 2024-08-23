@@ -1,5 +1,11 @@
 # backend
 
+## 1.14.1
+
+### Patch Changes
+
+-   5b8e7d5: fix cow amm event syncing
+
 ## 1.14.0
 
 ### Minor Changes
