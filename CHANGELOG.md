@@ -1,5 +1,11 @@
 # backend
 
+## 1.14.3
+
+### Patch Changes
+
+-   bf14fb9: associate gauge balances on pool addresses
+
 ## 1.14.2
 
 ### Patch Changes
