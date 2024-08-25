@@ -1,11 +1,12 @@
 import { poolService } from './pool.service';
-import { GqlChain, Resolvers } from '../../schema';
+import { GqlChain, QueryPoolEventsArgs, QueryPoolGetEventsArgs, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
 import { CowAmmController, EventsQueryController, PoolController, SnapshotsController } from '../controllers';
 import { chainToIdMap } from '../network/network-config';
+import { logResolver } from '../../app/gql/log-resolver';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -54,19 +55,21 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
-        poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
-            return EventsQueryController().getEvents({
-                first: 1000,
-                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
-            });
-        },
-        poolEvents: (parent, { first, skip, where }, context) => {
+        poolGetEvents: logResolver(
+            (parent: any, { range, poolId, chain, typeIn, userAddress }: QueryPoolGetEventsArgs) => {
+                return EventsQueryController().getEvents({
+                    first: 1000,
+                    where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
+                });
+            },
+        ),
+        poolEvents: logResolver((parent: any, { first, skip, where }: QueryPoolEventsArgs) => {
             return EventsQueryController().getEvents({
                 first,
                 skip,
                 where,
             });
-        },
+        }),
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();
             if (!chains && currentChain) {

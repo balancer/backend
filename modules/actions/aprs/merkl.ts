@@ -14,6 +14,7 @@ interface MerklCampaign {
     };
     campaignParameters: {
         symbolRewardToken: string;
+        whitelist: string[];
     };
 }
 
@@ -36,7 +37,8 @@ const fetchMerklCampaigns = async () => {
             });
         })
         .flat(2)
-        .filter((campaign) => campaign.type === 'balancerPool');
+        .filter((campaign) => campaign.type === 'balancerPool')
+        .filter((campaign) => campaign.campaignParameters.whitelist.length === 0);
 
     return campaigns;
 };
