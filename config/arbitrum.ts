@@ -114,6 +114,13 @@ export default <NetworkData>{
                             stataArbFRAX: '0x89aec2023f89e26dbb7eaa7a98fe3996f9d112a8',
                         },
                     },
+                    GHO: {
+                        underlyingAssetAddress: '0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33',
+                        aTokenAddress: '0xebe517846d0f36eced99c735cbf6131e1feb775d',
+                        wrappedTokens: {
+                            stataArbGHO: '0xd9fba68d89178e3538e708939332c79efc540179',
+                        },
+                    },
                 },
             },
         },
