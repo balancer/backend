@@ -36,15 +36,8 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
         orderDirection: OrderDirection.Asc,
     });
 
-    // Transform COW AMM types to V3 types
-    const joinExits = addRemoves.map((addRemove): AddRemoveFragment => {
-        return {
-            ...addRemove,
-        };
-    });
-
     // Prepare DB entries
-    const dbEntries = await joinExitV3Transformer(joinExits, chain);
+    const dbEntries = await joinExitV3Transformer(addRemoves, chain, 1);
 
     console.log(`Syncing Cow AMM ${dbEntries.length} join/exit events`);
 

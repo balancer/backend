@@ -1,5 +1,53 @@
 # backend
 
+## 1.14.3
+
+### Patch Changes
+
+-   bf14fb9: associate gauge balances on pool addresses
+
+## 1.14.2
+
+### Patch Changes
+
+-   0e599cb: adding event query logging to triage db issues
+
+## 1.14.1
+
+### Patch Changes
+
+-   5b8e7d5: fix cow amm event syncing
+
+## 1.14.0
+
+### Minor Changes
+
+-   1545310: SOR - Add support for paths with buffers/boosted pools
+
+### Patch Changes
+
+-   62baccf: make sure cow amm balances are added for new pools
+-   03f81ff: add aFRAX APR
+-   d9ebb9a: handle streamed BAL on mainnet properly
+-   d87f76e: Dont show MERKL APR if it has a whitelist
+
+## 1.13.0
+
+### Minor Changes
+
+-   ce47937: adding cow amm SG balance syncing
+
+## 1.12.0
+
+### Minor Changes
+
+-   2141ceb: APR source for yieldnest ETH (ynETH)
+
+### Patch Changes
+
+-   93e44ae: add agETH APR for mainnet
+-   b381a08: committing generate graphql schemas
+
 ## 1.11.1
 
 ### Patch Changes

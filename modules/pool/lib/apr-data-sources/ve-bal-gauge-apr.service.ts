@@ -58,7 +58,7 @@ export class GaugeAprService implements PoolAprService {
 
             // Get token rewards per year with data needed for the DB
             const rewards = await Promise.allSettled(
-                gauge.rewards.map(async ({ tokenAddress, rewardPerSecond }) => {
+                gauge.rewards.map(async ({ id, tokenAddress, rewardPerSecond }) => {
                     const price = this.tokenService.getPriceForToken(tokenPrices, tokenAddress, networkContext.chain);
                     if (!price) {
                         return Promise.reject(`Price not found for ${tokenAddress}`);
@@ -75,6 +75,7 @@ export class GaugeAprService implements PoolAprService {
                     }
 
                     return {
+                        id: id,
                         address: tokenAddress,
                         symbol: definition.symbol,
                         rewardPerYear: parseFloat(rewardPerSecond) * secondsPerYear * price,
@@ -101,7 +102,7 @@ export class GaugeAprService implements PoolAprService {
                     const { address, symbol, rewardPerYear } = reward.value;
 
                     const itemData: PrismaPoolAprItem = {
-                        id: `${gauge.id}-${symbol}-apr`,
+                        id: `${reward.value.id}-${symbol}-apr`,
                         chain: networkContext.chain,
                         poolId: pool.id,
                         title: `${symbol} reward APR`,
@@ -114,7 +115,7 @@ export class GaugeAprService implements PoolAprService {
 
                     // veBAL rewards have a range associated with the item
                     if (
-                        address.toLowerCase() === networkContext.data.bal!.address.toLowerCase() &&
+                        itemData.id.includes('balgauge') &&
                         (networkContext.chain === 'MAINNET' || gauge.version === 2)
                     ) {
                         let minApr = 0;

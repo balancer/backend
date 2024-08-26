@@ -5,7 +5,8 @@ import { Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 import { parseEther, parseUnits, Address } from 'viem';
 import { TokenPairData } from '../../../modules/sources/contracts/fetch-tokenpair-data';
-import { StablePool, StablePoolToken } from '../../../modules/sor/sorV2/lib/poolsV3';
+import { StablePool } from '../../../modules/sor/sorV2/lib/poolsV3';
+import { StableBasePoolToken } from '../../../modules/sor/sorV2/lib/poolsV3/stable/stableBasePoolToken';
 
 export const StablePoolFactory = Factory.define<StablePool>(({ params }) => {
     const chain: Chain = params.chain || faker.helpers.arrayElement<Chain>(['MAINNET', 'SEPOLIA']);
@@ -26,11 +27,11 @@ export const StablePoolFactory = Factory.define<StablePool>(({ params }) => {
                 faker.finance.currencyName(),
             );
             const tokenAmount = TokenAmount.fromHumanAmount(token, `${faker.number.int({ min: 1000, max: 1000000 })}`);
-            return new StablePoolToken(
+            return new StableBasePoolToken(
                 token,
                 tokenAmount.amount,
-                parseEther(faker.number.float({ min: 0.9, max: 1.1 }).toString()),
                 index,
+                parseEther(faker.number.float({ min: 0.9, max: 1.1 }).toString()),
             );
         });
 

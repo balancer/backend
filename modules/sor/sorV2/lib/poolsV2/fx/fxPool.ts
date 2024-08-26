@@ -62,11 +62,11 @@ export class FxPool implements BasePool {
                 new FxPoolToken(
                     token,
                     tokenAmount.amount,
+                    poolToken.index,
                     `${poolToken.dynamicData.latestFxPrice}`,
                     // TODO query fxOracleDecimals
                     // poolToken.token.fxOracleDecimals || 8,
                     8,
-                    poolToken.index,
                 ),
             );
         }
@@ -117,10 +117,7 @@ export class FxPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
             (tokenPair) => tokenPair.tokenA === tIn.token.address && tokenPair.tokenB === tOut.token.address,
@@ -197,21 +194,27 @@ export class FxPool implements BasePool {
         return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
     }
 
-    public getPoolPairData(tokenIn: Token, tokenOut: Token, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: FxPoolToken; tOut: FxPoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) {
             throw new Error('Token not found');
         }
+
+        return { tIn, tOut };
+    }
+
+    public getPoolPairData(tokenIn: Token, tokenOut: Token, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const usdcToken = isUSDC(tokenIn.address) ? tIn : tOut;
         const baseToken = isUSDC(tokenIn.address) ? tOut : tIn;
 
         const givenToken =
             swapKind === SwapKind.GivenIn
-                ? new FxPoolToken(tIn.token, swapAmount, tIn.latestFXPrice, tIn.fxOracleDecimals, tIn.index)
-                : new FxPoolToken(tOut.token, swapAmount, tOut.latestFXPrice, tOut.fxOracleDecimals, tOut.index);
+                ? new FxPoolToken(tIn.token, swapAmount, tIn.index, tIn.latestFXPrice, tIn.fxOracleDecimals)
+                : new FxPoolToken(tOut.token, swapAmount, tOut.index, tOut.latestFXPrice, tOut.fxOracleDecimals);
 
         return {
             tIn,

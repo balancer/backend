@@ -107,6 +107,13 @@ export default <NetworkData>{
                             stataArbWETH: '0x18468b6eba332285c6d9bb03fe7fb52e108c4596',
                         },
                     },
+                    FRAX: {
+                        underlyingAssetAddress: '0x17fc002b466eec40dae837fc4be5c67993ddbd6f',
+                        aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
+                        wrappedTokens: {
+                            stataArbFRAX: '0x89aec2023f89e26dbb7eaa7a98fe3996f9d112a8',
+                        },
+                    },
                 },
             },
         },

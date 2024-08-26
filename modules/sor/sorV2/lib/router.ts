@@ -41,7 +41,7 @@ export class Router {
         // Check if PathWithAmount is valid (each hop pool swap limit)
         paths.forEach((path) => {
             try {
-                quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
+                quotePaths.push(new PathWithAmount(path.tokens, path.pools, path.isBuffer, swapAmount));
             } catch {
                 // logger.trace('Invalid path:');
                 // logger.trace(path.tokens.map((token) => token.symbol).join(' -> '));
@@ -87,14 +87,34 @@ export class Router {
 
         const splitPaths = [
             [bestPath], // single path (no split)
-            this.splitPaths(swapAmount, bestPath, secondBestPath, 0.25), // 25/75 split
-            this.splitPaths(swapAmount, bestPath, secondBestPath, 0.5), // 50/50 split
-            this.splitPaths(swapAmount, bestPath, secondBestPath, 0.75), // 75/25 split
         ];
+
+        const ratios = [
+            0.25, // 25/75 split
+            0.5, // 50/50 split
+            0.75, // 75/25 split
+        ];
+        for (const ratio of ratios) {
+            try {
+                const paths = this.splitPaths(swapAmount, bestPath, secondBestPath, ratio);
+                splitPaths.push(paths);
+            } catch (error) {
+                console.log(`Error splitting paths: ${error}`);
+            }
+        }
+
         // prevent splitPaths from failing due to normalizedLiquidity not being properly filled out
-        const normalizedLiquiditySplitPaths = this.splitPathsNormalizedLiquidity(swapAmount, bestPath, secondBestPath);
-        if (normalizedLiquiditySplitPaths !== undefined) {
-            splitPaths.push(normalizedLiquiditySplitPaths);
+        try {
+            const normalizedLiquiditySplitPaths = this.splitPathsNormalizedLiquidity(
+                swapAmount,
+                bestPath,
+                secondBestPath,
+            );
+            if (normalizedLiquiditySplitPaths !== undefined) {
+                splitPaths.push(normalizedLiquiditySplitPaths);
+            }
+        } catch (error) {
+            console.log(`Error splitting paths by normalized liquidity: ${error}`);
         }
 
         // Find the split path that yields the best result (i.e. maxAmountOut on GivenIn, minAmountIn on GivenOut)
@@ -128,8 +148,13 @@ export class Router {
         const swapAmountUp = swapAmount.mulDownFixed(ratio);
         const swapAmountDown = swapAmount.sub(swapAmountUp);
 
-        const pathUp = new PathWithAmount(bestPath.tokens, bestPath.pools, swapAmountUp);
-        const pathDown = new PathWithAmount(secondBestPath.tokens, secondBestPath.pools, swapAmountDown);
+        const pathUp = new PathWithAmount(bestPath.tokens, bestPath.pools, bestPath.isBuffer, swapAmountUp);
+        const pathDown = new PathWithAmount(
+            secondBestPath.tokens,
+            secondBestPath.pools,
+            secondBestPath.isBuffer,
+            swapAmountDown,
+        );
 
         return [pathUp, pathDown];
     }
@@ -167,8 +192,13 @@ export class Router {
         const swapAmountNormUp = swapAmount.mulDownFixed(bestPathNL).divDownFixed(bestPathNL + secondBestPathNL);
         const swapAmountNormDown = swapAmount.sub(swapAmountNormUp);
 
-        const pathNormUp = new PathWithAmount(bestPath.tokens, bestPath.pools, swapAmountNormUp);
-        const pathNormDown = new PathWithAmount(secondBestPath.tokens, secondBestPath.pools, swapAmountNormDown);
+        const pathNormUp = new PathWithAmount(bestPath.tokens, bestPath.pools, bestPath.isBuffer, swapAmountNormUp);
+        const pathNormDown = new PathWithAmount(
+            secondBestPath.tokens,
+            secondBestPath.pools,
+            secondBestPath.isBuffer,
+            swapAmountNormDown,
+        );
 
         return [pathNormUp, pathNormDown];
     }

@@ -24,17 +24,6 @@ import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
 import * as Sentry from '@sentry/node';
 
-interface GaugeRate {
-    /** 1 for old gauges, 2 for gauges receiving cross chain BAL rewards */
-    version: number;
-    /** BAL per second received by the gauge */
-    rate: string;
-    // Amount of tokens staked in the gauge
-    totalSupply: string;
-    // Effective total LP token amount after all deposits have been boosted
-    workingSupply: string;
-}
-
 interface GaugeRewardData {
     [address: string]: {
         rewardData: {
@@ -139,17 +128,6 @@ export const syncGaugeStakingForPools = async (
         rewardsMulticallerV2,
     );
 
-    // TODO remove this once we have a better solution
-    let duplicateIds: string[] = [];
-    for (const rate of onchainRates) {
-        const duplicates = onchainRates.filter((r) => r.id === rate.id);
-        if (duplicates.length > 1) {
-            duplicateIds.push(duplicates[0].id);
-        }
-    }
-    const filteredOnchainRates = onchainRates.filter(
-        (rate) => !duplicateIds.includes(rate.id) || parseFloat(rate.rewardPerSecond) > 0,
-    );
     // Prepare DB operations
     const operations: any[] = [];
 
@@ -179,8 +157,8 @@ export const syncGaugeStakingForPools = async (
         }
 
         const dbStakingGauge = allDbStakingGauges.find((stakingGauge) => stakingGauge?.id === gauge.id);
-        const workingSupply = filteredOnchainRates.find(({ id }) => `${gauge.id}-${balAddress}` === id)?.workingSupply;
-        const totalSupply = filteredOnchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
+        const workingSupply = onchainRates.find(({ id }) => `${gauge.id}-${balAddress}-balgauge` === id)?.workingSupply;
+        const totalSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
         if (
             !dbStakingGauge ||
             dbStakingGauge.status !== gauge.status ||
@@ -215,7 +193,7 @@ export const syncGaugeStakingForPools = async (
     const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
     // DB operations for gauge reward tokens
-    for (const { id, rewardPerSecond } of filteredOnchainRates) {
+    for (const { id, rewardPerSecond } of onchainRates) {
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
@@ -319,13 +297,13 @@ const getOnchainRewardTokensData = async (
     // Format onchain rates for all the rewards
     const onchainRates = [
         ...Object.keys(balData).map((gaugeAddress) => {
-            const id = `${gaugeAddress}-${balAddress}`.toLowerCase();
+            const id = `${gaugeAddress}-${balAddress}-balgauge`.toLowerCase();
             const { rate, weight, workingSupply, totalSupply } = balData[gaugeAddress];
             const rewardPerSecond = rate
-                ? formatUnits(rate) // L2 V2 case
+                ? formatUnits(rate) // L2 V2 case for BAL rewards
                 : weight
-                ? (parseFloat(formatUnits(weight!)) * totalBalRate).toFixed(18) // mainnet case
-                : '0';
+                ? (parseFloat(formatUnits(weight!)) * totalBalRate).toFixed(18) // mainnet case for BAL rewards
+                : '0'; // mainnet case without any votes for this gauge for BAL rewards
 
             return {
                 id,
@@ -338,7 +316,7 @@ const getOnchainRewardTokensData = async (
             .map((gaugeAddress) => [
                 // L2 V1 case with any token
                 ...Object.keys(rewardsData[gaugeAddress].rewardData).map((tokenAddress) => {
-                    const id = `${gaugeAddress}-${tokenAddress}`.toLowerCase();
+                    const id = `${gaugeAddress}-${tokenAddress}-reward`.toLowerCase();
                     const { rate, period_finish } = rewardsData[gaugeAddress].rewardData[tokenAddress];
                     const rewardPerSecond =
                         period_finish && period_finish.toNumber() > now

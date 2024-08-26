@@ -21,6 +21,10 @@ export interface YbAprConfig {
         url: string;
         token: string;
     };
+    yieldnest?: {
+        url: string;
+        token: string;
+    };
     dforce?: {
         token: string;
     };

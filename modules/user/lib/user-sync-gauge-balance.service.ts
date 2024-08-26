@@ -52,12 +52,14 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
-            select: { id: true },
+            select: { id: true, address: true },
             where: { chain: this.chain },
         });
+        // Map the pools address to id
+        const poolsMap = new Map(pools.map((pool) => [pool.address, pool.id]));
 
         const filteredGaugeShares = gaugeShares.filter((share) => {
-            const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+            const pool = poolsMap.get(share.gauge.poolAddress);
             if (pool) {
                 return true;
             }
@@ -76,7 +78,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'GAUGE' }, chain: this.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: filteredGaugeShares.map((share) => {
-                        const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+                        const poolId = poolsMap.get(share.gauge.poolAddress);
 
                         return {
                             id: `${share.gauge.id}-${share.user.id}`,
@@ -84,7 +86,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             balance: share.balance,
                             balanceNum: parseFloat(share.balance),
                             userAddress: share.user.id,
-                            poolId: pool?.id,
+                            poolId,
                             tokenAddress: share.gauge.poolAddress,
                             stakingId: share.gauge.id,
                         };
@@ -229,12 +231,10 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     .filter(({ userAddress }) => userAddress !== AddressZero)
                     .filter(({ balance }) => balance.eq(0))
                     .map((userBalance) => {
-                        return prisma.prismaUserStakedBalance.delete({
+                        return prisma.prismaUserStakedBalance.deleteMany({
                             where: {
-                                id_chain: {
-                                    id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
-                                    chain: this.chain,
-                                },
+                                id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
+                                chain: this.chain,
                             },
                         });
                     }),
@@ -276,8 +276,11 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 },
             });
         } else {
-            await prisma.prismaUserStakedBalance.delete({
-                where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: {
+                    id: `${staking.address}-${userAddress}`,
+                    chain: this.chain,
+                },
             });
         }
     }

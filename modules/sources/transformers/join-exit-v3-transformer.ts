@@ -8,11 +8,14 @@ import { JoinExitEvent } from '../../../prisma/prisma-types';
  *
  * @param swaps
  * @param chain
+ * @param protocolVersion
  * @returns
  */
-export async function joinExitV3Transformer(events: AddRemoveFragment[], chain: Chain): Promise<JoinExitEvent[]> {
-    const protocolVersion = 3;
-
+export async function joinExitV3Transformer(
+    events: AddRemoveFragment[],
+    chain: Chain,
+    protocolVersion = 3,
+): Promise<JoinExitEvent[]> {
     return events.map((event) => ({
         protocolVersion,
         id: event.id, // tx + logIndex

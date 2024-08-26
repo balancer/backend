@@ -4,8 +4,9 @@ import { BasePool } from './poolsV2/basePool';
 export class PathLocal {
     public readonly pools: BasePool[];
     public readonly tokens: Token[];
+    public readonly isBuffer: boolean[];
 
-    public constructor(tokens: Token[], pools: BasePool[]) {
+    public constructor(tokens: Token[], pools: BasePool[], isBuffer: boolean[]) {
         if (pools.length === 0 || tokens.length < 2) {
             throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
         }
@@ -13,8 +14,13 @@ export class PathLocal {
             throw new Error('Invalid path: tokens length must equal pools length + 1');
         }
 
+        if (isBuffer.length !== pools.length) {
+            throw new Error('Invalid path: isBuffer length must equal pools length');
+        }
+
         this.pools = pools;
         this.tokens = tokens;
+        this.isBuffer = isBuffer;
     }
 }
 
@@ -26,8 +32,14 @@ export class PathWithAmount extends PathLocal {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
 
-    public constructor(tokens: Token[], pools: BasePool[], swapAmount: TokenAmount, mutateBalances?: boolean) {
-        super(tokens, pools);
+    public constructor(
+        tokens: Token[],
+        pools: BasePool[],
+        isBuffer: boolean[],
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ) {
+        super(tokens, pools, isBuffer);
         this.swapAmount = swapAmount;
         this.mutateBalances = Boolean(mutateBalances);
 
