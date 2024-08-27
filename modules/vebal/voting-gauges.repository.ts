@@ -9,7 +9,7 @@ import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { v1RootGaugeRecipients } from './special-pools/streamer-v1-gauges';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { formatEther } from 'viem';
-import { getViemClient } from '../sources/viem-client';
+import { getViemClient, IViemClient } from '../sources/viem-client';
 
 const { gaugeControllerAddress } = mainnet;
 
@@ -37,7 +37,10 @@ type SubGraphGauge = {
  * Saves voting gauges in prisma DB
  */
 export class VotingGaugesRepository {
-    constructor(private prisma: PrismaClient = prismaClient, private viemClient = getViemClient('MAINNET')) {}
+    constructor(
+        private prisma: PrismaClient = prismaClient,
+        private viemClient: IViemClient = getViemClient('MAINNET'),
+    ) {}
 
     async getVotingGaugeAddresses() {
         const totalGauges = await this.viemClient
@@ -238,10 +241,6 @@ export class VotingGaugesRepository {
         });
 
         return [...l2RootGauges, ...mainnetLiquidityGauges];
-    }
-
-    async deleteVotingGauges() {
-        await this.prisma.prismaVotingGauge.deleteMany();
     }
 
     async saveVotingGauges(votingGauges: VotingGauge[]) {
