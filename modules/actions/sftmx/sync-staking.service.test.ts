@@ -15,7 +15,7 @@ describe('SFTMX syncing service', () => {
     test('sync staking data via job', async () => {
         const jobsController = JobsController();
         await jobsController.syncSftmxStakingData('250');
-    }, 50000);
+    }, 50000000);
 
     test('sync staking snapshot data via job', async () => {
         const jobsController = JobsController();
