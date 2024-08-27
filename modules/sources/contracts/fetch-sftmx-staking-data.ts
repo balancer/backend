@@ -3,6 +3,7 @@ import FTMStaking from './abis/FTMStaking';
 import SftmxVault from './abis/SftmxVault';
 import SFC from './abis/SFC';
 import { ViemClient } from '../types';
+import { ZERO_ADDRESS } from '@balancer/sdk';
 
 export interface OnchainSftmxStakingData {
     totalFtmStaked: bigint;
@@ -156,6 +157,11 @@ export async function fetchSftmxStakingData(
             functionName: 'getVault',
             args: [vaultIndex],
         });
+
+        if (vaultAddress === ZERO_ADDRESS) {
+            continue;
+        }
+
         const validatorId = await client.readContract({
             abi: SftmxVault,
             address: vaultAddress,
