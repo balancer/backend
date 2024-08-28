@@ -128,6 +128,8 @@ export class ReliquaryFarmAprService implements PoolAprService {
                         },
                         type: PrismaPoolAprType.NATIVE_REWARD,
                         group: null,
+                        rewardTokenAddress: this.beetsAddress,
+                        rewardTokenSymbol: 'BEETS',
                     },
                 }),
             );

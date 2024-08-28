@@ -296,6 +296,8 @@ model PrismaPoolAprItem {
     pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     title               String
+    rewardTokenAddress  String?
+    rewardTokenSymbol   String?
     apr                 Float
     range               PrismaPoolAprRange?
 
@@ -495,6 +497,7 @@ model PrismaPoolStakingGaugeReward{
 
     tokenAddress        String
     rewardPerSecond     String
+    isDirectRewardToken Boolean                 @default(false)
 }
 
 

@@ -216,7 +216,14 @@ export interface GqlPoolAprItem {
     apr: Scalars['Float'];
     /** The id of the APR item */
     id: Scalars['ID'];
-    /** The title of the APR item, a human readable form */
+    /** The reward token address, if the APR originates from token emissions */
+    rewardTokenAddress?: Maybe<Scalars['String']>;
+    /** The reward token symbol, if the APR originates from token emissions */
+    rewardTokenSymbol?: Maybe<Scalars['String']>;
+    /**
+     * The title of the APR item, a human readable form
+     * @deprecated No replacement, should be built client side
+     */
     title: Scalars['String'];
     /** Specific type of this APR */
     type: GqlPoolAprItemType;
@@ -230,11 +237,13 @@ export type GqlPoolAprItemType =
     | 'IB_YIELD'
     /** APR in a pool that can be earned through locking, i.e. veBAL */
     | 'LOCKING'
+    /** Reward APR in a pool from maBEETS emissions allocated by gauge votes. Emitted in BEETS. */
+    | 'MABEETS_EMISSIONS'
     /** Rewards distributed by merkl.xyz */
     | 'MERKL'
     /** Represents if the APR items comes from a nested pool. */
     | 'NESTED'
-    /** Staking reward APR in a pool, i.e. BAL or BEETS. */
+    /** Staking reward APR in a pool from a reward token. */
     | 'STAKING'
     /** APR boost that can be earned, i.e. via veBAL or maBEETS. */
     | 'STAKING_BOOST'
@@ -242,6 +251,8 @@ export type GqlPoolAprItemType =
     | 'SURPLUS'
     /** Represents the swap fee APR in a pool. */
     | 'SWAP_FEE'
+    /** Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL. */
+    | 'VEBAL_EMISSIONS'
     /** APR that can be earned thourgh voting, i.e. gauge votes */
     | 'VOTING';
 
@@ -3069,6 +3080,8 @@ export type GqlPoolAprItemResolvers<
 > = ResolversObject<{
     apr?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    rewardTokenAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    rewardTokenSymbol?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolAprItemType'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

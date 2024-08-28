@@ -157,7 +157,7 @@ export const syncGaugeStakingForPools = async (
         }
 
         const dbStakingGauge = allDbStakingGauges.find((stakingGauge) => stakingGauge?.id === gauge.id);
-        const workingSupply = onchainRates.find(({ id }) => `${gauge.id}-${balAddress}-balgauge` === id)?.workingSupply;
+        const workingSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.workingSupply;
         const totalSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
         if (
             !dbStakingGauge ||
@@ -193,7 +193,7 @@ export const syncGaugeStakingForPools = async (
     const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
     // DB operations for gauge reward tokens
-    for (const { id, rewardPerSecond } of onchainRates) {
+    for (const { id, rewardPerSecond, isDirectRewardToken } of onchainRates) {
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
@@ -215,9 +215,11 @@ export const syncGaugeStakingForPools = async (
                         gaugeId,
                         tokenAddress,
                         rewardPerSecond,
+                        isDirectRewardToken,
                     },
                     update: {
                         rewardPerSecond,
+                        isDirectRewardToken,
                     },
                     where: { id_chain: { id, chain: networkContext.chain } },
                 }),
@@ -240,6 +242,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
+        isDirectRewardToken: boolean;
     }[]
 > => {
     // Get onchain data for BAL rewards
@@ -310,6 +313,7 @@ const getOnchainRewardTokensData = async (
                 rewardPerSecond,
                 workingSupply: workingSupply ? formatUnits(workingSupply) : '0',
                 totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
+                isDirectRewardToken: false,
             };
         }),
         ...Object.keys(rewardsData)
@@ -329,6 +333,7 @@ const getOnchainRewardTokensData = async (
                         rewardPerSecond,
                         workingSupply: '0',
                         totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
+                        isDirectRewardToken: true,
                     };
                 }),
             ])
@@ -338,6 +343,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
+        isDirectRewardToken: boolean;
     }[];
 
     return onchainRates;
