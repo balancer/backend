@@ -30,7 +30,7 @@ export async function syncSwapsV3(
             protocolVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 

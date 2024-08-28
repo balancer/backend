@@ -22,7 +22,7 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
             protocolVersion: 1,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 
