@@ -31,7 +31,6 @@ export const syncJoinExits = async (
         },
         orderBy: {
             blockTimestamp: 'desc',
-            blockNumber: 'desc',
         },
     });
 

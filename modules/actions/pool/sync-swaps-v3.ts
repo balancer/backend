@@ -31,7 +31,6 @@ export async function syncSwapsV3(
         },
         orderBy: {
             blockTimestamp: 'desc',
-            blockNumber: 'desc',
         },
     });
 
