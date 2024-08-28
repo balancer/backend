@@ -23,6 +23,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
             protocolVersion,
         },
         orderBy: {
+            blockTimestamp: 'desc',
             blockNumber: 'desc',
         },
     });
