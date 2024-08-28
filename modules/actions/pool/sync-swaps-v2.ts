@@ -29,7 +29,6 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
         },
         orderBy: {
             blockTimestamp: 'desc',
-            blockNumber: 'desc',
         },
     });
 

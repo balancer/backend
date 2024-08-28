@@ -28,7 +28,6 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
         },
         orderBy: {
             blockTimestamp: 'desc',
-            blockNumber: 'desc',
         },
     });
 

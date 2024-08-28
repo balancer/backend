@@ -24,7 +24,6 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
         },
         orderBy: {
             blockTimestamp: 'desc',
-            blockNumber: 'desc',
         },
     });
 
