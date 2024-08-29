@@ -55,21 +55,19 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
-        poolGetEvents: logResolver(
-            (parent: any, { range, poolId, chain, typeIn, userAddress }: QueryPoolGetEventsArgs) => {
-                return EventsQueryController().getEvents({
-                    first: 1000,
-                    where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
-                });
-            },
-        ),
-        poolEvents: logResolver((parent: any, { first, skip, where }: QueryPoolEventsArgs) => {
+        poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
+            return EventsQueryController().getEvents({
+                first: 1000,
+                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
+            });
+        },
+        poolEvents: async (parent: any, { first, skip, where }) => {
             return EventsQueryController().getEvents({
                 first,
                 skip,
                 where,
             });
-        }),
+        },
         poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
             const currentChain = headerChain();
             if (!chains && currentChain) {

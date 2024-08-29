@@ -28,7 +28,7 @@ export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEP
             protocolVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 

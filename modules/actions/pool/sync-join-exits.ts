@@ -30,7 +30,7 @@ export const syncJoinExits = async (
             protocolVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 

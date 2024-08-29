@@ -1,5 +1,17 @@
 # backend
 
+## 1.14.5
+
+### Patch Changes
+
+-   07d60a7: cleaup event indexes
+
+## 1.14.4
+
+### Patch Changes
+
+-   cc9899d: skip sftmx vaults that are 0x0
+
 ## 1.14.3
 
 ### Patch Changes

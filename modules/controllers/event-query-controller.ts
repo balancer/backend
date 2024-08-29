@@ -156,6 +156,9 @@ export function EventsQueryController(tracer?: any) {
                         blockTimestamp: 'desc',
                     },
                     {
+                        blockNumber: 'desc',
+                    },
+                    {
                         logIndex: 'desc',
                     },
                 ],
