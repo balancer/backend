@@ -59,14 +59,10 @@ export class VotingGaugesRepository {
         }));
 
         const addresses = await this.viemClient
-            .multicall({ contracts })
-            .then((results) =>
-                results.map((result) =>
-                    result.status === 'success' ? (result.result as string).toLowerCase() : undefined,
-                ),
-            );
+            .multicall({ contracts, allowFailure: false })
+            .then((results) => results.map((address) => (address as string).toLowerCase()));
 
-        return addresses as string[];
+        return addresses;
     }
 
     async fetchTypeNames() {
@@ -85,22 +81,12 @@ export class VotingGaugesRepository {
             args: [index],
         }));
 
-        const typeNames = await this.viemClient.multicall({ contracts }).then((results) =>
-            results.map((result, index) => {
-                const name = result.status === 'success' ? result.result : undefined;
-                if (!name) {
-                    console.error(`Failed to fetch gauge type name at index ${index}`);
-                }
-                return name as string;
-            }),
-        );
+        const typeNames = (await this.viemClient.multicall({ contracts, allowFailure: false })) as string[];
 
         return typeNames;
     }
 
-    /**
-     * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
-     */
+    // Many of the root contracts do not have getRelativeWeightCap function defined, so expect undefined values
     async fetchRelativeWeightCaps(gaugeAddresses: string[]): Promise<Record<string, string | undefined>> {
         const contracts = gaugeAddresses.map((address) => ({
             abi: rootGaugeAbi as any,
@@ -108,16 +94,11 @@ export class VotingGaugesRepository {
             functionName: 'getRelativeWeightCap',
         }));
 
-        const results = await this.viemClient.multicall({ contracts, allowFailure: true });
+        const results = await this.viemClient.multicall({ contracts });
         const caps = gaugeAddresses.map((address, index) => {
             const result = results[index];
-            const cap = result.status === 'success' ? result.result : undefined;
-            if (!cap) {
-                // Too many know errors to log
-                // console.error(`Failed to fetch gauge weight cap for ${address}`);
-                return [address, undefined];
-            }
-            return [address, formatEther(cap as bigint)];
+            const cap = result.status === 'success' ? formatEther(result.result as bigint) : undefined;
+            return [address, cap];
         });
 
         return Object.fromEntries(caps);
@@ -138,13 +119,9 @@ export class VotingGaugesRepository {
             args: [address],
         }));
 
-        const results = await this.viemClient.multicall({ contracts });
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
         const types = gaugeAddresses.map((address, index) => {
-            const result = results[index];
-            const type = result.status === 'success' ? result.result : undefined;
-            if (!address) {
-                console.error(`Failed to fetch gauge type for ${address}`);
-            }
+            const type = results[index];
             return [address, typeNames[Number(type)]] as [string, string];
         });
 
@@ -159,14 +136,11 @@ export class VotingGaugesRepository {
             args: [address],
         }));
 
-        const results = await this.viemClient.multicall({ contracts });
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
+
         const weigths = gaugeAddresses.map((address, index) => {
-            const result = results[index];
-            const weight = result.status === 'success' ? result.result : undefined;
-            if (!address) {
-                console.error(`Failed to fetch gauge address at index ${index}`);
-            }
-            return [address, Number(formatEther(weight as bigint))] as [string, number];
+            let weight = results[index] as bigint;
+            return [address, Number(formatEther(weight))] as [string, number];
         });
 
         return Object.fromEntries(weigths);
@@ -178,13 +152,9 @@ export class VotingGaugesRepository {
             address: address as `0x${string}`,
             functionName: 'is_killed',
         }));
-        const results = await this.viemClient.multicall({ contracts });
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
         const kills = gaugeAddresses.map((address, index) => {
-            const result = results[index].status === 'success' ? results[index].result : undefined;
-            if (result === undefined) {
-                console.error(`Failed to fetch isKilled for ${address}`);
-            }
-            return [address, result as boolean];
+            return [address, results[index] as boolean];
         });
 
         return Object.fromEntries(kills);
