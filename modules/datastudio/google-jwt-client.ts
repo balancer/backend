@@ -1,5 +1,5 @@
 import * as google from 'googleapis-common';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { JWT } from 'google-auth-library';
 import { networkContext } from '../network/network-context.service';
 import { DeploymentEnv } from '../network/network-config-types';

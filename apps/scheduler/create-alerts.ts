@@ -1,18 +1,17 @@
+import * as Sentry from '@sentry/node';
 import {
     CloudWatchClient,
     DeleteAlarmsCommand,
     DescribeAlarmsCommand,
     PutMetricAlarmCommand,
 } from '@aws-sdk/client-cloudwatch';
-import { env } from '../app/env';
-import { AllNetworkConfigs } from '../modules/network/network-config';
-import { DeploymentEnv, WorkerJob } from '../modules/network/network-config-types';
-import { networkContext } from '../modules/network/network-context.service';
-import * as Sentry from '@sentry/node';
-import { secondsPerDay } from '../modules/common/time';
-import { sleep } from '../modules/common/promise';
-import { cronsMetricPublisher } from '../modules/metrics/metrics.client';
-import { chain } from 'lodash';
+import { env } from '../env';
+import { AllNetworkConfigs } from '../../modules/network/network-config';
+import { DeploymentEnv, WorkerJob } from '../../modules/network/network-config-types';
+import { networkContext } from '../../modules/network/network-context.service';
+import { secondsPerDay } from '../../modules/common/time';
+import { sleep } from '../../modules/common/promise';
+import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
 
 export async function createAlerts(chainId: string): Promise<void> {
     await createAlertsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
@@ -65,8 +64,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
         if (evaluationPeriods * periodInSeconds > secondsPerDay) {
             // if the crons runs in bigger intervalls that once a day, we can't create an alarm
             if (periodInSeconds > 86400) {
-                console.log(`Cant create alert for ${cronJob.name} because interval is too big: ${cronJob.interval}ms`);
-                Sentry.captureException(
+                console.error(
                     `Cant create alert for ${cronJob.name} because interval is too big: ${cronJob.interval}ms`,
                 );
                 continue;
@@ -81,7 +79,7 @@ async function createAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promi
 
         const putAlarmCommand = new PutMetricAlarmCommand({
             AlarmName: alarmName,
-            AlarmDescription: `The cron job ${cronJob.name} should run every ${cronJob.interval / 1000} seconds. 
+            AlarmDescription: `The cron job ${cronJob.name} should run every ${cronJob.interval / 1000} seconds.
             Triggers alarm if the cron did not run at least once over the last ${
                 periodInSeconds * evaluationPeriods
             } seconds.`,

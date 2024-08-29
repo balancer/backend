@@ -1,5 +1,5 @@
 import { AllNetworkConfigs, BalancerChainIds, BeethovenChainIds } from './network-config';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { Chain } from '@prisma/client';
 import { NetworkConfig, NetworkData } from './network-config-types';
 import { BaseProvider } from '@ethersproject/providers';
