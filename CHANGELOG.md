@@ -1,5 +1,11 @@
 # backend
 
+## 1.14.8
+
+### Patch Changes
+
+-   ac4ff07: make queries to use wallet indexes properly
+
 ## 1.14.7
 
 ### Patch Changes
