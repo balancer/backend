@@ -1,5 +1,11 @@
 # backend
 
+## 1.14.6
+
+### Patch Changes
+
+-   271c9ae: optimise main events query index
+
 ## 1.14.5
 
 ### Patch Changes
