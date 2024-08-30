@@ -334,7 +334,7 @@ export class PoolGqlLoaderService {
                 orderBy = { dynamicData: { totalLiquidity: orderDirection } };
                 break;
             case 'totalShares':
-                orderBy = { dynamicData: { totalShares: orderDirection } };
+                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
                 break;
             case 'volume24h':
                 orderBy = { dynamicData: { volume24h: orderDirection } };
@@ -372,7 +372,7 @@ export class PoolGqlLoaderService {
         }
 
         const where = args.where;
-        const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
+        const textSearch = args.textSearch ? { contains: args.textSearch.toLowerCase() } : undefined;
 
         const allTokensFilter = [];
         where?.tokensIn?.forEach((token) => {
@@ -381,8 +381,7 @@ export class PoolGqlLoaderService {
                     some: {
                         token: {
                             address: {
-                                equals: token,
-                                mode: 'insensitive' as const,
+                                equals: token.toLowerCase(),
                             },
                         },
                     },
@@ -396,8 +395,7 @@ export class PoolGqlLoaderService {
                     every: {
                         token: {
                             address: {
-                                notIn: where.tokensNotIn || undefined,
-                                mode: 'insensitive' as const,
+                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
                             },
                         },
                     },
@@ -412,8 +410,7 @@ export class PoolGqlLoaderService {
                           userWalletBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -423,8 +420,7 @@ export class PoolGqlLoaderService {
                           userStakedBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -460,9 +456,8 @@ export class PoolGqlLoaderService {
             },
             AND: allTokensFilter,
             id: {
-                in: where?.idIn || undefined,
-                notIn: where?.idNotIn || undefined,
-                mode: 'insensitive',
+                in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
+                notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
             },
             ...(where?.categoryIn && !where?.tagIn
                 ? { categories: { hasSome: where.categoryIn.map((s) => s.toUpperCase()) } }
@@ -1324,8 +1319,7 @@ export class PoolGqlLoaderService {
                     userStakedBalances: {
                         where: {
                             userAddress: {
-                                equals: userAddress,
-                                mode: 'insensitive' as const,
+                                equals: userAddress.toLowerCase(),
                             },
                             balanceNum: { gt: 0 },
                         },
@@ -1335,8 +1329,7 @@ export class PoolGqlLoaderService {
             userWalletBalances: {
                 where: {
                     userAddress: {
-                        equals: userAddress,
-                        mode: 'insensitive' as const,
+                        equals: userAddress.toLowerCase(),
                     },
                     balanceNum: { gt: 0 },
                 },
