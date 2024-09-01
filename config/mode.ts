@@ -56,7 +56,19 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.5',
         },
     },
-    ybAprConfig: {},
+    ybAprConfig: {
+        maker: {
+            sdai: '0x3f51c6c5927b88cdec4b61e2787f9bd0f5249138',
+        },
+        defaultHandlers: {
+            ezETH: {
+                tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                sourceUrl: 'https://app.renzoprotocol.com/api/apr',
+                path: 'apr',
+                isIbYield: true,
+            },
+        },
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 2,
