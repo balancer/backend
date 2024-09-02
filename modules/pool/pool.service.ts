@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
     GqlChain,
+    GqlPoolAggregator,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
     GqlPoolFeaturedPoolGroup,
@@ -82,6 +83,10 @@ export class PoolService {
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
         return this.poolGqlLoaderService.getPools(args);
+    }
+
+    public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        return this.poolGqlLoaderService.getAggregatorPools(args);
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {

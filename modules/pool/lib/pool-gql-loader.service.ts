@@ -35,6 +35,7 @@ import {
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
     HookData,
+    GqlPoolAggregator,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
@@ -177,6 +178,20 @@ export class PoolGqlLoaderService {
                 }
             }
         }
+    }
+
+    public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        // add limits per default
+        args.first = args.first || 1000;
+        args.skip = args.skip || 0;
+
+        const pools = await prisma.prismaPool.findMany({
+            ...this.mapQueryArgsToPoolQuery(args),
+            include: {
+                ...this.getPoolInclude(),
+            },
+        });
+        return pools.map((pool) => this.mapPoolToAggregatorPool(pool));
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -533,6 +548,69 @@ export class PoolGqlLoaderService {
                     },
                 ],
             },
+        };
+    }
+
+    private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
+        const { typeData, ...poolWithoutTypeData } = pool;
+
+        const mappedData = {
+            decimals: 18,
+            dynamicData: this.getPoolDynamicData(pool),
+            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
+            vaultVersion: poolWithoutTypeData.protocolVersion,
+        };
+
+        switch (pool.type) {
+            case 'STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'META_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'COMPOSABLE_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                    // bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+                };
+            case 'ELEMENT':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as ElementData),
+                    ...mappedData,
+                };
+            case 'LIQUIDITY_BOOTSTRAPPING':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                };
+            case 'GYRO':
+            case 'GYRO3':
+            case 'GYROE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as GyroData),
+                    ...mappedData,
+                };
+            case 'FX':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                    ...(typeData as FxData),
+                };
+        }
+
+        return {
+            ...poolWithoutTypeData,
+            ...mappedData,
         };
     }
 

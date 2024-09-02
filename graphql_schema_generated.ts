@@ -280,6 +280,178 @@ export const schema = gql`
         valueUSD: Float!
     }
 
+    type GqlPoolAggregator {
+        """
+        The contract address of the pool.
+        """
+        address: Bytes!
+
+        """
+        Data specific to gyro/fx pools
+        """
+        alpha: String
+
+        """
+        Data specific to stable pools
+        """
+        amp: BigInt
+
+        """
+        Data specific to gyro/fx pools
+        """
+        beta: String
+
+        """
+        Data specific to gyro pools
+        """
+        c: String
+
+        """
+        The chain on which the pool is deployed
+        """
+        chain: GqlChain!
+
+        """
+        The timestamp the pool was created.
+        """
+        createTime: Int!
+
+        """
+        Data specific to gyro pools
+        """
+        dSq: String
+
+        """
+        The decimals of the BPT, usually 18
+        """
+        decimals: Int!
+
+        """
+        Data specific to fx pools
+        """
+        delta: String
+
+        """
+        Dynamic data such as token balances, swap fees or volume
+        """
+        dynamicData: GqlPoolDynamicData!
+
+        """
+        Data specific to fx pools
+        """
+        epsilon: String
+
+        """
+        The factory contract address from which the pool was created.
+        """
+        factory: Bytes
+
+        """
+        The pool id. This is equal to the address for protocolVersion 3 pools
+        """
+        id: ID!
+
+        """
+        Data specific to gyro/fx pools
+        """
+        lambda: String
+
+        """
+        The name of the pool as per contract
+        """
+        name: String!
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes
+
+        """
+        Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+        """
+        poolTokens: [GqlPoolTokenDetail!]!
+
+        """
+        The protocol version on which the pool is deployed, 1, 2 or 3
+        """
+        protocolVersion: Int!
+
+        """
+        Data specific to gyro pools
+        """
+        root3Alpha: String
+
+        """
+        Data specific to gyro pools
+        """
+        s: String
+
+        """
+        Data specific to gyro pools
+        """
+        sqrtAlpha: String
+
+        """
+        Data specific to gyro pools
+        """
+        sqrtBeta: String
+
+        """
+        The token symbol of the pool as per contract
+        """
+        symbol: String!
+
+        """
+        Data specific to gyro pools
+        """
+        tauAlphaX: String
+
+        """
+        Data specific to gyro pools
+        """
+        tauAlphaY: String
+
+        """
+        Data specific to gyro pools
+        """
+        tauBetaX: String
+
+        """
+        Data specific to gyro pools
+        """
+        tauBetaY: String
+
+        """
+        The pool type, such as weighted, stable, etc.
+        """
+        type: GqlPoolType!
+
+        """
+        Data specific to gyro pools
+        """
+        u: String
+
+        """
+        Data specific to gyro pools
+        """
+        v: String
+
+        """
+        The version of the pool type.
+        """
+        version: Int!
+
+        """
+        Data specific to gyro pools
+        """
+        w: String
+
+        """
+        Data specific to gyro pools
+        """
+        z: String
+    }
+
     type GqlPoolApr {
         apr: GqlPoolAprValue!
         hasRewardApr: Boolean!
@@ -2985,6 +3157,17 @@ export const schema = gql`
         Getting swap, add and remove events with paging
         """
         poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
+
+        """
+        Returns all pools for a given filter, specific for aggregators
+        """
+        poolGetAggregatorPools(
+            first: Int
+            orderBy: GqlPoolOrderBy
+            orderDirection: GqlPoolOrderDirection
+            skip: Int
+            where: GqlPoolFilter
+        ): [GqlPoolAggregator!]!
 
         """
         Will de deprecated in favor of poolEvents
