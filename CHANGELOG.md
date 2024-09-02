@@ -1,5 +1,11 @@
 # backend
 
+## 1.15.0
+
+### Minor Changes
+
+-   7f6a2bf: adding maker and renzo APRs on Mode
+
 ## 1.14.8
 
 ### Patch Changes
