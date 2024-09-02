@@ -1,22 +1,17 @@
 import { Chain } from '@prisma/client';
-import { keyBy, mapValues } from 'lodash';
+import { keyBy } from 'lodash';
 
-import { formatFixed } from '@ethersproject/bignumber';
-import { BigNumber, Contract } from 'ethers';
-import { formatEther } from 'ethers/lib/utils';
-import { mainnetNetworkConfig } from '../network/mainnet';
+import mainnet from '../../config/mainnet';
 import gaugeControllerAbi from './abi/gaugeController.json';
-import gaugeControllerHelperAbi from './abi/gaugeControllerHelper.json';
 import rootGaugeAbi from './abi/rootGauge.json';
 import { PrismaClient } from '@prisma/client';
 import { prisma as prismaClient } from '../../prisma/prisma-client';
 import { v1RootGaugeRecipients } from './special-pools/streamer-v1-gauges';
-import { Multicaller3 } from '../web3/multicaller3';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { formatEther } from 'viem';
+import { getViemClient, IViemClient } from '../sources/viem-client';
 
-const gaugeControllerAddress = mainnetNetworkConfig.data.gaugeControllerAddress!;
-// Helper contract that wraps gaugeControllerAddress contract to allow checkpointing and getting the updated relative weight
-const gaugeControllerHelperAddress = mainnetNetworkConfig.data.gaugeControllerHelperAddress!;
+const { gaugeControllerAddress } = mainnet;
 
 export type VotingGauge = {
     gaugeAddress: string;
@@ -42,31 +37,137 @@ type SubGraphGauge = {
  * Saves voting gauges in prisma DB
  */
 export class VotingGaugesRepository {
-    constructor(private prisma: PrismaClient = prismaClient) {}
+    constructor(
+        private prisma: PrismaClient = prismaClient,
+        private viemClient: IViemClient = getViemClient('MAINNET'),
+    ) {}
 
-    async getVotingGaugeAddresses(): Promise<string[]> {
-        const totalGauges = Number(formatFixed(await this.getGaugeControllerContract().n_gauges()));
-        return await this.fetchGaugeAddresses(totalGauges);
+    async getVotingGaugeAddresses() {
+        const totalGauges = await this.viemClient
+            .readContract({
+                address: gaugeControllerAddress as `0x${string}`,
+                functionName: 'n_gauges',
+                abi: gaugeControllerAbi,
+            })
+            .then(Number);
+
+        const contracts = Array.from({ length: totalGauges }, (_, index) => ({
+            abi: gaugeControllerAbi as any,
+            address: gaugeControllerAddress as `0x${string}`,
+            functionName: 'gauges',
+            args: [index],
+        }));
+
+        const addresses = await this.viemClient
+            .multicall({ contracts, allowFailure: false })
+            .then((results) => results.map((address) => (address as string).toLowerCase()));
+
+        return addresses;
+    }
+
+    async fetchTypeNames() {
+        const totalGaugesTypes = await this.viemClient
+            .readContract({
+                address: gaugeControllerAddress as `0x${string}`,
+                functionName: 'n_gauge_types',
+                abi: gaugeControllerAbi,
+            })
+            .then(Number);
+
+        const contracts = Array.from({ length: totalGaugesTypes }, (_, index) => ({
+            abi: gaugeControllerAbi as any,
+            address: gaugeControllerAddress as `0x${string}`,
+            functionName: 'gauge_type_names',
+            args: [index],
+        }));
+
+        const typeNames = (await this.viemClient.multicall({ contracts, allowFailure: false })) as string[];
+
+        return typeNames;
+    }
+
+    // Many of the root contracts do not have getRelativeWeightCap function defined, so expect undefined values
+    async fetchRelativeWeightCaps(gaugeAddresses: string[]): Promise<Record<string, string | undefined>> {
+        const contracts = gaugeAddresses.map((address) => ({
+            abi: rootGaugeAbi as any,
+            address: address as `0x${string}`,
+            functionName: 'getRelativeWeightCap',
+        }));
+
+        const results = await this.viemClient.multicall({ contracts });
+        const caps = gaugeAddresses.map((address, index) => {
+            const result = results[index];
+            const cap = result.status === 'success' ? formatEther(result.result as bigint) : undefined;
+            return [address, cap];
+        });
+
+        return Object.fromEntries(caps);
+    }
+
+    /*
+        gauge_types are not reliable because they are manually input by Maxis
+        We will use subgraph chain field instead
+        However, we keep pulling this gauge_types cause they can be useful for debugging (when a root gauge is not found in the subgraph)
+    */
+    async fetchGaugeTypes(gaugeAddresses: string[]) {
+        const typeNames = await this.fetchTypeNames();
+
+        const contracts = gaugeAddresses.map((address) => ({
+            abi: gaugeControllerAbi as any,
+            address: gaugeControllerAddress as `0x${string}`,
+            functionName: 'gauge_types',
+            args: [address],
+        }));
+
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
+        const types = gaugeAddresses.map((address, index) => {
+            const type = results[index];
+            return [address, typeNames[Number(type)]] as [string, string];
+        });
+
+        return Object.fromEntries(types);
+    }
+
+    async fetchRelativeWeights(gaugeAddresses: string[]) {
+        const contracts = gaugeAddresses.map((address) => ({
+            abi: gaugeControllerAbi as any,
+            address: gaugeControllerAddress as `0x${string}`,
+            functionName: 'gauge_relative_weight',
+            args: [address],
+        }));
+
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
+
+        const weigths = gaugeAddresses.map((address, index) => {
+            let weight = results[index] as bigint;
+            return [address, Number(formatEther(weight))] as [string, number];
+        });
+
+        return Object.fromEntries(weigths);
+    }
+
+    async fetchIsKilled(gaugeAddresses: string[]) {
+        const contracts = gaugeAddresses.map((address) => ({
+            abi: rootGaugeAbi as any,
+            address: address as `0x${string}`,
+            functionName: 'is_killed',
+        }));
+        const results = await this.viemClient.multicall({ contracts, allowFailure: false });
+        const kills = gaugeAddresses.map((address, index) => {
+            return [address, results[index] as boolean];
+        });
+
+        return Object.fromEntries(kills);
     }
 
     async fetchOnchainVotingGauges(gaugeAddresses: string[]): Promise<VotingGauge[]> {
-        const totalGaugesTypes = Number(formatFixed(await this.getGaugeControllerContract().n_gauge_types()));
-
-        const typeNames = await this.fetchTypeNames(totalGaugesTypes);
-
         const relativeWeights = await this.fetchRelativeWeights(gaugeAddresses);
-
-        /*
-            gauge_types are not reliable because they are manually input by Maxis
-            We will use subgraph chain field instead
-            However, we keep pulling this gauge_types cause they can be useful for debugging (when a root gauge is not found in the subgraph)
-        */
-        const gaugeTypeIndexes = await this.fetchGaugeTypes(gaugeAddresses);
-        const gaugeTypes = mapValues(gaugeTypeIndexes, (type) => typeNames[Number(type)]);
 
         const isKilled = await this.fetchIsKilled(gaugeAddresses);
 
         const relativeWeightCaps = await this.fetchRelativeWeightCaps(gaugeAddresses);
+
+        const gaugeTypes = await this.fetchGaugeTypes(gaugeAddresses);
 
         let votingGauges: VotingGauge[] = [];
         gaugeAddresses.forEach((gaugeAddress) => {
@@ -76,9 +177,7 @@ export class VotingGaugesRepository {
                 network: this.toPrismaNetwork(gaugeTypes[gaugeAddress]),
                 isKilled: isKilled[gaugeAddress],
                 relativeWeight: relativeWeights[gaugeAddress],
-                relativeWeightCap: relativeWeightCaps[gaugeAddress]
-                    ? formatEther(relativeWeightCaps[gaugeAddress]!)
-                    : undefined,
+                relativeWeightCap: relativeWeightCaps[gaugeAddress],
                 isInSubgraph: false,
             });
         });
@@ -88,7 +187,7 @@ export class VotingGaugesRepository {
 
     async fetchVotingGaugesFromSubgraph(onchainAddresses: string[]) {
         // This service only works with the mainnet subgraph, will return no voting gauges for other chains
-        const gaugeSubgraphService = new GaugeSubgraphService(mainnetNetworkConfig.data.subgraphs.gauge!);
+        const gaugeSubgraphService = new GaugeSubgraphService(mainnet.subgraphs.gauge!);
         const rootGauges = await gaugeSubgraphService.getRootGaugesForIds(onchainAddresses);
 
         const l2RootGauges: SubGraphGauge[] = rootGauges.map((gauge) => {
@@ -112,10 +211,6 @@ export class VotingGaugesRepository {
         });
 
         return [...l2RootGauges, ...mainnetLiquidityGauges];
-    }
-
-    async deleteVotingGauges() {
-        await this.prisma.prismaVotingGauge.deleteMany();
     }
 
     async saveVotingGauges(votingGauges: VotingGauge[]) {
@@ -225,86 +320,6 @@ export class VotingGaugesRepository {
             }
             return votingGauge;
         });
-    }
-
-    /**
-     * We need to use multicall3 with allowFailures=true because many of the root contracts do not have getRelativeWeightCap function defined
-     */
-    async fetchRelativeWeightCaps(gaugeAddresses: string[]) {
-        const multicall3 = new Multicaller3(rootGaugeAbi, 50);
-
-        gaugeAddresses.forEach((address) => {
-            multicall3.call(address, address, 'getRelativeWeightCap');
-        });
-
-        return (await multicall3.execute()) as Record<string, BigNumber | undefined>;
-    }
-
-    getGaugeControllerContract() {
-        return new Contract(gaugeControllerAddress, gaugeControllerAbi, mainnetNetworkConfig.provider);
-    }
-
-    async fetchGaugeAddresses(totalGauges: number) {
-        const multicaller = this.buildGaugeControllerMulticaller();
-        this.generateGaugeIndexes(totalGauges).forEach((index) =>
-            multicaller.call(`${index}`, gaugeControllerAddress, 'gauges', [index]),
-        );
-
-        const response = (await multicaller.execute()) as Record<string, string>;
-        return Object.values(response).map((address) => address.toLowerCase());
-    }
-
-    async fetchTypeNames(totalTypes: number) {
-        const multicaller = this.buildGaugeControllerMulticaller();
-
-        this.generateGaugeIndexes(totalTypes).forEach((index) =>
-            multicaller.call(`${index}`, gaugeControllerAddress, 'gauge_type_names', [index]),
-        );
-
-        const response = (await multicaller.execute()) as Record<string, string>;
-
-        return Object.values(response);
-    }
-
-    async fetchGaugeTypes(gaugeAddresses: string[]) {
-        const multicaller = this.buildGaugeControllerMulticaller();
-
-        gaugeAddresses.forEach((address) =>
-            multicaller.call(address, gaugeControllerAddress, 'gauge_types', [address]),
-        );
-
-        return (await multicaller.execute()) as Record<string, string>;
-    }
-
-    async fetchRelativeWeights(gaugeAddresses: string[]) {
-        const multicaller = this.buildGaugeControllerHelperMulticaller();
-        gaugeAddresses.forEach((address) =>
-            multicaller.call(address, gaugeControllerHelperAddress, 'gauge_relative_weight', [address], false),
-        );
-
-        const response = (await multicaller.execute()) as Record<string, BigNumber>;
-
-        return mapValues(response, (value) => Number(formatEther(value)));
-    }
-
-    async fetchIsKilled(gaugeAddresses: string[]) {
-        const rootGaugeMulticaller = new Multicaller3(rootGaugeAbi);
-
-        gaugeAddresses.forEach((address) => rootGaugeMulticaller.call(address, address, 'is_killed'));
-
-        return (await rootGaugeMulticaller.execute()) as Record<string, boolean>;
-    }
-
-    buildGaugeControllerMulticaller() {
-        return new Multicaller3(gaugeControllerAbi);
-    }
-
-    buildGaugeControllerHelperMulticaller() {
-        return new Multicaller3(gaugeControllerHelperAbi);
-    }
-
-    generateGaugeIndexes(totalGauges: number) {
-        return [...Array(totalGauges)].map((_, index) => index);
     }
 
     toPrismaNetwork(chainOrSubgraphNetwork: string): Chain {

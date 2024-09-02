@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, PublicClient } from 'viem';
 import {
     arbitrum,
     avalanche,
@@ -17,6 +17,12 @@ import { Chain } from '@prisma/client';
 import config from '../../config';
 
 export type ViemClient = ReturnType<typeof getViemClient>;
+
+// Use this interface for easier mocking
+export interface IViemClient {
+    multicall: PublicClient['multicall'];
+    readContract: PublicClient['readContract'];
+}
 
 const chain2ViemChain = {
     [Chain.MAINNET]: mainnet,
