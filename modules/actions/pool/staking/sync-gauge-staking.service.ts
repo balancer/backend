@@ -215,11 +215,11 @@ export const syncGaugeStakingForPools = async (
                         gaugeId,
                         tokenAddress,
                         rewardPerSecond,
-                        isDirectRewardToken,
+                        isVeBalemissions,
                     },
                     update: {
                         rewardPerSecond,
-                        isDirectRewardToken,
+                        isVeBalemissions,
                     },
                     where: { id_chain: { id, chain: networkContext.chain } },
                 }),
