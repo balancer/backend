@@ -48,9 +48,9 @@ export class PoolAprUpdaterService {
         }
 
         await prismaBulkExecuteOperations(operations);
-        // if (failedAprServices.length > 0) {
-        //     throw new Error(`The following APR services failed: ${failedAprServices}`);
-        // }
+        if (failedAprServices.length > 0) {
+            throw new Error(`The following APR services failed: ${failedAprServices}`);
+        }
     }
 
     public async reloadAllPoolAprs(chain: Chain) {

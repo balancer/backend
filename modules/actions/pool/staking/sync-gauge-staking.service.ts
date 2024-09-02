@@ -193,7 +193,7 @@ export const syncGaugeStakingForPools = async (
     const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
     // DB operations for gauge reward tokens
-    for (const { id, rewardPerSecond, isDirectRewardToken } of onchainRates) {
+    for (const { id, rewardPerSecond, isVeBalemissions } of onchainRates) {
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
@@ -242,7 +242,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
-        isDirectRewardToken: boolean;
+        isVeBalemissions: boolean;
     }[]
 > => {
     // Get onchain data for BAL rewards
@@ -313,7 +313,7 @@ const getOnchainRewardTokensData = async (
                 rewardPerSecond,
                 workingSupply: workingSupply ? formatUnits(workingSupply) : '0',
                 totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
-                isDirectRewardToken: false,
+                isVeBalemissions: true,
             };
         }),
         ...Object.keys(rewardsData)
@@ -333,7 +333,7 @@ const getOnchainRewardTokensData = async (
                         rewardPerSecond,
                         workingSupply: '0',
                         totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
-                        isDirectRewardToken: true,
+                        isVeBalemissions: false,
                     };
                 }),
             ])
@@ -343,7 +343,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
-        isDirectRewardToken: boolean;
+        isVeBalemissions: boolean;
     }[];
 
     return onchainRates;

@@ -423,7 +423,7 @@ model PrismaPoolStakingGaugeReward{
 
     tokenAddress        String
     rewardPerSecond     String
-    isDirectRewardToken Boolean                 @default(false)
+    isVeBalemissions    Boolean                 @default(false)
 }
 
 
