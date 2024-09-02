@@ -372,7 +372,7 @@ export class PoolGqlLoaderService {
         }
 
         const where = args.where;
-        const textSearch = args.textSearch ? { contains: args.textSearch.toLowerCase() } : undefined;
+        const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
 
         const allTokensFilter = [];
         where?.tokensIn?.forEach((token) => {
