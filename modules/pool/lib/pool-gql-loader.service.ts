@@ -181,6 +181,10 @@ export class PoolGqlLoaderService {
     }
 
     public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        // add limits per default
+        args.first = args.first || 1000;
+        args.skip = args.skip || 0;
+
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
             include: {
