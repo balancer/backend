@@ -1098,6 +1098,12 @@ export class PoolGqlLoaderService {
             let type: GqlPoolAprItemType;
             switch (aprItem.type) {
                 case PrismaPoolAprType.NATIVE_REWARD:
+                    if (pool.chain === 'FANTOM') {
+                        type = 'MABEETS_EMISSIONS';
+                    } else {
+                        type = 'VEBAL_EMISSIONS';
+                    }
+                    break;
                 case PrismaPoolAprType.THIRD_PARTY_REWARD:
                     type = 'STAKING';
                     break;
@@ -1115,12 +1121,16 @@ export class PoolGqlLoaderService {
                     title: aprItem.title,
                     apr: aprItem.range.min,
                     type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
                 aprItems.push({
                     id: `${aprItem.id}-boost`,
                     title: aprItem.title,
                     apr: aprItem.range.max - aprItem.range.min,
                     type: 'STAKING_BOOST',
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
             } else {
                 aprItems.push({
@@ -1128,6 +1138,8 @@ export class PoolGqlLoaderService {
                     title: aprItem.title,
                     apr: aprItem.apr,
                     type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
             }
         }

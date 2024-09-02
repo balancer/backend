@@ -1207,11 +1207,19 @@ type GqlPoolAprItem {
     """
     The title of the APR item, a human readable form
     """
-    title: String!
+    title: String! @deprecated(reason: "No replacement, should be built client side")
     """
     The APR value in % -> 0.2 = 0.2%
     """
     apr: Float!
+    """
+    The reward token address, if the APR originates from token emissions
+    """
+    rewardTokenAddress: String
+    """
+    The reward token symbol, if the APR originates from token emissions
+    """
+    rewardTokenSymbol: String
     """
     Specific type of this APR
     """
@@ -1226,47 +1234,46 @@ enum GqlPoolAprItemType {
     Represents the swap fee APR in a pool.
     """
     SWAP_FEE
-
     """
     Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
     """
     IB_YIELD
-
     """
     Represents if the APR items comes from a nested pool.
     """
     NESTED
-
     """
-    Staking reward APR in a pool, i.e. BAL or BEETS.
+    Staking reward APR in a pool from a reward token.
     """
     STAKING
-
+    """
+    Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL.
+    """
+    VEBAL_EMISSIONS
+    """
+    Reward APR in a pool from maBEETS emissions allocated by gauge votes. Emitted in BEETS.
+    """
+    MABEETS_EMISSIONS
     """
     APR boost that can be earned, i.e. via veBAL or maBEETS.
     """
     STAKING_BOOST
-
     """
     APR in a pool that can be earned through locking, i.e. veBAL
     """
     LOCKING
-
     """
     APR that can be earned thourgh voting, i.e. gauge votes
     """
     VOTING
-
     """
     APR that pools earns when BPT is staked on AURA.
     """
     AURA
-
     """
     Rewards distributed by merkl.xyz
     """
     MERKL
-
     """
     Cow AMM specific APR
     """

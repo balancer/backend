@@ -304,9 +304,19 @@ export const schema = gql`
         id: ID!
 
         """
+        The reward token address, if the APR originates from token emissions
+        """
+        rewardTokenAddress: String
+
+        """
+        The reward token symbol, if the APR originates from token emissions
+        """
+        rewardTokenSymbol: String
+
+        """
         The title of the APR item, a human readable form
         """
-        title: String!
+        title: String! @deprecated(reason: "No replacement, should be built client side")
 
         """
         Specific type of this APR
@@ -334,6 +344,11 @@ export const schema = gql`
         LOCKING
 
         """
+        Reward APR in a pool from maBEETS emissions allocated by gauge votes. Emitted in BEETS.
+        """
+        MABEETS_EMISSIONS
+
+        """
         Rewards distributed by merkl.xyz
         """
         MERKL
@@ -344,7 +359,7 @@ export const schema = gql`
         NESTED
 
         """
-        Staking reward APR in a pool, i.e. BAL or BEETS.
+        Staking reward APR in a pool from a reward token.
         """
         STAKING
 
@@ -362,6 +377,11 @@ export const schema = gql`
         Represents the swap fee APR in a pool.
         """
         SWAP_FEE
+
+        """
+        Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL.
+        """
+        VEBAL_EMISSIONS
 
         """
         APR that can be earned thourgh voting, i.e. gauge votes
