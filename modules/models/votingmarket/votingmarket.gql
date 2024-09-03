@@ -1,0 +1,78 @@
+extend type Query {
+    """
+    Retrieve voting market proposals based on the filter.
+    """
+    votingMarketGetProposals(where: GqlVotingMarketFilter): [GqlVotingMarketProposal!]!
+}
+
+type GqlVotingMarketProposal {
+    """
+    Id of the voting market proposal
+    """
+    id: String!
+    """
+    Hash of the voting market proposal
+    """
+    hash: String!
+    """
+    The pool ID this proposal belings to.
+    """
+    poolId: String!
+    """
+    The chain of this proposal.
+    """
+    chain: GqlChain!
+    """
+    The efficiency of the proposal. The ratio of USD value of emitted BAL to the total USD value of all incentives.
+    """
+    efficiency: Float!
+    """
+    The title of the proposal. Usually the pool name/description.
+    """
+    title: String!
+    """
+    Timestamp when the proposal is finalized and voting ends.
+    """
+    proposalDeadline: Int!
+    """
+    Total USD value of all incentives for this proposal.
+    """
+    totalIncentivesUsd: Float!
+    """
+    Total number of votes for this proposal.
+    """
+    voteCount: Float!
+    """
+    Usd value of one vote that is casted for this proposal.
+    """
+    valuePerVote: Float!
+    """
+    The incentives for this proposal.
+    """
+    incentives: [GqlVotingMarketProposalIncentive!]!
+}
+
+type GqlVotingMarketProposalIncentive {
+    """
+    The token that is used for the incentive.
+    """
+    token: GqlToken!
+    """
+    The USD value of the incentive.
+    """
+    incentiveValueUsd: Float!
+    """
+    The amount of incentive token that has been deposited.
+    """
+    incentiveAmount: AmountHumanReadable!
+    """
+    The address that has deposited the incentive.
+    """
+    depositor: String!
+}
+
+input GqlVotingMarketFilter {
+    proposalDeadlineIn: [Int!]
+    poolIdIn: [String!]
+    chainIn: [GqlChain!]
+}
