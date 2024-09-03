@@ -11,7 +11,7 @@ import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { formatEther } from 'viem';
 import { getViemClient, IViemClient } from '../sources/viem-client';
 
-const { gaugeControllerAddress } = mainnet;
+const { gaugeControllerAddress, gaugeControllerHelperAddress } = mainnet;
 
 export type VotingGauge = {
     gaugeAddress: string;
@@ -131,7 +131,7 @@ export class VotingGaugesRepository {
     async fetchRelativeWeights(gaugeAddresses: string[]) {
         const contracts = gaugeAddresses.map((address) => ({
             abi: gaugeControllerAbi as any,
-            address: gaugeControllerAddress as `0x${string}`,
+            address: gaugeControllerHelperAddress as `0x${string}`,
             functionName: 'gauge_relative_weight',
             args: [address],
         }));
