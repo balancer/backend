@@ -2,7 +2,7 @@ extend type Query {
     """
     Retrieve voting market proposals based on the filter.
     """
-    votingMarketGetProposals(where: GqlVotingProposalFilter): [GqlVotingProposal!]!
+    votingMarketGetProposals(first: Int, skip: Int, where: GqlVotingProposalFilter): [GqlVotingProposal!]!
 }
 
 type GqlVotingProposal {
