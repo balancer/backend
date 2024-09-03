@@ -139,7 +139,7 @@ const files = {
             immutableTypes: false,
             useIndexSignature: true,
             enumsAsTypes: true,
-            contextType: './app/gql/gql-context#Context',
+            contextType: './apps/api/gql/resolver-context#ResolverContext',
             scalars: {
                 Date: 'Date',
                 UUID: 'string',

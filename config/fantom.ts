@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{

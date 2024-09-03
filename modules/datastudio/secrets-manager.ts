@@ -1,5 +1,5 @@
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 
 export class SecretsManager {
     public async getSecret(secretId: string): Promise<string> {

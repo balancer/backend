@@ -1,12 +1,11 @@
 import { poolService } from './pool.service';
-import { GqlChain, QueryPoolEventsArgs, QueryPoolGetEventsArgs, Resolvers } from '../../schema';
+import { GqlChain, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
 import { CowAmmController, EventsQueryController, PoolController, SnapshotsController } from '../controllers';
 import { chainToIdMap } from '../network/network-config';
-import { logResolver } from '../../app/gql/log-resolver';
 
 const balancerResolvers: Resolvers = {
     Query: {

@@ -96,7 +96,7 @@ export const syncGaugeStakingForPools = async (
     for (const gauge of gaugesForDb) {
         const preferredGaugesForPool = gaugesForDb.filter((g) => gauge.poolId === g.poolId && g.status === 'PREFERRED');
         if (preferredGaugesForPool.length > 1) {
-            Sentry.captureException(
+            console.error(
                 `Pool ${gauge.poolId} on ${
                     networkContext.chain
                 } has multiple preferred gauges: ${preferredGaugesForPool.map((gauge) => gauge.id)}`,

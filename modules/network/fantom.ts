@@ -6,9 +6,9 @@ import { MasterchefFarmAprService } from '../pool/lib/apr-data-sources/fantom/ma
 import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
-import { every } from '../../worker/intervals';
+import { every } from '../../apps/scheduler/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';

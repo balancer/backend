@@ -1,7 +1,7 @@
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { networkContext } from '../../network/network-context.service';
-import { env } from '../../../app/env';
+import { env } from '../../../apps/env';
 import { RateLimiter } from 'limiter';
 import axios, { AxiosError } from 'axios';
 

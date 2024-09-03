@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { AllNetworkConfigs } from '../modules/network/network-config';
-import * as Sentry from '@sentry/node';
+import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
-import { env } from '../app/env';
+import { env } from '../env';
 
 class WokerQueue {
     constructor(private readonly client: SQSClient, private readonly queueUrl?: string) {}
@@ -20,8 +19,7 @@ class WokerQueue {
             }
             console.log(`Sent message to schedule job on queue ${this.queueUrl}: ${json}`);
         } catch (error) {
-            console.log(error);
-            Sentry.captureException(error);
+            console.error(error);
         } finally {
             setTimeout(() => {
                 this.sendWithInterval(json, intervalMs, deDuplicationId);
