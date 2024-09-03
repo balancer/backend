@@ -2,10 +2,10 @@ extend type Query {
     """
     Retrieve voting market proposals based on the filter.
     """
-    votingMarketGetProposals(where: GqlVotingMarketFilter): [GqlVotingMarketProposal!]!
+    votingMarketGetProposals(where: GqlVotingProposalFilter): [GqlVotingProposal!]!
 }
 
-type GqlVotingMarketProposal {
+type GqlVotingProposal {
     """
     Id of the voting market proposal
     """
@@ -15,9 +15,25 @@ type GqlVotingMarketProposal {
     """
     hash: String!
     """
+    The voting market this proposal belongs to.
+    """
+    market: GqlVotingMarketType!
+    """
+    The voting round this proposal belongs to.
+    """
+    round: GqlVotingRound!
+    """
     The pool ID this proposal belings to.
     """
     poolId: String!
+    """
+    The address of the root gauge this proposal refers to.
+    """
+    rootGaugeAddress: String
+    """
+    The address of the child chain gauge this proposal refers to.
+    """
+    childGaugeAddress: String
     """
     The chain of this proposal.
     """
@@ -27,7 +43,7 @@ type GqlVotingMarketProposal {
     """
     efficiency: Float!
     """
-    The title of the proposal. Usually the pool name/description.
+    The title of the proposal. Usually the pool name/description. Also corresponds to the snapshot vote option if voted on snapshot.
     """
     title: String!
     """
@@ -49,10 +65,10 @@ type GqlVotingMarketProposal {
     """
     The incentives for this proposal.
     """
-    incentives: [GqlVotingMarketProposalIncentive!]!
+    incentives: [GqlVotingProposalIncentive!]!
 }
 
-type GqlVotingMarketProposalIncentive {
+type GqlVotingProposalIncentive {
     """
     The token that is used for the incentive.
     """
@@ -71,8 +87,48 @@ type GqlVotingMarketProposalIncentive {
     depositor: String!
 }
 
-input GqlVotingMarketFilter {
-    proposalDeadlineIn: [Int!]
+enum GqlVotingMarket {
+    VEBAL
+    VLAURA
+    MABEETS
+}
+
+type GqlVotingRound {
+    """
+    Timestamp when the voting started.
+    """
+    votingStartTime: Int!
+    """
+    Timestamp when the voting ended.
+    """
+    votingEndTime: Int!
+    """
+    Timestamp when the emission started.
+    """
+    emissionStartTime: Int!
+    """
+    Timestamp when the emission ended.
+    """
+    emissionEndTime: Int!
+    """
+    The token that is emitted based on voting results
+    """
+    emissionToken: GqlToken!
+    """
+    The total token amount that is emitted based on voting results.
+    """
+    emissionAmount: AmountHumanReadable!
+    """
+    The total USD value of the token amount that is emitted based on voting results.
+    """
+    emissionAmountUsd: Float!
+}
+
+input GqlVotingProposalFilter {
+    proposalDeadline_gt: Int
+    proposalDeadline_lt: Int
     poolIdIn: [String!]
     chainIn: [GqlChain!]
+    rootGaugeAddressIn: [String!]
+    marketIn: [GqlVotingMarket!]
 }
