@@ -3146,7 +3146,7 @@ export type GqlPoolAddRemoveEventV3Resolvers<
 }>;
 
 export type GqlPoolAggregatorResolvers<
-    ContextType = Context,
+    ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlPoolAggregator'] = ResolversParentTypes['GqlPoolAggregator'],
 > = ResolversObject<{
     address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
