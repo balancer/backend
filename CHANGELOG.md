@@ -1,5 +1,17 @@
 # backend
 
+## 1.16.0
+
+### Minor Changes
+
+-   04a202e: adding reward token data to apr item
+
+### Patch Changes
+
+-   4b3aa1e: add reward token to yb and nested apr
+-   d61718a: adding new pool query specific for aggregator needs
+-   420ff5f: refactoring VotingGaugesRepository to use viem
+
 ## 1.15.0
 
 ### Minor Changes
