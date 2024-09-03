@@ -110,6 +110,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                 apr: beetsApr,
                 type: 'NATIVE_REWARD',
                 group: null,
+                rewardTokenAddress: this.beetsAddress,
+                rewardTokenSymbol: 'BEETS',
             });
         }
 
@@ -140,6 +142,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                     apr: rewardApr,
                     type: 'THIRD_PARTY_REWARD',
                     group: null,
+                    rewardTokenAddress: rewardToken.token,
+                    rewardTokenSymbol: rewardToken.symbol,
                 });
             }
         }

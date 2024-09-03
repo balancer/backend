@@ -58,7 +58,7 @@ export class GaugeAprService implements PoolAprService {
 
             // Get token rewards per year with data needed for the DB
             const rewards = await Promise.allSettled(
-                gauge.rewards.map(async ({ id, tokenAddress, rewardPerSecond }) => {
+                gauge.rewards.map(async ({ id, tokenAddress, rewardPerSecond, isVeBalemissions }) => {
                     const price = this.tokenService.getPriceForToken(tokenPrices, tokenAddress, networkContext.chain);
                     if (!price) {
                         return Promise.reject(`Price not found for ${tokenAddress}`);
@@ -79,6 +79,7 @@ export class GaugeAprService implements PoolAprService {
                         address: tokenAddress,
                         symbol: definition.symbol,
                         rewardPerYear: parseFloat(rewardPerSecond) * secondsPerYear * price,
+                        isVeBalemissions: isVeBalemissions,
                     };
                 }),
             );
@@ -99,7 +100,7 @@ export class GaugeAprService implements PoolAprService {
                         return null;
                     }
 
-                    const { address, symbol, rewardPerYear } = reward.value;
+                    const { address, symbol, rewardPerYear, isVeBalemissions } = reward.value;
 
                     const itemData: PrismaPoolAprItem = {
                         id: `${reward.value.id}-${symbol}-apr`,
@@ -108,16 +109,14 @@ export class GaugeAprService implements PoolAprService {
                         title: `${symbol} reward APR`,
                         group: null,
                         apr: 0,
-                        type: this.primaryTokens.includes(address.toLowerCase())
-                            ? PrismaPoolAprType.NATIVE_REWARD
-                            : PrismaPoolAprType.THIRD_PARTY_REWARD,
+                        rewardTokenAddress: address,
+                        rewardTokenSymbol: symbol,
+                        type: isVeBalemissions ? PrismaPoolAprType.NATIVE_REWARD : PrismaPoolAprType.THIRD_PARTY_REWARD,
                     };
 
                     // veBAL rewards have a range associated with the item
-                    if (
-                        itemData.id.includes('balgauge') &&
-                        (networkContext.chain === 'MAINNET' || gauge.version === 2)
-                    ) {
+                    // this is deprecated
+                    if (isVeBalemissions && (networkContext.chain === 'MAINNET' || gauge.version === 2)) {
                         let minApr = 0;
                         if (workingSupplyTvl > 0) {
                             minApr = rewardPerYear / workingSupplyTvl;

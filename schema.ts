@@ -199,6 +199,78 @@ export interface GqlPoolAddRemoveEventV3 extends GqlPoolEvent {
     valueUSD: Scalars['Float'];
 }
 
+export interface GqlPoolAggregator {
+    __typename?: 'GqlPoolAggregator';
+    /** The contract address of the pool. */
+    address: Scalars['Bytes'];
+    /** Data specific to gyro/fx pools */
+    alpha?: Maybe<Scalars['String']>;
+    /** Data specific to stable pools */
+    amp?: Maybe<Scalars['BigInt']>;
+    /** Data specific to gyro/fx pools */
+    beta?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    c?: Maybe<Scalars['String']>;
+    /** The chain on which the pool is deployed */
+    chain: GqlChain;
+    /** The timestamp the pool was created. */
+    createTime: Scalars['Int'];
+    /** Data specific to gyro pools */
+    dSq?: Maybe<Scalars['String']>;
+    /** The decimals of the BPT, usually 18 */
+    decimals: Scalars['Int'];
+    /** Data specific to fx pools */
+    delta?: Maybe<Scalars['String']>;
+    /** Dynamic data such as token balances, swap fees or volume */
+    dynamicData: GqlPoolDynamicData;
+    /** Data specific to fx pools */
+    epsilon?: Maybe<Scalars['String']>;
+    /** The factory contract address from which the pool was created. */
+    factory?: Maybe<Scalars['Bytes']>;
+    /** The pool id. This is equal to the address for protocolVersion 3 pools */
+    id: Scalars['ID'];
+    /** Data specific to gyro/fx pools */
+    lambda?: Maybe<Scalars['String']>;
+    /** The name of the pool as per contract */
+    name: Scalars['String'];
+    /** The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP. */
+    owner?: Maybe<Scalars['Bytes']>;
+    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
+    poolTokens: Array<GqlPoolTokenDetail>;
+    /** The protocol version on which the pool is deployed, 1, 2 or 3 */
+    protocolVersion: Scalars['Int'];
+    /** Data specific to gyro pools */
+    root3Alpha?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    s?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    sqrtAlpha?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    sqrtBeta?: Maybe<Scalars['String']>;
+    /** The token symbol of the pool as per contract */
+    symbol: Scalars['String'];
+    /** Data specific to gyro pools */
+    tauAlphaX?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    tauAlphaY?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    tauBetaX?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    tauBetaY?: Maybe<Scalars['String']>;
+    /** The pool type, such as weighted, stable, etc. */
+    type: GqlPoolType;
+    /** Data specific to gyro pools */
+    u?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    v?: Maybe<Scalars['String']>;
+    /** The version of the pool type. */
+    version: Scalars['Int'];
+    /** Data specific to gyro pools */
+    w?: Maybe<Scalars['String']>;
+    /** Data specific to gyro pools */
+    z?: Maybe<Scalars['String']>;
+}
+
 export interface GqlPoolApr {
     __typename?: 'GqlPoolApr';
     apr: GqlPoolAprValue;
@@ -216,7 +288,14 @@ export interface GqlPoolAprItem {
     apr: Scalars['Float'];
     /** The id of the APR item */
     id: Scalars['ID'];
-    /** The title of the APR item, a human readable form */
+    /** The reward token address, if the APR originates from token emissions */
+    rewardTokenAddress?: Maybe<Scalars['String']>;
+    /** The reward token symbol, if the APR originates from token emissions */
+    rewardTokenSymbol?: Maybe<Scalars['String']>;
+    /**
+     * The title of the APR item, a human readable form
+     * @deprecated No replacement, should be built client side
+     */
     title: Scalars['String'];
     /** Specific type of this APR */
     type: GqlPoolAprItemType;
@@ -230,11 +309,13 @@ export type GqlPoolAprItemType =
     | 'IB_YIELD'
     /** APR in a pool that can be earned through locking, i.e. veBAL */
     | 'LOCKING'
+    /** Reward APR in a pool from maBEETS emissions allocated by gauge votes. Emitted in BEETS. */
+    | 'MABEETS_EMISSIONS'
     /** Rewards distributed by merkl.xyz */
     | 'MERKL'
     /** Represents if the APR items comes from a nested pool. */
     | 'NESTED'
-    /** Staking reward APR in a pool, i.e. BAL or BEETS. */
+    /** Staking reward APR in a pool from a reward token. */
     | 'STAKING'
     /** APR boost that can be earned, i.e. via veBAL or maBEETS. */
     | 'STAKING_BOOST'
@@ -242,6 +323,8 @@ export type GqlPoolAprItemType =
     | 'SURPLUS'
     /** Represents the swap fee APR in a pool. */
     | 'SWAP_FEE'
+    /** Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL. */
+    | 'VEBAL_EMISSIONS'
     /** APR that can be earned thourgh voting, i.e. gauge votes */
     | 'VOTING';
 
@@ -2145,6 +2228,8 @@ export interface Query {
     latestSyncedBlocks: GqlLatestSyncedBlocks;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
+    /** Returns all pools for a given filter, specific for aggregators */
+    poolGetAggregatorPools: Array<GqlPoolAggregator>;
     /**
      * Will de deprecated in favor of poolEvents
      * @deprecated Use poolEvents instead
@@ -2258,6 +2343,14 @@ export interface QueryPoolEventsArgs {
     first?: InputMaybe<Scalars['Int']>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<GqlPoolEventsFilter>;
+}
+
+export interface QueryPoolGetAggregatorPoolsArgs {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GqlPoolOrderBy>;
+    orderDirection?: InputMaybe<GqlPoolOrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<GqlPoolFilter>;
 }
 
 export interface QueryPoolGetBatchSwapsArgs {
@@ -2566,6 +2659,7 @@ export type ResolversTypes = ResolversObject<{
     GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
+    GqlPoolAggregator: ResolverTypeWrapper<GqlPoolAggregator>;
     GqlPoolApr: ResolverTypeWrapper<
         Omit<GqlPoolApr, 'apr' | 'nativeRewardApr' | 'thirdPartyApr'> & {
             apr: ResolversTypes['GqlPoolAprValue'];
@@ -2757,6 +2851,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlNestedPool: GqlNestedPool;
     GqlPoolAddRemoveEventV3: GqlPoolAddRemoveEventV3;
+    GqlPoolAggregator: GqlPoolAggregator;
     GqlPoolApr: Omit<GqlPoolApr, 'apr' | 'nativeRewardApr' | 'thirdPartyApr'> & {
         apr: ResolversParentTypes['GqlPoolAprValue'];
         nativeRewardApr: ResolversParentTypes['GqlPoolAprValue'];
@@ -3050,6 +3145,47 @@ export type GqlPoolAddRemoveEventV3Resolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type GqlPoolAggregatorResolvers<
+    ContextType = Context,
+    ParentType extends ResolversParentTypes['GqlPoolAggregator'] = ResolversParentTypes['GqlPoolAggregator'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+    alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    amp?: Resolver<Maybe<ResolversTypes['BigInt']>, ParentType, ContextType>;
+    beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    c?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
+    createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
+    epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
+    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    s?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtAlpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtBeta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tauAlphaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauAlphaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
+    u?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    v?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    w?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    z?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type GqlPoolAprResolvers<
     ContextType = Context,
     ParentType extends ResolversParentTypes['GqlPoolApr'] = ResolversParentTypes['GqlPoolApr'],
@@ -3069,6 +3205,8 @@ export type GqlPoolAprItemResolvers<
 > = ResolversObject<{
     apr?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    rewardTokenAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    rewardTokenSymbol?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolAprItemType'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -4812,6 +4950,12 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryPoolEventsArgs, never>
     >;
+    poolGetAggregatorPools?: Resolver<
+        Array<ResolversTypes['GqlPoolAggregator']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryPoolGetAggregatorPoolsArgs, never>
+    >;
     poolGetBatchSwaps?: Resolver<
         Array<ResolversTypes['GqlPoolBatchSwap']>,
         ParentType,
@@ -5052,6 +5196,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
     GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
     GqlPoolAddRemoveEventV3?: GqlPoolAddRemoveEventV3Resolvers<ContextType>;
+    GqlPoolAggregator?: GqlPoolAggregatorResolvers<ContextType>;
     GqlPoolApr?: GqlPoolAprResolvers<ContextType>;
     GqlPoolAprItem?: GqlPoolAprItemResolvers<ContextType>;
     GqlPoolAprRange?: GqlPoolAprRangeResolvers<ContextType>;

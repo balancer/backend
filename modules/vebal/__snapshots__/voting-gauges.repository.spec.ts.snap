@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VotingGaugesRepository > fetches veBAL gauge as MAINNET 1`] = `
+[
+  {
+    "gaugeAddress": "0xe867ad0a48e8f815dc0cda2cdb275e0f163a480b",
+    "isInSubgraph": false,
+    "isKilled": "0",
+    "network": "MAINNET",
+    "relativeWeight": NaN,
+    "relativeWeightCap": undefined,
+  },
+]
+`;
+
+exports[`VotingGaugesRepository > generates voting gauge rows given a list of gauge addresses 1`] = `
+[
+  {
+    "gaugeAddress": "0x79ef6103a513951a3b25743db509e267685726b7",
+    "isInSubgraph": false,
+    "isKilled": "0.07308250729037725",
+    "network": "MAINNET",
+    "relativeWeight": NaN,
+    "relativeWeightCap": undefined,
+  },
+  {
+    "gaugeAddress": "0xfb0265841c49a6b19d70055e596b212b0da3f606",
+    "isInSubgraph": false,
+    "isKilled": "0",
+    "network": "OPTIMISM",
+    "relativeWeight": NaN,
+    "relativeWeightCap": undefined,
+  },
+  {
+    "gaugeAddress": "0x8f7a0f9cf545db78bf5120d3dbea7de9c6220c10",
+    "isInSubgraph": false,
+    "isKilled": "0",
+    "network": "ARBITRUM",
+    "relativeWeight": NaN,
+    "relativeWeightCap": "0.000000000000000.02",
+  },
+]
+`;

@@ -28,12 +28,15 @@ describe('pool debugging', () => {
         // // await CowAmmController().reloadPools('MAINNET');
         // // await CowAmmController().syncSwaps('1');
         // // await tokenService.updateTokenPrices(['MAINNET']);
-        await poolService.reloadAllPoolAprs('MAINNET');
+        // await poolService.syncStakingForPools(['MAINNET']);
         // await poolService.updatePoolAprs('MAINNET');
         const aprs = await prisma.prismaPoolAprItem.findMany({
             where: { chain: 'MAINNET', poolId: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' },
         });
         console.log(aprs);
+        const pool = await poolService.getGqlPool('0xf08d4dea369c456d26a3168ff0024b904f2d8b91', 'MAINNET');
+        expect(pool.dynamicData.aprItems).toBeDefined();
+        expect(pool.dynamicData.aprItems.length).toBeGreaterThan(0);
 
         // await poolService.updatePoolAprs('MAINNET');
         // expect(aprs[0].apr).toBeGreaterThan(0);
