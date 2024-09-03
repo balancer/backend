@@ -93,6 +93,8 @@ export class YbTokensAprService implements PoolAprService {
                     apr: userApr,
                     group: tokenApr.group as PrismaPoolAprItemGroup,
                     type: yieldType,
+                    rewardTokenAddress: token.address,
+                    rewardTokenSymbol: token.token.symbol,
                 };
 
                 operations.push(
