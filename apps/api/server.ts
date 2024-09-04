@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import * as http from 'http';
 import { env } from '../env';
 import { loadRestRoutes } from './rest-routes';
-import { corsMiddleware, lowerCaseMiddleware } from './middleware';
+import { corsMiddleware, lowerCaseMiddleware, sessionMiddleware } from './middleware';
 import {
     ApolloServerPluginDrainHttpServer,
     ApolloServerPluginLandingPageGraphQLPlayground,
@@ -34,6 +34,7 @@ const configureHelmet = (app: express.Express) => {
 
 const configureMiddlewares = (app: express.Express) => {
     app.use(corsMiddleware);
+    app.use(sessionMiddleware);
     app.use(lowerCaseMiddleware);
 };
 
