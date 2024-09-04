@@ -1,9 +1,4 @@
 import { Request } from 'express';
-import { networkContext } from '../../../modules/network/network-context.service';
-import {
-    initRequestScopedContext,
-    setRequestScopedContextValue,
-} from '../../../modules/context/request-scoped-context';
 
 function getHeader(req: Request, key: string): string | undefined {
     const value = req.headers[key.toLowerCase()];
@@ -20,11 +15,6 @@ export async function resolverContext(req: Request) {
     const accountAddress = getHeader(req, 'AccountAddress');
     const adminApiKey = getHeader(req, 'AdminApiKey');
     const chainId = getHeader(req, 'ChainId');
-
-    if (chainId && networkContext.isValidChainId(chainId)) {
-        initRequestScopedContext();
-        setRequestScopedContextValue('chainId', chainId);
-    }
 
     // Initialize context if it doesn't exist
     return {
