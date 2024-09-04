@@ -13,6 +13,8 @@ import {
     prismaPoolFactory,
     prismaPoolTokenDynamicDataFactory,
     prismaPoolTokenFactory,
+    hookFactory,
+    hookDataFactory
 } from '../../../../../../test/factories';
 
 describe('SOR V3 Weighted Pool Tests', () => {
@@ -27,6 +29,40 @@ describe('SOR V3 Weighted Pool Tests', () => {
     let weightedPrismaPool: PrismaPoolWithDynamic;
 
     beforeAll(() => {
+        
+    });
+
+    test('Get Pool State', () => {
+        setupWeightedPool(false);
+        const poolState = {
+            poolType: 'Weighted',
+            swapFee: parseEther(swapFee),
+            balancesLiveScaled18: tokenBalances.map((b) => parseEther(b)),
+            tokenRates: Array(tokenBalances.length).fill(WAD),
+            totalSupply: parseEther(totalShares),
+            weights: tokenWeights.map((w) => parseEther(w)),
+            tokens: tokenAddresses,
+            scalingFactors,
+            aggregateSwapFee: 0n
+        };
+        expect(poolState).toEqual(weightedPool.getPoolState());
+    });
+    test('get hook State hook attached', () => {
+        // true means that the weighted pool has a hook attached in this test
+        setupWeightedPool(true);
+        const hookState = {
+            tokens: tokenAddresses,
+            removeLiquidityHookFeePercentage: BigInt(1e16), //'0.01' %
+        }
+        expect(hookState).toEqual(weightedPool.getHookState());
+    });
+    test('get hook State no hook attached', () => {
+        // false means that the weighted pool has no hook attached in this test
+        setupWeightedPool(false);
+        expect(weightedPool.getHookState()).toBeUndefined();
+    });
+
+    const setupWeightedPool = (hasHooks: boolean) => {
         swapFee = '0.01';
         tokenBalances = ['169', '144'];
         tokenDecimals = [6, 18];
@@ -57,20 +93,52 @@ describe('SOR V3 Weighted Pool Tests', () => {
             tokens: [poolToken1, poolToken2],
             dynamicData: prismaPoolDynamicDataFactory.build({ swapFee, totalShares }),
         });
-        weightedPool = WeightedPoolV3.fromPrismaPool(weightedPrismaPool);
-    });
+        if (!hasHooks) {
+            weightedPool = WeightedPoolV3.fromPrismaPool(weightedPrismaPool, []);
+        } else {
 
-    test('Get Pool State', () => {
-        const poolState = {
-            poolType: 'Weighted',
-            swapFee: parseEther(swapFee),
-            balancesLiveScaled18: tokenBalances.map((b) => parseEther(b)),
-            tokenRates: Array(tokenBalances.length).fill(WAD),
-            totalSupply: parseEther(totalShares),
-            weights: tokenWeights.map((w) => parseEther(w)),
-            tokens: tokenAddresses,
-            scalingFactors,
-        };
-        expect(poolState).toEqual(weightedPool.getPoolState());
-    });
+            // create hooks here due to needing to pass stable pool address
+            // The stable pool has a hook attached in this test
+            const dynamicData = hookDataFactory.build({
+                // Add any specific dynamic data parameters here
+                addLiquidityFeePercentage: '0.01',
+                removeLiquidityFeePercentage: '0.01',
+                swapFeePercentage: '0.01'
+            });
+
+            // Create the Hook instance
+            const prismaHook1 = hookFactory.build({
+                dynamicData: dynamicData,
+                enableHookAdjustedAmounts: true,
+                poolsIds: [weightedPrismaPool.address, '0x102b75a27e5e157f93c679dd7a25fdfcdbc1473c'],
+                shouldCallAfterAddLiquidity: true,
+                shouldCallAfterInitialize: true,
+                shouldCallAfterRemoveLiquidity: true,
+                shouldCallAfterSwap: true,
+                shouldCallBeforeAddLiquidity: true,
+                shouldCallBeforeInitialize: true,
+                shouldCallBeforeRemoveLiquidity: true,
+                shouldCallBeforeSwap: true,
+                shouldCallComputeDynamicSwapFee: true,
+            });
+
+            // Create the Hook instance
+            const prismaHook2 = hookFactory.build({
+                dynamicData: dynamicData,
+                enableHookAdjustedAmounts: true,
+                poolsIds: ['0x102b75a27e5e157f93c679dd6a25fdfcdbc1473f', '0x102b75a17e5e157f93c679dd7a25fdfcdbc1473c'],
+                shouldCallAfterAddLiquidity: true,
+                shouldCallAfterInitialize: true,
+                shouldCallAfterRemoveLiquidity: true,
+                shouldCallAfterSwap: true,
+                shouldCallBeforeAddLiquidity: true,
+                shouldCallBeforeInitialize: true,
+                shouldCallBeforeRemoveLiquidity: true,
+                shouldCallBeforeSwap: true,
+                shouldCallComputeDynamicSwapFee: true,
+            });
+
+            weightedPool = WeightedPoolV3.fromPrismaPool(weightedPrismaPool, [prismaHook1, prismaHook2]);
+        }
+    }
 });

@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
+import { PrismaPoolWithDynamic, PrismaHookWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { ComposableStablePool, FxPool, Gyro2Pool, Gyro3Pool, GyroEPool, MetaStablePool, WeightedPool } from './poolsV2';
 import { SwapKind, Token } from '@balancer/sdk';
@@ -15,6 +15,7 @@ export async function sorGetPathsWithPools(
     swapAmountEvm: bigint,
     prismaPools: PrismaPoolWithDynamic[],
     protocolVersion: number,
+    hooks: PrismaHookWithDynamic[],
     swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
 ): Promise<PathWithAmount[] | null> {
     const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
@@ -28,7 +29,7 @@ export async function sorGetPathsWithPools(
                     if (prismaPool.protocolVersion === 2) {
                         basePools.push(WeightedPool.fromPrismaPool(prismaPool));
                     } else {
-                        basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool));
+                        basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool, hooks));
                     }
                 }
                 break;
@@ -39,7 +40,7 @@ export async function sorGetPathsWithPools(
             case 'STABLE':
                 {
                     if (prismaPool.protocolVersion === 3) {
-                        basePools.push(StablePool.fromPrismaPool(prismaPool));
+                        basePools.push(StablePool.fromPrismaPool(prismaPool, hooks));
                     }
                 }
                 break;

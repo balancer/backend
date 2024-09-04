@@ -53,6 +53,7 @@ class SorPathService implements SwapService {
 
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
+            // TODO pools are known, fetch all hooks for known pools
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -145,6 +146,7 @@ class SorPathService implements SwapService {
     ): Promise<PathWithAmount[] | null> {
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
+            // TODO Pools are known, fetch all hooks for the given pools
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -488,6 +490,10 @@ class SorPathService implements SwapService {
         // cache for 10s
         this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 10 * 1000);
         return pools;
+    }
+
+    private async getBaseHooksFromDb(chain: Chain): Promise<PrismaHookWithDynamic[]> {
+        
     }
 
     private mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {
