@@ -1,5 +1,17 @@
 # backend
 
+## 1.17.0
+
+### Minor Changes
+
+-   8257bdd: organising apps and updating sentry
+-   37d9161: cow amm on arbitrum
+
+### Patch Changes
+
+-   f0f4deb: make return values in GqlSorPath required
+-   6baafda: Report missing tokens for active rewards only
+
 ## 1.16.0
 
 ### Minor Changes
