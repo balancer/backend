@@ -1,16 +1,16 @@
-import { Context } from '../../app/gql/gql-context';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
+import { ResolverContext } from '../../apps/api/gql/resolver-context';
 
-export function getRequiredAccountAddress(context: Context) {
-    if (context.accountAddress === null) {
+export function getRequiredAccountAddress(context: ResolverContext) {
+    if (!context?.accountAddress) {
         throw new Error('Account address is required');
     }
 
     return context.accountAddress;
 }
 
-export function isAdminRoute(context: Context) {
-    if (context.adminApiKey === null || context.adminApiKey !== env.ADMIN_API_KEY) {
+export function isAdminRoute(context: ResolverContext) {
+    if (!context?.adminApiKey || context.adminApiKey !== env.ADMIN_API_KEY) {
         throw new Error('Missing or invalid admin api key');
     }
 }

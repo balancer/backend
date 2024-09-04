@@ -2472,7 +2472,7 @@ export const schema = gql`
         """
         A sorted list of booleans that indicate if the respective pool is a buffer
         """
-        isBuffer: [Boolean]!
+        isBuffer: [Boolean!]!
 
         """
         Output amount of this path in scaled form
@@ -2482,7 +2482,7 @@ export const schema = gql`
         """
         A sorted list of pool ids that are used in this path
         """
-        pools: [String]!
+        pools: [String!]!
 
         """
         The version of the protocol these paths are from
@@ -2492,7 +2492,7 @@ export const schema = gql`
         """
         A sorted list of tokens that are ussed in this path
         """
-        tokens: [Token]!
+        tokens: [Token!]!
 
         """
         Vault version of this path.

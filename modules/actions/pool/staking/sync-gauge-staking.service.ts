@@ -96,7 +96,7 @@ export const syncGaugeStakingForPools = async (
     for (const gauge of gaugesForDb) {
         const preferredGaugesForPool = gaugesForDb.filter((g) => gauge.poolId === g.poolId && g.status === 'PREFERRED');
         if (preferredGaugesForPool.length > 1) {
-            Sentry.captureException(
+            console.error(
                 `Pool ${gauge.poolId} on ${
                     networkContext.chain
                 } has multiple preferred gauges: ${preferredGaugesForPool.map((gauge) => gauge.id)}`,
@@ -197,10 +197,13 @@ export const syncGaugeStakingForPools = async (
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
-            const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
-            console.error(
-                `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
-            );
+            // Report missing tokens for active rewards only
+            if (Number(rewardPerSecond) > 0) {
+                const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
+                console.error(
+                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
+                );
+            }
             continue;
         }
 

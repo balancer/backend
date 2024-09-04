@@ -5,10 +5,10 @@ import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
-import { every } from '../../worker/intervals';
+import { every } from '../../apps/scheduler/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
