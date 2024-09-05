@@ -11,6 +11,7 @@ import {
     PoolController,
     EventController,
     FXPoolsController,
+    PoolsV2Controller,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -35,6 +36,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
         return PoolController().reloadPoolsV3(chainIdToChain[chain]);
+    } else if (job === 'add-pools-v2') {
+        return PoolsV2Controller().addPools(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {
@@ -61,6 +64,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return jobsController.syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-sftmx-staking-snapshots') {
         return jobsController.syncSftmxStakingSnapshots(chain);
+    } else if (job === 'sync-user-balances-v2') {
+        return UserBalancesController().syncUserBalancesFromV2Subgraph(chain);
     } else if (job === 'sync-user-balances-v3') {
         return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     } else if (job === 'load-onchain-data-v3') {

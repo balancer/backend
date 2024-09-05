@@ -25,6 +25,7 @@ import {
     ContentController,
     EventController,
     PoolController,
+    PoolsV2Controller,
 } from '../../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
@@ -167,7 +168,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-new-pools-from-subgraph':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.syncNewPoolsFromSubgraph(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolsV2Controller().addPools(chainId), res, next);
             break;
         case 'sync-join-exits-v2':
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chainId), res, next);

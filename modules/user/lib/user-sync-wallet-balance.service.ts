@@ -13,6 +13,7 @@ import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
 import { getEvents } from '../../web3/events';
 import { CowAmmController } from '../../controllers';
+import { Prisma } from '@prisma/client';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -102,8 +103,8 @@ export class UserSyncWalletBalanceService {
         const operations: any[] = [
             prisma.prismaUserWalletBalance.deleteMany({ where: { chain: this.chain } }),
             ...shares
-                .filter((share) => poolIds.includes(share.poolId))
-                .map((share) => this.getPrismaUpsertForPoolShare(share.poolId, share)),
+                .filter((share) => share.poolId && poolIds.includes(share.poolId))
+                .map((share) => this.getPrismaUpsertForPoolShare(share)),
         ];
 
         console.log(`initBalancesForPools: performing ${operations.length} db operations...`);
@@ -262,7 +263,7 @@ export class UserSyncWalletBalanceService {
                     data: shares.map((share) => ({ address: share.userAddress })),
                     skipDuplicates: true,
                 }),
-                ...shares.map((share) => this.getPrismaUpsertForPoolShare(poolId, share)),
+                ...shares.map((share) => this.getPrismaUpsertForPoolShare(share)),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'WALLET', chain: this.chain } },
                     create: { type: 'WALLET', chain: this.chain, blockNumber: block.number },
@@ -291,19 +292,14 @@ export class UserSyncWalletBalanceService {
         await Promise.all(operations);
     }
 
-    private getPrismaUpsertForPoolShare(poolId: string, share: BalancerUserPoolShare) {
+    private getPrismaUpsertForPoolShare(share: Prisma.PrismaUserWalletBalanceCreateManyInput) {
         return prisma.prismaUserWalletBalance.upsert({
-            where: { id_chain: { id: `${poolId}-${share.userAddress}`, chain: this.chain } },
+            where: { id_chain: { id: share.id, chain: this.chain } },
             create: {
-                id: `${poolId}-${share.userAddress}`,
+                ...share,
                 chain: this.chain,
-                userAddress: share.userAddress,
-                poolId,
-                tokenAddress: share.poolAddress.toLowerCase(),
-                balance: share.balance,
-                balanceNum: parseFloat(share.balance),
             },
-            update: { balance: share.balance, balanceNum: parseFloat(share.balance) },
+            update: { balance: share.balance, balanceNum: share.balanceNum },
         });
     }
 
