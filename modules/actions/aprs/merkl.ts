@@ -38,7 +38,8 @@ const fetchMerklCampaigns = async () => {
         })
         .flat(2)
         .filter((campaign) => campaign.type === 'balancerPool')
-        .filter((campaign) => campaign.campaignParameters.whitelist.length === 0);
+        .filter((campaign) => campaign.campaignParameters.whitelist.length === 0)
+        .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)));
 
     return campaigns;
 };
