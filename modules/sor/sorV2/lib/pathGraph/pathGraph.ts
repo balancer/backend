@@ -138,7 +138,7 @@ export class PathGraph {
                     const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
                     return { path, limit };
                 } catch (_e) {
-                    console.error('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
+                    console.log('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
                     return undefined;
                 }
             })
