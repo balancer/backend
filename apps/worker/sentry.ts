@@ -21,7 +21,7 @@ export const initWorkerSentry = () => {
 
         // Set sampling rate for profiling
         // This is relative to tracesSampleRate
-        profilesSampleRate: 0.01,
+        profilesSampleRate: 0.001,
 
         beforeSend: (event) => {
             if (event.tags?.job && event.tags?.chain) {
