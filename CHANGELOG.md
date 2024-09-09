@@ -1,5 +1,16 @@
 # backend
 
+## 1.18.0
+
+### Minor Changes
+
+-   a6b5027: update protocol revenue APR to usdc
+
+### Patch Changes
+
+-   dac4636: prevent common issues from being sent to sentry
+-   1516a1b: handle SOR's effective price when outputAmount is 0
+
 ## 1.17.0
 
 ### Minor Changes
