@@ -1,7 +1,6 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens, prismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
+import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { networkContext } from '../../../network/network-context.service';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { mainnet } from 'viem/chains';
 import { createPublicClient, formatUnits, http, parseAbi } from 'viem';
@@ -19,7 +18,7 @@ const balAddress = '0xba100000625a3754423978a60c9317c58a424e3d';
 const vebalPool = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
 const vebalPoolAddress = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56';
 const vebalAddress = '0xc128a9954e6c874ea3d62ce62b468ba073093f25';
-const bbAUsdAddress = '0xa13a9247ea42d743238089903570127dda72fe44';
+const usdcAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const id = `${vebalPool}-protocol-apr`;
 const chain = 'MAINNET';
 
@@ -56,11 +55,11 @@ const fetchRevenue = async (timestamp: number, rpcUrl: string) => {
             args: [balAddress, previousWeek],
         },
         {
-            path: 'bbAUsdAmount',
+            path: 'usdcAmount',
             address: feeDistributorAddress,
             abi: feeDistributorAbi,
             functionName: 'getTokensDistributedInWeek',
-            args: [bbAUsdAddress, previousWeek],
+            args: [usdcAddress, previousWeek],
         },
         {
             path: 'veBalSupply',
@@ -72,9 +71,9 @@ const fetchRevenue = async (timestamp: number, rpcUrl: string) => {
 
     const data = {
         balAmount: parseFloat(formatUnits(results.balAmount, 18)),
-        bbAUsdAmount: parseFloat(formatUnits(results.bbAUsdAmount, 18)),
+        usdcAmount: parseFloat(formatUnits(results.usdcAmount, 6)),
         veBalSupply: parseFloat(formatUnits(results.veBalSupply, 18)),
-        bbAUsdPrice: parseFloat('1.0'),
+        usdcPrice: parseFloat('1.0'),
         balAddress: balAddress,
     };
 
@@ -97,8 +96,8 @@ export class VeBalProtocolAprService implements PoolAprService {
             select: { price: true },
         });
 
-        const bbAUsdPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: bbAUsdAddress, chain: 'MAINNET' },
+        const usdcPrice = await prisma.prismaTokenCurrentPrice.findFirst({
+            where: { tokenAddress: usdcAddress, chain: 'MAINNET' },
             select: { price: true },
         });
 
@@ -107,14 +106,14 @@ export class VeBalProtocolAprService implements PoolAprService {
             select: { price: true },
         });
 
-        if (!balPrice || !bbAUsdPrice || !bptPrice) {
+        if (!balPrice || !usdcPrice || !bptPrice) {
             return 0;
         }
 
         const lastWeekBalRevenue = revenue.balAmount * balPrice.price;
-        const lastWeekBBAUsdRevenue = revenue.bbAUsdAmount * bbAUsdPrice.price;
+        const lastWeekUsdcRevenue = revenue.usdcAmount * usdcPrice.price;
 
-        const dailyRevenue = (lastWeekBalRevenue + lastWeekBBAUsdRevenue) / 7;
+        const dailyRevenue = (lastWeekBalRevenue + lastWeekUsdcRevenue) / 7;
         const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
 
         return apr;
