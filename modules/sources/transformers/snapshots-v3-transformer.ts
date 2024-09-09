@@ -54,7 +54,7 @@ export const snapshotsV3Transformer = (
     const tvl = values.amounts.reduce((acc, amount, index) => {
         const address = poolTokens[index];
         if (!prices[address]) {
-            console.error(`Missing price for ${address} on ${chain}`);
+            console.log(`Missing price for ${address} on ${chain}`);
             return acc;
         }
         return parseFloat(amount) * prices[address] + acc;

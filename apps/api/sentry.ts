@@ -45,6 +45,10 @@ export const initApiSentry = () => {
                 console.log(`The following error occurred but was not sent to Sentry: ${error}`);
                 return null;
             }
+            if (error?.toString().includes('Variable "$chains" of required type "[GqlChain!]!" was not provided')) {
+                console.log(`The following error occurred but was not sent to Sentry: ${error}`);
+                return null;
+            }
 
             return event;
         },
