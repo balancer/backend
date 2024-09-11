@@ -63,7 +63,7 @@ export default <NetworkData>{
     },
     hooks: {
         feeTakingHook: ['0xde97fc6ecdcd9efa53dac2d29c0fc10e9b482a0b'],
-        removeLiquidityFeeHook: ['0x8756a6527e8dc94cf07a468d2e4df8e9946bce3d'],
+        exitFeeHook: ['0x8756a6527e8dc94cf07a468d2e4df8e9946bce3d'],
     },
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

@@ -118,7 +118,7 @@ export interface NetworkData {
     };
     hooks?: {
         feeTakingHook?: string[];
-        removeLiquidityFeeHook?: string[];
+        exitFeeHook?: string[];
     };
     multicall: string;
     multicall3: string;

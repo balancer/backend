@@ -2,6 +2,7 @@ model Hook {
   id                              Int          @id @default(autoincrement())
   address                         String
   chain                           Chain
+  name                            String       @default("")
   enableHookAdjustedAmounts       Boolean      @default(false)
   shouldCallAfterSwap             Boolean      @default(false)
   shouldCallBeforeSwap            Boolean      @default(false)
