@@ -8,7 +8,6 @@ import {
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorPathService';
 import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult } from './types';
-import * as Sentry from '@sentry/node';
 import { Chain } from '@prisma/client';
 import { formatUnits, parseUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
@@ -22,6 +21,10 @@ export class SorService {
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = swapPathsZeroResponse(args.tokenIn, args.tokenOut);
+
+        if (parseFloat(args.swapAmount) <= 0) {
+            return emptyResponse;
+        }
 
         const wethIsEth =
             tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address ||
@@ -86,6 +89,10 @@ export class SorService {
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = zeroResponse(args.swapType, args.tokenIn, args.tokenOut, args.swapAmount);
+
+        if (parseFloat(args.swapAmount) <= 0) {
+            return emptyResponse;
+        }
 
         // check if tokens addresses exist
         try {
