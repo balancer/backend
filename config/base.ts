@@ -12,7 +12,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-07-10',
-        balancer: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
+        balancer: [`https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`],
         beetsBar: '',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-base-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-base/version/latest`,

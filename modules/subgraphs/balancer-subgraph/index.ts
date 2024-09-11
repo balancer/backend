@@ -9,15 +9,17 @@ import {
     getSdk,
 } from './generated/balancer-subgraph-types';
 import { BalancerSubgraphService } from './balancer-subgraph.service';
+import { wrapSdkWithRetryAndRotation } from '../../sources/subgraphs/retry-on-failure';
 
 export type V2SubgraphClient = ReturnType<typeof getV2SubgraphClient>;
 
-export function getV2SubgraphClient(url: string, chainId: number) {
-    const sdk = getSdk(new GraphQLClient(url));
+export function getV2SubgraphClient(urls: string[], chainId: number) {
+    const sdkClients = urls.map((url) => getSdk(new GraphQLClient(url)));
+    const sdkWithRetryAndRotation = wrapSdkWithRetryAndRotation(sdkClients);
 
     return {
-        ...sdk,
-        legacyService: new BalancerSubgraphService(url, chainId),
+        ...sdkWithRetryAndRotation,
+        legacyService: new BalancerSubgraphService(urls, chainId),
         async getSnapshotsForTimestamp(timestamp: number): Promise<BalancerPoolSnapshotFragment[]> {
             const limit = 1000;
             let hasMore = true;
@@ -25,7 +27,7 @@ export function getV2SubgraphClient(url: string, chainId: number) {
             let snapshots: BalancerPoolSnapshotFragment[] = [];
 
             while (hasMore) {
-                const response = await sdk.BalancerPoolSnapshots({
+                const response = await sdkWithRetryAndRotation.BalancerPoolSnapshots({
                     where: { timestamp, id_gt: id },
                     orderBy: PoolSnapshot_OrderBy.Id,
                     orderDirection: OrderDirection.Asc,
@@ -50,7 +52,7 @@ export function getV2SubgraphClient(url: string, chainId: number) {
             let data: PoolBalancesFragment[] = [];
 
             while (hasMore) {
-                const response = await sdk.PoolBalances({
+                const response = await sdkWithRetryAndRotation.PoolBalances({
                     where: { ...where, id_gt: id },
                     orderBy: Pool_OrderBy.Id,
                     orderDirection: OrderDirection.Asc,
