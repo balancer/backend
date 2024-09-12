@@ -12,12 +12,13 @@ export async function retryOnFailureWithRotation<T>(
             return await fn(sdk); // Try the operation using the current SDK
         } catch (error) {
             attempts += 1;
-            console.error(`Subgraph failed ${new URL(sdkClients[currentSdkIndex].url).host}:`, error);
+            console.log(`Subgraph URL from index ${currentSdkIndex} on ${attempts + 1} attempt failed:`, error);
+            console.error(`Subgraph failed:`, error);
 
             if (attempts < retries) {
                 // Rotate to the next SDK client
                 currentSdkIndex = (currentSdkIndex + 1) % sdkClients.length;
-                console.log(`Retrying with ${new URL(sdkClients[currentSdkIndex].url).host}...`);
+                console.log(`Retrying with URL from index ${currentSdkIndex}...`);
             } else {
                 throw new Error('All SDK clients failed after retries.');
             }
