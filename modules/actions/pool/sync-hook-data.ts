@@ -28,6 +28,7 @@ export const syncHookData = async (
             prisma.hook.update({
                 where: { address_chain: { address, chain } },
                 data: {
+                    name: addresses[address],
                     dynamicData: data[address],
                 },
             }),

@@ -6,10 +6,10 @@ export default [
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'fee', type: 'uint256' },
+            { internalType: 'uint256', name: 'feePercentage', type: 'uint256' },
             { internalType: 'uint256', name: 'limit', type: 'uint256' },
         ],
-        name: 'ExitHookFeeAboveLimit',
+        name: 'ExitFeeAboveLimit',
         type: 'error',
     },
     {
@@ -27,6 +27,34 @@ export default [
     {
         anonymous: false,
         inputs: [
+            { indexed: true, internalType: 'address', name: 'pool', type: 'address' },
+            { indexed: true, internalType: 'contract IERC20', name: 'token', type: 'address' },
+            { indexed: false, internalType: 'uint256', name: 'feeAmount', type: 'uint256' },
+        ],
+        name: 'ExitFeeCharged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: true, internalType: 'address', name: 'hooksContract', type: 'address' },
+            { indexed: true, internalType: 'address', name: 'pool', type: 'address' },
+        ],
+        name: 'ExitFeeHookExampleRegistered',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: true, internalType: 'address', name: 'hookContract', type: 'address' },
+            { indexed: false, internalType: 'uint256', name: 'exitFeePercentage', type: 'uint256' },
+        ],
+        name: 'ExitFeePercentageChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
             { indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
             { indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
         ],
@@ -35,7 +63,14 @@ export default [
     },
     {
         inputs: [],
-        name: 'MAX_EXIT_HOOK_FEE',
+        name: 'MAX_EXIT_FEE_PERCENTAGE',
+        outputs: [{ internalType: 'uint64', name: '', type: 'uint64' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'exitFeePercentage',
         outputs: [{ internalType: 'uint64', name: '', type: 'uint64' }],
         stateMutability: 'view',
         type: 'function',
@@ -57,7 +92,7 @@ export default [
                     { internalType: 'bool', name: 'shouldCallBeforeRemoveLiquidity', type: 'bool' },
                     { internalType: 'bool', name: 'shouldCallAfterRemoveLiquidity', type: 'bool' },
                 ],
-                internalType: 'struct IHooks.HookFlags',
+                internalType: 'struct HookFlags',
                 name: '',
                 type: 'tuple',
             },
@@ -131,7 +166,7 @@ export default [
                     { internalType: 'address', name: 'pool', type: 'address' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IHooks.AfterSwapParams',
+                internalType: 'struct AfterSwapParams',
                 name: '',
                 type: 'tuple',
             },
@@ -196,7 +231,7 @@ export default [
                     { internalType: 'address', name: 'router', type: 'address' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IBasePool.PoolSwapParams',
+                internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
@@ -219,14 +254,14 @@ export default [
                     { internalType: 'address', name: 'router', type: 'address' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IBasePool.PoolSwapParams',
+                internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
             { internalType: 'address', name: '', type: 'address' },
             { internalType: 'uint256', name: '', type: 'uint256' },
         ],
-        name: 'onComputeDynamicSwapFee',
+        name: 'onComputeDynamicSwapFeePercentage',
         outputs: [
             { internalType: 'bool', name: '', type: 'bool' },
             { internalType: 'uint256', name: '', type: 'uint256' },
@@ -237,7 +272,7 @@ export default [
     {
         inputs: [
             { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'address', name: 'pool', type: 'address' },
             {
                 components: [
                     { internalType: 'contract IERC20', name: 'token', type: 'address' },
@@ -263,7 +298,7 @@ export default [
         ],
         name: 'onRegister',
         outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -273,17 +308,10 @@ export default [
         stateMutability: 'view',
         type: 'function',
     },
-    {
-        inputs: [],
-        name: 'removeLiquidityHookFeePercentage',
-        outputs: [{ internalType: 'uint64', name: '', type: 'uint64' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
     { inputs: [], name: 'renounceOwnership', outputs: [], stateMutability: 'nonpayable', type: 'function' },
     {
-        inputs: [{ internalType: 'uint64', name: 'hookFeePercentage', type: 'uint64' }],
-        name: 'setRemoveLiquidityHookFeePercentage',
+        inputs: [{ internalType: 'uint64', name: 'newExitFeePercentage', type: 'uint64' }],
+        name: 'setExitFeePercentage',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',

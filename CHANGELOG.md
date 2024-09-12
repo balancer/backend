@@ -1,5 +1,12 @@
 # backend
 
+## 1.19.0
+
+### Minor Changes
+
+-   db7314d: add hook type name, handle swap amount = 0 errors
+-   46704ef: updating V3 vault deployment to v8 on sepolia
+
 ## 1.18.0
 
 ### Minor Changes
