@@ -53,8 +53,12 @@ export class Multicaller3 {
         for (const result of results) {
             let resultValue: Result | undefined = undefined;
             if (result.success) {
-                resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
-                set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
+                try {
+                    resultValue = this.interface.decodeFunctionResult(this.calls[i][1], result.returnData);
+                    set(returnObject, this.paths[i], resultValue.length > 1 ? resultValue : resultValue[0]);
+                } catch (e) {
+                    console.error('Error decoding function result', this.paths[i], e);
+                }
             } else {
                 set(returnObject, this.paths[i], undefined);
             }

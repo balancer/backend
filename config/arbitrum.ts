@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2021-08-23',
         balancer: [
             `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
-            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-fantom/api`,
+            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-arbitrum/api`,
         ],
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmTSU862YAXb5XMhGsE7JCajuvf5FPiZjrdvC9nnbzd86x`,
         beetsBar: 'https://',
