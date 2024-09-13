@@ -87,23 +87,22 @@ export default <NetworkData>{
         },
         aave: {
             v3: {
-                subgraphUrl: `https://gateway-gnosis.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83',
                         aTokenAddress: '0xc6b7aca6de8a6044e0e32d0c841a89244a10d284',
                         wrappedTokens: {
-                            stataGNOUSDC: '0x270ba1f35d8b87510d24f693fccc0da02e6e4eeb',
+                            stataGnoUSDC: '0x270ba1f35d8b87510d24f693fccc0da02e6e4eeb',
                         },
                     },
                     USDCn: {
                         underlyingAssetAddress: '0x2a22f9c3b484c3629090feed35f17ff8f88f76f0',
-                        aTokenAddress: '0xC0333cb85B59a788d8C7CAe5e1Fd6E229A3E5a65',
+                        aTokenAddress: '0xc0333cb85b59a788d8c7cae5e1fd6e229a3e5a65',
                         wrappedTokens: {
-                            stataGNOUSDCn2: '0xf0e7ec247b918311afa054e0aedb99d74c31b809',
+                            stataGnoUSDCe: '0xf0e7ec247b918311afa054e0aedb99d74c31b809',
                         },
                     },
-
                 },
             },
         },
