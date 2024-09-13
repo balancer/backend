@@ -96,7 +96,7 @@ export const syncGaugeStakingForPools = async (
     for (const gauge of gaugesForDb) {
         const preferredGaugesForPool = gaugesForDb.filter((g) => gauge.poolId === g.poolId && g.status === 'PREFERRED');
         if (preferredGaugesForPool.length > 1) {
-            Sentry.captureException(
+            console.error(
                 `Pool ${gauge.poolId} on ${
                     networkContext.chain
                 } has multiple preferred gauges: ${preferredGaugesForPool.map((gauge) => gauge.id)}`,
@@ -157,7 +157,7 @@ export const syncGaugeStakingForPools = async (
         }
 
         const dbStakingGauge = allDbStakingGauges.find((stakingGauge) => stakingGauge?.id === gauge.id);
-        const workingSupply = onchainRates.find(({ id }) => `${gauge.id}-${balAddress}-balgauge` === id)?.workingSupply;
+        const workingSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.workingSupply;
         const totalSupply = onchainRates.find(({ id }) => id.includes(gauge.id))?.totalSupply;
         if (
             !dbStakingGauge ||
@@ -193,14 +193,17 @@ export const syncGaugeStakingForPools = async (
     const allStakingGaugeRewards = allDbStakingGauges.map((gauge) => gauge?.rewards).flat();
 
     // DB operations for gauge reward tokens
-    for (const { id, rewardPerSecond } of onchainRates) {
+    for (const { id, rewardPerSecond, isVeBalemissions } of onchainRates) {
         const [gaugeId, tokenAddress] = id.toLowerCase().split('-');
         const token = prismaTokens.find((token) => token.address === tokenAddress);
         if (!token) {
-            const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
-            console.error(
-                `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
-            );
+            // Report missing tokens for active rewards only
+            if (Number(rewardPerSecond) > 0) {
+                const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
+                console.error(
+                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
+                );
+            }
             continue;
         }
 
@@ -215,9 +218,11 @@ export const syncGaugeStakingForPools = async (
                         gaugeId,
                         tokenAddress,
                         rewardPerSecond,
+                        isVeBalemissions,
                     },
                     update: {
                         rewardPerSecond,
+                        isVeBalemissions,
                     },
                     where: { id_chain: { id, chain: networkContext.chain } },
                 }),
@@ -240,6 +245,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
+        isVeBalemissions: boolean;
     }[]
 > => {
     // Get onchain data for BAL rewards
@@ -310,6 +316,7 @@ const getOnchainRewardTokensData = async (
                 rewardPerSecond,
                 workingSupply: workingSupply ? formatUnits(workingSupply) : '0',
                 totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
+                isVeBalemissions: true,
             };
         }),
         ...Object.keys(rewardsData)
@@ -329,6 +336,7 @@ const getOnchainRewardTokensData = async (
                         rewardPerSecond,
                         workingSupply: '0',
                         totalSupply: totalSupply ? formatUnits(totalSupply) : '0',
+                        isVeBalemissions: false,
                     };
                 }),
             ])
@@ -338,6 +346,7 @@ const getOnchainRewardTokensData = async (
         rewardPerSecond: string;
         workingSupply: string;
         totalSupply: string;
+        isVeBalemissions: boolean;
     }[];
 
     return onchainRates;

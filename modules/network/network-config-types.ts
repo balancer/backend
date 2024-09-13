@@ -61,7 +61,7 @@ export interface NetworkData {
     };
     subgraphs: {
         startDate: string;
-        balancer: string;
+        balancer: string[];
         balancerV3?: string;
         balancerPoolsV3?: string;
         blocks: string;
@@ -118,7 +118,7 @@ export interface NetworkData {
     };
     hooks?: {
         feeTakingHook?: string[];
-        removeLiquidityFeeHook?: string[];
+        exitFeeHook?: string[];
     };
     multicall: string;
     multicall3: string;

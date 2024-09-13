@@ -89,8 +89,15 @@ export class BoostedPoolAprService implements PoolAprService {
                             apr: userApr,
                             title: title,
                             group: aprItem.group,
+                            rewardTokenAddress: aprItem.rewardTokenAddress,
+                            rewardTokenSymbol: aprItem.rewardTokenSymbol,
                         },
-                        update: { apr: userApr, title: title },
+                        update: {
+                            apr: userApr,
+                            title: title,
+                            rewardTokenAddress: aprItem.rewardTokenAddress,
+                            rewardTokenSymbol: aprItem.rewardTokenSymbol,
+                        },
                     });
                 }
             }

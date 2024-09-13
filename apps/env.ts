@@ -33,6 +33,10 @@ export const schema = {
         optional: true,
         type: String,
     },
+    SATSUMA_API_KEY: {
+        optional: true,
+        type: String,
+    },
     WORKER_QUEUE_URL: {
         optional: true,
         type: String,

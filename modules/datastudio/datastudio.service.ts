@@ -1,6 +1,6 @@
 import { prisma } from '../../prisma/prisma-client';
 import { sheets } from '@googleapis/sheets';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import moment from 'moment-timezone';
 import { JWT } from 'google-auth-library';
 import { SecretsManager, secretsManager } from './secrets-manager';

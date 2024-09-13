@@ -35,6 +35,7 @@ import {
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
     HookData,
+    GqlPoolAggregator,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
@@ -177,6 +178,20 @@ export class PoolGqlLoaderService {
                 }
             }
         }
+    }
+
+    public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        // add limits per default
+        args.first = args.first || 1000;
+        args.skip = args.skip || 0;
+
+        const pools = await prisma.prismaPool.findMany({
+            ...this.mapQueryArgsToPoolQuery(args),
+            include: {
+                ...this.getPoolInclude(),
+            },
+        });
+        return pools.map((pool) => this.mapPoolToAggregatorPool(pool));
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -334,7 +349,7 @@ export class PoolGqlLoaderService {
                 orderBy = { dynamicData: { totalLiquidity: orderDirection } };
                 break;
             case 'totalShares':
-                orderBy = { dynamicData: { totalShares: orderDirection } };
+                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
                 break;
             case 'volume24h':
                 orderBy = { dynamicData: { volume24h: orderDirection } };
@@ -381,8 +396,7 @@ export class PoolGqlLoaderService {
                     some: {
                         token: {
                             address: {
-                                equals: token,
-                                mode: 'insensitive' as const,
+                                equals: token.toLowerCase(),
                             },
                         },
                     },
@@ -396,8 +410,7 @@ export class PoolGqlLoaderService {
                     every: {
                         token: {
                             address: {
-                                notIn: where.tokensNotIn || undefined,
-                                mode: 'insensitive' as const,
+                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
                             },
                         },
                     },
@@ -412,8 +425,7 @@ export class PoolGqlLoaderService {
                           userWalletBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -423,8 +435,7 @@ export class PoolGqlLoaderService {
                           userStakedBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -460,9 +471,8 @@ export class PoolGqlLoaderService {
             },
             AND: allTokensFilter,
             id: {
-                in: where?.idIn || undefined,
-                notIn: where?.idNotIn || undefined,
-                mode: 'insensitive',
+                in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
+                notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
             },
             ...(where?.categoryIn && !where?.tagIn
                 ? { categories: { hasSome: where.categoryIn.map((s) => s.toUpperCase()) } }
@@ -538,6 +548,69 @@ export class PoolGqlLoaderService {
                     },
                 ],
             },
+        };
+    }
+
+    private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
+        const { typeData, ...poolWithoutTypeData } = pool;
+
+        const mappedData = {
+            decimals: 18,
+            dynamicData: this.getPoolDynamicData(pool),
+            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
+            vaultVersion: poolWithoutTypeData.protocolVersion,
+        };
+
+        switch (pool.type) {
+            case 'STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'META_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'COMPOSABLE_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                    // bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+                };
+            case 'ELEMENT':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as ElementData),
+                    ...mappedData,
+                };
+            case 'LIQUIDITY_BOOTSTRAPPING':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                };
+            case 'GYRO':
+            case 'GYRO3':
+            case 'GYROE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as GyroData),
+                    ...mappedData,
+                };
+            case 'FX':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                    ...(typeData as FxData),
+                };
+        }
+
+        return {
+            ...poolWithoutTypeData,
+            ...mappedData,
         };
     }
 
@@ -1103,6 +1176,12 @@ export class PoolGqlLoaderService {
             let type: GqlPoolAprItemType;
             switch (aprItem.type) {
                 case PrismaPoolAprType.NATIVE_REWARD:
+                    if (pool.chain === 'FANTOM') {
+                        type = 'MABEETS_EMISSIONS';
+                    } else {
+                        type = 'VEBAL_EMISSIONS';
+                    }
+                    break;
                 case PrismaPoolAprType.THIRD_PARTY_REWARD:
                     type = 'STAKING';
                     break;
@@ -1120,12 +1199,16 @@ export class PoolGqlLoaderService {
                     title: aprItem.title,
                     apr: aprItem.range.min,
                     type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
                 aprItems.push({
                     id: `${aprItem.id}-boost`,
                     title: aprItem.title,
                     apr: aprItem.range.max - aprItem.range.min,
                     type: 'STAKING_BOOST',
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
             } else {
                 aprItems.push({
@@ -1133,6 +1216,8 @@ export class PoolGqlLoaderService {
                     title: aprItem.title,
                     apr: aprItem.apr,
                     type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
                 });
             }
         }
@@ -1324,8 +1409,7 @@ export class PoolGqlLoaderService {
                     userStakedBalances: {
                         where: {
                             userAddress: {
-                                equals: userAddress,
-                                mode: 'insensitive' as const,
+                                equals: userAddress.toLowerCase(),
                             },
                             balanceNum: { gt: 0 },
                         },
@@ -1335,8 +1419,7 @@ export class PoolGqlLoaderService {
             userWalletBalances: {
                 where: {
                     userAddress: {
-                        equals: userAddress,
-                        mode: 'insensitive' as const,
+                        equals: userAddress.toLowerCase(),
                     },
                     balanceNum: { gt: 0 },
                 },

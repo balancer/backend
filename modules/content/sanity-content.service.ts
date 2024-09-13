@@ -9,7 +9,7 @@ import {
     HomeScreenNewsItem,
 } from './content-types';
 import SanityClient from '@sanity/client';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { chainToIdMap } from '../network/network-config';
 
 interface SanityToken {

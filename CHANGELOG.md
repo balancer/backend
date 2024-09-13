@@ -1,5 +1,71 @@
 # backend
 
+## 1.19.0
+
+### Minor Changes
+
+-   db7314d: add hook type name, handle swap amount = 0 errors
+-   46704ef: updating V3 vault deployment to v8 on sepolia
+
+## 1.18.0
+
+### Minor Changes
+
+-   a6b5027: update protocol revenue APR to usdc
+
+### Patch Changes
+
+-   dac4636: prevent common issues from being sent to sentry
+-   1516a1b: handle SOR's effective price when outputAmount is 0
+
+## 1.17.0
+
+### Minor Changes
+
+-   8257bdd: organising apps and updating sentry
+-   37d9161: cow amm on arbitrum
+
+### Patch Changes
+
+-   f0f4deb: make return values in GqlSorPath required
+-   6baafda: Report missing tokens for active rewards only
+
+## 1.16.0
+
+### Minor Changes
+
+-   04a202e: adding reward token data to apr item
+
+### Patch Changes
+
+-   4b3aa1e: add reward token to yb and nested apr
+-   d61718a: adding new pool query specific for aggregator needs
+-   420ff5f: refactoring VotingGaugesRepository to use viem
+
+## 1.15.0
+
+### Minor Changes
+
+-   7f6a2bf: adding maker and renzo APRs on Mode
+
+## 1.14.8
+
+### Patch Changes
+
+-   ac4ff07: make queries to use wallet indexes properly
+
+## 1.14.7
+
+### Patch Changes
+
+-   039f01b: use index when querying events by userAddress
+
+## 1.14.6
+
+### Patch Changes
+
+-   271c9ae: optimise main events query index
+
 ## 1.14.5
 
 ### Patch Changes

@@ -124,8 +124,7 @@ export function EventsQueryController(tracer?: any) {
 
             if (userAddress) {
                 conditions.userAddress = {
-                    equals: userAddress,
-                    mode: 'insensitive',
+                    equals: userAddress.toLowerCase(),
                 };
             }
 

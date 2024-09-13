@@ -67,7 +67,7 @@ model PrismaPoolDynamicData {
     @@unique([poolId, chain])
     // Indexes used for sorting pools in the UI by different metrics
     @@index(totalLiquidity)
-    @@index(totalShares)
+    @@index(totalSharesNum(sort: Desc))
     @@index(volume24h)
     @@index(apr)
 
@@ -222,6 +222,8 @@ model PrismaPoolAprItem {
     pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
     chain               Chain
     title               String
+    rewardTokenAddress  String?
+    rewardTokenSymbol   String?
     apr                 Float
     range               PrismaPoolAprRange?
 
@@ -421,6 +423,7 @@ model PrismaPoolStakingGaugeReward{
 
     tokenAddress        String
     rewardPerSecond     String
+    isVeBalemissions    Boolean                 @default(false)
 }
 
 
@@ -558,7 +561,7 @@ model PrismaPoolEvent {
 
     @@id([id, chain])
     @@index([type])
-    @@index([poolId])
+    @@index([chain, poolId, userAddress])
     @@index([protocolVersion])
     @@index([blockTimestamp(sort: Desc), blockNumber(sort: Desc), logIndex(sort: Desc)])
     @@map("PartitionedPoolEvent")

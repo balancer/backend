@@ -5,7 +5,7 @@ import {
     PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
 import * as Sentry from '@sentry/node';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 
 export interface NotificationsCloudwatchMetric {
     merticData: MetricDatum[];

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { env } from '../app/env';
+import { env } from '../apps/env';
 
 export let prisma = new PrismaClient({
     datasources: {

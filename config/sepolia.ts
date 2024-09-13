@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -13,9 +13,9 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-05-03',
         cowAmm: 'https://api.studio.thegraph.com/proxy/75376/balancer-cow-amm-sepolia/version/latest',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
-        balancerV3: 'https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-6th/version/latest',
-        balancerPoolsV3: 'https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-6th/version/latest',
+        balancer: ['https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest'],
+        balancerV3: 'https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-8th/version/latest',
+        balancerPoolsV3: 'https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-8th/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
@@ -55,15 +55,15 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0x92b5c1cb2999c45804a60d6529d77deef00fb839',
-            routerAddress: '0xa12da7dfd0792a10a5b05b575545bd685798ce35',
+            vaultAddress: '0x0ef1c156a7986f394d90ed1beea6483cc435f542',
+            routerAddress: '0xb12fcb422aae6720f882e22c340964a7723f2387',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
     },
     hooks: {
-        feeTakingHook: ['0xcc4a97bb41dc77013d625fc2a5e7867603d4c78b'],
-        removeLiquidityFeeHook: ['0x04d584195a96dffc7f8b695aa3c9d3c1606b69d1'],
+        feeTakingHook: ['0xde97fc6ecdcd9efa53dac2d29c0fc10e9b482a0b'],
+        exitFeeHook: ['0x8756a6527e8dc94cf07a468d2e4df8e9946bce3d'],
     },
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,7 +12,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
+        balancer: [`https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`],
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-polygon-zkevm-blocks/version/latest',
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-polygon-zk/version/latest`,

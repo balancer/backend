@@ -332,7 +332,7 @@ class SorPathService implements SwapService {
         const returnAmount = swapKind === SwapKind.GivenIn ? outputAmount : inputAmount;
         const swapAmount = swapKind === SwapKind.GivenIn ? inputAmount : outputAmount;
 
-        const effectivePrice = inputAmount.divDownFixed(outputAmount.scale18);
+        const effectivePrice = outputAmount.amount > 0 ? inputAmount.divDownFixed(outputAmount.scale18) : Infinity;
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         return {
@@ -350,7 +350,13 @@ class SorPathService implements SwapService {
             swapAmountRaw: swapAmount.amount.toString(),
             returnAmount: formatUnits(returnAmount.amount, returnAmount.token.decimals),
             returnAmountRaw: returnAmount.amount.toString(),
-            effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
+            effectivePrice:
+                effectivePrice === Infinity
+                    ? 'Infinity'
+                    : formatUnits(
+                          (effectivePrice as TokenAmount).amount,
+                          (effectivePrice as TokenAmount).token.decimals,
+                      ),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: this.mapRoutes(paths, pools),
             priceImpact: {

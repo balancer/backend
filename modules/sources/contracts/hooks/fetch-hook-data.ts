@@ -4,7 +4,7 @@ import type { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { ViemClient } from '../../types';
 import { feeTakingHook } from './fee-taking-hook';
-import { removeLiquidityFeeHook } from './remove-liquidity-fee-hook';
+import { exitFeeHook } from './exit-fee-hook';
 
 export const fetchHookData = async (client: ViemClient, addresses?: Record<string, HookType>) => {
     if (!addresses) {
@@ -19,8 +19,8 @@ export const fetchHookData = async (client: ViemClient, addresses?: Record<strin
             case 'feeTakingHook':
                 calls = [...calls, ...feeTakingHook(address)];
                 break;
-            case 'removeLiquidityFeeHook':
-                calls = [...calls, ...removeLiquidityFeeHook(address)];
+            case 'exitFeeHook':
+                calls = [...calls, ...exitFeeHook(address)];
                 break;
             default:
                 break;

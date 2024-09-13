@@ -7,7 +7,7 @@ import axios from 'axios';
 import { SwapInfo, SwapV2 } from '@balancer-labs/sdk';
 import { replaceEthWithZeroAddress, replaceZeroAddressWithEth } from '../../web3/addresses';
 import { BigNumber } from 'ethers';
-import { env } from '../../../app/env';
+import { env } from '../../../apps/env';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { DeploymentEnv } from '../../network/network-config-types';
 import _ from 'lodash';
