@@ -165,6 +165,12 @@ userInitWalletBalancesForAllPools
 userInitStakedBalances
 ```
 
+You can do that by starting the server in development mode with hot reloading and calling the methods via API playground, or curl from the shell:
+
+```
+curl -d '{"query":"mutation { poolSyncAllPoolsFromSubgraph }"}' -H 'Content-Type: application/json' -H 'chainId: 1' -H "AdminApiKey: $(grep '^ADMIN_API_KEY=' .env | cut -d '=' -f2)" http://localhost:4000/graphql
+```
+
 ### Setup database & Prisma from backup
 
 Retrieve the current pg_dump file under `https://api-db-dump.s3.eu-central-1.amazonaws.com/canary/api-dump.YYYYMMDD`.
