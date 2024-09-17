@@ -1,6 +1,6 @@
 {
     "name": "backend",
-    "version": "1.20.0",
+    "version": "1.20.2",
     "description": "Backend service for Beethoven X and Balancer",
     "repository": "https://github.com/balancer/backend",
     "author": "Beethoven X",
@@ -15,7 +15,8 @@
         "prisma-merge": "ts-node prisma/prisma-merge.ts",
         "test": "jest",
         "vitest": "vitest",
-        "task": "ts-node -r tsconfig-paths/register -r dotenv/config tasks/index.ts"
+        "task": "ts-node -r tsconfig-paths/register -r dotenv/config tasks/index.ts",
+        "mutation": "sh scripts/run_mutation.sh"
     },
     "dependencies": {
         "@aws-sdk/client-cloudwatch": "^3.388.0",

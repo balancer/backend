@@ -1,5 +1,17 @@
 # backend
 
+## 1.20.2
+
+### Patch Changes
+
+-   2a486d0: fixing prisma include issue in updateAllTokenPrices
+
+## 1.20.1
+
+### Patch Changes
+
+-   c8913ca: Enable Stable pools for non-V3 in SOR.
+
 ## 1.20.0
 
 ### Minor Changes
