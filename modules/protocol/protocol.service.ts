@@ -4,12 +4,13 @@ import { Cache } from 'memory-cache';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../network/network-config';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
 import { GraphQLClient } from 'graphql-request';
 import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import axios from 'axios';
 import { tokenService } from '../token/token.service';
+import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -69,10 +70,12 @@ export class ProtocolService {
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
 
-        const client = new GraphQLClient(AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer);
-        const subgraphClient = getSdk(client);
+        const client = getV2SubgraphClient(
+            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
+            Number(chainToIdMap[chain]),
+        );
 
-        const { balancers } = await subgraphClient.BalancerProtocolData({});
+        const { balancers } = await client.BalancerProtocolData({});
         const { totalSwapFee, totalSwapVolume, poolCount } = balancers[0];
 
         const pools = await prisma.prismaPool.findMany({

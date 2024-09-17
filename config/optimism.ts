@@ -13,7 +13,10 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
+            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-optimism/api`,
+        ],
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/optimism-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
@@ -245,6 +248,13 @@ export default <NetworkData>{
                 sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
                 path: 'value',
                 isIbYield: true,
+            },
+            wusdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
             },
         },
     },

@@ -12,7 +12,9 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-06-06',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeJY1ZjmuJVPvmVghZSuiSxEx2a9kmpKnjr4Qw5hNdpLU`,
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeJY1ZjmuJVPvmVghZSuiSxEx2a9kmpKnjr4Qw5hNdpLU`,
+        ],
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/avalanche-blocks/version/latest',
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmYCJJToWTY31LgsJG2vZTNkKWpQ7i91cTVYgPUBsJ5nQZ`,

@@ -13,7 +13,10 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
+            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-fantom/api`,
+        ],
         beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXcxzZioHXV5ts2UcG6gNNEayoaZ9ip7D9JvPS88K2HXe`,
         blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
         masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmZQJu1rxMEDwzZb5TSqDXjcFiS1DN8BRKCLKRv6ifEBhA`,
