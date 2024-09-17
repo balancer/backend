@@ -105,14 +105,15 @@ export class TokenPriceService {
     public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             where: { chain: { in: chains } },
-            include: {
-                types: true,
-            },
+        });
+
+        const tokenTypes = await prisma.prismaTokenType.findMany({
+            where: { chain: { in: chains } },
         });
 
         let tokensWithTypes = tokens.map((token) => ({
             ...token,
-            types: token.types.map((type) => type.type),
+            types: tokenTypes.filter((type) => type.tokenAddress === token.address).map((type) => type.type),
         }));
 
         for (const handler of this.priceHandlers) {
