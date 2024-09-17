@@ -1,5 +1,11 @@
 # backend
 
+## 1.20.1
+
+### Patch Changes
+
+-   c8913ca: Enable Stable pools for non-V3 in SOR.
+
 ## 1.20.0
 
 ### Minor Changes
