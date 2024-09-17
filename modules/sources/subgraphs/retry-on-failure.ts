@@ -19,8 +19,8 @@ export async function retryOnFailureWithRotation<T>(
                 currentSdkIndex = (currentSdkIndex + 1) % sdkClients.length;
                 console.log(`Retrying with URL from index ${currentSdkIndex}...`);
                 if (error.message.includes('429')) {
-                    // Sleep for x seconds if the error is a 429
-                    await new Promise((resolve) => setTimeout(resolve, 5000 * attempts));
+                    // Sleep for x seconds if the error is a 429, would be better to use the Retry-After header
+                    await new Promise((resolve) => setTimeout(resolve, 10000 * attempts));
                 }
             } else {
                 throw new Error('All SDK clients failed after retries.');
