@@ -1,5 +1,17 @@
 # backend
 
+## 1.20.0
+
+### Minor Changes
+
+-   9d9b90d: Subgraph client will fallback to another URL on failure
+
+### Patch Changes
+
+-   d813678: dev setup with hot reloading
+-   5ea8f51: adding prodction base subgraph url
+-   7f76312: AAVE APRs on gnosis and wUSDM on OP
+
 ## 1.19.0
 
 ### Minor Changes
