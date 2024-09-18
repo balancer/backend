@@ -124,18 +124,22 @@ class SorPathService implements SwapService {
                 input.callDataInput,
             );
         } catch (err: any) {
-            console.log(`Error Retrieving QuerySwap`, err);
-            Sentry.captureException(err.message, {
-                tags: {
-                    service: 'sorV2 query swap',
-                    tokenIn: input.tokenIn,
-                    tokenOut: input.tokenOut,
-                    swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
-                    swapType: input.swapType,
-                    chain: input.chain,
-                },
-            });
-            return emptyResponse;
+            if (err.message === 'SOR queryBatchSwap failed') {
+                throw new Error('SOR queryBatchSwap failed');
+            } else {
+                console.log(`SOR queryBatchSwap failed`, err);
+                Sentry.captureException(err.message, {
+                    tags: {
+                        service: 'sorV2 query swap',
+                        tokenIn: input.tokenIn,
+                        tokenOut: input.tokenOut,
+                        swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
+                        swapType: input.swapType,
+                        chain: input.chain,
+                    },
+                });
+                return emptyResponse;
+            }
         }
     }
 
@@ -223,7 +227,11 @@ class SorPathService implements SwapService {
             swapKind,
         });
         if (queryFirst) {
-            queryOutput = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            try {
+                queryOutput = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            } catch (error) {
+                throw new Error('SOR queryBatchSwap failed');
+            }
             if (swapKind === SwapKind.GivenIn) {
                 updatedAmount = (queryOutput as ExactInQueryOutput).expectedAmountOut;
             } else {

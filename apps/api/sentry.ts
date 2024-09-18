@@ -68,6 +68,11 @@ export const apolloSentryPlugin: ApolloServerPlugin<ResolverContext> = {
                         continue;
                     }
 
+                    // Ignore specific errors
+                    if (err.message === 'SOR queryBatchSwap failed') {
+                        continue;
+                    }
+
                     // Potentially set transaction name to the operation name,
                     // add tags and fingerprint to group errors
 
