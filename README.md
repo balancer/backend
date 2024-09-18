@@ -106,7 +106,7 @@ Query the SOR to swap 1 WETH to USDC
 
 ## Pricing of tokens
 
-First of all, for a token to be able to have a price it must be allowed, meaning it must be added to the [tokenlist](https://github.com/balancer/tokenlists). This must happen *before* any pricing can occur. 
+First of all, for a token to be able to have a price it must be allowed, meaning it must be added to the [tokenlist](https://github.com/balancer/tokenlists). This must happen _before_ any pricing can occur.
 
 To price a token there are various handlers that will try to price a token. These handlers take priority over each other. This means that as soon
 as a handler can price a token, it will not be price by another handler. These handlers, order by priority, are:
@@ -165,6 +165,12 @@ userInitWalletBalancesForAllPools
 userInitStakedBalances
 ```
 
+You can do that by starting the server in development mode with hot reloading and calling the methods via API playground, or curl from the shell:
+
+```
+curl -d '{"query":"mutation { poolSyncAllPoolsFromSubgraph }"}' -H 'Content-Type: application/json' -H 'chainId: 1' -H "AdminApiKey: $(grep '^ADMIN_API_KEY=' .env | cut -d '=' -f2)" http://localhost:4000/graphql
+```
+
 ### Setup database & Prisma from backup
 
 Retrieve the current pg_dump file under `https://api-db-dump.s3.eu-central-1.amazonaws.com/canary/api-dump.YYYYMMDD`.
@@ -178,7 +184,7 @@ The output at the very end saying `ERROR: role "rdsadmin" does not exist` is nor
 
 ## Run locally
 
-`yarn start:local`
+`yarn dev`
 
 ## Branching and deployment environments
 

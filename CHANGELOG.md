@@ -1,5 +1,29 @@
 # backend
 
+## 1.20.2
+
+### Patch Changes
+
+-   2a486d0: fixing prisma include issue in updateAllTokenPrices
+
+## 1.20.1
+
+### Patch Changes
+
+-   c8913ca: Enable Stable pools for non-V3 in SOR.
+
+## 1.20.0
+
+### Minor Changes
+
+-   9d9b90d: Subgraph client will fallback to another URL on failure
+
+### Patch Changes
+
+-   d813678: dev setup with hot reloading
+-   5ea8f51: adding prodction base subgraph url
+-   7f76312: AAVE APRs on gnosis and wUSDM on OP
+
 ## 1.19.0
 
 ### Minor Changes
