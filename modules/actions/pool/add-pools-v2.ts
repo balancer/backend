@@ -16,7 +16,9 @@ export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain):
 
     const subgraphPools = await subgraphService.legacyService.getAllPools({}, false);
 
-    const newPools = subgraphPools.filter((pool) => !existing.includes(pool.id));
+    const newPools = subgraphPools
+        .filter((pool) => !existing.includes(pool.id))
+        .sort((a, b) => a.createTime - b.createTime);
 
     // Any pool can be nested
     const allNestedTypePools = [...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address }))];
