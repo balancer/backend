@@ -8,3 +8,4 @@ export * from './event-query-controller';
 export * from './event-controller';
 export * from './aprs-controller';
 export * from './content-controller';
+export * from './fx-pools-controller';
