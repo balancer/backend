@@ -10,6 +10,7 @@ import {
     PoolMutationController,
     PoolController,
     EventController,
+    FXPoolsController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -94,6 +95,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
+    } else if (job === 'sync-latest-fx-prices') {
+        return FXPoolsController().syncLatestPrices(chain);
     } else if (job === 'backsync-swaps') {
         // Run in loop until no new swaps are found
         let status: string | undefined = 'true';
