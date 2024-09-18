@@ -1,5 +1,13 @@
 # backend
 
+## 1.20.3
+
+### Patch Changes
+
+-   6c67ceb: SOR shouldn't be using all static pools
+-   c64e675: handle queryBatchSwap errors
+-   6c67ceb: add sync latest fx prices as a task
+
 ## 1.20.2
 
 ### Patch Changes
