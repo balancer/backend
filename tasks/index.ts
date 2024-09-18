@@ -38,6 +38,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return PoolController().reloadPoolsV3(chainIdToChain[chain]);
     } else if (job === 'add-pools-v2') {
         return PoolsV2Controller().addPools(chain);
+    } else if (job === 'sync-pools-v2') {
+        return PoolsV2Controller().syncPools(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {

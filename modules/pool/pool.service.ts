@@ -23,7 +23,7 @@ import { userService } from '../user/user.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolCreatorService } from './lib/pool-creator.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
-import { PoolOnChainDataService } from './lib/pool-on-chain-data.service';
+import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
 import { PoolSyncService } from './lib/pool-sync.service';
@@ -204,9 +204,12 @@ export class PoolService {
 
         const chunks = _.chunk(poolIds, 100);
 
+        // Get current token prices
+        const tokenPrices = await tokenService.getTokenPrices(this.chain);
+
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainStatus(chunk);
-            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
+            await this.poolOnChainDataService.updateOnChainStatus(chunk, this.chain);
+            await this.poolOnChainDataService.updateOnChainData(chunk, this.chain, blockNumber, tokenPrices);
         }
     }
 
@@ -214,15 +217,18 @@ export class PoolService {
         const chunks = _.chunk(poolIds, 1000);
 
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainStatus(chunk);
+            await this.poolOnChainDataService.updateOnChainStatus(chunk, this.chain);
         }
     }
 
     public async updateOnChainDataForPools(poolIds: string[], blockNumber: number) {
         const chunks = _.chunk(poolIds, 50);
 
+        // Get current token prices
+        const tokenPrices = await tokenService.getTokenPrices(this.chain);
+
         for (const chunk of chunks) {
-            await this.poolOnChainDataService.updateOnChainData(chunk, blockNumber);
+            await this.poolOnChainDataService.updateOnChainData(chunk, this.chain, blockNumber, tokenPrices);
         }
     }
 
@@ -230,8 +236,9 @@ export class PoolService {
         const blockNumber = await networkContext.provider.getBlockNumber();
         const timestamp = moment().subtract(5, 'minutes').unix();
         const poolIds = await this.balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
+        const tokenPrices = await tokenService.getTokenPrices(this.chain);
 
-        await this.poolOnChainDataService.updateOnChainData(poolIds, blockNumber);
+        await this.poolOnChainDataService.updateOnChainData(poolIds, this.chain, blockNumber, tokenPrices);
     }
 
     public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {
@@ -500,9 +507,20 @@ export class PoolService {
     }
 }
 
+const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOptions = () => {
+    return {
+        chain: networkContext.chain,
+        vaultAddress: networkContext.data.balancer.v2.vaultAddress,
+        balancerQueriesAddress: networkContext.data.balancer.v2.balancerQueriesAddress,
+        yieldProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
+        swapProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
+        gyroConfig: networkContext.data.gyro?.config,
+    };
+};
+
 export const poolService = new PoolService(
     new PoolCreatorService(userService),
-    new PoolOnChainDataService(tokenService),
+    new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
     new PoolUsdDataService(tokenService, blocksSubgraphService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
