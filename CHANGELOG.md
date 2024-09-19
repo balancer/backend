@@ -1,5 +1,12 @@
 # backend
 
+## 1.20.4
+
+### Patch Changes
+
+-   14b6f71: adding aura balance tracking to fraxtal
+-   3fb6c32: change RPCs to dRPC
+
 ## 1.20.3
 
 ### Patch Changes

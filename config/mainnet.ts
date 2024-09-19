@@ -48,8 +48,8 @@ export default <NetworkData>{
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://eth-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',

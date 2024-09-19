@@ -35,8 +35,8 @@ export default <NetworkData>{
         platformId: 'avalanche',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://avax-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=avalanche&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/avalanche',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
