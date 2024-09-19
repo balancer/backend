@@ -21,6 +21,10 @@ export const schema = {
         optional: true,
         type: String,
     },
+    DRPC_API_KEY: {
+        optional: true,
+        type: String,
+    },
     COINGECKO_API_KEY: {
         optional: true,
         type: String,

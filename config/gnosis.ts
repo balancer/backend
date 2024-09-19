@@ -36,8 +36,8 @@ export default <NetworkData>{
         platformId: 'xdai',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://gnosis-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=gnosis&dkey=${env.DRPC_API_KEY}`
         : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

@@ -35,8 +35,8 @@ export default <NetworkData>{
         platformId: 'polygon-pos',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://polygon-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=polygon&dkey=${env.DRPC_API_KEY}`
         : 'https://1rpc.io/matic',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

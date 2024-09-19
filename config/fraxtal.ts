@@ -1,3 +1,4 @@
+import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -33,7 +34,9 @@ export default <NetworkData>{
         platformId: 'fraxtal',
         excludedTokenAddresses: [],
     },
-    rpcUrl: 'https://rpc.frax.com/',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=fraxtal&dkey=${env.DRPC_API_KEY}`
+        : 'https://rpc.frax.com/',
     rpcMaxBlockRange: 5000,
     protocolToken: 'bal',
     bal: {

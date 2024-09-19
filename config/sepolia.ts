@@ -35,8 +35,8 @@ export default <NetworkData>{
         platformId: 'ethereum',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=sepolia&dkey=${env.DRPC_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
