@@ -11,6 +11,7 @@ import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 
 export const fraxtalNetworkData = config.FRAXTAL;
 
@@ -24,7 +25,7 @@ export const fraxtalNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new GaugeAprService(tokenService, [fraxtalNetworkData.bal!.address]),
     ],
-    userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
+    userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             fraxtalNetworkData.subgraphs.balancer,
