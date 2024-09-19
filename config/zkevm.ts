@@ -33,8 +33,8 @@ export default <NetworkData>{
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.ALCHEMY_API_KEY
-        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=polygon-zkevm&dkey=${env.DRPC_API_KEY}`
         : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',

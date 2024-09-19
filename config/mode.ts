@@ -1,3 +1,4 @@
+import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -31,7 +32,9 @@ export default <NetworkData>{
         platformId: 'mode',
         excludedTokenAddresses: [],
     },
-    rpcUrl: 'https://mainnet.mode.network',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=mode&dkey=${env.DRPC_API_KEY}`
+        : 'https://mainnet.mode.network',
     rpcMaxBlockRange: 5000,
     protocolToken: 'bal',
     bal: {
