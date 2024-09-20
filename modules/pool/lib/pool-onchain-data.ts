@@ -146,6 +146,7 @@ const addPoolTypeSpecificCallsToMulticaller = (type: PoolInput['type'], version 
             return stableCalls;
         case 'META_STABLE':
             return metaStableCalls;
+        case 'GYRO':
         case 'GYROE':
             if (version === 2) {
                 return gyroECalls;
