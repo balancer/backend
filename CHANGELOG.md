@@ -1,5 +1,11 @@
 # backend
 
+## 1.20.5
+
+### Patch Changes
+
+-   0ab785d: fetch token rates for gyro2 pools
+
 ## 1.20.4
 
 ### Patch Changes
