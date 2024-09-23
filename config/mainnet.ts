@@ -8,6 +8,8 @@ const underlyingTokens = {
     USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    crvUSD: '0xf939e0a03fb07f59a73314e73794be0e57ac1b4e',
+    LUSD: '0x5f98805a4e8be255a32880fdec7f6728c6568ba0',
 };
 
 export default <NetworkData>{
