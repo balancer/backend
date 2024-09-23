@@ -175,6 +175,20 @@ export default <NetworkData>{
                             stataEthWETH: '0x03928473f25bb2da6bc880b07ecbadc636822264',
                         },
                     },
+                    crvUSD: {
+                        underlyingAssetAddress: underlyingTokens.crvUSD,
+                        aTokenAddress: '0xb82fa9f31612989525992fcfbb09ab22eff5c85a',
+                        wrappedTokens: {
+                            stataEthcrvUSD: '0x848107491e029afde0ac543779c7790382f15929',
+                        },
+                    },
+                    LUSD: {
+                        underlyingAssetAddress: underlyingTokens.LUSD,
+                        aTokenAddress: '0x3fe6a295459fae07df8a0cecc36f37160fe86aa9',
+                        wrappedTokens: {
+                            stataEthLUSD: '0xdbf5e36569798d1e39ee9d7b1c61a7409a74f23a',
+                        },
+                    },
                 },
             },
         },
