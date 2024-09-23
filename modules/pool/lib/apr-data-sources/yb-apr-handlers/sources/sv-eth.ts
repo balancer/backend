@@ -1,10 +1,11 @@
 import { createPublicClient, formatEther, http, parseAbi } from 'viem';
 import { mainnet } from 'viem/chains';
 import type { AprHandler } from '../';
+import config from '../../../../../../config/mainnet';
 
 const client = createPublicClient({
     chain: mainnet,
-    transport: http('https://rpc.eth.gateway.fm'),
+    transport: http(config.rpcUrl),
 });
 
 const distributor = '0xc93ab6aca2c14422a65a31010ac2b4baa86a21b3' as `0x${string}`;
