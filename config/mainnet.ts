@@ -8,6 +8,8 @@ const underlyingTokens = {
     USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    crvUSD: '0xf939e0a03fb07f59a73314e73794be0e57ac1b4e',
+    LUSD: '0x5f98805a4e8be255a32880fdec7f6728c6568ba0',
 };
 
 export default <NetworkData>{
@@ -171,6 +173,20 @@ export default <NetworkData>{
                         wrappedTokens: {
                             waWETH: '0x59463bb67ddd04fe58ed291ba36c26d99a39fbc6',
                             stataEthWETH: '0x03928473f25bb2da6bc880b07ecbadc636822264',
+                        },
+                    },
+                    crvUSD: {
+                        underlyingAssetAddress: underlyingTokens.crvUSD,
+                        aTokenAddress: '0xb82fa9f31612989525992fcfbb09ab22eff5c85a',
+                        wrappedTokens: {
+                            stataEthcrvUSD: '0x848107491e029afde0ac543779c7790382f15929',
+                        },
+                    },
+                    LUSD: {
+                        underlyingAssetAddress: underlyingTokens.LUSD,
+                        aTokenAddress: '0x3fe6a295459fae07df8a0cecc36f37160fe86aa9',
+                        wrappedTokens: {
+                            stataEthLUSD: '0xdbf5e36569798d1e39ee9d7b1c61a7409a74f23a',
                         },
                     },
                 },
