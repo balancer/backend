@@ -39,7 +39,12 @@ export async function sorGetPathsWithPools(
             case 'STABLE':
                 // Since we allowed all the pools, we started getting BAL#322 errors
                 // Enabling pools one by one until we find the issue
-                if (prismaPool.id === '0x3dd0843a028c86e0b760b1a76929d1c5ef93a2dd000200000000000000000249') {
+                if (
+                    [
+                        '0x3dd0843a028c86e0b760b1a76929d1c5ef93a2dd000200000000000000000249', // auraBal/8020
+                        '0x2d011adf89f0576c9b722c28269fcb5d50c2d17900020000000000000000024d', // sdBal/8020
+                    ].includes(prismaPool.id)
+                ) {
                     basePools.push(StablePool.fromPrismaPool(prismaPool));
                 }
                 break;
