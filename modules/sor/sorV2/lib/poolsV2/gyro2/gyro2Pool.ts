@@ -4,12 +4,21 @@ import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualParams } from './gyro2Math';
 import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
-import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount, BigintIsh } from '@balancer/sdk';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
 import { BasePoolToken } from '../basePoolToken';
+
+export class Gyro2PoolToken extends BasePoolToken {
+    public readonly rate: bigint;
+
+    public constructor(token: Token, amount: BigintIsh, index:number, rate: BigintIsh) {
+        super(token, amount, index);
+        this.rate = BigInt(rate);
+    }
+}
 
 export class Gyro2Pool implements BasePool {
     public readonly chain: Chain;
@@ -18,15 +27,15 @@ export class Gyro2Pool implements BasePool {
     public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly tokens: BasePoolToken[];
+    public readonly tokens: Gyro2PoolToken[];
     public readonly tokenPairs: TokenPairData[];
 
     private readonly sqrtAlpha: bigint;
     private readonly sqrtBeta: bigint;
-    private readonly tokenMap: Map<string, BasePoolToken>;
+    private readonly tokenMap: Map<string, Gyro2PoolToken>;
 
     static fromPrismaPool(pool: PrismaPoolWithDynamic): Gyro2Pool {
-        const poolTokens: BasePoolToken[] = [];
+        const poolTokens: Gyro2PoolToken[] = [];
 
         if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
@@ -46,7 +55,7 @@ export class Gyro2Pool implements BasePool {
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(new BasePoolToken(token, tokenAmount.amount, poolToken.index));
+            poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.dynamicData.priceRate)));
         }
 
         const gyroData = pool.typeData as GyroData;
@@ -72,7 +81,7 @@ export class Gyro2Pool implements BasePool {
         swapFee: bigint,
         sqrtAlpha: bigint,
         sqrtBeta: bigint,
-        tokens: BasePoolToken[],
+        tokens: Gyro2PoolToken[],
         tokenPairs: TokenPairData[],
     ) {
         this.id = id;
@@ -106,14 +115,27 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
+        // The Gyro2CLPPool contract has the following onSwap execution order.
+        // See details here https://vscode.blockscan.com/arbitrum-one/0x14abd18d1fa335e9f630a658a2799b33208763fa
+        // Or a sim here https://dashboard.tenderly.co/mcquardt/project/simulator/f74b23ae-fcb5-459e-b4cf-f21055298a8c?trace=0.0.0.0.2.2.1.5.7.2
+        // 1. onSwap
+        // 2. swap Type decision
+        // 3. upscale balances reported by the Vault
+        // 5. calculate invariant & virtual paramIn & virtualParamOut
+        // 6. substract swap fee from swapAmount
+        // 7. do _calcOutGivenIn
+        // 8. final amountOut get downscaled by rate
+
+        // These tIn, tOut are vault reported balances (scaled to 18 decimals)
+
         const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(tokenIn, tokenOut);
-        const invariant = _calculateInvariant([tIn.scale18, tOut.scale18], sqrtAlpha, sqrtBeta);
+        const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(invariant, sqrtAlpha, sqrtBeta);
         const inAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
 
         const outAmountScale18 = _calcOutGivenIn(
-            tIn.scale18,
-            tOut.scale18,
+            MathSol.mulUpFixed(tIn.scale18,tIn.rate),
+            MathSol.mulUpFixed(tOut.scale18, tOut.rate),
             inAmountLessFee.scale18,
             virtualParamIn,
             virtualParamOut,
@@ -121,7 +143,8 @@ export class Gyro2Pool implements BasePool {
 
         if (outAmountScale18 > tOut.scale18) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
-        const outAmount = TokenAmount.fromScale18Amount(tokenOut, outAmountScale18);
+        // Gyro2CLPPool does not downscale in the Pool contract, but the Vault downscales.
+        const outAmount = TokenAmount.fromScale18Amount(tokenOut, outAmountScale18).divDownFixed(tOut.rate);
 
         if (mutateBalances) {
             tIn.increase(swapAmount.amount);
@@ -137,20 +160,34 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
+        // The Gyro2CLPPool contract has the following onSwap execution order.
+        // See details here https://vscode.blockscan.com/arbitrum-one/0x14abd18d1fa335e9f630a658a2799b33208763fa
+        // Or a sim here https://dashboard.tenderly.co/mkflow27/balancer/simulator/0322ee9f-89af-4cf4-9b2b-7a414c13ad9d
+        // 1. onSwap
+        // 2. swap Type decision
+        // 3. upscale balances reported by the Vault
+        // 5. calculate invariant & virtual paramIn & virtualParamOut
+        // 6. upscale swapAmount
+        // 7. do _calcInGivenOut
+        // 8. downscale amountIn
+        // 9. calculate swap fee amountIn.divUp(getSwapFeePercentage().complement());
+
         const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(tokenIn, tokenOut);
 
         if (swapAmount.scale18 > tOut.scale18) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
-        const invariant = _calculateInvariant([tIn.scale18, tOut.scale18], sqrtAlpha, sqrtBeta);
+        const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(invariant, sqrtAlpha, sqrtBeta);
         const inAmountLessFee = _calcInGivenOut(
-            tIn.scale18,
-            tOut.scale18,
-            swapAmount.scale18,
+            MathSol.mulUpFixed(tIn.scale18,tIn.rate),
+            MathSol.mulUpFixed(tOut.scale18, tOut.rate),
+            MathSol.mulUpFixed(swapAmount.scale18,tOut.rate), //amountOut
             virtualParamIn,
             virtualParamOut,
         );
-        const inAmount = this.addSwapFeeAmount(TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee));
+
+        const inAmountLessSwapFeeRateUndone = MathSol.divDownFixed(inAmountLessFee, tIn.rate);
+        const inAmount = this.addSwapFeeAmount(TokenAmount.fromScale18Amount(tokenIn, inAmountLessSwapFeeRateUndone));
 
         if (mutateBalances) {
             tIn.decrease(inAmount.amount);
@@ -184,7 +221,7 @@ export class Gyro2Pool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: Gyro2PoolToken; tOut: Gyro2PoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
@@ -199,8 +236,8 @@ export class Gyro2Pool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): {
-        tIn: BasePoolToken;
-        tOut: BasePoolToken;
+        tIn: Gyro2PoolToken;
+        tOut: Gyro2PoolToken;
         sqrtAlpha: bigint;
         sqrtBeta: bigint;
     } {
