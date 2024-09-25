@@ -1,11 +1,13 @@
-import { Multicaller3 } from '../../web3/multicaller3';
+import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
 import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
+import { Chain } from '@prisma/client';
 
 interface PoolInput {
     id: string;
+    chain: Chain;
     address: string;
     tokens: {
         address: string;
@@ -71,7 +73,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
 
     const tokenPairOutput: PoolTokenPairsOutput = {};
 
-    const multicaller = new Multicaller3(BalancerQueries, batchSize);
+    const multicaller = new Multicaller3Viem(pools[0].chain, BalancerQueries, batchSize);
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
@@ -217,7 +219,7 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 function addEffectivePriceCallsToMulticaller(
     tokenPair: TokenPair,
     balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    multicaller: IMulticaller,
 ) {
     multicaller.call(
         `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.effectivePriceAmountOut`,
@@ -241,7 +243,7 @@ function addEffectivePriceCallsToMulticaller(
 function addAToBPriceCallsToMulticaller(
     tokenPair: TokenPair,
     balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    multicaller: IMulticaller,
 ) {
     multicaller.call(
         `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.aToBAmountOut`,
@@ -265,7 +267,7 @@ function addAToBPriceCallsToMulticaller(
 function addBToAPriceCallsToMulticaller(
     tokenPair: TokenPair,
     balancerQueriesAddress: string,
-    multicaller: Multicaller3,
+    multicaller: IMulticaller,
 ) {
     multicaller.call(
         `${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}.bToAAmountOut`,

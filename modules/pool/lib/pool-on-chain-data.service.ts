@@ -52,7 +52,7 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, ['ZKEVM', 'FANTOM'].includes(chain) ? 190 : 400);
+        const state = await fetchOnChainPoolState(filteredPools, ['ZKEVM', 'FANTOM'].includes(chain) ? 256 : 1024);
 
         const operations = [];
         for (const pool of filteredPools) {

@@ -1,13 +1,15 @@
-import { Multicaller3 } from '../../web3/multicaller3';
+import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
 import { PrismaPoolType } from '@prisma/client';
 import abi from '../abi/GyroConfig.json';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { formatBytes32String } from '@ethersproject/strings';
 import { keccak256 } from '@ethersproject/solidity';
 import { formatEther } from 'ethers/lib/utils';
+import { Chain } from '@prisma/client';
 
 interface PoolInput {
     id: string;
+    chain: Chain;
     address: string;
     type: PrismaPoolType;
     version?: number;
@@ -30,7 +32,7 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
         return {};
     }
 
-    const multicaller = new Multicaller3(abi, batchSize);
+    const multicaller = new Multicaller3Viem(pools[0].chain, abi, batchSize);
 
     const feeKey = formatBytes32String('PROTOCOL_SWAP_FEE_PERC');
 

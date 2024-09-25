@@ -100,6 +100,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
+    } else if (job === 'sync-changed-pools-v2') {
+        return PoolsV2Controller().syncChangedPools(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {
