@@ -113,15 +113,19 @@ const casedQueryParams = (query: string): string => {
 export async function lowerCaseMiddleware(req: Request, res: Response, next: NextFunction) {
     json()(req, res, (err) => {
         if (req.method === 'POST' && req.is('application/json') && req.body) {
-            const { query, variables } = req.body;
+            try {
+                const { query, variables } = req.body;
 
-            if (variables) {
-                convertLetterCase(variables);
-            }
+                if (variables) {
+                    convertLetterCase(variables);
+                }
 
-            if (query) {
-                // Replacing the original query with the lowercase one
-                req.body.query = casedQueryParams(query);
+                if (query) {
+                    // Replacing the original query with the lowercase one
+                    req.body.query = casedQueryParams(query);
+                }
+            } catch (error) {
+                return next(error);
             }
         }
 
