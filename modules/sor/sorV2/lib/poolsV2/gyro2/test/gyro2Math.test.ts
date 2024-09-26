@@ -81,7 +81,7 @@ describe('gyro2Math', () => {
             "userData":"0x"
         } */
 
-        const expectedAmountOut = 773865n;
+        const expectedAmountOut = 1000003n;
 
         // Create dummy tokens
         const tokenIn = new Token(1, '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 6, 'TKN1', 'Token 1');
@@ -123,7 +123,7 @@ describe('gyro2Math', () => {
         )
         const swapAmount = TokenAmount.fromHumanAmount(tIn, '0.879697');
 
-        const swapAmountOut = pool.swapGivenIn(
+        const swapAmountOut = pool.swapGivenOut(
             tIn,
             tOut,
             swapAmount,
