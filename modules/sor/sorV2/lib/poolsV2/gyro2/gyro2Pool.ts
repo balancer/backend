@@ -127,7 +127,6 @@ export class Gyro2Pool implements BasePool {
         // 8. final amountOut get downscaled by rate
 
         // These tIn, tOut are vault reported balances (scaled to 18 decimals)
-
         const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(tokenIn, tokenOut);
         const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(invariant, sqrtAlpha, sqrtBeta);
@@ -200,7 +199,7 @@ export class Gyro2Pool implements BasePool {
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(tokenIn, tokenOut);
         if (swapKind === SwapKind.GivenIn) {
-            const invariant = _calculateInvariant([tIn.scale18, tOut.scale18], sqrtAlpha, sqrtBeta);
+            const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
             const maxAmountInAssetInPool = MathSol.mulUpFixed(
                 invariant,
                 MathSol.divDownFixed(WAD, sqrtAlpha) - MathSol.divDownFixed(WAD, sqrtBeta),
