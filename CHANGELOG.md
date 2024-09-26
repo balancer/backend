@@ -1,5 +1,12 @@
 # backend
 
+## 1.20.7
+
+### Patch Changes
+
+-   5419dc5: avax subgraph deployment update
+-   bcd8189: Handle parsing errors causing the app to crash
+
 ## 1.20.6
 
 ### Patch Changes
