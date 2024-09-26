@@ -1,5 +1,21 @@
 # backend
 
+## 1.20.7
+
+### Patch Changes
+
+-   5419dc5: avax subgraph deployment update
+-   bcd8189: Handle parsing errors causing the app to crash
+
+## 1.20.6
+
+### Patch Changes
+
+-   0cb9214: adding Aave lUSD and crvUSD APRs
+-   1c9aa5b: use default rpc url for fetching svEth APR data
+-   a0d5b42: use subgraph deployment if for zkevm
+-   dd3e100: Enable sdBal stable pool.
+
 ## 1.20.5
 
 ### Patch Changes
