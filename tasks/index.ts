@@ -1,5 +1,4 @@
 import moment from 'moment';
-import { daysAgo } from '../modules/common/time';
 import {
     JobsController,
     SnapshotsController,
@@ -11,7 +10,7 @@ import {
     PoolController,
     EventController,
     FXPoolsController,
-    PoolsV2Controller,
+    V2,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -32,22 +31,24 @@ const snapshotsController = SnapshotsController();
 async function run(job: string = process.argv[2], chain: string = process.argv[3]) {
     console.log('Running job', job, chain);
 
-    if (job === 'add-pools-v3') {
+    if (job === 'add-pools-v2') {
+        return V2.PoolsController().addPools(chain);
+    } else if (job === 'sync-pools-v2') {
+        return V2.PoolsController().syncPools(chain);
+    } else if (job === 'sync-changed-pools-v2') {
+        return V2.PoolsController().syncChangedPools(chain);
+    } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
         return PoolController().reloadPoolsV3(chainIdToChain[chain]);
-    } else if (job === 'add-pools-v2') {
-        return PoolsV2Controller().addPools(chain);
-    } else if (job === 'sync-pools-v2') {
-        return PoolsV2Controller().syncPools(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {
         return EventController().syncJoinExitsV3(chain);
     } else if (job === 'sync-join-exits-v2') {
-        return EventController().syncJoinExitsV2(chain);
+        return V2.EventController().syncJoinExits(chain);
     } else if (job === 'sync-swaps-v2') {
-        return EventController().syncSwapsV2(chain);
+        return V2.EventController().syncSwaps(chain);
     } else if (job === 'sync-snapshots-v2') {
         return snapshotsController.syncSnapshotsV2(chain);
     } else if (job === 'fill-missing-snapshots-v2') {
@@ -100,8 +101,6 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
-    } else if (job === 'sync-changed-pools-v2') {
-        return PoolsV2Controller().syncChangedPools(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {

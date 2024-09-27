@@ -1,9 +1,9 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { PoolOnChainDataService } from '../../pool/lib/pool-on-chain-data.service';
+import { prisma } from '../../../../prisma/prisma-client';
+import { PoolOnChainDataService } from '../../../pool/lib/pool-on-chain-data.service';
 import _ from 'lodash';
 
-export const syncPoolsV2 = async (
+export const syncPools = async (
     blockNumber: number,
     chain: Chain,
     vaultAddress: string,

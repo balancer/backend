@@ -9,4 +9,4 @@ export * from './event-controller';
 export * from './aprs-controller';
 export * from './content-controller';
 export * from './fx-pools-controller';
-export * from './pools-v2-controller';
+export * as V2 from './v2';

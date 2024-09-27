@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { nestedPoolWithSingleLayerNesting } from '../../../prisma/prisma-types';
-import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { BalancerPoolFragment } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { subgraphToPrismaCreate } from '../../pool/subgraph-mapper';
-import { upsertBptBalancesV2 } from '../user/upsert-bpt-balances-v2';
+import { prisma } from '../../../../prisma/prisma-client';
+import { nestedPoolWithSingleLayerNesting } from '../../../../prisma/prisma-types';
+import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
+import { BalancerPoolFragment } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { subgraphToPrismaCreate } from '../../../pool/subgraph-mapper';
+import { upsertBptBalancesV2 } from '../../user/upsert-bpt-balances-v2';
 import _ from 'lodash';
 
 export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain): Promise<string[]> => {

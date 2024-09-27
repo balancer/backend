@@ -25,7 +25,7 @@ import {
     ContentController,
     EventController,
     PoolController,
-    PoolsV2Controller,
+    V2,
 } from '../../modules/controllers';
 
 const runningJobs: Set<string> = new Set();
@@ -110,7 +110,13 @@ export function configureWorkerRoutes(app: Express) {
 const setupJobHandlers = async (name: string, chainId: string, res: any, next: NextFunction) => {
     switch (name) {
         case 'sync-changed-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => PoolsV2Controller().syncChangedPools(chainId), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => V2.PoolsController().syncChangedPools(chainId),
+                res,
+                next,
+            );
             break;
 
         case 'user-sync-wallet-balances-for-all-pools':
@@ -168,10 +174,10 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-new-pools-from-subgraph':
-            await runIfNotAlreadyRunning(name, chainId, () => PoolsV2Controller().addPools(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPools(chainId), res, next);
             break;
         case 'sync-join-exits-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExits(chainId), res, next);
             break;
         case 'sync-tokens-from-pool-tokens':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
@@ -318,7 +324,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncSwapsV3(chainId), res, next);
             break;
         case 'sync-swaps-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => EventController().syncSwapsV2(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwaps(chainId), res, next);
             break;
         case 'sync-join-exits-v3':
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV3(chainId), res, next);
