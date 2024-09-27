@@ -1,16 +1,19 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import type { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { JoinExit_OrderBy, OrderDirection } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
-import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
+import { prisma } from '../../../../prisma/prisma-client';
+import type { BalancerSubgraphService } from '../../../subgraphs/balancer-subgraph/balancer-subgraph.service';
+import {
+    JoinExit_OrderBy,
+    OrderDirection,
+} from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
+import { joinExitV2Transformer } from '../../../sources/transformers/join-exit-v2-transformer';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
+export const syncJoinExits = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
     const protocolVersion = 2;
 
     // Get latest event from the DB

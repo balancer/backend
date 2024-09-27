@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
+import { prisma } from '../../../../prisma/prisma-client';
+import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import _ from 'lodash';
-import { swapV2Transformer } from '../../sources/transformers/swap-v2-transformer';
-import { OrderDirection, Swap_OrderBy } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { swapsUsd } from '../../sources/enrichers/swaps-usd';
+import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
+import { OrderDirection, Swap_OrderBy } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -13,7 +13,7 @@ import { swapsUsd } from '../../sources/enrichers/swaps-usd';
  * @param chain
  * @returns
  */
-export async function syncSwapsV2(subgraphClient: V2SubgraphClient, chain = 'SEPOLIA' as Chain): Promise<string[]> {
+export async function syncSwaps(subgraphClient: V2SubgraphClient, chain = 'SEPOLIA' as Chain): Promise<string[]> {
     const protocolVersion = 2;
 
     // Get latest event from the DB
