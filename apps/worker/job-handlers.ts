@@ -110,7 +110,7 @@ export function configureWorkerRoutes(app: Express) {
 const setupJobHandlers = async (name: string, chainId: string, res: any, next: NextFunction) => {
     switch (name) {
         case 'sync-changed-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.syncChangedPools(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolsV2Controller().syncChangedPools(chainId), res, next);
             break;
 
         case 'user-sync-wallet-balances-for-all-pools':
