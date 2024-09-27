@@ -69,8 +69,11 @@ export class Multicaller3Viem implements IMulticaller {
 
         // Throw if any of the calls failed and allowFailure is false
         for (const idx in this.calls) {
-            if (!this.calls[idx][3] && results[this.paths[idx]] === undefined) {
-                throw new Error(`Multicall failed for call ${this.calls[idx]}`);
+            if (
+                !this.calls[idx][3] &&
+                this.paths[idx].split('.').reduce((acc, part) => acc?.[part], results) === undefined
+            ) {
+                throw new Error(`Multicall failed for call ${this.paths[idx]} ${this.calls[idx]}`);
             }
         }
 

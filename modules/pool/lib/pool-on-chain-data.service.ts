@@ -102,15 +102,15 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            ['ZKEVM', 'FANTOM'].includes(chain) ? 190 : 400,
+            ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048,
         );
         const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
-            ['ZKEVM', 'FANTOM'].includes(chain) ? 190 : 400,
+            ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048,
         );
         const gyroFees = await (this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, ['ZKEVM', 'FANTOM'].includes(chain) ? 190 : 1024)
+            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048)
             : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];

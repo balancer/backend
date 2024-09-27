@@ -105,7 +105,7 @@ const addDefaultCallsToMulticaller = (
 };
 
 const weightedCalls = ({ id, address }: PoolInput, multicaller: IMulticaller) => {
-    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
+    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights', [], false);
 };
 
 const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: IMulticaller) => {
