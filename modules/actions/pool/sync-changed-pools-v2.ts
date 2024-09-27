@@ -37,16 +37,15 @@ export const syncChangedPoolsV2 = async (
     }));
 
     // Update status for all the pools
-    const allPools = await prisma.prismaPool.findMany({
-        where: { chain },
-    });
+    await prisma.prismaPool
+        .findMany({
+            where: { chain },
+            select: { id: true },
+        })
+        .then((pools) => pools.map((pool) => pool.id))
+        .then((poolIds) => poolOnChainDataService.updateOnChainStatus(poolIds, chain));
 
-    await poolOnChainDataService.updateOnChainStatus(
-        allPools.map((pool) => pool.id),
-        chain,
-    );
-
-    // Get the pools that have changed
+    // Update other data only for the pools that have changed
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {
             chain,
