@@ -130,6 +130,12 @@ export default <NetworkData>{
                 },
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+            },
+        ],
         reaper: {
             onchainSource: {
                 averageAPRAcrossLastNHarvests: 5,

@@ -30,6 +30,10 @@ export interface YbAprConfig {
     };
     etherfi?: string;
     sveth?: boolean;
+    defillama?: {
+        defillamaPoolId: string;
+        tokenAddress: string;
+    }[];
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }
