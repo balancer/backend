@@ -1,7 +1,7 @@
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { PoolOnChainDataService } from '../../pool/lib/pool-on-chain-data.service';
-import { getChangedPools } from '../../sources/logs';
+import { getChangedPoolsV2 } from '../../sources/logs';
 import { getViemClient } from '../../sources/viem-client';
 
 export const syncChangedPoolsV2 = async (
@@ -47,22 +47,24 @@ export const syncChangedPoolsV2 = async (
     );
 
     // Get the pools that have changed
-    console.time('getChangedPoolIds');
-    const { changedPools } = await getChangedPools(vaultAddress, viemClient, BigInt(startBlock), endBlock);
-    console.timeEnd('getChangedPoolIds');
-
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {
             chain,
         },
     });
-
-    await poolOnChainDataService.updateOnChainStatus(changedPools, chain);
+    const { changedPools } = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(startBlock), endBlock);
     await poolOnChainDataService.updateOnChainData(changedPools, chain, Number(endBlock), tokenPrices);
 
-    await prisma.prismaLastBlockSynced.update({
+    await prisma.prismaLastBlockSynced.upsert({
         where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain } },
-        data: { blockNumber: Number(endBlock) },
+        create: {
+            category: PrismaLastBlockSyncedCategory.POOLS,
+            blockNumber: Number(endBlock),
+            chain,
+        },
+        update: {
+            blockNumber: Number(endBlock),
+        },
     });
 
     return changedPools;
