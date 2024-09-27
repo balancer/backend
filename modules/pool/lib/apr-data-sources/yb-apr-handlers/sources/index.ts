@@ -20,3 +20,4 @@ export * from './yieldnest-apr-handler';
 export * from './etherfi-apr-handler';
 export * from './sv-eth';
 export * from './dforce-apr-handler';
+export * from './defillama-apr-handler';
