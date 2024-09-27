@@ -37,6 +37,8 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
         return V2.PoolsController().syncPools(chain);
     } else if (job === 'sync-changed-pools-v2') {
         return V2.PoolsController().syncChangedPools(chain);
+    } else if (job === 'sync-all-pools-v2') {
+        return V2.PoolsController().syncOnchainAllPools(chain);
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
