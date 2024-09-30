@@ -48,6 +48,9 @@ export default <NetworkData>{
         bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0c6052254551eae3ecac77b01dfcf1025418828f',
     },
+    gyro: {
+        config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
+    },
     balancer: {
         v2: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
