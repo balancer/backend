@@ -26,6 +26,7 @@ const sourceToHandler = {
     etherfi: sources.Etherfi,
     sveth: sources.svEthAprHandler,
     dforce: sources.DForce,
+    defillama: sources.Defillama,
 };
 
 export class YbAprHandlers {

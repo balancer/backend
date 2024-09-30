@@ -139,6 +139,12 @@ export default <NetworkData>{
                 // and search for the vault address in the link: https://api.beefy.finance/vaults
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+            },
+        ],
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',

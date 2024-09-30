@@ -200,6 +200,16 @@ export default <NetworkData>{
                 },
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '5a9c2073-2190-4002-9654-8c245d1e8534',
+                tokenAddress: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+            },
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
+            },
+        ],
         euler: {
             subgraphUrl: 'https://api.thegraph.com/subgraphs/name/euler-xyz/euler-mainnet',
             tokens: {
