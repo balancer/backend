@@ -1,5 +1,12 @@
 # backend
 
+## 1.20.8
+
+### Patch Changes
+
+-   64e55d4: add defillama yields as an APR adapter
+-   07e1f17: Fix Gyro2CLPPool implementations to account for token rates during swaps.
+
 ## 1.20.7
 
 ### Patch Changes
