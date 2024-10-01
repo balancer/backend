@@ -4,7 +4,6 @@ import { AddressZero } from '@ethersproject/constants';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
 import { BeetsBarSubgraphService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
@@ -297,6 +296,7 @@ export class UserSyncWalletBalanceService {
             where: { id_chain: { id: `${share.poolId}-${share.userAddress}`, chain: this.chain } },
             create: {
                 ...share,
+                id: `${share.poolId}-${share.userAddress}`,
                 chain: this.chain,
             },
             update: { balance: share.balance, balanceNum: share.balanceNum },
