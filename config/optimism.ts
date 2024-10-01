@@ -14,7 +14,6 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2022-01-01',
         balancer: [
-            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-optimism/api`,
             `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
         ],
         beetsBar: 'https://',
