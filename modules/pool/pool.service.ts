@@ -47,7 +47,6 @@ import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph
 import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
 import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
-import { SanityContentService } from '../content/sanity-content.service';
 
 export class PoolService {
     constructor(
@@ -67,10 +66,6 @@ export class PoolService {
 
     private get chainId() {
         return networkContext.chainId;
-    }
-
-    private get poolStakingServices(): PoolStakingService[] {
-        return networkContext.config.poolStakingServices;
     }
 
     private get balancerSubgraphService() {
