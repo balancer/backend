@@ -1,5 +1,11 @@
 # backend
 
+## 1.20.10
+
+### Patch Changes
+
+-   53d8445: sync all token metadata from tokenlist
+
 ## 1.20.9
 
 ### Patch Changes
