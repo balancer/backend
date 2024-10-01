@@ -1,5 +1,11 @@
 # backend
 
+## 1.20.9
+
+### Patch Changes
+
+-   44ca026: gyro config on avax
+
 ## 1.20.8
 
 ### Patch Changes
