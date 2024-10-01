@@ -13,6 +13,7 @@ import {
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
+import { ChainId } from '@balancer/sdk';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -26,8 +27,10 @@ const snapshotsController = SnapshotsController();
  * @param chain
  * @returns
  */
-async function run(job: string = process.argv[2], chain: string = process.argv[3]) {
-    console.log('Running job', job, chain);
+async function run(job: string = process.argv[2], chainId: string = process.argv[3]) {
+    console.log('Running job', job, chainId);
+
+    const chain = chainIdToChain[chainId];
 
     if (job === 'add-pools-v2') {
         return V2.PoolsController().addPoolsV2(chain);

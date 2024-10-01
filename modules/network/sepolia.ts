@@ -28,7 +28,7 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             sepoliaNetworkData.subgraphs.balancer,
-            sepoliaNetworkData.chain.id,
+            sepoliaNetworkData.chain.prismaId,
         ),
     },
     /*

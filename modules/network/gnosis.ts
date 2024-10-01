@@ -29,7 +29,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             gnosisNetworkData.subgraphs.balancer,
-            gnosisNetworkData.chain.id,
+            gnosisNetworkData.chain.prismaId,
         ),
     },
     /*

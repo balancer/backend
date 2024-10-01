@@ -26,6 +26,7 @@ import {
     V2,
     V3,
 } from '../../modules/controllers';
+import { chain } from 'lodash';
 
 const runningJobs: Set<string> = new Set();
 
@@ -107,12 +108,13 @@ export function configureWorkerRoutes(app: Express) {
 }
 
 const setupJobHandlers = async (name: string, chainId: string, res: any, next: NextFunction) => {
+    const chain = chainIdToChain[chainId];
     switch (name) {
         case 'sync-changed-pools':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V2.PoolsController().syncChangedPoolsV2(chainId),
+                () => V2.PoolsController().syncChangedPoolsV2(chain),
                 res,
                 next,
             );
@@ -173,10 +175,10 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-new-pools-from-subgraph':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
             break;
         case 'sync-join-exits-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-tokens-from-pool-tokens':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
@@ -185,7 +187,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V2.PoolsController().updateLiquidity24hAgoV2(chainId),
+                () => V2.PoolsController().updateLiquidity24hAgoV2(chain),
                 res,
                 next,
             );
@@ -212,22 +214,10 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-snapshots-v2':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SnapshotsController().syncSnapshotsV2(chainId),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV2(chain), res, next);
             break;
         case 'sync-snapshots-v3':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SnapshotsController().syncSnapshotsV3(chainId),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV3(chain), res, next);
             break;
         case 'update-lifetime-values-for-all-pools':
             await runIfNotAlreadyRunning(name, chainId, () => poolService.updateLifetimeValuesForAllPools(), res, next);
@@ -311,28 +301,28 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         // V3 Jobs
         case 'add-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().addPoolsV3(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().addPoolsV3(chain), res, next);
             break;
         case 'sync-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncPoolsV3(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncPoolsV3(chain), res, next);
             break;
         case 'sync-hook-data':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncHookData(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncHookData(chain), res, next);
             break;
         case 'sync-swaps-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncSwapsV3(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncSwapsV3(chain), res, next);
             break;
         case 'sync-swaps-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
             break;
         case 'sync-join-exits-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chain), res, next);
             break;
         case 'update-liquidity-24h-ago-v3':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V3.PoolController().updateLiquidity24hAgoV3(chainId),
+                () => V3.PoolController().updateLiquidity24hAgoV3(chain),
                 res,
                 next,
             );
@@ -350,35 +340,29 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V3.EventController().syncSwapsUpdateVolumeAndFeesV3(chainId),
+                () => V3.EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
                 res,
                 next,
             );
             break;
         // COW AMM
         case 'add-new-cow-amm-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().addPools(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().addPools(chain), res, next);
             break;
         case 'sync-cow-amm-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncPools(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncPools(chain), res, next);
             break;
         case 'sync-cow-amm-swaps':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSwaps(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSwaps(chain), res, next);
             break;
         case 'sync-cow-amm-join-exits':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncJoinExits(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncJoinExits(chain), res, next);
             break;
         case 'sync-cow-amm-snapshots':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chain), res, next);
             break;
         case 'update-cow-amm-volume-and-fees':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => CowAmmController().updateVolumeAndFees(chainId),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateVolumeAndFees(chain), res, next);
             break;
         case 'update-surplus-aprs':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateSurplusAprs(), res, next);

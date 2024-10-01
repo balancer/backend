@@ -28,7 +28,7 @@ export const modeNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             modeNetworkData.subgraphs.balancer,
-            modeNetworkData.chain.id,
+            modeNetworkData.chain.prismaId,
         ),
     },
     /*

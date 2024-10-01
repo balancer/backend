@@ -29,7 +29,7 @@ export const optimismNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             optimismNetworkData.subgraphs.balancer,
-            optimismNetworkData.chain.id,
+            optimismNetworkData.chain.prismaId,
         ),
     },
     /*

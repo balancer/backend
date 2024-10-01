@@ -131,7 +131,7 @@ export class UserSyncWalletBalanceService {
 
         // Attach CowAMM syncing
         console.log('initBalancesForPools: syncing CowAMM balances...');
-        await CowAmmController().syncBalances(this.chainId);
+        await CowAmmController().syncBalances(this.chain);
         console.log('initBalancesForPools: finished syncing CowAMM balances');
     }
 

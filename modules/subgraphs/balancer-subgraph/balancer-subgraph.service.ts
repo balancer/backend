@@ -47,15 +47,14 @@ import { subgraphLoadAll } from '../subgraph-util';
 import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 import { SubgraphServiceBase } from '../../sources/subgraphs/subgraph-service-base';
-import { Prisma } from '@prisma/client';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { Chain, Prisma } from '@prisma/client';
 
 const ALL_POOLS_CACHE_KEY = `balance-subgraph_all-pools`;
 const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools`;
 
 export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<typeof getSdk>> {
-    constructor(subgraphUrl: string | string[], chainId: number) {
-        super(subgraphUrl, chainId, getSdk);
+    constructor(subgraphUrl: string | string[], chain: Chain) {
+        super(subgraphUrl, chain, getSdk);
     }
 
     public async getMetadata() {
@@ -254,7 +253,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
             return allPoolShares.map((shares) => ({
                 ...shares,
                 poolId: shares.poolId.id.toLowerCase(),
-                chain: chainIdToChain[this.chainId],
+                chain: this.chain,
                 //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
                 balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
                 balanceNum: Math.max(0, parseFloat(shares.balance)),
@@ -308,7 +307,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
         return this.retryOnFailure(async (sdk) => {
             const cached = this.cache.get(
-                `${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`,
+                `${PORTFOLIO_POOLS_CACHE_KEY}:${this.chain}`,
             ) as BalancerPortfolioPoolsDataQuery | null;
 
             if (cached) {
@@ -316,7 +315,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
             }
 
             const portfolioPools = await sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
-            this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`, portfolioPools, fiveMinutesInMs);
+            this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${this.chain}`, portfolioPools, fiveMinutesInMs);
 
             return portfolioPools;
         });
@@ -324,7 +323,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
         return this.retryOnFailure(async (sdk) => {
-            const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`) as
+            const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${this.chain}:${block}`) as
                 | BalancerPoolFragment[]
                 | null;
 
@@ -338,7 +337,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
                 block: { number: block },
             });
 
-            this.cache.put(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`, pools, twentyFourHoursInMs);
+            this.cache.put(`${ALL_POOLS_CACHE_KEY}:${this.chain}:${block}`, pools, twentyFourHoursInMs);
             return pools;
         });
     }

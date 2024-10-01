@@ -29,7 +29,7 @@ export const polygonNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             polygonNetworkData.subgraphs.balancer,
-            polygonNetworkData.chain.id,
+            polygonNetworkData.chain.prismaId,
         ),
     },
     /*

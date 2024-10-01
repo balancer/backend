@@ -29,7 +29,7 @@ export const avalancheNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             avalancheNetworkData.subgraphs.balancer,
-            avalancheNetworkData.chain.id,
+            avalancheNetworkData.chain.prismaId,
         ),
     },
     /*

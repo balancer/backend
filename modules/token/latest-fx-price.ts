@@ -41,7 +41,7 @@ export const syncLatestFXPrices = async (subgraphUrls: string[], chain: Chain) =
 };
 
 const fetchFxPools = (subgraphUrls: string[], chain: Chain) => {
-    const sdk = getV2SubgraphClient(subgraphUrls, Number(chainToIdMap[chain]));
+    const sdk = getV2SubgraphClient(subgraphUrls, chain);
 
     return sdk.BalancerPools({
         where: { poolType: 'FX' },

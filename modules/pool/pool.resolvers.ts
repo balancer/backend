@@ -5,7 +5,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
 import { CowAmmController, EventsQueryController, PoolController, SnapshotsController } from '../controllers';
-import { chainToIdMap } from '../network/network-config';
+import { chainIdToChain } from '../network/chain-id-to-chain';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -227,15 +227,18 @@ const balancerResolvers: Resolvers = {
         poolLoadSnapshotsForPools: async (parent, { poolIds, reload }, context) => {
             isAdminRoute(context);
 
-            await SnapshotsController().syncSnapshotForPools(poolIds, networkContext.chainId, reload || false);
+            await SnapshotsController().syncSnapshotForPools(
+                poolIds,
+                chainIdToChain[networkContext.chainId],
+                reload || false,
+            );
 
             return 'success';
         },
         poolSyncLatestSnapshotsForAllPools: async (parent, { chain }, context) => {
             isAdminRoute(context);
-            const chainId = chainToIdMap[chain];
 
-            await SnapshotsController().syncSnapshotsV2(chainId);
+            await SnapshotsController().syncSnapshotsV2(chain);
 
             return 'success';
         },
@@ -314,7 +317,7 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await CowAmmController().syncAllSnapshots(chainToIdMap[chain]);
+                    await CowAmmController().syncAllSnapshots(chain);
                     result.push({ type: 'cow', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'cow', chain, success: false, error: `${e}` });

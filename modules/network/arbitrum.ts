@@ -29,7 +29,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             arbitrumNetworkData.subgraphs.balancer,
-            arbitrumNetworkData.chain.id,
+            arbitrumNetworkData.chain.prismaId,
         ),
     },
     /*

@@ -29,7 +29,7 @@ export const zkevmNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             zkevmNetworkData.subgraphs.balancer,
-            zkevmNetworkData.chain.id,
+            zkevmNetworkData.chain.prismaId,
         ),
     },
     /*

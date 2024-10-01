@@ -29,7 +29,7 @@ export const baseNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             baseNetworkData.subgraphs.balancer,
-            baseNetworkData.chain.id,
+            baseNetworkData.chain.prismaId,
         ),
     },
     /*

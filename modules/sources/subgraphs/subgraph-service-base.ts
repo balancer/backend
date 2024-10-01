@@ -1,6 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import { Cache, CacheClass } from 'memory-cache';
 import { retryOnFailureWithRotation } from './retry-on-failure';
+import { Chain } from '@prisma/client';
 
 export class SubgraphServiceBase<TSdk> {
     protected cache: CacheClass<string, any>;
@@ -8,7 +9,7 @@ export class SubgraphServiceBase<TSdk> {
 
     constructor(
         subgraphUrl: string | string[],
-        protected chainId: number,
+        protected chain: Chain,
         private getSdk: (client: GraphQLClient) => TSdk,
     ) {
         this.cache = new Cache<string, any>();

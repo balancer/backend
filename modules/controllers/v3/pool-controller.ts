@@ -2,14 +2,12 @@ import config from '../../../config';
 import { syncPools } from '../../actions/pool/v3/sync-pools';
 import { syncHookData } from '../../actions/pool/v3/sync-hook-data';
 import { upsertPools } from '../../actions/pool/v3/upsert-pools';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
 import { getViemClient } from '../../sources/viem-client';
 import { getVaultSubgraphClient } from '../../sources/subgraphs/balancer-v3-vault';
 import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
 import { getChangedPools } from '../../sources/logs/get-changed-pools';
 import { getVaultClient } from '../../sources/contracts';
-import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { updateLiquidity24hAgo } from '../../actions/pool/update-liquidity-24h-ago';
 import { syncTokenPairs } from '../../actions/pool/v3/sync-tokenpairs';
 import { Chain } from '@prisma/client';
@@ -20,10 +18,9 @@ export function PoolController() {
         /**
          * Adds new pools found in subgraph to the database
          *
-         * @param chainId
+         * @param chain
          */
-        async addPoolsV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async addPoolsV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
                 balancer: {
@@ -92,8 +89,7 @@ export function PoolController() {
          *
          * @param chainId
          */
-        async syncPoolsV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async syncPoolsV3(chain: Chain) {
             const {
                 balancer: {
                     v3: { vaultAddress, routerAddress },
@@ -141,8 +137,7 @@ export function PoolController() {
 
             return poolsToSync.map(({ id }) => id);
         },
-        async updateLiquidity24hAgoV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async updateLiquidity24hAgoV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3, blocks },
             } = config[chain];
@@ -170,8 +165,7 @@ export function PoolController() {
 
             return updates;
         },
-        async syncHookData(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async syncHookData(chain: Chain) {
             const { hooks } = config[chain];
 
             // Guard against unconfigured chains

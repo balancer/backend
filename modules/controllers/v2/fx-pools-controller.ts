@@ -1,11 +1,10 @@
 import config from '../../../config';
 import { syncLatestFXPrices } from '../../token/latest-fx-price';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { Chain } from '@prisma/client';
 
 export function FXPoolsController() {
     return {
-        async syncLatestPrices(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async syncLatestPrices(chain: Chain) {
             const {
                 subgraphs: { balancer },
             } = config[chain];

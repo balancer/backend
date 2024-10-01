@@ -40,7 +40,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             fantomNetworkData.subgraphs.balancer,
-            fantomNetworkData.chain.id,
+            fantomNetworkData.chain.prismaId,
         ),
     },
     /*

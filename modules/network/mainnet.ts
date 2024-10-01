@@ -38,7 +38,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new UserSyncVebalLockBalanceService(),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
+        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 'MAINNET'),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.

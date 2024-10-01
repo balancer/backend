@@ -29,7 +29,7 @@ export const fraxtalNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             fraxtalNetworkData.subgraphs.balancer,
-            fraxtalNetworkData.chain.id,
+            fraxtalNetworkData.chain.prismaId,
         ),
     },
     /*
