@@ -39,6 +39,8 @@ export function PoolController() {
             const ids = pools.map((pool) => pool.id);
             if (ids.length === 0) ids.push('');
             const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3);
+
+            // TODO this might break once we have a lot of pools because the filter gets too big
             const newPools = await client.getAllInitializedPools({ id_not_in: ids });
 
             const viemClient = getViemClient(chain);
