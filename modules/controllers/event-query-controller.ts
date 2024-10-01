@@ -74,7 +74,7 @@ const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
 export function EventsQueryController(tracer?: any) {
     return {
         /**
-         * Getting pool events, with pagination and filtering
+         * Getting pool events, with pagination and filtering. This is for all vault versions.
          *
          * @param param.first - number of items to return
          * @param param.skip - number of items to skip

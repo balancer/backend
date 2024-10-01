@@ -1,5 +1,5 @@
 import { PrismaPoolType } from '@prisma/client';
-import { ViemClient } from '../viem-client';
+import { ViemClient } from '../../viem-client';
 import { fetchPoolTypeData } from './fetch-pool-type-data';
 
 export interface PoolsClient {

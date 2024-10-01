@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { V3VaultSubgraphClient } from '../../sources/subgraphs';
+import { prisma } from '../../../../prisma/prisma-client';
+import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import _ from 'lodash';
-import { swapV3Transformer } from '../../sources/transformers/swap-v3-transformer';
-import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
-import { swapsUsd } from '../../sources/enrichers/swaps-usd';
+import { swapV3Transformer } from '../../../sources/transformers/swap-v3-transformer';
+import { OrderDirection, Swap_OrderBy } from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
+import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -13,7 +13,7 @@ import { swapsUsd } from '../../sources/enrichers/swaps-usd';
  * @param chain
  * @returns
  */
-export async function syncSwapsV3(
+export async function syncSwaps(
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {

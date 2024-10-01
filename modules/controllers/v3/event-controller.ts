@@ -1,10 +1,10 @@
-import config from '../../config';
+import config from '../../../config';
 
-import { syncJoinExits } from '../actions/pool/sync-join-exits';
-import { chainIdToChain } from '../network/chain-id-to-chain';
-import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
-import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
-import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
+import { syncJoinExits } from '../../actions/pool/v3/sync-join-exits';
+import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { getVaultSubgraphClient } from '../../sources/subgraphs/balancer-v3-vault';
+import { syncSwaps } from '../../actions/pool/v3/sync-swaps';
+import { updateVolumeAndFees } from '../../actions/pool/update-volume-and-fees';
 
 export function EventController() {
     return {
@@ -35,7 +35,7 @@ export function EventController() {
             }
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
-            const entries = await syncSwapsV3(vaultSubgraphClient, chain);
+            const entries = await syncSwaps(vaultSubgraphClient, chain);
             return entries;
         },
         // TODO also update yieldfee
@@ -53,7 +53,7 @@ export function EventController() {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
             await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },

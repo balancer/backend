@@ -4,7 +4,7 @@
  */
 
 import { update } from './update';
-import { PoolsClient } from '../../../sources/contracts';
+import { PoolsClient } from '../../../../sources/contracts';
 import { PrismaPoolType } from '@prisma/client';
 
 export async function syncDynamicTypeDataForPools(

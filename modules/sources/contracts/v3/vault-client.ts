@@ -1,4 +1,4 @@
-import { ViemClient } from '../viem-client';
+import { ViemClient } from '../../viem-client';
 import { OnchainPoolData, fetchPoolData } from './fetch-pool-data';
 import { ProtocolFees, fetchProtocolFees } from './fetch-protocol-fees';
 

@@ -1,7 +1,7 @@
-import { fetchHookData } from '../../sources/contracts/hooks/fetch-hook-data';
-import { prisma } from '../../../prisma/prisma-client';
-import type { HookType } from '../../network/network-config-types';
-import type { ViemClient } from '../../sources/viem-client';
+import { fetchHookData } from '../../../sources/contracts/hooks/fetch-hook-data';
+import { prisma } from '../../../../prisma/prisma-client';
+import type { HookType } from '../../../network/network-config-types';
+import type { ViemClient } from '../../../sources/viem-client';
 import type { Chain } from '@prisma/client';
 
 /**

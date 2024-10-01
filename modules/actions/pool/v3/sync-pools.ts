@@ -1,10 +1,10 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { onchainPoolUpdate } from '../../sources/transformers/onchain-pool-update';
-import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
-import { type VaultClient, getVaultClient, getPoolsClient } from '../../sources/contracts';
-import { syncDynamicTypeDataForPools } from './type-data-v3/sync-dynamic-type-data-for-pools';
-import { ViemClient } from '../../sources/viem-client';
+import { prisma } from '../../../../prisma/prisma-client';
+import { onchainPoolUpdate } from '../../../sources/transformers/onchain-pool-update';
+import { poolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
+import { type VaultClient, getVaultClient, getPoolsClient } from '../../../sources/contracts';
+import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
+import { ViemClient } from '../../../sources/viem-client';
 
 const syncVaultData = async (
     vaultClient: VaultClient,

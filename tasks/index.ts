@@ -1,23 +1,21 @@
 import moment from 'moment';
 import {
-    JobsController,
+    SftmxController,
     SnapshotsController,
     UserBalancesController,
     CowAmmController,
     AprsController,
     ContentController,
-    PoolMutationController,
-    PoolController,
-    EventController,
     FXPoolsController,
     V2,
+    V3,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
 
 // TODO needed?
-const jobsController = JobsController();
+const sftmxController = SftmxController();
 const snapshotsController = SnapshotsController();
 
 /**
@@ -32,25 +30,25 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     console.log('Running job', job, chain);
 
     if (job === 'add-pools-v2') {
-        return V2.PoolsController().addPools(chain);
+        return V2.PoolsController().addPoolsV2(chain);
     } else if (job === 'sync-pools-v2') {
-        return V2.PoolsController().syncPools(chain);
+        return V2.PoolsController().syncPoolsV2(chain);
     } else if (job === 'sync-changed-pools-v2') {
-        return V2.PoolsController().syncChangedPools(chain);
+        return V2.PoolsController().syncChangedPoolsV2(chain);
     } else if (job === 'sync-all-pools-v2') {
-        return V2.PoolsController().syncOnchainAllPools(chain);
+        return V2.PoolsController().syncOnchainAllPoolsV2(chain);
     } else if (job === 'add-pools-v3') {
-        return PoolController().addPoolsV3(chain);
+        return V3.PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
-        return PoolController().reloadPoolsV3(chainIdToChain[chain]);
+        return V3.PoolController().reloadPoolsV3(chainIdToChain[chain]);
     } else if (job === 'sync-pools-v3') {
-        return PoolController().syncPoolsV3(chain);
+        return V3.PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-join-exits-v3') {
-        return EventController().syncJoinExitsV3(chain);
+        return V3.EventController().syncJoinExitsV3(chain);
     } else if (job === 'sync-join-exits-v2') {
-        return V2.EventController().syncJoinExits(chain);
+        return V2.EventController().syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
-        return V2.EventController().syncSwaps(chain);
+        return V2.EventController().syncSwapsV2(chain);
     } else if (job === 'sync-snapshots-v2') {
         return snapshotsController.syncSnapshotsV2(chain);
     } else if (job === 'fill-missing-snapshots-v2') {
@@ -60,21 +58,21 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     } else if (job === 'fill-missing-snapshots-v3') {
         return snapshotsController.fillMissingSnapshotsV3(chain);
     } else if (job === 'sync-swaps-v3') {
-        return EventController().syncSwapsV3(chain);
-    } else if (job === 'update-liquidity-24h-ago') {
-        return PoolController().updateLiquidity24hAgo(chain);
+        return V3.EventController().syncSwapsV3(chain);
+    } else if (job === 'update-liquidity-24h-ago-v3') {
+        return V3.PoolController().updateLiquidity24hAgoV3(chain);
     } else if (job === 'sync-sftmx-staking') {
-        return jobsController.syncSftmxStakingData(chain);
+        return sftmxController.syncSftmxStakingData(chain);
     } else if (job === 'sync-sftmx-withdrawal') {
-        return jobsController.syncSftmxWithdrawalrequests(chain);
+        return sftmxController.syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-sftmx-staking-snapshots') {
-        return jobsController.syncSftmxStakingSnapshots(chain);
+        return sftmxController.syncSftmxStakingSnapshots(chain);
     } else if (job === 'sync-user-balances-v2') {
         return UserBalancesController().syncUserBalancesFromV2Subgraph(chain);
     } else if (job === 'sync-user-balances-v3') {
         return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
     } else if (job === 'load-onchain-data-v3') {
-        return PoolMutationController().loadOnchainDataForAllPools(chain);
+        return V3.PoolMutationController().loadOnchainDataForAllPoolsV3(chain);
     } else if (job === 'add-new-cow-amm-pools') {
         return CowAmmController().addPools(chain);
     } else if (job === 'sync-cow-amm-pools') {
@@ -124,7 +122,7 @@ async function run(job: string = process.argv[2], chain: string = process.argv[3
     } else if (job === 'sync-rate-provider-reviews') {
         return ContentController().syncRateProviderReviews();
     } else if (job === 'sync-hook-data') {
-        return PoolController().syncHookData(chain);
+        return V3.PoolController().syncHookData(chain);
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }

@@ -1,13 +1,16 @@
 import config from '../../../config';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
-import { addPools } from '../../actions/v2/pool/add-pools';
+import { addPools } from '../../actions/pool/v2/add-pools';
 import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { syncPools, syncChangedPools, syncOnchainStateForAllPools } from '../../actions/v2/pool';
+import { syncPools, syncChangedPools, syncOnchainStateForAllPools } from '../../actions/pool/v2';
 import { getViemClient } from '../../sources/viem-client';
+import { getBlockNumbersSubgraphClient } from '../../sources/subgraphs';
+import { prisma } from '../../../prisma/prisma-client';
+import { updateLiquidity24hAgo } from '../../actions/pool/update-liquidity-24h-ago';
 
 export function PoolsController(tracer?: any) {
     return {
-        async addPools(chainId: string) {
+        async addPoolsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const subgraphUrl = config[chain].subgraphs.balancer;
             const subgraphService = getV2SubgraphClient(subgraphUrl, Number(chainId));
@@ -15,7 +18,7 @@ export function PoolsController(tracer?: any) {
             return addPools(subgraphService, chain);
         },
 
-        async syncPools(chainId: string) {
+        async syncPoolsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const vaultAddress = config[chain].balancer.v2.vaultAddress;
             const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
@@ -37,7 +40,7 @@ export function PoolsController(tracer?: any) {
             );
         },
 
-        async syncChangedPools(chainId: string) {
+        async syncChangedPoolsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const vaultAddress = config[chain].balancer.v2.vaultAddress;
             const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
@@ -55,7 +58,7 @@ export function PoolsController(tracer?: any) {
             );
         },
 
-        async syncOnchainAllPools(chainId: string) {
+        async syncOnchainAllPoolsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const vaultAddress = config[chain].balancer.v2.vaultAddress;
             const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
@@ -71,6 +74,36 @@ export function PoolsController(tracer?: any) {
                 swapProtocolFeePercentage,
                 gyroConfig,
             );
+        },
+
+        async updateLiquidity24hAgoV2(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const {
+                subgraphs: { balancer, blocks },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            const subgraph = balancer && getV2SubgraphClient(balancer, Number(chainId));
+
+            if (!subgraph) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const blocksSubgraph = getBlockNumbersSubgraphClient(blocks);
+
+            const poolIds = await prisma.prismaPoolDynamicData.findMany({
+                where: { chain },
+                select: { poolId: true },
+            });
+
+            const updates = await updateLiquidity24hAgo(
+                poolIds.map(({ poolId }) => poolId),
+                subgraph,
+                blocksSubgraph,
+                chain,
+            );
+
+            return updates;
         },
     };
 }

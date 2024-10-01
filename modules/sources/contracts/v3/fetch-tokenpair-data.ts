@@ -2,9 +2,9 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
 import * as Sentry from '@sentry/node';
-import { ViemClient } from '../types';
-import { ViemMulticallCall, multicallViem } from '../../web3/multicaller-viem';
-import BalancerRouterAbi from './abis/BalancerRouter';
+import { ViemClient } from '../../types';
+import { ViemMulticallCall, multicallViem } from '../../../web3/multicaller-viem';
+import BalancerRouterAbi from '../abis/BalancerRouter';
 
 interface PoolInput {
     id: string;

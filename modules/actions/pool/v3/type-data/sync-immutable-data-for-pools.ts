@@ -2,8 +2,8 @@
  * Immutable data is set once on a pool and doesn't change over time.
  * Subgraph is used as a source of truth for this data.
  */
-import { V3PoolsSubgraphClient } from '../../../sources/subgraphs';
-import { PoolType } from '../../../sources/subgraphs/balancer-v3-pools/generated/types';
+import { V3PoolsSubgraphClient } from '../../../../sources/subgraphs';
+import { PoolType } from '../../../../sources/subgraphs/balancer-v3-pools/generated/types';
 import { update } from './update';
 
 type StableData = {

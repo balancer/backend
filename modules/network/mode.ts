@@ -66,7 +66,7 @@ export const modeNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
+            name: 'update-liquidity-24h-ago-v2',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {

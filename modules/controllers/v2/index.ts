@@ -1,2 +1,2 @@
 export * from './pools-controller';
-export * from './events-controller';
+export * from './event-controller';

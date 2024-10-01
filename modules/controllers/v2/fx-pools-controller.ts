@@ -1,6 +1,6 @@
-import config from '../../config';
-import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
-import { chainIdToChain } from '../network/chain-id-to-chain';
+import config from '../../../config';
+import { syncLatestFXPrices } from '../../token/latest-fx-price';
+import { chainIdToChain } from '../../network/chain-id-to-chain';
 
 export function FXPoolsController() {
     return {

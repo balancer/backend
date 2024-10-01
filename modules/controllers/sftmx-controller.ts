@@ -1,11 +1,19 @@
+import config from '../../config';
+import { chainIdToChain } from '../network/chain-id-to-chain';
+import { getViemClient } from '../sources/viem-client';
+import { syncStakingData as syncSftmxStakingData } from '../actions/sftmx/sync-staking-data';
+import { Address } from 'viem';
+import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../actions/sftmx/sync-withdrawal-requests';
+import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
+import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
+import moment from 'moment';
+import { prisma } from '../../prisma/prisma-client';
 import {
-    GqlSftmxStakingData,
-    GqlSftmxStakingSnapshot,
     GqlSftmxStakingSnapshotDataRange,
     GqlSftmxWithdrawalRequests,
+    GqlSftmxStakingData,
+    GqlSftmxStakingSnapshot,
 } from '../../schema';
-import { prisma } from '../../prisma/prisma-client';
-import moment from 'moment';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 const SFTMX_STACKINGCONTRACT = AllNetworkConfigsKeyedOnChain['FANTOM'].data.sftmx!.stakingContractAddress;
@@ -25,9 +33,53 @@ const getTimestampForRange = (range: GqlSftmxStakingSnapshotDataRange): number =
     }
 };
 
-export function SftmxQueryController(tracer?: any) {
+export function SftmxController(tracer?: any) {
     return {
-        getWithdrawalRequests: async (user: string): Promise<GqlSftmxWithdrawalRequests[]> => {
+        async syncSftmxStakingData(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxStakingData: ${chain}`);
+            }
+
+            const viemClient = getViemClient(chain);
+
+            await syncSftmxStakingData(stakingContractAddress as Address, viemClient);
+        },
+
+        async syncSftmxWithdrawalrequests(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const sftmxSubgraphUrl = config[chain].subgraphs.sftmx;
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!sftmxSubgraphUrl || !stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxWithdrawalrequests: ${chain}`);
+            }
+
+            const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
+
+            await syncSftmxWithdrawalRequests(stakingContractAddress as Address, sftmxSubgraphClient);
+        },
+
+        async syncSftmxStakingSnapshots(chainId: string) {
+            const chain = chainIdToChain[chainId];
+            const sftmxSubgraphUrl = config[chain].subgraphs.sftmx;
+            const stakingContractAddress = config[chain].sftmx?.stakingContractAddress;
+
+            // Guard against unconfigured chains
+            if (!sftmxSubgraphUrl || !stakingContractAddress) {
+                throw new Error(`Chain not configured for job syncSftmxStakingSnapshots: ${chain}`);
+            }
+
+            const sftmxSubgraphClient = new SftmxSubgraphService(sftmxSubgraphUrl);
+
+            await syncSftmxStakingSnapshots(stakingContractAddress as Address, sftmxSubgraphClient);
+        },
+
+        async getWithdrawalRequests(user: string): Promise<GqlSftmxWithdrawalRequests[]> {
             const balances = await prisma.prismaSftmxWithdrawalRequest.findMany({
                 where: {
                     user: user,
@@ -36,7 +88,7 @@ export function SftmxQueryController(tracer?: any) {
             return balances;
         },
 
-        getStakingData: async (): Promise<GqlSftmxStakingData> => {
+        async getStakingData(): Promise<GqlSftmxStakingData> {
             const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
                 where: { id: SFTMX_STACKINGCONTRACT },
                 include: {
@@ -68,7 +120,7 @@ export function SftmxQueryController(tracer?: any) {
             };
         },
 
-        getStakingSnapshots: async (range: GqlSftmxStakingSnapshotDataRange): Promise<GqlSftmxStakingSnapshot[]> => {
+        async getStakingSnapshots(range: GqlSftmxStakingSnapshotDataRange): Promise<GqlSftmxStakingSnapshot[]> {
             const timestamp = getTimestampForRange(range);
 
             const stakingSnapshots = await prisma.prismaSftmxStakingDataSnapshot.findMany({

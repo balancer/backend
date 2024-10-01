@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { V3VaultSubgraphClient } from '../../sources/subgraphs';
-import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
-import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
-import { daysAgo } from '../../common/time';
-import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
+import { prisma } from '../../../../prisma/prisma-client';
+import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
+import { AddRemove_OrderBy, OrderDirection } from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
+import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
+import { daysAgo } from '../../../common/time';
+import { joinExitV3Transformer } from '../../../sources/transformers/join-exit-v3-transformer';
 
 export const JOIN_EXIT_HISTORY_DAYS = 90;
 

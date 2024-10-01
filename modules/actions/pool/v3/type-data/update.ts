@@ -1,4 +1,4 @@
-import { prisma } from '../../../../prisma/prisma-client';
+import { prisma } from '../../../../../prisma/prisma-client';
 
 export const update = async (params: { id: string; typeData: any }[]): Promise<void> => {
     return Promise.allSettled(

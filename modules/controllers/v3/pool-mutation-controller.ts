@@ -1,13 +1,13 @@
-import config from '../../config';
-import { prisma } from '../../prisma/prisma-client';
-import { syncPools } from '../actions/pool/sync-pools';
-import { syncSwapsV3 } from '../actions/pool/sync-swaps-v3';
-import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
-import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
-import { chainIdToChain } from '../network/chain-id-to-chain';
-import { getVaultSubgraphClient } from '../sources/subgraphs';
-import { getViemClient } from '../sources/viem-client';
-import { getVaultClient } from '../sources/contracts';
+import config from '../../../config';
+import { prisma } from '../../../prisma/prisma-client';
+import { syncPools } from '../../actions/pool/v3/sync-pools';
+import { syncSwaps } from '../../actions/pool/v3/sync-swaps';
+import { syncTokenPairs } from '../../actions/pool/v3/sync-tokenpairs';
+import { updateVolumeAndFees } from '../../actions/pool/update-volume-and-fees';
+import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { getVaultSubgraphClient } from '../../sources/subgraphs';
+import { getViemClient } from '../../sources/viem-client';
+import { getVaultClient } from '../../sources/contracts';
 
 /**
  * Controller responsible for matching job requests to configured job handlers
@@ -33,11 +33,11 @@ export function PoolMutationController(tracer?: any) {
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3);
 
-            const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
+            const poolsWithNewSwaps = await syncSwaps(vaultSubgraphClient, chain);
             await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
-        async loadOnchainDataForAllPools(chainId: string) {
+        async loadOnchainDataForAllPoolsV3(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
                 balancer: {

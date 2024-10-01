@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { ViemClient } from '../../sources/viem-client';
-import { fetchTokenPairData } from '../../sources/contracts/fetch-tokenpair-data';
+import { prisma } from '../../../../prisma/prisma-client';
+import { ViemClient } from '../../../sources/viem-client';
+import { fetchTokenPairData } from '../../../sources/contracts/v3/fetch-tokenpair-data';
 
 /**
  * Syncs all the token pair data for the given pool ids

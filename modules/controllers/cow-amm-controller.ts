@@ -13,7 +13,7 @@ import {
     updateSurplusAPRs,
 } from '../actions/cow-amm';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { updateVolumeAndFees } from '../actions/swap/update-volume-and-fees';
+import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import moment from 'moment';
 import { upsertBptBalances } from '../actions/cow-amm/upsert-bpt-balances';
 

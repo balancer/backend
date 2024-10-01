@@ -1,6 +1,6 @@
 import { syncPools } from './sync-pools';
-import { prisma } from '../../../prisma/prisma-client';
-import type { VaultClient } from '../../sources/contracts';
+import { prisma } from '../../../../prisma/prisma-client';
+import type { VaultClient } from '../../../sources/contracts';
 
 jest.mock('../../../prisma/prisma-client', () => ({
     prisma: {
@@ -27,10 +27,10 @@ describe('syncPools', () => {
         fetchProtocolFees: jest.fn().mockResolvedValue({}),
     };
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        return syncPools(ids, vaultClient, 'SEPOLIA', BigInt(1));
-    });
+    // beforeEach(() => {
+    //     jest.clearAllMocks();
+    //     return syncPools(ids, vaultClient, 'SEPOLIA', BigInt(1));
+    // });
 
     it('should fetch data from the vault contract', async () => {
         expect(vaultClient.fetchPoolData).toHaveBeenCalled();

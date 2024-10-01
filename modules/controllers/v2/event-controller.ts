@@ -1,13 +1,14 @@
 import config from '../../../config';
 
-import { syncJoinExits, syncSwaps } from '../../actions/v2';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
 import { BalancerSubgraphService } from '../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
+import { syncJoinExits } from '../../actions/pool/v2/sync-join-exits';
+import { syncSwaps } from '../../actions/pool/v2/sync-swaps';
 
 export function EventController() {
     return {
-        async syncJoinExits(chainId: string) {
+        async syncJoinExitsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancer },
@@ -22,7 +23,7 @@ export function EventController() {
             const entries = await syncJoinExits(subgraphClient, chain);
             return entries;
         },
-        async syncSwaps(chainId: string) {
+        async syncSwapsV2(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
                 subgraphs: { balancer },

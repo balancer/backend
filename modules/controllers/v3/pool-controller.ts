@@ -1,19 +1,19 @@
-import config from '../../config';
-import { syncPools } from '../actions/pool/sync-pools';
-import { upsertPools } from '../actions/pool/upsert-pools';
-import { chainIdToChain } from '../network/chain-id-to-chain';
-import { getViemClient } from '../sources/viem-client';
-import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
-import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../sources/subgraphs';
-import { prisma } from '../../prisma/prisma-client';
-import { getChangedPools } from '../sources/logs/get-changed-pools';
-import { getVaultClient } from '../sources/contracts';
-import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
-import { updateLiquidity24hAgo } from '../actions/pool/update-liquidity-24h-ago';
-import { syncTokenPairs } from '../actions/pool/sync-tokenpairs';
+import config from '../../../config';
+import { syncPools } from '../../actions/pool/v3/sync-pools';
+import { syncHookData } from '../../actions/pool/v3/sync-hook-data';
+import { upsertPools } from '../../actions/pool/v3/upsert-pools';
+import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { getViemClient } from '../../sources/viem-client';
+import { getVaultSubgraphClient } from '../../sources/subgraphs/balancer-v3-vault';
+import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient } from '../../sources/subgraphs';
+import { prisma } from '../../../prisma/prisma-client';
+import { getChangedPools } from '../../sources/logs/get-changed-pools';
+import { getVaultClient } from '../../sources/contracts';
+import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
+import { updateLiquidity24hAgo } from '../../actions/pool/update-liquidity-24h-ago';
+import { syncTokenPairs } from '../../actions/pool/v3/sync-tokenpairs';
 import { Chain } from '@prisma/client';
-import { syncHookData } from '../actions/pool/sync-hook-data';
-import { HookType } from '../network/network-config-types';
+import { HookType } from '../../network/network-config-types';
 
 export function PoolController() {
     return {
@@ -141,16 +141,14 @@ export function PoolController() {
 
             return poolsToSync.map(({ id }) => id);
         },
-        async updateLiquidity24hAgo(chainId: string) {
+        async updateLiquidity24hAgoV3(chainId: string) {
             const chain = chainIdToChain[chainId];
             const {
-                subgraphs: { balancerV3, balancer, blocks },
+                subgraphs: { balancerV3, blocks },
             } = config[chain];
 
             // Guard against unconfigured chains
-            const subgraph =
-                (balancerV3 && getVaultSubgraphClient(balancerV3)) ||
-                (balancer && getV2SubgraphClient(balancer, Number(chainId)));
+            const subgraph = balancerV3 && getVaultSubgraphClient(balancerV3);
 
             if (!subgraph) {
                 throw new Error(`Chain not configured: ${chain}`);

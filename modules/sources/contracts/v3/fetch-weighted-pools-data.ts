@@ -1,5 +1,5 @@
 import { parseAbi, formatEther } from 'viem';
-import { ViemClient } from '../types';
+import { ViemClient } from '../../types';
 
 const abi = parseAbi(['function getNormalizedWeights() view returns (uint[] weights)']);
 

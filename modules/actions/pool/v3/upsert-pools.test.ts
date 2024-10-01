@@ -1,9 +1,9 @@
-import { getVaultClient } from '../../sources/contracts';
+import { getVaultClient } from '../../../sources/contracts';
 import { upsertPools } from './upsert-pools';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
-import config from '../../../config';
-import { getV3JoinedSubgraphClient } from '../../sources/subgraphs/joined-client';
-import { getViemClient } from '../../sources/viem-client';
+import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import config from '../../../../config';
+import { getV3JoinedSubgraphClient } from '../../../sources/subgraphs/joined-client';
+import { getViemClient } from '../../../sources/viem-client';
 
 describe('upsert pools debug', () => {
     it('upsert boosted pool', async () => {
