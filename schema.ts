@@ -2088,32 +2088,14 @@ export interface Mutation {
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     beetsSyncFbeetsRatio: Scalars['String'];
     cacheAverageBlockTime: Scalars['String'];
-    poolBlackListAddPool: Scalars['String'];
-    poolBlackListRemovePool: Scalars['String'];
-    poolDeletePool: Scalars['String'];
-    poolInitOnChainDataForAllPools: Scalars['String'];
-    poolInitializeSnapshotsForPool: Scalars['String'];
-    poolLoadOnChainDataForAllPools: Scalars['String'];
-    poolLoadOnChainDataForPoolsWithActiveUpdates: Scalars['String'];
-    poolLoadSnapshotsForAllPools: Scalars['String'];
+    poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
-    poolReloadAllTokenNestedPoolIds: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
     poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
-    poolSyncLatestSnapshotsForAllPools: Scalars['String'];
-    poolSyncNewPoolsFromSubgraph: Array<Scalars['String']>;
-    poolSyncPool: Scalars['String'];
-    poolSyncPoolAllTokensRelationship: Scalars['String'];
-    poolSyncSanityPoolData: Scalars['String'];
-    poolSyncStakingForPools: Scalars['String'];
-    poolSyncSwapsForLast48Hours: Scalars['String'];
-    poolSyncTotalShares: Scalars['String'];
-    poolUpdateAprs: Scalars['String'];
     poolUpdateLifetimeValuesForAllPools: Scalars['String'];
-    poolUpdateLiquidity24hAgoForAllPools: Scalars['String'];
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
     poolUpdateVolumeAndFeeValuesForAllPools: Scalars['String'];
     protocolCacheMetrics: Scalars['String'];
@@ -2136,20 +2118,8 @@ export interface Mutation {
     veBalSyncTotalSupply: Scalars['String'];
 }
 
-export interface MutationPoolBlackListAddPoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationPoolBlackListRemovePoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationPoolDeletePoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationPoolInitializeSnapshotsForPoolArgs {
-    poolId: Scalars['String'];
+export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
+    chains: Array<GqlChain>;
 }
 
 export interface MutationPoolLoadSnapshotsForPoolsArgs {
@@ -2171,18 +2141,6 @@ export interface MutationPoolReloadStakingForAllPoolsArgs {
 
 export interface MutationPoolSyncAllCowSnapshotsArgs {
     chains: Array<GqlChain>;
-}
-
-export interface MutationPoolSyncLatestSnapshotsForAllPoolsArgs {
-    chain: GqlChain;
-}
-
-export interface MutationPoolSyncPoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationPoolUpdateAprsArgs {
-    chain: GqlChain;
 }
 
 export interface MutationTokenDeleteTokenTypeArgs {
@@ -4773,34 +4731,12 @@ export type MutationResolvers<
     beetsPoolLoadReliquarySnapshotsForAllFarms?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     cacheAverageBlockTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolBlackListAddPool?: Resolver<
-        ResolversTypes['String'],
+    poolLoadOnChainDataForAllPools?: Resolver<
+        Array<ResolversTypes['GqlPoolMutationResult']>,
         ParentType,
         ContextType,
-        RequireFields<MutationPoolBlackListAddPoolArgs, 'poolId'>
+        RequireFields<MutationPoolLoadOnChainDataForAllPoolsArgs, 'chains'>
     >;
-    poolBlackListRemovePool?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolBlackListRemovePoolArgs, 'poolId'>
-    >;
-    poolDeletePool?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolDeletePoolArgs, 'poolId'>
-    >;
-    poolInitOnChainDataForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolInitializeSnapshotsForPool?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolInitializeSnapshotsForPoolArgs, 'poolId'>
-    >;
-    poolLoadOnChainDataForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolLoadOnChainDataForPoolsWithActiveUpdates?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolLoadSnapshotsForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolLoadSnapshotsForPools?: Resolver<
         ResolversTypes['String'],
         ParentType,
@@ -4813,7 +4749,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationPoolReloadAllPoolAprsArgs, 'chain'>
     >;
-    poolReloadAllTokenNestedPoolIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolReloadPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
         ParentType,
@@ -4833,32 +4768,7 @@ export type MutationResolvers<
         RequireFields<MutationPoolSyncAllCowSnapshotsArgs, 'chains'>
     >;
     poolSyncAllPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-    poolSyncLatestSnapshotsForAllPools?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolSyncLatestSnapshotsForAllPoolsArgs, 'chain'>
-    >;
-    poolSyncNewPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-    poolSyncPool?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolSyncPoolArgs, 'poolId'>
-    >;
-    poolSyncPoolAllTokensRelationship?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolSyncSanityPoolData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolSyncStakingForPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolSyncSwapsForLast48Hours?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolSyncTotalShares?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolUpdateAprs?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolUpdateAprsArgs, 'chain'>
-    >;
     poolUpdateLifetimeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolUpdateLiquidity24hAgoForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolUpdateLiquidityValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolUpdateVolumeAndFeeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     protocolCacheMetrics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
