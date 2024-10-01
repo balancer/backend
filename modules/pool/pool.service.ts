@@ -31,7 +31,6 @@ import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { ContentService } from '../content/content-types';
 import { coingeckoDataService } from '../token/lib/coingecko-data.service';
 import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 import {
@@ -67,10 +66,6 @@ export class PoolService {
 
     private get chainId() {
         return networkContext.chainId;
-    }
-
-    private get contentService(): ContentService {
-        return networkContext.config.contentService;
     }
 
     private get balancerSubgraphService() {
