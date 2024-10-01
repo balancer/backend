@@ -9,6 +9,7 @@ import { networkContext } from '../network/network-context.service';
 import { Dictionary } from 'lodash';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { chainIdToChain } from '../network/chain-id-to-chain';
+import { GithubContentService } from '../content/github-content.service';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -26,7 +27,8 @@ export class TokenService {
     public async syncTokenContentData() {
         //sync coingecko Ids first, then override Ids from the content service
         await this.coingeckoDataService.syncCoingeckoIds();
-        await networkContext.config.contentService.syncTokenContentData([networkContext.chain]);
+        const githubContentService = new GithubContentService();
+        await githubContentService.syncTokenContentData([networkContext.chain]);
     }
 
     public async getToken(address: string, chain = networkContext.chain): Promise<PrismaToken | null> {
@@ -239,7 +241,9 @@ export class TokenService {
         await prisma.prismaTokenType.deleteMany({
             where: { chain: networkContext.chain },
         });
-        await networkContext.config.contentService.syncTokenContentData([networkContext.chain]);
+
+        const githubContentService = new GithubContentService();
+        await githubContentService.syncTokenContentData([networkContext.chain]);
     }
 }
 

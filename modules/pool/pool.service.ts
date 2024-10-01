@@ -34,9 +34,9 @@ import { PoolStakingService } from './pool-types';
 import { networkContext } from '../network/network-context.service';
 import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { ContentService } from '../content/content-types';
 import { coingeckoDataService } from '../token/lib/coingecko-data.service';
 import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
+import { SanityContentService } from '../content/sanity-content.service';
 
 export class PoolService {
     constructor(
@@ -61,10 +61,6 @@ export class PoolService {
 
     private get poolStakingServices(): PoolStakingService[] {
         return networkContext.config.poolStakingServices;
-    }
-
-    private get contentService(): ContentService {
-        return networkContext.config.contentService;
     }
 
     private get balancerSubgraphService() {
@@ -247,7 +243,8 @@ export class PoolService {
     }
 
     public async syncPoolContentData() {
-        await this.contentService.syncPoolContentData(this.chain);
+        const sanityContentService = new SanityContentService();
+        await sanityContentService.syncPoolContentData(this.chain);
     }
 
     public async syncStakingForPools() {
