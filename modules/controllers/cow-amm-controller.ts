@@ -92,22 +92,8 @@ export function CowAmmController(tracer?: any) {
                 })
             )?.blockNumber;
 
-            if (!fromBlock) {
-                fromBlock = await prisma.prismaPoolEvent
-                    .findFirst({
-                        where: {
-                            chain,
-                            protocolVersion: 1,
-                        },
-                        orderBy: {
-                            blockNumber: 'desc',
-                        },
-                    })
-                    .then((pool) => pool?.blockNumber);
-
-                if (fromBlock && fromBlock > 10) {
-                    fromBlock = fromBlock - 10; // Safety overlap
-                }
+            if (fromBlock && fromBlock > 10) {
+                fromBlock = fromBlock - 10; // Safety overlap
             }
 
             let poolsToSync: string[] = [];
@@ -126,7 +112,7 @@ export function CowAmmController(tracer?: any) {
                     .findMany({
                         where: {
                             chain,
-                            protocolVersion: 1,
+                            type: 'COW_AMM',
                         },
                         select: {
                             id: true,

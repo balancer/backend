@@ -4,7 +4,7 @@ import { prisma } from '../../../prisma/prisma-client';
 export const updateSurplusAPRs = async () => {
     const pools = await prisma.prismaPool.findMany({
         where: {
-            protocolVersion: 1,
+            type: 'COW_AMM',
         },
         include: {
             dynamicData: true,
