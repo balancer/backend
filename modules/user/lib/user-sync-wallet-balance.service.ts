@@ -294,7 +294,7 @@ export class UserSyncWalletBalanceService {
 
     private getPrismaUpsertForPoolShare(share: Prisma.PrismaUserWalletBalanceCreateManyInput) {
         return prisma.prismaUserWalletBalance.upsert({
-            where: { id_chain: { id: share.id, chain: this.chain } },
+            where: { id_chain: { id: `${share.poolId}-${share.userAddress}`, chain: this.chain } },
             create: {
                 ...share,
                 chain: this.chain,
