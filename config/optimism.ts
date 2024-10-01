@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -13,12 +13,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2022-01-01',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
+        ],
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/danielmkm/optimism-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-optimism',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-optimism',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
+        blocks: 'https://api.studio.thegraph.com/query/48427/optimism-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -35,8 +36,8 @@ export default <NetworkData>{
         platformId: 'optimistic-ethereum',
         excludedTokenAddresses: ['0x97513e975a7fa9072c72c92d8000b0db90b163c5'], //multibeets
     },
-    rpcUrl: env.INFURA_API_KEY
-        ? `https://optimism-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=optimism&dkey=${env.DRPC_API_KEY}`
         : 'https://mainnet.optimism.io',
     rpcMaxBlockRange: 2000,
     protocolToken: 'beets',
@@ -49,6 +50,7 @@ export default <NetworkData>{
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
         delegationProxy: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
     },
     gyro: {
         config: '0x32acb44fc929339b9f16f0449525cc590d2a23f3',
@@ -95,7 +97,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-optimism',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
                 tokens: {
                     USDCe: {
                         underlyingAssetAddress: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
@@ -136,6 +138,12 @@ export default <NetworkData>{
                 // and search for the vault address in the link: https://api.beefy.finance/vaults
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+            },
+        ],
         reaper: {
             subgraphSource: {
                 subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',
@@ -188,6 +196,7 @@ export default <NetworkData>{
         maker: {
             sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
         },
+        etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
         defaultHandlers: {
             wstEth: {
                 tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
@@ -239,19 +248,20 @@ export default <NetworkData>{
                 path: 'services.{serviceName == "eth"}.apy',
                 isIbYield: true,
             },
+            wrsETH: {
+                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
+            wusdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
+            },
         },
-    },
-    beefy: {
-        linearPools: [
-            '0x5bdd8c19b44c3e4a15305601a2c9841bde9366f00000000000000000000000ca',
-            '0x72d6df381cac8c2283c0b13fe5262a1f5e8e8d1b0000000000000000000000cb',
-        ],
-    },
-    rocket: {
-        rEthContract: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-    },
-    overnight: {
-        aprEndpoint: 'https://api.overnight.fi/optimism',
     },
     datastudio: {
         main: {

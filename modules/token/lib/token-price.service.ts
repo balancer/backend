@@ -11,7 +11,6 @@ import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-h
 import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
 import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
 import { FallbackHandlerService } from './token-price-handlers/fallback-price-handler.service';
-import { LinearWrappedTokenPriceHandlerService } from './token-price-handlers/linear-wrapped-token-price-handler.service';
 import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
 import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
 import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
@@ -26,7 +25,6 @@ export class TokenPriceService {
         new AavePriceHandlerService(),
         new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
-        new LinearWrappedTokenPriceHandlerService(),
         new SwapsPriceHandlerService(),
         new FallbackHandlerService(),
     ];
@@ -64,7 +62,7 @@ export class TokenPriceService {
         // also add ETH price (0xeee..)
         this.addNativeEthPrice(chains, tokenPrices);
 
-        return tokenPrices.filter((tokenPrice) => tokenPrice.price > 0.000000001);
+        return tokenPrices;
     }
 
     public async getTokenPricesFrom24hAgo(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
@@ -86,13 +84,11 @@ export class TokenPriceService {
         // also add ETH price (0xeee..)
         this.addNativeEthPrice(chains, distinctTokenPrices);
 
-        return distinctTokenPrices
-            .filter((tokenPrice) => tokenPrice.price > 0.000000001)
-            .map((tokenPrice) => ({
-                id: `${tokenPrice.tokenAddress}-${tokenPrice.timestamp}`,
-                ...tokenPrice,
-                updatedBy: null,
-            }));
+        return distinctTokenPrices.map((tokenPrice) => ({
+            id: `${tokenPrice.tokenAddress}-${tokenPrice.timestamp}`,
+            ...tokenPrice,
+            updatedBy: null,
+        }));
     }
 
     public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string, chain: Chain): number {
@@ -109,14 +105,15 @@ export class TokenPriceService {
     public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
         const tokens = await prisma.prismaToken.findMany({
             where: { chain: { in: chains } },
-            include: {
-                types: true,
-            },
+        });
+
+        const tokenTypes = await prisma.prismaTokenType.findMany({
+            where: { chain: { in: chains } },
         });
 
         let tokensWithTypes = tokens.map((token) => ({
             ...token,
-            types: token.types.map((type) => type.type),
+            types: tokenTypes.filter((type) => type.tokenAddress === token.address).map((type) => type.type),
         }));
 
         for (const handler of this.priceHandlers) {

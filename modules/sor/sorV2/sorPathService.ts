@@ -17,7 +17,7 @@ import { poolsToIgnore } from '../constants';
 import { AllNetworkConfigsKeyedOnChain, chainToIdMap } from '../../network/network-config';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
-import { sorGetSwapsWithPools as sorGetPathsWithPools } from './lib/static';
+import { sorGetPathsWithPools } from './lib/static';
 import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
@@ -30,20 +30,29 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    TokenAmount,
     SwapKind,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { SwapLocal } from './lib/swapLocal';
+import { Cache } from 'memory-cache';
 
 class SorPathService implements SwapService {
+    private cache = new Cache<string, PrismaPoolWithDynamic[]>();
+    private readonly SOR_POOLS_CACHE_KEY = `sor:pools`;
+
     // This is only used for the old SOR service
     public async getSwapResult(
         { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<SwapResult> {
+        const protocolVersion = 2;
+
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -59,7 +68,15 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             if (!paths && maxNonBoostedPathDepth < 5) {
                 return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
             }
@@ -67,7 +84,7 @@ class SorPathService implements SwapService {
                 return new SwapResultV2(null, chain);
             }
 
-            const swap = new SwapLocal({ paths: paths, swapKind });
+            const swap = new SwapLocal({ paths, swapKind });
 
             return new SwapResultV2(swap, chain);
         } catch (err: any) {
@@ -102,31 +119,36 @@ class SorPathService implements SwapService {
                 paths!,
                 input.swapType,
                 input.chain,
+                input.protocolVersion as 2 | 3,
                 input.queryBatchSwap,
                 input.callDataInput,
             );
         } catch (err: any) {
-            console.log(`Error Retrieving QuerySwap`, err);
-            Sentry.captureException(err.message, {
-                tags: {
-                    service: 'sorV2 query swap',
-                    tokenIn: input.tokenIn,
-                    tokenOut: input.tokenOut,
-                    swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
-                    swapType: input.swapType,
-                    chain: input.chain,
-                },
-            });
-            return emptyResponse;
+            if (err.message === 'SOR queryBatchSwap failed') {
+                throw new Error('SOR queryBatchSwap failed');
+            } else {
+                console.log(`SOR queryBatchSwap failed`, err);
+                Sentry.captureException(err.message, {
+                    tags: {
+                        service: 'sorV2 query swap',
+                        tokenIn: input.tokenIn,
+                        tokenOut: input.tokenOut,
+                        swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
+                        swapType: input.swapType,
+                        chain: input.chain,
+                    },
+                });
+                return emptyResponse;
+            }
         }
     }
 
     private async getSwapPathsFromSor(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapPathsInput,
+        { chain, tokenIn, tokenOut, swapType, swapAmount, protocolVersion, graphTraversalConfig }: GetSwapPathsInput,
         maxNonBoostedPathDepth = 4,
     ): Promise<PathWithAmount[] | null> {
         try {
-            const poolsFromDb = await this.getBasePoolsFromDb(chain);
+            const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -142,9 +164,18 @@ class SorPathService implements SwapService {
                           maxNonBoostedPathDepth,
                       },
                   };
-            const paths = await sorGetPathsWithPools(tIn, tOut, swapKind, swapAmount.amount, poolsFromDb, config);
+            const paths = await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                swapKind,
+                swapAmount.amount,
+                poolsFromDb,
+                protocolVersion,
+                config,
+            );
             // if we dont find a path with depth 4, we try one more level.
             if (!paths && maxNonBoostedPathDepth < 5) {
+                // TODO: we should be able to refactor this 'retry' logic so it's configurable from outside instead of hardcoding it here
                 return this.getSwapPathsFromSor(arguments[0], maxNonBoostedPathDepth + 1);
             }
             return paths;
@@ -171,17 +202,20 @@ class SorPathService implements SwapService {
         paths: PathWithAmount[],
         swapType: GqlSorSwapType,
         chain: Chain,
+        protocolVersion: 2 | 3,
         queryFirst = false,
         callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
 
         // TODO for v3 we need to update per swap path
-        let updatedAmount;
+        let queryOutput: ExactInQueryOutput | ExactOutQueryOutput | undefined = undefined;
+        let updatedAmount: TokenAmount | undefined = undefined;
         const sdkSwap = new Swap({
             chainId: parseFloat(chainToIdMap[chain]),
             paths: paths.map((path) => ({
-                vaultVersion: 2 as 2 | 3,
+                protocolVersion,
+                vaultVersion: protocolVersion,
                 inputAmountRaw: path.inputAmount.amount,
                 outputAmountRaw: path.outputAmount.amount,
                 tokens: path.tokens.map((token) => ({
@@ -193,7 +227,16 @@ class SorPathService implements SwapService {
             swapKind,
         });
         if (queryFirst) {
-            updatedAmount = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            try {
+                queryOutput = await sdkSwap.query(AllNetworkConfigsKeyedOnChain[chain].data.rpcUrl);
+            } catch (error) {
+                throw new Error('SOR queryBatchSwap failed');
+            }
+            if (swapKind === SwapKind.GivenIn) {
+                updatedAmount = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            } else {
+                updatedAmount = (queryOutput as ExactOutQueryOutput).expectedAmountIn;
+            }
         }
 
         let inputAmount = getInputAmount(paths);
@@ -213,7 +256,11 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountOut: outputAmount,
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountOut: outputAmount,
+                        amountIn: inputAmount,
+                    },
                     slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactIn;
@@ -231,8 +278,12 @@ class SorPathService implements SwapService {
                     sender: callDataInput.sender as `0x${string}`,
                     recipient: callDataInput.receiver as `0x${string}`,
                     wethIsEth: callDataInput.wethIsEth,
-                    expectedAmountIn: inputAmount,
-                    slippage: Slippage.fromPercentage(`${parseFloat(callDataInput.slippagePercentage)}`),
+                    queryOutput: {
+                        swapKind,
+                        expectedAmountIn: inputAmount,
+                        amountOut: outputAmount,
+                    },
+                    slippage: Slippage.fromPercentage(callDataInput.slippagePercentage as `${number}`),
                     deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
                 }) as SwapBuildOutputExactOut;
                 callData = {
@@ -272,6 +323,7 @@ class SorPathService implements SwapService {
             // paths used as input for b-sdk for client
             sorPaths.push({
                 vaultVersion: 2,
+                protocolVersion: 2,
                 inputAmountRaw: path.inputAmount.amount.toString(),
                 outputAmountRaw: path.outputAmount.amount.toString(),
                 tokens: path.tokens.map((token) => ({
@@ -279,17 +331,19 @@ class SorPathService implements SwapService {
                     decimals: token.decimals,
                 })),
                 pools: path.pools.map((pool) => pool.id),
+                isBuffer: path.isBuffer,
             });
         }
 
         const returnAmount = swapKind === SwapKind.GivenIn ? outputAmount : inputAmount;
         const swapAmount = swapKind === SwapKind.GivenIn ? inputAmount : outputAmount;
 
-        const effectivePrice = inputAmount.divDownFixed(outputAmount.scale18);
+        const effectivePrice = outputAmount.amount > 0 ? inputAmount.divDownFixed(outputAmount.scale18) : Infinity;
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         return {
             vaultVersion: 2,
+            protocolVersion: 2,
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),
@@ -302,7 +356,13 @@ class SorPathService implements SwapService {
             swapAmountRaw: swapAmount.amount.toString(),
             returnAmount: formatUnits(returnAmount.amount, returnAmount.token.decimals),
             returnAmountRaw: returnAmount.amount.toString(),
-            effectivePrice: formatUnits(effectivePrice.amount, effectivePrice.token.decimals),
+            effectivePrice:
+                effectivePrice === Infinity
+                    ? 'Infinity'
+                    : formatUnits(
+                          (effectivePrice as TokenAmount).amount,
+                          (effectivePrice as TokenAmount).token.decimals,
+                      ),
             effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
             routes: this.mapRoutes(paths, pools),
             priceImpact: {
@@ -399,18 +459,24 @@ class SorPathService implements SwapService {
      * Fetch pools from Prisma and map to b-sdk BasePool.
      * @returns
      */
-    private async getBasePoolsFromDb(chain: Chain): Promise<PrismaPoolWithDynamic[]> {
+    private async getBasePoolsFromDb(chain: Chain, protocolVersion: number): Promise<PrismaPoolWithDynamic[]> {
+        const cached = this.cache.get(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`);
+        if (cached) {
+            return cached;
+        }
+
         const poolIdsToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.poolIdsToExclude ?? [];
         const pools = await prisma.prismaPool.findMany({
             where: {
                 chain,
+                protocolVersion,
                 dynamicData: {
                     totalSharesNum: {
                         gt: 0.000000000001,
                     },
                     swapEnabled: true,
                     totalLiquidity: {
-                        gt: 1000,
+                        gte: chain === 'SEPOLIA' ? 0 : 100,
                     },
                 },
                 id: {
@@ -422,6 +488,7 @@ class SorPathService implements SwapService {
                         'META_STABLE',
                         'PHANTOM_STABLE',
                         'COMPOSABLE_STABLE',
+                        'STABLE',
                         'FX',
                         'GYRO',
                         'GYRO3',
@@ -431,6 +498,9 @@ class SorPathService implements SwapService {
             },
             include: prismaPoolWithDynamic.include,
         });
+
+        // cache for 10s
+        this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 10 * 1000);
         return pools;
     }
 

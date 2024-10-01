@@ -4,6 +4,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { SubgraphPoolUpsertData } from '../transformers/subgraph-pool-upsert';
 import { formatUnits } from 'viem';
 import { OnchainPoolUpdateData } from '../transformers/onchain-pool-update';
+import { OnchainCowAmmPoolUpdateData } from '../transformers/onchain-cow-amm-pool-update';
 
 type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
     ? U extends any[]
@@ -23,7 +24,9 @@ type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
  * @param chain
  * @returns
  */
-export async function poolUpsertsUsd<T extends OnchainPoolUpdateData | SubgraphPoolUpsertData>(
+export async function poolUpsertsUsd<
+    T extends OnchainCowAmmPoolUpdateData | OnchainPoolUpdateData | Exclude<SubgraphPoolUpsertData, null>,
+>(
     upsertData: T[],
     chain: Chain,
     allTokens: { address: string; decimals: number }[],

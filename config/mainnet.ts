@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
-import { env } from '../app/env';
+import { env } from '../apps/env';
+import { syncReliquaryStakingForPools } from '../modules/actions/pool/staking';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 const underlyingTokens = {
@@ -7,6 +8,8 @@ const underlyingTokens = {
     USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
     wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    crvUSD: '0xf939e0a03fb07f59a73314e73794be0e57ac1b4e',
+    LUSD: '0x5f98805a4e8be255a32880fdec7f6728c6568ba0',
 };
 
 export default <NetworkData>{
@@ -20,12 +23,14 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2019-04-20',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUvfS6hqU3nGQxFFzxoMBkufYJ7Jh3cYdTUM64hucgqe7`,
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
+        ],
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/ethereum-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdmQBHbBtwD6wNypHbuGKB1uKHpHNVuSHbo9FsvrMhXSn`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -45,10 +50,9 @@ export default <NetworkData>{
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
         ],
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.eth.gateway.fm',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
+        : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
     bal: {
@@ -56,6 +60,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0000000000000000000000000000000000000000',
     },
     gaugeControllerAddress: '0xc128468b7ce63ea702c1f104d55a2566b13d3abd',
@@ -109,7 +114,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v2: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: underlyingTokens.USDC,
@@ -135,7 +140,7 @@ export default <NetworkData>{
                 },
             },
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: underlyingTokens.USDC,
@@ -170,6 +175,20 @@ export default <NetworkData>{
                             stataEthWETH: '0x03928473f25bb2da6bc880b07ecbadc636822264',
                         },
                     },
+                    crvUSD: {
+                        underlyingAssetAddress: underlyingTokens.crvUSD,
+                        aTokenAddress: '0xb82fa9f31612989525992fcfbb09ab22eff5c85a',
+                        wrappedTokens: {
+                            stataEthcrvUSD: '0x848107491e029afde0ac543779c7790382f15929',
+                        },
+                    },
+                    LUSD: {
+                        underlyingAssetAddress: underlyingTokens.LUSD,
+                        aTokenAddress: '0x3fe6a295459fae07df8a0cecc36f37160fe86aa9',
+                        wrappedTokens: {
+                            stataEthLUSD: '0xdbf5e36569798d1e39ee9d7b1c61a7409a74f23a',
+                        },
+                    },
                 },
             },
         },
@@ -181,6 +200,16 @@ export default <NetworkData>{
                 },
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '5a9c2073-2190-4002-9654-8c245d1e8534',
+                tokenAddress: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+            },
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
+            },
+        ],
         euler: {
             subgraphUrl: 'https://api.thegraph.com/subgraphs/name/euler-xyz/euler-mainnet',
             tokens: {
@@ -191,7 +220,7 @@ export default <NetworkData>{
             },
         },
         gearbox: {
-            sourceUrl: 'https://mainnet.gearbox.foundation/api/pools',
+            sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
                 dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
                 dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
@@ -236,8 +265,19 @@ export default <NetworkData>{
                 },
             },
         },
-        stakewise: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+        },
         etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+        maple: {
+            url: 'https://api.maple.finance/v2/graphql',
+            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+        },
+        yieldnest: {
+            url: 'https://gateway.yieldnest.finance/api/v1/graphql',
+            token: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
+        },
         sveth: true,
         defaultHandlers: {
             uniETH: {
@@ -359,10 +399,34 @@ export default <NetworkData>{
                 path: 'stakingYield.value',
                 isIbYield: true,
             },
+            saETH: {
+                tokenAddress: '0xf1617882a71467534d14eee865922de1395c9e89',
+                sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
+                path: 'apr',
+                isIbYield: true,
+            },
+            cdcETH: {
+                tokenAddress: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
+                sourceUrl: 'https://api.crypto.com/pos/v1/public/get-staking-instruments',
+                path: 'result.data.{instrument_name == "ETH.staked"}.est_rewards',
+                isIbYield: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: {
+                    params: {
+                        country_code: 'POL',
+                    },
+                },
+                scale: 1,
+            },
+            agETH: {
+                tokenAddress: '0xe1b4d34e8754600962cd944b535180bd758e6c2e',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

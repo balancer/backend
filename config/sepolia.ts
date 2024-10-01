@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,14 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-03',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
-        balancerV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-v3-sepolia/version/latest',
-        balancerPoolsV3: 'https://api.studio.thegraph.com/proxy/31386/balancer-pools-v3-sepolia/version/latest',
+        cowAmm: 'https://api.studio.thegraph.com/query/75376/balancer-cow-amm-sepolia/version/latest',
+        balancer: ['https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest'],
+        balancerV3: 'https://api.studio.thegraph.com/query/31386/balancer-v3-sepolia-8th/version/latest',
+        balancerPoolsV3: 'https://api.studio.thegraph.com/query/31386/balancer-pools-v3-sepolia-8th/version/latest',
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest',
-        gauge: 'https://api.studio.thegraph.com/proxy/24660/balancer-gauges-sepolia/version/latest',
-        // veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -36,12 +35,8 @@ export default <NetworkData>{
         platformId: 'ethereum',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.GROVE_CITY
-        ? `https://sepolia.rpc.grove.city/v1/${env.GROVE_CITY}`
-        : env.ALCHEMY_API_KEY
-        ? `https://eth-sepolia.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-        : env.INFURA_API_KEY
-        ? `https://sepolia.infura.io/v3/${env.INFURA_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=sepolia&dkey=${env.DRPC_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',
     rpcMaxBlockRange: 700,
     protocolToken: 'bal',
@@ -60,11 +55,15 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0x1fc7f1f84cfe61a04224ac8d3f87f56214fec08c',
-            routerAddress: '0xa0de078cd5cfa7088821b83e0bd7545ccfb7c883',
+            vaultAddress: '0x0ef1c156a7986f394d90ed1beea6483cc435f542',
+            routerAddress: '0xb12fcb422aae6720f882e22c340964a7723f2387',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
+    },
+    hooks: {
+        feeTakingHook: ['0xde97fc6ecdcd9efa53dac2d29c0fc10e9b482a0b'],
+        exitFeeHook: ['0x8756a6527e8dc94cf07a468d2e4df8e9946bce3d'],
     },
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

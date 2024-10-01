@@ -40,6 +40,8 @@ export async function syncStakingData(stakingContractAddress: Address, viemClien
         },
     });
 
+    await prisma.prismaSftmxVault.deleteMany({ where: { id: { notIn: stakingData.vaults.map((vault) => vault.id) } } });
+
     for (const vaultData of stakingData.vaults) {
         await prisma.prismaSftmxVault.upsert({
             where: { id: vaultData.id },
@@ -54,14 +56,8 @@ export async function syncStakingData(stakingContractAddress: Address, viemClien
                 ftmStakingId: stakingContractAddress,
             },
             update: {
-                id: vaultData.id,
                 vaultIndex: parseFloat(vaultData.vaultIndex.toString()),
-                ftmStaked: formatEther(vaultData.ftmStaked),
-                unlockTimestamp: parseFloat(vaultData.unlockTimestamp.toString()),
-                validatorAddress: vaultData.validatorAddress,
-                validatorId: vaultData.validatorId.toString(),
                 matured: vaultData.matured,
-                ftmStakingId: stakingContractAddress,
             },
         });
     }

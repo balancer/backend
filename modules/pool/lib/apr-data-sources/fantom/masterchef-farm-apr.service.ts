@@ -5,10 +5,10 @@ import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { blocksSubgraphService } from '../../../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { FarmFragment } from '../../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
-import { masterchefService } from '../../../../subgraphs/masterchef-subgraph/masterchef.service';
 import { tokenService } from '../../../../token/token.service';
 import { PoolAprService } from '../../../pool-types';
 import { networkContext } from '../../../../network/network-context.service';
+import { MasterchefSubgraphService } from '../../../../subgraphs/masterchef-subgraph/masterchef.service';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -20,6 +20,7 @@ export class MasterchefFarmAprService implements PoolAprService {
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+        const masterchefService = new MasterchefSubgraphService(networkContext.data.subgraphs.masterchef!);
         const farms = await masterchefService.getAllFarms({});
 
         const blocksPerDay = await blocksSubgraphService.getBlocksPerDay();
@@ -109,6 +110,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                 apr: beetsApr,
                 type: 'NATIVE_REWARD',
                 group: null,
+                rewardTokenAddress: this.beetsAddress,
+                rewardTokenSymbol: 'BEETS',
             });
         }
 
@@ -139,6 +142,8 @@ export class MasterchefFarmAprService implements PoolAprService {
                     apr: rewardApr,
                     type: 'THIRD_PARTY_REWARD',
                     group: null,
+                    rewardTokenAddress: rewardToken.token,
+                    rewardTokenSymbol: rewardToken.symbol,
                 });
             }
         }

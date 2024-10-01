@@ -1,18 +1,16 @@
 import { ethers } from 'ethers';
-import { NetworkConfig } from './network-config-types';
+import { DeploymentEnv, NetworkConfig } from './network-config-types';
 import { tokenService } from '../token/token.service';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
+import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
-import { GaugeStakingService } from '../pool/lib/staking/gauge-staking.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
-import { every } from '../../worker/intervals';
+import { every } from '../../apps/scheduler/intervals';
 import { GithubContentService } from '../content/github-content.service';
-import { gaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
+import { env } from '../../apps/env';
 
 export const sepoliaNetworkData = config.SEPOLIA;
 
@@ -22,12 +20,10 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: sepoliaNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(sepoliaNetworkData.ybAprConfig, sepoliaNetworkData.chain.prismaId),
-        new PhantomStableAprService(sepoliaNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(tokenService, [sepoliaNetworkData.bal!.address]),
     ],
-    poolStakingServices: [new GaugeStakingService(gaugeSubgraphService, sepoliaNetworkData.bal!.address)],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
@@ -63,6 +59,39 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         {
             name: 'update-swaps-volume-and-fees-v3',
             interval: every(20, 'minutes'),
+        },
+        {
+            name: 'sync-snapshots-v3',
+            interval: every(12, 'hours'),
+        },
+        {
+            name: 'sync-hook-data',
+            interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-tokens-from-pool-tokens',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
+        },
+        // COW AMM
+        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
+        {
+            name: 'sync-cow-amm-pools',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
+            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
+        },
+        {
+            name: 'sync-cow-amm-swaps',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
+        },
+        {
+            name: 'sync-cow-amm-join-exits',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
+        },
+        { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
+        {
+            name: 'update-cow-amm-volume-and-fees',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
     ],
 };

@@ -75,7 +75,7 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
 
     // only inlcude pools with TVL >=$1000
     // for each pool, get pairs
-    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1k, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
+    // for each pair per pool, create multicall to do a swap with $100 (min liq is $1000, so there should be at least $100 for each token) for effectivePrice calc and a swap with 1% TVL
     //     then create multicall to do the second swap for each pair using the result of the first 1% swap as input, to calculate the spot price
     // https://github.com/balancer/b-sdk/pull/204/files#diff-52e6d86a27aec03f59dd3daee140b625fd99bd9199936bbccc50ee550d0b0806
 
@@ -87,11 +87,8 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
             // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (
-                (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) *
-                100
-            ).toFixed(20);
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            const oneHundred = ((parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100).toFixed(20);
+            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundred}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
             addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
@@ -151,10 +148,11 @@ function generateTokenPairs(filteredPools: PoolInput[]): TokenPair[] {
 
     for (const pool of filteredPools) {
         // create all pairs for pool
-        for (let i = 0; i < pool.tokens.length - 1; i++) {
-            for (let j = i + 1; j < pool.tokens.length; j++) {
+        for (let i = 0; i < pool.tokens.length; i++) {
+            for (let j = 0; j < pool.tokens.length; j++) {
                 const tokenA = pool.tokens[i];
                 const tokenB = pool.tokens[j];
+                if (tokenA.address === tokenB.address) continue;
                 // V2 Validation
                 // remove pools that have <$1000 TVL or a token without a balance or USD balance
                 // TODO: check if it's trully needed or if we're ok removing only the pairs without balance or balanceUSD
@@ -290,12 +288,12 @@ function addBToAPriceCallsToMulticaller(
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.effectivePriceAmountOut && result.aToBAmountOut) {
+    if (result?.effectivePriceAmountOut && result.effectivePriceAmountOut.gt(0) && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
             parseUnits(tokenPair.effectivePriceAmountIn.toString(), 18 - tokenPair.tokenA.decimals),
-            parseUnits(result.effectivePriceAmountOut?.toString(), 18 - tokenPair.tokenB.decimals),
+            parseUnits(result.effectivePriceAmountOut.toString(), 18 - tokenPair.tokenB.decimals),
         );
     }
 }
@@ -328,7 +326,7 @@ function calculateNormalizedLiquidity(tokenPair: TokenPair) {
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
     // this happens if you get a "bonus" ie positive price impact.
     if (priceRatio > parseEther('1')) {
-        console.error(
+        console.log(
             `Price ratio was ${priceRatio} for token pair ${tokenPair.tokenA.address}/${tokenPair.tokenB.address} in pool ${tokenPair.poolId}. Setting to 0.999999999999 instead.`,
         );
         priceRatio = parseEther('0.999999999999');

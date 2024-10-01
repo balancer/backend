@@ -1,9 +1,16 @@
 import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
+import { transformDocument } from '@prisma/client/runtime';
+import { types } from 'util';
 
 export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';
     payload: {
         fee: {
+            address: string;
+            amount: string;
+            valueUSD: string;
+        };
+        surplus?: {
             address: string;
             amount: string;
             valueUSD: string;
@@ -45,6 +52,7 @@ export type PrismaPoolTokenWithDynamicData = Prisma.PrismaPoolTokenGetPayload<ty
 export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
+        hook: true,
         staking: {
             include: {
                 farm: {
@@ -64,9 +72,10 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
                         },
                     },
                 },
+                aura: true,
+                vebal: true,
             },
         },
-        categories: true,
         allTokens: {
             include: {
                 token: {
@@ -98,14 +107,18 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
             orderBy: { index: 'asc' },
             include: {
                 dynamicData: true,
-                token: true,
+                token: {
+                    include: { types: true },
+                },
                 nestedPool: {
                     include: {
                         dynamicData: true,
                         tokens: {
                             orderBy: { index: 'asc' },
                             include: {
-                                token: true,
+                                token: {
+                                    include: { types: true },
+                                },
                                 dynamicData: true,
                                 nestedPool: {
                                     include: {
@@ -130,13 +143,15 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolA
 
 export type PrismaPoolWithExpandedNesting = Prisma.PrismaPoolGetPayload<typeof prismaPoolWithExpandedNesting>;
 
-const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
+export const nestedPoolWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {
-                token: true,
+                token: {
+                    include: { types: true },
+                },
                 dynamicData: true,
                 nestedPool: {
                     include: {
@@ -176,7 +191,11 @@ export type PrismaNestedPoolWithNoNesting = Prisma.PrismaPoolGetPayload<typeof n
 
 const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTokenArgs>()({
     include: {
-        token: true,
+        token: {
+            include: {
+                types: true,
+            },
+        },
         dynamicData: true,
         nestedPool: {
             include: {
@@ -184,7 +203,11 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolTok
                 tokens: {
                     orderBy: { index: 'asc' },
                     include: {
-                        token: true,
+                        token: {
+                            include: {
+                                types: true,
+                            },
+                        },
                         dynamicData: true,
                         nestedPool: {
                             include: {
@@ -239,7 +262,7 @@ export type PrismaTokenWithTypes = PrismaToken & {
 export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
     include: {
         dynamicData: true,
-        categories: true,
+        hook: true,
         allTokens: {
             include: {
                 token: {
@@ -270,7 +293,9 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
         tokens: {
             orderBy: { index: 'asc' },
             include: {
-                token: true,
+                token: {
+                    include: { types: true },
+                },
                 dynamicData: true,
             },
         },
@@ -293,6 +318,8 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolArgs>()({
                         },
                     },
                 },
+                aura: true,
+                vebal: true,
             },
         },
     },

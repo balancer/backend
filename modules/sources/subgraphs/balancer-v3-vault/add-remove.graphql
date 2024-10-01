@@ -1,0 +1,40 @@
+fragment AddRemove on AddRemove {
+    id
+    type
+    sender
+    amounts
+    pool {
+        id
+        tokens {
+            index
+            address
+        }
+    }
+    user {
+        id
+    }
+    blockNumber
+    logIndex
+    blockTimestamp
+    transactionHash
+}
+
+query AddRemove(
+    $skip: Int
+    $first: Int
+    $orderBy: AddRemove_orderBy
+    $orderDirection: OrderDirection
+    $where: AddRemove_filter
+    $block: Block_height
+) {
+    addRemoves(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...AddRemove
+    }
+}

@@ -1,11 +1,9 @@
 import {
-    PrismaNestedPoolWithNoNesting,
     PrismaNestedPoolWithSingleLayerNesting,
     prismaPoolMinimal,
     PrismaPoolMinimal,
     PrismaPoolTokenWithDynamicData,
     PrismaPoolTokenWithExpandedNesting,
-    PrismaPoolTokenWithSingleLayerNesting,
     prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
 } from '../../../prisma/prisma-types';
@@ -15,11 +13,8 @@ import {
     GqlPoolDynamicData,
     GqlPoolFeaturedPoolGroup,
     GqlPoolFeaturedPool,
-    GqlPoolGyro,
     GqlPoolInvestConfig,
     GqlPoolInvestOption,
-    GqlPoolLinear,
-    GqlPoolLinearNested,
     GqlPoolMinimal,
     GqlPoolNestingType,
     GqlPoolComposableStableNested,
@@ -33,31 +28,36 @@ import {
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
-    GqlPoolFx,
     GqlPoolTokenDetail,
     GqlNestedPool,
+    GqlPoolAprItem,
+    GqlPoolAprItemType,
+    GqlUserStakedBalance,
+    GqlPoolFilterCategory,
+    HookData,
+    GqlPoolAggregator,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
-import _ from 'lodash';
+import _, { has, map } from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import {
     Chain,
     Prisma,
     PrismaPoolAprType,
-    PrismaPoolStaking,
+    PrismaPriceRateProviderData,
+    PrismaTokenTypeOption,
     PrismaUserStakedBalance,
     PrismaUserWalletBalance,
 } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
-import { oldBnum } from '../../big-number/old-big-number';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { parseUnits } from 'ethers/lib/utils';
-import { formatFixed } from '@ethersproject/bignumber';
 import { BeethovenChainIds, chainToIdMap } from '../../network/network-config';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
-import { ElementData, FxData, GyroData, LinearData, StableData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
+import { ZERO_ADDRESS } from '@balancer/sdk';
+import { tokenService } from '../../token/token.service';
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -77,11 +77,121 @@ export class PoolGqlLoaderService {
             throw new Error('Pool exists, but has an unknown type');
         }
 
-        return this.mapPoolToGqlPool(
+        const mappedPool = this.mapPoolToGqlPool(
             pool,
             pool.userWalletBalances,
             userAddress ? pool.staking.map((staking) => staking.userStakedBalances).flat() : [],
         );
+
+        // load rate provider data into PoolTokenDetail model
+        await this.enrichWithRateproviderData(mappedPool);
+
+        // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
+        await this.enrichWithUnderlyingTokenData(mappedPool);
+
+        return mappedPool;
+    }
+
+    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion) {
+        for (const token of mappedPool.poolTokens) {
+            if (token.isErc4626) {
+                const prismaToken = await prisma.prismaToken.findUnique({
+                    where: { address_chain: { address: token.address, chain: mappedPool.chain } },
+                });
+                if (prismaToken?.underlyingTokenAddress) {
+                    const underlyingTokenDefinition = await tokenService.getTokenDefinition(
+                        prismaToken.underlyingTokenAddress,
+                        mappedPool.chain,
+                    );
+                    token.underlyingToken = underlyingTokenDefinition;
+                    mappedPool.displayTokens.push();
+                }
+            }
+            if (token.hasNestedPool) {
+                for (const nestedToken of token.nestedPool!.tokens) {
+                    if (nestedToken.isErc4626) {
+                        const prismaToken = await prisma.prismaToken.findUnique({
+                            where: { address_chain: { address: nestedToken.address, chain: mappedPool.chain } },
+                        });
+                        if (prismaToken?.underlyingTokenAddress) {
+                            const tokenDefinition = await tokenService.getTokenDefinition(
+                                prismaToken.underlyingTokenAddress,
+                                mappedPool.chain,
+                            );
+                            nestedToken.underlyingToken = tokenDefinition;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion) {
+        for (const token of mappedPool.poolTokens) {
+            if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
+                const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
+                    where: {
+                        chain_rateProviderAddress: {
+                            chain: mappedPool.chain,
+                            rateProviderAddress: token.priceRateProvider,
+                        },
+                    },
+                });
+                if (rateproviderData) {
+                    token.priceRateProviderData = {
+                        ...rateproviderData,
+                        warnings: rateproviderData.warnings?.split(',') || [],
+                        upgradeableComponents:
+                            (rateproviderData.upgradableComponents as {
+                                implementationReviewed: string;
+                                entryPoint: string;
+                            }[]) || [],
+                        address: rateproviderData.rateProviderAddress,
+                        reviewFile: rateproviderData.reviewUrl,
+                    };
+                }
+            }
+            if (token.hasNestedPool) {
+                for (const nestedToken of token.nestedPool!.tokens) {
+                    if (nestedToken.priceRateProvider && nestedToken.priceRateProvider !== ZERO_ADDRESS) {
+                        const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
+                            where: {
+                                chain_rateProviderAddress: {
+                                    chain: mappedPool.chain,
+                                    rateProviderAddress: nestedToken.priceRateProvider,
+                                },
+                            },
+                        });
+                        if (rateproviderData) {
+                            nestedToken.priceRateProviderData = {
+                                ...rateproviderData,
+                                warnings: rateproviderData.warnings?.split(',') || [],
+                                upgradeableComponents:
+                                    (rateproviderData.upgradableComponents as {
+                                        implementationReviewed: string;
+                                        entryPoint: string;
+                                    }[]) || [],
+                                address: rateproviderData.rateProviderAddress,
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        // add limits per default
+        args.first = args.first || 1000;
+        args.skip = args.skip || 0;
+
+        const pools = await prisma.prismaPool.findMany({
+            ...this.mapQueryArgsToPoolQuery(args),
+            include: {
+                ...this.getPoolInclude(),
+            },
+        });
+        return pools.map((pool) => this.mapPoolToAggregatorPool(pool));
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -137,36 +247,6 @@ export class PoolGqlLoaderService {
         return pools.map((pool) => this.mapToMinimalGqlPool(pool));
     }
 
-    public async getLinearPools(chains: Chain[]): Promise<GqlPoolLinear[]> {
-        const pools = await prisma.prismaPool.findMany({
-            where: { type: 'LINEAR', chain: { in: chains } },
-            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
-            include: prismaPoolWithExpandedNesting.include,
-        });
-
-        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolLinear[];
-    }
-
-    public async getGyroPools(chains: Chain[]): Promise<GqlPoolGyro[]> {
-        const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['GYRO', 'GYRO3', 'GYROE'] }, chain: { in: chains } },
-            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
-            include: prismaPoolWithExpandedNesting.include,
-        });
-
-        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolGyro[];
-    }
-
-    public async getFxPools(chains: Chain[]): Promise<GqlPoolFx[]> {
-        const pools = await prisma.prismaPool.findMany({
-            where: { type: { in: ['FX'] }, chain: { in: chains } },
-            orderBy: { dynamicData: { totalLiquidity: 'desc' } },
-            include: prismaPoolWithExpandedNesting.include,
-        });
-
-        return pools.map((pool) => this.mapPoolToGqlPool(pool)) as GqlPoolFx[];
-    }
-
     public mapToMinimalGqlPool(
         pool: PrismaPoolMinimal,
         userWalletbalances: PrismaUserWalletBalance[] = [],
@@ -174,12 +254,24 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            hook:
+                (pool.hook &&
+                    pool.hook.dynamicData && {
+                        ...pool.hook,
+                        dynamicData: pool.hook.dynamicData as HookData,
+                    }) ||
+                undefined,
+            incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
+            vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
+            hasErc4626: pool.allTokens.some((token) => token.token.types.some((type) => type.type === 'ERC4626')),
         };
     }
 
@@ -240,6 +332,7 @@ export class PoolGqlLoaderService {
                 poolId: contentPool.poolId,
                 primary: contentPool.primary,
                 pool: pool,
+                description: contentPool.description,
             });
         }
 
@@ -256,7 +349,7 @@ export class PoolGqlLoaderService {
                 orderBy = { dynamicData: { totalLiquidity: orderDirection } };
                 break;
             case 'totalShares':
-                orderBy = { dynamicData: { totalShares: orderDirection } };
+                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
                 break;
             case 'volume24h':
                 orderBy = { dynamicData: { volume24h: orderDirection } };
@@ -279,8 +372,10 @@ export class PoolGqlLoaderService {
             return {
                 ...baseQuery,
                 where: {
-                    categories: {
-                        none: { category: 'BLACK_LISTED' },
+                    NOT: {
+                        categories: {
+                            has: 'BLACK_LISTED',
+                        },
                     },
                     dynamicData: {
                         totalSharesNum: {
@@ -301,8 +396,7 @@ export class PoolGqlLoaderService {
                     some: {
                         token: {
                             address: {
-                                equals: token,
-                                mode: 'insensitive' as const,
+                                equals: token.toLowerCase(),
                             },
                         },
                     },
@@ -316,8 +410,7 @@ export class PoolGqlLoaderService {
                     every: {
                         token: {
                             address: {
-                                notIn: where.tokensNotIn || undefined,
-                                mode: 'insensitive' as const,
+                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
                             },
                         },
                     },
@@ -332,8 +425,7 @@ export class PoolGqlLoaderService {
                           userWalletBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -343,8 +435,7 @@ export class PoolGqlLoaderService {
                           userStakedBalances: {
                               some: {
                                   userAddress: {
-                                      equals: userAddress,
-                                      mode: 'insensitive' as const,
+                                      equals: userAddress.toLowerCase(),
                                   },
                                   balanceNum: { gt: 0 },
                               },
@@ -367,8 +458,8 @@ export class PoolGqlLoaderService {
                 in: where?.chainIn || undefined,
                 notIn: where?.chainNotIn || undefined,
             },
-            vaultVersion: {
-                in: where?.vaultVersionIn || undefined,
+            protocolVersion: {
+                in: where?.protocolVersionIn || undefined,
             },
             type: {
                 in: where?.poolTypeIn || undefined,
@@ -380,30 +471,21 @@ export class PoolGqlLoaderService {
             },
             AND: allTokensFilter,
             id: {
-                in: where?.idIn || undefined,
-                notIn: where?.idNotIn || undefined,
-                mode: 'insensitive',
+                in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
+                notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
             },
-            categories: {
-                ...(where?.categoryNotIn
-                    ? {
-                          every: {
-                              category: {
-                                  notIn: where.categoryNotIn,
-                              },
-                          },
-                      }
-                    : {}),
-                ...(where?.categoryIn
-                    ? {
-                          some: {
-                              category: {
-                                  in: where.categoryIn,
-                              },
-                          },
-                      }
-                    : {}),
-            },
+            ...(where?.categoryIn && !where?.tagIn
+                ? { categories: { hasSome: where.categoryIn.map((s) => s.toUpperCase()) } }
+                : {}),
+            ...(where?.categoryNotIn && !where?.tagNotIn
+                ? { NOT: { categories: { hasSome: where.categoryNotIn.map((s) => s.toUpperCase()) } } }
+                : {}),
+            ...(where?.tagIn && !where?.categoryIn
+                ? { categories: { hasSome: where.tagIn.map((s) => s.toUpperCase()) } }
+                : {}),
+            ...(where?.tagNotIn && !where?.categoryNotIn
+                ? { NOT: { categories: { hasSome: where.tagNotIn.map((s) => s.toUpperCase()) } } }
+                : {}),
             filters: {
                 ...(where?.filterNotIn
                     ? {
@@ -469,6 +551,69 @@ export class PoolGqlLoaderService {
         };
     }
 
+    private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
+        const { typeData, ...poolWithoutTypeData } = pool;
+
+        const mappedData = {
+            decimals: 18,
+            dynamicData: this.getPoolDynamicData(pool),
+            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
+            vaultVersion: poolWithoutTypeData.protocolVersion,
+        };
+
+        switch (pool.type) {
+            case 'STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'META_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                };
+            case 'COMPOSABLE_STABLE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as StableData),
+                    ...mappedData,
+                    // bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+                };
+            case 'ELEMENT':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as ElementData),
+                    ...mappedData,
+                };
+            case 'LIQUIDITY_BOOTSTRAPPING':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                };
+            case 'GYRO':
+            case 'GYRO3':
+            case 'GYROE':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as GyroData),
+                    ...mappedData,
+                };
+            case 'FX':
+                return {
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                    ...(typeData as FxData),
+                };
+        }
+
+        return {
+            ...poolWithoutTypeData,
+            ...mappedData,
+        };
+    }
+
     private mapPoolToGqlPool(
         pool: PrismaPoolWithExpandedNesting,
         userWalletbalances: PrismaUserWalletBalance[] = [],
@@ -478,20 +623,28 @@ export class PoolGqlLoaderService {
 
         const bpt = pool.tokens.find((token) => token.address === pool.address);
 
-        const stakingData = this.getStakingData(pool);
-
         const mappedData = {
             decimals: 18,
-            staking: stakingData,
+            staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
-            investConfig: this.getPoolInvestConfig(pool),
-            withdrawConfig: this.getPoolWithdrawConfig(pool),
+            investConfig: this.getPoolInvestConfig(pool), // TODO DEPRECATE
+            withdrawConfig: this.getPoolWithdrawConfig(pool), // TODO DEPRECATE
             nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)),
+            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
+            vaultVersion: poolWithoutTypeData.protocolVersion,
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
+            hook:
+                (pool.hook &&
+                    pool.hook.dynamicData && {
+                        ...pool.hook,
+                        dynamicData: pool.hook.dynamicData as HookData,
+                    }) ||
+                undefined,
         };
 
         //TODO: may need to build out the types here still
@@ -518,15 +671,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as StableData),
                     ...mappedData,
-                    bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
-                };
-            case 'LINEAR':
-                return {
-                    __typename: 'GqlPoolLinear',
-                    ...poolWithoutTypeData,
-                    ...(typeData as LinearData),
-                    ...mappedData,
-                    tokens: mappedData.tokens as GqlPoolToken[],
                     bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
                 };
             case 'ELEMENT':
@@ -574,8 +718,9 @@ export class PoolGqlLoaderService {
             const isNested = !poolToken;
             const isPhantomBpt = token.tokenAddress === pool.address;
             const isMainToken = !token.token.types.some(
-                (type) => type.type === 'LINEAR_WRAPPED_TOKEN' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
+                (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT' || type.type === 'ERC4626',
             );
+            const isErc4626 = token.token.types.some((type) => type.type === 'ERC4626');
 
             return {
                 ...token.token,
@@ -584,6 +729,7 @@ export class PoolGqlLoaderService {
                 isNested,
                 isPhantomBpt,
                 isMainToken,
+                isErc4626,
             };
         });
     }
@@ -592,35 +738,13 @@ export class PoolGqlLoaderService {
         return pool.tokens
             .filter((token) => token.address !== pool.address)
             .map((poolToken) => {
-                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address)!;
-
-                if (allToken.nestedPool?.type === 'LINEAR') {
-                    const mainToken = allToken.nestedPool.allTokens.find(
-                        (nestedToken) =>
-                            !nestedToken.token.types.some(
-                                (type) =>
-                                    type.type === 'LINEAR_WRAPPED_TOKEN' ||
-                                    type.type === 'PHANTOM_BPT' ||
-                                    type.type === 'BPT',
-                            ),
-                    );
-
-                    if (mainToken) {
-                        return {
-                            id: `${pool.id}-${mainToken.token.address}`,
-                            ...mainToken.token,
-                            weight: poolToken?.dynamicData?.weight,
-                        };
-                    }
-                } else if (allToken.nestedPool?.type === 'COMPOSABLE_STABLE') {
+                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address);
+                if (allToken?.nestedPool) {
                     const mainTokens =
                         allToken.nestedPool.allTokens.filter(
                             (nestedToken) =>
                                 !nestedToken.token.types.some(
-                                    (type) =>
-                                        type.type === 'LINEAR_WRAPPED_TOKEN' ||
-                                        type.type === 'PHANTOM_BPT' ||
-                                        type.type === 'BPT',
+                                    (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT',
                                 ),
                         ) || [];
 
@@ -651,11 +775,16 @@ export class PoolGqlLoaderService {
             ...poolToken.token,
             index: poolToken.index,
             balance: poolToken.dynamicData?.balance || '0',
+            balanceUSD: String(poolToken.dynamicData?.balanceUSD) || '0',
             priceRate: poolToken.dynamicData?.priceRate || '1.0',
             priceRateProvider: poolToken.priceRateProvider,
             weight: poolToken?.dynamicData?.weight,
             hasNestedPool: hasNestedPool,
             nestedPool: nestedPool ? this.mapNestedPool(nestedPool, poolToken.dynamicData?.balance || '0') : undefined,
+            isAllowed: poolToken.token.types.some(
+                (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
+            ),
+            isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
         };
     }
 
@@ -703,12 +832,23 @@ export class PoolGqlLoaderService {
                             apr: `${level.apr}`,
                         })),
                     },
+                    farm: null,
+                    gauge: null,
+                    aura: null,
                 };
             } else if (staking.farm) {
                 return {
                     ...staking,
                     gauge: null,
                     reliquary: null,
+                    aura: null,
+                };
+            } else if (staking.vebal) {
+                return {
+                    ...staking,
+                    gauge: null,
+                    reliquary: null,
+                    aura: null,
                 };
             }
         }
@@ -721,6 +861,7 @@ export class PoolGqlLoaderService {
                 ...sorted[0].gauge!,
                 otherGauges: sorted.slice(1).map((item) => item.gauge!),
             },
+            aura: pool.staking.find((staking) => staking.type === 'AURA' && !staking.aura!.isShutdown)?.aura,
             farm: null,
             reliquary: null,
         };
@@ -752,29 +893,35 @@ export class PoolGqlLoaderService {
         if (pool.dynamicData && pool.dynamicData.totalLiquidity > 0 && parseFloat(pool.dynamicData.totalShares) > 0) {
             bptPrice = pool.dynamicData.totalLiquidity / parseFloat(pool.dynamicData.totalShares);
         }
+        const walletBalance = userWalletBalances.at(0)?.balance || '0';
+        const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
+        const walletBalanceUsd = walletBalanceNum * bptPrice;
 
-        let activeStakingId = userStakedBalances.at(0)?.id;
-        if (pool.staking.length > 1) {
-            const sortedGauges = this.getSortedGauges(pool);
-            activeStakingId = sortedGauges[0].id;
+        const gqlUserStakedBalances: GqlUserStakedBalance[] = [];
+
+        let totalBalance = walletBalanceNum;
+
+        for (const balance of userStakedBalances) {
+            const stakedBalanceNum = balance.balanceNum || 0;
+            const stakedBalanceUsd = stakedBalanceNum * bptPrice;
+
+            const staking = pool.staking.find((staking) => staking.id === balance.stakingId);
+
+            gqlUserStakedBalances.push({
+                balance: balance.balance,
+                balanceUsd: stakedBalanceUsd,
+                stakingType: staking!.type,
+                stakingId: staking!.id,
+            });
+            totalBalance += stakedBalanceNum;
         }
 
-        const activeUserStakedBalance = userStakedBalances.find(
-            (userStakedBalance) => userStakedBalance.id === activeStakingId,
-        );
-
-        const walletBalance = parseUnits(userWalletBalances.at(0)?.balance || '0', 18);
-        const stakedBalance = parseUnits(activeUserStakedBalance?.balance || '0', 18);
-        const walletBalanceNum = userWalletBalances.at(0)?.balanceNum || 0;
-        const stakedBalanceNum = activeUserStakedBalance?.balanceNum || 0;
-
         return {
-            walletBalance: userWalletBalances.at(0)?.balance || '0',
-            stakedBalance: activeUserStakedBalance?.balance || '0',
-            totalBalance: formatFixed(stakedBalance.add(walletBalance), 18),
-            walletBalanceUsd: walletBalanceNum * bptPrice,
-            stakedBalanceUsd: stakedBalanceNum * bptPrice,
-            totalBalanceUsd: (walletBalanceNum + stakedBalanceNum) * bptPrice,
+            walletBalance: walletBalance,
+            walletBalanceUsd,
+            totalBalance: totalBalance.toString(),
+            totalBalanceUsd: totalBalance * bptPrice,
+            stakedBalances: gqlUserStakedBalances,
         };
     }
 
@@ -783,8 +930,10 @@ export class PoolGqlLoaderService {
             fees24h,
             totalLiquidity,
             volume24h,
+            surplus24h,
             fees48h,
             volume48h,
+            surplus48h,
             yieldCapture24h,
             yieldCapture48h,
             totalLiquidity24hAgo,
@@ -810,6 +959,9 @@ export class PoolGqlLoaderService {
             fees24hAth,
             fees24hAtlTimestamp,
         } = pool.dynamicData!;
+
+        const newAprItemsSchema = this.buildAprItems(pool);
+
         const aprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
         const swapAprItems = aprItems.filter((item) => item.type == 'SWAP_FEE');
 
@@ -911,6 +1063,8 @@ export class PoolGqlLoaderService {
             totalShares24hAgo,
             fees24h: `${fixedNumber(fees24h, 2)}`,
             volume24h: `${fixedNumber(volume24h, 2)}`,
+            surplus24h: `${fixedNumber(surplus24h, 2)}`,
+            surplus48h: `${fixedNumber(surplus48h, 2)}`,
             yieldCapture24h: `${fixedNumber(yieldCapture24h, 2)}`,
             yieldCapture48h: `${fixedNumber(yieldCapture48h, 2)}`,
             fees48h: `${fixedNumber(fees48h, 2)}`,
@@ -935,6 +1089,7 @@ export class PoolGqlLoaderService {
             fees24hAtlTimestamp,
             volume24hAthTimestamp,
             volume24hAtlTimestamp,
+            aprItems: newAprItemsSchema,
             apr: {
                 apr:
                     typeof aprRangeMin !== 'undefined' && typeof aprRangeMax !== 'undefined'
@@ -1010,6 +1165,66 @@ export class PoolGqlLoaderService {
         };
     }
 
+    private buildAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
+        const aprItems: GqlPoolAprItem[] = [];
+
+        for (const aprItem of pool.aprItems) {
+            if (aprItem.apr === 0 || (aprItem.range && aprItem.range.max === 0)) {
+                continue;
+            }
+
+            let type: GqlPoolAprItemType;
+            switch (aprItem.type) {
+                case PrismaPoolAprType.NATIVE_REWARD:
+                    if (pool.chain === 'FANTOM') {
+                        type = 'MABEETS_EMISSIONS';
+                    } else {
+                        type = 'VEBAL_EMISSIONS';
+                    }
+                    break;
+                case PrismaPoolAprType.THIRD_PARTY_REWARD:
+                    type = 'STAKING';
+                    break;
+                case null:
+                    type = 'NESTED';
+                    break;
+                default:
+                    type = aprItem.type;
+                    break;
+            }
+
+            if (aprItem.range) {
+                aprItems.push({
+                    id: aprItem.id,
+                    title: aprItem.title,
+                    apr: aprItem.range.min,
+                    type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
+                });
+                aprItems.push({
+                    id: `${aprItem.id}-boost`,
+                    title: aprItem.title,
+                    apr: aprItem.range.max - aprItem.range.min,
+                    type: 'STAKING_BOOST',
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
+                });
+            } else {
+                aprItems.push({
+                    id: aprItem.id,
+                    title: aprItem.title,
+                    apr: aprItem.apr,
+                    type: type,
+                    rewardTokenAddress: aprItem.rewardTokenAddress,
+                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
+                });
+            }
+        }
+
+        return aprItems;
+    }
+
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
         const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
         const supportsNativeAssetDeposit = pool.type !== 'COMPOSABLE_STABLE';
@@ -1052,32 +1267,7 @@ export class PoolGqlLoaderService {
         const nestedPool = poolToken.nestedPool;
         const options: GqlPoolInvestOption[] = [];
 
-        if (nestedPool && nestedPool.type === 'LINEAR' && (nestedPool.typeData as LinearData).mainIndex !== undefined) {
-            const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
-            const isWrappedNativeAsset = isSameAddress(mainToken.address, networkContext.data.weth.address);
-
-            options.push({
-                poolTokenIndex: poolToken.index,
-                poolTokenAddress: poolToken.address,
-                tokenOptions:
-                    //TODO: will be good to add support for depositing the wrapped token for the linear pool
-                    isWrappedNativeAsset && supportsNativeAsset
-                        ? [
-                              this.mapPoolTokenToGql(mainToken),
-                              this.mapPoolTokenToGql({
-                                  ...mainToken,
-                                  token: {
-                                      ...poolToken.token,
-                                      symbol: networkContext.data.eth.symbol,
-                                      address: networkContext.data.eth.address,
-                                      name: networkContext.data.eth.name,
-                                  },
-                                  id: `${pool.id}-${networkContext.data.eth.address}`,
-                              }),
-                          ]
-                        : [this.mapPoolTokenToGql(mainToken)],
-            });
-        } else if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
+        if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
             const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
 
             if (pool.type === 'COMPOSABLE_STABLE' || isWeightedPoolV2(pool)) {
@@ -1088,18 +1278,7 @@ export class PoolGqlLoaderService {
                     options.push({
                         poolTokenIndex: poolToken.index,
                         poolTokenAddress: poolToken.address,
-                        tokenOptions:
-                            nestedToken.nestedPool &&
-                            nestedToken.nestedPool.type === 'LINEAR' &&
-                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
-                                ? [
-                                      this.mapPoolTokenToGql(
-                                          nestedToken.nestedPool.tokens[
-                                              (nestedToken.nestedPool.typeData as LinearData).mainIndex
-                                          ],
-                                      ),
-                                  ]
-                                : [this.mapPoolTokenToGql(nestedToken)],
+                        tokenOptions: [this.mapPoolTokenToGql(nestedToken)],
                     });
                 }
             } else {
@@ -1108,18 +1287,6 @@ export class PoolGqlLoaderService {
                     poolTokenIndex: poolToken.index,
                     poolTokenAddress: poolToken.address,
                     tokenOptions: nestedTokens.map((nestedToken) => {
-                        if (
-                            nestedToken.nestedPool &&
-                            nestedToken.nestedPool.type === 'LINEAR' &&
-                            (nestedToken.nestedPool.typeData as LinearData).mainIndex !== undefined
-                        ) {
-                            return this.mapPoolTokenToGql(
-                                nestedToken.nestedPool.tokens[
-                                    (nestedToken.nestedPool.typeData as LinearData).mainIndex
-                                ],
-                            );
-                        }
-
                         return this.mapPoolTokenToGql(nestedToken);
                     }),
                 });
@@ -1155,18 +1322,7 @@ export class PoolGqlLoaderService {
     private mapPoolTokenToGqlUnion(token: PrismaPoolTokenWithExpandedNesting): GqlPoolTokenUnion {
         const { nestedPool } = token;
 
-        if (nestedPool && nestedPool.type === 'LINEAR') {
-            const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-            const percentOfSupplyNested =
-                totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
-
-            return {
-                ...this.mapPoolTokenToGql(token),
-                __typename: 'GqlPoolTokenLinear',
-                ...this.getLinearPoolTokenData(token, nestedPool),
-                pool: this.mapNestedPoolToGqlPoolLinearNested(nestedPool, percentOfSupplyNested),
-            };
-        } else if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
+        if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
             const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
             const percentOfSupplyNested =
                 totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
@@ -1196,39 +1352,6 @@ export class PoolGqlLoaderService {
         };
     }
 
-    private mapNestedPoolToGqlPoolLinearNested(
-        pool: PrismaNestedPoolWithNoNesting,
-        percentOfSupplyNested: number,
-    ): GqlPoolLinearNested {
-        const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
-        const bpt = pool.tokens.find((token) => token.address === pool.address);
-
-        return {
-            __typename: 'GqlPoolLinearNested',
-            ...pool,
-            ...(pool.typeData as LinearData)!,
-            tokens: pool.tokens
-                .filter((token) => token.address !== pool.address)
-                .map((token) => {
-                    return {
-                        ...this.mapPoolTokenToGql({
-                            ...token,
-                            dynamicData: token.dynamicData
-                                ? {
-                                      ...token.dynamicData,
-                                      balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
-                                  }
-                                : null,
-                        }),
-                        totalBalance: token.dynamicData?.balance || '0',
-                    };
-                }),
-            totalLiquidity: `${totalLiquidity}`,
-            totalShares: pool.dynamicData?.totalShares || '0',
-            bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
-        };
-    }
-
     private mapNestedPoolToGqlPoolComposableStableNested(
         pool: PrismaNestedPoolWithSingleLayerNesting,
         percentOfSupplyNested: number,
@@ -1240,40 +1363,13 @@ export class PoolGqlLoaderService {
             ...pool,
             ...(pool.typeData as StableData)!,
             nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => {
-                const nestedPool = token.nestedPool;
-
-                if (nestedPool && nestedPool.type === 'LINEAR') {
-                    const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-                    const percentOfLinearSupplyNested =
-                        totalShares > 0 ? parseFloat(token.dynamicData?.balance || '0') / totalShares : 0;
-
-                    return {
-                        ...this.mapPoolTokenToGql({
-                            ...token,
-                            dynamicData: token.dynamicData
-                                ? {
-                                      ...token.dynamicData,
-                                      balance: `${parseFloat(token.dynamicData.balance) * percentOfSupplyNested}`,
-                                  }
-                                : null,
-                        }),
-                        __typename: 'GqlPoolTokenLinear',
-                        ...this.getLinearPoolTokenData(token, nestedPool),
-                        pool: this.mapNestedPoolToGqlPoolLinearNested(
-                            nestedPool,
-                            percentOfSupplyNested * percentOfLinearSupplyNested,
-                        ),
-                        totalBalance: token.dynamicData?.balance || '0',
-                    };
-                }
-
-                return this.mapPoolTokenToGql(token);
-            }),
+            tokens: pool.tokens.map((token) => this.mapPoolTokenToGql(token)),
             totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
             totalShares: pool.dynamicData?.totalShares || '0',
             swapFee: pool.dynamicData?.swapFee || '0',
             bptPriceRate: bpt?.dynamicData?.priceRate || '1.0',
+            categories: pool.categories as GqlPoolFilterCategory[],
+            tags: pool.categories,
         };
     }
 
@@ -1290,40 +1386,6 @@ export class PoolGqlLoaderService {
         return 'NO_NESTING';
     }
 
-    private getLinearPoolTokenData(
-        poolToken: PrismaPoolTokenWithDynamicData,
-        nestedPool: PrismaNestedPoolWithNoNesting,
-    ): {
-        mainTokenBalance: string;
-        wrappedTokenBalance: string;
-        totalMainTokenBalance: string;
-    } {
-        if (!poolToken.dynamicData || !(nestedPool.typeData as LinearData) || !nestedPool.dynamicData) {
-            return {
-                mainTokenBalance: '0',
-                wrappedTokenBalance: '0',
-                totalMainTokenBalance: '0',
-            };
-        }
-
-        const percentOfSupplyInPool =
-            parseFloat(poolToken.dynamicData.balance) / parseFloat(nestedPool.dynamicData.totalShares);
-
-        const mainToken = nestedPool.tokens[(nestedPool.typeData as LinearData).mainIndex];
-        const wrappedToken = nestedPool.tokens[(nestedPool.typeData as LinearData).wrappedIndex];
-
-        const wrappedTokenBalance = oldBnum(wrappedToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
-        const mainTokenBalance = oldBnum(mainToken.dynamicData?.balance || '0').times(percentOfSupplyInPool);
-
-        return {
-            mainTokenBalance: `${mainTokenBalance.toFixed(mainToken.token.decimals)}`,
-            wrappedTokenBalance: `${wrappedTokenBalance.toFixed(wrappedToken.token.decimals)}`,
-            totalMainTokenBalance: `${mainTokenBalance
-                .plus(wrappedTokenBalance.times(wrappedToken.dynamicData?.priceRate || '1'))
-                .toFixed(mainToken.token.decimals)}`,
-        };
-    }
-
     private getPoolInclude(userAddress?: string) {
         if (!userAddress) {
             return {
@@ -1335,6 +1397,7 @@ export class PoolGqlLoaderService {
                     },
                 },
                 userWalletBalances: false,
+                hook: true,
             };
         }
 
@@ -1346,8 +1409,7 @@ export class PoolGqlLoaderService {
                     userStakedBalances: {
                         where: {
                             userAddress: {
-                                equals: userAddress,
-                                mode: 'insensitive' as const,
+                                equals: userAddress.toLowerCase(),
                             },
                             balanceNum: { gt: 0 },
                         },
@@ -1357,12 +1419,12 @@ export class PoolGqlLoaderService {
             userWalletBalances: {
                 where: {
                     userAddress: {
-                        equals: userAddress,
-                        mode: 'insensitive' as const,
+                        equals: userAddress.toLowerCase(),
                     },
                     balanceNum: { gt: 0 },
                 },
             },
+            hook: true,
         };
     }
 }

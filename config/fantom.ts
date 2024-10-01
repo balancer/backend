@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -13,13 +13,15 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
-        beetsBar: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/beets-bar',
-        blocks: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/fantom-blocks',
-        masterchef: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/masterchefv2',
-        reliquary: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/reliquary',
-        userBalances: 'https://api.thegraph.com/subgraphs/name/beethovenxfi/user-bpt-balances-fantom',
-        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/9nyH9cdBwBiXj3AJhbSEBSphzT89ozd68s9u4KTfD3ZL`,
+        balancer: [
+            `https://subgraph.satsuma-prod.com/${env.SATSUMA_API_KEY}/balancer/balancer-v2-fantom/api`,
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYN8qV7PEokFeQvhhWMinYD5wsspP1Sc87pGKEvAmjSCJ`,
+        ],
+        beetsBar: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXcxzZioHXV5ts2UcG6gNNEayoaZ9ip7D9JvPS88K2HXe`,
+        blocks: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/subgraphs/id/3drjZDpA9hAuYGA19ttEkhW432mVe2XHy5YarBDVYHbz`,
+        masterchef: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmZQJu1rxMEDwzZb5TSqDXjcFiS1DN8BRKCLKRv6ifEBhA`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmQB4iZpeX9eYgLUaiBt2HwkobqE3NzVUiupXF6Ha9Nzbk`,
+        sftmx: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmaD9zWMc6kQrBVbtjXNjNjbhpGWUHQFQdxABBEaVJqK5s`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -66,7 +68,9 @@ export default <NetworkData>{
             '0xb7c2ddb1ebac1056231ef22c1b0a13988537a274', // new tarot
         ],
     },
-    rpcUrl: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main' ? `https://rpc.ankr.com/fantom` : `https://rpc.ftm.tools`,
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=fantom&dkey=${env.DRPC_API_KEY}`
+        : `https://rpc.ankr.com/fantom`,
     rpcMaxBlockRange: 1000,
     protocolToken: 'beets',
     beets: {
@@ -216,15 +220,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    copper: {
-        proxyAddress: '0xbc8a71c75ffbd2807c021f4f81a8832392def93c',
-    },
-    beefy: {
-        linearPools: [''],
-    },
-    spooky: {
-        xBooContract: '0x841fad6eae12c286d1fd18d1d525dffa75c7effe',
     },
     datastudio: {
         main: {

@@ -1,19 +1,14 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { PhantomStableAprService } from '../pool/lib/apr-data-sources/phantom-stable-apr.service';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/boosted-pool-apr.service';
+import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/swap-fee-apr.service';
 import { MasterchefFarmAprService } from '../pool/lib/apr-data-sources/fantom/masterchef-farm-apr.service';
 import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
-import { MasterChefStakingService } from '../pool/lib/staking/master-chef-staking.service';
-import { masterchefService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { ReliquaryStakingService } from '../pool/lib/staking/reliquary-staking.service';
-import { reliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
-import { every } from '../../worker/intervals';
+import { every } from '../../apps/scheduler/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -27,17 +22,11 @@ export const fantomNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
-        // new SpookySwapAprService(tokenService, fantomNetworkData.spooky!.xBooContract),
-        new PhantomStableAprService(fantomNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),
         new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
         new BeetswarsGaugeVotingAprService(),
-    ],
-    poolStakingServices: [
-        new MasterChefStakingService(masterchefService, fantomNetworkData.masterchef!.excludedFarmIds),
-        new ReliquaryStakingService(fantomNetworkData.reliquary!.address, reliquarySubgraphService),
     ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
@@ -85,10 +74,6 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
-            name: 'sync-sanity-pool-data',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(9, 'minutes') : every(3, 'minutes'),
-        },
-        {
             name: 'sync-tokens-from-pool-tokens',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
@@ -105,7 +90,7 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
         },
         {
-            name: 'sync-latest-snapshots-for-all-pools',
+            name: 'sync-snapshots-v2',
             interval: every(90, 'minutes'),
         },
         {
@@ -159,14 +144,13 @@ export const fantomNetworkConfig: NetworkConfig = {
             name: 'update-liquidity-24h-ago',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
-        // V3 Jobs
         {
             name: 'sync-join-exits-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         {
             name: 'sync-swaps-v2',
-            interval: every(1, 'minutes'),
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

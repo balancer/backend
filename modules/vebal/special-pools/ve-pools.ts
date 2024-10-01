@@ -1,3 +1,6 @@
+import { VotingGaugesRepository } from '../voting-gauges.repository';
+import { prisma } from '../../../prisma/prisma-client';
+
 /*
   The following hardcoded pools are missing in the subgraph but we have their pool data so we just need to provide a match between poolId and veVotingGauge address
   This is needed for any singleRecipientGauge
@@ -14,18 +17,25 @@ export const veGauges = Object.values(vePools).map((v) => v.toLowerCase());
 
 const isVebalPool = (poolId: string) => poolId === '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
 
-export function getVeVotingGauges() {
+export async function getVeVotingGauges() {
     // Make sure that gauge addresses and poolIds are lowercase
     const vePoolsLowerCase: Record<string, string> = {};
     Object.entries(vePools).forEach(([key, value]) => {
         vePoolsLowerCase[key.toLowerCase()] = value.toLowerCase();
     });
 
+    // Get relative weight for each veVotingGauge
+    const veService = new VotingGaugesRepository(prisma);
+    const veGaugeAddresses = Object.values(vePoolsLowerCase);
+    const relativeWeights = await veService.fetchRelativeWeights(veGaugeAddresses);
+
     let veVotingGauges = [];
     for (const poolId in vePoolsLowerCase) {
         veVotingGauges.push({
             // veBal pool have a max of 10% voting weight (AKA '0.1' relativeWeightCap)
             relativeWeightCap: isVebalPool(poolId) ? '0.1' : null,
+            // Actual voting weight needs to be queried from RPC
+            relativeWeight: String(relativeWeights[vePoolsLowerCase[poolId]]),
             id: vePoolsLowerCase[poolId],
             status: 'ACTIVE' as const,
             addedTimestamp: null,

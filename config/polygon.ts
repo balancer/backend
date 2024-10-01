@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,12 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-06-16',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUqS6BAVQgvstEsVrxuwsu1DwQdfAdj3Q6gz2j3DbUYQ9`,
+        ],
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-polygon',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/polygon-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmewSgLJf9TZt8trr61dECJhEGGyHxKFWbNQ3AnNZAdYyU`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0x0000000000000000000000000000000000001010',
@@ -34,7 +35,9 @@ export default <NetworkData>{
         platformId: 'polygon-pos',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.INFURA_API_KEY ? `https://polygon-mainnet.infura.io/v3/${env.INFURA_API_KEY}` : 'https://1rpc.io/matic',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=polygon&dkey=${env.DRPC_API_KEY}`
+        : 'https://1rpc.io/matic',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -42,6 +45,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
     },
     gyro: {
@@ -67,7 +71,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v2: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/aave-v2-matic',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -93,7 +97,7 @@ export default <NetworkData>{
                 },
             },
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-polygon',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
                 tokens: {
                     USDCn: {
                         underlyingAssetAddress: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
@@ -200,9 +204,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

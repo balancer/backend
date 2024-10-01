@@ -1,10 +1,11 @@
 import { poolService } from './pool.service';
-import { Resolvers } from '../../schema';
+import { GqlChain, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
 import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { EventsQueryController } from '../controllers/pool-events-query-controller';
+import { CowAmmController, EventsQueryController, PoolController, SnapshotsController } from '../controllers';
+import { chainToIdMap } from '../network/network-config';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -19,6 +20,9 @@ const balancerResolvers: Resolvers = {
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);
+        },
+        poolGetAggregatorPools: async (parent, args, context) => {
+            return poolService.getAggregatorPools(args);
         },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
@@ -53,13 +57,13 @@ const balancerResolvers: Resolvers = {
             }
             return poolService.getPoolJoinExits(args);
         },
-        poolGetEvents: (parent, { range, poolId, chain, typeIn, userAddress }, context) => {
+        poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
             return EventsQueryController().getEvents({
                 first: 1000,
-                where: { range, poolId, chain, typeIn, userAddress },
+                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
             });
         },
-        poolEvents: (parent, { first, skip, where }, context) => {
+        poolEvents: async (parent: any, { first, skip, where }) => {
             return EventsQueryController().getEvents({
                 first,
                 skip,
@@ -93,38 +97,13 @@ const balancerResolvers: Resolvers = {
                 sharePrice: `${snapshot.sharePrice}`,
                 volume24h: `${snapshot.volume24h}`,
                 fees24h: `${snapshot.fees24h}`,
+                surplus24h: `${snapshot.surplus24h}`,
                 totalSwapVolume: `${snapshot.totalSwapVolume}`,
                 totalSwapFee: `${snapshot.totalSwapFee}`,
+                totalSurplus: `${snapshot.totalSurplus}`,
                 swapsCount: `${snapshot.swapsCount}`,
                 holdersCount: `${snapshot.holdersCount}`,
             }));
-        },
-        poolGetLinearPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetLinearPools error: Provide "chains" param');
-            }
-            return poolService.getGqlLinearPools(chains);
-        },
-        poolGetGyroPools: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetGyroPools error: Provide "chains" param');
-            }
-            return poolService.getGqlGyroPools(chains);
-        },
-        poolGetFxPools: async (parent, { chains }) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new Error('poolGetFxPools error: Provide "chains" param');
-            }
-            return poolService.getGqlFxPools(chains);
         },
     },
     Mutation: {
@@ -173,13 +152,6 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSyncSanityPoolData: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.syncPoolContentData();
-
-            return 'success';
-        },
         poolUpdateAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
@@ -218,14 +190,23 @@ const balancerResolvers: Resolvers = {
         poolReloadStakingForAllPools: async (parent, args, context) => {
             isAdminRoute(context);
 
-            await poolService.reloadStakingForAllPools(args.stakingTypes);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolReloadStakingForAllPools error: Provide chain header');
+            }
+
+            await poolService.reloadStakingForAllPools(args.stakingTypes, currentChain);
 
             return 'success';
         },
         poolSyncStakingForPools: async (parent, args, context) => {
             isAdminRoute(context);
+            const currentChain = headerChain();
+            if (!currentChain) {
+                throw new Error('poolSyncStakingForPools error: Provide chain header');
+            }
 
-            await poolService.syncStakingForPools();
+            await poolService.syncStakingForPools([currentChain]);
 
             return 'success';
         },
@@ -246,14 +227,15 @@ const balancerResolvers: Resolvers = {
         poolLoadSnapshotsForPools: async (parent, { poolIds, reload }, context) => {
             isAdminRoute(context);
 
-            await poolService.loadSnapshotsForPools(poolIds, reload || false);
+            await SnapshotsController().syncSnapshotForPools(poolIds, networkContext.chainId, reload || false);
 
             return 'success';
         },
-        poolSyncLatestSnapshotsForAllPools: async (parent, { daysToSync }, context) => {
+        poolSyncLatestSnapshotsForAllPools: async (parent, { chain }, context) => {
             isAdminRoute(context);
+            const chainId = chainToIdMap[chain];
 
-            await poolService.syncLatestSnapshotsForAllPools(daysToSync || undefined);
+            await SnapshotsController().syncSnapshotsV2(chainId);
 
             return 'success';
         },
@@ -294,33 +276,53 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolSetPoolsWithPreferredGaugesAsIncentivized: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.setPoolsWithPreferredGaugesAsIncentivized();
-
-            return 'success';
-        },
-        poolBlackListAddPool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.addToBlackList(poolId);
-
-            return 'success';
-        },
-        poolBlackListRemovePool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await poolService.removeFromBlackList(poolId);
-
-            return 'success';
-        },
         poolDeletePool: async (parent, { poolId }, context) => {
             isAdminRoute(context);
 
             await poolService.deletePool(poolId);
 
             return 'success';
+        },
+        poolReloadPools: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
+
+            for (const chain of chains) {
+                try {
+                    await PoolController().reloadPoolsV3(chain);
+                    result.push({ type: 'v3', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'v3', chain, success: false, error: `${e}` });
+                    console.log(`Could not reload v3 pools for chain ${chain}: ${e}`);
+                }
+                try {
+                    await CowAmmController().reloadPools(chain);
+                    result.push({ type: 'cow', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'cow', chain, success: false, error: `${e}` });
+                    console.log(`Could not reload COW pools for chain ${chain}: ${e}`);
+                }
+            }
+
+            return result;
+        },
+        poolSyncAllCowSnapshots: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
+
+            for (const chain of chains) {
+                try {
+                    await CowAmmController().syncAllSnapshots(chainToIdMap[chain]);
+                    result.push({ type: 'cow', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'cow', chain, success: false, error: `${e}` });
+                    console.log(`Could not sync cow amm snapshots for chain ${chain}: ${e}`);
+                }
+            }
+
+            return result;
         },
     },
 };

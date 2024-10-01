@@ -9,7 +9,6 @@ import {
     OrderDirection,
     User_OrderBy,
 } from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
-import { masterchefService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 import { getContractAt } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
@@ -17,6 +16,7 @@ import MasterChefAbi from '../../web3/abi/MasterChef.json';
 import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
+import { MasterchefSubgraphService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     constructor(
@@ -25,6 +25,10 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         private readonly masterchefAddress: string,
         private readonly excludedFarmIds: string[],
     ) {}
+
+    get masterchefService() {
+        return new MasterchefSubgraphService(networkContext.data.subgraphs.masterchef!);
+    }
 
     public async syncChangedStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
@@ -45,7 +49,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             include: { staking: true },
         });
         const latestBlock = await networkContext.provider.getBlockNumber();
-        const farms = await masterchefService.getAllFarms({});
+        const farms = await this.masterchefService.getAllFarms({});
 
         const startBlock = status.blockNumber + 1;
         const endBlock =
@@ -84,25 +88,34 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                     const pool = pools.find((pool) => pool.staking.some((stake) => stake.id === update.farmId));
                     const farm = farms.find((farm) => farm.id === update.farmId);
 
-                    return prisma.prismaUserStakedBalance.upsert({
-                        where: {
-                            id_chain: { id: `${update.farmId}-${update.userAddress}`, chain: networkContext.chain },
-                        },
-                        update: {
-                            balance: update.amount,
-                            balanceNum: parseFloat(update.amount),
-                        },
-                        create: {
-                            id: `${update.farmId}-${update.userAddress}`,
-                            chain: networkContext.chain,
-                            balance: update.amount,
-                            balanceNum: parseFloat(update.amount),
-                            userAddress: update.userAddress,
-                            poolId: update.farmId !== this.fbeetsFarmId ? pool?.id : null,
-                            tokenAddress: farm!.pair,
-                            stakingId: update.farmId,
-                        },
-                    });
+                    if (update.amount === '0') {
+                        return prisma.prismaUserStakedBalance.deleteMany({
+                            where: {
+                                id: `${update.farmId}-${update.userAddress}`,
+                                chain: networkContext.chain,
+                            },
+                        });
+                    } else {
+                        return prisma.prismaUserStakedBalance.upsert({
+                            where: {
+                                id_chain: { id: `${update.farmId}-${update.userAddress}`, chain: networkContext.chain },
+                            },
+                            update: {
+                                balance: update.amount,
+                                balanceNum: parseFloat(update.amount),
+                            },
+                            create: {
+                                id: `${update.farmId}-${update.userAddress}`,
+                                chain: networkContext.chain,
+                                balance: update.amount,
+                                balanceNum: parseFloat(update.amount),
+                                userAddress: update.userAddress,
+                                poolId: update.farmId !== this.fbeetsFarmId ? pool?.id : null,
+                                tokenAddress: farm!.pair,
+                                stakingId: update.farmId,
+                            },
+                        });
+                    }
                 }),
                 prisma.prismaUserBalanceSyncStatus.update({
                     where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },
@@ -117,7 +130,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         if (!stakingTypes.includes('MASTER_CHEF')) {
             return;
         }
-        const { block } = await masterchefService.getMetadata();
+        const { block } = await this.masterchefService.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
         const farmUsers = await this.loadAllSubgraphUsers();
         console.log('initStakedBalances: finished loading subgraph users...');
@@ -259,7 +272,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         let skip = 0;
 
         while (hasMore) {
-            const { farmUsers } = await masterchefService.getFarmUsers({
+            const { farmUsers } = await this.masterchefService.getFarmUsers({
                 where: { timestamp_gte: timestamp, amount_not: '0' },
                 first: pageSize,
                 skip,

@@ -3,7 +3,6 @@ import { Multicaller3 } from '../../web3/multicaller3';
 import { PrismaPoolType } from '@prisma/client';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
-import LinearPoolAbi from '../abi/LinearPool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
 import ComposableStablePoolAbi from '../abi/ComposableStablePool.json';
 import GyroEV2Abi from '../abi/GyroEV2.json';
@@ -51,7 +50,6 @@ const abi: JsonFragment[] = Object.values(
     Object.fromEntries(
         [
             ...ElementPoolAbi,
-            ...LinearPoolAbi,
             ...LiquidityBootstrappingPoolAbi,
             ...ComposableStablePoolAbi,
             ...GyroEV2Abi,
@@ -79,7 +77,7 @@ const getSwapFeeFn = (type: string) => {
 };
 
 const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
-    if (['LINEAR'].includes(type) || (type === 'COMPOSABLE_STABLE' && version === 0)) {
+    if (type === 'COMPOSABLE_STABLE' && version === 0) {
         return 'getVirtualSupply';
     } else if (
         type === 'COMPOSABLE_STABLE' ||
@@ -112,11 +110,6 @@ const weightedCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) =>
 const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
     multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
     multicaller.call(`${id}.swapEnabled`, address, 'getSwapEnabled');
-};
-
-const linearCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.targets`, address, 'getTargets');
-    multicaller.call(`${id}.wrappedTokenRate`, address, 'getWrappedTokenRate');
 };
 
 const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
@@ -153,14 +146,13 @@ const addPoolTypeSpecificCallsToMulticaller = (type: PoolInput['type'], version 
             return stableCalls;
         case 'META_STABLE':
             return metaStableCalls;
+        case 'GYRO':
         case 'GYROE':
             if (version === 2) {
                 return gyroECalls;
             } else {
                 return do_nothing;
             }
-        case 'LINEAR':
-            return linearCalls;
         default:
             return do_nothing;
     }
@@ -200,7 +192,7 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
         : undefined,
 });
 
-export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: string, batchSize = 1024) => {
+export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: string, batchSize = 400) => {
     if (pools.length === 0) {
         return {};
     }

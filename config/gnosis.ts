@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,12 +12,14 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-08-23',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXXSKeLh14DnJgR1ncHhAHciqacfRshcHKXasAGy7LP4Y`,
+        ],
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/rebase-agency/gnosis-chain-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-gnosis-chain',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/gnosis-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme9hQY1NZ8ReVDSSQb893s2fGpeLkgfwXd3YU5rndACaP`,
+        aura: 'https://data.aura.finance/graphql',
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZ5RYZdrdSreBaMxjB65MUzW4WzVeSQU5tLwRskQNKnTW`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -34,12 +36,9 @@ export default <NetworkData>{
         platformId: 'xdai',
         excludedTokenAddresses: [],
     },
-    rpcUrl:
-        env.GATEWAYFM_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://rpc.eu-central-2.gateway.fm/v4/gnosis/archival/mainnet?apiKey=${env.GATEWAYFM_API_KEY}`
-            : env.GROVE_CITY
-            ? `https://gnosischain-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
-            : 'https://gnosis.drpc.org',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=gnosis&dkey=${env.DRPC_API_KEY}`
+        : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -47,6 +46,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05',
     },
     balancer: {
@@ -67,6 +67,10 @@ export default <NetworkData>{
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
     ybAprConfig: {
+        stakewise: {
+            url: 'https://gnosis-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
+        },
         defaultHandlers: {
             wstETH: {
                 tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
@@ -74,7 +78,37 @@ export default <NetworkData>{
                 path: 'data.smaApr',
                 isIbYield: true,
             },
+            rETH: {
+                tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
+                path: 'rethAPR',
+                isIbYield: true,
+            },
         },
+        aave: {
+            v3: {
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
+                tokens: {
+                    USDC: {
+                        underlyingAssetAddress: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83',
+                        aTokenAddress: '0xc6b7aca6de8a6044e0e32d0c841a89244a10d284',
+                        wrappedTokens: {
+                            stataGnoUSDC: '0x270ba1f35d8b87510d24f693fccc0da02e6e4eeb',
+                        },
+                    },
+                    USDCn: {
+                        underlyingAssetAddress: '0x2a22f9c3b484c3629090feed35f17ff8f88f76f0',
+                        aTokenAddress: '0xc0333cb85b59a788d8c7cae5e1fd6e229a3e5a65',
+                        wrappedTokens: {
+                            stataGnoUSDCe: '0xf0e7ec247b918311afa054e0aedb99d74c31b809',
+                        },
+                    },
+                },
+            },
+        },
+    },
+    gyro: {
+        config: '0x00a2a9bbd352ab46274433faa9fec35fe3abb4a8',
     },
     datastudio: {
         main: {
@@ -99,8 +133,5 @@ export default <NetworkData>{
         canary: {
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
 };

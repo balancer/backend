@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, PublicClient } from 'viem';
 import {
     arbitrum,
     avalanche,
@@ -10,11 +10,19 @@ import {
     polygon,
     polygonZkEvm,
     sepolia,
+    fraxtal,
+    mode,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
 import config from '../../config';
 
 export type ViemClient = ReturnType<typeof getViemClient>;
+
+// Use this interface for easier mocking
+export interface IViemClient {
+    multicall: PublicClient['multicall'];
+    readContract: PublicClient['readContract'];
+}
 
 const chain2ViemChain = {
     [Chain.MAINNET]: mainnet,
@@ -27,6 +35,8 @@ const chain2ViemChain = {
     [Chain.OPTIMISM]: optimism,
     [Chain.POLYGON]: polygon,
     [Chain.ZKEVM]: polygonZkEvm,
+    [Chain.FRAXTAL]: fraxtal,
+    [Chain.MODE]: mode,
 };
 
 export const getViemClient = (chain: Chain) => {

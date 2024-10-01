@@ -9,9 +9,9 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import ERC20Abi from '../../web3/abi/ERC20.json';
-import { gaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { AddressZero } from '@ethersproject/constants';
 import { getEvents } from '../../web3/events';
+import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     get chain() {
@@ -38,22 +38,28 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         return networkContext.data.multicall;
     }
 
+    get gaugeSubgraphService() {
+        return new GaugeSubgraphService(networkContext.data.subgraphs.gauge!);
+    }
+
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (!stakingTypes.includes('GAUGE')) {
             return;
         }
-        const { block } = await gaugeSubgraphService.getMetadata();
+        const { block } = await this.gaugeSubgraphService.getMetadata();
         console.log('initStakedBalances: loading subgraph users...');
-        const gaugeShares = await gaugeSubgraphService.getAllGaugeShares();
+        const gaugeShares = await this.gaugeSubgraphService.getAllGaugeShares();
         console.log('initStakedBalances: finished loading subgraph users...');
         console.log('initStakedBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
-            select: { id: true },
+            select: { id: true, address: true },
             where: { chain: this.chain },
         });
+        // Map the pools address to id
+        const poolsMap = new Map(pools.map((pool) => [pool.address, pool.id]));
 
         const filteredGaugeShares = gaugeShares.filter((share) => {
-            const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+            const pool = poolsMap.get(share.gauge.poolAddress);
             if (pool) {
                 return true;
             }
@@ -69,10 +75,10 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
                 }),
-                prisma.prismaUserStakedBalance.deleteMany({ where: { chain: this.chain } }),
+                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'GAUGE' }, chain: this.chain } }),
                 prisma.prismaUserStakedBalance.createMany({
                     data: filteredGaugeShares.map((share) => {
-                        const pool = pools.find((pool) => pool.id === share.gauge.poolId);
+                        const poolId = poolsMap.get(share.gauge.poolAddress);
 
                         return {
                             id: `${share.gauge.id}-${share.user.id}`,
@@ -80,7 +86,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             balance: share.balance,
                             balanceNum: parseFloat(share.balance),
                             userAddress: share.user.id,
-                            poolId: pool?.id,
+                            poolId,
                             tokenAddress: share.gauge.poolAddress,
                             stakingId: share.gauge.id,
                         };
@@ -115,7 +121,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         console.log(`user-sync-staked-balances-${this.chainId} got data from db.`);
 
         const latestBlock = await this.provider.getBlockNumber();
-        console.log(`user-sync-staked-balances-${this.chainId} got latest block.`);
+        console.log(`user-sync-staked-balances-${this.chainId} got latest block ${latestBlock}.`);
 
         // Get gauge addresses
         const gaugeAddresses = (
@@ -127,10 +133,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         // we sync at most 10k blocks at a time
         const startBlock = status.blockNumber + 1;
-        const endBlock = latestBlock;
 
         // no new blocks have been minted, needed for slow networks
-        if (startBlock > endBlock) {
+        if (startBlock > latestBlock) {
             return;
         }
 
@@ -193,6 +198,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 }),
                 ...balances
                     .filter(({ userAddress }) => userAddress !== AddressZero)
+                    .filter(({ balance }) => balance.gt(0))
                     .map((userBalance) => {
                         const pool = pools.find((pool) =>
                             pool.staking.some((stake) => stake.id === userBalance.erc20Address),
@@ -221,6 +227,17 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                             },
                         });
                     }),
+                ...balances
+                    .filter(({ userAddress }) => userAddress !== AddressZero)
+                    .filter(({ balance }) => balance.eq(0))
+                    .map((userBalance) => {
+                        return prisma.prismaUserStakedBalance.deleteMany({
+                            where: {
+                                id: `${userBalance.erc20Address}-${userBalance.userAddress}`,
+                                chain: this.chain,
+                            },
+                        });
+                    }),
                 prisma.prismaUserBalanceSyncStatus.update({
                     where: {
                         type_chain: {
@@ -240,22 +257,31 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const balance = await contract.balanceOf(userAddress);
         const amount = formatFixed(balance, 18);
 
-        await prisma.prismaUserStakedBalance.upsert({
-            where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
-            update: {
-                balance: amount,
-                balanceNum: parseFloat(amount),
-            },
-            create: {
-                id: `${staking.address}-${userAddress}`,
-                chain: this.chain,
-                balance: amount,
-                balanceNum: parseFloat(amount),
-                userAddress: userAddress,
-                poolId: poolId,
-                tokenAddress: poolAddress,
-                stakingId: staking.address,
-            },
-        });
+        if (amount != '0') {
+            await prisma.prismaUserStakedBalance.upsert({
+                where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: this.chain } },
+                update: {
+                    balance: amount,
+                    balanceNum: parseFloat(amount),
+                },
+                create: {
+                    id: `${staking.address}-${userAddress}`,
+                    chain: this.chain,
+                    balance: amount,
+                    balanceNum: parseFloat(amount),
+                    userAddress: userAddress,
+                    poolId: poolId,
+                    tokenAddress: poolAddress,
+                    stakingId: staking.address,
+                },
+            });
+        } else {
+            await prisma.prismaUserStakedBalance.deleteMany({
+                where: {
+                    id: `${staking.address}-${userAddress}`,
+                    chain: this.chain,
+                },
+            });
+        }
     }
 }

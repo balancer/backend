@@ -1,0 +1,42 @@
+model PrismaVeBalUserBalance {
+    @@id([id, chain])
+
+    id                  String
+    chain               Chain
+
+    balance             String
+    locked              String              @default("0")
+
+    userAddress         String
+    user                PrismaUser          @relation(fields:[userAddress], references: [address])
+
+}
+
+model PrismaVeBalTotalSupply {
+    @@id([address, chain])
+
+    address             String
+    chain               Chain
+
+    totalSupply         String
+}
+
+enum PrismaVotingGaugeStatus {
+    KILLED
+    ACTIVE
+}
+
+model PrismaVotingGauge {
+  @@id([id, chain])
+
+  id      String
+  chain   Chain
+
+  stakingGauge      PrismaPoolStakingGauge? @relation(fields: [stakingGaugeId, chain], references: [id, chain], onDelete: Cascade)
+  status            PrismaVotingGaugeStatus @default(ACTIVE)
+  gaugeAddress      String
+  stakingGaugeId    String?
+  relativeWeight    String?
+  relativeWeightCap String?
+  addedTimestamp    Int?
+}

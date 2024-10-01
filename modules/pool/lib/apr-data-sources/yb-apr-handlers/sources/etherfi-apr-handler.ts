@@ -1,4 +1,4 @@
-const url = 'https://api.studio.thegraph.com/proxy/41778/syko-dev-mainnet/v0.0.3';
+const url = 'https://api.studio.thegraph.com/query/41778/syko-dev-mainnet/v0.0.3';
 
 const query = `
   {

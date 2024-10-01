@@ -9,7 +9,7 @@ import { fetchOnChainPoolState } from './pool-onchain-state';
 import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { networkContext } from '../../network/network-context.service';
-import { LinearData, StableData } from '../subgraph-mapper';
+import { StableData } from '../subgraph-mapper';
 import { fetchTokenPairData } from './pool-on-chain-tokenpair-data';
 
 export const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
@@ -18,7 +18,6 @@ export const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'META_STABLE',
     'PHANTOM_STABLE',
     'COMPOSABLE_STABLE',
-    'LINEAR',
     'LIQUIDITY_BOOTSTRAPPING',
     'ELEMENT',
     'GYRO',
@@ -55,7 +54,10 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, networkContext.chain === 'ZKEVM' ? 190 : 1024);
+        const state = await fetchOnChainPoolState(
+            filteredPools,
+            networkContext.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
+        );
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -101,15 +103,19 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            this.options.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
         );
         const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
-            this.options.chain === 'ZKEVM' ? 190 : 1024,
+            this.options.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 400,
         );
         const gyroFees = await (this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, networkContext.chain === 'ZKEVM' ? 190 : 1024)
+            ? fetchOnChainGyroFees(
+                  gyroPools,
+                  this.options.gyroConfig,
+                  networkContext.chain === 'ZKEVM' || networkContext.chain === 'FANTOM' ? 190 : 1024,
+              )
             : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];
@@ -138,34 +144,6 @@ export class PoolOnChainDataService {
                                 },
                             }),
                         );
-                    }
-                }
-
-                if (pool.type === 'LINEAR') {
-                    if (!onchainData.targets) {
-                        console.error(`Linear Pool Missing Targets: ${pool.id}`);
-                        continue;
-                    } else {
-                        const lowerTarget = formatFixed(onchainData.targets[0], 18);
-                        const upperTarget = formatFixed(onchainData.targets[1], 18);
-
-                        if (
-                            (pool.typeData as LinearData).lowerTarget !== lowerTarget ||
-                            (pool.typeData as LinearData).upperTarget !== upperTarget
-                        ) {
-                            operations.push(
-                                prisma.prismaPool.update({
-                                    where: { id_chain: { id: pool.id, chain: this.options.chain } },
-                                    data: {
-                                        typeData: {
-                                            ...(pool.typeData as LinearData),
-                                            lowerTarget,
-                                            upperTarget,
-                                        },
-                                    },
-                                }),
-                            );
-                        }
                     }
                 }
 
@@ -244,14 +222,6 @@ export class PoolOnChainDataService {
                     // bpt price rate
                     if (onchainData.rate && isSameAddress(poolToken.address, pool.address)) {
                         priceRate = onchainData.rate;
-                    }
-
-                    // linear wrapped token rate
-                    if (
-                        onchainData.wrappedTokenRate &&
-                        (pool.typeData as LinearData)?.wrappedIndex === poolToken.index
-                    ) {
-                        priceRate = onchainData.wrappedTokenRate;
                     }
 
                     if (

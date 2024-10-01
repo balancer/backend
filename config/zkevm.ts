@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,12 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVNcphdNjTCaJ4ammPtFzRyD4gmyNBomKcVFZ98RADpS1`,
+        ],
         beetsBar: 'https://',
         blocks: 'https://api.studio.thegraph.com/query/48427/bleu-polygon-zkevm-blocks/version/latest',
-        gauge: 'https://api.studio.thegraph.com/query/24660/balancer-gauges-polygon-zk/version/latest',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-polygon-zk/version/latest`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -34,10 +35,8 @@ export default <NetworkData>{
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.GROVE_CITY
-        ? `https://polygon-zkevm-mainnet.rpc.grove.city/v1/${env.GROVE_CITY}`
-        : env.ALCHEMY_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-        ? `https://polygonzkevm-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=polygon-zkevm&dkey=${env.DRPC_API_KEY}`
         : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
@@ -46,6 +45,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     },
     balancer: {
@@ -108,9 +108,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

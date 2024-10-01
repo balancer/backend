@@ -8,13 +8,13 @@ import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { bn } from '../../big-number/big-number';
 import { AmountHumanReadable } from '../../common/global-types';
-import { reliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import ReliquaryAbi from '../../web3/abi/Reliquary.json';
 import { getContractAt } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { Reliquary } from '../../web3/types/Reliquary';
 import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
 import { networkContext } from '../../network/network-context.service';
+import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 
 type ReliquaryPosition = {
     amount: BigNumber;
@@ -53,6 +53,10 @@ type TransferEvent = Event & {
 export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceService {
     constructor(private readonly reliquaryAddress: string) {}
 
+    get reliquarySubgraphService() {
+        return new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary!);
+    }
+
     public async syncChangedStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
             where: { type_chain: { type: 'RELIQUARY', chain: networkContext.chain } },
@@ -74,7 +78,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             include: { staking: true },
         });
         const latestBlock = await networkContext.provider.getBlockNumber();
-        const farms = await reliquarySubgraphService.getAllFarms({});
+        const farms = await this.reliquarySubgraphService.getAllFarms({});
         const filteredFarms = farms.filter(
             (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
@@ -84,6 +88,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
                 ? startBlock + networkContext.data.rpcMaxBlockRange
                 : latestBlock;
+
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             this.reliquaryAddress,
             startBlock,
@@ -94,12 +99,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         if (startBlock > endBlock) {
             return;
         }
+        const userAddresses = _.uniq(amountUpdates.map((update) => update.userAddress.toLowerCase()));
 
         const filteredAmountUpdates = amountUpdates.filter(
-            (update) => !networkContext.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()),
+            (update) =>
+                !networkContext.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()) &&
+                update.amount !== '0.0',
         );
-
-        const userAddresses = _.uniq(filteredAmountUpdates.map((update) => update.userAddress.toLowerCase()));
 
         if (filteredAmountUpdates.length === 0) {
             await prisma.prismaUserBalanceSyncStatus.update({
@@ -120,6 +126,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 prisma.prismaUser.createMany({
                     data: userAddresses.map((userAddress) => ({ address: userAddress })),
                     skipDuplicates: true,
+                }),
+                prisma.prismaUserStakedBalance.deleteMany({
+                    where: {
+                        staking: { type: 'RELIQUARY' },
+                        chain: networkContext.chain,
+                        userAddress: { in: userAddresses },
+                    },
                 }),
                 ...filteredAmountUpdates.map((update) => {
                     const userAddress = update.userAddress.toLowerCase();
@@ -165,9 +178,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         if (!stakingTypes.includes('RELIQUARY')) {
             return;
         }
-        const { block } = await reliquarySubgraphService.getMetadata();
+        const { block } = await this.reliquarySubgraphService.getMetadata();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
-        const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
+        const relics = await this.reliquarySubgraphService.getAllRelicsWithPaging({});
         const filteredRelics = relics.filter(
             (relic) => !networkContext.data.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
         );
@@ -341,6 +354,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
         // we only care for the user address and all positions, we can ignore the relicIds array
         Object.entries(updatedPositions).forEach(([userAddress, [relicIds, positions]]) => {
+            if (positions.length === 0) {
+                userFarmBalances[userAddress] = {
+                    userAddress,
+                    farmId: '0',
+                    amount: BigNumber.from(0),
+                };
+            }
             positions.forEach((position) => {
                 const key = `${userAddress}-${position.poolId}`;
                 if (key in userFarmBalances) {

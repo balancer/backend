@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,12 +12,14 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-08-23',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
+        ],
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmTSU862YAXb5XMhGsE7JCajuvf5FPiZjrdvC9nnbzd86x`,
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-arbitrum',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/arbitrum-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -34,12 +36,9 @@ export default <NetworkData>{
         platformId: 'arbitrum-one',
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://arbitrum-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : env.ALCHEMY_API_KEY
-            ? `https://arb-mainnet.g.alchemy.com/v2/${env.ALCHEMY_API_KEY}`
-            : 'https://1rpc.io/arb',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=arbitrum&dkey=${env.DRPC_API_KEY}`
+        : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -47,6 +46,7 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x81cfae226343b24ba12ec6521db2c79e7aeeb310',
     },
     balancer: {
@@ -69,7 +69,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-arbitrum',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DLuE98kEb5pQNXAcKFQGQgfSQ57Xdou4jnVbAEqMfy3B`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
@@ -112,9 +112,29 @@ export default <NetworkData>{
                             stataArbWETH: '0x18468b6eba332285c6d9bb03fe7fb52e108c4596',
                         },
                     },
+                    FRAX: {
+                        underlyingAssetAddress: '0x17fc002b466eec40dae837fc4be5c67993ddbd6f',
+                        aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
+                        wrappedTokens: {
+                            stataArbFRAX: '0x89aec2023f89e26dbb7eaa7a98fe3996f9d112a8',
+                        },
+                    },
+                    GHO: {
+                        underlyingAssetAddress: '0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33',
+                        aTokenAddress: '0xebe517846d0f36eced99c735cbf6131e1feb775d',
+                        wrappedTokens: {
+                            stataArbGHO: '0xd9fba68d89178e3538e708939332c79efc540179',
+                        },
+                    },
                 },
             },
         },
+        defillama: [
+            {
+                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+            },
+        ],
         reaper: {
             onchainSource: {
                 averageAPRAcrossLastNHarvests: 5,
@@ -131,7 +151,22 @@ export default <NetworkData>{
                 },
             },
         },
+        stakewise: {
+            url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+            token: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
+        },
+        etherfi: '0x35751007a407ca6feffe80b3cb397736d2cf4dbe',
+        dforce: {
+            token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
+        },
         defaultHandlers: {
+            usdm: {
+                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                path: 'value',
+                isIbYield: true,
+                scale: 1,
+            },
             wstETH: {
                 tokenAddress: '0x5979d7b546e38e414f7e9822514be443a4800529',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
@@ -194,10 +229,25 @@ export default <NetworkData>{
                 scale: 1,
                 isIbYield: true,
             },
+            woETH: {
+                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
+                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
+                path: 'apr',
+                isIbYield: true,
+            },
+            ETHx: {
+                tokenAddress: '0xed65c5085a18fa160af0313e60dcc7905e944dc7',
+                sourceUrl: 'https://universe.staderlabs.com/eth/apy',
+                path: 'value',
+                isIbYield: true,
+            },
+            gUSDC: {
+                tokenAddress: '0xd3443ee1e91af28e5fb858fbd0d72a63ba8046e0',
+                sourceUrl: 'https://backend-arbitrum.gains.trade/apr',
+                path: 'collateralRewards.{symbol == "USDC"}.vaultApr',
+                isIbYield: true,
+            },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     gyro: {
         config: '0x9b683ca24b0e013512e2566b68704dbe9677413c',

@@ -1,4 +1,4 @@
-import { env } from '../app/env';
+import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
@@ -12,12 +12,13 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-06-06',
-        balancer: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
+        balancer: [
+            `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNudbtVu2eACfxNpFz37MVwKxxHPh1Lg5MzFKwQZG2xsU`,
+        ],
         beetsBar: 'https://',
-        blocks: 'https://api.thegraph.com/subgraphs/name/iliaazhel/avalanche-blocks',
-        gauge: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges-avalanche',
-        veBalLocks: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gauges',
-        userBalances: 'https://',
+        blocks: 'https://api.studio.thegraph.com/query/48427/avalanche-blocks/version/latest',
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmYCJJToWTY31LgsJG2vZTNkKWpQ7i91cTVYgPUBsJ5nQZ`,
+        aura: 'https://data.aura.finance/graphql',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -34,10 +35,9 @@ export default <NetworkData>{
         platformId: 'avalanche',
         excludedTokenAddresses: [],
     },
-    rpcUrl:
-        env.INFURA_API_KEY && (env.DEPLOYMENT_ENV as DeploymentEnv) === 'main'
-            ? `https://avalanche-mainnet.infura.io/v3/${env.INFURA_API_KEY}`
-            : 'https://rpc.ankr.com/avalanche',
+    rpcUrl: env.DRPC_API_KEY
+        ? `https://lb.drpc.org/ogrpc?network=avalanche&dkey=${env.DRPC_API_KEY}`
+        : 'https://rpc.ankr.com/avalanche',
     rpcMaxBlockRange: 2000,
     protocolToken: 'bal',
     bal: {
@@ -45,7 +45,11 @@ export default <NetworkData>{
     },
     veBal: {
         address: '0xc128a9954e6c874ea3d62ce62b468ba073093f25',
+        bptAddress: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
         delegationProxy: '0x0c6052254551eae3ecac77b01dfcf1025418828f',
+    },
+    gyro: {
+        config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
     },
     balancer: {
         v2: {
@@ -67,7 +71,7 @@ export default <NetworkData>{
     ybAprConfig: {
         aave: {
             v3: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/aave/protocol-v3-avalanche',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
                 tokens: {
                     USDC: {
                         underlyingAssetAddress: '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e',
@@ -143,9 +147,6 @@ export default <NetworkData>{
                 isIbYield: true,
             },
         },
-    },
-    beefy: {
-        linearPools: [''],
     },
     datastudio: {
         main: {

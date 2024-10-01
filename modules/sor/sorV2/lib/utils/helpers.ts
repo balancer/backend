@@ -41,11 +41,13 @@ export function calculatePriceImpact(paths: PathWithAmount[], swapKind: SwapKind
             new PathWithAmount(
                 [...path.tokens].reverse(),
                 [...path.pools].reverse(),
+                [...path.isBuffer].reverse(),
                 swapKind === SwapKind.GivenIn ? path.outputAmount : path.inputAmount,
             ),
     );
 
-    const amountInitial = swapKind === SwapKind.GivenIn ? getInputAmount(paths).amount : getInputAmount(pathsReverse).amount;
+    const amountInitial =
+        swapKind === SwapKind.GivenIn ? getInputAmount(paths).amount : getInputAmount(pathsReverse).amount;
 
     const amountFinal =
         swapKind === SwapKind.GivenIn ? getOutputAmount(pathsReverse).amount : getOutputAmount(paths).amount;

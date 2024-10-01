@@ -5,10 +5,21 @@ import VaultV3Abi from './abis/VaultV3';
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?
 type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
-
+type PoolTokenInfo = [
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][0]>, // token address array
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][1]>, // tokenInfo (rateprovider etc)
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][2]>, // balancesRaw
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenInfo'>['outputs'][3]>, // lastLiveBalances
+];
+type PoolTokenRates = [
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][0]>, // decimalScalingFactors
+    AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolTokenRates'>['outputs'][1]>, // tokenRates
+];
 export interface OnchainPoolData {
     totalSupply: bigint;
     swapFee: bigint;
+    aggregateSwapFee?: bigint;
+    aggregateYieldFee?: bigint;
     // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
@@ -18,6 +29,7 @@ export interface OnchainPoolData {
         balance: bigint;
         rateProvider: string;
         rate: bigint;
+        isErc4626: boolean;
     }[];
 }
 
@@ -56,6 +68,7 @@ export async function fetchPoolData(
         ])
         .flat();
 
+    // @ts-ignore – viem has some issues with the typings when using imported abis
     const results = await client.multicall({ contracts, blockNumber });
 
     // Parse the results
@@ -65,29 +78,31 @@ export async function fetchPoolData(
             results[pointer + 1].status === 'success'
                 ? (results[pointer + 1].result as unknown as PoolConfig)
                 : undefined;
-        const poolTokens =
+        const poolTokenInfo =
             results[pointer + 2].status === 'success'
-                ? {
-                      tokens: (results[pointer + 2].result as any)[0],
-                      balancesRaw: (results[pointer + 2].result as any)[2],
-                      rateProviders: (results[pointer + 2].result as any)[4],
-                  }
+                ? (results[pointer + 2].result as unknown as PoolTokenInfo)
                 : undefined;
         const poolTokenRates =
-            results[pointer + 3].status === 'success' ? (results[pointer + 3].result as any) : undefined;
+            results[pointer + 3].status === 'success'
+                ? (results[pointer + 3].result as unknown as PoolTokenRates)
+                : undefined;
 
         return [
             pool.toLowerCase(),
             {
                 totalSupply: results[pointer].status === 'success' ? (results[pointer].result as bigint) : undefined,
                 swapFee: config?.staticSwapFeePercentage,
+                aggregateSwapFee: config?.aggregateSwapFeePercentage,
+                aggregateYieldFee: config?.aggregateYieldFeePercentage,
                 isPoolPaused: config?.isPoolPaused,
                 isPoolInRecoveryMode: config?.isPoolInRecoveryMode,
-                tokens: poolTokens?.tokens.map((token: string, i: number) => ({
+                tokens: poolTokenInfo?.[0].map((token: string, i: number) => ({
                     address: token.toLowerCase(),
-                    balance: poolTokens.balancesRaw[i],
-                    rateProvider: poolTokens.rateProviders[i],
-                    rate: poolTokenRates[i],
+                    balance: poolTokenInfo[2][i],
+                    paysYieldFees: poolTokenInfo[1][i].paysYieldFees,
+                    rateProvider: poolTokenInfo[1][i].rateProvider,
+                    rate: poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n,
+                    isErc4626: false, // will be added later in the process
                 })),
             },
         ];

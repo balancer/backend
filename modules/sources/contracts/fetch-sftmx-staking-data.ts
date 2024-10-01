@@ -3,6 +3,7 @@ import FTMStaking from './abis/FTMStaking';
 import SftmxVault from './abis/SftmxVault';
 import SFC from './abis/SFC';
 import { ViemClient } from '../types';
+import { ZERO_ADDRESS } from '@balancer/sdk';
 
 export interface OnchainSftmxStakingData {
     totalFtmStaked: bigint;
@@ -136,7 +137,7 @@ export async function fetchSftmxStakingData(
         functionName: 'getMaturedVaultLength',
     });
 
-    const maturedVaults: Address[] = [];
+    const maturedVaults: { address: Address; index: bigint }[] = [];
 
     for (let i = 0n; i < maturedVaultCount; i++) {
         const maturedVaultAddress = await client.readContract({
@@ -145,7 +146,7 @@ export async function fetchSftmxStakingData(
             functionName: 'getMaturedVault',
             args: [i],
         });
-        maturedVaults.push(maturedVaultAddress);
+        maturedVaults.push({ address: maturedVaultAddress, index: i });
     }
 
     for (let i = 1n; i <= stakingData.numberOfVaults; i++) {
@@ -156,6 +157,11 @@ export async function fetchSftmxStakingData(
             functionName: 'getVault',
             args: [vaultIndex],
         });
+
+        if (vaultAddress === ZERO_ADDRESS) {
+            continue;
+        }
+
         const validatorId = await client.readContract({
             abi: SftmxVault,
             address: vaultAddress,
@@ -177,11 +183,41 @@ export async function fetchSftmxStakingData(
             id: vaultAddress,
             ftmStaked: lockedStake,
             ftmStakingId: stakingContractAddress,
-            matured: maturedVaults.includes(vaultAddress),
+            matured: false,
             unlockTimestamp: endTime,
             validatorAddress: validatorAddress,
             validatorId: validatorId,
             vaultIndex: vaultIndex,
+        });
+    }
+    for (const maturedVault of maturedVaults) {
+        const vaultAddress = maturedVault.address;
+        const validatorId = await client.readContract({
+            abi: SftmxVault,
+            address: vaultAddress,
+            functionName: 'toValidatorID',
+        });
+        const validatorAddress = await client.readContract({
+            abi: SftmxVault,
+            address: vaultAddress,
+            functionName: 'toValidator',
+        });
+
+        const [lockedStake, fromEpoch, endTime, duration] = await client.readContract({
+            abi: SFC,
+            address: SFC_ADDRESS,
+            functionName: 'getLockupInfo',
+            args: [vaultAddress, validatorId],
+        });
+        stakingData.vaults.push({
+            id: vaultAddress,
+            ftmStaked: lockedStake,
+            ftmStakingId: stakingContractAddress,
+            matured: true,
+            unlockTimestamp: endTime,
+            validatorAddress: validatorAddress,
+            validatorId: validatorId,
+            vaultIndex: maturedVault.index,
         });
     }
     return stakingData;

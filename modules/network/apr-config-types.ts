@@ -13,9 +13,27 @@ export interface YbAprConfig {
     tetu?: TetuAprConfig;
     tranchess?: TranchessAprConfig;
     yearn?: YearnAprConfig;
-    stakewise?: string;
+    stakewise?: {
+        url: string;
+        token: string;
+    };
+    maple?: {
+        url: string;
+        token: string;
+    };
+    yieldnest?: {
+        url: string;
+        token: string;
+    };
+    dforce?: {
+        token: string;
+    };
     etherfi?: string;
     sveth?: boolean;
+    defillama?: {
+        defillamaPoolId: string;
+        tokenAddress: string;
+    }[];
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }

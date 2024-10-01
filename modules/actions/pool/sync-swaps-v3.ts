@@ -17,7 +17,7 @@ export async function syncSwapsV3(
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain = 'SEPOLIA' as Chain,
 ): Promise<string[]> {
-    const vaultVersion = 3;
+    const protocolVersion = 3;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -27,10 +27,10 @@ export async function syncSwapsV3(
         where: {
             type: 'SWAP',
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 

@@ -1,18 +1,17 @@
 import {
-    GqlSorSwapType,
-    GqlSorGetSwapsResponse,
-    QuerySorGetSwapsArgs,
-    QuerySorGetSwapPathsArgs,
     GqlSorGetSwapPaths,
+    GqlSorGetSwapsResponse,
+    GqlSorSwapType,
+    QuerySorGetSwapPathsArgs,
+    QuerySorGetSwapsArgs,
 } from '../../schema';
 import { sorV1BeetsService } from './sorV1Beets/sorV1Beets.service';
 import { sorV2Service } from './sorV2/sorPathService';
-import { GetSwapsInput, SwapResult } from './types';
-import * as Sentry from '@sentry/node';
+import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult } from './types';
 import { Chain } from '@prisma/client';
-import { parseUnits, formatUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { tokenService } from '../token/token.service';
-import { getToken, getTokenAmountHuman, zeroResponse, swapPathsZeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, swapPathsZeroResponse, zeroResponse } from './utils';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 export class SorService {
@@ -23,29 +22,21 @@ export class SorService {
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = swapPathsZeroResponse(args.tokenIn, args.tokenOut);
 
-        let wethIsEth = false;
-        if (
-            tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address ||
-            tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address
-        ) {
-            wethIsEth = true;
+        if (parseFloat(args.swapAmount) <= 0) {
+            return emptyResponse;
         }
+
+        const wethIsEth =
+            tokenIn === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address ||
+            tokenOut === AllNetworkConfigsKeyedOnChain[args.chain].data.eth.address;
 
         // check if tokens addresses exist
         try {
             await getToken(tokenIn, args.chain!);
             await getToken(tokenOut, args.chain!);
         } catch (e: any) {
-            Sentry.captureException(e.message, {
-                tags: {
-                    service: 'sorV2',
-                    tokenIn,
-                    tokenOut,
-                    swapAmount: args.swapAmount,
-                    swapType: args.swapType,
-                    chain: args.chain,
-                },
-            });
+            // Just log to console for parsing
+            console.log('Missing token for SOR request', `in: ${tokenIn}`, `out: ${tokenOut}`, args.chain);
             return emptyResponse;
         }
 
@@ -64,7 +55,7 @@ export class SorService {
         // args.swapAmount is HumanScale
         const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
 
-        return sorV2Service.getSorSwapPaths({
+        const getSwapPathsInput: Omit<GetSwapPathsInput, 'protocolVersion'> = {
             chain: args.chain!,
             swapAmount: amount,
             swapType: args.swapType,
@@ -80,7 +71,16 @@ export class SorService {
                       wethIsEth: wethIsEth,
                   }
                 : undefined,
-        });
+        };
+
+        if (args.useProtocolVersion) {
+            return sorV2Service.getSorSwapPaths({
+                ...getSwapPathsInput,
+                protocolVersion: args.useProtocolVersion,
+            });
+        }
+
+        return this.getBestSwapPathVersion(getSwapPathsInput);
     }
 
     async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {
@@ -89,6 +89,10 @@ export class SorService {
         const tokenOut = args.tokenOut.toLowerCase();
         const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
         const emptyResponse = zeroResponse(args.swapType, args.tokenIn, args.tokenOut, args.swapAmount);
+
+        if (parseFloat(args.swapAmount) <= 0) {
+            return emptyResponse;
+        }
 
         // check if tokens addresses exist
         try {
@@ -246,6 +250,27 @@ export class SorService {
                 v2Perf.toFixed(8),
             ].join(','),
         );
+    }
+
+    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
+        const swapBalancerV2 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 2 });
+        const swapBalancerV3 = await sorV2Service.getSorSwapPaths({ ...input, protocolVersion: 3 });
+        if (input.swapType === 'EXACT_IN') {
+            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
+                ? swapBalancerV2
+                : swapBalancerV3;
+        } else {
+            // return swap path with smallest non-zero amountsIn (if it exists)
+            if (parseFloat(swapBalancerV2.returnAmount) === 0) {
+                return swapBalancerV3;
+            } else if (parseFloat(swapBalancerV3.returnAmount) === 0) {
+                return swapBalancerV2;
+            } else {
+                return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
+                    ? swapBalancerV2
+                    : swapBalancerV3;
+            }
+        }
     }
 }
 

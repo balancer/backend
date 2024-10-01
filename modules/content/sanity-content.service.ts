@@ -1,5 +1,5 @@
 import { isSameAddress } from '@balancer-labs/sdk';
-import { Chain, Prisma, PrismaPoolCategoryType } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import {
     ConfigHomeScreen,
@@ -9,9 +9,8 @@ import {
     HomeScreenNewsItem,
 } from './content-types';
 import SanityClient from '@sanity/client';
-import { env } from '../../app/env';
+import { env } from '../../apps/env';
 import { chainToIdMap } from '../network/network-config';
-import { LinearData } from '../pool/subgraph-mapper';
 
 interface SanityToken {
     name: string;
@@ -30,11 +29,6 @@ interface SanityToken {
     telegramUrl?: string;
 }
 
-interface SanityPoolConfig {
-    incentivizedPools: string[];
-    blacklistedPools: string[];
-}
-
 const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
     '250': 'fantomToken',
     '4': 'rinkebyToken',
@@ -43,6 +37,8 @@ const SANITY_TOKEN_TYPE_MAP: { [key: string]: string } = {
 
 export class SanityContentService implements ContentService {
     constructor(private readonly projectId = '1g2ag2hb', private readonly dataset = 'production') {}
+
+    async syncRateProviderReviews(chains: Chain[]): Promise<void> {}
 
     async syncTokenContentData(chains: Chain[]): Promise<void> {
         for (const chain of chains) {
@@ -105,13 +101,14 @@ export class SanityContentService implements ContentService {
                     update: {
                         name: sanityToken.name,
                         symbol: sanityToken.symbol,
-                        //use set to ensure we overwrite the underlying value if it is removed in sanity
+                        // if you update a field with "undefined" it will actually NOT update the field at all, need to use "null" to set to null
+                        // once we remove the entry from sanity, it will use whatever was provided by coingecko as it wont update here anymore (is set to undefined)
                         logoURI: { set: sanityToken.logoURI || null },
                         decimals: sanityToken.decimals,
                         priority: sanityToken.priority,
-                        coingeckoPlatformId: { set: sanityToken.coingeckoPlatformId?.toLowerCase() || null },
-                        coingeckoContractAddress: { set: sanityToken.coingeckoContractAddress?.toLowerCase() || null },
-                        coingeckoTokenId: { set: sanityToken.coingeckoTokenId?.toLowerCase() || null },
+                        coingeckoPlatformId: sanityToken.coingeckoPlatformId?.toLowerCase(),
+                        coingeckoContractAddress: sanityToken.coingeckoContractAddress?.toLowerCase(),
+                        coingeckoTokenId: sanityToken.coingeckoTokenId?.toLowerCase(),
                         ...tokenData,
                     },
                 });
@@ -171,35 +168,12 @@ export class SanityContentService implements ContentService {
                 });
             }
 
-            if (
-                (pool?.type === 'COMPOSABLE_STABLE' || pool?.type === 'LINEAR') &&
-                !tokenTypes.includes('PHANTOM_BPT')
-            ) {
+            if (pool?.type === 'COMPOSABLE_STABLE' && !tokenTypes.includes('PHANTOM_BPT')) {
                 types.push({
                     id: `${token.address}-phantom-bpt`,
                     chain: chain,
                     type: 'PHANTOM_BPT',
                     tokenAddress: token.address,
-                });
-            }
-
-            const wrappedIndex = pool ? (pool.typeData as LinearData).wrappedIndex : undefined;
-            const wrappedLinearPoolToken = wrappedIndex
-                ? pools.find((pool) => pool.tokens[wrappedIndex]?.address === token.address)
-                : undefined;
-
-            if (wrappedLinearPoolToken && !tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                types.push({
-                    id: `${token.address}-linear-wrapped`,
-                    chain: chain,
-                    type: 'LINEAR_WRAPPED_TOKEN',
-                    tokenAddress: token.address,
-                });
-            }
-
-            if (!wrappedLinearPoolToken && tokenTypes.includes('LINEAR_WRAPPED_TOKEN')) {
-                prisma.prismaTokenType.delete({
-                    where: { id_chain: { id: `${token.address}-linear-wrapped`, chain: chain } },
                 });
             }
         }
@@ -219,57 +193,6 @@ export class SanityContentService implements ContentService {
                 tokens: { orderBy: { index: 'asc' } },
             },
         });
-    }
-
-    public async syncPoolContentData(chain: Chain): Promise<void> {
-        const response = await this.getSanityClient()
-            .fetch(`*[_type == "config" && chainId == ${chainToIdMap[chain]}][0]{
-            incentivizedPools,
-            blacklistedPools,
-        }`);
-
-        const config: SanityPoolConfig = {
-            incentivizedPools: response?.incentivizedPools ?? [],
-            blacklistedPools: response?.blacklistedPools ?? [],
-        };
-
-        const categories = await prisma.prismaPoolCategory.findMany({ where: { chain: chain } });
-        const blacklisted = categories.filter((item) => item.category === 'BLACK_LISTED').map((item) => item.poolId);
-
-        await this.updatePoolCategory(blacklisted, config.blacklistedPools, 'BLACK_LISTED', chain);
-    }
-
-    private async updatePoolCategory(
-        currentPoolIds: string[],
-        newPoolIds: string[],
-        category: PrismaPoolCategoryType,
-        chain: Chain,
-    ) {
-        const itemsToAdd = newPoolIds.filter((poolId) => !currentPoolIds.includes(poolId));
-        const itemsToRemove = currentPoolIds.filter((poolId) => !newPoolIds.includes(poolId));
-
-        // make sure the pools really exist to prevent sanity mistakes from breaking the system
-        const pools = await prisma.prismaPool.findMany({
-            where: { id: { in: itemsToAdd }, chain: chain },
-            select: { id: true },
-        });
-        const poolIds = pools.map((pool) => pool.id);
-        const existingItemsToAdd = itemsToAdd.filter((poolId) => poolIds.includes(poolId));
-
-        await prisma.$transaction([
-            prisma.prismaPoolCategory.createMany({
-                data: existingItemsToAdd.map((poolId) => ({
-                    id: `${poolId}-${category}`,
-                    chain: chain,
-                    category,
-                    poolId,
-                })),
-                skipDuplicates: true,
-            }),
-            prisma.prismaPoolCategory.deleteMany({
-                where: { poolId: { in: itemsToRemove }, category, chain: chain },
-            }),
-        ]);
     }
 
     public async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
@@ -331,6 +254,7 @@ export class SanityContentService implements ContentService {
                                 poolId: group.poolId,
                                 primary: i === 0 ? true : false,
                                 chain: chain,
+                                description: '',
                             });
                         }
                     }

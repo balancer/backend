@@ -9,20 +9,24 @@ const sourceToHandler = {
     beefy: sources.BeefyAprHandler,
     bloom: sources.BloomAprHandler,
     sftmx: sources.SftmxAprHandler,
-    euler: sources.EulerAprHandler,
-    gearbox: sources.GearboxAprHandler,
-    idle: sources.IdleAprHandler,
+    // euler: sources.EulerAprHandler, // Removed, pools rekt
+    // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
+    // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,
     ovix: sources.OvixAprHandler,
-    reaper: sources.ReaperCryptAprHandler,
+    // reaper: sources.ReaperCryptAprHandler, // Removed, pools rekt
     tessera: sources.TesseraAprHandler,
     tetu: sources.TetuAprHandler,
     tranchess: sources.TranchessAprHandler,
     yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
     stakewise: sources.Stakewise,
+    maple: sources.Maple,
+    yieldnest: sources.Yieldnest,
     etherfi: sources.Etherfi,
     sveth: sources.svEthAprHandler,
+    dforce: sources.DForce,
+    defillama: sources.Defillama,
 };
 
 export class YbAprHandlers {
@@ -41,6 +45,11 @@ export class YbAprHandlers {
         // Add handlers from global configuration
         for (const [source, config] of Object.entries(aprConfig)) {
             const Handler = sourceToHandler[source as keyof typeof sourceToHandler];
+
+            // Ignore unknown sources
+            if (!Handler) {
+                continue;
+            }
 
             // Handle nested configs
             if (source === 'aave' || source === 'defaultHandlers') {

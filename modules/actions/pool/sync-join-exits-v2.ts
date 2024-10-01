@@ -11,7 +11,7 @@ import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-t
  * @param vaultSubgraphClient
  */
 export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
-    const vaultVersion = 2;
+    const protocolVersion = 2;
 
     // Get latest event from the DB
     const latestEvent = await prisma.prismaPoolEvent.findFirst({
@@ -20,10 +20,10 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
                 in: ['JOIN', 'EXIT'],
             },
             chain: chain,
-            vaultVersion,
+            protocolVersion,
         },
         orderBy: {
-            blockNumber: 'desc',
+            blockTimestamp: 'desc',
         },
     });
 
@@ -35,7 +35,7 @@ export const syncJoinExitsV2 = async (v2SubgraphClient: BalancerSubgraphService,
     const { joinExits } = await v2SubgraphClient.getPoolJoinExits({
         first: 1000,
         where: where,
-        orderBy: chain === Chain.FANTOM ? JoinExit_OrderBy.Timestamp : JoinExit_OrderBy.Block,
+        orderBy: JoinExit_OrderBy.Block,
         orderDirection: OrderDirection.Asc,
     });
 
