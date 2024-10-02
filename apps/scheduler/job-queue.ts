@@ -55,7 +55,9 @@ const workerQueue = new WokerQueue(new SQSClient({}), env.WORKER_QUEUE_URL);
 
 export async function scheduleJobs(chainId: string): Promise<void> {
     for (const job of AllNetworkConfigs[chainId].workerJobs) {
-        console.log(`Initializing job ${job.name}-${chainId}-init`);
-        await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chain: chainId }), job.interval);
+        if (job.name === 'sync-changed-pools') {
+            console.log(`Initializing job ${job.name}-${chainId}-init`);
+            await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chain: chainId }), job.interval);
+        }
     }
 }
