@@ -1,5 +1,4 @@
 import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
-import { BigNumber } from '@ethersproject/bignumber';
 import BalancerQueries from '../abi/BalancerQueries.json';
 import { MathSol, WAD, ZERO_ADDRESS } from '@balancer/sdk';
 import { parseEther, parseUnits } from 'viem';
@@ -61,9 +60,9 @@ interface Token {
 }
 
 interface OnchainData {
-    effectivePriceAmountOut: BigNumber;
-    aToBAmountOut: BigNumber;
-    bToAAmountOut: BigNumber;
+    effectivePriceAmountOut: bigint;
+    aToBAmountOut: bigint;
+    bToAAmountOut: bigint;
 }
 
 export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddress: string, batchSize = 1024) {
@@ -290,7 +289,7 @@ function addBToAPriceCallsToMulticaller(
 function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result?.effectivePriceAmountOut && result.effectivePriceAmountOut.gt(0) && result.aToBAmountOut) {
+    if (result?.effectivePriceAmountOut && result.effectivePriceAmountOut > 0n && result.aToBAmountOut) {
         tokenPair.aToBAmountOut = BigInt(result.aToBAmountOut.toString());
         // MathSol expects all values with 18 decimals, need to scale them
         tokenPair.effectivePrice = MathSol.divDownFixed(
