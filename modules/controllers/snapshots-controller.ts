@@ -1,3 +1,4 @@
+import { Chain } from '@prisma/client';
 import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { syncSnapshotsV3, syncSnapshotsV2, fillMissingSnapshotsV3, fillMissingSnapshotsV2 } from '../actions/snapshots';
@@ -23,8 +24,7 @@ export function SnapshotsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        async syncSnapshotsV2(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async syncSnapshotsV2(chain: Chain) {
             const {
                 subgraphs: { balancer },
             } = config[chain];
@@ -34,12 +34,11 @@ export function SnapshotsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
+            const subgraphClient = getV2SubgraphClient(balancer, chain);
             const entries = await syncSnapshotsV2(subgraphClient, chain);
             return entries;
         },
-        async syncSnapshotForPools(poolIds: string[], chainId: string, reload = false) {
-            const chain = chainIdToChain[chainId];
+        async syncSnapshotForPools(poolIds: string[], chain: Chain, reload = false) {
             const {
                 subgraphs: { balancer },
             } = config[chain];
@@ -61,14 +60,13 @@ export function SnapshotsController(tracer?: any) {
                 })
                 .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
 
-            const subgraphClient = getV2SubgraphClient(balancer, Number(chainId));
+            const subgraphClient = getV2SubgraphClient(balancer, chain);
             const service = new PoolSnapshotService(subgraphClient, chain, prices);
             const entries = await service.loadAllSnapshotsForPools(poolIds, reload);
 
             return entries;
         },
-        async syncSnapshotsV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
+        async syncSnapshotsV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3 },
             } = config[chain];
@@ -82,15 +80,11 @@ export function SnapshotsController(tracer?: any) {
             const entries = await syncSnapshotsV3(vaultSubgraphClient, chain);
             return entries;
         },
-        async fillMissingSnapshotsV2(chainId: string) {
-            const chain = chainIdToChain[chainId];
-
+        async fillMissingSnapshotsV2(chain: Chain) {
             const entries = await fillMissingSnapshotsV2(chain);
             return entries;
         },
-        async fillMissingSnapshotsV3(chainId: string) {
-            const chain = chainIdToChain[chainId];
-
+        async fillMissingSnapshotsV3(chain: Chain) {
             const entries = await fillMissingSnapshotsV3(chain);
             return entries;
         },

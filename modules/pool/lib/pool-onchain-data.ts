@@ -1,6 +1,5 @@
 import { formatEther, formatUnits } from 'ethers/lib/utils';
-import { Multicaller3 } from '../../web3/multicaller3';
-import { PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolType } from '@prisma/client';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import ElementPoolAbi from '../abi/ConvergentCurvePool.json';
 import LiquidityBootstrappingPoolAbi from '../abi/LiquidityBootstrappingPool.json';
@@ -14,9 +13,11 @@ import MetaStablePoolAbi from '../abi/MetaStablePool.json';
 import StablePhantomPoolAbi from '../abi/StablePhantomPool.json';
 import FxPoolAbi from '../abi/FxPool.json';
 import { JsonFragment } from '@ethersproject/abi';
+import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
 
 interface PoolInput {
     id: string;
+    chain: Chain;
     address: string;
     type: PrismaPoolType | 'COMPOSABLE_STABLE';
     tokens: {
@@ -29,20 +30,20 @@ interface PoolInput {
 }
 
 interface OnchainData {
-    poolTokens: [string[], BigNumber[]];
-    totalSupply: BigNumber;
-    swapFee: BigNumber;
+    poolTokens: [string[], bigint[]];
+    totalSupply: bigint;
+    swapFee: bigint;
     swapEnabled?: boolean;
-    protocolYieldFeePercentageCache?: BigNumber;
-    protocolSwapFeePercentageCache?: BigNumber;
-    rate?: BigNumber;
-    weights?: BigNumber[];
-    targets?: [BigNumber, BigNumber];
-    wrappedTokenRate?: BigNumber;
-    amp?: [BigNumber, boolean, BigNumber];
-    tokenRates?: [BigNumber, BigNumber];
-    tokenRate?: BigNumber[];
-    metaPriceRateCache?: [BigNumber, BigNumber, BigNumber][];
+    protocolYieldFeePercentageCache?: bigint;
+    protocolSwapFeePercentageCache?: bigint;
+    rate?: bigint;
+    weights?: bigint[];
+    targets?: [bigint, bigint];
+    wrappedTokenRate?: bigint;
+    amp?: [bigint, boolean, bigint];
+    tokenRates?: [bigint, bigint];
+    tokenRate?: bigint[];
+    metaPriceRateCache?: [bigint, bigint, bigint][];
 }
 
 const abi: JsonFragment[] = Object.values(
@@ -93,7 +94,7 @@ const getTotalSupplyFn = (type: PoolInput['type'], version: number) => {
 const addDefaultCallsToMulticaller = (
     { id, address, type, version }: PoolInput,
     vaultAddress: string,
-    multicaller: Multicaller3,
+    multicaller: IMulticaller,
 ) => {
     multicaller.call(`${id}.poolTokens`, vaultAddress, 'getPoolTokens', [id]);
     multicaller.call(`${id}.totalSupply`, address, getTotalSupplyFn(type, version));
@@ -103,16 +104,16 @@ const addDefaultCallsToMulticaller = (
     multicaller.call(`${id}.protocolYieldFeePercentageCache`, address, 'getProtocolFeePercentageCache', [2]);
 };
 
-const weightedCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
-    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
+const weightedCalls = ({ id, address }: PoolInput, multicaller: IMulticaller) => {
+    multicaller.call(`${id}.weights`, address, 'getNormalizedWeights', [], false);
 };
 
-const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
+const lbpAndInvestmentCalls = ({ id, address }: PoolInput, multicaller: IMulticaller) => {
     multicaller.call(`${id}.weights`, address, 'getNormalizedWeights');
     multicaller.call(`${id}.swapEnabled`, address, 'getSwapEnabled');
 };
 
-const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
+const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: IMulticaller) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
     tokens.forEach(({ address: tokenAddress }, i) => {
@@ -120,7 +121,7 @@ const stableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicalle
     });
 };
 
-const metaStableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multicaller3) => {
+const metaStableCalls = ({ id, address, tokens }: PoolInput, multicaller: IMulticaller) => {
     multicaller.call(`${id}.amp`, address, 'getAmplificationParameter');
 
     tokens.forEach(({ address: tokenAddress }, i) => {
@@ -128,7 +129,7 @@ const metaStableCalls = ({ id, address, tokens }: PoolInput, multicaller: Multic
     });
 };
 
-const gyroECalls = ({ id, address }: PoolInput, multicaller: Multicaller3) => {
+const gyroECalls = ({ id, address }: PoolInput, multicaller: IMulticaller) => {
     multicaller.call(`${id}.tokenRates`, address, 'getTokenRates');
 };
 
@@ -175,7 +176,7 @@ const parse = (result: OnchainData, decimalsLookup: { [address: string]: number 
                       ? formatEther(result.tokenRate[i])
                       : result.tokenRates && result.tokenRates[i]
                       ? formatEther(result.tokenRates[i])
-                      : result.metaPriceRateCache && result.metaPriceRateCache[i][0].gt(0)
+                      : result.metaPriceRateCache && result.metaPriceRateCache[i][0] > 0n
                       ? formatEther(result.metaPriceRateCache[i][0])
                       : undefined,
               ),
@@ -197,7 +198,7 @@ export const fetchOnChainPoolData = async (pools: PoolInput[], vaultAddress: str
         return {};
     }
 
-    const multicaller = new Multicaller3(abi, batchSize);
+    const multicaller = new Multicaller3Viem(pools[0].chain, abi, batchSize);
 
     pools.forEach((pool) => {
         addDefaultCallsToMulticaller(pool, vaultAddress, multicaller);

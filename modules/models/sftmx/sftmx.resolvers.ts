@@ -1,16 +1,16 @@
 import { Resolvers } from '../../../schema';
-import { SftmxQueryController } from '../../controllers/sftmx-query-controller';
+import { SftmxController } from '../../controllers';
 
 const resolvers: Resolvers = {
     Query: {
         sftmxGetWithdrawalRequests: async (parent, { user }, context) => {
-            return SftmxQueryController().getWithdrawalRequests(user);
+            return SftmxController().getWithdrawalRequests(user);
         },
         sftmxGetStakingData: async (parent, {}, context) => {
-            return SftmxQueryController().getStakingData();
+            return SftmxController().getStakingData();
         },
         sftmxGetStakingSnapshots: async (parent, { range }, context) => {
-            return SftmxQueryController().getStakingSnapshots(range);
+            return SftmxController().getStakingSnapshots(range);
         },
     },
 };

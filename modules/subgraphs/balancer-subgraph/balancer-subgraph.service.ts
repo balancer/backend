@@ -1,59 +1,60 @@
 import {
-    Balancer,
-    BalancerAmpUpdateFragment,
-    BalancerAmpUpdatesQueryVariables,
-    BalancerGradualWeightUpdateFragment,
-    BalancerGradualWeightUpdatesQueryVariables,
-    BalancerJoinExitsQuery,
-    BalancerJoinExitsQueryVariables,
-    BalancerLatestPriceFragment,
-    BalancerLatestPricesQuery,
-    BalancerLatestPricesQueryVariables,
-    BalancerPoolFragment,
-    BalancerPoolQuery,
-    BalancerPoolQueryVariables,
-    BalancerPoolShareFragment,
-    BalancerPoolSharesQueryVariables,
-    BalancerPoolSnapshotFragment,
-    BalancerPoolSnapshotsQuery,
-    BalancerPoolSnapshotsQueryVariables,
-    BalancerPoolsQuery,
-    BalancerPoolsQueryVariables,
-    BalancerPortfolioDataQuery,
-    BalancerPortfolioPoolsDataQuery,
+    getSdk,
     BalancerProtocolDataQueryVariables,
-    BalancerSwapFragment,
-    BalancerSwapsQuery,
-    BalancerSwapsQueryVariables,
-    BalancerTokenPriceFragment,
-    BalancerTokenPricesQuery,
+    Balancer,
     BalancerTokenPricesQueryVariables,
-    BalancerTokensQuery,
+    BalancerTokenPricesQuery,
     BalancerTokensQueryVariables,
-    BalancerTradePairSnapshotsQuery,
-    BalancerTradePairSnapshotsQueryVariables,
+    BalancerTokensQuery,
+    BalancerPoolSnapshotsQueryVariables,
+    BalancerPoolSnapshotsQuery,
+    BalancerPoolSnapshotFragment,
+    BalancerPoolsQueryVariables,
+    BalancerPoolsQuery,
+    BalancerSwapsQueryVariables,
+    BalancerSwapsQuery,
+    BalancerSwapFragment,
+    Swap_OrderBy,
+    OrderDirection,
+    BalancerGradualWeightUpdatesQueryVariables,
+    BalancerGradualWeightUpdateFragment,
+    BalancerAmpUpdatesQueryVariables,
+    BalancerAmpUpdateFragment,
+    BalancerPoolQueryVariables,
+    BalancerPoolQuery,
+    BalancerPortfolioDataQuery,
     BalancerUserFragment,
     BalancerUsersQueryVariables,
-    getSdk,
-    OrderDirection,
-    Pool_OrderBy,
-    PoolBalancesFragment,
-    PoolBalancesQueryVariables,
+    BalancerPoolSharesQueryVariables,
+    BalancerPoolShareFragment,
     PoolShare_OrderBy,
+    BalancerLatestPricesQueryVariables,
+    BalancerLatestPricesQuery,
+    BalancerLatestPriceFragment,
+    BalancerTokenPriceFragment,
+    BalancerPoolFragment,
+    BalancerJoinExitsQueryVariables,
+    BalancerJoinExitsQuery,
+    BalancerPortfolioPoolsDataQuery,
+    BalancerTradePairSnapshotsQueryVariables,
+    BalancerTradePairSnapshotsQuery,
     PoolSnapshot_OrderBy,
-    Swap_OrderBy,
+    PoolBalancesQueryVariables,
+    PoolBalancesFragment,
+    Pool_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { subgraphLoadAll } from '../subgraph-util';
 import { fiveMinutesInMs, twentyFourHoursInMs } from '../../common/time';
 import { BalancerUserPoolShare } from './balancer-subgraph-types';
 import { SubgraphServiceBase } from '../../sources/subgraphs/subgraph-service-base';
+import { Chain, Prisma } from '@prisma/client';
 
 const ALL_POOLS_CACHE_KEY = `balance-subgraph_all-pools`;
 const PORTFOLIO_POOLS_CACHE_KEY = `balance-subgraph_portfolio-pools`;
 
 export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<typeof getSdk>> {
-    constructor(subgraphUrl: string | string[], chainId: number) {
-        super(subgraphUrl, chainId, getSdk);
+    constructor(subgraphUrl: string | string[], chain: Chain) {
+        super(subgraphUrl, chain, getSdk);
     }
 
     public async getMetadata() {
@@ -217,7 +218,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
     public async getAllPoolSharesWithBalance(
         poolIds: string[],
         excludedAddresses: string[],
-    ): Promise<BalancerUserPoolShare[]> {
+    ): Promise<Prisma.PrismaUserWalletBalanceCreateManyInput[]> {
         return this.retryOnFailure(async (sdk) => {
             const allPoolShares: BalancerPoolShareFragment[] = [];
             let hasMore = true;
@@ -251,10 +252,13 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
 
             return allPoolShares.map((shares) => ({
                 ...shares,
+                poolId: shares.poolId.id.toLowerCase(),
+                chain: this.chain,
+                //ensure the user balance isn't negative, unsure how the subgraph ever allows this to happen
                 balance: parseFloat(shares.balance) < 0 ? '0' : shares.balance,
-                poolId: shares.poolId.id,
-                poolAddress: shares.id.split('-')[0],
-                userAddress: shares.id.split('-')[1],
+                balanceNum: Math.max(0, parseFloat(shares.balance)),
+                tokenAddress: shares.id.toLowerCase().split('-')[0],
+                userAddress: shares.id.toLowerCase().split('-')[1],
             }));
         });
     }
@@ -303,7 +307,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
     public async getPortfolioPoolsData(previousBlockNumber: number): Promise<BalancerPortfolioPoolsDataQuery> {
         return this.retryOnFailure(async (sdk) => {
             const cached = this.cache.get(
-                `${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`,
+                `${PORTFOLIO_POOLS_CACHE_KEY}:${this.chain}`,
             ) as BalancerPortfolioPoolsDataQuery | null;
 
             if (cached) {
@@ -311,7 +315,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
             }
 
             const portfolioPools = await sdk.BalancerPortfolioPoolsData({ previousBlockNumber });
-            this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${this.chainId}`, portfolioPools, fiveMinutesInMs);
+            this.cache.put(`${PORTFOLIO_POOLS_CACHE_KEY}:${this.chain}`, portfolioPools, fiveMinutesInMs);
 
             return portfolioPools;
         });
@@ -319,7 +323,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
 
     public async getAllPoolsAtBlock(block: number): Promise<BalancerPoolFragment[]> {
         return this.retryOnFailure(async (sdk) => {
-            const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`) as
+            const cached = this.cache.get(`${ALL_POOLS_CACHE_KEY}:${this.chain}:${block}`) as
                 | BalancerPoolFragment[]
                 | null;
 
@@ -333,7 +337,7 @@ export class BalancerSubgraphService extends SubgraphServiceBase<ReturnType<type
                 block: { number: block },
             });
 
-            this.cache.put(`${ALL_POOLS_CACHE_KEY}:${this.chainId}:${block}`, pools, twentyFourHoursInMs);
+            this.cache.put(`${ALL_POOLS_CACHE_KEY}:${this.chain}:${block}`, pools, twentyFourHoursInMs);
             return pools;
         });
     }

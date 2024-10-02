@@ -38,7 +38,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new UserSyncVebalLockBalanceService(),
     ],
     services: {
-        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 1),
+        balancerSubgraphService: new BalancerSubgraphService(data.subgraphs.balancer, 'MAINNET'),
     },
     /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
@@ -79,7 +79,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'update-liquidity-24h-ago-for-all-pools',
+            name: 'update-liquidity-24h-ago-v2',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {

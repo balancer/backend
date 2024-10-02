@@ -37,10 +37,15 @@ export type Block_Height = {
 
 export type Factory = {
     __typename?: 'Factory';
+    /** Address of the Factory contract */
     address: Scalars['Bytes'];
+    /** Unique identifier for the Factory */
     id: Scalars['Bytes'];
+    /** Pools created by this Factory */
     pools?: Maybe<Array<Pool>>;
+    /** Type of pools this Factory creates */
     type: PoolType;
+    /** Version number of the Factory */
     version: Scalars['Int'];
 };
 
@@ -108,10 +113,15 @@ export enum OrderDirection {
 
 export type Pool = {
     __typename?: 'Pool';
+    /** Address of the Pool contract */
     address: Scalars['Bytes'];
+    /** Amplification parameter for Stable Pools */
     amp?: Maybe<Scalars['BigInt']>;
+    /** Factory that created this Pool */
     factory: Factory;
+    /** Unique identifier for the Pool */
     id: Scalars['Bytes'];
+    /** Token weights for Weighted Pools */
     weights?: Maybe<Array<Scalars['BigDecimal']>>;
 };
 

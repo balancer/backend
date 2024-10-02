@@ -3090,32 +3090,14 @@ export const schema = gql`
         beetsPoolLoadReliquarySnapshotsForAllFarms: String!
         beetsSyncFbeetsRatio: String!
         cacheAverageBlockTime: String!
-        poolBlackListAddPool(poolId: String!): String!
-        poolBlackListRemovePool(poolId: String!): String!
-        poolDeletePool(poolId: String!): String!
-        poolInitOnChainDataForAllPools: String!
-        poolInitializeSnapshotsForPool(poolId: String!): String!
-        poolLoadOnChainDataForAllPools: String!
-        poolLoadOnChainDataForPoolsWithActiveUpdates: String!
-        poolLoadSnapshotsForAllPools: String!
+        poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
-        poolReloadAllTokenNestedPoolIds: String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
         poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
-        poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
-        poolSyncNewPoolsFromSubgraph: [String!]!
-        poolSyncPool(poolId: String!): String!
-        poolSyncPoolAllTokensRelationship: String!
-        poolSyncSanityPoolData: String!
-        poolSyncStakingForPools: String!
-        poolSyncSwapsForLast48Hours: String!
-        poolSyncTotalShares: String!
-        poolUpdateAprs(chain: GqlChain!): String!
         poolUpdateLifetimeValuesForAllPools: String!
-        poolUpdateLiquidity24hAgoForAllPools: String!
         poolUpdateLiquidityValuesForAllPools: String!
         poolUpdateVolumeAndFeeValuesForAllPools: String!
         protocolCacheMetrics: String!

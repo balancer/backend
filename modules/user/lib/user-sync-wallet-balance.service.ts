@@ -4,7 +4,6 @@ import { AddressZero } from '@ethersproject/constants';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { BalancerUserPoolShare } from '../../subgraphs/balancer-subgraph/balancer-subgraph-types';
 import { BeetsBarSubgraphService } from '../../subgraphs/beets-bar-subgraph/beets-bar.service';
 import { BeetsBarUserFragment } from '../../subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types';
 import { Multicaller, MulticallUserBalance } from '../../web3/multicaller';
@@ -13,6 +12,7 @@ import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
 import { getEvents } from '../../web3/events';
 import { CowAmmController } from '../../controllers';
+import { Prisma } from '@prisma/client';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -102,8 +102,8 @@ export class UserSyncWalletBalanceService {
         const operations: any[] = [
             prisma.prismaUserWalletBalance.deleteMany({ where: { chain: this.chain } }),
             ...shares
-                .filter((share) => poolIds.includes(share.poolId))
-                .map((share) => this.getPrismaUpsertForPoolShare(share.poolId, share)),
+                .filter((share) => share.poolId && poolIds.includes(share.poolId))
+                .map((share) => this.getPrismaUpsertForPoolShare(share)),
         ];
 
         console.log(`initBalancesForPools: performing ${operations.length} db operations...`);
@@ -131,7 +131,7 @@ export class UserSyncWalletBalanceService {
 
         // Attach CowAMM syncing
         console.log('initBalancesForPools: syncing CowAMM balances...');
-        await CowAmmController().syncBalances(this.chainId);
+        await CowAmmController().syncBalances(this.chain);
         console.log('initBalancesForPools: finished syncing CowAMM balances');
     }
 
@@ -262,7 +262,7 @@ export class UserSyncWalletBalanceService {
                     data: shares.map((share) => ({ address: share.userAddress })),
                     skipDuplicates: true,
                 }),
-                ...shares.map((share) => this.getPrismaUpsertForPoolShare(poolId, share)),
+                ...shares.map((share) => this.getPrismaUpsertForPoolShare(share)),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'WALLET', chain: this.chain } },
                     create: { type: 'WALLET', chain: this.chain, blockNumber: block.number },
@@ -291,19 +291,15 @@ export class UserSyncWalletBalanceService {
         await Promise.all(operations);
     }
 
-    private getPrismaUpsertForPoolShare(poolId: string, share: BalancerUserPoolShare) {
+    private getPrismaUpsertForPoolShare(share: Prisma.PrismaUserWalletBalanceCreateManyInput) {
         return prisma.prismaUserWalletBalance.upsert({
-            where: { id_chain: { id: `${poolId}-${share.userAddress}`, chain: this.chain } },
+            where: { id_chain: { id: `${share.poolId}-${share.userAddress}`, chain: this.chain } },
             create: {
-                id: `${poolId}-${share.userAddress}`,
+                ...share,
+                id: `${share.poolId}-${share.userAddress}`,
                 chain: this.chain,
-                userAddress: share.userAddress,
-                poolId,
-                tokenAddress: share.poolAddress.toLowerCase(),
-                balance: share.balance,
-                balanceNum: parseFloat(share.balance),
             },
-            update: { balance: share.balance, balanceNum: parseFloat(share.balance) },
+            update: { balance: share.balance, balanceNum: share.balanceNum },
         });
     }
 

@@ -70,10 +70,7 @@ export class ProtocolService {
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
 
-        const client = getV2SubgraphClient(
-            AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer,
-            Number(chainToIdMap[chain]),
-        );
+        const client = getV2SubgraphClient(AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer, chain);
 
         const { balancers } = await client.BalancerProtocolData({});
         const { totalSwapFee, totalSwapVolume, poolCount } = balancers[0];
