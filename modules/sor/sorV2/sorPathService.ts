@@ -53,7 +53,6 @@ class SorPathService implements SwapService {
 
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
-            const hooksFromDb = await this.getBaseHooksFromDb(chain);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -76,7 +75,6 @@ class SorPathService implements SwapService {
                 swapAmount.amount,
                 poolsFromDb,
                 protocolVersion,
-                hooksFromDb,
                 config,
             );
             if (!paths && maxNonBoostedPathDepth < 5) {
@@ -147,7 +145,6 @@ class SorPathService implements SwapService {
     ): Promise<PathWithAmount[] | null> {
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
-            const hooksFromDb = await this.getBaseHooksFromDb(chain);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -170,7 +167,6 @@ class SorPathService implements SwapService {
                 swapAmount.amount,
                 poolsFromDb,
                 protocolVersion,
-                hooksFromDb,
                 config,
             );
             // if we dont find a path with depth 4, we try one more level.
@@ -498,32 +494,6 @@ class SorPathService implements SwapService {
         // cache for 10s
         this.cache.put(`${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}`, pools, 10 * 1000);
         return pools;
-    }
-
-    private async getBaseHooksFromDb(chain: Chain): Promise<PrismaHookWithDynamic[]> {
-        // duplicate cache logic from getBasePoolsFromDb
-
-        // const hookAddressesToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.hookAddressesToExclude ?? [];
-        // prisma query to fetch hooks
-        const hooks = await prisma.hook.findMany({
-            where: {
-                chain,
-                enableHookAdjustedAmounts: true,
-                shouldCallAfterSwap: true,
-                shouldCallBeforeSwap: true,
-                shouldCallAfterInitialize: true,
-                shouldCallBeforeInitialize: true,
-                shouldCallAfterAddLiquidity: true,
-                shouldCallBeforeAddLiquidity: true,
-                shouldCallAfterRemoveLiquidity: true,
-                shouldCallBeforeRemoveLiquidity: true,
-                shouldCallComputeDynamicSwapFee: true,
-            }
-        });
-
-        // TODO cache hooks
-        return hooks;
-
     }
 
     private mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {

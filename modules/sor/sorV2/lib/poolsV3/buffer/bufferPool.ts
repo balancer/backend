@@ -117,6 +117,10 @@ export class BufferPool implements BasePoolV3 {
         };
     }
 
+    public getHookState(): undefined {
+        return undefined;
+    }
+
     // Helper methods
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {

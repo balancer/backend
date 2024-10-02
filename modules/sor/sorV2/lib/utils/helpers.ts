@@ -80,9 +80,13 @@ export function returnHookDataAccordingToHookName(pool: PrismaPoolWithDynamic): 
         return undefined;
     } else {
         if (pool.hook.name == 'ExitFeeHook') {
+            // api for this hook is an Object with removeLiquidityFeePercentage key & fee as string
+            const dynamicData = pool.hook.dynamicData as { removeLiquidityFeePercentage: string };
+
             return {
                 tokens: pool.tokens.map(token => token.address),
-                removeLiquidityHookFeePercentage: percentageStringToBigInt(pool.hook.dynamicData.removeLiquidityFeePercentage),
+                // ExitFeeHook will always have dynamicData as part of the API response
+                removeLiquidityHookFeePercentage: percentageStringToBigInt(dynamicData.removeLiquidityFeePercentage),
             };
         }
         else if (pool.hook.name != 'ExitFeeHook') {
