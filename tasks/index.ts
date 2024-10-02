@@ -13,7 +13,6 @@ import {
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
-import { ChainId } from '@balancer/sdk';
 
 // TODO needed?
 const sftmxController = SftmxController();

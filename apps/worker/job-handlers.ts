@@ -26,11 +26,10 @@ import {
     V2,
     V3,
 } from '../../modules/controllers';
-import { chain } from 'lodash';
 
 const runningJobs: Set<string> = new Set();
 
-const jobsController = SftmxController();
+const sftmxController = SftmxController();
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -279,13 +278,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(name, chainId, () => jobsController.syncSftmxStakingData(chainId), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => sftmxController.syncSftmxStakingData(chainId), res, next);
             break;
         case 'sync-sftmx-withdrawal-requests':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => jobsController.syncSftmxWithdrawalrequests(chainId),
+                () => sftmxController.syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );
@@ -294,7 +293,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => jobsController.syncSftmxStakingSnapshots(chainId),
+                () => sftmxController.syncSftmxStakingSnapshots(chainId),
                 res,
                 next,
             );
