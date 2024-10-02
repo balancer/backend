@@ -10,7 +10,7 @@ import {
     GqlSwapCallDataInput,
 } from '../../../schema';
 import { Chain } from '@prisma/client';
-import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
+import { PrismaPoolWithDynamic, prismaPoolWithDynamic, PrismaHookWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult, SwapService } from '../types';
 import { poolsToIgnore } from '../constants';
@@ -53,7 +53,7 @@ class SorPathService implements SwapService {
 
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
-            // TODO pools are known, fetch all hooks for known pools
+            const hooksFromDb = await this.getBaseHooksFromDb(chain);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -76,6 +76,7 @@ class SorPathService implements SwapService {
                 swapAmount.amount,
                 poolsFromDb,
                 protocolVersion,
+                hooksFromDb,
                 config,
             );
             if (!paths && maxNonBoostedPathDepth < 5) {
@@ -146,7 +147,7 @@ class SorPathService implements SwapService {
     ): Promise<PathWithAmount[] | null> {
         try {
             const poolsFromDb = await this.getBasePoolsFromDb(chain, protocolVersion);
-            // TODO Pools are known, fetch all hooks for the given pools
+            const hooksFromDb = await this.getBaseHooksFromDb(chain);
             const tIn = await getToken(tokenIn as Address, chain);
             const tOut = await getToken(tokenOut as Address, chain);
             const swapKind = this.mapSwapTypeToSwapKind(swapType);
@@ -169,6 +170,7 @@ class SorPathService implements SwapService {
                 swapAmount.amount,
                 poolsFromDb,
                 protocolVersion,
+                hooksFromDb,
                 config,
             );
             // if we dont find a path with depth 4, we try one more level.
@@ -499,7 +501,29 @@ class SorPathService implements SwapService {
     }
 
     private async getBaseHooksFromDb(chain: Chain): Promise<PrismaHookWithDynamic[]> {
-        
+        // duplicate cache logic from getBasePoolsFromDb
+
+        // const hookAddressesToExclude = AllNetworkConfigsKeyedOnChain[chain].data.sor?.hookAddressesToExclude ?? [];
+        // prisma query to fetch hooks
+        const hooks = await prisma.hook.findMany({
+            where: {
+                chain,
+                enableHookAdjustedAmounts: true,
+                shouldCallAfterSwap: true,
+                shouldCallBeforeSwap: true,
+                shouldCallAfterInitialize: true,
+                shouldCallBeforeInitialize: true,
+                shouldCallAfterAddLiquidity: true,
+                shouldCallBeforeAddLiquidity: true,
+                shouldCallAfterRemoveLiquidity: true,
+                shouldCallBeforeRemoveLiquidity: true,
+                shouldCallComputeDynamicSwapFee: true,
+            }
+        });
+
+        // TODO cache hooks
+        return hooks;
+
     }
 
     private mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {

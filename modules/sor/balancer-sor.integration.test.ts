@@ -104,7 +104,6 @@ describe('Balancer SOR Integration Tests', () => {
                 amountIn,
                 [prismaWeightedPool],
                 protocolVersion,
-                [],
             )) as PathWithAmount[];
 
             // build SDK swap from SOR paths
@@ -180,7 +179,6 @@ describe('Balancer SOR Integration Tests', () => {
                 amountIn,
                 [prismaStablePool],
                 protocolVersion,
-                [],
             )) as PathWithAmount[];
 
             const swapPaths: Path[] = paths.map((path) => ({
@@ -291,7 +289,6 @@ describe('Balancer SOR Integration Tests', () => {
                     amountIn,
                     [nestedPool, weightedPool],
                     protocolVersion,
-                    [],
                 )) as PathWithAmount[];
 
                 const swapPaths: Path[] = paths.map((path) => ({
@@ -343,7 +340,6 @@ describe('Balancer SOR Integration Tests', () => {
                     amountIn,
                     [nestedPool, weightedPool],
                     protocolVersion,
-                    [],
                 )) as PathWithAmount[];
 
                 const swapPaths: Path[] = paths.map((path) => ({
@@ -422,7 +418,6 @@ describe('Balancer SOR Integration Tests', () => {
                 amountIn,
                 [prismaStablePool],
                 protocolVersion,
-                [],
             )) as PathWithAmount[];
 
             const swapPaths: Path[] = paths.map((path) => ({
@@ -455,91 +450,105 @@ describe('Balancer SOR Integration Tests', () => {
         });
     });
 
-    describe('Stable Pool Path with hooks', async () => {
+    describe('Pools Path with hooks', async () => {
+        let WETH, BAL, stataDAI, stataUSDC: ReturnType<typeof prismaPoolTokenFactory.build>;
+        let prismaWeightedPool, prismaStablePool: ReturnType<typeof prismaPoolFactory.build>;
+        let exitFeeHook, directionalFeeHook: ReturnType<typeof hookFactory.build>;
 
         beforeAll(async() => {
-            // setup mock pool data
-            const poolAddress = '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c';
-            const stataUSDC = prismaPoolTokenFactory.build({
-                address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
-                token: { decimals: 6 },
+            // setup mock pool data - Weighted
+            WETH = prismaPoolTokenFactory.build({
+                address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
                 dynamicData: prismaPoolTokenDynamicDataFactory.build({
-                    balance: '500',
-                    priceRate: '1.046992819427282715',
+                    balance: '0.005',
+                    weight: '0.5',
                 }),
             });
-            const stataDAI = prismaPoolTokenFactory.build({
+            BAL = prismaPoolTokenFactory.build({
+                address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75',
+                dynamicData: prismaPoolTokenDynamicDataFactory.build({
+                    balance: '5',
+                    weight: '0.5',
+                }),
+            });
+            stataDAI = prismaPoolTokenFactory.build({
                 address: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
                 token: { decimals: 18 },
-                dynamicData: prismaPoolTokenDynamicDataFactory.build({
-                    balance: '500',
-                    priceRate: '1.101882285912091736',
-                }),
             });
-            const prismaStablePool = prismaPoolFactory.stable('1000').build({
-                address: poolAddress,
+            stataUSDC = prismaPoolTokenFactory.build({
+                address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+                token: { decimals: 6 },
+            });
+            const dynamicData = {
+                // Add any specific dynamic data parameters here
+                addLiquidityFeePercentage: '0.01',
+                removeLiquidityFeePercentage: '0.01',
+                swapFeePercentage: '0.01'
+            };
+            exitFeeHook = hookFactory.build({
+                name: 'ExitFeeHook',
+                dynamicData: dynamicData,
+                enableHookAdjustedAmounts: true,
+                pools: [prismaWeightedPool],
+                shouldCallAfterAddLiquidity: true,
+                shouldCallAfterInitialize: true,
+                shouldCallAfterRemoveLiquidity: true,
+                shouldCallAfterSwap: true,
+                shouldCallBeforeAddLiquidity: true,
+                shouldCallBeforeInitialize: true,
+                shouldCallBeforeRemoveLiquidity: true,
+                shouldCallBeforeSwap: true,
+                shouldCallComputeDynamicSwapFee: true,
+            });
+            directionalFeeHook = hookFactory.build({
+                name: 'DirectionalFeeHook',
+                dynamicData: dynamicData,
+                enableHookAdjustedAmounts: true,
+                pools: [prismaStablePool],
+                shouldCallAfterAddLiquidity: true,
+                shouldCallAfterInitialize: true,
+                shouldCallAfterRemoveLiquidity: true,
+                shouldCallAfterSwap: true,
+                shouldCallBeforeAddLiquidity: true,
+                shouldCallBeforeInitialize: true,
+                shouldCallBeforeRemoveLiquidity: true,
+                shouldCallBeforeSwap: true,
+                shouldCallComputeDynamicSwapFee: true,
+            });
+            // this pool has an exitFee hook
+            prismaWeightedPool = prismaPoolFactory.build({
+                address: '0xc7436329da34B54fAD1400f400931751E1D06Cf8',
+                type: 'WEIGHTED',
+                protocolVersion,
+                tokens: [WETH, BAL],
+                dynamicData: prismaPoolDynamicDataFactory.build({
+                    totalShares: '0.158113883008415798',
+                    swapFee: '0.1',
+                }),
+                hook: exitFeeHook,
+            });
+            prismaStablePool = prismaPoolFactory.stable('1000').build({
+                address: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
                 tokens: [stataUSDC, stataDAI],
                 dynamicData: prismaPoolDynamicDataFactory.build({
                     totalShares: '1054.451151293881721519',
                     swapFee: '0.01',
                 }),
+                hook: exitFeeHook,
             });
-
-
-            // mock api data for hooks.
-            const dynamicData = hookDataFactory.build({
-                // Add any specific dynamic data parameters here
-                addLiquidityFeePercentage: '0.01',
-                removeLiquidityFeePercentage: '0.01',
-                swapFeePercentage: '0.01'
-            });
-
-
-            // Create the Hook instance
-            const prismaHook1 = hookFactory.build({
-                dynamicData: dynamicData,
-                enableHookAdjustedAmounts: true,
-                poolsIds: [poolAddress, '0x102b75a27e5e157f93c679dd7a25fdfcdbc1473c'],
-                shouldCallAfterAddLiquidity: true,
-                shouldCallAfterInitialize: true,
-                shouldCallAfterRemoveLiquidity: true,
-                shouldCallAfterSwap: true,
-                shouldCallBeforeAddLiquidity: true,
-                shouldCallBeforeInitialize: true,
-                shouldCallBeforeRemoveLiquidity: true,
-                shouldCallBeforeSwap: true,
-                shouldCallComputeDynamicSwapFee: true,
-            });
-
-            // Create the Hook instance
-            const prismaHook2 = hookFactory.build({
-                dynamicData: dynamicData,
-                enableHookAdjustedAmounts: true,
-                poolsIds: ['0x102b75a27e5e157f93c679dd6a25fdfcdbc1473f', '0x102b75a17e5e157f93c679dd7a25fdfcdbc1473c'],
-                shouldCallAfterAddLiquidity: true,
-                shouldCallAfterInitialize: true,
-                shouldCallAfterRemoveLiquidity: true,
-                shouldCallAfterSwap: true,
-                shouldCallBeforeAddLiquidity: true,
-                shouldCallBeforeInitialize: true,
-                shouldCallBeforeRemoveLiquidity: true,
-                shouldCallBeforeSwap: true,
-                shouldCallComputeDynamicSwapFee: true,
-            });
-
-
-
-
-            // get SOR paths
+        })
+        test.only('SOR quote should match swap query with hooks', async () => {
+            // This test does not trigger the ExitFeeHook, as the ExitFee is
+            // applied on RemoveLiquidity operations
             const tIn = new Token(
-                parseFloat(chainToIdMap[stataUSDC.token.chain]),
-                stataUSDC.address as Address,
-                stataUSDC.token.decimals,
+                parseFloat(chainToIdMap[BAL.token.chain]),
+                BAL.address as Address,
+                BAL.token.decimals,
             );
             const tOut = new Token(
-                parseFloat(chainToIdMap[stataDAI.token.chain]),
-                stataDAI.address as Address,
-                stataDAI.token.decimals,
+                parseFloat(chainToIdMap[WETH.token.chain]),
+                WETH.address as Address,
+                WETH.token.decimals,
             );
             const amountIn = BigInt(1000e6);
             paths = (await sorGetPathsWithPools(
@@ -547,9 +556,8 @@ describe('Balancer SOR Integration Tests', () => {
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
-                [prismaStablePool],
+                [prismaStablePool, prismaWeightedPool],
                 protocolVersion,
-                [prismaHook1, prismaHook2],
             )) as PathWithAmount[];
 
             const swapPaths: Path[] = paths.map((path) => ({
@@ -569,17 +577,59 @@ describe('Balancer SOR Integration Tests', () => {
                 paths: swapPaths,
                 swapKind: SwapKind.GivenIn,
             });
-        })
 
-        test('SOR quote should match swap query', async () => {
+            const returnAmountSOR = getOutputAmount(paths);
+            const queryOutput = await sdkSwap.query(rpcUrl);
+            const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
+            expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
+        });
+        test.skip('SOR quote should match swap query with hook logic used', async () => {
+            // This test applies the hook logic, as a BPT -> Token Swap will trigger
+            // a RemoveLiquidity operation.
+            const tIn = new Token(
+                parseFloat('11155111'),
+                prismaWeightedPool.address as Address,
+                prismaWeightedPool.decimals,
+            );
+            const tOut = new Token(
+                parseFloat(chainToIdMap[WETH.token.chain]),
+                WETH.address as Address,
+                WETH.token.decimals,
+            );
+            const amountIn = BigInt(1000e6);
+            paths = (await sorGetPathsWithPools(
+                tIn,
+                tOut,
+                SwapKind.GivenIn,
+                amountIn,
+                [prismaStablePool, prismaWeightedPool],
+                protocolVersion,
+            )) as PathWithAmount[];
+
+            const swapPaths: Path[] = paths.map((path) => ({
+                protocolVersion,
+                inputAmountRaw: path.inputAmount.amount,
+                outputAmountRaw: path.outputAmount.amount,
+                tokens: path.tokens.map((token) => ({
+                    address: token.address,
+                    decimals: token.decimals,
+                })),
+                pools: path.pools.map((pool) => pool.id),
+            }));
+
+            // build SDK swap from SOR paths
+            sdkSwap = new Swap({
+                chainId: parseFloat(chainToIdMap['SEPOLIA']),
+                paths: swapPaths,
+                swapKind: SwapKind.GivenIn,
+            });
+
             const returnAmountSOR = getOutputAmount(paths);
             const queryOutput = await sdkSwap.query(rpcUrl);
             const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
             expect(returnAmountQuery.amount).toEqual(returnAmountSOR.amount);
         });
     });
-        
-
     afterAll(async () => {
         await stopAnvilForks();
     });

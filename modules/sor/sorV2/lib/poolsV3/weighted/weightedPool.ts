@@ -12,6 +12,9 @@ import { BasePoolV3 } from '../../poolsV2/basePool';
 import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
+import { returnHookDataAccordingToHookName } from '../../utils/helpers';
+
+
 type WeightedPoolToken = WeightedBasePoolToken | WeightedErc4626PoolToken;
 
 export class WeightedPoolV3 implements BasePoolV3 {
@@ -33,7 +36,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
     private vault: Vault;
     private poolState: WeightedState;
 
-    static fromPrismaPool(pool: PrismaPoolWithDynamic, hooks?: PrismaHookWithDynamic[]): WeightedPoolV3 {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): WeightedPoolV3 {
         const poolTokens: WeightedPoolToken[] = [];
 
         if (!pool.dynamicData) {
@@ -78,11 +81,8 @@ export class WeightedPoolV3 implements BasePoolV3 {
             }
         }
 
-        // write the logic to transform the PrismaHooks into a Hook object
-        var hook = hooks?.find(hook => hook.poolsIds.includes(pool.id));
-        // find the first hook that matches the poolsIds of
-        hook = transformPrismaHookToHookState(hook);
-
+        //transform
+        const hook = returnHookDataAccordingToHookName(pool);
 
         return new WeightedPoolV3(
             pool.id as Hex,
@@ -95,20 +95,6 @@ export class WeightedPoolV3 implements BasePoolV3 {
             pool.dynamicData.tokenPairsData as TokenPairData[],
             hook
         );
-
-        function transformPrismaHookToHookState(prismaHook?: PrismaHookWithDynamic): HookState | undefined {
-            if (!prismaHook) {
-                return undefined;
-            }
-            // TODO: return the specific hook type state. Right now the HookState is an alias
-            const feePercentageString = prismaHook.dynamicData.removeLiquidityFeePercentage;
-            const feePercentageNumber = parseFloat(feePercentageString);
-            const feePercentageBigInt = BigInt(Math.round(feePercentageNumber * 10 ** 18));
-            return {
-                tokens: poolTokens.map(token => token.token.address),
-                removeLiquidityHookFeePercentage: feePercentageBigInt
-            };
-        }
     }
 
     constructor(

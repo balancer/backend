@@ -1,10 +1,9 @@
 import { Factory } from 'fishery';
+import { PrismaHookWithDynamic } from '../../prisma/prisma-types';
 import { createRandomAddress } from '../utils';
 import { Chain } from '@prisma/client';
-import { Hook } from '../../schema'; // Adjust the path based on your project structure
-import { hookDataFactory } from './prismaHookDynamicData.factory';
 
-class PrismaHookFactory extends Factory<Hook> {
+class PrismaHookFactory extends Factory<PrismaHookWithDynamic> {
     
 }
 
@@ -12,11 +11,12 @@ export const hookFactory = PrismaHookFactory.define(({ params }) => {
     const hookAddress = params?.address ?? createRandomAddress();
 
     return {
+        id: Math.floor(Math.random() * (100)) + 1,
+        name: params.name || 'Test Hook',
         address: hookAddress,
         chain: params?.chain || Chain.SEPOLIA,
-        dynamicData: params?.dynamicData ?? hookDataFactory.build(),
+        dynamicData: params?.dynamicData ?? {},
         enableHookAdjustedAmounts: params?.enableHookAdjustedAmounts ?? false,
-        poolsIds: params?.poolsIds ?? [],
         shouldCallAfterAddLiquidity: params?.shouldCallAfterAddLiquidity ?? false,
         shouldCallAfterInitialize: params?.shouldCallAfterInitialize ?? false,
         shouldCallAfterRemoveLiquidity: params?.shouldCallAfterRemoveLiquidity ?? false,
@@ -26,5 +26,6 @@ export const hookFactory = PrismaHookFactory.define(({ params }) => {
         shouldCallBeforeRemoveLiquidity: params?.shouldCallBeforeRemoveLiquidity ?? false,
         shouldCallBeforeSwap: params?.shouldCallBeforeSwap ?? false,
         shouldCallComputeDynamicSwapFee: params?.shouldCallComputeDynamicSwapFee ?? false,
+        pools: params?.pools ?? [],
     };
 });

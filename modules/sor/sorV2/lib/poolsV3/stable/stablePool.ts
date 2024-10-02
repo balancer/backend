@@ -14,6 +14,8 @@ import { BasePoolV3 } from '../../poolsV2/basePool';
 import { StableBasePoolToken } from './stableBasePoolToken';
 import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
 
+import { returnHookDataAccordingToHookName } from '../../utils/helpers';
+
 type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
 
 export class StablePool implements BasePoolV3 {
@@ -34,7 +36,7 @@ export class StablePool implements BasePoolV3 {
     private vault: Vault;
     private poolState: StableState;
 
-    static fromPrismaPool(pool: PrismaPoolWithDynamic, hooks?: PrismaHookWithDynamic[]): StablePool {
+    static fromPrismaPool(pool: PrismaPoolWithDynamic): StablePool {
         const poolTokens: StablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
@@ -76,10 +78,8 @@ export class StablePool implements BasePoolV3 {
         const totalShares = parseEther(pool.dynamicData.totalShares);
         const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
-        // Get the hook for the pool
-        var hook = hooks?.find(hook => hook.poolsIds.includes(pool.id));
-        // transform
-        hook = transformPrismaHookToHookState(hook);
+        //transform
+        const hook = returnHookDataAccordingToHookName(pool);
 
         return new StablePool(
             pool.id as Hex,
@@ -92,20 +92,6 @@ export class StablePool implements BasePoolV3 {
             pool.dynamicData.tokenPairsData as TokenPairData[],
             hook,
         );
-
-        function transformPrismaHookToHookState(prismaHook?: PrismaHookWithDynamic): HookState | undefined {
-            if (!prismaHook) {
-                return undefined;
-            }
-            // TODO: return the specific hook type state. Right now the HookState is an alias
-            const feePercentageString = prismaHook.dynamicData.removeLiquidityFeePercentage;
-            const feePercentageNumber = parseFloat(feePercentageString);
-            const feePercentageBigInt = BigInt(Math.round(feePercentageNumber * 10 ** 18));
-            return {
-                tokens: poolTokens.map(token => token.token.address),
-                removeLiquidityHookFeePercentage: feePercentageBigInt
-            };
-        }
     }
 
     constructor(
@@ -117,7 +103,7 @@ export class StablePool implements BasePoolV3 {
         tokens: StablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
-        hook: PrismaHookWithDynamic | undefined = undefined,
+        hook: HookState | undefined = undefined,
     ) {
         this.chain = chain;
         this.id = id;
