@@ -1,5 +1,24 @@
 # backend
 
+## 1.20.10
+
+### Patch Changes
+
+-   53d8445: sync all token metadata from tokenlist
+
+## 1.20.9
+
+### Patch Changes
+
+-   44ca026: gyro config on avax
+
+## 1.20.8
+
+### Patch Changes
+
+-   64e55d4: add defillama yields as an APR adapter
+-   07e1f17: Fix Gyro2CLPPool implementations to account for token rates during swaps.
+
 ## 1.20.7
 
 ### Patch Changes

@@ -1,6 +1,7 @@
 import { Resolvers } from '../../schema';
 import { headerChain } from '../context/header-chain';
 import { networkContext } from '../network/network-context.service';
+import { SanityContentService } from './sanity-content.service';
 
 const contentResolvers: Resolvers = {
     Query: {
@@ -11,7 +12,8 @@ const contentResolvers: Resolvers = {
             } else if (!chain) {
                 throw new Error('contentGetNewsItems error: Provide "chain" param');
             }
-            return await networkContext.config.contentService.getNewsItems(chain);
+            const sanityContent = new SanityContentService();
+            return sanityContent.getNewsItems(chain);
         },
     },
 };
