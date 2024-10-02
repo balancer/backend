@@ -932,6 +932,8 @@ export interface GqlPoolMinimal {
     id: Scalars['ID'];
     /** Pool is receiving rewards when liquidity tokens are staked */
     incentivized: Scalars['Boolean'];
+    /** Liquidity management settings */
+    liquidityManagement?: Maybe<LiquidityManagement>;
     /** The name of the pool as per contract */
     name: Scalars['String'];
     /** The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP. */
@@ -2083,6 +2085,19 @@ export interface HookData {
     swapFeePercentage?: Maybe<Scalars['String']>;
 }
 
+/** If pools has liquidity management settings */
+export interface LiquidityManagement {
+    __typename?: 'LiquidityManagement';
+    /** Indicates whether unbalanced liquidity is disabled */
+    disableUnbalancedLiquidity?: Maybe<Scalars['Boolean']>;
+    /** Indicates whether custom add liquidity is enabled */
+    enableAddLiquidityCustom?: Maybe<Scalars['Boolean']>;
+    /** Indicates whether donation is enabled */
+    enableDonation?: Maybe<Scalars['Boolean']>;
+    /** Indicates whether custom remove liquidity is enableDonation */
+    enableRemoveLiquidityCustom?: Maybe<Scalars['Boolean']>;
+}
+
 export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
@@ -2825,6 +2840,7 @@ export type ResolversTypes = ResolversObject<{
     ID: ResolverTypeWrapper<Scalars['ID']>;
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
+    LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     Mutation: ResolverTypeWrapper<{}>;
     Query: ResolverTypeWrapper<{}>;
     String: ResolverTypeWrapper<Scalars['String']>;
@@ -2993,6 +3009,7 @@ export type ResolversParentTypes = ResolversObject<{
     ID: Scalars['ID'];
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
+    LiquidityManagement: LiquidityManagement;
     Mutation: {};
     Query: {};
     String: Scalars['String'];
@@ -3737,6 +3754,7 @@ export type GqlPoolMinimalResolvers<
     hook?: Resolver<Maybe<ResolversTypes['Hook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     incentivized?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -4766,6 +4784,17 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
     name: 'JSON';
 }
 
+export type LiquidityManagementResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['LiquidityManagement'] = ResolversParentTypes['LiquidityManagement'],
+> = ResolversObject<{
+    disableUnbalancedLiquidity?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    enableAddLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    enableDonation?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    enableRemoveLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
@@ -5294,6 +5323,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     Hook?: HookResolvers<ContextType>;
     HookData?: HookDataResolvers<ContextType>;
     JSON?: GraphQLScalarType;
+    LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
     Token?: TokenResolvers<ContextType>;

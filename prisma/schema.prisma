@@ -98,6 +98,8 @@ model PrismaPool {
 
     dynamicData         PrismaPoolDynamicData?
 
+    liquidityManagement  Json @default("{}")
+
     snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]

@@ -46,6 +46,12 @@ fragment VaultPool on Pool {
         shouldCallBeforeRemoveLiquidity
         shouldCallComputeDynamicSwapFee
     }
+    liquidityManagement {
+        disableUnbalancedLiquidity
+        enableAddLiquidityCustom
+        enableDonation
+        enableRemoveLiquidityCustom
+    }
 }
 
 query Pools(
