@@ -1,4 +1,4 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import _ from 'lodash';
@@ -14,24 +14,15 @@ import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-tr
  * @returns
  */
 export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'SEPOLIA' as Chain) {
-    const protocolVersion = 1;
-
-    // Get latest event from the DB
-    const latestEvent = await prisma.prismaPoolEvent.findFirst({
-        select: {
-            blockNumber: true,
-        },
+    // Get the last synced block number from the PrismaLastBlockSynced table
+    const lastSyncedBlock = await prisma.prismaLastBlockSynced.findFirst({
         where: {
-            type: 'SWAP',
-            chain: chain,
-            protocolVersion,
-        },
-        orderBy: {
-            blockTimestamp: 'desc',
+            category: PrismaLastBlockSyncedCategory.COW_AMM_SWAPS,
+            chain,
         },
     });
 
-    const where = latestEvent?.blockNumber ? { blockNumber_gte: String(latestEvent.blockNumber) } : {};
+    const where = lastSyncedBlock?.blockNumber ? { blockNumber_gt: String(lastSyncedBlock.blockNumber) } : {};
 
     // Get events
     const { swaps } = await subgraphClient.Swaps({
@@ -51,6 +42,27 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
         skipDuplicates: true,
         data: dbEntries,
     });
+
+    // Update the last synced block number in the PrismaLastBlockSynced table
+    const latestBlockNumber = Math.max(...dbEntries.map((entry) => entry.blockNumber));
+    if (latestBlockNumber > 0) {
+        await prisma.prismaLastBlockSynced.upsert({
+            where: {
+                category_chain: {
+                    category: PrismaLastBlockSyncedCategory.COW_AMM_SWAPS,
+                    chain,
+                },
+            },
+            update: {
+                blockNumber: latestBlockNumber,
+            },
+            create: {
+                category: PrismaLastBlockSyncedCategory.COW_AMM_SWAPS,
+                blockNumber: latestBlockNumber,
+                chain,
+            },
+        });
+    }
 
     return dbEntries;
 }
