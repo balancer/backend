@@ -173,11 +173,11 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-new-pools-from-subgraph':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
-            break;
-        // case 'sync-join-exits-v2':
-        // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
+        // await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
         // break;
+        case 'sync-join-exits-v2':
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
+            break;
         case 'sync-tokens-from-pool-tokens':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
             break;
