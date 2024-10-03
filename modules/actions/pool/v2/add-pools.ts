@@ -28,11 +28,13 @@ export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain):
     }
 
     // Add user balances for new pools
-    // await upsertBptBalancesV2(
-    //     newPools.map((pool) => pool.id),
-    //     subgraphService,
-    //     chain,
-    // );
+    if (newPools.length > 0) {
+        await upsertBptBalancesV2(
+            newPools.map((pool) => pool.id),
+            subgraphService,
+            chain,
+        );
+    }
 
     return Array.from(newPools.map((pool) => pool.id));
 };
