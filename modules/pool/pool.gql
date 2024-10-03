@@ -230,31 +230,34 @@ type GqlPoolMinimal {
     """
     hook: Hook
     """
-    Liquidity management settings
+    Liquidity management settings for v3 pools.
     """
     liquidityManagement: LiquidityManagement
 }
 
 """
-If pools has liquidity management settings
+Liquidity management settings for v3 pools.
 """
 type LiquidityManagement {
     """
-    Indicates whether unbalanced liquidity is disabled
+    Indicates whether this pool has disabled add and removes of unbalanced/non-proportional liquidity. Meaning it will only support proportional add and remove liquidity.
     """
     disableUnbalancedLiquidity: Boolean
+
     """
-    Indicates whether custom add liquidity is enabled
+    Whether this pool support additional, custom add liquditiy operations apart from proportional, unbalanced and single asset.
     """
     enableAddLiquidityCustom: Boolean
+
     """
-    Indicates whether donation is enabled
-    """
-    enableDonation: Boolean
-    """
-    Indicates whether custom remove liquidity is enableDonation
+    Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
     """
     enableRemoveLiquidityCustom: Boolean
+
+    """
+    Indicates whether donation is enabled. Meaning you can send funds to the pool without receiving a BPT.
+    """
+    enableDonation: Boolean
 }
 
 """
