@@ -39,6 +39,7 @@ export const poolTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
         typeData: typeData,
         version: poolData.factory.version,
         createTime: Number(poolData.blockTimestamp),
+        liquidityManagement: poolData.liquidityManagement,
     };
 };
 

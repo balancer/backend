@@ -10,11 +10,15 @@ export type BaseJoinedSubgraphPool = ReturnType<V3JoinedSubgraphClient['getAllIn
     ? T
     : never;
 
-export type JoinedSubgraphPool = Omit<Omit<BaseJoinedSubgraphPool, 'factory'>, 'hookConfig'> & {
+export type JoinedSubgraphPool = Omit<
+    Omit<Omit<BaseJoinedSubgraphPool, 'factory'>, 'hookConfig'>,
+    'liquidityManagement'
+> & {
     factory: Omit<BaseJoinedSubgraphPool['factory'], 'type'> & {
         type: BaseJoinedSubgraphPool['factory']['type'] | 'COW_AMM';
     };
     hookConfig?: BaseJoinedSubgraphPool['hookConfig'];
+    liquidityManagement?: BaseJoinedSubgraphPool['liquidityManagement'];
 };
 
 export const getV3JoinedSubgraphClient = (vaultSubgraphUrl: string, poolsSubgraphUrl: string) => {

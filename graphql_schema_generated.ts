@@ -1293,6 +1293,11 @@ export const schema = gql`
         incentivized: Boolean!
 
         """
+        Liquidity management settings
+        """
+        liquidityManagement: LiquidityManagement
+
+        """
         The name of the pool as per contract
         """
         name: String!
@@ -3085,6 +3090,31 @@ export const schema = gql`
     }
 
     scalar JSON
+
+    """
+    If pools has liquidity management settings
+    """
+    type LiquidityManagement {
+        """
+        Indicates whether unbalanced liquidity is disabled
+        """
+        disableUnbalancedLiquidity: Boolean
+
+        """
+        Indicates whether custom add liquidity is enabled
+        """
+        enableAddLiquidityCustom: Boolean
+
+        """
+        Indicates whether donation is enabled
+        """
+        enableDonation: Boolean
+
+        """
+        Indicates whether custom remove liquidity is enableDonation
+        """
+        enableRemoveLiquidityCustom: Boolean
+    }
 
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms: String!

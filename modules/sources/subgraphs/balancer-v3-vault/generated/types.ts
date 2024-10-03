@@ -3011,6 +3011,13 @@ export type VaultPoolFragment = {
         shouldCallComputeDynamicSwapFee: boolean;
         hook: { __typename?: 'Hook'; address: string };
     };
+    liquidityManagement: {
+        __typename?: 'LiquidityManagement';
+        disableUnbalancedLiquidity: boolean;
+        enableAddLiquidityCustom: boolean;
+        enableDonation: boolean;
+        enableRemoveLiquidityCustom: boolean;
+    };
 };
 
 export type PoolsQueryVariables = Exact<{
@@ -3069,6 +3076,13 @@ export type PoolsQuery = {
             shouldCallBeforeRemoveLiquidity: boolean;
             shouldCallComputeDynamicSwapFee: boolean;
             hook: { __typename?: 'Hook'; address: string };
+        };
+        liquidityManagement: {
+            __typename?: 'LiquidityManagement';
+            disableUnbalancedLiquidity: boolean;
+            enableAddLiquidityCustom: boolean;
+            enableDonation: boolean;
+            enableRemoveLiquidityCustom: boolean;
         };
     }>;
 };
@@ -3298,6 +3312,12 @@ export const VaultPoolFragmentDoc = gql`
             shouldCallAfterRemoveLiquidity
             shouldCallBeforeRemoveLiquidity
             shouldCallComputeDynamicSwapFee
+        }
+        liquidityManagement {
+            disableUnbalancedLiquidity
+            enableAddLiquidityCustom
+            enableDonation
+            enableRemoveLiquidityCustom
         }
     }
 `;

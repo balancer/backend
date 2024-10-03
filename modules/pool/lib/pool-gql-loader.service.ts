@@ -36,6 +36,7 @@ import {
     GqlPoolFilterCategory,
     HookData,
     GqlPoolAggregator,
+    LiquidityManagement,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
@@ -254,6 +255,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook:
                 (pool.hook &&
                     pool.hook.dynamicData && {
