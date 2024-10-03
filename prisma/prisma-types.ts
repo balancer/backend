@@ -345,7 +345,18 @@ export const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolArgs>()({
                 dynamicData: true,
             },
         },
+        hook: true
     },
 });
 
 export type PrismaPoolWithDynamic = Prisma.PrismaPoolGetPayload<typeof prismaPoolWithDynamic>;
+
+export const prismaHookWithDynamic = Prisma.validator<Prisma.HookArgs>()({
+    include: {
+        pools:true,
+    },
+});
+
+export type PrismaHookWithDynamic = Prisma.HookGetPayload<typeof prismaHookWithDynamic>;
+
+  

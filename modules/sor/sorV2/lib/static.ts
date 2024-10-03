@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
+import { PrismaPoolWithDynamic, PrismaHookWithDynamic } from '../../../../prisma/prisma-types';
 import { checkInputs } from './utils/helpers';
 import { ComposableStablePool, FxPool, Gyro2Pool, Gyro3Pool, GyroEPool, MetaStablePool, WeightedPool } from './poolsV2';
 import { SwapKind, Token } from '@balancer/sdk';
@@ -22,6 +22,12 @@ export async function sorGetPathsWithPools(
     const basePools: BasePool[] = [];
 
     for (const prismaPool of prismaPools) {
+        // TODO: Once more hooks infrastructure exists, allow pools with hooks to be considered for routing
+        // for now they are discarded.
+        // Discard pools with hooks
+        if (prismaPool.hook !== null) {
+            continue;
+        }
         switch (prismaPool.type) {
             case 'WEIGHTED':
                 {

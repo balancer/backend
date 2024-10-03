@@ -10,7 +10,7 @@ import {
     GqlSwapCallDataInput,
 } from '../../../schema';
 import { Chain } from '@prisma/client';
-import { PrismaPoolWithDynamic, prismaPoolWithDynamic } from '../../../prisma/prisma-types';
+import { PrismaPoolWithDynamic, prismaPoolWithDynamic, PrismaHookWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult, SwapService } from '../types';
 import { poolsToIgnore } from '../constants';

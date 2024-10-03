@@ -1,4 +1,4 @@
-import { BufferState, PoolState } from '@balancer-labs/balancer-maths';
+import { BufferState, PoolState, HookState } from '@balancer-labs/balancer-maths';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Hex } from 'viem';
 import { BasePoolToken } from './basePoolToken';
@@ -23,4 +23,5 @@ export interface BasePool {
 export interface BasePoolV3 extends BasePool {
     tokens: (BasePoolToken | Erc4626PoolToken)[];
     getPoolState(): PoolState | BufferState;
+    getHookState(): HookState | undefined;
 }

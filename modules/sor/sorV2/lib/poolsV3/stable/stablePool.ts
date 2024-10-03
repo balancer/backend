@@ -1,10 +1,10 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 
 import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { AddKind, RemoveKind, StableState, Vault } from '@balancer-labs/balancer-maths';
+import { AddKind, RemoveKind, StableState, Vault, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
-import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { PrismaPoolWithDynamic, PrismaHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { chainToIdMap } from '../../../../../network/network-config';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
@@ -13,6 +13,8 @@ import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
 import { StableBasePoolToken } from './stableBasePoolToken';
 import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
+
+import { returnHookDataAccordingToHookName } from '../../utils/helpers';
 
 type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
 
@@ -27,6 +29,7 @@ export class StablePool implements BasePoolV3 {
 
     public totalShares: bigint;
     public tokens: StablePoolToken[];
+    public readonly hook: HookState | undefined;
 
     private readonly tokenMap: Map<string, StablePoolToken>;
 
@@ -75,6 +78,9 @@ export class StablePool implements BasePoolV3 {
         const totalShares = parseEther(pool.dynamicData.totalShares);
         const amp = parseUnits((pool.typeData as StableData).amp, 3);
 
+        //transform
+        const hook = returnHookDataAccordingToHookName(pool);
+
         return new StablePool(
             pool.id as Hex,
             pool.address,
@@ -84,6 +90,7 @@ export class StablePool implements BasePoolV3 {
             poolTokens,
             totalShares,
             pool.dynamicData.tokenPairsData as TokenPairData[],
+            hook,
         );
     }
 
@@ -96,6 +103,7 @@ export class StablePool implements BasePoolV3 {
         tokens: StablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
+        hook: HookState | undefined = undefined,
     ) {
         this.chain = chain;
         this.id = id;
@@ -107,6 +115,7 @@ export class StablePool implements BasePoolV3 {
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
         this.tokenPairs = tokenPairs;
+        this.hook = hook;
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
@@ -165,6 +174,7 @@ export class StablePool implements BasePoolV3 {
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
                 this.poolState,
+                this.hook
             );
             calculatedAmount = amountsOutRaw[tOut.index];
         } else if (tOut.token.isSameAddress(this.id)) {
@@ -177,6 +187,7 @@ export class StablePool implements BasePoolV3 {
                     kind: AddKind.UNBALANCED,
                 },
                 this.poolState,
+                this.hook
             );
             calculatedAmount = bptAmountOutRaw;
         } else {
@@ -189,6 +200,7 @@ export class StablePool implements BasePoolV3 {
                     swapKind: SwapKind.GivenIn,
                 },
                 this.poolState,
+                this.hook
             );
         }
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
@@ -264,6 +276,18 @@ export class StablePool implements BasePoolV3 {
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar * WAD),
             aggregateSwapFee: 0n,
+        };
+    }
+
+    public getHookState(): HookState | undefined {
+        if (this.hook === undefined) {
+            return undefined;
+        }
+    
+        // returned hook state will depend on hook type eventually
+        return {
+            tokens: this.tokens.map((t) => t.token.address),
+            removeLiquidityHookFeePercentage: this.hook.removeLiquidityHookFeePercentage,
         };
     }
 

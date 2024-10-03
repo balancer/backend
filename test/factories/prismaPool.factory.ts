@@ -2,7 +2,7 @@ import { Factory } from 'fishery';
 import { PrismaPoolWithDynamic } from '../../prisma/prisma-types';
 import { prismaPoolTokenFactory } from './prismaToken.factory';
 import { createRandomAddress } from '../utils';
-import { Chain, PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolType, Hook } from '@prisma/client';
 import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
 
 class PrismaPoolFactory extends Factory<PrismaPoolWithDynamic> {
@@ -32,5 +32,6 @@ export const prismaPoolFactory = PrismaPoolFactory.define(({ params }) => {
         dynamicData: prismaPoolDynamicDataFactory.build({ id: poolAddress, chain: params?.chain || Chain.SEPOLIA }),
         tokens: prismaPoolTokenFactory.buildList(2),
         hookId: null,
+        hook: params.hook as Hook ?? null,
     };
 });

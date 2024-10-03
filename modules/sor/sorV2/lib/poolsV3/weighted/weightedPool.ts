@@ -1,9 +1,9 @@
 import { Address, Hex, parseEther } from 'viem';
 import { MAX_UINT256, SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
-import { AddKind, RemoveKind, Vault, Weighted, WeightedState } from '@balancer-labs/balancer-maths';
+import { AddKind, RemoveKind, Vault, Weighted, WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
-import { PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
+import { PrismaHookWithDynamic, PrismaPoolWithDynamic } from '../../../../../../prisma/prisma-types';
 import { GqlPoolType } from '../../../../../../schema';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 import { chainToIdMap } from '../../../../../network/network-config';
@@ -11,6 +11,9 @@ import { chainToIdMap } from '../../../../../network/network-config';
 import { BasePoolV3 } from '../../poolsV2/basePool';
 import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
+
+import { returnHookDataAccordingToHookName } from '../../utils/helpers';
+
 
 type WeightedPoolToken = WeightedBasePoolToken | WeightedErc4626PoolToken;
 
@@ -26,6 +29,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
     public readonly tokenPairs: TokenPairData[];
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
+    public readonly hook: HookState | undefined;
 
     private readonly tokenMap: Map<string, WeightedPoolToken>;
 
@@ -77,6 +81,9 @@ export class WeightedPoolV3 implements BasePoolV3 {
             }
         }
 
+        //transform
+        const hook = returnHookDataAccordingToHookName(pool);
+
         return new WeightedPoolV3(
             pool.id as Hex,
             pool.address,
@@ -86,6 +93,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
+            hook
         );
     }
 
@@ -98,6 +106,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
         totalShares: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
+        hook: HookState | undefined = undefined,
     ) {
         this.chain = chain;
         this.id = id;
@@ -108,6 +117,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
         this.tokenPairs = tokenPairs;
+        this.hook = hook
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
@@ -181,6 +191,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
                     kind: RemoveKind.SINGLE_TOKEN_EXACT_IN,
                 },
                 this.poolState,
+                this.hook,
             );
             calculatedAmount = amountsOutRaw[tOut.index];
         } else if (tOut.token.isSameAddress(this.id)) {
@@ -193,6 +204,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
                     kind: AddKind.UNBALANCED,
                 },
                 this.poolState,
+                this.hook
             );
             calculatedAmount = bptAmountOutRaw;
         } else {
@@ -205,6 +217,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
                     swapKind: SwapKind.GivenIn,
                 },
                 this.poolState,
+                this.hook,
             );
         }
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
@@ -265,6 +278,18 @@ export class WeightedPoolV3 implements BasePoolV3 {
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar * WAD),
             aggregateSwapFee: 0n,
+        };
+    }
+
+    public getHookState(): HookState | undefined {
+        if (this.hook === undefined) {
+            return undefined;
+        }
+    
+        // returned hook state will depend on hook type eventually
+        return {
+            tokens: this.tokens.map((t) => t.token.address),
+            removeLiquidityHookFeePercentage: this.hook.removeLiquidityHookFeePercentage,
         };
     }
 
