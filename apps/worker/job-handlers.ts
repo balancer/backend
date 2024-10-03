@@ -183,13 +183,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
             break;
         case 'update-liquidity-24h-ago-v2':
-            // await runIfNotAlreadyRunning(
-            //     name,
-            //     chainId,
-            //     () => V2.PoolsController().updateLiquidity24hAgoV2(chain),
-            //     res,
-            //     next,
-            // );
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => V2.PoolsController().updateLiquidity24hAgoV2(chain),
+                res,
+                next,
+            );
             break;
         case 'cache-average-block-time':
             await runIfNotAlreadyRunning(name, chainId, () => blocksSubgraphService.cacheAverageBlockTime(), res, next);
