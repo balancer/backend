@@ -150,6 +150,11 @@ export const schema = gql`
         id: ID!
 
         """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
+
+        """
         Name of the pool.
         """
         name: String!
@@ -632,6 +637,11 @@ export const schema = gql`
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
 
         """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
+
+        """
         The name of the pool as per contract
         """
         name: String!
@@ -740,6 +750,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -861,6 +872,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1056,6 +1068,7 @@ export const schema = gql`
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1092,6 +1105,7 @@ export const schema = gql`
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -1175,6 +1189,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -1208,6 +1223,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1293,7 +1309,7 @@ export const schema = gql`
         incentivized: Boolean!
 
         """
-        Liquidity management settings
+        Liquidity management settings for v3 pools.
         """
         liquidityManagement: LiquidityManagement
 
@@ -1435,6 +1451,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1448,15 +1465,6 @@ export const schema = gql`
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-    }
-
-    type GqlPoolStableComposablePoolData {
-        address: String!
-        balance: String!
-        id: ID!
-        symbol: String!
-        tokens: [GqlPoolToken!]!
-        totalSupply: String!
     }
 
     type GqlPoolStaking {
@@ -1981,6 +1989,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -3092,26 +3101,26 @@ export const schema = gql`
     scalar JSON
 
     """
-    If pools has liquidity management settings
+    Liquidity management settings for v3 pools.
     """
     type LiquidityManagement {
         """
-        Indicates whether unbalanced liquidity is disabled
+        Indicates whether this pool has disabled add and removes of unbalanced/non-proportional liquidity. Meaning it will only support proportional add and remove liquidity.
         """
         disableUnbalancedLiquidity: Boolean
 
         """
-        Indicates whether custom add liquidity is enabled
+        Whether this pool support additional, custom add liquditiy operations apart from proportional, unbalanced and single asset.
         """
         enableAddLiquidityCustom: Boolean
 
         """
-        Indicates whether donation is enabled
+        Indicates whether donation is enabled. Meaning you can send funds to the pool without receiving a BPT.
         """
         enableDonation: Boolean
 
         """
-        Indicates whether custom remove liquidity is enableDonation
+        Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
         """
         enableRemoveLiquidityCustom: Boolean
     }

@@ -647,6 +647,7 @@ export class PoolGqlLoaderService {
                         dynamicData: pool.hook.dynamicData as HookData,
                     }) ||
                 undefined,
+            liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
         };
 
         //TODO: may need to build out the types here still
@@ -798,6 +799,7 @@ export class PoolGqlLoaderService {
 
         return {
             ...nestedPool,
+            liquidityManagement: (nestedPool.liquidityManagement as LiquidityManagement) || undefined,
             totalLiquidity: `${totalLiquidity}`,
             totalShares: `${totalShares}`,
             nestedShares: `${totalShares * percentOfSupplyNested}`,

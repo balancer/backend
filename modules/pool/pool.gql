@@ -542,6 +542,11 @@ interface GqlPoolBase {
     List of tags assigned by the team based on external factors
     """
     tags: [String]
+
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
 }
 
 type GqlPoolDynamicData {
@@ -672,6 +677,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -706,6 +712,7 @@ type GqlPoolGyro implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     alpha: String!
     beta: String!
@@ -764,6 +771,7 @@ type GqlPoolFx implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -794,6 +802,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -827,6 +836,7 @@ type GqlPoolStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -857,6 +867,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -887,6 +898,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -923,6 +935,7 @@ type GqlPoolElement implements GqlPoolBase {
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     #element specific fields
     unitSeconds: BigInt!
@@ -1119,6 +1132,10 @@ type GqlNestedPool {
     Price rate of the Balancer Pool Token (BPT).
     """
     bptPriceRate: BigDecimal!
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
 }
 
 interface GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
@@ -1169,15 +1186,6 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase @deprecated(reason
     totalBalance: BigDecimal!
 
     pool: GqlPoolComposableStableNested!
-}
-
-type GqlPoolStableComposablePoolData {
-    id: ID!
-    address: String!
-    symbol: String!
-    tokens: [GqlPoolToken!]!
-    totalSupply: String!
-    balance: String!
 }
 
 type GqlPoolApr @deprecated(reason: "Use GqlPoolApr instead") {
