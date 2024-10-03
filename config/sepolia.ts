@@ -27,8 +27,8 @@ export default <NetworkData>{
         name: 'Ether',
     },
     weth: {
-        address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
-        addressFormatted: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+        addressFormatted: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9',
     },
     coingecko: {
         nativeAssetId: 'ethereum',
