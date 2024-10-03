@@ -109,15 +109,15 @@ export function configureWorkerRoutes(app: Express) {
 const setupJobHandlers = async (name: string, chainId: string, res: any, next: NextFunction) => {
     const chain = chainIdToChain[chainId];
     switch (name) {
-        case 'sync-changed-pools':
-            // await runIfNotAlreadyRunning(
-            //     name,
-            //     chainId,
-            //     () => V2.PoolsController().syncChangedPoolsV2(chain),
-            //     res,
-            //     next,
-            // );
-            break;
+        // case 'sync-changed-pools':
+        // await runIfNotAlreadyRunning(
+        //     name,
+        //     chainId,
+        //     () => V2.PoolsController().syncChangedPoolsV2(chain),
+        //     res,
+        //     next,
+        // );
+        // break;
 
         case 'user-sync-wallet-balances-for-all-pools':
             await runIfNotAlreadyRunning(
@@ -173,12 +173,12 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'sync-new-pools-from-subgraph':
-            // await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
-            break;
-        case 'sync-join-exits-v2':
-            // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
-            break;
+        // case 'sync-new-pools-from-subgraph':
+        // await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
+        // break;
+        // case 'sync-join-exits-v2':
+        // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
+        // break;
         case 'sync-tokens-from-pool-tokens':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
             break;
@@ -311,9 +311,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-swaps-v3':
             await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncSwapsV3(chain), res, next);
             break;
-        case 'sync-swaps-v2':
-            // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
-            break;
+        // case 'sync-swaps-v2':
+        // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
+        // break;
         case 'sync-join-exits-v3':
             await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chain), res, next);
             break;
@@ -378,6 +378,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         default:
             res.sendStatus(400);
-            throw new Error(`Unhandled job type ${name}`);
+            // throw new Error(`Unhandled job type ${name}`);
+            console.log(`Unhandled job type ${name}`);
     }
 };
