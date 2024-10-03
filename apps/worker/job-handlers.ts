@@ -310,9 +310,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-swaps-v3':
             await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncSwapsV3(chain), res, next);
             break;
-        // case 'sync-swaps-v2':
-        // await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
-        // break;
+        case 'sync-swaps-v2':
+            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
+            break;
         case 'sync-join-exits-v3':
             await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chain), res, next);
             break;
