@@ -7,6 +7,7 @@ import { getBlockNumbersSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
 import { updateLiquidity24hAgo } from '../../actions/pool/update-liquidity-24h-ago';
 import { Chain } from '@prisma/client';
+import { poolService } from '../../pool/pool.service';
 
 export function PoolsController(tracer?: any) {
     return {
@@ -45,7 +46,7 @@ export function PoolsController(tracer?: any) {
             const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
             const gyroConfig = config[chain].gyro?.config;
 
-            return syncChangedPools(
+            const changedPools = syncChangedPools(
                 chain,
                 vaultAddress,
                 balancerQueriesAddress,
@@ -53,6 +54,10 @@ export function PoolsController(tracer?: any) {
                 swapProtocolFeePercentage,
                 gyroConfig,
             );
+
+            // TODO a lot still uses the prismaPoolSwap table. Calling legacy service until fixed.
+            await poolService.syncSwapsForLast48Hours();
+            return changedPools;
         },
 
         async updateLiquidity24hAgoV2(chain: Chain) {

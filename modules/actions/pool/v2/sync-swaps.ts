@@ -67,5 +67,5 @@ export async function syncSwaps(subgraphClient: V2SubgraphClient, chain = 'SEPOL
     });
     console.timeEnd('prismaPoolEvent.createMany');
 
-    return dbEntries.map((entry) => entry.id);
+    return dbEntries.map((entry) => entry.poolId);
 }
