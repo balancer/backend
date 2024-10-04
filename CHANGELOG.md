@@ -1,5 +1,12 @@
 # backend
 
+## 1.21.1
+
+### Patch Changes
+
+-   3c6840e: make v2 sync work with nested pool creation in the same block
+-   a6e8e1a: update cow subgraph for mainnet
+
 ## 1.21.0
 
 ### Minor Changes
