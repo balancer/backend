@@ -1,5 +1,11 @@
 # backend
 
+## 1.21.2
+
+### Patch Changes
+
+-   8532816: update cow subgraph on other chains
+
 ## 1.21.1
 
 ### Patch Changes
