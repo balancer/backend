@@ -40,7 +40,7 @@ export const fantomNetworkConfig: NetworkConfig = {
     services: {
         balancerSubgraphService: new BalancerSubgraphService(
             fantomNetworkData.subgraphs.balancer,
-            fantomNetworkData.chain.id,
+            fantomNetworkData.chain.prismaId,
         ),
     },
     /*
@@ -141,7 +141,7 @@ export const fantomNetworkConfig: NetworkConfig = {
         },
         // Refactored
         {
-            name: 'update-liquidity-24h-ago',
+            name: 'update-liquidity-24h-ago-v2',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {

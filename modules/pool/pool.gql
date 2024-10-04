@@ -82,31 +82,13 @@ extend type Query {
 
 extend type Mutation {
     poolSyncAllPoolsFromSubgraph: [String!]!
-    poolSyncNewPoolsFromSubgraph: [String!]!
-    poolLoadOnChainDataForAllPools: String!
-    poolLoadOnChainDataForPoolsWithActiveUpdates: String!
     poolUpdateLiquidityValuesForAllPools: String!
     poolUpdateVolumeAndFeeValuesForAllPools: String!
-    poolSyncSwapsForLast48Hours: String!
-    poolSyncSanityPoolData: String!
-    poolUpdateAprs(chain: GqlChain!): String!
-    poolSyncPoolAllTokensRelationship: String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
-    poolSyncTotalShares: String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-    poolSyncStakingForPools: String!
-    poolUpdateLiquidity24hAgoForAllPools: String!
-    poolLoadSnapshotsForAllPools: String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-    poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
     poolUpdateLifetimeValuesForAllPools: String!
-    poolInitializeSnapshotsForPool(poolId: String!): String!
-    poolSyncPool(poolId: String!): String!
-    poolReloadAllTokenNestedPoolIds: String!
-    poolBlackListAddPool(poolId: String!): String!
-    poolBlackListRemovePool(poolId: String!): String!
-    poolDeletePool(poolId: String!): String!
-    poolInitOnChainDataForAllPools: String!
+    poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
 }
@@ -229,6 +211,35 @@ type GqlPoolMinimal {
     Hook assigned to a pool
     """
     hook: Hook
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
+}
+
+"""
+Liquidity management settings for v3 pools.
+"""
+type LiquidityManagement {
+    """
+    Indicates whether this pool has disabled add and removes of unbalanced/non-proportional liquidity. Meaning it will only support proportional add and remove liquidity.
+    """
+    disableUnbalancedLiquidity: Boolean
+
+    """
+    Whether this pool support additional, custom add liquditiy operations apart from proportional, unbalanced and single asset.
+    """
+    enableAddLiquidityCustom: Boolean
+
+    """
+    Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
+    """
+    enableRemoveLiquidityCustom: Boolean
+
+    """
+    Indicates whether donation is enabled. Meaning you can send funds to the pool without receiving a BPT.
+    """
+    enableDonation: Boolean
 }
 
 """
@@ -531,6 +542,11 @@ interface GqlPoolBase {
     List of tags assigned by the team based on external factors
     """
     tags: [String]
+
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
 }
 
 type GqlPoolDynamicData {
@@ -661,6 +677,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -695,6 +712,7 @@ type GqlPoolGyro implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     alpha: String!
     beta: String!
@@ -753,6 +771,7 @@ type GqlPoolFx implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
@@ -783,6 +802,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -816,6 +836,7 @@ type GqlPoolStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -846,6 +867,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
@@ -876,6 +898,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -912,6 +935,7 @@ type GqlPoolElement implements GqlPoolBase {
     tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     categories: [GqlPoolFilterCategory]
     tags: [String]
+    liquidityManagement: LiquidityManagement
 
     #element specific fields
     unitSeconds: BigInt!
@@ -1108,6 +1132,10 @@ type GqlNestedPool {
     Price rate of the Balancer Pool Token (BPT).
     """
     bptPriceRate: BigDecimal!
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
 }
 
 interface GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
@@ -1158,15 +1186,6 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase @deprecated(reason
     totalBalance: BigDecimal!
 
     pool: GqlPoolComposableStableNested!
-}
-
-type GqlPoolStableComposablePoolData {
-    id: ID!
-    address: String!
-    symbol: String!
-    tokens: [GqlPoolToken!]!
-    totalSupply: String!
-    balance: String!
 }
 
 type GqlPoolApr @deprecated(reason: "Use GqlPoolApr instead") {

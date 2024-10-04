@@ -10,16 +10,17 @@ import {
 } from './generated/balancer-subgraph-types';
 import { BalancerSubgraphService } from './balancer-subgraph.service';
 import { wrapSdkWithRetryAndRotation } from '../../sources/subgraphs/retry-on-failure';
+import { Chain } from '@prisma/client';
 
 export type V2SubgraphClient = ReturnType<typeof getV2SubgraphClient>;
 
-export function getV2SubgraphClient(urls: string[], chainId: number) {
+export function getV2SubgraphClient(urls: string[], chain: Chain) {
     const sdkClients = urls.map((url) => getSdk(new GraphQLClient(url)));
     const sdkWithRetryAndRotation = wrapSdkWithRetryAndRotation(sdkClients);
 
     return {
         ...sdkWithRetryAndRotation,
-        legacyService: new BalancerSubgraphService(urls, chainId),
+        legacyService: new BalancerSubgraphService(urls, chain),
         async getSnapshotsForTimestamp(timestamp: number): Promise<BalancerPoolSnapshotFragment[]> {
             const limit = 1000;
             let hasMore = true;

@@ -112,56 +112,6 @@ export class PoolUsdDataService {
         await Promise.all(updates);
     }
 
-    public async updateLiquidity24hAgoForAllPools() {
-        const block24hAgo = await this.blockSubgraphService.getBlockFrom24HoursAgo();
-        const tokenPrices24hAgo = await this.tokenService.getTokenPriceFrom24hAgo(this.chain);
-
-        if (!block24hAgo) {
-            // Send an alert to Sentry
-            console.error(`Block Subgraph not working on ${this.chain}`);
-            return;
-        }
-
-        const subgraphPoolsAll = await this.balancerSubgraphService.getAllPools(
-            { block: { number: parseInt(block24hAgo.number) } },
-            false,
-        );
-
-        const pdts = await prisma.prismaPoolDynamicData.findMany({
-            where: { chain: this.chain },
-        });
-
-        const exitingIds = pdts.map((pdt) => pdt.id);
-
-        const subgraphPools = subgraphPoolsAll.filter((pool) => exitingIds.includes(pool.id));
-
-        let updates: any[] = [];
-
-        for (const pool of subgraphPools) {
-            const balanceUSDs = (pool.tokens || []).map((token) => ({
-                id: token.id,
-                balanceUSD:
-                    token.address === pool.address
-                        ? 0
-                        : parseFloat(token.balance || '0') *
-                          this.tokenService.getPriceForToken(tokenPrices24hAgo, token.address, this.chain),
-            }));
-            const totalLiquidity = Math.max(
-                _.sumBy(balanceUSDs, (item) => item.balanceUSD),
-                0,
-            );
-
-            updates.push(
-                prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: this.chain } },
-                    data: { totalLiquidity24hAgo: totalLiquidity, totalShares24hAgo: pool.totalShares },
-                }),
-            );
-        }
-
-        await prismaBulkExecuteOperations(updates);
-    }
-
     /**
      *
      * @param poolIds the ids to update, if not provided, will update for all pools

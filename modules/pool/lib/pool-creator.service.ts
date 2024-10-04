@@ -55,27 +55,6 @@ export class PoolCreatorService {
         return poolIds;
     }
 
-    public async syncNewPoolsFromSubgraph(blockNumber: number): Promise<string[]> {
-        const existing = (await prisma.prismaPool.findMany({ where: { chain: this.chain }, select: { id: true } })).map(
-            (pool) => pool.id,
-        );
-
-        const subgraphPools = await this.balancerSubgraphService
-            .getAllPools({}, false)
-            .then((pools) => _.orderBy(pools, ['createTime'], 'asc'));
-
-        const missing = subgraphPools.filter((pool) => !existing.includes(pool.id));
-
-        // any pool can be nested
-        const allNestedTypePools = [...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address }))];
-
-        for (const subgraphPool of missing) {
-            await this.createPoolRecord(subgraphPool, blockNumber, allNestedTypePools);
-        }
-
-        return Array.from(missing.map((pool) => pool.id));
-    }
-
     public async reloadAllTokenNestedPoolIds(): Promise<void> {
         let operations: any[] = [];
         const pools = await prisma.prismaPool.findMany({

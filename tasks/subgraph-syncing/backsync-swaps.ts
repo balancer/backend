@@ -1,14 +1,13 @@
 import { getV2SubgraphClient } from '../../modules/subgraphs/balancer-subgraph';
 import config from '../../config';
-import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
 import { prisma } from '../../prisma/prisma-client';
 import { swapV2Transformer } from '../../modules/sources/transformers/swap-v2-transformer';
 import { swapsUsd } from '../../modules/sources/enrichers/swaps-usd';
+import { Chain } from '@prisma/client';
 
-export const backsyncSwaps = async (chainId: string) => {
-    const chain = chainIdToChain[chainId];
+export const backsyncSwaps = async (chain: Chain) => {
     const subgraphUrl = config[chain].subgraphs.balancer;
-    const subgraphClient = getV2SubgraphClient(subgraphUrl, Number(chainId));
+    const subgraphClient = getV2SubgraphClient(subgraphUrl, chain);
 
     // Read last synced ID from DB - use empty event as a placeholder
     const syncingStatus = await prisma.prismaPoolEvent.findFirst({

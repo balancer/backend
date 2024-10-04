@@ -42,6 +42,9 @@ enum PrismaLastBlockSyncedCategory {
     POOLS
     FARMS
     COW_AMM_POOLS
+    COW_AMM_JOIN_EXITS
+    COW_AMM_SWAPS
+    COW_AMM_SNAPSHOTS
 }
 
 
@@ -97,6 +100,8 @@ model PrismaPool {
     tokens              PrismaPoolToken[]
 
     dynamicData         PrismaPoolDynamicData?
+
+    liquidityManagement  Json @default("{}")
 
     snapshots           PrismaPoolSnapshot[]
     swaps               PrismaPoolSwap[]

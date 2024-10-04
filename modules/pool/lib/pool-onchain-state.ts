@@ -1,9 +1,11 @@
-import { Multicaller3 } from '../../web3/multicaller3';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 import { PrismaPoolType } from '@prisma/client';
 import abi from '../abi/WeightedPoolV2.json';
+import { Chain } from '@prisma/client';
 
 interface PoolInput {
     id: string;
+    chain: Chain;
     address: string;
     type: PrismaPoolType;
     version?: number;
@@ -26,7 +28,7 @@ export const fetchOnChainPoolState = async (pools: PoolInput[], batchSize = 1024
         return {};
     }
 
-    const multicaller = new Multicaller3(abi, batchSize);
+    const multicaller = new Multicaller3Viem(pools[0].chain, abi, batchSize);
 
     pools.forEach(({ id, type, address }) => {
         // filter certain pool types that don't have pausedState or recovery mode

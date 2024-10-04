@@ -32,5 +32,6 @@ export const prismaPoolFactory = PrismaPoolFactory.define(({ params }) => {
         dynamicData: prismaPoolDynamicDataFactory.build({ id: poolAddress, chain: params?.chain || Chain.SEPOLIA }),
         tokens: prismaPoolTokenFactory.buildList(2),
         hookId: null,
+        liquidityManagement: {},
     };
 });

@@ -1,7 +1,6 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
-import { AddRemoveFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/cow-amm/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
@@ -12,21 +11,15 @@ import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-t
  * @param vaultSubgraphClient
  */
 export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> => {
-    // Get latest event from the DB
-    const latestEvent = await prisma.prismaPoolEvent.findFirst({
+    // Get the last synced block number from the PrismaLastBlockSynced table
+    const lastSyncedBlock = await prisma.prismaLastBlockSynced.findFirst({
         where: {
-            type: {
-                in: ['JOIN', 'EXIT'],
-            },
-            chain: chain,
-            protocolVersion: 1,
-        },
-        orderBy: {
-            blockTimestamp: 'desc',
+            category: PrismaLastBlockSyncedCategory.COW_AMM_JOIN_EXITS,
+            chain,
         },
     });
 
-    const where = latestEvent?.blockNumber ? { blockNumber_gt: String(latestEvent.blockNumber) } : {};
+    const where = lastSyncedBlock?.blockNumber ? { blockNumber_gt: String(lastSyncedBlock.blockNumber) } : {};
 
     // Get events
     const { addRemoves } = await subgraphClient.AddRemoves({
@@ -53,6 +46,27 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
         .catch((e) => {
             console.error('Error creating DB entries', e);
         });
+
+    // Update the last synced block number in the PrismaLastBlockSynced table
+    const latestBlockNumber = Math.max(...dbEntries.map((entry) => entry.blockNumber));
+    if (latestBlockNumber > 0) {
+        await prisma.prismaLastBlockSynced.upsert({
+            where: {
+                category_chain: {
+                    category: PrismaLastBlockSyncedCategory.COW_AMM_JOIN_EXITS,
+                    chain,
+                },
+            },
+            update: {
+                blockNumber: latestBlockNumber,
+            },
+            create: {
+                category: PrismaLastBlockSyncedCategory.COW_AMM_JOIN_EXITS,
+                blockNumber: latestBlockNumber,
+                chain,
+            },
+        });
+    }
 
     return dbEntries.map((entry) => entry.id);
 };

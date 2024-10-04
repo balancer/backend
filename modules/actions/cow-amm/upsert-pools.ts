@@ -71,6 +71,7 @@ export const upsertPools = async (
                 name: token.name,
                 chain,
             })),
+            skipDuplicates: true,
         });
     }
 

@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import { Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 import { parseEther, parseUnits, Address } from 'viem';
-import { TokenPairData } from '../../../modules/sources/contracts/fetch-tokenpair-data';
+import { TokenPairData } from '../../../modules/sources/contracts/v3/fetch-tokenpair-data';
 import { StablePool } from '../../../modules/sor/sorV2/lib/poolsV3';
 import { StableBasePoolToken } from '../../../modules/sor/sorV2/lib/poolsV3/stable/stableBasePoolToken';
 

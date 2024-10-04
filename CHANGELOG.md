@@ -1,5 +1,20 @@
 # backend
 
+## 1.21.0
+
+### Minor Changes
+
+-   19abfd7: adding liquidity management json
+-   56b06a5: adding pool actions for v2
+
+### Patch Changes
+
+-   8aacde1: use cow_amm type selector for syncing actions
+-   e96b9be: use bigint in tokenpair sync
+-   056c32d: fix weth address for sepolia
+-   462b6d9: add liquidity mangement to pool list query
+-   39f2e4a: enable v2 syncs for sepolia
+
 ## 1.20.10
 
 ### Patch Changes

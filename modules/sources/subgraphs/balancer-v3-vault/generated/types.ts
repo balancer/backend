@@ -22,15 +22,25 @@ export type Scalars = {
 
 export type AddRemove = {
     __typename?: 'AddRemove';
+    /** Amounts of tokens added or removed */
     amounts: Array<Scalars['BigDecimal']>;
+    /** Block number when the event occurred */
     blockNumber: Scalars['BigInt'];
+    /** Timestamp of the block when the event occurred */
     blockTimestamp: Scalars['BigInt'];
+    /** Unique identifier for the AddRemove event */
     id: Scalars['Bytes'];
+    /** Log index of the event in the transaction */
     logIndex: Scalars['BigInt'];
+    /** The Pool where liquidity was added or removed */
     pool: Pool;
+    /** Address of the sender */
     sender: Scalars['Bytes'];
+    /** Hash of the transaction containing the event */
     transactionHash: Scalars['Bytes'];
+    /** Type of investment (Add or Remove) */
     type: InvestType;
+    /** User who performed the add or remove action */
     user: User;
 };
 
@@ -193,19 +203,29 @@ export type Block_Height = {
 
 export type Buffer = {
     __typename?: 'Buffer';
+    /** Unique identifier for the Buffer */
     id: Scalars['Bytes'];
+    /** Total shares of this Buffer */
     totalShares: Scalars['BigDecimal'];
+    /** Balance of the underlying token in this Buffer */
     underlyingBalance: Scalars['BigDecimal'];
+    /** The underlying token in this Buffer */
     underlyingToken: Token;
+    /** Balance of the wrapped token in this Buffer */
     wrappedBalance: Scalars['BigDecimal'];
+    /** The wrapped token in this Buffer */
     wrappedToken: Token;
 };
 
 export type BufferShare = {
     __typename?: 'BufferShare';
+    /** Balance of this share */
     balance: Scalars['BigDecimal'];
+    /** The Buffer this share is for */
     buffer: Buffer;
+    /** Unique identifier for the BufferShare */
     id: Scalars['Bytes'];
+    /** The user who owns this share */
     user: User;
 };
 
@@ -392,8 +412,11 @@ export enum Buffer_OrderBy {
 
 export type Hook = {
     __typename?: 'Hook';
+    /** Address of the Hook */
     address: Scalars['Bytes'];
+    /** Unique identifier for the Hook */
     id: Scalars['Bytes'];
+    /** Pools associated with this Hook */
     pools?: Maybe<Array<Pool>>;
 };
 
@@ -407,18 +430,31 @@ export type HookPoolsArgs = {
 
 export type HookConfig = {
     __typename?: 'HookConfig';
+    /** Indicates whether hook-adjusted amounts are enabled */
     enableHookAdjustedAmounts: Scalars['Boolean'];
+    /** The Hook this config is for */
     hook: Hook;
+    /** Unique identifier for the HookConfig */
     id: Scalars['Bytes'];
+    /** The Pool this HookConfig is associated with */
     pool: Pool;
+    /** Indicates whether the hook should be called after adding liquidity */
     shouldCallAfterAddLiquidity: Scalars['Boolean'];
+    /** Indicates whether the hook should be called after initialization */
     shouldCallAfterInitialize: Scalars['Boolean'];
+    /** Indicates whether the hook should be called after removing liquidity */
     shouldCallAfterRemoveLiquidity: Scalars['Boolean'];
+    /** Indicates whether the hook should be called after a swap */
     shouldCallAfterSwap: Scalars['Boolean'];
+    /** Indicates whether the hook should be called before adding liquidity */
     shouldCallBeforeAddLiquidity: Scalars['Boolean'];
+    /** Indicates whether the hook should be called before initialization */
     shouldCallBeforeInitialize: Scalars['Boolean'];
+    /** Indicates whether the hook should be called before removing liquidity */
     shouldCallBeforeRemoveLiquidity: Scalars['Boolean'];
+    /** Indicates whether the hook should be called before a swap */
     shouldCallBeforeSwap: Scalars['Boolean'];
+    /** Indicates whether the hook should be called to compute dynamic swap fees */
     shouldCallComputeDynamicSwapFee: Scalars['Boolean'];
 };
 
@@ -595,11 +631,17 @@ export enum InvestType {
 
 export type LiquidityManagement = {
     __typename?: 'LiquidityManagement';
+    /** Indicates whether unbalanced liquidity is disabled */
     disableUnbalancedLiquidity: Scalars['Boolean'];
+    /** Indicates whether custom add liquidity is enabled */
     enableAddLiquidityCustom: Scalars['Boolean'];
+    /** Indicates whether donation is enabled */
     enableDonation: Scalars['Boolean'];
+    /** Indicates whether custom remove liquidity is enabled */
     enableRemoveLiquidityCustom: Scalars['Boolean'];
+    /** Unique identifier for the LiquidityManagement */
     id: Scalars['Bytes'];
+    /** The Pool this LiquidityManagement is associated with */
     pool: Pool;
 };
 
@@ -689,27 +731,49 @@ export enum OrderDirection {
 
 export type Pool = {
     __typename?: 'Pool';
+    /** Address of the Pool */
     address: Scalars['Bytes'];
+    /** Block number when the Pool was created */
     blockNumber: Scalars['BigInt'];
+    /** Timestamp of the block when the Pool was created */
     blockTimestamp: Scalars['BigInt'];
+    /** Address of the factory that created this Pool */
     factory: Scalars['Bytes'];
+    /** Number of unique holders of this Pool's tokens */
     holdersCount: Scalars['BigInt'];
+    /** The Hook associated with this Pool */
     hook: Hook;
+    /** Configuration for the Hook of this Pool */
     hookConfig: HookConfig;
+    /** Unique identifier for the Pool */
     id: Scalars['Bytes'];
+    /** Indicates whether the Pool has been initialized */
     isInitialized: Scalars['Boolean'];
+    /** Liquidity management settings for this Pool */
     liquidityManagement: LiquidityManagement;
+    /** Name of the Pool */
     name: Scalars['String'];
+    /** Address of the pause manager for this Pool */
     pauseManager: Scalars['Bytes'];
+    /** Timestamp when the pause window ends */
     pauseWindowEndTime: Scalars['BigInt'];
+    /** Rate providers associated with this Pool */
     rateProviders: Array<RateProvider>;
+    /** Snapshots of this Pool's state over time */
     snapshots: Array<PoolSnapshot>;
+    /** Swap fee percentage for this Pool */
     swapFee: Scalars['BigDecimal'];
+    /** Total number of swaps performed in this Pool */
     swapsCount: Scalars['BigInt'];
+    /** Symbol of the Pool */
     symbol: Scalars['String'];
+    /** Tokens in this Pool */
     tokens: Array<PoolToken>;
+    /** Total shares of the Pool */
     totalShares: Scalars['BigDecimal'];
+    /** Hash of the transaction that created the Pool */
     transactionHash: Scalars['Bytes'];
+    /** The Vault this Pool belongs to */
     vault: Vault;
 };
 
@@ -739,9 +803,13 @@ export type PoolTokensArgs = {
 
 export type PoolShare = {
     __typename?: 'PoolShare';
+    /** Balance of this share */
     balance: Scalars['BigDecimal'];
+    /** Unique identifier for the PoolShare */
     id: Scalars['ID'];
+    /** The Pool this share is for */
     pool: Pool;
+    /** The user who owns this share */
     user: User;
 };
 
@@ -835,16 +903,27 @@ export enum PoolShare_OrderBy {
 
 export type PoolSnapshot = {
     __typename?: 'PoolSnapshot';
+    /** Balances of each token in the Pool at the time of the snapshot */
     balances: Array<Scalars['BigDecimal']>;
+    /** Number of unique holders of the Pool's tokens at the time of the snapshot */
     holdersCount: Scalars['BigInt'];
+    /** Unique identifier for the PoolSnapshot */
     id: Scalars['ID'];
+    /** The Pool this snapshot is for */
     pool: Pool;
+    /** Number of swaps performed in the Pool at the time of the snapshot */
     swapsCount: Scalars['BigInt'];
+    /** Timestamp when this snapshot was taken */
     timestamp: Scalars['Int'];
+    /** Total protocol swap fees collected for each token at the time of the snapshot */
     totalProtocolSwapFees: Array<Scalars['BigDecimal']>;
+    /** Total protocol yield fees collected for each token at the time of the snapshot */
     totalProtocolYieldFees: Array<Scalars['BigDecimal']>;
+    /** Total shares of the Pool at the time of the snapshot */
     totalShares: Scalars['BigDecimal'];
+    /** Total swap fees collected for each token at the time of the snapshot */
     totalSwapFees: Array<Scalars['BigDecimal']>;
+    /** Total swap volumes for each token at the time of the snapshot */
     totalSwapVolumes: Array<Scalars['BigDecimal']>;
 };
 
@@ -977,20 +1056,35 @@ export enum PoolSnapshot_OrderBy {
 
 export type PoolToken = {
     __typename?: 'PoolToken';
+    /** Address of the token */
     address: Scalars['Bytes'];
+    /** Current balance of this token in the Pool */
     balance: Scalars['BigDecimal'];
+    /** Buffer associated with this token, if any */
     buffer?: Maybe<Buffer>;
+    /** Number of decimal places for the token */
     decimals: Scalars['Int'];
+    /** Unique identifier for the PoolToken */
     id: Scalars['Bytes'];
+    /** Index of this token in the Pool */
     index: Scalars['Int'];
+    /** Name of the token */
     name: Scalars['String'];
+    /** Nested Pool associated with this token, if any */
     nestedPool?: Maybe<Pool>;
+    /** Indicates whether this token pays yield fees */
     paysYieldFees: Scalars['Boolean'];
+    /** The Pool this token belongs to */
     pool: Pool;
+    /** Current price rate for this token */
     priceRate: Scalars['BigDecimal'];
+    /** Symbol of the token */
     symbol: Scalars['String'];
+    /** Total protocol swap fees collected for this token */
     totalProtocolSwapFee: Scalars['BigDecimal'];
+    /** Total protocol yield fees collected for this token */
     totalProtocolYieldFee: Scalars['BigDecimal'];
+    /** Total volume of this token traded in the Pool */
     volume: Scalars['BigDecimal'];
 };
 
@@ -1524,6 +1618,7 @@ export enum Pool_OrderBy {
     VaultAuthorizer = 'vault__authorizer',
     VaultId = 'vault__id',
     VaultIsPaused = 'vault__isPaused',
+    VaultProtocolFeeController = 'vault__protocolFeeController',
     VaultProtocolSwapFee = 'vault__protocolSwapFee',
     VaultProtocolYieldFee = 'vault__protocolYieldFee',
 }
@@ -1810,9 +1905,13 @@ export type QueryVaultsArgs = {
 
 export type RateProvider = {
     __typename?: 'RateProvider';
+    /** Address of the RateProvider */
     address: Scalars['Bytes'];
+    /** Unique identifier for the RateProvider */
     id: Scalars['Bytes'];
+    /** The Pool this RateProvider is associated with */
     pool: Pool;
+    /** The token this RateProvider is for */
     token: PoolToken;
 };
 
@@ -2201,20 +2300,35 @@ export type SubscriptionVaultsArgs = {
 
 export type Swap = {
     __typename?: 'Swap';
+    /** Block number when the swap occurred */
     blockNumber: Scalars['BigInt'];
+    /** Timestamp of the block when the swap occurred */
     blockTimestamp: Scalars['BigInt'];
+    /** Unique identifier for the Swap */
     id: Scalars['Bytes'];
+    /** Log index of the swap event in the transaction */
     logIndex: Scalars['BigInt'];
+    /** Address of the Pool where the swap occurred */
     pool: Scalars['Bytes'];
+    /** Amount of swap fees */
     swapFeeAmount: Scalars['BigDecimal'];
+    /** Address of the token used for swap fees */
     swapFeeToken: Scalars['Bytes'];
+    /** Amount of tokens swapped in */
     tokenAmountIn: Scalars['BigDecimal'];
+    /** Amount of tokens swapped out */
     tokenAmountOut: Scalars['BigDecimal'];
+    /** Address of the token being swapped in */
     tokenIn: Scalars['Bytes'];
+    /** Symbol of the token being swapped in */
     tokenInSymbol: Scalars['String'];
+    /** Address of the token being swapped out */
     tokenOut: Scalars['Bytes'];
+    /** Symbol of the token being swapped out */
     tokenOutSymbol: Scalars['String'];
+    /** Hash of the transaction containing the swap */
     transactionHash: Scalars['Bytes'];
+    /** User who performed the swap */
     user: User;
 };
 
@@ -2415,10 +2529,15 @@ export enum Swap_OrderBy {
 
 export type Token = {
     __typename?: 'Token';
+    /** Address of the token */
     address: Scalars['Bytes'];
+    /** Number of decimal places for the token */
     decimals: Scalars['Int'];
+    /** Unique identifier for the Token */
     id: Scalars['Bytes'];
+    /** Name of the token */
     name: Scalars['String'];
+    /** Symbol of the token */
     symbol: Scalars['String'];
 };
 
@@ -2507,9 +2626,13 @@ export enum Token_OrderBy {
 
 export type User = {
     __typename?: 'User';
+    /** Add/Remove liquidity events performed by this user */
     addRemoves?: Maybe<Array<AddRemove>>;
+    /** Unique identifier for the User (typically their address) */
     id: Scalars['Bytes'];
+    /** Pool shares owned by this user */
     shares?: Maybe<Array<PoolShare>>;
+    /** Swaps performed by this user */
     swaps?: Maybe<Array<Swap>>;
 };
 
@@ -2566,11 +2689,19 @@ export enum User_OrderBy {
 
 export type Vault = {
     __typename?: 'Vault';
+    /** Address of the authorizer */
     authorizer: Scalars['Bytes'];
+    /** Unique identifier for the Vault */
     id: Scalars['Bytes'];
+    /** Indicates whether the Vault is currently paused */
     isPaused: Scalars['Boolean'];
+    /** Pools associated with this Vault */
     pools?: Maybe<Array<Pool>>;
+    /** Address of the protocol fee controller */
+    protocolFeeController: Scalars['Bytes'];
+    /** Protocol swap fee percentage */
     protocolSwapFee: Scalars['BigDecimal'];
+    /** Protocol yield fee percentage */
     protocolYieldFee: Scalars['BigDecimal'];
 };
 
@@ -2612,6 +2743,16 @@ export type Vault_Filter = {
     isPaused_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
     or?: InputMaybe<Array<InputMaybe<Vault_Filter>>>;
     pools_?: InputMaybe<Pool_Filter>;
+    protocolFeeController?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_contains?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_gt?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_gte?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    protocolFeeController_lt?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_lte?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_not?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_not_contains?: InputMaybe<Scalars['Bytes']>;
+    protocolFeeController_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     protocolSwapFee?: InputMaybe<Scalars['BigDecimal']>;
     protocolSwapFee_gt?: InputMaybe<Scalars['BigDecimal']>;
     protocolSwapFee_gte?: InputMaybe<Scalars['BigDecimal']>;
@@ -2635,6 +2776,7 @@ export enum Vault_OrderBy {
     Id = 'id',
     IsPaused = 'isPaused',
     Pools = 'pools',
+    ProtocolFeeController = 'protocolFeeController',
     ProtocolSwapFee = 'protocolSwapFee',
     ProtocolYieldFee = 'protocolYieldFee',
 }
@@ -2869,6 +3011,13 @@ export type VaultPoolFragment = {
         shouldCallComputeDynamicSwapFee: boolean;
         hook: { __typename?: 'Hook'; address: string };
     };
+    liquidityManagement: {
+        __typename?: 'LiquidityManagement';
+        disableUnbalancedLiquidity: boolean;
+        enableAddLiquidityCustom: boolean;
+        enableDonation: boolean;
+        enableRemoveLiquidityCustom: boolean;
+    };
 };
 
 export type PoolsQueryVariables = Exact<{
@@ -2927,6 +3076,13 @@ export type PoolsQuery = {
             shouldCallBeforeRemoveLiquidity: boolean;
             shouldCallComputeDynamicSwapFee: boolean;
             hook: { __typename?: 'Hook'; address: string };
+        };
+        liquidityManagement: {
+            __typename?: 'LiquidityManagement';
+            disableUnbalancedLiquidity: boolean;
+            enableAddLiquidityCustom: boolean;
+            enableDonation: boolean;
+            enableRemoveLiquidityCustom: boolean;
         };
     }>;
 };
@@ -3156,6 +3312,12 @@ export const VaultPoolFragmentDoc = gql`
             shouldCallAfterRemoveLiquidity
             shouldCallBeforeRemoveLiquidity
             shouldCallComputeDynamicSwapFee
+        }
+        liquidityManagement {
+            disableUnbalancedLiquidity
+            enableAddLiquidityCustom
+            enableDonation
+            enableRemoveLiquidityCustom
         }
     }
 `;

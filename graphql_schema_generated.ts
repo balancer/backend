@@ -150,6 +150,11 @@ export const schema = gql`
         id: ID!
 
         """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
+
+        """
         Name of the pool.
         """
         name: String!
@@ -632,6 +637,11 @@ export const schema = gql`
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
 
         """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
+
+        """
         The name of the pool as per contract
         """
         name: String!
@@ -740,6 +750,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -861,6 +872,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1056,6 +1068,7 @@ export const schema = gql`
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1092,6 +1105,7 @@ export const schema = gql`
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -1175,6 +1189,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -1208,6 +1223,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1291,6 +1307,11 @@ export const schema = gql`
         Pool is receiving rewards when liquidity tokens are staked
         """
         incentivized: Boolean!
+
+        """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
 
         """
         The name of the pool as per contract
@@ -1430,6 +1451,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         owner: Bytes!
         poolTokens: [GqlPoolTokenDetail!]!
@@ -1443,15 +1465,6 @@ export const schema = gql`
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-    }
-
-    type GqlPoolStableComposablePoolData {
-        address: String!
-        balance: String!
-        id: ID!
-        symbol: String!
-        tokens: [GqlPoolToken!]!
-        totalSupply: String!
     }
 
     type GqlPoolStaking {
@@ -1976,6 +1989,7 @@ export const schema = gql`
         factory: Bytes
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType!
         owner: Bytes!
@@ -3086,36 +3100,43 @@ export const schema = gql`
 
     scalar JSON
 
+    """
+    Liquidity management settings for v3 pools.
+    """
+    type LiquidityManagement {
+        """
+        Indicates whether this pool has disabled add and removes of unbalanced/non-proportional liquidity. Meaning it will only support proportional add and remove liquidity.
+        """
+        disableUnbalancedLiquidity: Boolean
+
+        """
+        Whether this pool support additional, custom add liquditiy operations apart from proportional, unbalanced and single asset.
+        """
+        enableAddLiquidityCustom: Boolean
+
+        """
+        Indicates whether donation is enabled. Meaning you can send funds to the pool without receiving a BPT.
+        """
+        enableDonation: Boolean
+
+        """
+        Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
+        """
+        enableRemoveLiquidityCustom: Boolean
+    }
+
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms: String!
         beetsSyncFbeetsRatio: String!
         cacheAverageBlockTime: String!
-        poolBlackListAddPool(poolId: String!): String!
-        poolBlackListRemovePool(poolId: String!): String!
-        poolDeletePool(poolId: String!): String!
-        poolInitOnChainDataForAllPools: String!
-        poolInitializeSnapshotsForPool(poolId: String!): String!
-        poolLoadOnChainDataForAllPools: String!
-        poolLoadOnChainDataForPoolsWithActiveUpdates: String!
-        poolLoadSnapshotsForAllPools: String!
+        poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
-        poolReloadAllTokenNestedPoolIds: String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
         poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
-        poolSyncLatestSnapshotsForAllPools(chain: GqlChain!): String!
-        poolSyncNewPoolsFromSubgraph: [String!]!
-        poolSyncPool(poolId: String!): String!
-        poolSyncPoolAllTokensRelationship: String!
-        poolSyncSanityPoolData: String!
-        poolSyncStakingForPools: String!
-        poolSyncSwapsForLast48Hours: String!
-        poolSyncTotalShares: String!
-        poolUpdateAprs(chain: GqlChain!): String!
         poolUpdateLifetimeValuesForAllPools: String!
-        poolUpdateLiquidity24hAgoForAllPools: String!
         poolUpdateLiquidityValuesForAllPools: String!
         poolUpdateVolumeAndFeeValuesForAllPools: String!
         protocolCacheMetrics: String!
