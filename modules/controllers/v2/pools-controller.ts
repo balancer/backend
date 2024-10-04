@@ -1,7 +1,7 @@
 import config from '../../../config';
 import { addPools } from '../../actions/pool/v2/add-pools';
 import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { syncPools, syncChangedPools, syncOnchainStateForAllPools } from '../../actions/pool/v2';
+import { syncOnchainDataForAllPools, syncChangedPools } from '../../actions/pool/v2';
 import { getViemClient } from '../../sources/viem-client';
 import { getBlockNumbersSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
@@ -17,7 +17,7 @@ export function PoolsController(tracer?: any) {
             return addPools(subgraphService, chain);
         },
 
-        async syncPoolsV2(chain: Chain) {
+        async syncOnchainDataForAllPoolsV2(chain: Chain) {
             const vaultAddress = config[chain].balancer.v2.vaultAddress;
             const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
             const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
@@ -27,7 +27,7 @@ export function PoolsController(tracer?: any) {
             const viemClient = getViemClient(chain);
             const latestBlock = await viemClient.getBlockNumber();
 
-            return syncPools(
+            return syncOnchainDataForAllPools(
                 Number(latestBlock),
                 chain,
                 vaultAddress,
@@ -46,23 +46,6 @@ export function PoolsController(tracer?: any) {
             const gyroConfig = config[chain].gyro?.config;
 
             return syncChangedPools(
-                chain,
-                vaultAddress,
-                balancerQueriesAddress,
-                yieldProtocolFeePercentage,
-                swapProtocolFeePercentage,
-                gyroConfig,
-            );
-        },
-
-        async syncOnchainAllPoolsV2(chain: Chain) {
-            const vaultAddress = config[chain].balancer.v2.vaultAddress;
-            const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
-            const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
-            const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
-            const gyroConfig = config[chain].gyro?.config;
-
-            return syncOnchainStateForAllPools(
                 chain,
                 vaultAddress,
                 balancerQueriesAddress,

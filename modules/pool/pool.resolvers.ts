@@ -169,7 +169,7 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await V2.PoolsController().syncPoolsV2(chain);
+                    await V2.PoolsController().syncOnchainDataForAllPoolsV2(chain);
                     result.push({ type: 'v2', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'v2', chain, success: false, error: `${e}` });
