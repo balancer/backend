@@ -23,8 +23,12 @@ export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain):
     // Any pool can be nested
     const allNestedTypePools = [...subgraphPools.map((pool) => ({ id: pool.id, address: pool.address }))];
 
+    const createdPools: string[] = [];
     for (const subgraphPool of newPools) {
-        await createPoolRecord(subgraphPool, chain, block.number, allNestedTypePools);
+        const created = await createPoolRecord(subgraphPool, chain, block.number, allNestedTypePools);
+        if (created) {
+            createdPools.push(subgraphPool.id);
+        }
     }
 
     // Add user balances for new pools
@@ -36,7 +40,7 @@ export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain):
         );
     }
 
-    return Array.from(newPools.map((pool) => pool.id));
+    return createdPools;
 };
 
 const createPoolRecord = async (
@@ -44,7 +48,7 @@ const createPoolRecord = async (
     chain: Chain,
     blockNumber: number,
     nestedPools: { id: string; address: string }[],
-) => {
+): Promise<Boolean> => {
     const poolTokens = pool.tokens || [];
 
     await prisma.prismaToken.createMany({
@@ -69,22 +73,28 @@ const createPoolRecord = async (
 
     const prismaPoolRecordWithAssociations = subgraphToPrismaCreate(pool, chain, blockNumber, nestedPools);
 
-    await prisma.prismaPool.create(prismaPoolRecordWithAssociations);
+    try {
+        await prisma.prismaPool.create(prismaPoolRecordWithAssociations);
 
-    await prisma.prismaPoolTokenDynamicData.createMany({
-        data: poolTokens.map((token) => ({
-            id: token.id,
-            chain,
-            poolTokenId: token.id,
-            blockNumber,
-            priceRate: token.priceRate || '1.0',
-            weight: token.weight,
-            balance: token.balance,
-            balanceUSD: 0,
-        })),
-    });
+        await prisma.prismaPoolTokenDynamicData.createMany({
+            data: poolTokens.map((token) => ({
+                id: token.id,
+                chain,
+                poolTokenId: token.id,
+                blockNumber,
+                priceRate: token.priceRate || '1.0',
+                weight: token.weight,
+                balance: token.balance,
+                balanceUSD: 0,
+            })),
+        });
 
-    await createAllTokensRelationshipForPool(pool.id, chain);
+        await createAllTokensRelationshipForPool(pool.id, chain);
+    } catch (e) {
+        console.error(`Could not create pool ${pool.id} on chain ${chain}. Skipping.`, e);
+        return false;
+    }
+    return true;
 };
 
 const createAllTokensRelationshipForPool = async (poolId: string, chain: Chain): Promise<void> => {
