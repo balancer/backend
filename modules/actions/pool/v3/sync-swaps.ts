@@ -56,5 +56,5 @@ export async function syncSwaps(
         data: dbEntries,
     });
 
-    return dbEntries.map((entry) => entry.id);
+    return dbEntries.map((entry) => entry.poolId);
 }

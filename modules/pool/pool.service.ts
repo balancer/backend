@@ -225,6 +225,10 @@ export class PoolService {
         await syncIncentivizedCategory();
     }
 
+    public async syncSwapsForLast48Hours(): Promise<string[]> {
+        return this.poolSwapService.syncSwapsForLast48Hours();
+    }
+
     public async syncLatestReliquarySnapshotsForAllFarms() {
         if (networkContext.data.subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(
