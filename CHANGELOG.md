@@ -1,5 +1,11 @@
 # backend
 
+## 1.21.3
+
+### Patch Changes
+
+-   e33ff3a: populate prismaPoolSwap table until everything is migrated
+
 ## 1.21.2
 
 ### Patch Changes
