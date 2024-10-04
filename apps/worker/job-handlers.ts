@@ -308,10 +308,22 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncHookData(chain), res, next);
             break;
         case 'sync-swaps-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncSwapsV3(chain), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => V3.EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
+                res,
+                next,
+            );
             break;
         case 'sync-swaps-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncSwapsV2(chain), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => V2.EventController().syncSwapsUpdateVolumeAndFeesV2(chain),
+                res,
+                next,
+            );
             break;
         case 'sync-join-exits-v3':
             await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chain), res, next);
@@ -335,15 +347,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         //         next,
         //     );
         //     break;
-        case 'update-swaps-volume-and-fees-v3':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => V3.EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
-                res,
-                next,
-            );
-            break;
         // COW AMM
         case 'add-new-cow-amm-pools':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().addPools(chain), res, next);
