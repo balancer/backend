@@ -1,7 +1,7 @@
 import config from '../../../config';
 import { addPools } from '../../actions/pool/v2/add-pools';
 import { getV2SubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { syncOnchainDataForAllPools, syncChangedPools } from '../../actions/pool/v2';
+import { syncOnchainDataForAllPools, syncChangedPools, syncOnChainDataForPools } from '../../actions/pool/v2';
 import { getViemClient } from '../../sources/viem-client';
 import { getBlockNumbersSubgraphClient } from '../../sources/subgraphs';
 import { prisma } from '../../../prisma/prisma-client';
@@ -29,6 +29,28 @@ export function PoolsController(tracer?: any) {
             const latestBlock = await viemClient.getBlockNumber();
 
             return syncOnchainDataForAllPools(
+                Number(latestBlock),
+                chain,
+                vaultAddress,
+                balancerQueriesAddress,
+                yieldProtocolFeePercentage,
+                swapProtocolFeePercentage,
+                gyroConfig,
+            );
+        },
+
+        async syncOnchainDataForPoolsV2(chain: Chain, poolIds: string[]) {
+            const vaultAddress = config[chain].balancer.v2.vaultAddress;
+            const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
+            const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
+            const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
+            const gyroConfig = config[chain].gyro?.config;
+
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            return syncOnChainDataForPools(
+                poolIds,
                 Number(latestBlock),
                 chain,
                 vaultAddress,
