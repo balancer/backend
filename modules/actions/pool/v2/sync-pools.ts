@@ -59,7 +59,7 @@ export const syncOnChainDataForPools = async (
         gyroConfig,
     }));
 
-    const tokenPrices = await prisma.prismaTokenPrice.findMany({
+    const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {
             chain,
         },
