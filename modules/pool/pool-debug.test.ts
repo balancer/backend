@@ -8,13 +8,32 @@ import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
 import { ContentController } from '../controllers/content-controller';
 import { chainToIdMap } from '../network/network-config';
+import { PoolsController } from '../controllers/v2';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '250');
+        setRequestScopedContextValue('chainId', '1');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
-        await poolService.syncChangedPools();
+        // await poolService.syncChangedPools();
+        // await tokenService.updateTokenPrices(['MAINNET']);
+        await PoolsController().syncOnchainDataForPoolsV2('MAINNET', [
+            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+        ]);
+        const poolAfterNewSync = await poolService.getGqlPool(
+            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+            'MAINNET',
+        );
+
+        await poolService.updateLiquidityValuesForPools();
+        const poolAfterUpdateLiq = await poolService.getGqlPool(
+            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+            'MAINNET',
+        );
+
+        for (let i = 0; i < poolAfterNewSync.poolTokens.length; i++) {
+            expect(poolAfterNewSync.poolTokens[i].balanceUSD).toBe(poolAfterUpdateLiq.poolTokens[i].balanceUSD);
+        }
     }, 5000000);
 
     it('sync aprs', async () => {
