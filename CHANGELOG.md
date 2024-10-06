@@ -1,5 +1,11 @@
 # backend
 
+## 1.21.4
+
+### Patch Changes
+
+-   90bc31a: fix pool token price query
+
 ## 1.21.3
 
 ### Patch Changes
