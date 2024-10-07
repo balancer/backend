@@ -1,5 +1,12 @@
 # backend
 
+## 1.21.5
+
+### Patch Changes
+
+-   fd5ea37: multicall request size tuning
+-   c0fc647: fix balance calculation
+
 ## 1.21.4
 
 ### Patch Changes
