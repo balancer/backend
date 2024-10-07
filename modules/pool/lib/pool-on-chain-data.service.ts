@@ -258,12 +258,12 @@ export class PoolOnChainDataService {
                                     balanceUSD:
                                         poolToken.address === pool.address
                                             ? 0
-                                            : tokenPrices.find(
+                                            : (tokenPrices.find(
                                                   (tokenPrice) =>
                                                       tokenPrice.tokenAddress.toLowerCase() ===
                                                           poolToken.address.toLowerCase() &&
                                                       tokenPrice.chain === poolToken.chain,
-                                              )?.price || 0 * parseFloat(balance),
+                                              )?.price || 0) * parseFloat(balance),
                                 },
                             }),
                         );
