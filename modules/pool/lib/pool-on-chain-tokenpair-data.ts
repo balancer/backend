@@ -88,8 +88,12 @@ export async function fetchTokenPairData(pools: PoolInput[], balancerQueriesAddr
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
             // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundred = ((parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100).toFixed(20);
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundred}`, tokenPair.tokenA.decimals);
+            const oneHundred = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            let oneHundredStr = oneHundred.toFixed(20);
+            if (oneHundredStr.includes('e+')) {
+                oneHundredStr = oneHundred.toLocaleString('fullwide', { useGrouping: false });
+            }
+            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredStr}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
             addAToBPriceCallsToMulticaller(tokenPair, balancerQueriesAddress, multicaller);
