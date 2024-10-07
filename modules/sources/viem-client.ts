@@ -42,6 +42,40 @@ const chain2ViemChain = {
 export const getViemClient = (chain: Chain) => {
     return createPublicClient({
         chain: chain2ViemChain[chain],
-        transport: http(config[chain]?.rpcUrl),
+        transport: http(config[chain]?.rpcUrl, {
+            onFetchRequest(request) {
+                if (process.env.DEBUG) {
+                    const reader = request.body?.getReader();
+                    if (!reader) {
+                        return;
+                    }
+                    let body = '';
+
+                    reader
+                        .read()
+                        .then(function processText({ done, value }) {
+                            if (done) {
+                                return;
+                            }
+                            // value for fetch streams is a Uint8Array
+                            body += value;
+                            reader.read().then(processText);
+                        })
+                        .then(() => {
+                            const json = JSON.parse(
+                                body
+                                    .split(',')
+                                    .map((code) => String.fromCharCode(parseInt(code, 10)))
+                                    .join(''),
+                            );
+                            try {
+                                console.log(json['id'], json['method'], body.length, json['params'][0]['to']);
+                            } catch (e) {
+                                console.log(json['id'], json['method'], body.length);
+                            }
+                        });
+                }
+            },
+        }),
     });
 };
