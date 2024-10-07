@@ -52,7 +52,7 @@ export class PoolOnChainDataService {
             },
         });
 
-        const state = await fetchOnChainPoolState(filteredPools, ['ZKEVM', 'FANTOM'].includes(chain) ? 256 : 1024);
+        const state = await fetchOnChainPoolState(filteredPools, ['ZKEVM', 'FANTOM'].includes(chain) ? 8192 : 32768);
 
         const operations = [];
         for (const pool of filteredPools) {
@@ -102,15 +102,19 @@ export class PoolOnChainDataService {
         const onchainResults = await fetchOnChainPoolData(
             filteredPools,
             this.options.vaultAddress,
-            ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048,
+            ['ZKEVM', 'FANTOM'].includes(chain) ? 8192 : 32768,
         );
         const tokenPairData = await fetchTokenPairData(
             filteredPools,
             this.options.balancerQueriesAddress,
-            ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048,
+            ['ZKEVM', 'FANTOM'].includes(chain) ? 8192 : 32768,
         );
         const gyroFees = await (this.options.gyroConfig
-            ? fetchOnChainGyroFees(gyroPools, this.options.gyroConfig, ['ZKEVM', 'FANTOM'].includes(chain) ? 512 : 2048)
+            ? fetchOnChainGyroFees(
+                  gyroPools,
+                  this.options.gyroConfig,
+                  ['ZKEVM', 'FANTOM'].includes(chain) ? 8192 : 32768,
+              )
             : Promise.resolve({} as { [address: string]: string }));
 
         const operations = [];
@@ -239,12 +243,12 @@ export class PoolOnChainDataService {
                                     balanceUSD:
                                         poolToken.address === pool.address
                                             ? 0
-                                            : tokenPrices.find(
+                                            : (tokenPrices.find(
                                                   (tokenPrice) =>
                                                       tokenPrice.tokenAddress.toLowerCase() ===
                                                           poolToken.address.toLowerCase() &&
                                                       tokenPrice.chain === poolToken.chain,
-                                              )?.price || 0 * parseFloat(balance),
+                                              )?.price || 0) * parseFloat(balance),
                                 },
                                 update: {
                                     blockNumber,
@@ -254,12 +258,12 @@ export class PoolOnChainDataService {
                                     balanceUSD:
                                         poolToken.address === pool.address
                                             ? 0
-                                            : tokenPrices.find(
+                                            : (tokenPrices.find(
                                                   (tokenPrice) =>
                                                       tokenPrice.tokenAddress.toLowerCase() ===
                                                           poolToken.address.toLowerCase() &&
                                                       tokenPrice.chain === poolToken.chain,
-                                              )?.price || 0 * parseFloat(balance),
+                                              )?.price || 0) * parseFloat(balance),
                                 },
                             }),
                         );
