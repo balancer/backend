@@ -5,7 +5,6 @@ import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 import type { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import type { ViemClient } from '../../sources/types';
 import { SubgraphPoolUpsertData, subgraphPoolUpsert } from '../../sources/transformers/subgraph-pool-upsert';
-import { formatUnits } from 'viem';
 
 /**
  * Gets a list of pool ids and fetches the data from the subgraph and rpc, and then upserts into the database.
@@ -111,6 +110,7 @@ export const upsertPools = async (
                         rate: 1n,
                         paysYieldFees: false,
                         isErc4626: false,
+                        scalingFactor: undefined,
                     })),
                 },
                 chain,

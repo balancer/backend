@@ -1885,7 +1885,7 @@ export const schema = gql`
         priceRateProviderData: GqlPriceRateProviderData
 
         """
-        The factor by which the token balance needs to be scaled by the vault.
+        Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only.
         """
         scalingFactor: BigDecimal
 
