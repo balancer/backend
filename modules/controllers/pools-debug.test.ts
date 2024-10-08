@@ -1,7 +1,7 @@
 import { prisma } from '../../prisma/prisma-client';
 import { poolService } from '../pool/pool.service';
-import { PoolController } from './pool-controller';
 import { CowAmmController } from './cow-amm-controller';
+import { PoolController } from './v3';
 
 describe('pool controller debugging', () => {
     it('delete reload v3 pools', async () => {
@@ -23,23 +23,23 @@ describe('pool controller debugging', () => {
     }, 5000000);
 
     it('update surplus apr', async () => {
-        await CowAmmController().addPools('1');
-        // await CowAmmController().addPools('1');
-        await CowAmmController().syncSwaps('1');
-        // await CowAmmController().syncSwaps('1');
-        await CowAmmController().syncJoinExits('1');
-        await CowAmmController().updateVolumeAndFees('1');
+        await CowAmmController().addPools('MAINNET');
+        // await CowAmmController().addPools('MAINNET');
+        await CowAmmController().syncSwaps('MAINNET');
+        // await CowAmmController().syncSwaps('MAINNET');
+        await CowAmmController().syncJoinExits('MAINNET');
+        await CowAmmController().updateVolumeAndFees('MAINNET');
         await CowAmmController().updateSurplusAprs();
     }, 5000000);
 
     it('cow snapshots', async () => {
-        await CowAmmController().addPools('1');
-        // await CowAmmController().addPools('1');
-        await CowAmmController().syncSwaps('1');
-        // await CowAmmController().syncSwaps('1');
-        await CowAmmController().syncJoinExits('1');
-        await CowAmmController().updateVolumeAndFees('1');
-        await CowAmmController().syncSnapshots('1')
+        await CowAmmController().addPools('MAINNET');
+        // await CowAmmController().addPools('MAINNET');
+        await CowAmmController().syncSwaps('MAINNET');
+        // await CowAmmController().syncSwaps('MAINNET');
+        await CowAmmController().syncJoinExits('MAINNET');
+        await CowAmmController().updateVolumeAndFees('MAINNET');
+        await CowAmmController().syncSnapshots('MAINNET');
         await CowAmmController().updateSurplusAprs();
     }, 5000000);
 

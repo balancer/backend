@@ -83,7 +83,6 @@ extend type Query {
 extend type Mutation {
     poolSyncAllPoolsFromSubgraph: [String!]!
     poolUpdateLiquidityValuesForAllPools: String!
-    poolUpdateVolumeAndFeeValuesForAllPools: String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!

@@ -1,10 +1,9 @@
 import { poolService } from './pool.service';
 import { GqlChain, Resolvers } from '../../schema';
 import { isAdminRoute } from '../auth/auth-context';
-import { prisma } from '../../prisma/prisma-client';
 import { networkContext } from '../network/network-context.service';
 import { headerChain } from '../context/header-chain';
-import { CowAmmController, EventsQueryController, SnapshotsController, V2, V3 } from '../controllers';
+import { CowAmmController, EventsQueryController, SnapshotsController, PoolController } from '../controllers';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 
 const balancerResolvers: Resolvers = {
@@ -112,20 +111,6 @@ const balancerResolvers: Resolvers = {
 
             return poolService.syncAllPoolsFromSubgraph();
         },
-        poolUpdateLiquidityValuesForAllPools: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.updateLiquidityValuesForPools();
-
-            return 'success';
-        },
-        poolUpdateVolumeAndFeeValuesForAllPools: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await poolService.updateVolumeAndFeeValuesForPools();
-
-            return 'success';
-        },
         poolReloadAllPoolAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
@@ -169,7 +154,7 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await V2.PoolsController().syncOnchainDataForAllPoolsV2(chain);
+                    await PoolController().syncOnchainDataForAllPoolsV2(chain);
                     result.push({ type: 'v2', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'v2', chain, success: false, error: `${e}` });
@@ -185,7 +170,7 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await V3.PoolController().reloadPoolsV3(chain);
+                    await PoolController().reloadPoolsV3(chain);
                     result.push({ type: 'v3', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'v3', chain, success: false, error: `${e}` });
