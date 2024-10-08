@@ -7,6 +7,7 @@ import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/rel
 import { blocksSubgraphService } from '../../subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { oneDayInMinutes } from '../../common/time';
 import {
+    Chain,
     PrismaReliquaryFarmSnapshot,
     PrismaReliquaryLevelSnapshot,
     PrismaReliquaryTokenBalanceSnapshot,
@@ -25,13 +26,6 @@ export class ReliquarySnapshotService {
         });
     }
 
-    public async getSnapshotForFarm(farmId: number, timestamp: number) {
-        return prisma.prismaReliquaryFarmSnapshot.findFirst({
-            where: { farmId: `${farmId}`, timestamp: timestamp, chain: networkContext.chain },
-            include: { levelBalances: true },
-        });
-    }
-
     public async syncLatestSnapshotsForAllFarms() {
         const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
@@ -44,15 +38,13 @@ export class ReliquarySnapshotService {
         );
         const farmIdsInSubgraphSnapshots = _.uniq(filteredSnapshots.map((snapshot) => snapshot.farmId));
 
-        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots);
+        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots, networkContext.chain);
     }
 
-    public async loadAllSnapshotsForFarm(farmId: number) {
+    public async loadAllSnapshotsForFarm(farmId: number, excludedFarmIds: string[], chain: Chain) {
         const farmSnapshots = await this.reliquarySubgraphService.getAllFarmSnapshotsForFarm(farmId);
-        const filteredSnapshots = farmSnapshots.filter(
-            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
-        );
-        await this.upsertFarmSnapshots([farmId], filteredSnapshots);
+        const filteredSnapshots = farmSnapshots.filter((farm) => !excludedFarmIds.includes(farm.farmId.toString()));
+        await this.upsertFarmSnapshots([farmId], filteredSnapshots, chain);
     }
 
     private async upsertFarmSnapshots(
@@ -66,6 +58,7 @@ export class ReliquarySnapshotService {
             relicCount: number;
             farmId: number;
         }[],
+        chain: Chain,
     ) {
         let operations: any[] = [];
         for (const farmId of farmIds) {
@@ -81,12 +74,12 @@ export class ReliquarySnapshotService {
                         : moment().utc().unix() - 1200;
 
                 const pool = await prisma.prismaPool.findFirstOrThrow({
-                    where: { staking: { some: { reliquary: { id: `${farmId}` } } }, chain: networkContext.chain },
+                    where: { staking: { some: { reliquary: { id: `${farmId}` } } }, chain: chain },
                     include: { tokens: { include: { token: true } } },
                 });
 
                 const mostRecentPoolSnapshot = await prisma.prismaPoolSnapshot.findFirstOrThrow({
-                    where: { poolId: pool.id, timestamp: { lte: timestampForSnapshot }, chain: networkContext.chain },
+                    where: { poolId: pool.id, timestamp: { lte: timestampForSnapshot }, chain: chain },
                     orderBy: { timestamp: 'desc' },
                 });
 
@@ -105,7 +98,7 @@ export class ReliquarySnapshotService {
                 const uniqueUsers = _.uniq(relicsInFarm.map((relic) => relic.userAddress));
                 const data: PrismaReliquaryFarmSnapshot = {
                     id: snapshot.id,
-                    chain: networkContext.chain,
+                    chain: chain,
                     farmId: `${snapshot.farmId}`,
                     timestamp: snapshot.snapshotTimestamp,
                     relicCount: snapshot.relicCount,
@@ -117,7 +110,7 @@ export class ReliquarySnapshotService {
                 };
                 farmOperations.push(
                     prisma.prismaReliquaryFarmSnapshot.upsert({
-                        where: { id_chain: { id: snapshot.id, chain: networkContext.chain } },
+                        where: { id_chain: { id: snapshot.id, chain: chain } },
                         create: data,
                         update: data,
                     }),
@@ -126,14 +119,14 @@ export class ReliquarySnapshotService {
                 for (const level of levelsAtBlock.poolLevels) {
                     const data: PrismaReliquaryLevelSnapshot = {
                         id: `${level.id}-${snapshot.id}`,
-                        chain: networkContext.chain,
+                        chain: chain,
                         farmSnapshotId: snapshot.id,
                         level: `${level.level}`,
                         balance: level.balance,
                     };
                     farmOperations.push(
                         prisma.prismaReliquaryLevelSnapshot.upsert({
-                            where: { id_chain: { id: `${level.id}-${snapshot.id}`, chain: networkContext.chain } },
+                            where: { id_chain: { id: `${level.id}-${snapshot.id}`, chain: chain } },
                             create: data,
                             update: data,
                         }),
@@ -143,7 +136,7 @@ export class ReliquarySnapshotService {
                 for (const token of pool.tokens) {
                     const data: PrismaReliquaryTokenBalanceSnapshot = {
                         id: `${token.id}-${snapshot.id}`,
-                        chain: networkContext.chain,
+                        chain: chain,
                         farmSnapshotId: snapshot.id,
                         address: token.address,
                         symbol: token.token.symbol,
@@ -153,7 +146,7 @@ export class ReliquarySnapshotService {
                     };
                     farmOperations.push(
                         prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
-                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: networkContext.chain } },
+                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: chain } },
                             create: data,
                             update: data,
                         }),
