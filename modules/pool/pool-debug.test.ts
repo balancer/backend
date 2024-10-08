@@ -12,28 +12,21 @@ import { PoolsController } from '../controllers/v2';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '1');
+        setRequestScopedContextValue('chainId', '10');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
         // await poolService.syncChangedPools();
         // await tokenService.updateTokenPrices(['MAINNET']);
-        await PoolsController().syncOnchainDataForPoolsV2('MAINNET', [
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+        await PoolsController().syncOnchainDataForPoolsV2('OPTIMISM', [
+            '0x408e11ec9b1751c3d00589b61cae484e07fb9e44000000000000000000000141',
         ]);
+
         const poolAfterNewSync = await poolService.getGqlPool(
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-            'MAINNET',
+            '0x408e11ec9b1751c3d00589b61cae484e07fb9e44000000000000000000000141',
+            'OPTIMISM',
         );
 
-        await poolService.updateLiquidityValuesForPools();
-        const poolAfterUpdateLiq = await poolService.getGqlPool(
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-            'MAINNET',
-        );
-
-        for (let i = 0; i < poolAfterNewSync.poolTokens.length; i++) {
-            expect(poolAfterNewSync.poolTokens[i].balanceUSD).toBe(poolAfterUpdateLiq.poolTokens[i].balanceUSD);
-        }
+        expect(poolAfterNewSync.dynamicData.isPaused).toBe(true);
     }, 5000000);
 
     it('sync aprs', async () => {

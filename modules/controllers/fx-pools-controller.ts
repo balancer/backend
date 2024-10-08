@@ -1,5 +1,5 @@
-import config from '../../../config';
-import { syncLatestFXPrices } from '../../token/latest-fx-price';
+import config from '../../config';
+import { syncLatestFXPrices } from '../token/latest-fx-price';
 import { Chain } from '@prisma/client';
 
 export function FXPoolsController() {

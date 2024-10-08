@@ -23,9 +23,10 @@ import {
     SnapshotsController,
     AprsController,
     ContentController,
-    V2,
-    V3,
+    PoolController,
+    EventController,
 } from '../../modules/controllers';
+import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 
 const runningJobs: Set<string> = new Set();
 
@@ -110,13 +111,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
     const chain = chainIdToChain[chainId];
     switch (name) {
         case 'sync-changed-pools':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => V2.PoolsController().syncChangedPoolsV2(chain),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncChangedPoolsV2(chain), res, next);
             break;
         case 'user-sync-wallet-balances-for-all-pools':
             await runIfNotAlreadyRunning(
@@ -140,13 +135,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'update-liquidity-for-active-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.updateLiquidityValuesForPools(), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => PoolController().updateLiquidityValuesForActivePools(chain),
+                res,
+                next,
+            );
             break;
         case 'update-liquidity-for-inactive-pools':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => poolService.updateLiquidityValuesForPools(0, 0.00000000001),
+                () => PoolController().updateLiquidityValuesForInactivePools(chain),
                 res,
                 next,
             );
@@ -173,10 +174,10 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-new-pools-from-subgraph':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.PoolsController().addPoolsV2(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV2(chain), res, next);
             break;
         case 'sync-join-exits-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => V2.EventController().syncJoinExitsV2(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-tokens-from-pool-tokens':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
@@ -185,7 +186,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V2.PoolsController().updateLiquidity24hAgoV2(chain),
+                () => PoolController().updateLiquidity24hAgoV2(chain),
                 res,
                 next,
             );
@@ -251,7 +252,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'update-fee-volume-yield-all-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.updateFeeVolumeYieldForAllPools(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => updateVolumeAndFees(chain), res, next);
             break;
         case 'sync-vebal-balances':
             await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(), res, next);
@@ -299,19 +300,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         // V3 Jobs
         case 'add-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().addPoolsV3(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV3(chain), res, next);
             break;
         case 'sync-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncPoolsV3(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncPoolsV3(chain), res, next);
             break;
         case 'sync-hook-data':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.PoolController().syncHookData(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncHookData(chain), res, next);
             break;
         case 'sync-swaps-v3':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V3.EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
+                () => EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
                 res,
                 next,
             );
@@ -320,19 +321,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V2.EventController().syncSwapsUpdateVolumeAndFeesV2(chain),
+                () => EventController().syncSwapsUpdateVolumeAndFeesV2(chain),
                 res,
                 next,
             );
             break;
         case 'sync-join-exits-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => V3.EventController().syncJoinExitsV3(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV3(chain), res, next);
             break;
         case 'update-liquidity-24h-ago-v3':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => V3.PoolController().updateLiquidity24hAgoV3(chain),
+                () => PoolController().updateLiquidity24hAgoV3(chain),
                 res,
                 next,
             );

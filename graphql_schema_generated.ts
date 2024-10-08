@@ -3138,7 +3138,6 @@ export const schema = gql`
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolUpdateLifetimeValuesForAllPools: String!
         poolUpdateLiquidityValuesForAllPools: String!
-        poolUpdateVolumeAndFeeValuesForAllPools: String!
         protocolCacheMetrics: String!
         sftmxSyncStakingData: String!
         sftmxSyncWithdrawalRequests: String!

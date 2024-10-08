@@ -2114,7 +2114,6 @@ export interface Mutation {
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolUpdateLifetimeValuesForAllPools: Scalars['String'];
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
-    poolUpdateVolumeAndFeeValuesForAllPools: Scalars['String'];
     protocolCacheMetrics: Scalars['String'];
     sftmxSyncStakingData: Scalars['String'];
     sftmxSyncWithdrawalRequests: Scalars['String'];
@@ -4796,7 +4795,6 @@ export type MutationResolvers<
     poolSyncAllPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
     poolUpdateLifetimeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolUpdateLiquidityValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    poolUpdateVolumeAndFeeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     protocolCacheMetrics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     sftmxSyncStakingData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     sftmxSyncWithdrawalRequests?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
