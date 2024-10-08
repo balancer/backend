@@ -36,6 +36,7 @@ import {
     deleteGaugeStakingForAllPools,
     deleteMasterchefStakingForAllPools,
     deleteReliquaryStakingForAllPools,
+    loadReliquarySnapshotsForAllFarms,
     syncGaugeStakingForPools,
     syncMasterchefStakingForPools,
     syncReliquaryStakingForPools,
@@ -216,23 +217,11 @@ export class PoolService {
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        if (networkContext.data.subgraphs.reliquary) {
-            const reliquarySnapshotService = new ReliquarySnapshotService(
-                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
-            );
-            await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
-            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
-            await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
-            const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
-            const farmIds = farms.map((farm) => parseFloat(farm.id));
-            for (const farmId of farmIds) {
-                await reliquarySnapshotService.loadAllSnapshotsForFarm(
-                    farmId,
-                    networkContext.data.reliquary!.excludedFarmIds,
-                    this.chain,
-                );
-            }
-        }
+        loadReliquarySnapshotsForAllFarms(
+            this.chain,
+            networkContext.data.subgraphs.reliquary,
+            networkContext.data.reliquary?.excludedFarmIds,
+        );
     }
 
     public async updateLifetimeValuesForAllPools() {
