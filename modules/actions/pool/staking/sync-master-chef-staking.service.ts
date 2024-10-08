@@ -1,4 +1,3 @@
-import { PoolStakingService } from '../../../pool/pool-types';
 import { MasterchefSubgraphService } from '../../../subgraphs/masterchef-subgraph/masterchef.service';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
