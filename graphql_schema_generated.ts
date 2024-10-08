@@ -352,6 +352,11 @@ export const schema = gql`
         factory: Bytes
 
         """
+        Hook assigned to a pool
+        """
+        hook: Hook
+
+        """
         The pool id. This is equal to the address for protocolVersion 3 pools
         """
         id: ID!
@@ -360,6 +365,11 @@ export const schema = gql`
         Data specific to gyro/fx pools
         """
         lambda: String
+
+        """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement
 
         """
         The name of the pool as per contract
@@ -849,6 +859,7 @@ export const schema = gql`
         totalLiquidityAtlTimestamp: Int!
         totalShares: BigDecimal!
         totalShares24hAgo: BigDecimal!
+        totalSupply: BigDecimal!
         volume24h: BigDecimal!
         volume24hAth: BigDecimal!
         volume24hAthTimestamp: Int!
@@ -1015,6 +1026,7 @@ export const schema = gql`
         createTime: GqlPoolTimePeriod
         filterIn: [String!]
         filterNotIn: [String!]
+        hookAddressIn: [String!]
         idIn: [String!]
         idNotIn: [String!]
         minTvl: Float
@@ -1871,6 +1883,11 @@ export const schema = gql`
         Additional data for the price rate provider, such as reviews or warnings.
         """
         priceRateProviderData: GqlPriceRateProviderData
+
+        """
+        The factor by which the token balance needs to be scaled by the vault.
+        """
+        scalingFactor: BigDecimal
 
         """
         Symbol of the pool token.

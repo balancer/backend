@@ -443,6 +443,14 @@ type GqlPoolAggregator {
     Data specific to stable pools
     """
     amp: BigInt
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
+    """
+    Hook assigned to a pool
+    """
+    hook: Hook
 }
 
 """
@@ -567,6 +575,7 @@ type GqlPoolDynamicData {
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!
+    totalSupply: BigDecimal!
     #data that has USD values
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
@@ -1038,6 +1047,10 @@ type GqlPoolTokenDetail {
     """
     weight: BigDecimal
     """
+    The factor by which the token balance needs to be scaled by the vault.
+    """
+    scalingFactor: BigDecimal
+    """
     Indicates whether this token is a BPT and therefor has a nested pool.
     """
     hasNestedPool: Boolean!
@@ -1266,6 +1279,7 @@ input GqlPoolFilter {
     userAddress: String
     protocolVersionIn: [Int!]
     minTvl: Float
+    hookAddressIn: [String!]
 }
 
 type GqlPoolTokenExpanded {
