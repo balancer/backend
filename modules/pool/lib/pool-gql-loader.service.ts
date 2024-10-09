@@ -516,9 +516,11 @@ export class PoolGqlLoaderService {
                       }
                     : {}),
             },
-            hook: {
-                address: { in: where?.hookAddressIn || undefined },
-            },
+            ...(where?.hasHook && where.hasHook
+                ? { hook: { isNot: null } }
+                : where?.hasHook && !where.hasHook
+                ? { hook: { is: null } }
+                : {}),
         };
 
         if (!textSearch) {

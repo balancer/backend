@@ -1026,7 +1026,7 @@ export const schema = gql`
         createTime: GqlPoolTimePeriod
         filterIn: [String!]
         filterNotIn: [String!]
-        hookAddressIn: [String!]
+        hasHook: Boolean
         idIn: [String!]
         idNotIn: [String!]
         minTvl: Float
