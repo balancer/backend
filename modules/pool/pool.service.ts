@@ -160,6 +160,9 @@ export class PoolService {
         await this.poolOnChainDataService.updateOnChainData(poolIds, this.chain, blockNumber, tokenPrices);
     }
 
+    /**
+     * Deprecated in favor of StakingController().syncStaking(chain)
+     */
     public async syncStakingForPools(chains: Chain[]) {
         for (const chain of chains) {
             const networkconfig = AllNetworkConfigsKeyedOnChain[chain];

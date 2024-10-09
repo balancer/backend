@@ -10,6 +10,7 @@ import {
     PoolController,
     EventController,
     PoolMutationController,
+    StakingController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -44,6 +45,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().reloadPoolsV3(chainIdToChain[chain]);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
+    } else if (job === 'sync-staking') {
+        return StakingController().syncStaking(chain);
     } else if (job === 'sync-join-exits-v3') {
         return EventController().syncJoinExitsV3(chain);
     } else if (job === 'sync-join-exits-v2') {

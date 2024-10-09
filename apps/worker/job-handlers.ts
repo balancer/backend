@@ -25,6 +25,7 @@ import {
     ContentController,
     PoolController,
     EventController,
+    StakingController,
 } from '../../modules/controllers';
 import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 
@@ -195,13 +196,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => blocksSubgraphService.cacheAverageBlockTime(), res, next);
             break;
         case 'sync-staking-for-pools':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => poolService.syncStakingForPools([networkContext.chain]),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => StakingController().syncStaking(chain), res, next);
             break;
         case 'cache-protocol-data':
             await runIfNotAlreadyRunning(
