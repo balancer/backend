@@ -247,6 +247,12 @@ export default <NetworkData>{
                 path: 'collateralRewards.{symbol == "USDC"}.vaultApr',
                 isIbYield: true,
             },
+            wUSDL: {
+                tokenAddress: '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
+                sourceUrl: 'https://usdl-apy.replit.app/usdl_apy',
+                path: 'apy',
+                isIbYield: true,
+            },
         },
     },
     gyro: {
