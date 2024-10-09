@@ -106,6 +106,8 @@ export default <NetworkData>{
                         aTokenAddress: '0x6d80113e533a2c0fe82eabd35f1875dcea89ea97',
                         wrappedTokens: {
                             stataAvaWAVAX: '0xa291ae608d8854cdbf9838e28e9badcf10181669',
+                            stataAvaWAVAX2: '0x6a02c7a974f1f13a67980c80f774ec1d2ed8f98d',
+
                         },
                     },
                     wBTC: {
