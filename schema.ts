@@ -679,7 +679,7 @@ export interface GqlPoolFilter {
     createTime?: InputMaybe<GqlPoolTimePeriod>;
     filterIn?: InputMaybe<Array<Scalars['String']>>;
     filterNotIn?: InputMaybe<Array<Scalars['String']>>;
-    hookAddressIn?: InputMaybe<Array<Scalars['String']>>;
+    hasHook?: InputMaybe<Scalars['Boolean']>;
     idIn?: InputMaybe<Array<Scalars['String']>>;
     idNotIn?: InputMaybe<Array<Scalars['String']>>;
     minTvl?: InputMaybe<Scalars['Float']>;
