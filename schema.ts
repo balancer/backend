@@ -229,10 +229,14 @@ export interface GqlPoolAggregator {
     epsilon?: Maybe<Scalars['String']>;
     /** The factory contract address from which the pool was created. */
     factory?: Maybe<Scalars['Bytes']>;
+    /** Hook assigned to a pool */
+    hook?: Maybe<Hook>;
     /** The pool id. This is equal to the address for protocolVersion 3 pools */
     id: Scalars['ID'];
     /** Data specific to gyro/fx pools */
     lambda?: Maybe<Scalars['String']>;
+    /** Liquidity management settings for v3 pools. */
+    liquidityManagement?: Maybe<LiquidityManagement>;
     /** The name of the pool as per contract */
     name: Scalars['String'];
     /** The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP. */
@@ -551,6 +555,7 @@ export interface GqlPoolDynamicData {
     totalLiquidityAtlTimestamp: Scalars['Int'];
     totalShares: Scalars['BigDecimal'];
     totalShares24hAgo: Scalars['BigDecimal'];
+    totalSupply: Scalars['BigDecimal'];
     volume24h: Scalars['BigDecimal'];
     volume24hAth: Scalars['BigDecimal'];
     volume24hAthTimestamp: Scalars['Int'];
@@ -674,6 +679,7 @@ export interface GqlPoolFilter {
     createTime?: InputMaybe<GqlPoolTimePeriod>;
     filterIn?: InputMaybe<Array<Scalars['String']>>;
     filterNotIn?: InputMaybe<Array<Scalars['String']>>;
+    hookAddressIn?: InputMaybe<Array<Scalars['String']>>;
     idIn?: InputMaybe<Array<Scalars['String']>>;
     idNotIn?: InputMaybe<Array<Scalars['String']>>;
     minTvl?: InputMaybe<Scalars['Float']>;
@@ -1324,6 +1330,8 @@ export interface GqlPoolTokenDetail {
     priceRateProvider?: Maybe<Scalars['String']>;
     /** Additional data for the price rate provider, such as reviews or warnings. */
     priceRateProviderData?: Maybe<GqlPriceRateProviderData>;
+    /** Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only. */
+    scalingFactor?: Maybe<Scalars['BigDecimal']>;
     /** Symbol of the pool token. */
     symbol: Scalars['String'];
     /** If it is an Erc4262, this will be the underlying token if present in the API. */
@@ -3137,8 +3145,10 @@ export type GqlPoolAggregatorResolvers<
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
     epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    hook?: Resolver<Maybe<ResolversTypes['Hook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
@@ -3396,6 +3406,7 @@ export type GqlPoolDynamicDataResolvers<
     totalLiquidityAtlTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     totalShares?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     totalShares24hAgo?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    totalSupply?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     volume24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     volume24hAth?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     volume24hAthTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -4069,6 +4080,7 @@ export type GqlPoolTokenDetailResolvers<
     priceRate?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     priceRateProvider?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     priceRateProviderData?: Resolver<Maybe<ResolversTypes['GqlPriceRateProviderData']>, ParentType, ContextType>;
+    scalingFactor?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     underlyingToken?: Resolver<Maybe<ResolversTypes['GqlToken']>, ParentType, ContextType>;
     weight?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
