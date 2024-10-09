@@ -41,7 +41,7 @@ export function poolTokensDynamicDataTransformer(
             blockNumber: Number(poolData.blockNumber),
             balance: formatUnits(balance, subgraphToken.decimals),
             priceRate: String(rate),
-            scalingFactor: scalingFactor ? String(scalingFactor) : null,
+            // scalingFactor: scalingFactor ? String(scalingFactor) : null,
             weight: poolData.weights ? poolData.weights[token.index] ?? null : null,
         };
     });
