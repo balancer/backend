@@ -8,7 +8,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
 import { ContentController } from '../controllers/content-controller';
 import { chainToIdMap } from '../network/network-config';
-import { PoolsController } from '../controllers/v2';
+import { PoolController } from '../controllers';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
@@ -17,14 +17,9 @@ describe('pool debugging', () => {
         // await poolService.syncAllPoolsFromSubgraph();
         // await poolService.syncChangedPools();
         // await tokenService.updateTokenPrices(['MAINNET']);
-        await PoolsController().syncOnchainDataForPoolsV2('OPTIMISM', [
-            '0x408e11ec9b1751c3d00589b61cae484e07fb9e44000000000000000000000141',
-        ]);
+        await PoolController().reloadPoolsV3('SEPOLIA');
 
-        const poolAfterNewSync = await poolService.getGqlPool(
-            '0x408e11ec9b1751c3d00589b61cae484e07fb9e44000000000000000000000141',
-            'OPTIMISM',
-        );
+        const poolAfterNewSync = await poolService.getGqlPool('0x8fc07bcf9b88ace84c7523248dc4a85f638c9536', 'SEPOLIA');
 
         expect(poolAfterNewSync.dynamicData.isPaused).toBe(true);
     }, 5000000);
