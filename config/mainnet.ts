@@ -1,6 +1,5 @@
 import { BigNumber } from 'ethers';
 import { env } from '../apps/env';
-import { syncReliquaryStakingForPools } from '../modules/actions/pool/staking';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
 const underlyingTokens = {

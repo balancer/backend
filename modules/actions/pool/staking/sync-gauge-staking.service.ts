@@ -22,7 +22,6 @@ import type { JsonFragment } from '@ethersproject/abi';
 import { Multicaller3 } from '../../../web3/multicaller3';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
-import * as Sentry from '@sentry/node';
 
 interface GaugeRewardData {
     [address: string]: {

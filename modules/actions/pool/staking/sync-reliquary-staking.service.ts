@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
+import { ReliquarySnapshotService } from '../../../pool/lib/reliquary-snapshot.service';
 
 export const syncReliquaryStakingForPools = async (
     chain: Chain,
@@ -128,12 +129,32 @@ export const deleteReliquaryStakingForAllPools = async (reloadStakingTypes: Pris
         // need to remove snapshots as well as they have a FK in reliquary staking
         await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: chain } });
         await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: chain } });
-        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: chain } });
         await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: chain } });
         await prisma.prismaUserRelicSnapshot.deleteMany({});
 
         await prisma.prismaPoolStakingReliquaryFarmLevel.deleteMany({ where: { chain: chain } });
         await prisma.prismaPoolStakingReliquaryFarm.deleteMany({ where: { chain: chain } });
         await prisma.prismaPoolStaking.deleteMany({ where: { type: 'RELIQUARY', chain: chain } });
+    }
+};
+
+export const loadReliquarySnapshotsForAllFarms = async (
+    chain: Chain,
+    reliquarySubgraphUrl?: string,
+    excludedFarmIds: string[] = [],
+) => {
+    if (reliquarySubgraphUrl) {
+        const reliquarySnapshotService = new ReliquarySnapshotService(
+            new ReliquarySubgraphService(reliquarySubgraphUrl),
+        );
+        await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain } });
+        await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain } });
+        await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain } });
+
+        const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain } });
+        const farmIds = farms.map((farm) => parseFloat(farm.id));
+        for (const farmId of farmIds) {
+            await reliquarySnapshotService.loadAllSnapshotsForFarm(farmId, excludedFarmIds, chain);
+        }
     }
 };
