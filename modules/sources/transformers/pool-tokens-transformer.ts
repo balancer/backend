@@ -19,7 +19,7 @@ export function poolTokensTransformer(poolData: JoinedSubgraphPool, chain: Chain
 
 export function poolTokensDynamicDataTransformer(
     poolData: JoinedSubgraphPool,
-    onchainTokensData: { [address: string]: { balance: bigint; rate: bigint } },
+    onchainTokensData: { [address: string]: { balance: bigint; rate: bigint; scalingFactor?: bigint } },
     chain: Chain,
 ) {
     const tokens = poolData.tokens ?? [];
@@ -29,7 +29,8 @@ export function poolTokensDynamicDataTransformer(
         const subgraphToken = poolData.tokens.find((t) => t.address === token.address);
         const onchainTokenData = onchainTokensData[token.address];
         const balance = onchainTokenData?.balance ?? 0n;
-        const rate = onchainTokenData?.rate ?? 0n;
+        const rate = onchainTokenData?.rate ?? 1000000000000000000n;
+        const scalingFactor = onchainTokenData?.scalingFactor ?? undefined;
 
         if (!subgraphToken) throw new Error(`Token ${token.address} not found in subgraph data`);
 
@@ -40,6 +41,7 @@ export function poolTokensDynamicDataTransformer(
             blockNumber: Number(poolData.blockNumber),
             balance: formatUnits(balance, subgraphToken.decimals),
             priceRate: String(rate),
+            // scalingFactor: scalingFactor ? String(scalingFactor) : null,
             weight: poolData.weights ? poolData.weights[token.index] ?? null : null,
         };
     });

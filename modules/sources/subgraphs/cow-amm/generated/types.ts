@@ -1252,6 +1252,7 @@ export type Swap = {
     __typename?: 'Swap';
     blockNumber: Scalars['BigInt'];
     blockTimestamp: Scalars['BigInt'];
+    expectedAmountOut?: Maybe<Scalars['BigDecimal']>;
     id: Scalars['Bytes'];
     logIndex: Scalars['BigInt'];
     pool: Pool;
@@ -1289,6 +1290,14 @@ export type Swap_Filter = {
     blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
     blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
     blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    expectedAmountOut?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_gt?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_gte?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    expectedAmountOut_lt?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_lte?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_not?: InputMaybe<Scalars['BigDecimal']>;
+    expectedAmountOut_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     id?: InputMaybe<Scalars['Bytes']>;
     id_contains?: InputMaybe<Scalars['Bytes']>;
     id_gt?: InputMaybe<Scalars['Bytes']>;
@@ -1477,6 +1486,7 @@ export type Swap_Filter = {
 export enum Swap_OrderBy {
     BlockNumber = 'blockNumber',
     BlockTimestamp = 'blockTimestamp',
+    ExpectedAmountOut = 'expectedAmountOut',
     Id = 'id',
     LogIndex = 'logIndex',
     Pool = 'pool',

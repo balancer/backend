@@ -8,32 +8,30 @@ import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
 import { ContentController } from '../controllers/content-controller';
 import { chainToIdMap } from '../network/network-config';
-import { PoolsController } from '../controllers/v2';
+import { PoolController } from '../controllers';
 describe('pool debugging', () => {
     it('sync pools', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '1');
+        setRequestScopedContextValue('chainId', '10');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
         // await poolService.syncChangedPools();
         // await tokenService.updateTokenPrices(['MAINNET']);
-        await PoolsController().syncOnchainDataForPoolsV2('MAINNET', [
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-        ]);
-        const poolAfterNewSync = await poolService.getGqlPool(
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-            'MAINNET',
-        );
+        // await PoolController().reloadPoolsV3('SEPOLIA');
 
-        await poolService.updateLiquidityValuesForPools();
-        const poolAfterUpdateLiq = await poolService.getGqlPool(
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-            'MAINNET',
-        );
+        const allPools = await poolService.getGqlPools({ where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] } });
 
-        for (let i = 0; i < poolAfterNewSync.poolTokens.length; i++) {
-            expect(poolAfterNewSync.poolTokens[i].balanceUSD).toBe(poolAfterUpdateLiq.poolTokens[i].balanceUSD);
-        }
+        const allPoolsHooks = await poolService.getGqlPools({
+            where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3], hasHook: true },
+        });
+        const allPoolsNoHooks = await poolService.getGqlPools({
+            where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3], hasHook: false },
+        });
+        console.log(allPools.length);
+
+        // const poolAfterNewSync = await poolService.getGqlPool('0x8fc07bcf9b88ace84c7523248dc4a85f638c9536', 'SEPOLIA');
+
+        // expect(poolAfterNewSync.dynamicData.isPaused).toBe(true);
     }, 5000000);
 
     it('sync aprs', async () => {

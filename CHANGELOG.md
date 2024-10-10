@@ -1,5 +1,18 @@
 # backend
 
+## 1.21.6
+
+### Patch Changes
+
+-   4bd3844: rename polygon native asset from MATIC to POL
+-   33bac59: Add stataAvaWAVAX2 APR hanlder
+-   9d8e6de: add scalingfactor, liquidity mangement and default filters to aggregator query
+-   716e7f0: move swap service to actions
+-   92adb18: fix paused state parsing issue
+-   f613949: change hook filter to bool
+-   ebc0eaf: feat: allow stable pool routing for v3
+-   a7ed429: adding wUSDL apr on arbitrum
+
 ## 1.21.5
 
 ### Patch Changes

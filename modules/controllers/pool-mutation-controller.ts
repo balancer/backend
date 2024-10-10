@@ -1,11 +1,11 @@
-import config from '../../../config';
-import { prisma } from '../../../prisma/prisma-client';
-import { syncPools } from '../../actions/pool/v3/sync-pools';
-import { syncSwaps } from '../../actions/pool/v3/sync-swaps';
-import { syncTokenPairs } from '../../actions/pool/v3/sync-tokenpairs';
-import { updateVolumeAndFees } from '../../actions/pool/update-volume-and-fees';
-import { getVaultSubgraphClient } from '../../sources/subgraphs';
-import { getViemClient } from '../../sources/viem-client';
+import config from '../../config';
+import { prisma } from '../../prisma/prisma-client';
+import { syncPools } from '../actions/pool/v3/sync-pools';
+import { syncSwaps } from '../actions/pool/v3/sync-swaps';
+import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
+import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
+import { getVaultSubgraphClient } from '../sources/subgraphs';
+import { getViemClient } from '../sources/viem-client';
 import { Chain } from '@prisma/client';
 
 /**
@@ -19,7 +19,7 @@ export function PoolMutationController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        async loadSwapsFeesVolumeForAllPools(chain: Chain) {
+        async loadSwapsFeesVolumeForAllPoolsV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3 },
             } = config[chain];

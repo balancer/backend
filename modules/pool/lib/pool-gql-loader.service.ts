@@ -188,6 +188,14 @@ export class PoolGqlLoaderService {
 
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
+            where: {
+                ...this.mapQueryArgsToPoolQuery(args).where,
+                dynamicData: {
+                    swapEnabled: true,
+                    isPaused: false,
+                    isInRecoveryMode: false,
+                },
+            },
             include: {
                 ...this.getPoolInclude(),
             },
@@ -508,6 +516,11 @@ export class PoolGqlLoaderService {
                       }
                     : {}),
             },
+            ...(where?.hasHook !== undefined && where.hasHook
+                ? { hook: { isNot: null } }
+                : where?.hasHook !== undefined && !where.hasHook
+                ? { hook: { is: null } }
+                : {}),
         };
 
         if (!textSearch) {
@@ -561,6 +574,14 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token, token.nestedPool !== null)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
+            liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
+            hook:
+                (pool.hook &&
+                    pool.hook.dynamicData && {
+                        ...pool.hook,
+                        dynamicData: pool.hook.dynamicData as HookData,
+                    }) ||
+                undefined,
         };
 
         switch (pool.type) {
@@ -1065,6 +1086,7 @@ export class PoolGqlLoaderService {
             totalLiquidity: `${fixedNumber(totalLiquidity, 2)}`,
             totalLiquidity24hAgo: `${fixedNumber(totalLiquidity24hAgo, 2)}`,
             totalShares24hAgo,
+            totalSupply: pool.dynamicData?.totalShares || '0',
             fees24h: `${fixedNumber(fees24h, 2)}`,
             volume24h: `${fixedNumber(volume24h, 2)}`,
             surplus24h: `${fixedNumber(surplus24h, 2)}`,

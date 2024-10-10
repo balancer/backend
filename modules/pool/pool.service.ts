@@ -36,6 +36,7 @@ import {
     deleteGaugeStakingForAllPools,
     deleteMasterchefStakingForAllPools,
     deleteReliquaryStakingForAllPools,
+    loadReliquarySnapshotsForAllFarms,
     syncGaugeStakingForPools,
     syncMasterchefStakingForPools,
     syncReliquaryStakingForPools,
@@ -159,25 +160,9 @@ export class PoolService {
         await this.poolOnChainDataService.updateOnChainData(poolIds, this.chain, blockNumber, tokenPrices);
     }
 
-    public async updateLiquidityValuesForPools(minShares?: number, maxShares?: number): Promise<void> {
-        await this.poolUsdDataService.updateLiquidityValuesForPools(minShares, maxShares);
-    }
-
-    // It's needed to update the volume and fee for all pools from time to time to "reset" pools that don't have any changes and therefore aren't updated in the syncChangedPools job.
-    // We also update the yield capture in the same job, as these are very related metrics and have a similar timing requirement.
-    public async updateFeeVolumeYieldForAllPools() {
-        await this.updateVolumeAndFeeValuesForPools();
-        await this.updateYieldCaptureForAllPools();
-    }
-
-    public async updateVolumeAndFeeValuesForPools(poolIds?: string[]): Promise<void> {
-        await this.poolUsdDataService.updateVolumeAndFeeValuesForPools(poolIds);
-    }
-
-    public async updateYieldCaptureForAllPools() {
-        await this.poolUsdDataService.updateYieldCaptureForAllPools();
-    }
-
+    /**
+     * Deprecated in favor of StakingController().syncStaking(chain)
+     */
     public async syncStakingForPools(chains: Chain[]) {
         for (const chain of chains) {
             const networkconfig = AllNetworkConfigsKeyedOnChain[chain];
@@ -225,10 +210,6 @@ export class PoolService {
         await syncIncentivizedCategory();
     }
 
-    public async syncSwapsForLast48Hours(): Promise<string[]> {
-        return this.poolSwapService.syncSwapsForLast48Hours();
-    }
-
     public async syncLatestReliquarySnapshotsForAllFarms() {
         if (networkContext.data.subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(
@@ -239,19 +220,11 @@ export class PoolService {
     }
 
     public async loadReliquarySnapshotsForAllFarms() {
-        if (networkContext.data.subgraphs.reliquary) {
-            const reliquarySnapshotService = new ReliquarySnapshotService(
-                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
-            );
-            await prisma.prismaReliquaryTokenBalanceSnapshot.deleteMany({ where: { chain: this.chain } });
-            await prisma.prismaReliquaryLevelSnapshot.deleteMany({ where: { chain: this.chain } });
-            await prisma.prismaReliquaryFarmSnapshot.deleteMany({ where: { chain: this.chain } });
-            const farms = await prisma.prismaPoolStakingReliquaryFarm.findMany({ where: { chain: this.chain } });
-            const farmIds = farms.map((farm) => parseFloat(farm.id));
-            for (const farmId of farmIds) {
-                await reliquarySnapshotService.loadAllSnapshotsForFarm(farmId);
-            }
-        }
+        loadReliquarySnapshotsForAllFarms(
+            this.chain,
+            networkContext.data.subgraphs.reliquary,
+            networkContext.data.reliquary?.excludedFarmIds,
+        );
     }
 
     public async updateLifetimeValuesForAllPools() {

@@ -83,7 +83,6 @@ extend type Query {
 extend type Mutation {
     poolSyncAllPoolsFromSubgraph: [String!]!
     poolUpdateLiquidityValuesForAllPools: String!
-    poolUpdateVolumeAndFeeValuesForAllPools: String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
@@ -444,6 +443,14 @@ type GqlPoolAggregator {
     Data specific to stable pools
     """
     amp: BigInt
+    """
+    Liquidity management settings for v3 pools.
+    """
+    liquidityManagement: LiquidityManagement
+    """
+    Hook assigned to a pool
+    """
+    hook: Hook
 }
 
 """
@@ -568,6 +575,7 @@ type GqlPoolDynamicData {
     swapEnabled: Boolean!
     #fields that change often
     totalShares: BigDecimal!
+    totalSupply: BigDecimal!
     #data that has USD values
     totalLiquidity: BigDecimal!
     volume24h: BigDecimal!
@@ -1039,6 +1047,10 @@ type GqlPoolTokenDetail {
     """
     weight: BigDecimal
     """
+    Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only.
+    """
+    scalingFactor: BigDecimal
+    """
     Indicates whether this token is a BPT and therefor has a nested pool.
     """
     hasNestedPool: Boolean!
@@ -1267,6 +1279,7 @@ input GqlPoolFilter {
     userAddress: String
     protocolVersionIn: [Int!]
     minTvl: Float
+    hasHook: Boolean
 }
 
 type GqlPoolTokenExpanded {
