@@ -1,5 +1,12 @@
 # backend
 
+## 1.21.7
+
+### Patch Changes
+
+-   a159cc9: fix hardcoded protocolVersion return value in SOR paths
+-   127142c: fix protocol metrics
+
 ## 1.21.6
 
 ### Patch Changes
