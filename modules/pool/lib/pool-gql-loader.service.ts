@@ -516,9 +516,9 @@ export class PoolGqlLoaderService {
                       }
                     : {}),
             },
-            ...(where?.hasHook && where.hasHook
+            ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { isNot: null } }
-                : where?.hasHook && !where.hasHook
+                : where?.hasHook !== undefined && !where.hasHook
                 ? { hook: { is: null } }
                 : {}),
         };
