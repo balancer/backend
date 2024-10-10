@@ -322,8 +322,8 @@ class SorPathService implements SwapService {
         for (const path of paths) {
             // paths used as input for b-sdk for client
             sorPaths.push({
-                vaultVersion: 2,
-                protocolVersion: 2,
+                protocolVersion,
+                vaultVersion: protocolVersion,
                 inputAmountRaw: path.inputAmount.amount.toString(),
                 outputAmountRaw: path.outputAmount.amount.toString(),
                 tokens: path.tokens.map((token) => ({
@@ -342,8 +342,8 @@ class SorPathService implements SwapService {
         const effectivePriceReversed = outputAmount.divDownFixed(inputAmount.scale18);
 
         return {
-            vaultVersion: 2,
-            protocolVersion: 2,
+            protocolVersion,
+            vaultVersion: protocolVersion,
             paths: sorPaths,
             swapType,
             swaps: this.mapSwaps(paths, swapKind),
