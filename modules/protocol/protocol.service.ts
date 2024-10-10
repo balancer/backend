@@ -90,7 +90,7 @@ export class ProtocolService {
 
         const swaps = await prisma.prismaPoolEvent.findMany({
             select: { poolId: true, valueUSD: true, blockTimestamp: true },
-            where: { blockTimestamp: { gte: oneDayAgo }, chain },
+            where: { blockTimestamp: { gte: oneDayAgo }, chain, type: 'SWAP' },
         });
         const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
 
