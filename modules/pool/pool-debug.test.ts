@@ -19,34 +19,15 @@ describe('pool debugging', () => {
         // await tokenService.updateTokenPrices(['MAINNET']);
         // await PoolController().reloadPoolsV3('SEPOLIA');
 
-        const poolsUndefinedArr = await prisma.prismaPool.findMany({
-            where: { chain: 'SEPOLIA', protocolVersion: 3, hook: { address: { in: undefined } } },
-        });
-
-        const poolsWithHooks = await prisma.prismaPool.findMany({
-            where: { chain: 'SEPOLIA', protocolVersion: 3, hook: { isNot: null } },
-        });
-
-        const poolsEmptyArr = await prisma.prismaPool.findMany({
-            where: { chain: 'SEPOLIA', protocolVersion: 3, hook: { address: { in: [''] } } },
-        });
-
-        const poolsWithoutHooks = await prisma.prismaPool.findMany({
-            where: { chain: 'SEPOLIA', protocolVersion: 3, hook: { is: null } },
-        });
-
-        const poolsAll = await prisma.prismaPool.findMany({
-            where: { chain: 'SEPOLIA', protocolVersion: 3 },
-        });
-
         const allPools = await poolService.getGqlPools({ where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] } });
+
         const allPoolsHooks = await poolService.getGqlPools({
             where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3], hasHook: true },
         });
         const allPoolsNoHooks = await poolService.getGqlPools({
             where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3], hasHook: false },
         });
-        console.log(poolsAll.length);
+        console.log(allPools.length);
 
         // const poolAfterNewSync = await poolService.getGqlPool('0x8fc07bcf9b88ace84c7523248dc4a85f638c9536', 'SEPOLIA');
 
