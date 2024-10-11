@@ -18,7 +18,7 @@ export const getChangedPoolsV2 = async (
     vaultAddress: string,
     client: ViemClient,
     fromBlock: bigint,
-    toBlock?: bigint, //
+    toBlock: bigint,
 ) => {
     // Get Transfer logs from the vault
     const logs = await client.getLogs({
@@ -32,6 +32,5 @@ export const getChangedPoolsV2 = async (
     const changedPools = logs
         .map((log) => (log as any).args.poolId)
         .filter((value, index, self) => self.indexOf(value) === index);
-    const latestBlock = logs.reduce((max, log) => (log.blockNumber > max ? log.blockNumber : max), 0n);
-    return { changedPools, latestBlock };
+    return changedPools;
 };

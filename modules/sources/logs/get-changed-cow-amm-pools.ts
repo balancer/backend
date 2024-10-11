@@ -116,7 +116,6 @@ export const getChangedCowAmmPools = async (
     const changedPools = logs
         .map((log) => log.address.toLowerCase())
         .filter((value, index, self) => self.indexOf(value) === index);
-    const latestBlock = logs.reduce((max, log) => (log.blockNumber > max ? log.blockNumber : max), 0n);
 
-    return { changedPools, latestBlock };
+    return changedPools;
 };

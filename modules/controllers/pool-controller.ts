@@ -10,14 +10,15 @@ import { getViemClient } from '../sources/viem-client';
 import { getBlockNumbersSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
-import { Chain } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
 import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
-import { getChangedPools } from '../sources/logs/get-changed-pools';
+import { getChangedPoolsV3 } from '../sources/logs/get-changed-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { HookType } from '../network/network-config-types';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
 
 export function PoolController(tracer?: any) {
     return {
@@ -218,6 +219,8 @@ export function PoolController(tracer?: any) {
             const pools = await upsertPoolsV3(allPools, vaultClient, chain, latestBlock);
             await syncPoolsV3(pools, viemClient, vaultAddress, chain, latestBlock);
 
+            await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
+
             return pools.map(({ id }) => id);
         },
         /**
@@ -225,7 +228,7 @@ export function PoolController(tracer?: any) {
          *
          * @param chainId
          */
-        async syncPoolsV3(chain: Chain) {
+        async syncChangedPoolsV3(chain: Chain) {
             const {
                 balancer: {
                     v3: { vaultAddress, routerAddress },
@@ -237,39 +240,40 @@ export function PoolController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const fromBlock = (
-                await prisma.prismaPoolDynamicData.findFirst({
-                    where: { chain: chain },
-                    orderBy: { blockNumber: 'desc' },
-                })
-            )?.blockNumber;
+            const viemClient = getViemClient(chain);
+
+            const lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3);
+            const fromBlock = lastSyncBlock + 1;
+            const toBlock = await viemClient.getBlockNumber();
 
             // Sepolia vault deployment block, uncomment to test from the beginning
             // const fromBlock = 5274748n;
 
             // Guard against unsynced pools
-            if (!fromBlock) {
-                throw new Error(`No synced pools found for chain: ${chain}`);
+            if (fromBlock === 0) {
+                throw new Error(`No synced pools found for chain: ${chain}. Reload pools first.`);
             }
 
             const pools = await prisma.prismaPool.findMany({
                 where: { chain, protocolVersion: 3 },
             });
-            const viemClient = getViemClient(chain);
 
-            const { changedPools, latestBlock } = await getChangedPools(vaultAddress, viemClient, BigInt(fromBlock));
+            const changedPools = await getChangedPoolsV3(vaultAddress, viemClient, BigInt(fromBlock), BigInt(toBlock));
+
             const changedPoolsIds = changedPools.map((id) => id.toLowerCase());
             const poolsToSync = pools.filter((pool) => changedPoolsIds.includes(pool.id.toLowerCase())); // only sync pools that are in the database
             if (poolsToSync.length === 0) {
                 return [];
             }
-            await syncPoolsV3(poolsToSync, viemClient, vaultAddress, chain, latestBlock);
+            await syncPoolsV3(poolsToSync, viemClient, vaultAddress, chain, toBlock);
             await syncTokenPairs(
                 poolsToSync.map(({ id }) => id),
                 viemClient,
                 routerAddress,
                 chain,
             );
+
+            await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, toBlock);
 
             return poolsToSync.map(({ id }) => id);
         },

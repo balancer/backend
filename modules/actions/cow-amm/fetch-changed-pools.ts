@@ -3,7 +3,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { ViemClient } from '../../sources/viem-client';
 import { getChangedCowAmmPools } from '../../sources/logs/get-changed-cow-amm-pools';
 
-export const fetchChangedPools = async (viemClient: ViemClient, chain: Chain, fromBlock: number) => {
+export const fetchChangedPools = async (viemClient: ViemClient, chain: Chain, fromBlock: number, toBlock: number) => {
     const poolIds = await prisma.prismaPool
         .findMany({
             where: {
@@ -16,7 +16,5 @@ export const fetchChangedPools = async (viemClient: ViemClient, chain: Chain, fr
         })
         .then((pools) => pools.map((pool) => pool.id));
 
-    const { changedPools, latestBlock } = await getChangedCowAmmPools(poolIds, viemClient, BigInt(fromBlock));
-
-    return { changedPools, latestBlock };
+    return getChangedCowAmmPools(poolIds, viemClient, BigInt(fromBlock), BigInt(toBlock));
 };

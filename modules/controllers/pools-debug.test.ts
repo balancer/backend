@@ -1,7 +1,7 @@
 import { prisma } from '../../prisma/prisma-client';
 import { poolService } from '../pool/pool.service';
 import { CowAmmController } from './cow-amm-controller';
-import { PoolController } from './v3';
+import { PoolController } from './pool-controller';
 
 describe('pool controller debugging', () => {
     it('delete reload v3 pools', async () => {
@@ -20,6 +20,12 @@ describe('pool controller debugging', () => {
         pools = await poolService.getGqlPools({ where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] } });
 
         expect(pools.length).toBeGreaterThan(0);
+    }, 5000000);
+
+    it('sync pools', async () => {
+        await CowAmmController().syncPools('MAINNET');
+        // await PoolController().syncChangedPoolsV2('MAINNET');
+        await PoolController().syncChangedPoolsV3('SEPOLIA');
     }, 5000000);
 
     it('update surplus apr', async () => {
