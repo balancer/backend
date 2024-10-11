@@ -41,15 +41,7 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import {
-    Chain,
-    Prisma,
-    PrismaPoolAprType,
-    PrismaPriceRateProviderData,
-    PrismaTokenTypeOption,
-    PrismaUserStakedBalance,
-    PrismaUserWalletBalance,
-} from '@prisma/client';
+import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
@@ -96,7 +88,7 @@ export class PoolGqlLoaderService {
         return mappedPool;
     }
 
-    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion) {
+    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion | GqlPoolAggregator) {
         for (const token of mappedPool.poolTokens) {
             if (token.isErc4626) {
                 const prismaToken = await prisma.prismaToken.findUnique({
@@ -108,9 +100,12 @@ export class PoolGqlLoaderService {
                         mappedPool.chain,
                     );
                     token.underlyingToken = underlyingTokenDefinition;
-                    mappedPool.displayTokens.push();
+                    if ((mappedPool as GqlPoolUnion).displayTokens) {
+                        (mappedPool as GqlPoolUnion).displayTokens.push();
+                    }
                 }
             }
+
             if (token.hasNestedPool) {
                 for (const nestedToken of token.nestedPool!.tokens) {
                     if (nestedToken.isErc4626) {
@@ -130,7 +125,7 @@ export class PoolGqlLoaderService {
         }
     }
 
-    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion) {
+    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion | GqlPoolAggregator) {
         for (const token of mappedPool.poolTokens) {
             if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
                 const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
@@ -203,7 +198,17 @@ export class PoolGqlLoaderService {
                 ...this.getPoolInclude(),
             },
         });
-        return pools.map((pool) => this.mapPoolToAggregatorPool(pool));
+        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool));
+
+        for (const mappedPool of gqlPools) {
+            // load rate provider data into PoolTokenDetail model
+            await this.enrichWithRateproviderData(mappedPool);
+
+            // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
+            await this.enrichWithUnderlyingTokenData(mappedPool);
+        }
+
+        return gqlPools;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
