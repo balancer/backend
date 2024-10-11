@@ -1078,6 +1078,8 @@ export type PoolToken = {
     pool: Pool;
     /** Current price rate for this token */
     priceRate: Scalars['BigDecimal'];
+    /** Scaling factor for this token */
+    scalingFactor: Scalars['BigInt'];
     /** Symbol of the token */
     symbol: Scalars['String'];
     /** Total protocol swap fees collected for this token */
@@ -1232,6 +1234,14 @@ export type PoolToken_Filter = {
     priceRate_lte?: InputMaybe<Scalars['BigDecimal']>;
     priceRate_not?: InputMaybe<Scalars['BigDecimal']>;
     priceRate_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    scalingFactor?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_gt?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_gte?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    scalingFactor_lt?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_lte?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_not?: InputMaybe<Scalars['BigInt']>;
+    scalingFactor_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     symbol?: InputMaybe<Scalars['String']>;
     symbol_contains?: InputMaybe<Scalars['String']>;
     symbol_contains_nocase?: InputMaybe<Scalars['String']>;
@@ -1324,6 +1334,7 @@ export enum PoolToken_OrderBy {
     PoolTotalShares = 'pool__totalShares',
     PoolTransactionHash = 'pool__transactionHash',
     PriceRate = 'priceRate',
+    ScalingFactor = 'scalingFactor',
     Symbol = 'symbol',
     TotalProtocolSwapFee = 'totalProtocolSwapFee',
     TotalProtocolYieldFee = 'totalProtocolYieldFee',
@@ -2012,6 +2023,7 @@ export enum RateProvider_OrderBy {
     TokenName = 'token__name',
     TokenPaysYieldFees = 'token__paysYieldFees',
     TokenPriceRate = 'token__priceRate',
+    TokenScalingFactor = 'token__scalingFactor',
     TokenSymbol = 'token__symbol',
     TokenTotalProtocolSwapFee = 'token__totalProtocolSwapFee',
     TokenTotalProtocolYieldFee = 'token__totalProtocolYieldFee',
@@ -2312,6 +2324,8 @@ export type Swap = {
     pool: Scalars['Bytes'];
     /** Amount of swap fees */
     swapFeeAmount: Scalars['BigDecimal'];
+    /** Swap fee percentage */
+    swapFeePercentage: Scalars['BigDecimal'];
     /** Address of the token used for swap fees */
     swapFeeToken: Scalars['Bytes'];
     /** Amount of tokens swapped in */
@@ -2389,6 +2403,14 @@ export type Swap_Filter = {
     swapFeeAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
     swapFeeAmount_not?: InputMaybe<Scalars['BigDecimal']>;
     swapFeeAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeePercentage?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_gt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_gte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeePercentage_lt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_lte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_not?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeePercentage_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     swapFeeToken?: InputMaybe<Scalars['Bytes']>;
     swapFeeToken_contains?: InputMaybe<Scalars['Bytes']>;
     swapFeeToken_gt?: InputMaybe<Scalars['Bytes']>;
@@ -2515,6 +2537,7 @@ export enum Swap_OrderBy {
     LogIndex = 'logIndex',
     Pool = 'pool',
     SwapFeeAmount = 'swapFeeAmount',
+    SwapFeePercentage = 'swapFeePercentage',
     SwapFeeToken = 'swapFeeToken',
     TokenAmountIn = 'tokenAmountIn',
     TokenAmountOut = 'tokenAmountOut',
