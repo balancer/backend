@@ -60,6 +60,9 @@ import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
 
+const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
+const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
+
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
         let pool = undefined;
@@ -396,8 +399,13 @@ export class PoolGqlLoaderService {
             };
         }
 
-        const where = args.where;
-        const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
+        const where = args.where || {};
+        let textSearch: Prisma.StringFilter | undefined;
+        if (args.textSearch && isPoolId(args.textSearch)) {
+            where.idIn = [args.textSearch];
+        } else if (args.textSearch) {
+            textSearch = { contains: args.textSearch, mode: 'insensitive' as const };
+        }
 
         const allTokensFilter = [];
         where?.tokensIn?.forEach((token) => {
