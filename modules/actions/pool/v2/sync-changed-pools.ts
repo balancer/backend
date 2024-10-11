@@ -3,6 +3,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { PoolOnChainDataService } from '../../../pool/lib/pool-on-chain-data.service';
 import { getChangedPoolsV2 } from '../../../sources/logs';
 import { getViemClient } from '../../../sources/viem-client';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../last-synced-block';
 
 export const syncChangedPools = async (
     chain: Chain,
@@ -15,10 +16,7 @@ export const syncChangedPools = async (
     const viemClient = getViemClient(chain);
     const latestBlock = await viemClient.getBlockNumber();
 
-    let lastSync = await prisma.prismaLastBlockSynced.findUnique({
-        where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain } },
-    });
-    const lastSyncBlock = lastSync?.blockNumber ?? 0;
+    const lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS);
 
     const startBlock = lastSyncBlock + 1;
     const endBlock = latestBlock;
@@ -51,20 +49,10 @@ export const syncChangedPools = async (
             chain,
         },
     });
-    const { changedPools } = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(startBlock), endBlock);
+    const changedPools = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(startBlock), endBlock);
     await poolOnChainDataService.updateOnChainData(changedPools, chain, Number(endBlock), tokenPrices);
 
-    await prisma.prismaLastBlockSynced.upsert({
-        where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain } },
-        create: {
-            category: PrismaLastBlockSyncedCategory.POOLS,
-            blockNumber: Number(endBlock),
-            chain,
-        },
-        update: {
-            blockNumber: Number(endBlock),
-        },
-    });
+    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS, endBlock);
 
     return changedPools;
 };
