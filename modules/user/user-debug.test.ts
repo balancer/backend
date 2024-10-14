@@ -27,11 +27,14 @@ describe('user debugging', () => {
 
     it('sync user balances', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '100');
+        setRequestScopedContextValue('chainId', '250');
         //only do once before starting to debug
         // await poolService.syncAllPoolsFromSubgraph();
         // const reliquaryUserService = new UserSyncReliquaryFarmBalanceService(networkContext.s.reliquary!.address);
         // await poolService.syncStakingForPools(['GNOSIS']);
-        await userService.syncChangedStakedBalances();
+        await userService.syncUserBalance(
+            '0xc09252451831d0c436e11debff4558c66437ab7f',
+            '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec',
+        );
     }, 5000000);
 });
