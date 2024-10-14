@@ -251,7 +251,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const positions = relicPositions[1];
 
         const balance = positions
-            .filter((position) => position.poolId.toString() === poolId)
+            .filter((position) => position.poolId.toString() === staking.id.split('-')[1])
             .reduce((total, position) => total.add(position.amount), bn(0));
         const balanceFormatted = formatFixed(balance, 18);
 
