@@ -1,5 +1,16 @@
 # backend
 
+## 1.21.8
+
+### Patch Changes
+
+-   7df8cc6: fixing user sync balance for reliquary positions
+-   4a46b01: allow searching by pool ID
+-   1962da6: add enrichments to aggregator query
+-   eabb550: dvstETH-APR-mainnet
+-   a529b35: track last synced block for v3
+-   a5b85ad: 9th v3 deployment
+
 ## 1.21.7
 
 ### Patch Changes

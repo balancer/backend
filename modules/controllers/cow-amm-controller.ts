@@ -16,6 +16,7 @@ import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import moment from 'moment';
 import { upsertBptBalances } from '../actions/cow-amm/upsert-bpt-balances';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -80,31 +81,25 @@ export function CowAmmController(tracer?: any) {
             const subgraphClient = getSubgraphClient(chain);
             const viemClient = getViemClient(chain);
 
-            // TODO: move prismaLastBlockSynced wrapping to an action
-            let fromBlock = (
-                await prisma.prismaLastBlockSynced.findFirst({
-                    where: {
-                        category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
-                        chain,
-                    },
-                })
-            )?.blockNumber;
+            let lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS);
 
-            if (fromBlock && fromBlock > 10) {
-                fromBlock = fromBlock - 10; // Safety overlap
+            const fromBlock = lastSyncBlock + 1;
+            const toBlock = await viemClient.getBlockNumber();
+
+            // no new blocks have been minted, needed for slow networks
+            if (fromBlock > toBlock) {
+                return [];
             }
 
             let poolsToSync: string[] = [];
-            let blockToSync: bigint;
 
-            if (fromBlock) {
-                const { changedPools, latestBlock } = await fetchChangedPools(viemClient, chain, fromBlock);
+            if (fromBlock > 1) {
+                const changedPools = await fetchChangedPools(viemClient, chain, fromBlock, Number(toBlock));
 
                 if (changedPools.length === 0) {
                     return [];
                 }
                 poolsToSync = changedPools;
-                blockToSync = latestBlock;
             } else {
                 poolsToSync = await prisma.prismaPool
                     .findMany({
@@ -117,30 +112,13 @@ export function CowAmmController(tracer?: any) {
                         },
                     })
                     .then((pools) => pools.map((pool) => pool.id));
-                blockToSync = await viemClient.getBlockNumber();
             }
 
-            await upsertPools(poolsToSync, viemClient, subgraphClient, chain, blockToSync);
+            await upsertPools(poolsToSync, viemClient, subgraphClient, chain, toBlock);
             await updateVolumeAndFees(chain, poolsToSync);
             await updateSurplusAPRs();
 
-            const toBlock = await viemClient.getBlockNumber();
-            await prisma.prismaLastBlockSynced.upsert({
-                where: {
-                    category_chain: {
-                        category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
-                        chain,
-                    },
-                },
-                update: {
-                    blockNumber: Number(toBlock),
-                },
-                create: {
-                    category: PrismaLastBlockSyncedCategory.COW_AMM_POOLS,
-                    blockNumber: Number(toBlock),
-                    chain,
-                },
-            });
+            await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, toBlock);
 
             return poolsToSync;
         },

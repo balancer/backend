@@ -41,15 +41,7 @@ import {
 import { isSameAddress } from '@balancer-labs/sdk';
 import _, { has, map } from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import {
-    Chain,
-    Prisma,
-    PrismaPoolAprType,
-    PrismaPriceRateProviderData,
-    PrismaTokenTypeOption,
-    PrismaUserStakedBalance,
-    PrismaUserWalletBalance,
-} from '@prisma/client';
+import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
 import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
@@ -59,6 +51,9 @@ import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
+
+const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
+const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
 
 export class PoolGqlLoaderService {
     public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
@@ -93,7 +88,7 @@ export class PoolGqlLoaderService {
         return mappedPool;
     }
 
-    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion) {
+    private async enrichWithUnderlyingTokenData(mappedPool: GqlPoolUnion | GqlPoolAggregator) {
         for (const token of mappedPool.poolTokens) {
             if (token.isErc4626) {
                 const prismaToken = await prisma.prismaToken.findUnique({
@@ -105,9 +100,12 @@ export class PoolGqlLoaderService {
                         mappedPool.chain,
                     );
                     token.underlyingToken = underlyingTokenDefinition;
-                    mappedPool.displayTokens.push();
+                    if ((mappedPool as GqlPoolUnion).displayTokens) {
+                        (mappedPool as GqlPoolUnion).displayTokens.push();
+                    }
                 }
             }
+
             if (token.hasNestedPool) {
                 for (const nestedToken of token.nestedPool!.tokens) {
                     if (nestedToken.isErc4626) {
@@ -127,7 +125,7 @@ export class PoolGqlLoaderService {
         }
     }
 
-    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion) {
+    private async enrichWithRateproviderData(mappedPool: GqlPoolUnion | GqlPoolAggregator) {
         for (const token of mappedPool.poolTokens) {
             if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
                 const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({
@@ -200,7 +198,17 @@ export class PoolGqlLoaderService {
                 ...this.getPoolInclude(),
             },
         });
-        return pools.map((pool) => this.mapPoolToAggregatorPool(pool));
+        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool));
+
+        for (const mappedPool of gqlPools) {
+            // load rate provider data into PoolTokenDetail model
+            await this.enrichWithRateproviderData(mappedPool);
+
+            // load underlying token info into PoolTokenDetail and GqlPoolTokenDisplay
+            await this.enrichWithUnderlyingTokenData(mappedPool);
+        }
+
+        return gqlPools;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -396,8 +404,13 @@ export class PoolGqlLoaderService {
             };
         }
 
-        const where = args.where;
-        const textSearch = args.textSearch ? { contains: args.textSearch, mode: 'insensitive' as const } : undefined;
+        const where = args.where || {};
+        let textSearch: Prisma.StringFilter | undefined;
+        if (args.textSearch && isPoolId(args.textSearch)) {
+            where.idIn = [args.textSearch];
+        } else if (args.textSearch) {
+            textSearch = { contains: args.textSearch, mode: 'insensitive' as const };
+        }
 
         const allTokensFilter = [];
         where?.tokensIn?.forEach((token) => {

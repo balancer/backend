@@ -425,6 +425,12 @@ export default <NetworkData>{
                 path: 'value',
                 isIbYield: true,
             },
+            dvstETH: {
+                tokenAddress: '0x5e362eb2c0706bd1d134689ec75176018385430b',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
