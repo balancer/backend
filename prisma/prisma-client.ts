@@ -12,6 +12,11 @@ export let prisma = new PrismaClient({
 // Debugging query times
 // export let prisma = new PrismaClient({
 //     log: ['query'],
+//     datasources: {
+//         db: {
+//             url: env.DATABASE_URL,
+//         },
+//     },
 // });
 
 // prisma.$use(async (params, next) => {

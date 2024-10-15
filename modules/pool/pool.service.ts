@@ -98,7 +98,18 @@ export class PoolService {
             swaps: batchSwap.swaps.map((swap) => {
                 return {
                     ...swap,
-                    pool: this.poolGqlLoaderService.mapToMinimalGqlPool(swap.pool),
+                    pool: {
+                        id: swap.pool.id,
+                        name: swap.pool.name,
+                        type: swap.pool.type,
+                        symbol: swap.pool.symbol,
+                        allTokens: swap.pool.tokens.map((token) => ({
+                            address: token.address,
+                            isNested: token.nestedPoolId !== null,
+                            isPhantomBpt: token.address === swap.pool.address,
+                            weight: token.dynamicData?.weight,
+                        })),
+                    },
                 };
             }),
         }));
