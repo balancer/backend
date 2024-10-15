@@ -334,6 +334,9 @@ enum PrismaPoolAprType {
     AURA
     MERKL
     SURPLUS
+    SURPLUS_24H
+    SURPLUS_7D
+    SURPLUS_30D
 }
 
 enum PrismaPoolAprItemGroup {
