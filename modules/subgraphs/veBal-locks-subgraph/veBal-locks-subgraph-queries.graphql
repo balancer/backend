@@ -22,6 +22,31 @@ query VotingEscrowLocks(
     }
 }
 
+query LockSnapshots(
+    $block: Block_height
+    $first: Int = 1000
+    $orderBy: LockSnapshot_orderBy
+    $orderDirection: OrderDirection
+    $skip: Int = 0
+    $where: LockSnapshot_filter
+) {
+    lockSnapshots(
+        block: $block
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+    ) {
+        id
+        user {
+            id
+        }
+        bias
+        slope
+        timestamp
+    }
+}
 query VebalGetMeta {
     meta: _meta {
         block {

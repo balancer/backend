@@ -2336,6 +2336,27 @@ export type VotingEscrowLocksQuery = {
     }>;
 };
 
+export type LockSnapshotsQueryVariables = Exact<{
+    block?: Maybe<Block_Height>;
+    first?: Maybe<Scalars['Int']>;
+    orderBy?: Maybe<LockSnapshot_OrderBy>;
+    orderDirection?: Maybe<OrderDirection>;
+    skip?: Maybe<Scalars['Int']>;
+    where?: Maybe<LockSnapshot_Filter>;
+}>;
+
+export type LockSnapshotsQuery = {
+    __typename?: 'Query';
+    lockSnapshots: Array<{
+        __typename?: 'LockSnapshot';
+        id: string;
+        bias: string;
+        slope: string;
+        timestamp: number;
+        user: { __typename?: 'User'; id: string };
+    }>;
+};
+
 export type VebalGetMetaQueryVariables = Exact<{ [key: string]: never }>;
 
 export type VebalGetMetaQuery = {
@@ -2376,6 +2397,33 @@ export const VotingEscrowLocksDocument = gql`
         }
     }
 `;
+export const LockSnapshotsDocument = gql`
+    query LockSnapshots(
+        $block: Block_height
+        $first: Int = 1000
+        $orderBy: LockSnapshot_orderBy
+        $orderDirection: OrderDirection
+        $skip: Int = 0
+        $where: LockSnapshot_filter
+    ) {
+        lockSnapshots(
+            block: $block
+            first: $first
+            skip: $skip
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+        ) {
+            id
+            user {
+                id
+            }
+            bias
+            slope
+            timestamp
+        }
+    }
+`;
 export const VebalGetMetaDocument = gql`
     query VebalGetMeta {
         meta: _meta {
@@ -2408,6 +2456,19 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'VotingEscrowLocks',
+            );
+        },
+        LockSnapshots(
+            variables?: LockSnapshotsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<LockSnapshotsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<LockSnapshotsQuery>(LockSnapshotsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'LockSnapshots',
             );
         },
         VebalGetMeta(

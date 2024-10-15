@@ -2967,8 +2967,24 @@ export const schema = gql`
         lockedUsd: AmountHumanReadable!
     }
 
+    """
+    Represents a snapshot of a VeBal lock at a specific point in time.
+    """
+    type GqlVeBalLockSnapshot {
+        """
+        The locked balance at that time.
+        """
+        balance: AmountHumanReadable!
+
+        """
+        The timestamp of the snapshot, snapshots are taking at lock events.
+        """
+        timestamp: Int!
+    }
+
     type GqlVeBalUserData {
         balance: AmountHumanReadable!
+        lockSnapshots: [GqlVeBalLockSnapshot!]!
         locked: AmountHumanReadable!
         lockedUsd: AmountHumanReadable!
         rank: Int

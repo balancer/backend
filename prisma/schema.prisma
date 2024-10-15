@@ -859,6 +859,8 @@ model PrismaUser {
     stakedBalances          PrismaUserStakedBalance[]
     
     veBalBalance            PrismaVeBalUserBalance[]
+
+    veBalBalanceSnapshots   PrismaVeBalUserBalanceSnapshot[]
 }
 
 
@@ -963,6 +965,17 @@ model PrismaUserRelicSnapshot {
     level                   Int
 }
 
+model PrismaVeBalUserBalanceSnapshot {
+    @@id([userAddress, timestamp])
+    userAddress             String
+    user                    PrismaUser          @relation(fields:[userAddress], references: [address])
+    chain                   Chain               
+    timestamp               Int
+
+    bias                    String
+    slope                   String
+    balance                 String
+}
 
 model PrismaVeBalUserBalance {
     @@id([id, chain])

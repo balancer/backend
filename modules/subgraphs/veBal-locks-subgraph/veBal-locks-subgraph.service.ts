@@ -1,7 +1,13 @@
 import { GraphQLClient } from 'graphql-request';
 import config from '../../../config/mainnet';
 import _ from 'lodash';
-import { VotingEscrowLock_OrderBy, OrderDirection, getSdk } from './generated/veBal-locks-subgraph-types';
+import {
+    VotingEscrowLock_OrderBy,
+    OrderDirection,
+    getSdk,
+    LockSnapshot,
+    LockSnapshot_OrderBy,
+} from './generated/veBal-locks-subgraph-types';
 import moment from 'moment';
 
 export class VeBalLocksSubgraphService {
@@ -37,6 +43,35 @@ export class VeBalLocksSubgraphService {
                 hasMore = false;
             } else {
                 id = response.votingEscrowLocks[response.votingEscrowLocks.length - 1].id;
+            }
+        }
+
+        return locks;
+    }
+
+    async getAllHistoricalLocksSince(timestamp: number): Promise<LockSnapshot[]> {
+        const locks: LockSnapshot[] = [];
+        const limit = 1000;
+        let hasMore = true;
+        let id = `0`;
+
+        while (hasMore) {
+            const response = await this.sdk.LockSnapshots({
+                first: limit,
+                orderBy: LockSnapshot_OrderBy.id,
+                orderDirection: OrderDirection.asc,
+                where: {
+                    id_gt: id,
+                    timestamp_gte: timestamp,
+                },
+            });
+
+            locks.push(...response.lockSnapshots);
+
+            if (response.lockSnapshots.length < limit) {
+                hasMore = false;
+            } else {
+                id = response.lockSnapshots[response.lockSnapshots.length - 1].id;
             }
         }
 

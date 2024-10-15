@@ -15,7 +15,10 @@ describe('vebal debugging', () => {
 
     it('sync vebal data', async () => {
         initRequestScopedContext();
-        setRequestScopedContextValue('chainId', '10');
+        setRequestScopedContextValue('chainId', '1');
         await veBalService.syncVeBalBalances();
+        await veBalService.syncVeBalUserBalanceSnapshots();
+        const user = await veBalService.getVeBalUserData('MAINNET', '0xdf67c7d23199353361437ee257e04e06ccee1c28');
+        console.log(user);
     }, 500000);
 });

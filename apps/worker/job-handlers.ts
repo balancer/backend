@@ -252,6 +252,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-vebal-balances':
             await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(), res, next);
             break;
+        case 'sync-vebal-snapshots':
+            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalUserBalanceSnapshots(), res, next);
+            break;
         case 'sync-vebal-totalSupply':
             await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalTotalSupply(), res, next);
             break;
