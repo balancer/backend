@@ -327,6 +327,12 @@ export type GqlPoolAprItemType =
     | 'STAKING_BOOST'
     /** Cow AMM specific APR */
     | 'SURPLUS'
+    /** Surplus APR based on data from the last 7d */
+    | 'SURPLUS_7D'
+    /** Surplus APR based on data from the last 24h */
+    | 'SURPLUS_24H'
+    /** Surplus APR based on data from the last 30d */
+    | 'SURPLUS_30D'
     /** Represents the swap fee APR in a pool. */
     | 'SWAP_FEE'
     /** Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL. */

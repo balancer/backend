@@ -1475,6 +1475,18 @@ enum GqlPoolAprItemType {
     Cow AMM specific APR
     """
     SURPLUS
+    """
+    Surplus APR based on data from the last 24h
+    """
+    SURPLUS_24H
+    """
+    Surplus APR based on data from the last 7d
+    """
+    SURPLUS_7D
+    """
+    Surplus APR based on data from the last 30d
+    """
+    SURPLUS_30D
 }
 
 type GqlBalancePoolAprItem {
