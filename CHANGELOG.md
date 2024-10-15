@@ -1,5 +1,11 @@
 # backend
 
+## 1.21.9
+
+### Patch Changes
+
+-   0cf158a: remove yearn apr from fantom
+
 ## 1.21.8
 
 ### Patch Changes
