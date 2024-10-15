@@ -1325,9 +1325,24 @@ type GqlPoolBatchSwap {
     swaps: [GqlPoolBatchSwapSwap!]!
 }
 
+type TokenForBatchSwapPool {
+    address: String!
+    isNested: Boolean!
+    isPhantomBpt: Boolean!
+    weight: BigDecimal
+}
+
+type PoolForBatchSwap {
+    id: String!
+    name: String!
+    type: GqlPoolType!
+    symbol: String!
+    allTokens: [TokenForBatchSwapPool!]
+}
+
 type GqlPoolBatchSwapSwap {
     id: ID!
-    pool: GqlPoolMinimal!
+    pool: PoolForBatchSwap!
     userAddress: String!
     tokenIn: String!
     tokenOut: String!

@@ -180,7 +180,20 @@ export class PoolSwapService {
             },
             orderBy: { timestamp: 'desc' },
             include: {
-                swaps: { include: { pool: { include: prismaPoolMinimal.include } } },
+                swaps: {
+                    include: {
+                        pool: {
+                            include: {
+                                tokens: {
+                                    include: {
+                                        token: true,
+                                        dynamicData: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
     }

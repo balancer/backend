@@ -735,7 +735,7 @@ export const schema = gql`
 
     type GqlPoolBatchSwapSwap {
         id: ID!
-        pool: GqlPoolMinimal!
+        pool: PoolForBatchSwap!
         timestamp: Int!
         tokenAmountIn: String!
         tokenAmountOut: String!
@@ -3175,6 +3175,14 @@ export const schema = gql`
         veBalSyncTotalSupply: String!
     }
 
+    type PoolForBatchSwap {
+        allTokens: [TokenForBatchSwapPool!]
+        id: String!
+        name: String!
+        symbol: String!
+        type: GqlPoolType!
+    }
+
     type Query {
         beetsGetFbeetsRatio: String!
         beetsPoolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
@@ -3483,5 +3491,12 @@ export const schema = gql`
     type Token {
         address: String!
         decimals: Int!
+    }
+
+    type TokenForBatchSwapPool {
+        address: String!
+        isNested: Boolean!
+        isPhantomBpt: Boolean!
+        weight: BigDecimal
     }
 `;

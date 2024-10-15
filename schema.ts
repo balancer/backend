@@ -440,7 +440,7 @@ export interface GqlPoolBatchSwapPool {
 export interface GqlPoolBatchSwapSwap {
     __typename?: 'GqlPoolBatchSwapSwap';
     id: Scalars['ID'];
-    pool: GqlPoolMinimal;
+    pool: PoolForBatchSwap;
     timestamp: Scalars['Int'];
     tokenAmountIn: Scalars['String'];
     tokenAmountOut: Scalars['String'];
@@ -2196,6 +2196,15 @@ export interface MutationUserSyncBalanceArgs {
     poolId: Scalars['String'];
 }
 
+export interface PoolForBatchSwap {
+    __typename?: 'PoolForBatchSwap';
+    allTokens?: Maybe<Array<TokenForBatchSwapPool>>;
+    id: Scalars['String'];
+    name: Scalars['String'];
+    symbol: Scalars['String'];
+    type: GqlPoolType;
+}
+
 export interface Query {
     __typename?: 'Query';
     beetsGetFbeetsRatio: Scalars['String'];
@@ -2542,6 +2551,14 @@ export interface Token {
     decimals: Scalars['Int'];
 }
 
+export interface TokenForBatchSwapPool {
+    __typename?: 'TokenForBatchSwapPool';
+    address: Scalars['String'];
+    isNested: Scalars['Boolean'];
+    isPhantomBpt: Scalars['Boolean'];
+    weight?: Maybe<Scalars['BigDecimal']>;
+}
+
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
 
@@ -2808,9 +2825,11 @@ export type ResolversTypes = ResolversObject<{
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     Mutation: ResolverTypeWrapper<{}>;
+    PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     Query: ResolverTypeWrapper<{}>;
     String: ResolverTypeWrapper<Scalars['String']>;
     Token: ResolverTypeWrapper<Token>;
+    TokenForBatchSwapPool: ResolverTypeWrapper<TokenForBatchSwapPool>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -2976,9 +2995,11 @@ export type ResolversParentTypes = ResolversObject<{
     JSON: Scalars['JSON'];
     LiquidityManagement: LiquidityManagement;
     Mutation: {};
+    PoolForBatchSwap: PoolForBatchSwap;
     Query: {};
     String: Scalars['String'];
     Token: Token;
+    TokenForBatchSwapPool: TokenForBatchSwapPool;
 }>;
 
 export interface AmountHumanReadableScalarConfig
@@ -3297,7 +3318,7 @@ export type GqlPoolBatchSwapSwapResolvers<
     ParentType extends ResolversParentTypes['GqlPoolBatchSwapSwap'] = ResolversParentTypes['GqlPoolBatchSwapSwap'],
 > = ResolversObject<{
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    pool?: Resolver<ResolversTypes['GqlPoolMinimal'], ParentType, ContextType>;
+    pool?: Resolver<ResolversTypes['PoolForBatchSwap'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     tokenAmountIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tokenAmountOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -4862,6 +4883,18 @@ export type MutationResolvers<
     veBalSyncTotalSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 }>;
 
+export type PoolForBatchSwapResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['PoolForBatchSwap'] = ResolversParentTypes['PoolForBatchSwap'],
+> = ResolversObject<{
+    allTokens?: Resolver<Maybe<Array<ResolversTypes['TokenForBatchSwapPool']>>, ParentType, ContextType>;
+    id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
@@ -5126,6 +5159,17 @@ export type TokenResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type TokenForBatchSwapPoolResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['TokenForBatchSwapPool'] = ResolversParentTypes['TokenForBatchSwapPool'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    isNested?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    isPhantomBpt?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    weight?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     AmountHumanReadable?: GraphQLScalarType;
     BigDecimal?: GraphQLScalarType;
@@ -5241,6 +5285,8 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     JSON?: GraphQLScalarType;
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
+    PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
     Token?: TokenResolvers<ContextType>;
+    TokenForBatchSwapPool?: TokenForBatchSwapPoolResolvers<ContextType>;
 }>;
