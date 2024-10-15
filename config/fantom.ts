@@ -202,9 +202,6 @@ export default <NetworkData>{
                 },
             },
         },
-        yearn: {
-            sourceUrl: 'https://api.yexporter.io/v1/chains/250/vaults/all',
-        },
         defaultHandlers: {
             ankrETH: {
                 tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
