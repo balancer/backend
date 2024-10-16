@@ -268,10 +268,7 @@ class SorPathService implements SwapService {
                     callData: callDataExactIn.callData,
                     to: callDataExactIn.to,
                     value: callDataExactIn.value.toString(),
-                    minAmountOutRaw: formatUnits(
-                        callDataExactIn.minAmountOut.amount,
-                        callDataExactIn.minAmountOut.token.decimals,
-                    ),
+                    minAmountOutRaw: callDataExactIn.minAmountOut.amount.toString(),
                 };
             } else {
                 const callDataExactOut = sdkSwap.buildCall({
@@ -290,10 +287,7 @@ class SorPathService implements SwapService {
                     callData: callDataExactOut.callData,
                     to: callDataExactOut.to,
                     value: callDataExactOut.value.toString(),
-                    maxAmountInRaw: formatUnits(
-                        callDataExactOut.maxAmountIn.amount,
-                        callDataExactOut.maxAmountIn.token.decimals,
-                    ),
+                    maxAmountInRaw: callDataExactOut.maxAmountIn.amount.toString(),
                 };
             }
         }
