@@ -1,5 +1,11 @@
 # backend
 
+## 1.21.10
+
+### Patch Changes
+
+-   025c43d: limit db data over-reading for batch swaps query (beets)
+
 ## 1.21.9
 
 ### Patch Changes
