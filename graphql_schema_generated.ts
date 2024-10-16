@@ -581,6 +581,21 @@ export const schema = gql`
         SWAP_FEE
 
         """
+        Swap fee APR based on data from the last 7d
+        """
+        SWAP_FEE_7D
+
+        """
+        Swap fee APR based on data from the last 24h
+        """
+        SWAP_FEE_24H
+
+        """
+        Swap fee APR based on data from the last 30d
+        """
+        SWAP_FEE_30D
+
+        """
         Reward APR in a pool from veBAL emissions allocated by gauge votes. Emitted in BAL.
         """
         VEBAL_EMISSIONS
