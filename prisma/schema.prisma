@@ -326,6 +326,9 @@ model PrismaPoolAprRange {
 
 enum PrismaPoolAprType {
     SWAP_FEE
+    SWAP_FEE_24H
+    SWAP_FEE_7D
+    SWAP_FEE_30D
     NATIVE_REWARD
     THIRD_PARTY_REWARD
     IB_YIELD
