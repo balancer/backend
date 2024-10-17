@@ -18,6 +18,7 @@ export const prismaPoolTokenFactory = Factory.define<PrismaPoolTokenWithDynamicD
         exemptFromProtocolYieldFee: false,
         token: prismaTokenFactory.build({ address: tokenAddress }),
         dynamicData: prismaPoolTokenDynamicDataFactory.build({ id: poolId + '-' + tokenAddress }),
+        scalingFactor: null,
     };
 });
 

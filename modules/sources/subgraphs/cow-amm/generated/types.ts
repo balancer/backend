@@ -1839,6 +1839,7 @@ export type CowAmmPoolFragment = {
     blockNumber: string;
     blockTimestamp: string;
     transactionHash: string;
+    swapFee: string;
     swapsCount: string;
     holdersCount: string;
     weights: Array<string>;
@@ -1852,6 +1853,7 @@ export type CowAmmPoolFragment = {
         address: string;
         decimals: number;
         balance: string;
+        weight: string;
     }>;
 };
 
@@ -1875,6 +1877,7 @@ export type PoolsQuery = {
         blockNumber: string;
         blockTimestamp: string;
         transactionHash: string;
+        swapFee: string;
         swapsCount: string;
         holdersCount: string;
         weights: Array<string>;
@@ -1888,8 +1891,10 @@ export type PoolsQuery = {
             address: string;
             decimals: number;
             balance: string;
+            weight: string;
         }>;
     }>;
+    _meta?: { __typename?: '_Meta_'; block: { __typename?: '_Block_'; number: number } } | null | undefined;
 };
 
 export type SnapshotsQueryVariables = Exact<{
@@ -2013,6 +2018,7 @@ export const CowAmmPoolFragmentDoc = gql`
         blockNumber
         blockTimestamp
         transactionHash
+        swapFee
         swapsCount
         holdersCount
         weights
@@ -2024,6 +2030,7 @@ export const CowAmmPoolFragmentDoc = gql`
             address
             decimals
             balance
+            weight
         }
     }
 `;
@@ -2134,6 +2141,11 @@ export const PoolsDocument = gql`
             block: $block
         ) {
             ...CowAmmPool
+        }
+        _meta {
+            block {
+                number
+            }
         }
     }
     ${CowAmmPoolFragmentDoc}

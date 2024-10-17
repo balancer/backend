@@ -67,7 +67,7 @@ export class BoostedPoolAprService implements PoolAprService {
                     const itemId = `${pool.id}-${aprItem.id}`;
                     //scale the apr as a % of total liquidity
 
-                    const apr = aprItem.apr * (token.dynamicData.balanceUSD / pool.dynamicData.totalLiquidity);
+                    const apr = aprItem.apr * ((token.dynamicData.balanceUSD || 0) / pool.dynamicData.totalLiquidity);
                     let userApr = apr;
 
                     if (

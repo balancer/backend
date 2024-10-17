@@ -39,7 +39,7 @@ import {
     LiquidityManagement,
 } from '../../../schema';
 import { isSameAddress } from '@balancer-labs/sdk';
-import _, { has, map } from 'lodash';
+import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { isWeightedPoolV2 } from './pool-utils';
@@ -822,6 +822,7 @@ export class PoolGqlLoaderService {
                 (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
             ),
             isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
+            scalingFactor: poolToken.scalingFactor,
         };
     }
 

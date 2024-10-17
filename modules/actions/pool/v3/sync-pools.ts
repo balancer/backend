@@ -1,7 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { onchainPoolUpdate } from '../../../sources/transformers/onchain-pool-update';
-import { poolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
+import { onchainV3PoolUpdate } from '../../../sources/transformers/onchain-pool-update';
+import { poolDynamicDataUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import { type VaultClient, getVaultClient, getPoolsClient } from '../../../sources/contracts';
 import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
 import { ViemClient } from '../../../sources/viem-client';
@@ -25,10 +25,10 @@ const syncVaultData = async (
 
     // Get the data for the tables about pools
     const dbUpdates = Object.keys(onchainData).map((id) =>
-        onchainPoolUpdate(onchainData[id], allTokens, chain, id, blockNumber),
+        onchainV3PoolUpdate(onchainData[id], allTokens, chain, id, blockNumber),
     );
 
-    const poolsWithUSD = await poolUpsertsUsd(dbUpdates, chain, allTokens);
+    const poolsWithUSD = await poolDynamicDataUpsertsUsd(dbUpdates, chain, allTokens);
 
     // Update pools data to the database
     for (const { poolDynamicData, poolTokenDynamicData } of poolsWithUSD) {
@@ -36,8 +36,8 @@ const syncVaultData = async (
             await prisma.prismaPoolDynamicData.update({
                 where: {
                     poolId_chain: {
-                        poolId: poolDynamicData.poolId,
-                        chain: poolDynamicData.chain,
+                        poolId: poolDynamicData.id,
+                        chain: chain,
                     },
                 },
                 data: poolDynamicData,

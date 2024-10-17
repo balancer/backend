@@ -1,10 +1,10 @@
-import { Chain } from '@prisma/client';
-import { JoinedSubgraphPool } from '../subgraphs';
+import { Chain, Prisma } from '@prisma/client';
+import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
 import config from '../../../config';
 import { HookType } from '../../network/network-config-types';
 
-export const hookTransformer = (poolData: JoinedSubgraphPool, chain: Chain) => {
+export const hookTransformer = (poolData: V3JoinedSubgraphPool, chain: Chain): Prisma.HookCreateInput | undefined => {
     // By default v3 pools have a hook config with the address 0x0
     // We don't want to store this in the database because it's not doing anything
     const hookConfig =

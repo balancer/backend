@@ -9,6 +9,7 @@ fragment CowAmmPool on Pool {
     blockNumber
     blockTimestamp
     transactionHash
+    swapFee
     swapsCount
     holdersCount
     weights
@@ -20,6 +21,7 @@ fragment CowAmmPool on Pool {
         address
         decimals
         balance
+        weight
     }
 }
 
@@ -40,5 +42,10 @@ query Pools(
         block: $block
     ) {
         ...CowAmmPool
+    }
+    _meta {
+        block {
+            number
+        }
     }
 }

@@ -24,6 +24,7 @@ fragment VaultPool on Pool {
         nestedPool {
             id
         }
+        scalingFactor
     }
     rateProviders {
         address

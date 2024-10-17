@@ -229,6 +229,8 @@ model PrismaPoolToken {
 
     dynamicData         PrismaPoolTokenDynamicData?
 
+    scalingFactor               String?
+
     @@index([poolId, chain])
     @@index([address, chain])
     @@index([nestedPoolId, chain])
@@ -246,9 +248,9 @@ model PrismaPoolTokenDynamicData {
     updatedAt           DateTime            @updatedAt
 
     balance             String
-    balanceUSD          Float
+    balanceUSD          Float?
     weight              String?
-    priceRate           String
+    priceRate           String?
     latestFxPrice       Float?
 }
 
