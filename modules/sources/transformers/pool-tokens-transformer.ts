@@ -17,6 +17,7 @@ export function poolV3TokensTransformer(
         nestedPoolId: token.nestedPool?.id.toLowerCase() ?? null,
         priceRateProvider: poolData.rateProviders![i].address.toLowerCase(),
         exemptFromProtocolYieldFee: !token.paysYieldFees,
+        scalingFactor: token.scalingFactor,
     }));
 }
 
