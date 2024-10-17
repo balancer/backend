@@ -1,6 +1,4 @@
 import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
-import { transformDocument } from '@prisma/client/runtime';
-import { types } from 'util';
 
 export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';
