@@ -1,5 +1,12 @@
 # backend
 
+## 1.21.11
+
+### Patch Changes
+
+-   6d70678: sync vebal user snapshots
+-   5249d64: fix SOR raw amounts
+
 ## 1.21.10
 
 ### Patch Changes

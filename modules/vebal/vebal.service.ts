@@ -77,11 +77,17 @@ export class VeBalService {
             });
         }
 
+        const snapshots = await prisma.prismaVeBalUserBalanceSnapshot.findMany({
+            where: { userAddress: userAddress.toLowerCase() },
+            orderBy: { timestamp: 'desc' },
+        });
+
         return {
             balance,
             locked,
             lockedUsd: (parseFloat(locked) * veBalPrice.price).toFixed(2),
             rank: balance === '0.0' ? undefined : rank,
+            lockSnapshots: snapshots,
         };
     }
 
@@ -223,6 +229,66 @@ export class VeBalService {
                 update: { totalSupply: formatFixed(totalSupply, 18) },
             });
         }
+    }
+
+    public async syncVeBalUserBalanceSnapshots(): Promise<void> {
+        const latestSnapshot = await prisma.prismaVeBalUserBalanceSnapshot.findFirst({
+            orderBy: { timestamp: 'desc' },
+        });
+
+        const userLocksFromSubgraph = await veBalLocksSubgraphService.getAllHistoricalLocksSince(
+            latestSnapshot?.timestamp || 0,
+        );
+        let operations: any[] = [];
+
+        await prisma.prismaUser.createMany({
+            data: userLocksFromSubgraph.map((snapshot) => ({ address: snapshot.user.id.toLowerCase() })),
+            skipDuplicates: true,
+        });
+
+        for (const lockSnapshot of userLocksFromSubgraph) {
+            const balance = this.calculateVeBalBalance(
+                parseFloat(lockSnapshot.bias),
+                parseFloat(lockSnapshot.slope),
+                lockSnapshot.timestamp,
+            );
+            operations.push(
+                prisma.prismaVeBalUserBalanceSnapshot.upsert({
+                    where: {
+                        userAddress_timestamp: {
+                            userAddress: lockSnapshot.user.id.toLowerCase(),
+                            timestamp: lockSnapshot.timestamp,
+                        },
+                    },
+                    create: {
+                        userAddress: lockSnapshot.user.id.toLowerCase(),
+                        chain: 'MAINNET',
+                        timestamp: lockSnapshot.timestamp,
+                        bias: lockSnapshot.bias,
+                        slope: lockSnapshot.slope,
+                        balance: balance.toString(),
+                    },
+                    update: {
+                        balance: balance.toString(),
+                        slope: lockSnapshot.slope,
+                        bias: lockSnapshot.bias,
+                    },
+                }),
+            );
+        }
+
+        await prismaBulkExecuteOperations(operations);
+    }
+
+    calculateVeBalBalance(bias: number, slope: number, timestamp: number): number {
+        const x = slope * Math.floor(Date.now() / 1000) - timestamp;
+
+        if (x < 0) return bias;
+
+        const balance = bias - x;
+        if (balance < 0) return 0;
+
+        return balance;
     }
 }
 
