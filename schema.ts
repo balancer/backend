@@ -2008,9 +2008,19 @@ export interface GqlVeBalBalance {
     lockedUsd: Scalars['AmountHumanReadable'];
 }
 
+/** Represents a snapshot of a VeBal lock at a specific point in time. */
+export interface GqlVeBalLockSnapshot {
+    __typename?: 'GqlVeBalLockSnapshot';
+    /** The locked balance at that time. */
+    balance: Scalars['AmountHumanReadable'];
+    /** The timestamp of the snapshot, snapshots are taking at lock events. */
+    timestamp: Scalars['Int'];
+}
+
 export interface GqlVeBalUserData {
     __typename?: 'GqlVeBalUserData';
     balance: Scalars['AmountHumanReadable'];
+    lockSnapshots: Array<GqlVeBalLockSnapshot>;
     locked: Scalars['AmountHumanReadable'];
     lockedUsd: Scalars['AmountHumanReadable'];
     rank?: Maybe<Scalars['Int']>;
@@ -2814,6 +2824,7 @@ export type ResolversTypes = ResolversObject<{
     GqlUserStakedBalance: ResolverTypeWrapper<GqlUserStakedBalance>;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
     GqlVeBalBalance: ResolverTypeWrapper<GqlVeBalBalance>;
+    GqlVeBalLockSnapshot: ResolverTypeWrapper<GqlVeBalLockSnapshot>;
     GqlVeBalUserData: ResolverTypeWrapper<GqlVeBalUserData>;
     GqlVotingGauge: ResolverTypeWrapper<GqlVotingGauge>;
     GqlVotingGaugeToken: ResolverTypeWrapper<GqlVotingGaugeToken>;
@@ -2984,6 +2995,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlUserStakedBalance: GqlUserStakedBalance;
     GqlUserSwapVolumeFilter: GqlUserSwapVolumeFilter;
     GqlVeBalBalance: GqlVeBalBalance;
+    GqlVeBalLockSnapshot: GqlVeBalLockSnapshot;
     GqlVeBalUserData: GqlVeBalUserData;
     GqlVotingGauge: GqlVotingGauge;
     GqlVotingGaugeToken: GqlVotingGaugeToken;
@@ -4687,11 +4699,21 @@ export type GqlVeBalBalanceResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type GqlVeBalLockSnapshotResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlVeBalLockSnapshot'] = ResolversParentTypes['GqlVeBalLockSnapshot'],
+> = ResolversObject<{
+    balance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type GqlVeBalUserDataResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlVeBalUserData'] = ResolversParentTypes['GqlVeBalUserData'],
 > = ResolversObject<{
     balance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    lockSnapshots?: Resolver<Array<ResolversTypes['GqlVeBalLockSnapshot']>, ParentType, ContextType>;
     locked?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     lockedUsd?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     rank?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -5276,6 +5298,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlUserPoolBalance?: GqlUserPoolBalanceResolvers<ContextType>;
     GqlUserStakedBalance?: GqlUserStakedBalanceResolvers<ContextType>;
     GqlVeBalBalance?: GqlVeBalBalanceResolvers<ContextType>;
+    GqlVeBalLockSnapshot?: GqlVeBalLockSnapshotResolvers<ContextType>;
     GqlVeBalUserData?: GqlVeBalUserDataResolvers<ContextType>;
     GqlVotingGauge?: GqlVotingGaugeResolvers<ContextType>;
     GqlVotingGaugeToken?: GqlVotingGaugeTokenResolvers<ContextType>;
