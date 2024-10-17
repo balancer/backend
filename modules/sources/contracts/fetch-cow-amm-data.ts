@@ -16,12 +16,13 @@ export interface OnchainDataCowAmm {
         address: string;
         balance: bigint;
     }[];
+    blockNumber: bigint;
 }
 
 export async function fetchCowAmmData(
     pools: string[],
     client: ViemClient,
-    blockNumber?: bigint,
+    blockNumber: bigint,
 ): Promise<{ [address: string]: OnchainDataCowAmm }> {
     const contracts = pools
         .map((pool) => [
@@ -68,7 +69,7 @@ export async function fetchCowAmmData(
         .flat();
 
     // Get balances
-    const balanceResults = (await multicallViem(client, balances)) as Record<
+    const balanceResults = (await multicallViem(client, balances, blockNumber)) as Record<
         string,
         {
             tokenBalances: { [token: string]: string };
@@ -89,6 +90,7 @@ export async function fetchCowAmmData(
                 swapFee: BigInt(poolResults['swapFee']),
                 totalSupply: BigInt(poolResults['totalSupply']),
                 tokens,
+                blockNumber,
             },
         };
     });
