@@ -9,7 +9,7 @@ const cowAmmAbi = parseAbi([
     'function getFinalTokens() view returns (address[])',
 ]);
 
-export interface CowAmmOnchainData {
+export interface OnchainDataCowAmm {
     totalSupply: bigint;
     swapFee: bigint;
     tokens: {
@@ -22,7 +22,7 @@ export async function fetchCowAmmData(
     pools: string[],
     client: ViemClient,
     blockNumber?: bigint,
-): Promise<{ [address: string]: CowAmmOnchainData }> {
+): Promise<{ [address: string]: OnchainDataCowAmm }> {
     const contracts = pools
         .map((pool) => [
             {

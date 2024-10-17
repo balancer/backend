@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { tokensTransformer } from '../../../sources/transformers/tokens-transformer';
-import { JoinedSubgraphPool } from '../../../sources/subgraphs';
-import { subgraphPoolUpsert, SubgraphPoolUpsertData } from '../../../sources/transformers/subgraph-pool-upsert';
+import { V3JoinedSubgraphPool } from '../../../sources/subgraphs';
+import { subgraphPoolV3Upsert, SubgraphPoolUpsertData } from '../../../sources/transformers/subgraph-pool-upsert';
 import { poolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import type { VaultClient } from '../../../sources/contracts';
 import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/fetch-erc4626-token-data';
@@ -19,7 +19,7 @@ import { getViemClient } from '../../../sources/viem-client';
  * @param blockNumber
  */
 export const upsertPools = async (
-    subgraphPools: JoinedSubgraphPool[],
+    subgraphPools: V3JoinedSubgraphPool[],
     vaultClient: VaultClient,
     chain = 'SEPOLIA' as Chain,
     blockNumber: bigint,
@@ -45,9 +45,13 @@ export const upsertPools = async (
     }
 
     // Get the data for the tables about pools
-    const dbPools = subgraphPools
-        .map((poolData) => subgraphPoolUpsert(poolData, onchainData[poolData.id], chain, blockNumber))
-        .filter((item): item is Exclude<SubgraphPoolUpsertData, null> => Boolean(item));
+    const dbPools: SubgraphPoolUpsertData[] = [];
+    for (const pool of subgraphPools) {
+        const transformedPool = subgraphPoolV3Upsert(pool, onchainData[pool.id], chain, blockNumber);
+        if (transformedPool) {
+            dbPools.push(transformedPool);
+        }
+    }
 
     // Enrich updates with USD values
     const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);

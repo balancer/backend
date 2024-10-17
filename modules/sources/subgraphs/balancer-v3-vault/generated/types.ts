@@ -3013,6 +3013,7 @@ export type VaultPoolFragment = {
         totalProtocolSwapFee: string;
         totalProtocolYieldFee: string;
         paysYieldFees: boolean;
+        scalingFactor: string;
         nestedPool?: { __typename?: 'Pool'; id: string } | null | undefined;
     }>;
     rateProviders: Array<{
@@ -3079,6 +3080,7 @@ export type PoolsQuery = {
             totalProtocolSwapFee: string;
             totalProtocolYieldFee: string;
             paysYieldFees: boolean;
+            scalingFactor: string;
             nestedPool?: { __typename?: 'Pool'; id: string } | null | undefined;
         }>;
         rateProviders: Array<{
@@ -3314,6 +3316,7 @@ export const VaultPoolFragmentDoc = gql`
             nestedPool {
                 id
             }
+            scalingFactor
         }
         rateProviders {
             address

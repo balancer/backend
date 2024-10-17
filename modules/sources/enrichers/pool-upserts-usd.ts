@@ -1,19 +1,8 @@
 import _ from 'lodash';
-import { Chain } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { SubgraphPoolUpsertData } from '../transformers/subgraph-pool-upsert';
-import { formatUnits } from 'viem';
-import { OnchainPoolUpdateData } from '../transformers/onchain-pool-update';
-import { OnchainCowAmmPoolUpdateData } from '../transformers/onchain-cow-amm-pool-update';
-
-type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
-    ? U extends any[]
-        ? {
-              poolDynamicData: U[number] & { totalLiquidity: number };
-              poolTokenDynamicData: (U[number] & { balanceUSD: number })[];
-          }
-        : never
-    : never;
+import { PoolDynamicUpsertData } from '../transformers/onchain-pool-update';
 
 /**
  * Takes pool data for the DB upserts and enriches them with USD values:
@@ -24,13 +13,11 @@ type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
  * @param chain
  * @returns
  */
-export async function poolUpsertsUsd<
-    T extends OnchainCowAmmPoolUpdateData | OnchainPoolUpdateData | Exclude<SubgraphPoolUpsertData, null>,
->(
-    upsertData: T[],
+export async function poolUpsertsUsd(
+    upsertData: SubgraphPoolUpsertData[],
     chain: Chain,
     allTokens: { address: string; decimals: number }[],
-): Promise<(T & EnrichedTokenData<T>)[]> {
+): Promise<SubgraphPoolUpsertData[]> {
     // Get the token prices needed for calculating token balances and total liquidity
     const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {
@@ -41,7 +28,7 @@ export async function poolUpsertsUsd<
     const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
 
     return upsertData.map((pool) => {
-        const poolTokenDynamicData = pool.poolTokenDynamicData.map((token) => ({
+        const poolTokenDynamicData = pool!.poolTokenDynamicData.map((token) => ({
             ...token,
             balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
         }));
@@ -57,5 +44,48 @@ export async function poolUpsertsUsd<
             poolDynamicData,
             poolTokenDynamicData,
         };
-    }) as (T & EnrichedTokenData<T>)[];
+    });
+}
+
+/**
+ * Takes pool data for the DB upserts and enriches them with USD values:
+ *  - pool tokens balances in USD
+ *  - pool liquidity in USD
+ *
+ * @param upsertData
+ * @param chain
+ * @returns
+ */
+export async function poolDynamicDataUpsertsUsd(
+    upsertData: PoolDynamicUpsertData[],
+    chain: Chain,
+    allTokens: { address: string; decimals: number }[],
+): Promise<PoolDynamicUpsertData[]> {
+    // Get the token prices needed for calculating token balances and total liquidity
+    const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
+        where: {
+            tokenAddress: { in: allTokens.map((token) => token.address) },
+            chain: chain,
+        },
+    });
+    const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
+
+    return upsertData.map((pool) => {
+        const poolTokenDynamicData = pool!.poolTokenDynamicData.map((token) => ({
+            ...token,
+            balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
+        }));
+
+        const poolDynamicData = {
+            ...pool.poolDynamicData,
+            // TODO: do we need to filter out BPTs?
+            totalLiquidity: poolTokenDynamicData.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
+        };
+
+        return {
+            ...pool,
+            poolDynamicData,
+            poolTokenDynamicData,
+        };
+    });
 }
