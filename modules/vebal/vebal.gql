@@ -41,6 +41,8 @@ type GqlVeBalLockSnapshot {
     The locked balance at that time.
     """
     balance: AmountHumanReadable!
+    slope: String!
+    bias: String!
 }
 
 """
