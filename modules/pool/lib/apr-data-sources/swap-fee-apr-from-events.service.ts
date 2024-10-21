@@ -64,24 +64,24 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
             return acc;
         }, {} as Record<string, PoolSwapFeeData>);
 
-        const operations = dynamicData.flatMap((dd) => {
+        const operations = dynamicData.flatMap((pool) => {
             let apr_24h = 0;
             let apr_7d = 0;
             let apr_30d = 0;
 
-            if (dd.totalLiquidity > 0) {
-                apr_24h = (dd.fees24h * 365) / dd.totalLiquidity;
-                apr_7d = (swapFeeDataMap[dd.poolId].fees_7d * 365) / 7 / dd.totalLiquidity;
-                apr_30d = (swapFeeDataMap[dd.poolId].fees_30d * 365) / 30 / dd.totalLiquidity;
+            if (pool.totalLiquidity > 0) {
+                apr_24h = (pool.fees24h * 365) / pool.totalLiquidity;
+                apr_7d = (swapFeeDataMap[pool.poolId].fees_7d * 365) / 7 / pool.totalLiquidity;
+                apr_30d = (swapFeeDataMap[pool.poolId].fees_30d * 365) / 30 / pool.totalLiquidity;
             }
 
-            let protocolFee = parseFloat(dd.protocolSwapFee);
+            let protocolFee = parseFloat(pool.protocolSwapFee);
 
-            if (typeMap[dd.poolId] === 'GYROE') {
+            if (typeMap[pool.poolId] === 'GYROE') {
                 // Gyro has custom protocol fee structure
-                protocolFee = parseFloat(dd.protocolYieldFee || '0');
+                protocolFee = parseFloat(pool.protocolYieldFee || '0');
             }
-            if (dd.isInRecoveryMode || typeMap[dd.poolId] === 'LIQUIDITY_BOOTSTRAPPING') {
+            if (pool.isInRecoveryMode || typeMap[pool.poolId] === 'LIQUIDITY_BOOTSTRAPPING') {
                 // pool does not collect any protocol fees
                 protocolFee = 0;
             }
@@ -102,11 +102,11 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
 
             return [
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${dd.poolId}-swap-apr`, chain } },
+                    where: { id_chain: { id: `${pool.poolId}-swap-apr`, chain } },
                     create: {
-                        id: `${dd.poolId}-swap-apr`,
+                        id: `${pool.poolId}-swap-apr`,
                         chain,
-                        poolId: dd.poolId,
+                        poolId: pool.poolId,
                         title: 'Swap fees APR',
                         apr: apr_24h,
                         type: 'SWAP_FEE',
@@ -114,11 +114,11 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
                     update: { apr: apr_24h },
                 }),
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${dd.poolId}-swap-apr-24h`, chain } },
+                    where: { id_chain: { id: `${pool.poolId}-swap-apr-24h`, chain } },
                     create: {
-                        id: `${dd.poolId}-swap-apr-24h`,
+                        id: `${pool.poolId}-swap-apr-24h`,
                         chain,
-                        poolId: dd.poolId,
+                        poolId: pool.poolId,
                         title: 'Swap fees APR (24h)',
                         apr: apr_24h,
                         type: 'SWAP_FEE_24H',
@@ -126,11 +126,11 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
                     update: { apr: apr_24h },
                 }),
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${dd.poolId}-swap-apr-7d`, chain } },
+                    where: { id_chain: { id: `${pool.poolId}-swap-apr-7d`, chain } },
                     create: {
-                        id: `${dd.poolId}-swap-apr-7d`,
+                        id: `${pool.poolId}-swap-apr-7d`,
                         chain,
-                        poolId: dd.poolId,
+                        poolId: pool.poolId,
                         title: 'Swap fees APR (7d)',
                         apr: apr_7d,
                         type: 'SWAP_FEE_7D',
@@ -138,11 +138,11 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
                     update: { apr: apr_7d },
                 }),
                 prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${dd.poolId}-swap-apr-30d`, chain } },
+                    where: { id_chain: { id: `${pool.poolId}-swap-apr-30d`, chain } },
                     create: {
-                        id: `${dd.poolId}-swap-apr-30d`,
+                        id: `${pool.poolId}-swap-apr-30d`,
                         chain,
-                        poolId: dd.poolId,
+                        poolId: pool.poolId,
                         title: 'Swap fees APR (30d)',
                         apr: apr_30d,
                         type: 'SWAP_FEE_30D',
