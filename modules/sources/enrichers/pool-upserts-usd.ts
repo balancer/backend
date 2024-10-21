@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { SubgraphPoolUpsertData } from '../transformers/subgraph-pool-upsert';
 import { PoolDynamicUpsertData } from '../transformers/onchain-pool-update';
 import { PoolUpsertData } from '../../../prisma/prisma-types';
 
@@ -33,10 +32,10 @@ export const enrichPoolUpsertsUsd = (data: PoolUpsertData, prices: { [address: s
  * @returns
  */
 export async function poolUpsertsUsd(
-    upsertData: SubgraphPoolUpsertData[],
+    upsertData: PoolUpsertData[],
     chain: Chain,
     allTokens: { address: string; decimals: number }[],
-): Promise<SubgraphPoolUpsertData[]> {
+): Promise<PoolUpsertData[]> {
     // Get the token prices needed for calculating token balances and total liquidity
     const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
         where: {

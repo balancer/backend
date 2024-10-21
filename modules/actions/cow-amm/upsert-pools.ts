@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchCowAmmData } from '../../sources/contracts';
-import { applyCowAmmOnchainData, enrichPoolUpsertsUsd } from '../../sources/enrichers';
-import { cowAmmPoolUpsertTransformer } from '../../sources/transformers';
+import { applyOnchainDataCowAmm, enrichPoolUpsertsUsd } from '../../sources/enrichers';
+import { poolUpsertTransformerCowAmm } from '../../sources/transformers';
 import type { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import type { ViemClient } from '../../sources/types';
 
@@ -40,8 +40,8 @@ export const upsertPools = async (
         .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
 
     const pools = sgPools
-        .map((fragment) => cowAmmPoolUpsertTransformer(fragment, chain, blockNumber))
-        .map((upsert) => applyCowAmmOnchainData(upsert, onchainData[upsert.pool.id]))
+        .map((fragment) => poolUpsertTransformerCowAmm(fragment, chain, blockNumber))
+        .map((upsert) => applyOnchainDataCowAmm(upsert, onchainData[upsert.pool.id]))
         .map((upsert) => enrichPoolUpsertsUsd(upsert, prices));
 
     // Upserts pools to the database

@@ -2,11 +2,12 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { tokensTransformer } from '../../../sources/transformers/tokens-transformer';
 import { V3JoinedSubgraphPool } from '../../../sources/subgraphs';
-import { subgraphPoolV3Upsert, SubgraphPoolUpsertData } from '../../../sources/transformers/subgraph-pool-upsert';
-import { poolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
+import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import type { VaultClient } from '../../../sources/contracts';
 import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/fetch-erc4626-token-data';
 import { getViemClient } from '../../../sources/viem-client';
+import { poolUpsertTransformerV3 } from '../../../sources/transformers/pool-upsert-transformer-v3';
+import { applyOnChainDataV3 } from '../../../sources/enrichers/apply-onchain-data-v3';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -21,7 +22,7 @@ import { getViemClient } from '../../../sources/viem-client';
 export const upsertPools = async (
     subgraphPools: V3JoinedSubgraphPool[],
     vaultClient: VaultClient,
-    chain = 'SEPOLIA' as Chain,
+    chain: Chain,
     blockNumber: bigint,
 ) => {
     // Enrich with onchain data for all the pools
@@ -29,6 +30,20 @@ export const upsertPools = async (
         subgraphPools.map((pool) => pool.id),
         blockNumber,
     );
+
+    // Get the prices
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
+                chain: chain,
+            },
+        })
+        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
+
+    const pools = subgraphPools
+        .map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber))
+        .map((upsert) => applyOnChainDataV3(upsert, onchainData[upsert.pool.id]))
+        .map((upsert) => enrichPoolUpsertsUsd(upsert, prices));
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);
@@ -44,20 +59,8 @@ export const upsertPools = async (
         console.error('Error creating tokens', e);
     }
 
-    // Get the data for the tables about pools
-    const dbPools: SubgraphPoolUpsertData[] = [];
-    for (const pool of subgraphPools) {
-        const transformedPool = subgraphPoolV3Upsert(pool, onchainData[pool.id], chain, blockNumber);
-        if (transformedPool) {
-            dbPools.push(transformedPool);
-        }
-    }
-
-    // Enrich updates with USD values
-    const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);
-
     // Upsert pools to the database
-    for (const { pool, hook, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of poolsWithUSD) {
+    for (const { pool, hook, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of pools) {
         const hookCreateOrConnect =
             (hook && {
                 connectOrCreate: {
@@ -117,5 +120,5 @@ export const upsertPools = async (
         }
     }
 
-    return dbPools.map(({ pool }) => ({ id: pool.id, type: pool.type }));
+    return pools.map(({ pool }) => ({ id: pool.id, type: pool.type }));
 };

@@ -20,7 +20,6 @@ export interface OnchainDataV3 {
     swapFee: bigint;
     aggregateSwapFee?: bigint;
     aggregateYieldFee?: bigint;
-    // rate?: bigint;
     // amp?: [bigint, boolean, bigint];
     isPoolPaused: boolean;
     isPoolInRecoveryMode: boolean;
@@ -30,7 +29,7 @@ export interface OnchainDataV3 {
         rateProvider: string;
         rate: bigint;
         isErc4626: boolean;
-        scalingFactor?: bigint;
+        scalingFactor: bigint;
     }[];
 }
 

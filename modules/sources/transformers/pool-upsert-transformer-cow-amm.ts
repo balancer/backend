@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
 import { PoolUpsertData } from '../../../prisma/prisma-types';
 import { CowAmmPoolFragment } from '../subgraphs/cow-amm/generated/types';
-import { parseUnits, zeroAddress } from 'viem';
+import { parseEther, zeroAddress } from 'viem';
 
 // Subgraph to DB format transformation
-export const cowAmmPoolUpsertTransformer = (
+export const poolUpsertTransformerCowAmm = (
     poolFragment: CowAmmPoolFragment,
     chain: Chain,
     blockNumber: bigint,
@@ -43,7 +43,7 @@ export const cowAmmPoolUpsertTransformer = (
                 },
             },
         },
-        totalShares: String(parseUnits(poolFragment.totalShares, 18)),
+        totalShares: String(parseEther(poolFragment.totalShares)),
         totalSharesNum: Number(poolFragment.totalShares),
         blockNumber: Number(blockNumber),
         swapFee: poolFragment.swapFee,
@@ -70,6 +70,8 @@ export const cowAmmPoolUpsertTransformer = (
         blockNumber: Number(blockNumber),
         balance: token.balance,
         weight: token.weight,
+        balanceUSD: 0,
+        priceRate: '1.0',
     })),
     poolExpandedTokens: poolFragment.tokens.map(({ address }) => ({
         tokenAddress: address,

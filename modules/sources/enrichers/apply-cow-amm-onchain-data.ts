@@ -2,7 +2,7 @@ import { formatUnits } from 'viem';
 import type { PoolUpsertData } from '../../../prisma/prisma-types';
 import { OnchainDataCowAmm } from '../contracts';
 
-export const applyCowAmmOnchainData = (upsert: PoolUpsertData, data: OnchainDataCowAmm): PoolUpsertData => ({
+export const applyOnchainDataCowAmm = (upsert: PoolUpsertData, data: OnchainDataCowAmm): PoolUpsertData => ({
     ...upsert,
     poolDynamicData: {
         ...upsert.poolDynamicData,
