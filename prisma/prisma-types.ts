@@ -10,6 +10,11 @@ export type PoolUpsertData = {
     poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
 };
 
+export type PoolDynamicUpsertData = {
+    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
+    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
+};
+
 export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';
     payload: {

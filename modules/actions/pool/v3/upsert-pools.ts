@@ -7,7 +7,7 @@ import type { VaultClient } from '../../../sources/contracts';
 import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/fetch-erc4626-token-data';
 import { getViemClient } from '../../../sources/viem-client';
 import { poolUpsertTransformerV3 } from '../../../sources/transformers/pool-upsert-transformer-v3';
-import { applyOnChainDataV3 } from '../../../sources/enrichers/apply-onchain-data-v3';
+import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -31,30 +31,6 @@ export const upsertPools = async (
         blockNumber,
     );
 
-    // Get the prices
-    const prices = await prisma.prismaTokenCurrentPrice
-        .findMany({
-            where: {
-                chain: chain,
-            },
-        })
-        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
-
-    const pools = subgraphPools
-        .map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber))
-        .map((upsert) => applyOnChainDataV3(upsert, onchainData[upsert.pool.id]))
-        .map((upsert) => {
-            const update = enrichPoolUpsertsUsd(
-                { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
-                prices,
-            );
-            return {
-                ...upsert,
-                poolDynamicData: update.poolDynamicData,
-                poolTokenDynamicData: update.poolTokenDynamicData,
-            };
-        });
-
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);
 
@@ -68,6 +44,44 @@ export const upsertPools = async (
     } catch (e) {
         console.error('Error creating tokens', e);
     }
+
+    // Get the prices
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
+                chain: chain,
+                tokenAddress: { in: allTokens.map((token) => token.address) },
+            },
+        })
+        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
+
+    const pools = subgraphPools
+        .map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber))
+        .map((upsert) => {
+            const update = applyOnchainDataUpdateV3(
+                onchainData[upsert.pool.id],
+                upsert.tokens,
+                chain,
+                upsert.pool.id,
+                blockNumber,
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        })
+        .map((upsert) => {
+            const update = enrichPoolUpsertsUsd(
+                { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+                prices,
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        });
 
     // Upsert pools to the database
     for (const { pool, hook, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of pools) {

@@ -1,7 +1,5 @@
 import _ from 'lodash';
-import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { PoolDynamicUpsertData } from './apply-onchain-pool-update';
+import { PoolDynamicUpsertData } from '../../../prisma/prisma-types';
 
 export const enrichPoolUpsertsUsd = (
     data: PoolDynamicUpsertData,

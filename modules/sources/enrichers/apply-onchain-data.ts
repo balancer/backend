@@ -1,65 +1,23 @@
-import { Chain, Prisma } from '@prisma/client';
-import { OnchainDataCowAmm, OnchainDataV3 } from '../contracts';
 import { formatEther, formatUnits } from 'viem';
+import { OnchainDataCowAmm, OnchainDataV3 } from '../contracts';
+import { Chain } from '@prisma/client';
+import { PoolDynamicUpsertData } from '../../../prisma/prisma-types';
 
-export type PoolDynamicUpsertData = {
-    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
-    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
-};
-
-export const onchainCowAmmPoolUpdate = (
-    onchainPoolData: OnchainDataCowAmm,
-    allTokens: { address: string; decimals: number }[],
-    chain: Chain,
-    id: string,
-    blockNumber: bigint,
-): PoolDynamicUpsertData => {
-    const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
-
-    return {
-        poolDynamicData: {
-            id: id.toLowerCase(),
-            pool: {
-                connect: {
-                    id_chain: {
-                        id: id.toLowerCase(),
-                        chain: chain,
-                    },
-                },
-            },
-            totalShares: formatEther(onchainPoolData.totalSupply),
-            blockNumber: Number(blockNumber),
-            swapFee: formatEther(onchainPoolData.swapFee),
-            swapEnabled: true,
-            totalLiquidity: 0,
-        },
-        poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
-            id: `${id}-${tokenData.address.toLowerCase()}`,
-            poolTokenId: `${id}-${tokenData.address.toLowerCase()}`,
-            chain: chain,
-            balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
-            blockNumber: Number(blockNumber),
-            priceRate: '1',
-            balanceUSD: 0,
-        })),
-    };
-};
-
-export const onchainV3PoolUpdate = (
+export const applyOnchainDataUpdateV3 = (
     onchainPoolData: OnchainDataV3,
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
-    id: string,
+    poolId: string,
     blockNumber: bigint,
 ): PoolDynamicUpsertData => {
     const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
     return {
         poolDynamicData: {
-            id: id.toLowerCase(),
+            id: poolId.toLowerCase(),
             pool: {
                 connect: {
                     id_chain: {
-                        id: id.toLowerCase(),
+                        id: poolId.toLowerCase(),
                         chain: chain,
                     },
                 },
@@ -75,12 +33,52 @@ export const onchainV3PoolUpdate = (
             totalLiquidity: 0,
         },
         poolTokenDynamicData: onchainPoolData.tokens?.map((tokenData) => ({
-            id: `${id}-${tokenData.address.toLowerCase()}`,
-            poolTokenId: `${id}-${tokenData.address.toLowerCase()}`,
+            id: `${poolId}-${tokenData.address.toLowerCase()}`,
+            poolTokenId: `${poolId}-${tokenData.address.toLowerCase()}`,
             chain: chain,
             balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
+            balanceNum: Number(formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()])),
             priceRate: formatEther(tokenData.rate),
             blockNumber: Number(blockNumber),
+            balanceUSD: 0,
+        })),
+    };
+};
+
+export const applyOnchainDataUpdateCowAmm = (
+    onchainPoolData: OnchainDataCowAmm,
+    allTokens: { address: string; decimals: number }[],
+    chain: Chain,
+    poolId: string,
+    blockNumber: bigint,
+): PoolDynamicUpsertData => {
+    const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
+
+    return {
+        poolDynamicData: {
+            id: poolId.toLowerCase(),
+            pool: {
+                connect: {
+                    id_chain: {
+                        id: poolId.toLowerCase(),
+                        chain: chain,
+                    },
+                },
+            },
+            totalShares: formatEther(onchainPoolData.totalSupply),
+            blockNumber: Number(blockNumber),
+            swapFee: formatEther(onchainPoolData.swapFee),
+            swapEnabled: true,
+            totalLiquidity: 0,
+        },
+        poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
+            id: `${poolId}-${tokenData.address.toLowerCase()}`,
+            poolTokenId: `${poolId}-${tokenData.address.toLowerCase()}`,
+            chain: chain,
+            balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
+            balanceNum: Number(formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()])),
+            blockNumber: Number(blockNumber),
+            priceRate: '1',
             balanceUSD: 0,
         })),
     };

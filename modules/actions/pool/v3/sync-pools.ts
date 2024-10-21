@@ -1,8 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { onchainV3PoolUpdate } from '../../../sources/enrichers/apply-onchain-pool-update';
 import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
-import { type VaultClient, getVaultClient, getPoolsClient } from '../../../sources/contracts';
+import { type VaultClient, getVaultClient, getPoolsClient, OnchainDataV3 } from '../../../sources/contracts';
 import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
 import { ViemClient } from '../../../sources/viem-client';
 
@@ -100,3 +99,7 @@ export const syncPools = async (
 
     return pools.map(({id}) => id);
 };
+function onchainV3PoolUpdate(arg0: OnchainDataV3, allTokens: import(".prisma/client").PrismaToken[], chain: string, id: string, blockNumber: bigint): any {
+    throw new Error('Function not implemented.');
+}
+
