@@ -43,7 +43,17 @@ export const upsertPools = async (
     const pools = subgraphPools
         .map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber))
         .map((upsert) => applyOnChainDataV3(upsert, onchainData[upsert.pool.id]))
-        .map((upsert) => enrichPoolUpsertsUsd(upsert, prices));
+        .map((upsert) => {
+            const update = enrichPoolUpsertsUsd(
+                { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+                prices,
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        });
 
     // Store pool tokens and BPT in the tokens table before creating the pools
     const allTokens = tokensTransformer(subgraphPools, chain);

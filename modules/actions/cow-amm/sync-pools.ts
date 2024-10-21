@@ -1,9 +1,9 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchCowAmmData } from '../../sources/contracts';
-import { poolDynamicDataUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
+import { enrichPoolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 import type { ViemClient } from '../../sources/types';
-import { onchainCowAmmPoolUpdate } from '../../sources/transformers/onchain-pool-update';
+import { onchainCowAmmPoolUpdate } from '../../sources/enrichers/apply-onchain-pool-update';
 
 /**
  * Gets a list of pool ids and fetches the onchain data then upserts into the database.
@@ -25,9 +25,24 @@ export const syncPools = async (ids: string[], viemClient: ViemClient, chain: Ch
         },
     });
 
+    // Get the prices
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
+                chain: chain,
+            },
+        })
+        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
+
     // Get the data for the tables about pools
     const dbPools = ids.map((id) => onchainCowAmmPoolUpdate(onchainData[id], allTokens, chain, id, blockNumber));
-    const poolsWithUSD = await poolDynamicDataUpsertsUsd(dbPools, chain, allTokens);
+
+    const poolsWithUSD = dbPools.map((upsert) =>
+        enrichPoolUpsertsUsd(
+            { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+            prices,
+        ),
+    );
 
     // Upsert RPC data to the database
     // Update pools data to the database

@@ -17,6 +17,7 @@ export const applyOnchainDataCowAmm = (upsert: PoolUpsertData, data: OnchainData
         return {
             ...tokenData,
             balance,
+            balanceNum: Number(balance),
         };
     }),
 });

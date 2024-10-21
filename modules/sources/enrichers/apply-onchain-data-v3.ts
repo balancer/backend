@@ -22,6 +22,7 @@ export const applyOnChainDataV3 = (upsert: PoolUpsertData, onchainPoolData: Onch
             poolTokenId: `${upsert.pool.id}-${tokenData.address.toLowerCase()}`,
             chain: upsert.pool.chain,
             balance: formatUnits(tokenData.balance, tokenDecimals),
+            balanceNum: Number(formatUnits(tokenData.balance, tokenDecimals)),
             priceRate: formatEther(tokenData.rate),
             blockNumber: upsert.poolDynamicData.blockNumber,
             balanceUSD: 0,

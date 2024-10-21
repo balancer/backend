@@ -42,7 +42,17 @@ export const upsertPools = async (
     const pools = sgPools
         .map((fragment) => poolUpsertTransformerCowAmm(fragment, chain, blockNumber))
         .map((upsert) => applyOnchainDataCowAmm(upsert, onchainData[upsert.pool.id]))
-        .map((upsert) => enrichPoolUpsertsUsd(upsert, prices));
+        .map((upsert) => {
+            const update = enrichPoolUpsertsUsd(
+                { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+                prices,
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        });
 
     // Upserts pools to the database
     // TODO: extract to a DB helper
