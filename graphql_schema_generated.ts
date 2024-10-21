@@ -558,7 +558,7 @@ export const schema = gql`
         """
         Cow AMM specific APR
         """
-        SURPLUS
+        SURPLUS @deprecated(reason: "Use SURPLUS_24H instead")
 
         """
         Surplus APR based on data from the last 7d
@@ -578,7 +578,7 @@ export const schema = gql`
         """
         Represents the swap fee APR in a pool.
         """
-        SWAP_FEE
+        SWAP_FEE @deprecated(reason: "Use SWAP_FEE_24H instead")
 
         """
         Swap fee APR based on data from the last 7d
