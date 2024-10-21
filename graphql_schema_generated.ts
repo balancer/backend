@@ -2975,6 +2975,8 @@ export const schema = gql`
         The locked balance at that time.
         """
         balance: AmountHumanReadable!
+        bias: String!
+        slope: String!
 
         """
         The timestamp of the snapshot, snapshots are taking at lock events.

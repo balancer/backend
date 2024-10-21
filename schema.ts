@@ -2013,6 +2013,8 @@ export interface GqlVeBalLockSnapshot {
     __typename?: 'GqlVeBalLockSnapshot';
     /** The locked balance at that time. */
     balance: Scalars['AmountHumanReadable'];
+    bias: Scalars['String'];
+    slope: Scalars['String'];
     /** The timestamp of the snapshot, snapshots are taking at lock events. */
     timestamp: Scalars['Int'];
 }
@@ -4704,6 +4706,8 @@ export type GqlVeBalLockSnapshotResolvers<
     ParentType extends ResolversParentTypes['GqlVeBalLockSnapshot'] = ResolversParentTypes['GqlVeBalLockSnapshot'],
 > = ResolversObject<{
     balance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
+    bias?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    slope?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
