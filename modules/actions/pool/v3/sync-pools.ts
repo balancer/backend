@@ -4,6 +4,7 @@ import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-us
 import { type VaultClient, getVaultClient, getPoolsClient, OnchainDataV3 } from '../../../sources/contracts';
 import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
 import { ViemClient } from '../../../sources/viem-client';
+import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
 
 const syncVaultData = async (
     vaultClient: VaultClient,
@@ -24,7 +25,7 @@ const syncVaultData = async (
 
     // Get the data for the tables about pools
     const dbUpdates = Object.keys(onchainData).map((id) =>
-        onchainV3PoolUpdate(onchainData[id], allTokens, chain, id, blockNumber),
+        applyOnchainDataUpdateV3(onchainData[id], allTokens, chain, id, blockNumber),
     );
 
     // Get the prices
@@ -99,7 +100,3 @@ export const syncPools = async (
 
     return pools.map(({id}) => id);
 };
-function onchainV3PoolUpdate(arg0: OnchainDataV3, allTokens: import(".prisma/client").PrismaToken[], chain: string, id: string, blockNumber: bigint): any {
-    throw new Error('Function not implemented.');
-}
-

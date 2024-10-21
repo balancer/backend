@@ -3,7 +3,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { fetchCowAmmData } from '../../sources/contracts';
 import { enrichPoolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
 import type { ViemClient } from '../../sources/types';
-import { onchainCowAmmPoolUpdate } from '../../sources/enrichers/apply-onchain-pool-update';
+import { applyOnchainDataUpdateCowAmm } from '../../sources/enrichers/apply-onchain-data';
 
 /**
  * Gets a list of pool ids and fetches the onchain data then upserts into the database.
@@ -35,7 +35,7 @@ export const syncPools = async (ids: string[], viemClient: ViemClient, chain: Ch
         .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
 
     // Get the data for the tables about pools
-    const dbPools = ids.map((id) => onchainCowAmmPoolUpdate(onchainData[id], allTokens, chain, id, blockNumber));
+    const dbPools = ids.map((id) => applyOnchainDataUpdateCowAmm(onchainData[id], allTokens, chain, id, blockNumber));
 
     const poolsWithUSD = dbPools.map((upsert) =>
         enrichPoolUpsertsUsd(
