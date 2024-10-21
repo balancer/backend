@@ -60,7 +60,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
                         token,
                         tokenAmount.amount,
                         poolToken.index,
-                        parseEther(poolToken.dynamicData.priceRate || '1'),
+                        parseEther(poolToken.dynamicData.priceRate),
                         poolToken.token.underlyingTokenAddress,
                         parseEther(poolToken.dynamicData.weight),
                     ),

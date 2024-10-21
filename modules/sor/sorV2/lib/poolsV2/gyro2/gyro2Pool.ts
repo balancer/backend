@@ -14,7 +14,7 @@ import { BasePoolToken } from '../basePoolToken';
 export class Gyro2PoolToken extends BasePoolToken {
     public readonly rate: bigint;
 
-    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
+    public constructor(token: Token, amount: BigintIsh, index:number, rate: BigintIsh) {
         super(token, amount, index);
         this.rate = BigInt(rate);
     }
@@ -55,14 +55,7 @@ export class Gyro2Pool implements BasePool {
             const scale18 = parseEther(poolToken.dynamicData.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(
-                new Gyro2PoolToken(
-                    token,
-                    tokenAmount.amount,
-                    poolToken.index,
-                    parseEther(poolToken.dynamicData.priceRate || '1'),
-                ),
-            );
+            poolTokens.push(new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.dynamicData.priceRate)));
         }
 
         const gyroData = pool.typeData as GyroData;
@@ -135,16 +128,12 @@ export class Gyro2Pool implements BasePool {
 
         // These tIn, tOut are vault reported balances (scaled to 18 decimals)
         const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(tokenIn, tokenOut);
-        const invariant = _calculateInvariant(
-            [MathSol.mulUpFixed(tIn.scale18, tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)],
-            sqrtAlpha,
-            sqrtBeta,
-        );
+        const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(invariant, sqrtAlpha, sqrtBeta);
         const inAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
 
         const outAmountScale18 = _calcOutGivenIn(
-            MathSol.mulUpFixed(tIn.scale18, tIn.rate),
+            MathSol.mulUpFixed(tIn.scale18,tIn.rate),
             MathSol.mulUpFixed(tOut.scale18, tOut.rate),
             inAmountLessFee.scale18,
             virtualParamIn,
@@ -186,16 +175,12 @@ export class Gyro2Pool implements BasePool {
 
         if (swapAmount.scale18 > tOut.scale18) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
-        const invariant = _calculateInvariant(
-            [MathSol.mulUpFixed(tIn.scale18, tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)],
-            sqrtAlpha,
-            sqrtBeta,
-        );
+        const invariant = _calculateInvariant([MathSol.mulUpFixed(tIn.scale18,tIn.rate), MathSol.mulUpFixed(tOut.scale18, tOut.rate)], sqrtAlpha, sqrtBeta);
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(invariant, sqrtAlpha, sqrtBeta);
         const inAmountLessFee = _calcInGivenOut(
-            MathSol.mulUpFixed(tIn.scale18, tIn.rate),
+            MathSol.mulUpFixed(tIn.scale18,tIn.rate),
             MathSol.mulUpFixed(tOut.scale18, tOut.rate),
-            MathSol.mulUpFixed(swapAmount.scale18, tOut.rate), //amountOut
+            MathSol.mulUpFixed(swapAmount.scale18,tOut.rate), //amountOut
             virtualParamIn,
             virtualParamOut,
         );

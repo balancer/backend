@@ -16,7 +16,7 @@ interface PoolInput {
         };
         dynamicData: {
             balance: string;
-            balanceUSD: number | null;
+            balanceUSD: number;
         } | null;
     }[];
     dynamicData: {

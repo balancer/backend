@@ -248,9 +248,9 @@ model PrismaPoolTokenDynamicData {
     updatedAt           DateTime            @updatedAt
 
     balance             String
-    balanceUSD          Float?
+    balanceUSD          Float
     weight              String?
-    priceRate           String?
+    priceRate           String
     latestFxPrice       Float?
 }
 

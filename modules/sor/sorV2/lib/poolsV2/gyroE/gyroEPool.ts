@@ -72,9 +72,7 @@ export class GyroEPool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
             const tokenRate = poolToken.dynamicData.priceRate;
 
-            poolTokens.push(
-                new GyroEPoolToken(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate || '1')),
-            );
+            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate)));
         }
 
         const gyroData = pool.typeData as GyroData;
