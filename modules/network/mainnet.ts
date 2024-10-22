@@ -4,6 +4,7 @@ import { tokenService } from '../token/token.service';
 import {
     BoostedPoolAprService,
     SwapFeeAprService,
+    SwapFeeFromEventsAprService,
     GaugeAprService,
     YbTokensAprService,
     VeBalProtocolAprService,
@@ -27,7 +28,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
     poolAprServices: [
         new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),
         new BoostedPoolAprService(),
-        new SwapFeeAprService(),
+        new SwapFeeFromEventsAprService(),
         new GaugeAprService(tokenService, [data.bal!.address]),
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),
