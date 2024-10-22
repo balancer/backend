@@ -56,6 +56,7 @@ export const updateSurplusAPRs = async () => {
         .then((pools) =>
             pools.flatMap((pool) => ({
                 poolId: pool.id,
+                chain: pool.chain,
                 totalLiquidity: pool.dynamicData?.totalLiquidity,
                 surplus24h: pool.dynamicData?.surplus24h,
             })),
@@ -80,7 +81,9 @@ export const updateSurplusAPRs = async () => {
         chain: snapshot.chain,
         poolId: snapshot.poolId,
         apr:
-            mapLatestSnapshots[snapshot.poolId].totalSurplus <= 0 || snapshot.totalLiquidity === 0
+            !mapLatestSnapshots[snapshot.poolId] ||
+            mapLatestSnapshots[snapshot.poolId].totalSurplus <= 0 ||
+            snapshot.totalLiquidity === 0
                 ? 0
                 : ((mapLatestSnapshots[snapshot.poolId].totalSurplus - snapshot.totalSurplus) * 365) /
                   7 /
@@ -95,7 +98,9 @@ export const updateSurplusAPRs = async () => {
         chain: snapshot.chain,
         poolId: snapshot.poolId,
         apr:
-            mapLatestSnapshots[snapshot.poolId].totalSurplus <= 0 || snapshot.totalLiquidity === 0
+            !mapLatestSnapshots[snapshot.poolId] ||
+            mapLatestSnapshots[snapshot.poolId].totalSurplus <= 0 ||
+            snapshot.totalLiquidity === 0
                 ? 0
                 : ((mapLatestSnapshots[snapshot.poolId].totalSurplus - snapshot.totalSurplus) * 365) /
                   30 /
@@ -114,6 +119,7 @@ export const updateSurplusAPRs = async () => {
 
     const data = data24h.map((v) => ({
         ...v,
+        id: `${v.poolId}-surplus`,
         type: PrismaPoolAprType.SURPLUS,
         title: 'Surplus APR',
     }));
@@ -121,7 +127,14 @@ export const updateSurplusAPRs = async () => {
     await prisma.$transaction([
         prisma.prismaPoolAprItem.deleteMany({
             where: {
-                type: PrismaPoolAprType.SURPLUS,
+                type: {
+                    in: [
+                        PrismaPoolAprType.SURPLUS,
+                        PrismaPoolAprType.SURPLUS_24H,
+                        PrismaPoolAprType.SURPLUS_7D,
+                        PrismaPoolAprType.SURPLUS_30D,
+                    ],
+                },
             },
         }),
         prisma.prismaPoolAprItem.createMany({
