@@ -89,7 +89,7 @@ export const syncPools = async (
     pools: {id: string, type: PrismaPoolType}[],
     client: ViemClient,
     vaultAddress: string,
-    chain = 'SEPOLIA' as Chain,
+    chain: Chain,
     blockNumber: bigint,
 ) => {
     const vaultClient = getVaultClient(client, vaultAddress);
