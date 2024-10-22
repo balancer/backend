@@ -1,14 +1,14 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
-import { type VaultClient, getVaultClient, getPoolsClient, OnchainDataV3 } from '../../../sources/contracts';
+import { type VaultClient, getVaultClient, getPoolsClient } from '../../../sources/contracts';
 import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
 import { ViemClient } from '../../../sources/viem-client';
 import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
 
 const syncVaultData = async (
     vaultClient: VaultClient,
-    chain = 'SEPOLIA' as Chain,
+    chain: Chain,
     ids: string[],
     blockNumber: bigint,
 ) => {
