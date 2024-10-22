@@ -69,7 +69,7 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
             let apr_7d = 0;
             let apr_30d = 0;
 
-            if (pool.totalLiquidity > 0) {
+            if (pool.totalLiquidity > 0 && swapFeeDataMap[pool.poolId]) {
                 apr_24h = (pool.fees24h * 365) / pool.totalLiquidity;
                 apr_7d = (swapFeeDataMap[pool.poolId].fees_7d * 365) / 7 / pool.totalLiquidity;
                 apr_30d = (swapFeeDataMap[pool.poolId].fees_30d * 365) / 30 / pool.totalLiquidity;
